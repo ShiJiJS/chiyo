@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'desktop_motion.dart';
+import 'desktop_interaction_host.dart';
 import 'ui_palette.dart';
 
 enum DesktopButtonKind { quiet, menu, link, outline, primary, danger }
@@ -88,6 +89,8 @@ class _DesktopButtonState extends State<DesktopButton> {
     final focusVisible =
         enabled &&
         _states.value.contains(WidgetState.focused) &&
+        (!round09 ||
+            (DesktopInteractionHost.keyboardInputOf(context) ?? true)) &&
         FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
     final menuFocus = menu && focusVisible;
     final menuActive =

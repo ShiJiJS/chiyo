@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_button.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/desktop_interaction_host.dart';
 import 'package:info_desktop/ui_palette.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
@@ -188,10 +189,17 @@ void main() {
             final nav = find.byKey(const ValueKey('workspace-nav-library'));
             final rect = t.getRect(nav);
             final color = UiPalette.of(t.element(nav)).accent;
-            Focus.of(
+            final navFocus = Focus.of(
               t.element(find.descendant(of: nav, matching: find.text('信息库'))),
-            ).requestFocus();
+            );
+            navFocus.requestFocus();
             await t.pumpAndSettle();
+            expect(navFocus.hasPrimaryFocus, true);
+            // Arrow keys traverse this navigation bar. A non-navigation key
+            // changes input modality while keeping this exact selected item.
+            await t.sendKeyEvent(LogicalKeyboardKey.keyA);
+            await t.pumpAndSettle();
+            expect(navFocus.hasPrimaryFocus, true);
             expect(t.getRect(nav), rect);
             final pixel = await t.runAsync(() async {
               final image =
@@ -235,6 +243,105 @@ void main() {
       }
     }
   }
+
+  testWidgets(
+    'pointer focus stays quiet and handled keyboard activation restores the outline without moving focus',
+    (t) async {
+      t.view.physicalSize = const Size(320, 200);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final strategy = FocusManager.instance.highlightStrategy;
+      addTearDown(() => FocusManager.instance.highlightStrategy = strategy);
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTraditional;
+      final focus = FocusNode(), boundary = GlobalKey();
+      addTearDown(focus.dispose);
+      var calls = 0;
+      await t.pumpWidget(
+        MaterialApp(
+          theme: zhiyuTheme(
+            Brightness.light,
+          ).copyWith(platform: TargetPlatform.macOS),
+          builder: (_, child) => DesktopInteractionHost(child: child!),
+          home: RepaintBoundary(
+            key: boundary,
+            child: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 160,
+                  height: 48,
+                  child: DesktopButton(
+                    focusNode: focus,
+                    onPressed: () => calls++,
+                    child: const Text('动作'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      final button = find.byType(DesktopButton),
+          rect = t.getRect(find.byType(DesktopButton));
+      final colors = UiPalette.of(t.element(button));
+      Future<Color> outlinePixel() async => (await t.runAsync(() async {
+        final image =
+            await (boundary.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary)
+                .toImage(pixelRatio: 1);
+        try {
+          final b = (await image.toByteData(
+            format: ui.ImageByteFormat.rawRgba,
+          ))!.buffer.asUint8List();
+          final offset =
+              ((rect.top.toInt() - 4) * image.width + rect.center.dx.toInt()) *
+              4;
+          return Color.fromARGB(
+            b[offset + 3],
+            b[offset],
+            b[offset + 1],
+            b[offset + 2],
+          );
+        } finally {
+          image.dispose();
+        }
+      }))!;
+      focus.requestFocus();
+      await t.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await t.pumpAndSettle();
+      expect(await outlinePixel(), colors.accent);
+      await t.tap(button, kind: ui.PointerDeviceKind.mouse);
+      await t.pumpAndSettle();
+      expect(focus.hasFocus, true);
+      expect(
+        await outlinePixel(),
+        colors.canvas,
+        reason: 'Mouse focus is not CSS focus-visible.',
+      );
+      await t.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await t.pumpAndSettle();
+      expect(focus.hasFocus, true);
+      expect(await outlinePixel(), colors.accent);
+      await t.tap(button, kind: ui.PointerDeviceKind.mouse);
+      await t.pumpAndSettle();
+      expect(await outlinePixel(), colors.canvas);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.pumpAndSettle();
+      expect(
+        await outlinePixel(),
+        colors.accent,
+        reason: 'Observe input before a child handles Enter.',
+      );
+      expect(
+        calls,
+        3,
+        reason:
+            'The modality observer must not swallow or duplicate activation.',
+      );
+    },
+  );
 
   testWidgets(
     'disabling the focused action removes its outline and keeps the legacy border behavior',
