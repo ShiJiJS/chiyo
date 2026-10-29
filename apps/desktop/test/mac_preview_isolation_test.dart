@@ -186,6 +186,32 @@ void main() {
       );
       await t.tap(find.byKey(const ValueKey('host-close')));
       await t.pumpAndSettle();
+      // New D01/D02 must also stay inside the same IO/channel guard.
+      for (final key in [
+        'plugin-update',
+        'plugin-change-submit',
+        'plugin-tab-settings',
+        'host-import',
+      ]) {
+        final target = find.byKey(ValueKey(key));
+        await t.ensureVisible(target);
+        await t.tap(target);
+        await t.pumpAndSettle();
+      }
+      await t.tap(find.textContaining('合成主机记录.known_hosts').last);
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey('host-import-submit')));
+      await t.pumpAndSettle();
+      expect((await source.plugins.load()).updates, isEmpty);
+      expect((await source.hosts.importedFile())!.entryCount, 2);
+      expect(
+        (await source.hosts.read(
+          const WorkspaceHostTarget.record(
+            WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+          ),
+        )).state,
+        WorkspaceHostState.revoked,
+      );
       await t.tap(find.byKey(const ValueKey('plugin-install')));
       await t.pumpAndSettle();
       await t.tap(find.textContaining('域名管理-1.0.0.json').last);
@@ -514,6 +540,8 @@ void main() {
         WorkspaceCredentialRequestState.pending,
       );
       expect((await source.plugins.load()).packages, hasLength(3));
+      expect((await source.plugins.load()).updates.single.version, '1.1.0');
+      expect(await source.hosts.importedFile(), isNull);
       expect((await source.legacyTemplates.read('legacy-resource')).version, 1);
       expect(
         (await source.hosts.read(
