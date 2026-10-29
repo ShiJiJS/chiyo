@@ -1,4 +1,6 @@
 import 'workspace_records.dart';
+import 'workspace_host_imports.dart';
+export 'workspace_host_imports.dart';
 
 /// Owner-only, host-provided SSH identity projection. No network or key bytes.
 class WorkspaceHostEndpoint {
@@ -136,6 +138,13 @@ class WorkspaceHostReceipt {
 }
 
 abstract interface class WorkspaceHostSource {
+  Future<WorkspaceHostImportStatus?> importedFile();
+  Future<WorkspaceHostImportPreview> previewImport(String selectionId);
+  Future<WorkspaceHostImportReceipt> importFile(
+    WorkspaceHostImportChange change,
+  );
+  Future<WorkspaceHostImportReceipt?> importReceipt(String operationId);
+  Future<void> releaseImport(String selectionId);
   Future<List<WorkspaceHostIdentity>> load();
   Future<WorkspaceHostIdentity> read(WorkspaceHostTarget target);
   Future<WorkspaceHostReceipt> change(WorkspaceHostChange change);

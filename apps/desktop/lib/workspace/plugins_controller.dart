@@ -69,6 +69,12 @@ class PluginsController extends ChangeNotifier {
   ];
   WorkspacePlugin? get selected =>
       catalog?.packages.where((p) => p.id == selection).firstOrNull;
+  WorkspacePluginUpdate? get selectedUpdate => catalog?.updates
+      .where(
+        (u) =>
+            u.packageId == selection && u.installedDigest == selected?.digest,
+      )
+      .firstOrNull;
   WorkspacePluginTemplate? get selectedTemplate =>
       selected?.templates.where((t) => t.id == templateId).firstOrNull ??
       selected?.templates.firstOrNull;

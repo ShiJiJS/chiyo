@@ -69,9 +69,10 @@ void main() {
       await t.pumpAndSettle();
     }
 
+    var recordingActive = false;
     Future<void> stage(String name) async {
       checks.add(name);
-      recording.mark(name);
+      if (recordingActive) recording.mark(name);
       await recording.saveStill(name);
     }
 
@@ -107,12 +108,50 @@ void main() {
     await tap(find.text('关闭').last);
     await stage('u03-file-version-confirm-cancel');
 
-    // Record the remaining R07–R13 surfaces with the existing bounded recorder.
-    // Real timestamps are retained; this is native rendering, not OS input.
+    // Record this round's two new flows only. Existing U04–U07 recordings and
+    // shared timing traces retain their original scope; no new capture system.
     await recording.start();
-    recording.mark('u04-plugin-start');
+    recordingActive = true;
+    recording.mark('bundled-update-start');
     await press('workspace-nav-settings');
     await press('settings-section-plugins');
+    final originalServer = await source.readDetail(
+      const WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure'),
+    );
+    await press('plugin-update');
+    await tap(find.text('取消').last);
+    await press('plugin-update');
+    await press('plugin-change-submit');
+    expect((await source.plugins.load()).updates, isEmpty);
+    expect(
+      (await source.readDetail(originalServer.record.ref)).definition,
+      originalServer.definition,
+    );
+    await stage('d01-bundled-update-keeps-record-snapshot');
+    recording.mark('host-import-start');
+    await press('plugin-tab-settings');
+    await press('host-import');
+    await press('host-file-choice-cancel');
+    expect(await source.hosts.importedFile(), isNull);
+    await press('host-import');
+    await tap(find.textContaining('合成主机记录.known_hosts').last);
+    source.nextSaveFailure = const WorkspaceFailure(
+      'disk_full',
+      '原生合成导入失败，选择保留',
+    );
+    await press('host-import-submit');
+    expect(find.text('原生合成导入失败，选择保留'), findsOneWidget);
+    expect(await source.hosts.importedFile(), isNull);
+    source.loseNextHostImportReply = true;
+    await press('host-import-submit');
+    final imported = await source.hosts.importedFile();
+    await press('host-import-reconcile');
+    expect((await source.hosts.importedFile())!.version, imported!.version);
+    expect(find.byKey(const ValueKey('host-import-status')), findsOneWidget);
+    await stage('d02-host-file-import-original-receipt');
+    await recording.stop('native-controls');
+    recordingActive = false;
+
     await press('plugin-install');
     await tap(find.textContaining('域名管理-1.0.0.json').last);
     await press('plugin-change-submit');
@@ -134,7 +173,6 @@ void main() {
     expect(library.detail!.values['domain'], 'candidate.example');
     await stage('u04-plugin-preview-install-adopt');
 
-    recording.mark('u05-approval-start');
     await press('workspace-nav-approvals');
     final approval = t
         .widget<ApprovalsPage>(find.byType(ApprovalsPage))
@@ -159,7 +197,6 @@ void main() {
     expect(history.detail!.scopes.single.id, host.id);
     await stage('u05-approval-result-in-shared-history');
 
-    recording.mark('u06-proposal-start');
     await press('workspace-nav-proposals');
     final proposals = t
         .widget<ProposalsPage>(find.byType(ProposalsPage))
@@ -175,7 +212,6 @@ void main() {
     expect(proposals.selection, 'import');
     await stage('u06-proposal-result-current-return');
 
-    recording.mark('u07-settings-start');
     await press('workspace-nav-settings');
     await press('settings-section-appearance');
     source.nextSaveFailure = const WorkspaceFailure('disk_full', '候选设置失败，选择保留');
@@ -210,7 +246,6 @@ void main() {
         await press('settings-notifications');
         expect((await source.settings.read()).notifications, enabled);
       }
-      recording.mark('u07-${section.name}');
     }
     await stage('u07-settings-failure-retry-eight-sections');
     for (final destination in [
@@ -224,7 +259,6 @@ void main() {
     }
     expect(settings.section, WorkspaceSettingsSection.agents);
     await stage('all-primary-destinations-return');
-    await recording.stop('native-controls');
     await File('$directory/native-checks.json').writeAsString(
       const JsonEncoder.withIndent('  ').convert({
         'runtime': runtime,

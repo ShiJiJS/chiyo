@@ -23,6 +23,7 @@ import 'library_credential_choices.dart';
 import 'plugins_controller.dart';
 import 'plugins_page.dart';
 import 'plugin_dialogs.dart';
+import 'host_import_dialog.dart';
 import 'library_edit_dialog.dart';
 import 'legacy_templates_controller.dart';
 import 'approvals_controller.dart';
@@ -1045,6 +1046,11 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
                       unawaited(_createWithLegacy(context, t)),
                   hosts: _source.hosts,
                   hostChanges: _source.changes,
+                  hostFilePicker: () => showHostFileChoices(
+                    context,
+                    _source.hostFileChoices,
+                    _source.hosts.releaseImport,
+                  ),
                   onRecord: (ref) => unawaited(_hostRecord(ref)),
                   picker: () => showPluginChoices(
                     context,

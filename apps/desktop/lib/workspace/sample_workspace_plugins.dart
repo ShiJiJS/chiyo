@@ -40,6 +40,8 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
 
   final _current = <String, WorkspacePlugin>{},
       _initial = <String, WorkspacePlugin>{};
+  final _bundledUpdates = <String, WorkspacePlugin>{};
+  final _hostSelections = <String, WorkspacePlugin>{};
   final _knownTypes = <String, WorkspaceType>{};
   final _operations =
       <String, ({String fingerprint, WorkspacePluginReceipt receipt})>{};
@@ -47,6 +49,7 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   int get version => _version;
   Map<String, WorkspacePlugin> capturePortable() => Map.unmodifiable(_current);
   void installPortable(Map<String, WorkspacePlugin> values) {
+    _hostSelections.clear();
     _selections.clear();
     _legacySelections.clear();
     _operations.clear();
@@ -112,10 +115,58 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
       );
       _initial[id] = _current[id] = package;
       _knownTypes[template.type.id] = template.type;
+      if (key == 'server') {
+        final definition = <String, Object?>{
+          ...template.definition,
+          'templateVersion': '1.1.0',
+          'fields': [
+            ...template.definition['fields'] as List,
+            {
+              'key': 'maintainer',
+              'label': '维护负责人',
+              'type': 'text',
+              'required': false,
+            },
+          ],
+          'sections': [
+            for (final section in template.definition['sections'] as List)
+              if (section['kind'] == 'fields')
+                {
+                  ...section as Map<String, Object?>,
+                  'keys': [...section['keys'] as List, 'maintainer'],
+                }
+              else
+                section,
+          ],
+        }..remove('packageDigest');
+        final updateDigest = sha256
+            .convert(utf8.encode(jsonEncode(definition)))
+            .toString();
+        _bundledUpdates[id] = WorkspacePlugin(
+          id: id,
+          name: package.name,
+          version: '1.1.0',
+          author: package.author,
+          description: package.description,
+          digest: updateDigest,
+          origin: '随应用提供（示例）',
+          builtin: true,
+          panels: package.panels,
+          templates: [
+            WorkspacePluginTemplate(
+              id: template.id,
+              type: template.type,
+              definition: {...definition, 'packageDigest': updateDigest},
+            ),
+          ],
+        );
+      }
     }
   }
 
   void clear() {
+    _hostSelections.clear();
+    _bundledUpdates.clear();
     _legacySelections.clear();
     _selections.clear();
     _current.clear();
@@ -127,6 +178,7 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   }
 
   void reset() {
+    _hostSelections.clear();
     _legacySelections.clear();
     _selections.clear();
     _current
@@ -187,6 +239,7 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
 
   @override
   Future<void> releaseCandidate(String selectionId) async {
+    _hostSelections.remove(selectionId);
     _selections.remove(selectionId);
     _legacySelections.remove(selectionId);
   }
@@ -194,10 +247,57 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   @override
   Future<WorkspacePluginCatalog> load() async {
     await readable();
-    return WorkspacePluginCatalog(_version, _current.values.map(_project));
+    return WorkspacePluginCatalog(
+      _version,
+      _current.values.map(_project),
+      updates: [
+        for (final next in _bundledUpdates.values)
+          if (_current[next.id] case final old?)
+            if (_compareVersions(next.version, old.version) > 0)
+              WorkspacePluginUpdate(
+                packageId: next.id,
+                version: next.version,
+                digest: next.digest,
+                installedDigest: old.digest,
+                summary: '新增可选的维护负责人，已有资料保持原样。',
+              ),
+      ],
+    );
+  }
+
+  @override
+  Future<WorkspacePluginCandidate> prepareUpdate(
+    WorkspacePluginUpdate update,
+    int catalogVersion,
+  ) async {
+    await readable();
+    final next = _bundledUpdates[update.packageId],
+        old = _current[update.packageId];
+    if (catalogVersion != _version ||
+        next == null ||
+        old == null ||
+        next.version != update.version ||
+        next.digest != update.digest ||
+        old.digest != update.installedDigest ||
+        _compareVersions(next.version, old.version) <= 0) {
+      throw const WorkspaceFailure('conflict', '更新来源或已安装定义已变化，请关闭后重新核对。');
+    }
+    if (_hostSelections.length + _selections.length >= 100) {
+      throw const WorkspaceFailure('selection_busy', '待核对的选择过多，请先关闭已有表单。');
+    }
+    final id = workspaceOperationId();
+    _hostSelections[id] = next;
+    return WorkspacePluginCandidate(
+      id,
+      '${next.name}-${next.version}（应用内置示例）',
+      utf8.encode(jsonEncode(next.templates.first.definition)).length,
+    );
   }
 
   WorkspacePlugin _decode(String selectionId) {
+    // Only prepareUpdate can create these opaque host leases. External JSON
+    // still goes through the decoder's reserved-namespace rejection below.
+    if (_hostSelections[selectionId] case final bundled?) return bundled;
     final input = _selections[selectionId];
     if (input == null) {
       throw const WorkspaceFailure('selection_unavailable', '所选插件包已不可用，请重新选择。');

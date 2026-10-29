@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_source.dart';
+import 'sample_host_file_imports.dart';
 
 enum SampleHostScenario { fingerprintChanged, missingFingerprint }
 
@@ -35,6 +36,38 @@ class SampleWorkspaceHosts implements WorkspaceHostSource {
       <String, ({String intent, WorkspaceHostReceipt receipt})>{};
   int _version = 1;
   bool loseNextReply = false;
+  late final _imports = SampleHostFileImports(
+    readable: readable,
+    beforeWrite: beforeWrite,
+    changed: changed,
+    version: () => _version,
+    commitVersion: () => ++_version,
+    pluginVersion: pluginVersion,
+    pluginEnabled: () => plugin()?.enabled ?? false,
+  );
+  Future<List<WorkspaceHostFile>> fileChoices() async {
+    await readable();
+    return _imports.choices();
+  }
+
+  set loseNextImportReply(bool value) => _imports.loseNextReply = value;
+  @override
+  Future<WorkspaceHostImportStatus?> importedFile() async {
+    await readable();
+    return _imports.current;
+  }
+
+  @override
+  Future<WorkspaceHostImportPreview> previewImport(String id) =>
+      _imports.preview(id);
+  @override
+  Future<WorkspaceHostImportReceipt> importFile(WorkspaceHostImportChange c) =>
+      _imports.apply(c);
+  @override
+  Future<WorkspaceHostImportReceipt?> importReceipt(String id) =>
+      _imports.receipt(id);
+  @override
+  Future<void> releaseImport(String id) async => _imports.release(id);
   ({Map<String, WorkspaceHostEndpoint> endpoints, Map<String, String?> trusted})
   capturePortable() => (
     endpoints: Map.unmodifiable(_endpoints),
@@ -78,6 +111,7 @@ class SampleWorkspaceHosts implements WorkspaceHostSource {
   }
 
   void clearCurrent() {
+    _imports.reset();
     _trusted.clear();
     _endpoints.clear();
     _operations.clear();
@@ -95,6 +129,7 @@ class SampleWorkspaceHosts implements WorkspaceHostSource {
   }
 
   void reset() {
+    _imports.reset();
     _endpoints
       ..clear()
       ..addAll(_initialEndpoints);
