@@ -1,6 +1,6 @@
 # Mac 示例界面候选 · 2026-10-29
 
-当前固定预览已更新到共享焦点修正`b9160aa5`，见[本段实现与验收范围](zhiyu-macos-focus-cues.md)。以下`e6ac4fa3`及57项检查属于首候选历史基线；当前84项相关检查和Profile原生检查通过，不代表七张UI正式验收已完成。
+当前固定预览已更新到表单焦点修正`1dc85cd9`，见[本段实现与验收范围](zhiyu-macos-form-contexts.md)。当前97项相关检查、严格分析及普通预览构建通过。以下`e6ac4fa3`及57项检查属于首候选历史基线；[共享焦点](zhiyu-macos-focus-cues.md)的84项和Profile原生结果属于R6源码，不扩大为当前源码完整原生验收。七张UI正式验收仍未完成。
 
 本轮交付入口与当前状态以 [#62 顶部](https://github.com/ShiJiJS/agent-info-manage/issues/62)为准。本页只提供本机启动指引和检查边界，取代继续自动扩展开发范围的历史排期。
 
