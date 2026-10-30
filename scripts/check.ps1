@@ -66,7 +66,10 @@ try {
         Invoke-Checked $flutterCommand @('build', 'windows', '--release', '--no-pub')
     }
     if ($MacosRelease) {
-        Invoke-Checked $flutterCommand @('build', 'macos', '--release', '--no-pub')
+        $macFlutterSdk = Split-Path -Parent (Split-Path -Parent $flutterCommand)
+        Invoke-Checked (Get-Command python3 -ErrorAction Stop).Source @(
+            (Join-Path $PSScriptRoot 'build-macos-release.py'), $macFlutterSdk
+        )
     }
 } finally { Pop-Location }
 

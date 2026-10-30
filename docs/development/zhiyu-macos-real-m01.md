@@ -170,3 +170,52 @@
 ### 当前接入重点
 
 资料、分类和历史模块仍需组合成完整 `WorkspaceSource`，统一保存和生命周期操作查询，并接入正式内置定义及bootstrap/runtime。继续处理未提交意图与资料库身份绑定、独立进程重开、旧库升级及Mac构建，才能完成 #70；#71–#73仍依赖该结果，当前预览保持不变。
+
+## 2026-10-30：正式资料来源、库身份绑定与 Mac 启动
+
+`OwnerWorkspaceSource` 组合已有信息、分类和历史模块，统一原保存/生命周期回执查询。两个查询均须成功，原编号在两种回执中冲突时返回未知，不能挑选一个结果或将查询失败当作未提交。真实版本/分类元数据轮询及请求事件使外部写入可被界面发现，不缓存正文用于变化判断。
+
+- 普通资料内置定义独立于示例资料，提供通用资料、文档、服务器、应用服务和个人档案；包含固定版本/摘要及不可变结构，不创建样例记录或目录。经历仍是独立叶字段。
+- `OwnerLibraryScope` 将异步界面操作绑定到同一服务及库代次，并继续使用原 Owner 写入队列。恢复成功后，尚未调用写入的旧表单和已经排队的旧操作都被拒绝；跨服务不能借用绑定，失败恢复/只读导出不使绑定失效，迟到的旧库结果不能用于新库。
+- Mac `main.dart` 正式启动现在由 `OwnerWorkspaceHost` 使用 bootstrap 已打开的服务和 Owner 构造新界面；不另开库、密钥、服务或 hooks。成功换库重建页面投影，退出时仍先卸载资料页，再走现有服务保存/停止/关闭流程。Windows 仍走原入口。
+- 原生导航和滚动条偏好复用正式 DesktopRuntime；编辑时保留导航门禁，关闭窗口沿用隐藏行为，完全退出由原运行时执行。通知的准确请求定位及真实审批来源仍待 #71/#72；当前没有新增演示入口。
+- 设置、运行维护页、备份 UI、Agent/审批/授权历史、凭据、提案、插件、旧模板及附件等未接入接口明确失败，回执查询也不返回假缺失；不把现有 UI 或示例来源当作真实实现。部分能力按 #71/#72 接入，其余仍按 #69 后续阶段推进。
+
+### 检查证据
+
+- core 静态检查通过；`owner_library_scope_test`、`backup_coordinator_test`、`classification_operations_test`、`lifecycle_operations_test`、`library_test`、`revisions_test`、`information_layout_test` 共 **34项通过**。包含迟到/排队旧表单、恢复失败、跨服务和旧读取结果隔离。
+- desktop 静态检查通过；正式组合来源/启动、新界面、原退出失败恢复、bootstrap/runtime 回归共 **36项通过**（`owner_workspace_host_test`、`owner_workspace_source_test`、`desktop_shutdown_frame_test`、`desktop_bootstrap_test`、`desktop_runtime_test`、`workspace_app_test`）。五种表单使用真实 SQLCipher 保存后重新开库核对，界面创建和启动流程使用隔离 Owner 服务。没有把测试句柄重开当作正式 App 独立进程验收。
+- Widget 测试最初在收尾时受真实服务队列与 Flutter 模拟时钟交叉影响挂起；测试服务改为真实调度器初始化/关闭，显式推进两种调度器后，完整组合测试通过。没有修改生产退出语义来适配测试。
+- Swift 语法检查通过；Mac ARM64 Release 构建及 `codesign --verify --deep --strict` 通过，主程序架构为 `arm64`。日志/摘要在 `build/macos-adaptation/m01-source-checkpoint/`，普通 App 未启动、未访问个人库/Keychain。
+
+### 固定 SDK 的 AOT 构建兼容处理
+
+原始构建及清空 Flutter 构建缓存后的重试，均触发 `_window_macos.dart` 的 `_Rect` 非法 class ID 崩溃；与上游 [Flutter #191575](https://github.com/flutter/flutter/issues/191575) 所确认的问题一致，上游修复见 [Dart f9bd4cef](https://github.com/dart-lang/sdk/commit/f9bd4cef8bdaa3119ebffb36d48d2b2e6cfabe76)。本项目固定 Flutter 3.47.7 / Dart 3.13.5 仍实际复现。
+
+新增 `scripts/build-macos-release.py`：核对固定 SDK revision 和源文件 SHA256，持锁仅在编译期间将未使用的实验 windowing 标志编译为 false；结束后恢复 SDK 原文件。已知中断补丁可恢复，未知修改拒绝覆盖。`dev-macos.sh build` 及检查脚本的 Mac Release 分支使用相同入口；交付 manifest 记录兼容处理及脚本摘要。没有升级 SDK，也没有声称原始 SDK 无修改构建通过；未来升级应根据上游修复重新评估并移除处理。
+
+- 原文件 SHA256：`34335494e2a8128f873b69f8cb16bada88cf190e9d582d8802ae7027a5e22c28`；构建期间：`668ce492866ec9eb7e6404ce4ab3599c0f978eba33a036ca9c48e9dbd89ae44a`。成功构建后确认 SDK 工作区干净、原摘要恢复。
+- 兼容处理的成功/失败恢复、中断恢复、未知修改保护等 **4项 Python 测试通过**，Python 编译和 shell 语法检查通过。PowerShell Mac 分支和 hosted CI 未运行；本机实际构建走 shell 入口，无 Windows CI。
+- Xcode 仍输出 iOS CoreSimulator 版本过旧及既有 API 弃用警告；本次 Mac 构建通过，不将模拟器警告误报为 Mac 构建失败，也不宣称 iOS 工具链已修复。
+
+### 清理与后续
+
+已移除约2.8GiB旧 Flutter 构建缓存，以及本轮编译检查生成的约876MiB Release App/框架/dSYM；保留约20KiB日志和摘要、必要的当前增量缓存。原 Debug 预览 App 保留，未知 `.local/` 未处理。当前库格式/备份格式没有因本轮组合而改变。
+
+#70 仍 OPEN，完整验收项不勾选：尚需同一正式候选的独立进程保存/退出/重开、旧库与备份接缝以及实际界面流程证据；Mac 输入和系统交互边界按原票集中收口。随后继续 #71 真实 AI 申请、#72 审批与读取、#73 同候选联合交付。
+
+## 2026-10-30：独立进程重开与备份往返
+
+新增可重复入口 `python3 scripts/qa/check-owner-reopen.py`，依次启动五个独立 Flutter 测试进程（`apps/desktop/tool/check_owner_reopen.dart`），以真实 DesktopBootstrap、OwnerWorkspaceSource、SQLCipher 和运行时退出流程验证数据。每阶段使用随机本机服务端口；原生平台使用 fixture，没有打开系统窗口、调用 Keychain 或启动个人库。
+
+1. seed：空加密库创建普通资料、Markdown 文档、含独立教育经历叶的个人档案；保存目录、标签和资料关联。
+2. edit：新进程核对正文、字段身份、分类/关联及原创建回执，再修改普通资料。
+3. read：新进程确认修改值、版本2、原创建回执仍为版本1、修订存在；用现有备份机制导出。
+4. restore：另一进程恢复到新的隔离库，验证原 UI 库绑定失效，重建来源后内容/身份/分类/关联/修订一致，本机创建和编辑回执未随备份带入。
+5. restored-read：再启动独立进程，确认恢复后的库经正常退出后仍可读取相同结果。
+
+五阶段通过，实际进程 PID 分别为13224、13276、13330、13460、13521；运行器检查进程独立性，成功后清理全部合成库、备份和恢复材料。fixture 身份文件只存在于临时合成目录，不作为用户资料格式。未生成 App/dSYM。
+
+本次桌面静态分析通过；core相关34项、desktop组合/启动/退出相关36项复跑通过，SDK兼容处理4项Python测试、Python编译及shell语法检查通过。生产Dart/Swift相对上一个成功Release构建没有新增变化；新增的是独立进程验证工具和文档。
+
+本证据补齐正式数据来源的跨进程及备份接缝，但不是原生App的鼠标/键盘验收，也不是旧版本库升级后的新界面验收。#70保持OPEN，未勾选整票验收；当前预览保持不变。下一步先补同候选原生启动/保存/重开和旧库接缝，再进入#71。

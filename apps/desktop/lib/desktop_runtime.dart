@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
+import 'desktop_scroll.dart';
 
 enum DesktopEvent {
   closeWindow,
@@ -17,9 +18,14 @@ enum DesktopEvent {
 enum NotificationAvailability { enabled, notEnabled, denied, unavailable }
 
 class DesktopAvailability {
-  const DesktopAvailability({required this.tray, required this.notifications});
+  const DesktopAvailability({
+    required this.tray,
+    required this.notifications,
+    this.scrollbarStyle = DesktopScrollbarStyle.legacy,
+  });
   final bool tray;
   final NotificationAvailability notifications;
+  final DesktopScrollbarStyle scrollbarStyle;
   static const unavailable = DesktopAvailability(
     tray: false,
     notifications: NotificationAvailability.unavailable,
@@ -58,6 +64,9 @@ class NativeDesktopPlatform
     if (raw is! Map) return DesktopAvailability.unavailable;
     return DesktopAvailability(
       tray: raw['tray'] == true,
+      scrollbarStyle: raw['scrollbarStyle'] == 'overlay'
+          ? DesktopScrollbarStyle.overlay
+          : DesktopScrollbarStyle.legacy,
       notifications: switch (raw['notifications']) {
         'enabled' => NotificationAvailability.enabled,
         'not_enabled' => NotificationAvailability.notEnabled,
