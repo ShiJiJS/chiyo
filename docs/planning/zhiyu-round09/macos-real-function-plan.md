@@ -15,7 +15,7 @@
 | M03 | [#72](https://github.com/ShiJiJS/agent-info-manage/issues/72) | 主人批准/拒绝、AI 限定字段读取、撤销/到期/会话结束失效 | #71，传递含 #70 |
 | M04 | [#73](https://github.com/ShiJiJS/agent-info-manage/issues/73) | 同一固定 Mac 候选的真实闭环与交付说明 | #72，传递含 #70/#71 |
 
-四票均为 OPEN，`enhancement`、`ready-for-agent`；标签表示规格可执行，不表示本轮已经开始实现。下一张实施入口为 #70。每票正文详列复用接口、错误/未知结果、身份与权限、迁移/备份、验证和不包含范围；本地源见 [M01](issues/M01.md)、[M02](issues/M02.md)、[M03](issues/M03.md)、[M04](issues/M04.md)。
+四票均为 OPEN，`enhancement`、`ready-for-agent`；标签表示规格可执行，不表示已完成。#70 已有基础实施检查点但完整接入尚未完成，#71–#73 按依赖待实施。当前实施入口仍为 #70。每票正文详列复用接口、错误/未知结果、身份与权限、迁移/备份、验证和不包含范围；本地源见 [M01](issues/M01.md)、[M02](issues/M02.md)、[M03](issues/M03.md)、[M04](issues/M04.md)。
 
 ## 已有能力、缺口与未定事项
 
