@@ -94,3 +94,22 @@
 命令：`python3 scripts/qa/check-owner-cli.py --report build/macos-adaptation/m03-cli-interop-2.json`。结果与二进制/探针摘要见该JSON，运行日志为同名 `.log`。首轮探针按整数传入表单端口被正确拒绝，修正为界面合同的文本值后两阶段通过；未修改业务校验来迁就测试。测试目录、固定测试密钥、合成关联文件及临时编译程序均已清理。桌面静态检查通过。
 
 下一步构建固定源码Mac Release包，并用包内CLI重跑；用户预览仍未替换，#72/#73仍OPEN。
+
+
+## 2026-10-30：固定源码 Release 包与包内 CLI 验证
+
+源码 `b0578cf6ed9890a2c689ec7ee65af5f6ba869bb4` 已构建为 `0.4.1+13-mac-dev.b0578cf6ed98`。随包 README 原先沿用旧界面描述，现按正式 OwnerWorkspaceSource 的实际组合，明确普通资料/审批/历史范围，以及附件、凭据、备份与应用运行设置尚未接入的边界；退出使用应用菜单或 ⌘Q。没有以协议能力冒充界面已可用。
+
+构建使用当前工作目录下的临时本地 clone，固定 detached commit，复用锁定 SDK、下载及依赖缓存；未访问未知 `.local/`。第一次预检发现 clone 中的三个缓存 symlink 未被目录式 exclude 匹配，修正该临时 clone 的 exclude 后重新执行，未改变项目忽略规则或产品源码。依赖按 lockfile 顺序获取。构建沿用已记录的 Flutter AOT 兼容处理，结束已核对 SDK 源码恢复；Xcode 的 iOS 模拟器版本警告未阻止 macOS 构建，没有借此修改系统配置。
+
+验证结果：
+
+- 打包器20个阶段全部退出0：Release App、五个AOT CLI、存储诊断、ARM64/最低系统/动态依赖/沙箱与深度签名核对、压缩解压一致性及随包链接检查通过。最低二进制要求macOS14.0，构建主机27.0.1，不表示其他系统已验收。
+- 解压后独立存储诊断通过：SQLCipher4.19.0、重开、独立恢复与旧能力拒绝。解压后的CLI准备/worker生命周期6项测试通过。
+- 使用最终候选包内 `info`、`info-codex`、`info-codex-hook` 重跑 `check-owner-cli.py --tools`：两阶段/14个具名检查通过，Owner进程不同；二进制摘要逐项匹配包清单，合成库、测试密钥与关联文件已清理。平台fixture、可控时钟和合成hook仍不代表真实宿主或物理系统验收。
+
+候选保留在 `build/macos-adaptation/m03-candidate-b0578cf6/`，包含一个 `AgentInfoManage` 完整目录、ZIP、摘要、日志及报告。ZIP SHA256：`2745d3e9fd1f1fe5436d7c317148b8c98dfe8211c93318a098f774690965283d`。可追溯的摘要报告见 [固定候选证据](evidence/zhiyu-round09/m03-package-b0578cf6.json)。完整日志与本机报告分别为 `verification.json`、`owner-cli-interop.json`、`cleanup.json`。
+
+已删除本轮临时clone、Xcode产物、重复解压App及诊断中间产物；无残留构建进程。既有Debug预览52个文件/链接条目与构建前完全一致，未启动或替换用户预览，未触碰个人库/Keychain/hooks/信任，无CUA或Windows CI。保留的候选目录约501MiB（含ZIP）。
+
+#72 的固定包与包内CLI分项已通过，整票仍OPEN；后续对照完整验收标准补差额，并交 #73 完成同候选原生窗口/退出重开及真实AI宿主闭环。现阶段不能将这个候选称为已经验收可日用的App。
