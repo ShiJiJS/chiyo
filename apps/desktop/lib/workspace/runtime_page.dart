@@ -59,6 +59,7 @@ class WorkspaceRuntimePage extends StatelessWidget {
           v = m.value,
           p = preferences,
           c = UiPalette.of(context);
+      final exitFailed = v?.phase == WorkspaceRuntimePhase.terminationFailed;
       final active = m.available && !p.frozen,
           canOperate = m.canMaintain && !p.frozen;
       final backgroundReady =
@@ -203,13 +204,22 @@ class WorkspaceRuntimePage extends StatelessWidget {
               SettingsPreferenceRow(
                 title: '完全退出应用',
                 divider: false,
-                description:
-                    '先保存退出事实，再停止本机服务并结束会话授权。已启动的外部程序可能继续运行；使用中的材料和未确认副本不保证立即回收。',
+                description: exitFailed
+                    ? '服务已停止，系统退出尚未完成。重试只完成退出，不恢复会话授权或重新执行外部程序。'
+                    : '先保存退出事实，再停止本机服务并结束会话授权。已启动的外部程序可能继续运行；使用中的材料和未确认副本不保证立即回收。',
                 control: DesktopButton(
-                  key: const ValueKey('runtime-quit'),
-                  onPressed: active ? () => _quit(context) : null,
+                  key: ValueKey(
+                    exitFailed ? 'runtime-finish-exit' : 'runtime-quit',
+                  ),
+                  onPressed: active
+                      ? exitFailed
+                            ? () => m.write(WorkspaceRuntimeAction.finishExit)
+                            : () => _quit(context)
+                      : null,
                   child: Text(
-                    v?.phase == WorkspaceRuntimePhase.saveFailed
+                    exitFailed
+                        ? '重试退出应用'
+                        : v?.phase == WorkspaceRuntimePhase.saveFailed
                         ? '重试保存并退出'
                         : '完全退出',
                   ),

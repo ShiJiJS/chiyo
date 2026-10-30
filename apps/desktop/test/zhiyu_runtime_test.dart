@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -42,7 +43,7 @@ void main() {
     await File('$evidence/fonts.json').writeAsString(jsonEncode(fonts));
   });
   Future<void> ready(WidgetTester t) async {
-    await t.pumpAndSettle();
+    await settleFixture(t);
     expect(t.takeException(), isNull);
   }
 
@@ -61,6 +62,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, String key, {bool pending = false}) async {
+    if (await prepareFixtureAction(t, find.byKey(ValueKey(key)))) return;
     final f = find.byKey(ValueKey(key));
     await t.ensureVisible(f);
     await t.pump();
@@ -104,7 +106,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('runtime-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await ready(t);
@@ -357,7 +359,11 @@ void main() {
       await tap(t, 'runtime-quit');
       await tap(t, 'runtime-quit-confirm');
       await tap(t, 'runtime-quit-cancel');
-      expect(find.byKey(const ValueKey('runtime-stopped')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('preview-runtime-resume')),
+        findsNothing,
+      );
+      expect(m.value!.phase, WorkspaceRuntimePhase.stopped);
       await capture(t, 'runtime-1440-light-stopped');
       await tap(t, 'preview-runtime-resume');
       expect(find.byType(WorkspaceRuntimePage), findsOneWidget);

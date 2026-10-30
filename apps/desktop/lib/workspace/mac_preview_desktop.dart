@@ -79,6 +79,8 @@ class MacPreviewDesktop {
     return channel.invokeMethod<void>('setNavigationEnabled', enabled);
   }
 
+  Future<void> quit() => channel.invokeMethod<void>('quit');
+
   void dispose() {
     if (_disposed) return;
     _disposed = true;

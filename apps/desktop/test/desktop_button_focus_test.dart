@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -177,13 +178,13 @@ void main() {
                 FocusHighlightStrategy.alwaysTraditional;
             final boundary = GlobalKey();
             await t.pumpWidget(
-              RepaintBoundary(key: boundary, child: const PreviewWorkspace()),
+              RepaintBoundary(key: boundary, child: const PreviewWorkspace(inputsBuilder: fixtureInputs, )),
             );
             await t.pumpAndSettle();
             if (dark) {
-              await t.tap(find.byKey(const ValueKey('preview-guide')));
+              await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
               await t.pumpAndSettle();
-              await t.tap(find.byKey(const ValueKey('preview-theme-dark')));
+              await fixtureTap(t, find.byKey(const ValueKey('preview-theme-dark')));
               await t.pumpAndSettle();
             }
             final nav = find.byKey(const ValueKey('workspace-nav-library'));

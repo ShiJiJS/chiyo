@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -140,7 +141,9 @@ void main() {
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
       final calls = <MethodCall>[], desktop = await startDesktop(calls);
-      await t.pumpWidget(PreviewWorkspace(desktop: desktop));
+      await t.pumpWidget(
+        PreviewWorkspace(inputsBuilder: fixtureInputs, desktop: desktop),
+      );
       await t.pumpAndSettle();
       final title = find.byKey(const ValueKey('library-detail-title'));
       final width = t.getSize(title).width;
@@ -228,6 +231,7 @@ void main() {
       WorkspacePage? current;
       await tester.pumpWidget(
         PreviewWorkspace(
+          inputsBuilder: fixtureInputs,
           desktop: desktop,
           pageBuilder: (_, location) {
             current = location.page;
@@ -242,12 +246,10 @@ void main() {
       await nativeCommand('searchApprovals');
       await tester.pumpAndSettle();
       expect(current, WorkspacePage.library);
-      await tester.tap(find.byKey(const ValueKey('preview-guide')));
-      await tester.pumpAndSettle();
-      expect(commands.last.method, 'setNavigationEnabled');
+      expect(find.byKey(const ValueKey('preview-guide')), findsNothing);
+      await desktop.setNavigationEnabled(false);
       expect(commands.last.arguments, false);
-      await tester.tap(find.text('完成'));
-      await tester.pumpAndSettle();
+      await desktop.setNavigationEnabled(true);
       expect(commands.last.arguments, true);
       await tester.pumpWidget(const SizedBox());
       await nativeCommand('openSettings');
@@ -280,7 +282,9 @@ void main() {
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
       final calls = <MethodCall>[], desktop = await startDesktop(calls);
-      await t.pumpWidget(PreviewWorkspace(desktop: desktop));
+      await t.pumpWidget(
+        PreviewWorkspace(inputsBuilder: fixtureInputs, desktop: desktop),
+      );
       await t.pumpAndSettle();
       final page = t.widget<LibraryPage>(find.byType(LibraryPage)),
           source = page.controller.source as SampleWorkspaceSource;
@@ -329,7 +333,9 @@ void main() {
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
       final calls = <MethodCall>[], desktop = await startDesktop(calls);
-      await t.pumpWidget(PreviewWorkspace(desktop: desktop));
+      await t.pumpWidget(
+        PreviewWorkspace(inputsBuilder: fixtureInputs, desktop: desktop),
+      );
       await t.pumpAndSettle();
       final page = t.widget<LibraryPage>(find.byType(LibraryPage)),
           source = page.controller.source as SampleWorkspaceSource;

@@ -1,3 +1,4 @@
+import '../test/support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ void main() {
     await t.pumpWidget(
       RepaintBoundary(
         key: boundary,
-        child: PreviewWorkspace(desktop: desktop),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs, desktop: desktop),
       ),
     );
     await t.pumpAndSettle();
@@ -55,6 +56,7 @@ void main() {
     final source = library.source as SampleWorkspaceSource;
     Finder key(String value) => find.byKey(ValueKey(value));
     Future<void> tap(Finder target) async {
+      if (await prepareFixtureAction(t, target)) return;
       await t.ensureVisible(target);
       await t.pumpAndSettle();
       await t.tap(target);

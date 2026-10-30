@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -24,14 +25,14 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('fidelity-root'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
     if (dark) {
-      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const ValueKey('preview-theme-dark')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-theme-dark')));
       await t.pumpAndSettle();
     }
     final model = t.widget<LibraryPage>(find.byType(LibraryPage)).controller;

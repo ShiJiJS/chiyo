@@ -5,53 +5,6 @@ import 'host_import_controller.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 
-Future<WorkspaceHostFile?> showHostFileChoices(
-  BuildContext context,
-  Future<List<WorkspaceHostFile>> Function() read,
-  Future<void> Function(String) release,
-) async {
-  final choices = await read();
-  WorkspaceHostFile? selected;
-  try {
-    if (!context.mounted) return null;
-    selected = await showDesktopDialog<WorkspaceHostFile>(
-      context,
-      builder: (context) => DesktopDialog(
-        title: const Text('选择主机记录文件'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final file in choices)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: DesktopButton(
-                  alignment: Alignment.centerLeft,
-                  onPressed: () => Navigator.pop(context, file),
-                  child: Text('${file.name} · ${file.byteLength}字节'),
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          DesktopButton(
-            key: const ValueKey('host-file-choice-cancel'),
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-        ],
-      ),
-    );
-    return selected;
-  } finally {
-    for (final file in choices) {
-      if (selected?.selectionId != file.selectionId) {
-        await release(file.selectionId);
-      }
-    }
-  }
-}
-
 Future<WorkspaceHostImportReceipt?> showHostFileImport(
   BuildContext context,
   WorkspaceHostSource source,

@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -40,6 +41,7 @@ void main() {
   ApprovalsController model(WidgetTester t) =>
       t.widget<ApprovalsPage>(find.byType(ApprovalsPage)).controller;
   Future<void> tap(WidgetTester t, Finder f) async {
+    if (await prepareFixtureAction(t, f)) return;
     await t.ensureVisible(f);
     await t.pumpAndSettle();
     await t.tap(f);
@@ -86,7 +88,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('approvals-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
@@ -202,18 +204,15 @@ void main() {
       );
       expect(model(t).selection, 'server');
       await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
-      await tap(t, find.byKey(const ValueKey('credential-use')));
-      await t.enterText(
-        find.byKey(const ValueKey('credential-request-purpose')),
+      expect(find.byKey(const ValueKey('credential-use')), findsNothing);
+      final request = await submitAgentCredentialRequest(
+        t,
+        const WorkspaceRecordRef(WorkspaceRecordKind.credential, 'sshkey'),
         '核对审批入口关联',
-      );
-      await tap(t, find.byKey(const ValueKey('credential-request-submit')));
-      final request = (await s.credentials.requests()).singleWhere(
-        (r) => r.purpose == '核对审批入口关联',
       );
       await tap(
         t,
-        find.byKey(const ValueKey('credential-request-open-approval')),
+        find.byKey(ValueKey('credential-open-request-${request.id}')),
       );
       final m = model(t);
       expect(m.selection, request.approvalId);
@@ -320,12 +319,7 @@ void main() {
             .onPressed,
         isNull,
       );
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('preview-guide')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('preview-guide')), findsNothing);
       await capture(t, 'approval-1440-light-unknown');
       s.setScenario(SampleWorkspaceScenario.failure);
       await tap(t, find.byKey(const ValueKey('approval-reconcile')));
@@ -532,44 +526,27 @@ void main() {
       expect(m.results!.total, 5);
       await tap(t, find.byKey(const ValueKey('preview-guide')));
       // An indeterminate progress indicator intentionally never settles.
-      await t.ensureVisible(
+      await fixtureTap(
+        t,
         find.byKey(const ValueKey('preview-scenario-waiting')),
       );
-      await t.tap(find.byKey(const ValueKey('preview-scenario-waiting')));
       await t.pump();
       expect(m.loading, true);
       expect(m.readFailure, isNull);
-      for (
-        var frame = 0;
-        frame < 40 &&
-            (find
-                    .byKey(const ValueKey('preview-scenario-waiting'))
-                    .evaluate()
-                    .isNotEmpty ||
-                t
-                        .widget<DesktopButton>(
-                          find.byKey(const ValueKey('preview-guide')),
-                        )
-                        .onPressed ==
-                    null);
-        frame++
-      ) {
-        await t.pump(const Duration(milliseconds: 16));
-      }
       expect(
         find.byKey(const ValueKey('preview-scenario-waiting')),
         findsNothing,
       );
-      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
       await t.pump();
       final normal = find.byKey(const ValueKey('preview-scenario-ready'));
-      await t.ensureVisible(normal);
-      await t.tap(normal);
+      await fixtureTap(t, normal);
       await ready(t, () => !m.loading && !m.reading);
       expect(m.results!.total, 5);
       await tap(t, find.byKey(const ValueKey('preview-guide')));
       await tap(t, find.byKey(const ValueKey('preview-scenario-failure')));
       expect(m.readFailure, isNotNull);
+      s.setScenario(SampleWorkspaceScenario.ready);
       await tap(t, find.byKey(const ValueKey('approval-retry')));
       expect(m.readFailure, isNull);
       expect(m.results!.total, 5);

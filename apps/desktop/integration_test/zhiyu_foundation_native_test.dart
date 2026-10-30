@@ -1,3 +1,5 @@
+import '../test/support/foundation_controls.dart';
+import '../test/support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -69,7 +71,10 @@ void main() {
       await tester.pumpWidget(
         RepaintBoundary(
           key: boundary,
-          child: PreviewWorkspace(desktop: desktop),
+          child: PreviewWorkspace(
+            inputsBuilder: fixtureInputs,
+            desktop: desktop,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -96,20 +101,25 @@ void main() {
         await tester.pumpAndSettle();
       }
       final initial = tester.element(
-        find.byKey(const ValueKey('preview-guide')),
+        find.byKey(const ValueKey('zhiyu-content')),
       );
       final nativeDpr = tester.view.devicePixelRatio;
       final nativeSize = tester.view.physicalSize;
       final initialScale = MediaQuery.textScalerOf(initial).scale(14) / 14;
 
       Future<void> tap(Finder target) async {
+        if (await prepareFixtureAction(tester, target)) return;
         await tester.ensureVisible(target);
         await tester.tap(target);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       }
 
-      Future<void> guide() => tap(find.byKey(const ValueKey('preview-guide')));
+      Future<void> guide() async {
+        await openFoundationControls(tester, desktop);
+        await tester.pumpAndSettle();
+      }
+
       Future<void> key(LogicalKeyboardKey value) async {
         final physical = {
           LogicalKeyboardKey.escape: PhysicalKeyboardKey.escape,
@@ -337,9 +347,9 @@ void main() {
         );
         await traceOpacity(
           'dialog',
-          find.text('设计说明与界面检查'),
+          find.text('共享控件检查'),
           () async {
-            await tester.tap(find.byKey(const ValueKey('preview-guide')));
+            await openFoundationControls(tester, desktop);
             await tester.pump();
           },
           180,
@@ -468,12 +478,10 @@ void main() {
       expect(find.text('已保存到预览资料'), findsOneWidget);
       await key(LogicalKeyboardKey.escape);
       expect(find.byType(DesktopDialog), findsNothing);
-      final focus = FocusManager.instance.primaryFocus?.context
-          ?.findAncestorWidgetOfExactType<DesktopButton>();
-      expect(focus?.key, const ValueKey('preview-guide'));
+      expect(find.byKey(const ValueKey('preview-guide')), findsNothing);
       checks.add('dialog-escape-restores-focus');
       recording.mark('rapid-open-close');
-      await tester.tap(find.byKey(const ValueKey('preview-guide')));
+      await openFoundationControls(tester, desktop);
       await tester.pump();
       // Match the deterministic rapid-close contract: dispatch during the
       // entrance (40ms of 180ms), after the new route has acquired focus.

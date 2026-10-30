@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -44,6 +45,7 @@ void main() {
             addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
             Finder key(String value) => find.byKey(ValueKey(value));
             Future<void> tap(Finder target) async {
+              if (await prepareFixtureAction(t, target)) return;
               if (target.hitTestable().evaluate().isEmpty) {
                 await t.ensureVisible(target);
               }
@@ -61,7 +63,7 @@ void main() {
             await t.pumpWidget(
               const RepaintBoundary(
                 key: ValueKey('library-workflow-capture'),
-                child: PreviewWorkspace(),
+                child: PreviewWorkspace(inputsBuilder: fixtureInputs),
               ),
             );
             await t.pumpAndSettle();

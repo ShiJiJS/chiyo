@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
@@ -38,11 +39,12 @@ void main() {
     await File('$evidence/fonts.json').writeAsString(jsonEncode(fonts));
   });
   Future<void> ready(WidgetTester t) async {
-    await t.pumpAndSettle();
+    await settleFixture(t);
     expect(t.takeException(), isNull);
   }
 
   Future<void> tap(WidgetTester t, String key, {bool pending = false}) async {
+    if (await prepareFixtureAction(t, find.byKey(ValueKey(key)))) return;
     final f = find.byKey(ValueKey(key));
     await t.ensureVisible(f);
     await t.pump();
@@ -110,7 +112,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('backup-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await ready(t);

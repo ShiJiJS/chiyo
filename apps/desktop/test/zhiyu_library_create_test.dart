@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -20,6 +21,7 @@ import 'package:info_desktop/workspace/zhiyu_theme.dart';
 
 Finder key(String value) => find.byKey(ValueKey(value));
 Future<void> tap(WidgetTester t, Finder target) async {
+  if (await prepareFixtureAction(t, target)) return;
   if (target.hitTestable().evaluate().isEmpty) await t.ensureVisible(target);
   await t.pumpAndSettle();
   await t.tap(target, kind: ui.PointerDeviceKind.mouse);
@@ -67,7 +69,7 @@ void main() {
               await t.pumpWidget(
                 const RepaintBoundary(
                   key: ValueKey('chooser-capture'),
-                  child: PreviewWorkspace(),
+                  child: PreviewWorkspace(inputsBuilder: fixtureInputs),
                 ),
               );
               await t.pumpAndSettle();
@@ -284,7 +286,7 @@ void main() {
       t.view.devicePixelRatio = 1;
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
-      await t.pumpWidget(const PreviewWorkspace());
+      await t.pumpWidget(const PreviewWorkspace(inputsBuilder: fixtureInputs));
       await t.pumpAndSettle();
       await tap(t, find.text('关联资料').first);
       const ref = 'information:blinko';

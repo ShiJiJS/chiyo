@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -114,7 +115,9 @@ void main() {
             'scrollbarRevision': 0,
           };
         }
-        if (call.method == 'setNavigationEnabled') return null;
+        if (call.method == 'setNavigationEnabled' || call.method == 'quit') {
+          return null;
+        }
         forbidden.add('preview/${call.method}');
         throw StateError('Unexpected native action');
       });
@@ -131,7 +134,9 @@ void main() {
       await t.runAsync(loadDesktopFonts);
       final desktop = MacPreviewDesktop();
       await desktop.initialize();
-      await t.pumpWidget(PreviewWorkspace(desktop: desktop));
+      await t.pumpWidget(
+        PreviewWorkspace(inputsBuilder: fixtureInputs, desktop: desktop),
+      );
       await t.pumpAndSettle();
       final controller = t
           .widget<LibraryPage>(find.byType(LibraryPage))
@@ -385,13 +390,12 @@ void main() {
       await t.pumpAndSettle();
       await t.tap(approve);
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
       final demoUses = find.byKey(
         const ValueKey('preview-approval-executions'),
       );
-      await t.ensureVisible(demoUses);
-      await t.tap(demoUses);
+      await fixtureTap(t, demoUses);
       await t.pumpAndSettle();
       final uses = (await source.approvals.read('token')).executions;
       expect(uses, hasLength(3));
@@ -521,9 +525,9 @@ void main() {
       );
       expect(created.record.name, '北辰服务入口');
       expect(created.values['url'], 'https://portal.beichen.example');
-      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
-      await t.tap(find.text('重置预览资料'));
+      await prepareFixtureAction(t, find.text('重置预览资料'));
       await t.pumpAndSettle();
       expect((await source.credentials.read(ssh)).privateNote, isEmpty);
       expect((await source.loadSummary()).records, 31);
@@ -789,7 +793,11 @@ void main() {
       expect(find.byType(WorkspaceSettingsPage), findsOneWidget);
       await runtime.reconcile();
       await t.pumpAndSettle();
-      expect(find.byKey(const ValueKey('runtime-stopped')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('preview-runtime-resume')),
+        findsNothing,
+      );
+      expect(calls.where((c) => c.method == 'quit'), hasLength(1));
       expect(forbidden, isEmpty);
       expect(network.calls, 0);
       expect(filesystem.rejected, isEmpty);
@@ -797,7 +805,8 @@ void main() {
       expect(calls.first.method, 'initialize');
       expect(
         calls.every(
-          (c) => ['initialize', 'setNavigationEnabled'].contains(c.method),
+          (c) =>
+              ['initialize', 'setNavigationEnabled', 'quit'].contains(c.method),
         ),
         isTrue,
       );

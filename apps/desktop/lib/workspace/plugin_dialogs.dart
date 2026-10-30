@@ -7,52 +7,6 @@ import 'plugin_mutation.dart';
 import 'plugin_widgets.dart';
 import 'workspace_source.dart';
 
-/// The composition root supplies host selection and releases unchosen leases.
-Future<WorkspacePluginCandidate?> showPluginChoices(
-  BuildContext context,
-  Future<List<WorkspacePluginCandidate>> Function() read,
-  Future<void> Function(String) release,
-) async {
-  final choices = await read();
-  WorkspacePluginCandidate? selected;
-  try {
-    if (!context.mounted) return null;
-    selected = await showDesktopDialog<WorkspacePluginCandidate>(
-      context,
-      builder: (context) => DesktopDialog(
-        title: const Text('选择插件包'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final choice in choices)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: DesktopButton(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.all(14),
-                  onPressed: () => Navigator.pop(context, choice),
-                  child: Text('${choice.filename} · ${choice.byteLength}字节'),
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          DesktopButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-        ],
-      ),
-    );
-    return selected;
-  } finally {
-    for (final c in choices) {
-      if (c.selectionId != selected?.selectionId) await release(c.selectionId);
-    }
-  }
-}
-
 Future<WorkspacePluginReceipt?> showPluginInstall(
   BuildContext context,
   WorkspacePluginSource source,
@@ -139,7 +93,11 @@ class _PluginChangeState extends State<_PluginChange> {
       _showPrevious = false;
     });
     try {
-      final candidate = await widget.picker?.call();
+      final picker = widget.picker;
+      if (picker == null) {
+        throw const WorkspaceFailure('unsupported', '本机插件文件选择尚未接入。');
+      }
+      final candidate = await picker();
       if (!mounted) {
         if (candidate != null) {
           await widget.source.releaseCandidate(candidate.selectionId);
@@ -409,7 +367,11 @@ class _PluginChangeState extends State<_PluginChange> {
           if (!_mutation.uncertain &&
               (_readFailure != null || _mutation.failure?.code == 'conflict'))
             DesktopButton(
-              onPressed: _loading ? null : _reload,
+              onPressed: _loading
+                  ? null
+                  : _install && _candidate == null
+                  ? _pick
+                  : _reload,
               child: const Text('重新预览'),
             ),
           if (_install)

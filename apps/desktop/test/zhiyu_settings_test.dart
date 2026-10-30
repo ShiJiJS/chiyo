@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -129,6 +130,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, Finder f) async {
+    if (await prepareFixtureAction(t, f)) return;
     await t.ensureVisible(f);
     await t.pumpAndSettle();
     await t.tap(f);
@@ -148,7 +150,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('settings-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await ready(t);
@@ -236,12 +238,7 @@ void main() {
       s.settings.loseNextReply = true;
       await tap(t, find.byKey(const ValueKey('settings-save')));
       expect(model(t).frozen, true);
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('preview-guide')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('preview-guide')), findsNothing);
       expect(
         t
             .widget<DesktopButton>(
