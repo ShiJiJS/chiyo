@@ -752,6 +752,8 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         WorkspaceCredentialRequestState.sessionEnded,
       WorkspaceApprovalState.unavailable =>
         WorkspaceCredentialRequestState.superseded,
+      WorkspaceApprovalState.cancelled =>
+        WorkspaceCredentialRequestState.superseded,
       WorkspaceApprovalState.completed =>
         WorkspaceCredentialRequestState.superseded,
     };

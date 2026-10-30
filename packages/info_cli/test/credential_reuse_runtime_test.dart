@@ -416,7 +416,9 @@ void main() {
       addTearDown(h.close);
       final capabilities = await h.client.execute({'command': 'capabilities'});
       expect(capabilities['protocolVersions'], [1]);
-      expect(capabilities['capabilities'], isEmpty);
+      expect(capabilities['capabilities'], [
+        'information-request-operations.v1',
+      ]);
       for (final version in [null, 2]) {
         final result = await h.client.execute({
           'protocolVersion': ?version,

@@ -145,7 +145,8 @@ class AgentServer {
               runtime ||
               informationFile ||
               request.uri.path == '/catalog' ||
-              request.uri.path == '/request'
+              request.uri.path == '/request' ||
+              request.uri.path == '/request/status'
           ? decodeProtocolObject(utf8.decode(bytes))
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
@@ -229,6 +230,7 @@ class AgentServer {
           'status': 'ok',
           'protocolVersions': [1, if (enableReusableCredentialUse) 2],
           'capabilities': [
+            'information-request-operations.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
             if (_focusedFillEnabled) 'credential-focused-fill.v1',
             if (_focusedFillEnabled && _agent.focusedFillDiscoveryAvailable)
@@ -574,11 +576,13 @@ class AgentServer {
         );
       case '/catalog':
         final query = body['query'] ?? '';
+        final typeId = body['typeId'];
         final directoryId = body['directoryId'];
         final tagId = body['tagId'];
         final offset = body['offset'] ?? 0;
         final limit = body['limit'] ?? 20;
         if (query is! String ||
+            (typeId != null && typeId is! String) ||
             (directoryId != null && directoryId is! String) ||
             (tagId != null && tagId is! String) ||
             offset is! int ||
@@ -587,6 +591,7 @@ class AgentServer {
         }
         final page = _agent.searchCatalog(
           query: query,
+          typeId: typeId as String?,
           directoryId: directoryId as String?,
           tagId: tagId as String?,
           offset: offset,
@@ -606,6 +611,7 @@ class AgentServer {
         return {
           'status': 'ok',
           'items': page.items,
+          'tags': _agent.catalogTags(),
           'total': page.total,
           'offset': offset,
           'nextOffset': page.nextOffset,
@@ -629,6 +635,9 @@ class AgentServer {
         return {'status': 'ended'};
       case '/request':
         _agent.validateSession(_text(body, 'sessionSecret'));
+        if (body.containsKey('operationId') && body['operationId'] is! String) {
+          throw const AccessFailure('invalid_request');
+        }
         final raw = body['fields'];
         if (raw is! List || raw.length > 200) {
           throw const AccessFailure('invalid_request');
@@ -655,8 +664,18 @@ class AgentServer {
           _text(body, 'sessionSecret'),
           _text(body, 'purpose'),
           fields,
+          operationId: body['operationId'] as String?,
         );
-        return _agent.status(_text(body, 'sessionSecret'), receipt.id);
+        return {
+          ..._agent.status(_text(body, 'sessionSecret'), receipt.id),
+          if (body.containsKey('operationId'))
+            'operationId': body['operationId'],
+        };
+      case '/request/status':
+        return _agent.requestOperationStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'operationId'),
+        );
       case '/cancel':
         final session = _text(body, 'sessionSecret');
         final id = _text(body, 'requestId');

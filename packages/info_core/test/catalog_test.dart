@@ -3,6 +3,65 @@ import 'package:test/test.dart';
 
 void main() async {
   test(
+    'type and public tags are discoverable without exposing layout or content',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository([
+          InformationItem(
+            'document',
+            'Document',
+            'Public summary',
+            1,
+            [
+              const InformationField(
+                'body',
+                'Body',
+                'Public field description',
+                'SECRET_BODY',
+                1,
+              ),
+            ],
+            layout: InformationLayout(
+              typeId: 'document',
+              snapshot: {'private': 'SECRET_LAYOUT'},
+              fieldIds: {'body': 'body'},
+              relations: {
+                'related': [
+                  InformationRelationRef('information', 'SECRET_RELATION'),
+                ],
+              },
+            ),
+          ),
+        ]),
+      );
+      addTearDown(service.close);
+      final tag = await service.owner.createTag('Shared label');
+      final unused = await service.owner.createTag('Unused label');
+      await service.owner.organizeInformation('document', tagIds: [tag.id]);
+      final page = service.agent.searchCatalog(
+        typeId: 'document',
+        query: 'shared label',
+        tagId: tag.id,
+      );
+      expect(page.total, 1);
+      expect(page.items.single['typeId'], 'document');
+      expect(
+        service.agent.catalogTags(),
+        contains(equals({'id': unused.id, 'name': unused.name})),
+      );
+      expect(service.agent.searchCatalog(typeId: 'server').items, isEmpty);
+      expect(service.agent.searchCatalog(query: 'SECRET').items, isEmpty);
+      expect(page.items.toString(), isNot(contains('SECRET')));
+      expect(
+        () => service.agent.searchCatalog(typeId: ''),
+        throwsA(isA<AccessFailure>()),
+      );
+      await service.close();
+      expect(() => service.agent.catalogTags(), throwsA(isA<AccessFailure>()));
+    },
+  );
+
+  test(
     'catalog searches only saved public metadata and pages matching items',
     () async {
       final service = InformationService(
@@ -12,7 +71,7 @@ void main() async {
       final directory = await service.owner.createDirectory(
         'PRIVATE_DIRECTORY_MARKER',
       );
-      final tag = await service.owner.createTag('PRIVATE_TAG_MARKER');
+      final tag = await service.owner.createTag('PUBLIC_TAG_MARKER');
       final first = await service.owner.createInformation('One', 'Public', [
         const FieldInput('Host', 'Address', 'PRIVATE_VALUE_MARKER'),
       ]);
@@ -38,6 +97,14 @@ void main() async {
       );
       expect(page.items.single['name'], 'Reviewed name');
       expect(page.total, 1);
+      expect(page.items.single['tags'], [
+        {'id': tag.id, 'name': tag.name},
+      ]);
+      expect(service.agent.searchCatalog(query: 'PUBLIC_TAG').total, 1);
+      expect(
+        service.agent.catalogTags(),
+        contains(equals({'id': tag.id, 'name': tag.name})),
+      );
       expect(service.agent.searchCatalog(limit: 1).nextOffset, 1);
       expect(
         service.agent.searchCatalog(offset: 1, limit: 1).items.single['name'],
@@ -118,7 +185,10 @@ void main() async {
         tagIds: [tag.id],
       );
       expect(service.owner.fieldsInDirectory(project.id), hasLength(2));
-      expect(await service.agent.read(grant.token, selected.single), 'first.invalid');
+      expect(
+        await service.agent.read(grant.token, selected.single),
+        'first.invalid',
+      );
       expect(
         () => service.agent.read(
           grant.token,

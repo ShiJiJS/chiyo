@@ -104,6 +104,11 @@ class OwnerRequestSnapshot {
     required Iterable<FieldRef>? approvedFields,
     required this.grantExpiresAt,
     this.grantLifetime,
+    this.sessionId = '',
+    this.approvedAt,
+    this.historical = false,
+    this.applicationClosed = false,
+    this.restoredAt,
     this.sessionEnded = false,
     Iterable<RecordedField> recordedFields = const [],
   }) : fields = List.unmodifiable(fields),
@@ -125,6 +130,11 @@ class OwnerRequestSnapshot {
   final Duration? grantLifetime;
   final bool sessionEnded;
 
+  /// Public audit identity, never the private session capability.
+  final String sessionId;
+  final DateTime? approvedAt, restoredAt;
+  final bool historical, applicationClosed;
+
   /// Owner display names captured at request/approval, never old field values.
   final List<RecordedField> recordedFields;
 }
@@ -136,8 +146,10 @@ class _Request {
     this.purpose,
     this.fields,
     this.createdAt,
-    this.expiresAt,
-  );
+    this.expiresAt, {
+    this.operationId,
+  });
+  final String? operationId;
   final String id;
   final String session;
   final String purpose;
@@ -413,14 +425,31 @@ class AgentAccess {
   RequestReceipt request(
     String session,
     String purpose,
-    List<FieldRef> fields,
-  ) {
+    List<FieldRef> fields, {
+    String? operationId,
+  }) {
     _service._requireSession(session);
     if (purpose.trim().isEmpty ||
         purpose.length > 2000 ||
         fields.isEmpty ||
-        fields.length > 200 ||
-        fields.any((f) => _service._field(f) == null)) {
+        fields.length > 200) {
+      throw const AccessFailure('invalid_request');
+    }
+    if (operationId != null) {
+      final original = _findRequestOperation(session, operationId);
+      if (original != null) {
+        if (original.purpose != purpose ||
+            original.fields.length != fields.toSet().length ||
+            !original.fields.containsAll(fields)) {
+          throw const AccessFailure('operation_conflict');
+        }
+        // The original request survives edits/deletion and terminal decisions.
+        // Never revalidate it as a new intent or extend its fixed deadline.
+        _service._expire(original);
+        return RequestReceipt(original.id);
+      }
+    }
+    if (fields.any((f) => _service._field(f) == null)) {
       throw const AccessFailure('invalid_request');
     }
     final id = _service._secret();
@@ -433,6 +462,7 @@ class AgentAccess {
             Set.unmodifiable(fields),
             now,
             now.add(_service._requestLifetime),
+            operationId: operationId,
           )
           ..recordedFields = fields.toSet().map((ref) {
             final item = _service._repository.items.firstWhere(
@@ -443,6 +473,35 @@ class AgentAccess {
           }).toList();
     _service._submitted.add(id);
     return RequestReceipt(id);
+  }
+
+  _Request? _findRequestOperation(String session, String operationId) {
+    if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(operationId)) {
+      throw const AccessFailure('invalid_request');
+    }
+    for (final request in _service._requests.values) {
+      if (request.session == session && request.operationId == operationId) {
+        return request;
+      }
+    }
+    return null;
+  }
+
+  /// Query only; not_found is a snapshot, not proof an in-flight submit cannot
+  /// arrive later. Private session authentication is required even for absence.
+  Map<String, Object?> requestOperationStatus(
+    String session,
+    String operationId,
+  ) {
+    _service._requireSession(session);
+    final request = _findRequestOperation(session, operationId);
+    return {
+      if (request == null)
+        'status': 'not_found'
+      else
+        ...status(session, request.id),
+      'operationId': operationId,
+    };
   }
 
   _Request _request(String session, String id) {
@@ -501,30 +560,47 @@ class AgentAccess {
     return reading;
   }
 
-  List<Map<String, Object?>> catalog() => searchCatalog().items;
+  /// Complete metadata for internal capability checks. Transport discovery is
+  /// paginated by searchCatalog; protocol checks must not stop at its first page.
+  List<Map<String, Object?>> catalog() {
+    if (_service._closed || _service._backupBusy) {
+      throw const AccessFailure('service_unavailable');
+    }
+    return _catalogMetadata();
+  }
 
-  List<Map<String, Object?>> _catalogMetadata() => _service._repository.items
-      .map(
-        (item) => <String, Object?>{
-          'id': item.id,
-          'version': item.version,
-          'name': item.name,
-          'description': item.description,
-          'directoryId': item.directoryId,
-          'tagIds': item.tagIds,
-          'fields': item.fields
-              .map(
-                (field) => {
-                  'id': field.id,
-                  'name': field.name,
-                  'description': field.description,
-                  'kind': field.kind.name,
-                },
-              )
-              .toList(),
-        },
-      )
-      .toList();
+  List<Map<String, Object?>> _catalogMetadata() {
+    final tags = {
+      for (final tag in _service._repository.tags) tag.id: tag.name,
+    };
+    return _service._repository.items
+        .map(
+          (item) => <String, Object?>{
+            'id': item.id,
+            'version': item.version,
+            'name': item.name,
+            'description': item.description,
+            'typeId': item.layout?.typeId ?? 'generic',
+            'directoryId': item.directoryId,
+            'tagIds': item.tagIds,
+            'tags': [
+              for (final id in item.tagIds)
+                if (tags.containsKey(id)) {'id': id, 'name': tags[id]!},
+            ],
+            'fields': item.fields
+                .map(
+                  (field) => {
+                    'id': field.id,
+                    'name': field.name,
+                    'description': field.description,
+                    'kind': field.kind.name,
+                  },
+                )
+                .toList(),
+          },
+        )
+        .toList();
+  }
 }
 
 class OpenedSession {
@@ -861,6 +937,8 @@ class OwnerAccess {
       id: r.id,
       state: r.state,
       chatLabel: _service._sessions[r.session]!,
+      sessionId: _service._sessionBindings[r.session]!,
+      approvedAt: r.approvedAt,
       purpose: r.purpose,
       createdAt: r.createdAt,
       requestExpiresAt: r.expiresAt,

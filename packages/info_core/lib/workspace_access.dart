@@ -39,8 +39,14 @@ class InboxEntry {
     this.organization,
     this.organizationState, {
     this.organizationRemainingSeconds = 0,
-  }) : access = null,credentialUse=null,credentialUseState=null;
-  InboxEntry.credential(this.credentialUse,this.credentialUseState):access=null,organization=null,organizationState=null,organizationRemainingSeconds=0;
+  }) : access = null,
+       credentialUse = null,
+       credentialUseState = null;
+  InboxEntry.credential(this.credentialUse, this.credentialUseState)
+    : access = null,
+      organization = null,
+      organizationState = null,
+      organizationRemainingSeconds = 0;
   final CredentialUseRequest? credentialUse;
   final String? credentialUseState;
   final OwnerRequestSnapshot? access;
@@ -48,9 +54,12 @@ class InboxEntry {
   final OrganizationTaskState? organizationState;
   final int organizationRemainingSeconds;
   String get id => access?.id ?? credentialUse?.id ?? organization!.id;
-  String get chatLabel => access?.chatLabel ?? credentialUse?.chatLabel ?? organization!.chatLabel;
-  String get purpose => access?.purpose ?? credentialUse?.purpose ?? organization!.purpose;
-  DateTime get createdAt => access?.createdAt ?? credentialUse?.createdAt ?? organization!.createdAt;
+  String get chatLabel =>
+      access?.chatLabel ?? credentialUse?.chatLabel ?? organization!.chatLabel;
+  String get purpose =>
+      access?.purpose ?? credentialUse?.purpose ?? organization!.purpose;
+  DateTime get createdAt =>
+      access?.createdAt ?? credentialUse?.createdAt ?? organization!.createdAt;
   bool get pending =>
       access?.state == AccessRequestState.pending ||
       credentialUseState == 'pending' ||
@@ -75,6 +84,60 @@ class InboxPage {
 extension OwnerInbox on OwnerAccess {
   bool get serviceAvailable => !_service._closed && !_service._backupBusy;
 
+  /// Ordinary information requests only. Credential requests have their own
+  /// projection even when they also contain ordinary field references.
+  List<OwnerRequestSnapshot> get informationRequests => requests
+      .where((r) => !_service._credentialUseSessions.containsKey(r.id))
+      .toList();
+
+  /// Live state wins over durable history; old facts cannot restore a pending
+  /// request or an active session. No secrets or field values are projected.
+  Future<List<OwnerRequestSnapshot>> informationRequestInbox() async {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    final audit = await history();
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    final credentialIds = {
+      ..._service._credentialUseSessions.keys,
+      if (_service._repository case CredentialRuntimeRepository repository)
+        ...repository.credentialUseRequests.map((r) => r.id),
+    };
+    final grants = {for (final g in audit.grants) g.id: g};
+    final result = <String, OwnerRequestSnapshot>{};
+    for (final h in audit.requests) {
+      if (credentialIds.contains(h.id)) continue;
+      final grant = grants[h.grantId];
+      result[h.id] = OwnerRequestSnapshot(
+        id: h.id,
+        state: h.state,
+        sessionId: h.sessionId,
+        chatLabel: h.chatLabel,
+        purpose: h.purpose,
+        createdAt: h.createdAt,
+        requestExpiresAt: h.requestExpiresAt,
+        remainingSeconds: 0,
+        fields: h.fields.map((f) => FieldRef(f.itemId, f.fieldId)),
+        approvedFields: grant?.fields.map((f) => FieldRef(f.itemId, f.fieldId)),
+        grantExpiresAt: grant?.expiresAt,
+        approvedAt: grant?.approvedAt,
+        sessionEnded: h.sessionEnded,
+        applicationClosed: h.applicationClosed,
+        historical: true,
+        restoredAt: h.restoredAt,
+        recordedFields: {
+          ...{for (final f in h.fields) FieldRef(f.itemId, f.fieldId): f},
+          ...{
+            for (final f in grant?.fields ?? const <RecordedField>[])
+              FieldRef(f.itemId, f.fieldId): f,
+          },
+        }.values,
+      );
+    }
+    for (final current in informationRequests) {
+      result[current.id] = current;
+    }
+    return result.values.toList();
+  }
+
   /// Bounded results over the repository's current snapshot. Ordering is newest
   /// first, then opaque ID, independent of Map/repository insertion order.
   InboxPage queryInbox({
@@ -92,9 +155,12 @@ extension OwnerInbox on OwnerAccess {
     final names = {for (final item in information) item.id: item.name};
     final matching =
         <InboxEntry>[
-          for (final request in requests) if(!_service._credentialUseSessions.containsKey(request.id)) InboxEntry.access(request),
-          if(_service._repository is CredentialRuntimeRepository)
-            for(final request in credentialUseRequests) InboxEntry.credential(request,credentialUseState(request)),
+          for (final request in requests)
+            if (!_service._credentialUseSessions.containsKey(request.id))
+              InboxEntry.access(request),
+          if (_service._repository is CredentialRuntimeRepository)
+            for (final request in credentialUseRequests)
+              InboxEntry.credential(request, credentialUseState(request)),
           for (final task in organizationTasks)
             InboxEntry.organization(
               task,
@@ -108,7 +174,7 @@ extension OwnerInbox on OwnerAccess {
           if (needle.isEmpty) return true;
           final itemIds =
               entry.access?.fields.map((f) => f.itemId) ??
-              entry.credentialUse?.fields.map((f)=>f.itemId) ??
+              entry.credentialUse?.fields.map((f) => f.itemId) ??
               entry.organization!.itemVersions.keys;
           return [
             entry.id,

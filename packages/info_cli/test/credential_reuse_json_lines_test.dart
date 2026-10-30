@@ -123,7 +123,10 @@ void main() {
       }
 
       final capabilities = await command({'command': 'capabilities'});
-      expect(capabilities['capabilities'], ['credential-use-reuse.v1']);
+      expect(capabilities['capabilities'], [
+        'information-request-operations.v1',
+        'credential-use-reuse.v1',
+      ]);
       await command({'command': 'session', 'chatLabel': 'Independent v2 CLI'});
       Map<String, Object?> launch(List<String> argv) => {
         'receiver': 'gh_token',

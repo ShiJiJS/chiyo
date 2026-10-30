@@ -15,7 +15,8 @@ void main() {
       final directory = await service.owner.createDirectory(
         'Owner only organization',
       );
-      final tag = await service.owner.createTag('Owner only label');
+      final tag = await service.owner.createTag('Public label');
+      final unused = await service.owner.createTag('Unused public label');
       final item = await service.owner.createInformation(
         'Public server',
         'Project A',
@@ -64,6 +65,32 @@ void main() {
         'limit': 1,
       });
       expect(page['total'], 1);
+      expect(
+        page['tags'],
+        contains(equals({'id': unused.id, 'name': unused.name})),
+      );
+      expect((page['items'] as List).single['tags'], [
+        {'id': tag.id, 'name': tag.name},
+      ]);
+      expect(
+        (await command({'command': 'catalog', 'typeId': 'generic'}))['total'],
+        2,
+      );
+      expect(
+        (await command({'command': 'catalog', 'typeId': 'server'}))['total'],
+        0,
+      );
+      expect(
+        (await command({'command': 'catalog', 'typeId': 1}))['status'],
+        'invalid_request',
+      );
+      expect(
+        (await command({
+          'command': 'catalog',
+          'query': 'Public label',
+        }))['total'],
+        1,
+      );
       expect((page['items'] as List).single['name'], 'Public server');
       expect(page.toString(), isNot(contains('PRIVATE-CLI-MARKER')));
       expect(
@@ -97,13 +124,28 @@ void main() {
         'invalid_request',
       );
       await command({'command': 'session', 'chatLabel': 'test'});
-      final request = await command({
+      final intent = <String, Object?>{
         'command': 'request',
+        'operationId': 'cli-inspect-1',
         'purpose': 'use discovered host',
         'fields': [
           {'itemId': item.id, 'fieldId': item.fields.single.id},
         ],
-      });
+      };
+      final request = await command(intent);
+      expect(await command(intent), request);
+      expect(
+        await command({
+          'command': 'request-status',
+          'operationId': 'cli-inspect-1',
+        }),
+        request,
+      );
+      expect(
+        (await command({...intent, 'purpose': 'changed'}))['status'],
+        'operation_conflict',
+      );
+      expect(service.owner.requests, hasLength(1));
       service.owner.approve(request['requestId'] as String, [
         FieldRef(item.id, item.fields.single.id),
       ]);

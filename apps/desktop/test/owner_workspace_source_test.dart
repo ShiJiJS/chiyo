@@ -362,19 +362,16 @@ void main() {
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
       final repo = core.MemoryInformationRepository([]);
-      final service = (await t.runAsync(
-        () async => core.InformationService(repository: repo),
-      ))!;
-      final source = (await t.runAsync(
-        () async => OwnerWorkspaceSource(
-          owner: service.owner,
-          refreshInterval: Duration.zero,
-        ),
-      ))!;
+      // This fixture is entirely in memory. Keep its audit futures in the same
+      // fake-clock zone as the UI; SQLCipher tests above use real async I/O.
+      final service = core.InformationService(repository: repo);
+      final source = OwnerWorkspaceSource(
+        owner: service.owner,
+        refreshInterval: Duration.zero,
+      );
       addTearDown(source.dispose);
       Future<void> settle() async {
-        // Owner services use real asynchronous queues; widget frames use the
-        // fake clock. Drain both schedulers before waiting for animations.
+        // Drain widget work plus framework futures completed in the real zone.
         for (var i = 0; i < 10; i++) {
           await t.runAsync(() => Future<void>.delayed(Duration.zero));
           await t.pump(const Duration(milliseconds: 100));
@@ -408,10 +405,13 @@ void main() {
       expect(t.takeException(), isNull);
       await t.pumpWidget(const SizedBox());
       await settle();
-      await t.runAsync(() async {
-        await source.dispose();
-        await service.close();
-      });
+      final disposing = source.dispose();
+      await settle();
+      await disposing;
+      // Inbox history reads and close now share the widget clock's audit queue.
+      final closing = service.close();
+      await settle();
+      await closing;
     },
   );
 

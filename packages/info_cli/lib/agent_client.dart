@@ -236,6 +236,7 @@ class AgentClient {
           'protocolVersion': input['protocolVersion'] ?? 2,
           for (final key in [
             'query',
+            'typeId',
             'directoryId',
             'tagId',
             'offset',
@@ -259,13 +260,48 @@ class AgentClient {
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/session/check', {'sessionSecret': _session});
       case 'request':
+      case 'request-status':
         if (_session == null) return {'status': 'unauthorized'};
-        return _call('/request', {
+        final operation = input['operationId'];
+        final hasOperation = input.containsKey('operationId');
+        if (hasOperation || command == 'request-status') {
+          if (operation is! String ||
+              !RegExp(
+                r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+              ).hasMatch(operation)) {
+            return {'status': 'invalid_request'};
+          }
+          // Old servers ignore unknown request fields. Verify support before
+          // sending an idempotent intent; never silently create duplicates.
+          final support = await _call('/capabilities', {});
+          if (support['status'] != 'ok') return support;
+          if (support['capabilities'] is! List ||
+              !(support['capabilities'] as List).contains(
+                'information-request-operations.v1',
+              )) {
+            return {'status': 'unsupported_capability'};
+          }
+        }
+        if (command == 'request-status') {
+          return _call('/request/status', {
+            'sessionSecret': _session,
+            'operationId': operation,
+          });
+        }
+        final result = await _call('/request', {
           'protocolVersion': input['protocolVersion'] ?? 2,
           'sessionSecret': _session,
           'purpose': input['purpose'],
           'fields': input['fields'],
+          if (hasOperation) 'operationId': operation,
         });
+        if (result['status'] == 'service_unavailable') {
+          return {
+            'status': 'request_unknown',
+            if (hasOperation) 'operationId': operation,
+          };
+        }
+        return result;
       case 'status':
       case 'cancel':
       case 'claim':
