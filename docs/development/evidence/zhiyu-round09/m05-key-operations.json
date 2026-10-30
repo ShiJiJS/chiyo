@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-30",
+  "ticket": 74,
+  "scope": "Atomic recovery-key creation receipts only; no production WorkspaceBackupSource composition or external file operation receipts.",
+  "baseCommit": "3511d713",
+  "sources": {
+    "packages/info_storage/lib/backup_operations.dart": "c5d704a03896a3e42c82e3b8d16c95586954818b6567bc81238109ece309bf2f",
+    "packages/info_storage/lib/backups.dart": "241085e405537cf9d0aecec6db99a5060ee6d301655ed65729bde05ecf78d40a",
+    "packages/info_storage/lib/info_storage.dart": "0cd6239360de03f1f1dd71aba42fb8c124c4dd4dd0b9007428fa24d8c7c17c64",
+    "packages/info_storage/test/backup_operations_test.dart": "42df2ddacf71818ef6599615fccf0d9d757309c88304b95a38815195b72c9448"
+  },
+  "checks": {
+    "storage-tests.log": {
+      "sha256": "389c1c9fcf2b81326446bff501966fc378bcfe5972148e903c55e14ef7935a77",
+      "passed": 231,
+      "skipped": 19,
+      "failed": 0,
+      "success": true
+    },
+    "storage-analysis.log": {
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+      "success": true
+    },
+    "desktop-backup-tests-corrected.log": {
+      "sha256": "3a95dfef1f62a1c1f0f0cd4408021b0250f61c784cfe004c68e663b176c90b96",
+      "passed": 13,
+      "skipped": 0,
+      "failed": 0,
+      "success": true
+    },
+    "key-receipts-final.log": {
+      "sha256": "b630c300375cce93af118729c58b4facaa7d40844633300d5bad056351c942b0",
+      "passed": 10,
+      "skipped": 0,
+      "failed": 0,
+      "success": true
+    },
+    "storage-analysis-final.log": {
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+      "success": true
+    }
+  },
+  "limitations": [
+    "Only isolated synthetic SQLCipher data and test key stores.",
+    "Full storage suite preceded two additional negative tests; final focused suite includes all ten key-operation tests.",
+    "19 full-suite skips retain platform/external-reader preconditions.",
+    "Desktop checks use mocked native channels, not actual macOS file panels.",
+    "No installed Release, personal library, Keychain, Windows CI or computer-use validation.",
+    "Initial desktop invocation named nonexistent backup_flow_test.dart; corrected command uses backup_flow_widget_test.dart."
+  ],
+  "candidateUnchanged": "1443d358"
+}
