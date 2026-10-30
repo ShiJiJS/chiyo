@@ -273,14 +273,14 @@ void main() {
       final f = await _Fixture.create();
       addTearDown(f.close);
       final (ordinary, ordinaryKey) = await f.backup('ordinary-format7');
-      expect(_format(f), [26, 26]);
+      expect(_format(f), [28, 28]);
       expect(
         (await f.repo.backups.inspect(ordinary, ordinaryKey)).formatVersion,
         7,
       );
       const executable = '/Applications/中文 Browser.app/Contents/MacOS/Browser';
       final r = await f.request(executable: executable);
-      expect(_format(f), [27, 27]);
+      expect(_format(f), [29, 29]);
       final result = await f.fill(r.id, 'synthetic-mac-fill');
       expect(result.state, FocusedFillState.sent);
       final (backup, recovery) = await f.backup('mac-format11');
@@ -305,7 +305,7 @@ void main() {
         throwsA(isA<StorageFailure>()),
       );
       await f.reopen();
-      expect(_format(f), [27, 27]);
+      expect(_format(f), [29, 29]);
       expect(
         f.repo.credentialUseRequests.single.focusedFill!.application.executable,
         executable,
@@ -324,10 +324,10 @@ void main() {
     final r = await f.request();
     await f.fill(r.id, 'ordinary');
     final (path, key) = await f.backup('ordinary');
-    expect(_format(f), [26, 26]);
+    expect(_format(f), [28, 28]);
     expect((await f.repo.backups.inspect(path, key)).formatVersion, 7);
     await f.reopen();
-    expect(_format(f), [26, 26]);
+    expect(_format(f), [28, 28]);
   });
 
   test(
@@ -339,7 +339,7 @@ void main() {
         approve: false,
         executable: '/Applications/Synthetic.app/Contents/MacOS/Synthetic',
       );
-      expect(_format(f), [27, 27]);
+      expect(_format(f), [29, 29]);
       final (path, key) = await f.backup('pending-only');
       final preview = await f.repo.backups.inspect(path, key);
       expect(preview.formatVersion, 7);
@@ -378,13 +378,13 @@ void main() {
       throwsA(isA<CredentialUseFailure>()),
     );
     expect(calls, 3);
-    expect(_format(f), [26, 26]);
+    expect(_format(f), [28, 28]);
     expect(
       f.repo.credentialUseRequests.single.focusedFill!.application.executable,
       r'C:\Synthetic\Browser.exe',
     );
     await f.reopen();
-    expect(_format(f), [26, 26]);
+    expect(_format(f), [28, 28]);
   });
 
   test(
@@ -419,7 +419,7 @@ void main() {
       );
       final failed = _keyedDb('$targetPath/library.db', targetKeys);
       try {
-        expect(_dbFormat(failed), [26, 26]);
+        expect(_dbFormat(failed), [28, 28]);
         expect(
           failed
               .select('SELECT count(*) FROM credential_runtime_requests')
@@ -457,7 +457,7 @@ void main() {
       );
       final current = _keyedDb('$targetPath/library.db', targetKeys);
       try {
-        expect(_dbFormat(current), [27, 27]);
+        expect(_dbFormat(current), [29, 29]);
       } finally {
         current.close();
       }
@@ -508,7 +508,7 @@ void main() {
       try {
         final probe = _keyedDb('$path/library.db', f.keys);
         try {
-          expect(_dbFormat(probe), [27, 27]);
+          expect(_dbFormat(probe), [29, 29]);
         } finally {
           probe.close();
         }
@@ -650,7 +650,7 @@ void main() {
       });
       expect(digest(File(backup)), backupDigest);
       await f.reopen();
-      expect(_format(f), [27, 27]);
+      expect(_format(f), [29, 29]);
       expect(f.repo.focusedFillOperations.single.state, FocusedFillState.sent);
     },
     skip: format22Probe == null,

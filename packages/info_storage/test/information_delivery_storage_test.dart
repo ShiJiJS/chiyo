@@ -1034,7 +1034,7 @@ void main() {
       await service.close();
       await repo.close();
       db = inspect();
-      expect(db.select('PRAGMA user_version').single.values.single, 26);
+      expect(db.select('PRAGMA user_version').single.values.single, 28);
       db.execute('UPDATE library_format SET version=20');
       db.execute('PRAGMA user_version=10');
       db.close();

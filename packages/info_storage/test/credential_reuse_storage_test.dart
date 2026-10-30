@@ -636,7 +636,7 @@ void main() {
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
             .join();
         db.execute('PRAGMA key = "x\'$hex\'"');
-        expect(db.select('PRAGMA user_version').single.values.single, 26);
+        expect(db.select('PRAGMA user_version').single.values.single, 28);
       } finally {
         db.close();
       }
