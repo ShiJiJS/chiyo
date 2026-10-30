@@ -8,7 +8,9 @@ List<String> get desktopFontFallback => Platform.isMacOS
 
 /// System font paths are discovered locally, never copied into a distribution.
 /// The returned profile is also used by local reference/capture tooling.
-Future<Map<String, String>> loadDesktopFonts() async {
+Future<Map<String, String>> loadDesktopFonts({
+  bool requiredFiles = true,
+}) async {
   if (!Platform.isMacOS) {
     if (!await loadWindowsDesktopFonts()) {
       throw StateError('Desktop reference fonts are unavailable.');
@@ -36,13 +38,21 @@ Future<Map<String, String>> loadDesktopFonts() async {
     'PingFang SC': pingFang.path,
     'Menlo': '/System/Library/Fonts/Menlo.ttc',
   };
+  final loaded = <String, String>{};
   for (final entry in files.entries) {
-    final bytes = await File(entry.value).readAsBytes();
-    await (FontLoader(
-      entry.key,
-    )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+    try {
+      final bytes = await File(entry.value).readAsBytes();
+      await (FontLoader(
+        entry.key,
+      )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+      loaded[entry.key] = entry.value;
+    } on FileSystemException {
+      // Production can use Flutter's system fallback on an OS without these
+      // exact files. Reference captures still require every declared face.
+      if (requiredFiles) rethrow;
+    }
   }
-  return {'platform': Platform.operatingSystem, ...files};
+  return {'platform': Platform.operatingSystem, ...loaded};
 }
 
 /// Uses the machine's installed fonts, without shipping Windows font files.

@@ -8,6 +8,7 @@ import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_entries.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
+import 'package:sqlite3/sqlite3.dart' as sql;
 
 class _Keys implements DatabaseKeyStore {
   List<int>? value;
@@ -68,6 +69,72 @@ void main() {
       await close();
       await root.delete(recursive: true);
     });
+
+    test(
+      'format24 fixture upgrades and legacy fields stay editable with original identities',
+      () async {
+        final legacy = await service.owner.createInformation('合成旧资料', '', [
+          const core.FieldInput('旧地址', '', 'legacy.invalid'),
+          const core.FieldInput('旧备注', '', 'synthetic retained'),
+        ]);
+        await close();
+        final db = sql.sqlite3.open('${root.path}/library.db');
+        try {
+          final hex = keys.value!
+              .map((v) => v.toRadixString(16).padLeft(2, '0'))
+              .join();
+          db.execute('PRAGMA key = "x\'$hex\'"');
+          // Match the pre-layout schema seam, not a claim to be an archived
+          // historical application database. Other migration fixtures live in storage.
+          db.execute('ALTER TABLE information_items DROP COLUMN layout_json');
+          db.execute('UPDATE library_format SET version=24');
+          db.execute('PRAGMA user_version=24');
+        } finally {
+          db.close();
+        }
+        await open();
+        final ref = WorkspaceRecordRef(
+          WorkspaceRecordKind.information,
+          legacy.id,
+        );
+        final before = await source.readDetail(ref);
+        expect(
+          before.fieldIds.values,
+          unorderedEquals(legacy.fields.map((f) => f.id)),
+        );
+        expect(
+          before.values.values,
+          unorderedEquals(['legacy.invalid', 'synthetic retained']),
+        );
+        final key = before.fieldIds.entries
+            .singleWhere((e) => e.value == legacy.fields.first.id)
+            .key;
+        final edited = await source.saveRecord(
+          WorkspaceEdit(
+            operationId: 'edit-upgraded',
+            expectedVersion: 1,
+            record: before.record.copyWith(name: '合成旧资料改名'),
+            values: {...before.values, key: 'corrected.invalid'},
+          ),
+        );
+        expect(edited, isA<WorkspaceSaved>());
+        await close();
+        await open();
+        final after = await source.readDetail(ref);
+        expect(after.record.name, '合成旧资料改名');
+        expect(after.fieldIds, before.fieldIds);
+        expect(after.values[key], 'corrected.invalid');
+        expect(after.values.values, contains('synthetic retained'));
+        expect(after.version, 2);
+        expect(
+          (await source.recordOperationReceipt(
+            'edit-upgraded',
+          ))!.result.version,
+          2,
+        );
+        expect(await source.loadRevisions(ref), isNotEmpty);
+      },
+    );
 
     test(
       'built-in schemas create no seed, preserve five forms and original receipts across reopen',

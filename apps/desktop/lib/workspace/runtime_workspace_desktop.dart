@@ -9,19 +9,23 @@ import 'workspace_source.dart';
 class RuntimeWorkspaceDesktop implements WorkspaceDesktop {
   RuntimeWorkspaceDesktop(this.runtime)
     : scrollbarStyle = ValueNotifier(runtime.availability.scrollbarStyle),
-      _openRevision = runtime.openApprovalsRevision,
-      _settingsRevision = runtime.openSettingsRevision,
-      _searchRevision = runtime.searchApprovalsRevision {
+      _navigationRevision = runtime.navigationRevision {
     runtime.addListener(_changed);
-    if (_openRevision > 0) _pending = WorkspacePage.approvals;
+    _pending = _destination(runtime.lastNavigationEvent);
   }
   final DesktopRuntime runtime;
   @override
   final ValueNotifier<DesktopScrollbarStyle> scrollbarStyle;
-  int _openRevision, _settingsRevision, _searchRevision;
+  int _navigationRevision;
   bool _enabled = true, _disposed = false;
   WorkspacePage? _pending;
   void Function(WorkspacePage)? _navigate;
+  static WorkspacePage? _destination(DesktopEvent? event) => switch (event) {
+    DesktopEvent.openApprovals => WorkspacePage.approvals,
+    DesktopEvent.openSettings => WorkspacePage.settings,
+    DesktopEvent.searchApprovals => WorkspacePage.library,
+    _ => null,
+  };
   @override
   void Function(WorkspacePage)? get onNavigate => _navigate;
   @override
@@ -47,17 +51,11 @@ class RuntimeWorkspaceDesktop implements WorkspaceDesktop {
   void _changed() {
     if (_disposed) return;
     scrollbarStyle.value = runtime.availability.scrollbarStyle;
-    if (_openRevision != runtime.openApprovalsRevision) {
-      _openRevision = runtime.openApprovalsRevision;
-      _pending = WorkspacePage.approvals;
-    }
-    if (_settingsRevision != runtime.openSettingsRevision) {
-      _settingsRevision = runtime.openSettingsRevision;
-      _pending = WorkspacePage.settings;
-    }
-    if (_searchRevision != runtime.searchApprovalsRevision) {
-      _searchRevision = runtime.searchApprovalsRevision;
-      _pending = WorkspacePage.library;
+    if (_navigationRevision != runtime.navigationRevision) {
+      _navigationRevision = runtime.navigationRevision;
+      // Native commands received during an editor/modal are rejected. They
+      // must not turn into a surprising page switch when the editor closes.
+      _pending = _enabled ? _destination(runtime.lastNavigationEvent) : null;
     }
     _deliver();
   }
@@ -66,6 +64,7 @@ class RuntimeWorkspaceDesktop implements WorkspaceDesktop {
   Future<void> setNavigationEnabled(bool enabled) async {
     if (_disposed) return;
     _enabled = enabled;
+    if (!enabled) _pending = null;
     if (runtime.platform case final DesktopNavigationPlatform platform) {
       try {
         await platform

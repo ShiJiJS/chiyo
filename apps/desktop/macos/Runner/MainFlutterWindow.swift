@@ -57,6 +57,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       finishWindowSetup(flutterViewController)
       return
     }
+    // The real three-column workspace needs a usable initial content area.
+    // Clamp to the current display so smaller displays remain reachable.
+    self.title = "知予"
+    let visibleFrame = (screen ?? NSScreen.main)?.visibleFrame
+      ?? NSRect(x: 0, y: 0, width: 1280, height: 828)
+    let available = contentRect(forFrameRect: visibleFrame).size
+    contentMinSize = NSSize(width: min(1100, available.width), height: min(680, available.height))
+    setContentSize(NSSize(width: min(1280, available.width), height: min(800, available.height)))
+    center()
     configureToolAccess(flutterViewController)
     secretEditor = NativeSecretEditor(window: self, messenger: flutterViewController.engine.binaryMessenger)
     // Registers a local owner channel only. No helper/permission/AX work until

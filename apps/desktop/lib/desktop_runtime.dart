@@ -159,6 +159,8 @@ class DesktopRuntime extends ChangeNotifier {
   int openApprovalsRevision = 0;
   int openSettingsRevision = 0;
   int searchApprovalsRevision = 0;
+  int navigationRevision = 0;
+  DesktopEvent? lastNavigationEvent;
   String? openRequestId;
   bool quitting = false;
   bool shutdownFailed = false;
@@ -406,12 +408,15 @@ class DesktopRuntime extends ChangeNotifier {
         availability = DesktopAvailability(
           tray: false,
           notifications: availability.notifications,
+          scrollbarStyle: availability.scrollbarStyle,
         );
         notifyListeners();
       case DesktopEvent.openApprovals:
         await platform.showWindow();
         openRequestId = platform.openedRequestId;
         openApprovalsRevision++;
+        lastNavigationEvent = event;
+        navigationRevision++;
         notifyListeners();
       case DesktopEvent.availabilityChanged:
         // Native code restores a hidden window before reporting entry failure.
@@ -427,6 +432,8 @@ class DesktopRuntime extends ChangeNotifier {
         await platform.showWindow();
         if (quitting || _stopped) return;
         openSettingsRevision++;
+        lastNavigationEvent = event;
+        navigationRevision++;
         notifyListeners();
       case DesktopEvent.searchApprovals:
         await _ready.future;
@@ -434,6 +441,8 @@ class DesktopRuntime extends ChangeNotifier {
         await platform.showWindow();
         if (quitting || _stopped) return;
         searchApprovalsRevision++;
+        lastNavigationEvent = event;
+        navigationRevision++;
         notifyListeners();
       case DesktopEvent.quit:
         break;

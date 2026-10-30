@@ -23,9 +23,11 @@ import 'prototype_dialog.dart';
 import 'bundled_focused_fill.dart';
 import 'package:info_core/macos_desktop_control.dart';
 import 'workspace/owner_workspace_host.dart';
+import 'desktop_fonts.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isMacOS) await loadDesktopFonts(requiredFiles: false);
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks([
       'Noto Sans SC',

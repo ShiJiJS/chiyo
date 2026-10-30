@@ -13,6 +13,49 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'initial navigation uses the most recent runtime event exactly once',
+    () async {
+      for (final event in [
+        DesktopEvent.openSettings,
+        DesktopEvent.searchApprovals,
+      ]) {
+        final native = NativeDesktopFixture();
+        final service = InformationService(
+          repository: MemoryInformationRepository([]),
+        );
+        final runtime = DesktopRuntime(
+          service: service,
+          platform: native,
+          closeServer: () async {},
+          closeRepository: () async {},
+        );
+        await runtime.start();
+        await runtime.handleEvent(DesktopEvent.openApprovals);
+        await runtime.handleEvent(event);
+        final desktop = RuntimeWorkspaceDesktop(runtime);
+        final pages = <WorkspacePage>[];
+        desktop.onNavigate = pages.add;
+        expect(pages, [
+          event == DesktopEvent.openSettings
+              ? WorkspacePage.settings
+              : WorkspacePage.library,
+        ]);
+        await runtime.handleEvent(DesktopEvent.availabilityChanged);
+        expect(pages, hasLength(1));
+        await desktop.setNavigationEnabled(false);
+        await runtime.handleEvent(DesktopEvent.openApprovals);
+        await desktop.setNavigationEnabled(true);
+        expect(pages, hasLength(1));
+        await runtime.handleEvent(DesktopEvent.openApprovals);
+        expect(pages.last, WorkspacePage.approvals);
+        desktop.dispose();
+        await runtime.quit();
+        runtime.dispose();
+      }
+    },
+  );
+
+  test(
     'native navigation respects editor gate and quit uses existing runtime',
     () async {
       final native = NativeDesktopFixture();
@@ -38,6 +81,8 @@ void main() {
       await runtime.handleEvent(DesktopEvent.openSettings);
       expect(pages, isEmpty);
       await desktop.setNavigationEnabled(true);
+      expect(pages, isEmpty, reason: 'a blocked menu action is not deferred');
+      await runtime.handleEvent(DesktopEvent.openSettings);
       expect(pages, [WorkspacePage.settings]);
       await runtime.handleEvent(DesktopEvent.searchApprovals);
       expect(pages.last, WorkspacePage.library);
