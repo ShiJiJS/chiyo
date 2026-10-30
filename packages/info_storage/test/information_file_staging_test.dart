@@ -79,10 +79,10 @@ void main() {
         );
         expect(metadata.sameAs(saved), isTrue);
         expect(saved.sha256, sha256.convert(original).toString());
-        expect(db.select('PRAGMA user_version').single.values.single, 34);
+        expect(db.select('PRAGMA user_version').single.values.single, 36);
         expect(
           db.select('SELECT version FROM library_format').single.values.single,
-          34,
+          36,
         );
       } finally {
         db.close();

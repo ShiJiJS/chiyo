@@ -24,12 +24,13 @@ part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
 part 'lifecycle_storage.dart';
+part 'approval_operations_storage.dart';
 part 'information_purge_storage.dart';
 
-const _libraryFormat = 34;
+const _libraryFormat = 36;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 35;
+const _portableFocusedFillLibraryFormat = 37;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -115,9 +116,20 @@ class EncryptedInformationRepository
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
         InformationLifecycleRepository,
+        InformationApprovalRepository,
         InformationPurgeRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
+  @override
+  Future<InformationApprovalReceipt?> informationApprovalReceipt(String id) =>
+      _approvalReceipt(id);
+  @override
+  Future<int> informationApprovalRevision(String id) => _approvalRevision(id);
+  @override
+  Future<void> commitInformationApproval(
+    InformationApprovalCommit change, {
+    void Function()? validate,
+  }) => _commitApproval(change, validate: validate);
   @override
   Future<void> commitInformationPurge(InformationPurgeChange change) =>
       _commitInformationPurge(change);
@@ -458,14 +470,15 @@ class EncryptedInformationRepository
         }
         final storedFormat = marker.single['version'] as int;
         // Preserve the portable-fill boundary across older receipt/layout
-        // formats. Format34 adds purge receipts and draft tombstones.
+        // formats. Format36 adds atomic approval decision receipts.
         openingFormat =
             (storedFormat == 23 ||
                 storedFormat == 25 ||
                 storedFormat == 27 ||
                 storedFormat == 29 ||
                 storedFormat == 31 ||
-                storedFormat == 33)
+                storedFormat == 33 ||
+                storedFormat == 35)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
@@ -1540,6 +1553,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _organizationSchema();
       await _createInformationClassification();
       await _createInformationLifecycle();
+      await _createInformationApproval();
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
@@ -1631,6 +1645,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 26) await _createInformationLayout();
         if (sourceVersion < 30) await _createInformationClassification();
         if (sourceVersion < 32) await _createInformationLifecycle();
+        if (sourceVersion < 36) await _createInformationApproval();
         await _createLibraryFormat();
       });
     },
@@ -1686,6 +1701,10 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE IF NOT EXISTS information_record_operations('
     'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,'
     'invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+  );
+
+  Future<void> _createInformationApproval() => customStatement(
+    'CREATE TABLE IF NOT EXISTS information_approval_operations(operation_id TEXT PRIMARY KEY,request_id TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)),UNIQUE(request_id,revision))',
   );
 
   Future<void> _createInformationLifecycle() => customStatement(
