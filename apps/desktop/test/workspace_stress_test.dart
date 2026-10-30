@@ -203,7 +203,11 @@ void main() {
     'fixture replacement cancels pending reads and resets edits, versions, catalog and navigation',
     () async {
       final source = SampleWorkspaceSource();
-      final model = LibraryController(source);
+      final model = LibraryController(
+        source,
+        initialQuery: const WorkspaceQuery(directoryId: 'selfhost'),
+        initialSelection: azure,
+      );
       addTearDown(model.dispose);
       addTearDown(source.dispose);
       await model.load(model.query, keepSelection: azure);

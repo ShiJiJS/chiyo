@@ -33,6 +33,7 @@ class WorkspaceApp extends StatelessWidget {
     required this.source,
     required this.windowTitle,
     this.initialSelection,
+    this.initialQuery = const WorkspaceQuery(),
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
@@ -40,6 +41,7 @@ class WorkspaceApp extends StatelessWidget {
   final WorkspaceSource source;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
+  final WorkspaceQuery initialQuery;
   final WorkspacePageBuilder? pageBuilder;
   final WorkspaceDesktop? desktop;
   final WorkspaceInputs Function(BuildContext)? inputsBuilder;
@@ -49,6 +51,7 @@ class WorkspaceApp extends StatelessWidget {
     source: source,
     windowTitle: windowTitle,
     initialSelection: initialSelection,
+    initialQuery: initialQuery,
     pageBuilder: pageBuilder,
     desktop: desktop,
     inputsBuilder: inputsBuilder,
@@ -63,6 +66,7 @@ class _WorkspaceSession extends StatefulWidget {
     required this.source,
     required this.windowTitle,
     this.initialSelection,
+    this.initialQuery = const WorkspaceQuery(),
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
@@ -70,6 +74,7 @@ class _WorkspaceSession extends StatefulWidget {
   final WorkspaceSource source;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
+  final WorkspaceQuery initialQuery;
   final WorkspacePageBuilder? pageBuilder;
   final WorkspaceDesktop? desktop;
   final WorkspaceInputs Function(BuildContext)? inputsBuilder;
@@ -119,7 +124,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _proposals = ProposalsController(_source.proposals, _source.changes)
       ..addListener(_proposalChanged);
     unawaited(_proposals.load());
-    _library = LibraryController(_source);
+    _library = LibraryController(
+      _source,
+      initialQuery: widget.initialQuery,
+      initialSelection: widget.initialSelection,
+    );
     _classifications = ClassificationController(_source);
     _backups = BackupController(_source.backups, _source.changes)
       ..addListener(_backupChanged);

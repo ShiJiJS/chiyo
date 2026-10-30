@@ -42,6 +42,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
   Widget build(BuildContext context) => WorkspaceApp(
     source: _source,
     windowTitle: MacPreviewDesktop.windowTitle,
+    initialQuery: const WorkspaceQuery(directoryId: 'selfhost'),
     initialSelection: const WorkspaceRecordRef(
       WorkspaceRecordKind.information,
       'azure',

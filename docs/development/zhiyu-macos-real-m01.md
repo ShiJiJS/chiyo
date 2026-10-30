@@ -62,3 +62,26 @@
 1. 实现真实 `WorkspaceDetail`/`WorkspaceCreate`/`WorkspaceEdit` 编解码：冻结定义和实例覆盖、独立经历叶、正文格式、关联及未知旧字段；字段标签以当前真实描述为准，不能因旧模板标签误导用户。
 2. 将编解码接入 `WorkspaceSource` 的真实 OwnerAccess 读写、分类、修订/回收和操作核对，并接入正式 bootstrap/runtime。未知结果先查询回执；未提交意图绑定库身份。
 3. 完成 #70 独立进程与新界面整体接缝、实际 Mac 构建，再进入 #71/#72。#73 仍负责同候选真实 AI 闭环及交付；所有完整验收项保持未勾选。
+
+## 2026-10-30：表单编解码与真实库验证
+
+新增 `WorkspaceInformationCodec`，将新界面创建/编辑表单转换为现有核心保存输入，并从实际信息项还原详情。普通文本、文档格式/正文、独立经历叶、实例描述及关联引用保存在同一持久模型中；布局只放描述和顺序，正文保留在核心字段。编解码本身不打开库、不构造示例来源、不向 Agent 提供正文。
+
+- 新经历的 UI 临时 ID 不作为核心字段 ID；再次保存和排序使用真实不透明身份。实际 SQLCipher 测试发现核心 ID 的 base64url 填充不符合临时 ID 语法，已区分两者，避免正常再次编辑失败。借用已有身份、重复叶身份和重用删除经历均拒绝。
+- 未映射旧字段在详情中保留，连续编辑及删除恢复后仍可保存。未知字段类型可原样保留，禁止改写；未知布局版本只读。已有普通附件可原样保留身份、版本和字节，本票没有因此开放新文件导入。
+- 已有资料的字段被全部删除后，允许继续修改名称等元数据；新建空字段资料仍拒绝。文档格式字段已被删除时，不再用其旧模板要求阻止保存。字段名为 `name` 的校验错误与资料名称错误分别呈现。
+- `LibraryController` 默认使用全部真实资料范围，不再硬编码 `selfhost`/`azure`。预览组合入口显式传入自己的初始查询和选择，正式组合默认不依赖示例身份。相关预览重置测试改为显式声明示例初始选择。
+
+### 本次检查
+
+- desktop `flutter analyze --no-pub --fatal-infos` 通过；最终 `workspace_information_codec_test.dart` **11 项通过**，使用隔离 SQLCipher 与内存测试密钥，覆盖保存/重开/回执重放、经历新增/排序/恢复的授权边界、未知与旧字段、旧附件字节不变、校验冲突及空字段资料。
+- `workspace_app_test`、`zhiyu_library_test`、`zhiyu_directory_test`、`workspace_classification_test`、`workspace_history_test`、`workspace_stress_test` 共 **44 项通过**。这组加当时9项编解码测试运行结果为53通过，后来补充的两项及最终字节/名称断言在末次11项中通过；不把重复运行累加。
+- core `dart analyze --fatal-infos` 通过；`information_draft_test`、`information_layout_test`、`library_test` **19 项通过**。
+- storage `information_record_operations_test`、`information_layout_storage_test` **15 项通过**，覆盖持久回执、旧库迁移和布局备份往返；仍有测试使用独立库句柄时的 Drift 多实例调试提醒。此轮没有重新运行 storage 全套。
+- 没有使用 computer use、个人资料/钥匙串或 Windows CI，没有生成新 App/dSYM。仅测试进程重开数据库，不将其记为正式 App 独立进程验收。
+
+### 尚待接通
+
+1. 正式 `WorkspaceSource`：实际资料/分类/模板列表、创建编辑、修订回收，以及关联目标和模板版本检查；不能因编解码完成就假定这些能力已接入。
+2. 持久回执到 UI 原操作意图的精确映射。现有核心回执只有输入摘要、结果身份和版本，尚不能在资料已删除后重建 UI 要求的类型等原意图；必须补齐，不能查询当前内容猜测原操作。
+3. 正式 bootstrap/runtime、新界面组合及同库未提交意图绑定；随后完成 #70 的独立进程和构建验收，再依次推进 #71–#73。现有固定预览仍是原版本，#70 的完整验收项保持未勾选。
