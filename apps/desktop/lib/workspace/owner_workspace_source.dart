@@ -127,6 +127,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
                     r.id,
                     r.state.name,
                     r.sessionEnded,
+                    r.decisionPending,
                     r.grantExpiresAt?.toIso8601String(),
                     for (final f in r.approvedFields ?? <core.FieldRef>[])
                       [f.itemId, f.fieldId],

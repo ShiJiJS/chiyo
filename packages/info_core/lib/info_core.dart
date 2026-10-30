@@ -48,6 +48,7 @@ part 'information_draft_models.dart';
 part 'information_draft_access.dart';
 part 'information_record_operations.dart';
 part 'information_approval_operations.dart';
+part 'information_approval_access.dart';
 part 'information_classification_operations.dart';
 part 'information_lifecycle_operations.dart';
 part 'information_purge.dart';
@@ -111,6 +112,7 @@ class OwnerRequestSnapshot {
     this.applicationClosed = false,
     this.restoredAt,
     this.sessionEnded = false,
+    this.decisionPending = false,
     Iterable<RecordedField> recordedFields = const [],
   }) : fields = List.unmodifiable(fields),
        recordedFields = List.unmodifiable(recordedFields),
@@ -129,7 +131,7 @@ class OwnerRequestSnapshot {
   final List<FieldRef>? approvedFields;
   final DateTime? grantExpiresAt;
   final Duration? grantLifetime;
-  final bool sessionEnded;
+  final bool sessionEnded, decisionPending;
 
   /// Public audit identity, never the private session capability.
   final String sessionId;
@@ -162,6 +164,9 @@ class _Request {
   DateTime? approvedAt;
   GrantHistory? history;
   List<RecordedField> recordedFields = const [];
+  bool informationDecisionPending = false;
+  bool decisionSessionEnded = false, decisionApplicationClosed = false;
+  RequestHistory? deferredDecisionRequest;
   final invalidatedFields = <FieldRef>{};
 }
 
@@ -261,6 +266,8 @@ class InformationService {
   Completer<void>? _backupBarrier;
   int _libraryGeneration = 0;
   final _reads = <Future<void>>{};
+  final _informationDecisionWrites = <Future<void>>{};
+  final _uncertainInformationDecisions = <String, _InformationDecision>{};
   Future<void> _auditWrites = Future.value();
   final _auditPending = <Future<void> Function()>[];
   bool _auditFailed = false;
@@ -271,7 +278,7 @@ class InformationService {
     }
     if (_closed) {
       return Future.wait<void>([
-        owner.retryAuditStorage(),
+        _drainInformationDecisions(),
         owner._releaseAllInformationFileDrafts(),
         owner._closeInformationFileDeliveries(),
         drainFocusedFills(),
@@ -298,7 +305,7 @@ class InformationService {
     _grants.clear();
     _submitted.close();
     return Future.wait<void>([
-      owner.retryAuditStorage(),
+      _drainInformationDecisions(),
       owner._releaseAllInformationFileDrafts(),
       owner._closeInformationFileDeliveries(),
       Future<void>.sync(
@@ -334,6 +341,7 @@ class InformationService {
     if (request == null) return false;
     _expire(request);
     return _sessionActive(request.session) &&
+        !request.informationDecisionPending &&
         request.state == AccessRequestState.approved &&
         request.grant!.fields.contains(field) &&
         !request.invalidatedFields.contains(field) &&
@@ -543,6 +551,9 @@ class AgentAccess {
       throw const CredentialUseFailure('scope_not_approved');
     }
     final request = _request(session, id);
+    if (request.informationDecisionPending) {
+      throw const AccessFailure('decision_unknown');
+    }
     if (request.grant == null) throw AccessFailure(request.state.name);
     if (request.state != AccessRequestState.approved) {
       throw const AccessFailure('unauthorized');
@@ -954,6 +965,7 @@ class OwnerAccess {
           ? null
           : r.grant?.expiresAt.difference(r.approvedAt!),
       sessionEnded: _service._endedSessions.contains(r.session),
+      decisionPending: r.informationDecisionPending,
       recordedFields: {
         for (final field in r.recordedFields)
           FieldRef(field.itemId, field.fieldId): field,
@@ -965,6 +977,9 @@ class OwnerAccess {
   void revoke(String requestId) {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
+    if (request?.informationDecisionPending ?? false) {
+      throw const AccessFailure('decision_unknown');
+    }
     if (request?.grant == null) throw const AccessFailure('invalid_request');
     request!.state = AccessRequestState.revoked;
     _service._finishHistory(request, GrantEventKind.revoked);
@@ -975,6 +990,9 @@ class OwnerAccess {
   void deny(String requestId) {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
+    if (request?.informationDecisionPending ?? false) {
+      throw const AccessFailure('decision_unknown');
+    }
     if (request == null) throw const AccessFailure('invalid_request');
     _service._finishPending(request, AccessRequestState.denied);
   }
@@ -987,6 +1005,9 @@ class OwnerAccess {
   }) {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');
     final request = _service._requests[requestId];
+    if (request?.informationDecisionPending ?? false) {
+      throw const AccessFailure('decision_unknown');
+    }
     if (request != null) _service._expire(request);
     if (request == null ||
         !_service._sessionActive(request.session) ||

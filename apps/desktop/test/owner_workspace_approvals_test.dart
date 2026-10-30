@@ -103,8 +103,8 @@ void main() {
       expect(detail.scopes.single.fieldId, item.fields.single.id);
       expect(detail.scopes.single.label, '地址');
       expect(detail.scopes.single.recordName, '合成资料');
-      expect(model.canDecide, isFalse);
-      expect(detail.decisionUnavailableReason, isNotNull);
+      expect(model.canDecide, isTrue);
+      expect(detail.decisionUnavailableReason, isNull);
       expect((await source.loadSummary()).pending, 1);
       expect(
         (await source.approvals.query(
@@ -118,6 +118,109 @@ void main() {
           'requestId': response['requestId'],
         }))['status'],
         'pending',
+      );
+    },
+  );
+
+  test(
+    'HTTP AI request, controller partial approval, read and revoke use the same durable decision',
+    () async {
+      final item = await service.owner.createInformation('真实审批合成资料', '', [
+        const core.FieldInput('允许字段', '', 'ALLOWED'),
+        const core.FieldInput('未选字段', '', 'NOT-ALLOWED'),
+      ]);
+      final session =
+          (await call('/session', {'chatLabel': '真实协议合成聊天'}))['sessionSecret']
+              as String;
+      final request = await call('/request', {
+        'sessionSecret': session,
+        'purpose': 'partial read',
+        'fields': [
+          for (final f in item.fields) {'itemId': item.id, 'fieldId': f.id},
+        ],
+      });
+      final model = ApprovalsController(source.approvals, const Stream.empty());
+      addTearDown(model.dispose);
+      await model.load();
+      model.toggle(model.detail!.scopes.last.id);
+      model.lifetime(5);
+      await model.decide(WorkspaceApprovalAction.approve);
+      expect(model.writeFailure, isNull);
+      expect(model.detail!.request.state, WorkspaceApprovalState.approved);
+      expect(model.detail!.approved, hasLength(1));
+      final claimed = await call('/claim', {
+        'sessionSecret': session,
+        'requestId': request['requestId'],
+      });
+      expect(claimed['status'], 'ok');
+      expect(
+        DateTime.parse(claimed['expiresAt'] as String),
+        now.add(const Duration(minutes: 5)),
+      );
+      final read = {
+        'token': claimed['token'],
+        'itemId': item.id,
+        'fieldId': item.fields.first.id,
+      };
+      expect((await call('/read', read))['value'], 'ALLOWED');
+      expect(
+        (await call('/read', {
+          ...read,
+          'fieldId': item.fields.last.id,
+        }))['status'],
+        'unauthorized',
+      );
+      await model.decide(WorkspaceApprovalAction.revoke);
+      expect(model.writeFailure, isNull);
+      expect(model.detail!.request.state, WorkspaceApprovalState.revoked);
+      expect((await call('/read', read))['status'], 'unauthorized');
+      expect((await service.owner.history()).grants.single.active, isFalse);
+    },
+  );
+
+  test(
+    'stale review conflicts; denial and original receipt survive reopen without replay',
+    () async {
+      final item = await service.owner.createInformation('合成冲突', '', [
+        const core.FieldInput('字段', '', 'ONE'),
+      ]);
+      final session = service.agent.openSession('synthetic');
+      final ref = core.FieldRef(item.id, item.fields.single.id);
+      final id = service.agent.request(session, 'review', [ref]).id;
+      final before = await source.approvals.read(id);
+      WorkspaceApprovalChange change(String token) => WorkspaceApprovalChange(
+        operationId: 'deny-real',
+        requestId: id,
+        reviewToken: token,
+        action: WorkspaceApprovalAction.deny,
+      );
+      await service.owner.correctValue(ref, 'TWO');
+      await expectLater(
+        source.approvals.change(change(before.reviewToken)),
+        throwsA(
+          isA<WorkspaceFailure>().having((e) => e.code, 'code', 'conflict'),
+        ),
+      );
+      expect(await source.approvals.receipt('deny-real'), isNull);
+      final command = change((await source.approvals.read(id)).reviewToken);
+      await source.approvals.change(command);
+      expect(service.agent.status(session, id)['status'], 'denied');
+      final receipt = await source.approvals.receipt('deny-real');
+      expect(receipt!.commandDigest, command.digest);
+      await close();
+      await open();
+      expect(
+        (await source.approvals.change(command)).commandDigest,
+        receipt.commandDigest,
+      );
+      expect(service.owner.sessions, isEmpty);
+      expect(
+        (await source.approvals.receipt('deny-real'))!.action,
+        WorkspaceApprovalAction.deny,
+      );
+      expect(
+        (await source.approvals.read(id)).request.state,
+        WorkspaceApprovalState.denied,
       );
     },
   );

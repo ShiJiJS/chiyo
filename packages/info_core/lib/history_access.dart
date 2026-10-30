@@ -7,6 +7,9 @@ extension _AuditService on InformationService {
     bool applicationClosed = false,
   }) {
     if (request.state == AccessRequestState.pending) return;
+    request.decisionSessionEnded |=
+        sessionEnded || _endedSessions.contains(request.session);
+    request.decisionApplicationClosed |= applicationClosed;
     final history = RequestHistory(
       id: request.id,
       sessionId: _sessionBindings[request.session]!,
@@ -21,7 +24,22 @@ extension _AuditService on InformationService {
       sessionEnded: sessionEnded || _endedSessions.contains(request.session),
       applicationClosed: applicationClosed,
     );
-    _enqueueAudit(() => _repository.saveRequestHistory(history));
+    if (request.informationDecisionPending) {
+      request.deferredDecisionRequest = history;
+    } else {
+      _enqueueAudit(() => _repository.saveRequestHistory(history));
+    }
+  }
+
+  void _recordDeferredInformationRequest(_Request request) {
+    final history = request.deferredDecisionRequest;
+    request.deferredDecisionRequest = null;
+    if (history == null) return;
+    final grant = request.history;
+    _enqueueAudit(() async {
+      if (grant != null) await _repository.saveGrantHistory(grant);
+      await _repository.saveRequestHistory(history);
+    });
   }
 
   void _recoverAudit() {
@@ -85,7 +103,9 @@ extension _AuditService on InformationService {
       kind == GrantEventKind.expired ? history.expiresAt : _clock(),
     );
     request.history = finished;
-    _enqueueAudit(() => _repository.saveGrantHistory(finished));
+    if (!request.informationDecisionPending) {
+      _enqueueAudit(() => _repository.saveGrantHistory(finished));
+    }
   }
 
   void _enqueueAudit(Future<void> Function() write) {

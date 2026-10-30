@@ -404,6 +404,71 @@ void main() {
     expect(receipts.whereType<InformationApprovalReceipt>(), hasLength(1));
   });
 
+  test(
+    'real owner decisions persist with scoped reads, revocation and reopen',
+    () async {
+      final item = await service.owner.createInformation('Synthetic API', '', [
+        const FieldInput('Selected', '', 'SELECTED'),
+        const FieldInput('Unselected', '', 'UNSELECTED'),
+      ]);
+      final fields = item.fields.map((f) => FieldRef(item.id, f.id)).toList();
+      final session = service.agent.openSession('synthetic decision');
+      final request = service.agent
+          .request(session, 'partial approval', fields)
+          .id;
+      InformationApprovalCommand command(
+        String id,
+        InformationApprovalAction action,
+      ) => InformationApprovalCommand(
+        operationId: id,
+        requestId: request,
+        action: action,
+        reviewToken: 'a' * 64,
+        commandDigest: (id == 'live-approve' ? 'b' : 'c') * 64,
+        fields: action == InformationApprovalAction.approve
+            ? [fields.first]
+            : [],
+        itemVersions: action == InformationApprovalAction.approve
+            ? {item.id: item.version}
+            : {},
+      );
+      await service.owner.decideInformationRequest(
+        command('live-approve', InformationApprovalAction.approve),
+      );
+      final grant = service.agent.claim(session, request);
+      expect(await service.agent.read(grant.token, fields.first), 'SELECTED');
+      await expectLater(
+        service.agent.read(grant.token, fields.last),
+        fails('unauthorized'),
+      );
+      await service.owner.decideInformationRequest(
+        command('live-revoke', InformationApprovalAction.revoke),
+      );
+      await expectLater(
+        service.agent.read(grant.token, fields.first),
+        fails('unauthorized'),
+      );
+      expect(repo.requestHistory.single.state, AccessRequestState.revoked);
+      expect(repo.grantHistory.single.active, isFalse);
+      await close();
+      await open();
+      expect(
+        (await service.owner.informationApprovalReceipt(
+          'live-approve',
+        ))!.action,
+        InformationApprovalAction.approve,
+      );
+      expect(
+        (await service.owner.informationApprovalReceipt(
+          'live-revoke',
+        ))!.revision,
+        2,
+      );
+      expect(service.owner.sessions, isEmpty);
+      expect(repo.grantHistory.single.active, isFalse);
+    },
+  );
+
   for (final old in [34, 35]) {
     test(
       'format $old upgrades preserving data and portable boundary',
