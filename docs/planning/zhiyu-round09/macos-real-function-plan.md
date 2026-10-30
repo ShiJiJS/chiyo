@@ -1,5 +1,13 @@
 # Mac 真实业务首批计划（2026-10-30）
 
+## 修正后的 Release 候选与接入预检（2026-10-30）
+
+`1443d358` 已生成 Mac ARM64 Release 候选，包含审批资料名称/分组修正；打包20阶段、解压后的SQLCipher诊断及6项CLI/worker检查通过。新包内CLI与完整Flutter界面联调12项、Owner/CLI故障和授权检查14项通过，包括独立Owner进程重开。实现与依赖匹配候选源码，CLI摘要匹配清单。[实施记录](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)和[候选证据](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/evidence/zhiyu-round09/m04-package-1443d358.json)。
+
+本机候选位于 `build/macos-adaptation/m04-candidate-1443d358/AgentInfoManage`。原合成项目文件摘要未变，正式Codex客户端只读预检返回三项hook仍已启用/信任，默认模型可列出；未创建聊天、调用模型或改信任。已清理临时源码/重复App与旧候选展开副本，保留新候选和ZIP及旧ZIP，现有预览保持。
+
+当前结果不代表正常Release入口、个人Keychain升级、实际AI聊天或物理系统验收。下一步继续新版与真实宿主联合接入及交付；四票保持OPEN，未验项不勾选。Windows未动。
+
 ## 当前执行摘要：首批真实功能 tickets（2026-10-30）
 
 本次核对 GitHub 正文、标签、评论及依赖后，沿用 #69 下的四张实现票，不重复建单。优先交付主人保存普通资料、AI 申请、主人审批、AI 限定读取的完整流程。**申请只由 AI 发起，主人负责审批和管理；不增加演示入口或演示模式。**

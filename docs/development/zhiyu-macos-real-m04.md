@@ -56,3 +56,17 @@ python3 scripts/qa/check-owner-native.py build/macos-adaptation/m04-native-workf
 修正后再次执行 `check-owner-native.py build/macos-adaptation/m04-native-record-labels --workflow`：同一沙盒Debug App的两个独立进程共12个具名检查通过，原生截图已确认申请范围和关联资料显示“界面合成服务器”。[结果](evidence/zhiyu-round09/m04-native-workflow/record-labels-result.json)和[修正截图](evidence/zhiyu-round09/m04-native-workflow/record-labels-corrected.png)保留源码摘要。窗口置前仍未成功，不计物理输入或真实AI宿主验收。
 
 本轮测试库及App/dSYM/Xcode临时产物均已清理，既有预览保持。已保存的Release候选b0578cf6不含此次修正，需要在后续交付时更新；没有将源码修正冒充用户安装完成。#72/#73继续OPEN。
+
+## 2026-10-30：纳入资料辨识修正的 Release 候选
+
+源码 `1443d358e6069c5ea923c4e3f3386cfe97fc8fd3` 已形成 Mac ARM64 Release 整包 `0.4.1+13-mac-dev.1443d358e606`，位于 `build/macos-adaptation/m04-candidate-1443d358/AgentInfoManage`。含修正后的审批名称/分组、真实保存/申请/审批/历史及同源 CLI。当前为本机 ad-hoc 开发候选、未公证；未启动个人库或替换旧预览。
+
+在独立稀疏源码克隆中构建，20阶段通过，包含签名、架构/依赖、解压逐文件核对、实际SQLCipher存储诊断及6项CLI/worker测试。首次准备因SDK/下载目录的符号链接未被目录式exclude匹配而停止于清洁源码检查；补充准确链接路径的本地忽略后继续，没有修改产品源码或放宽打包检查。
+
+使用新包内CLI再次运行完整Flutter界面检查12项及Owner/CLI授权故障检查14项，两个场景都包含独立Owner进程重开。UI实现/依赖与候选源码相同、CLI摘要匹配清单，测试资料均自动删除。它们分别使用平台fixture/合成hook，不代表交付Release原生启动或实际AI聊天通过。前节原生Debug检查也保持其独立范围。
+
+只读检查已获准的 `issue49-codex-preparation-1/独立 Mac Codex 验收项目`：六份准备文件摘要未变，`codex-cli 0.158.0` 的正式app-server返回三项hook均enabled/trusted，默认模型可列出，进程正常退出。未修改hook/信任、未创建聊天、未调用模型；后续真实场景可沿用该项目。旧QA客户端入口使用旧界面，不能直接用旧结果代替Round09联合验收。
+
+[候选完整证据](evidence/zhiyu-round09/m04-package-1443d358.json)记录载荷、检查与边界。保留一个新候选展开目录及ZIP；删除本轮源码克隆、重复解压App、诊断构建树和旧b0578cf6候选的展开目录，旧ZIP及原验证记录仍保留。现有预览52项文件/链接内容核对保持不变，没有新增系统授权请求。
+
+下一步为真实AI宿主与新版界面的联合接入，以及正常Release入口/个人Keychain升级和集中系统配合；不把生成包或只读信任预检等同于这些项目已完成。#70–#73保持OPEN。
