@@ -89,7 +89,7 @@ extension OwnerInformationRecords on OwnerAccess {
     final generation = _service._libraryGeneration;
     if (input.name.length > 200 ||
         input.description.length > 2000 ||
-        input.fields.isEmpty ||
+        (input.itemId == null && input.fields.isEmpty) ||
         input.fields.length > 200 ||
         input.tagIds.length > 100 ||
         input.tagIds.toSet().length != input.tagIds.length ||

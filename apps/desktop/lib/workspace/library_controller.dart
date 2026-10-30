@@ -4,9 +4,15 @@ import 'workspace_source.dart';
 /// Library navigation owns query/selection/return state. It never reads a
 /// related record's body merely to decide whether a filter includes it.
 class LibraryController extends WorkspaceRecordsController {
-  LibraryController(super.source) {
-    query = const WorkspaceQuery(directoryId: 'selfhost');
+  LibraryController(
+    super.source, {
+    this.initialQuery = const WorkspaceQuery(),
+    this.initialSelection,
+  }) {
+    query = initialQuery;
   }
+  final WorkspaceQuery initialQuery;
+  final WorkspaceRecordRef? initialSelection;
   final _back =
       <({WorkspaceQuery query, WorkspaceRecordRef? selected, double scroll})>[];
   int _navigation = 0;
@@ -23,13 +29,7 @@ class LibraryController extends WorkspaceRecordsController {
     navigationNotice = null;
     selection = null;
     detail = null;
-    return load(
-      const WorkspaceQuery(directoryId: 'selfhost'),
-      keepSelection: const WorkspaceRecordRef(
-        WorkspaceRecordKind.information,
-        'azure',
-      ),
-    );
+    return load(initialQuery, keepSelection: initialSelection);
   }
 
   void focusSearch() {

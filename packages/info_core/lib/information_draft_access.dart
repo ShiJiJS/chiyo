@@ -39,7 +39,7 @@ extension OwnerInformationDrafts on OwnerAccess {
     }
     if (input.name.length > 200 ||
         input.description.length > 2000 ||
-        input.fields.isEmpty ||
+        (input.itemId == null && input.fields.isEmpty) ||
         input.fields.length > 200 ||
         input.tagIds.length > 100 ||
         input.tagIds.toSet().length != input.tagIds.length ||
@@ -76,7 +76,7 @@ extension OwnerInformationDrafts on OwnerAccess {
     _checkOrganizationName(input.name);
     _checkParent(input.directoryId);
     if (input.description.length > 2000 ||
-        input.fields.isEmpty ||
+        (input.itemId == null && input.fields.isEmpty) ||
         input.fields.length > 200 ||
         input.tagIds.length > 100 ||
         input.tagIds.toSet().length != input.tagIds.length ||

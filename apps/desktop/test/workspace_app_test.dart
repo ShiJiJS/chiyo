@@ -56,6 +56,8 @@ void main() {
           .widget<LibraryPage>(find.byType(LibraryPage))
           .controller;
       expect(previous.source, same(first));
+      expect(previous.query.directoryId, isNull);
+      expect(previous.initialSelection, isNull);
       // Refreshing the same service retains page state/controllers.
       await show(first);
       expect(
