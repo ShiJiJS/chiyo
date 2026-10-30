@@ -5,6 +5,7 @@ import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_classification.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_information.dart';
+import 'owner_workspace_approvals.dart';
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
@@ -21,13 +22,14 @@ class OwnerWorkspaceSource implements WorkspaceSource {
     this.runtime = const UnavailableWorkspaceRuntime(),
     this.agents = const UnavailableWorkspaceAgents(),
     this.credentials = const UnavailableWorkspaceCredential(),
-    this.approvals = const UnavailableWorkspaceApproval(),
+    WorkspaceApprovalSource? approvals,
     this.grantHistory = const UnavailableWorkspaceGrantHistory(),
     this.proposals = const UnavailableWorkspaceProposal(),
     this.plugins = const UnavailableWorkspacePlugin(),
     this.hosts = const UnavailableWorkspaceHost(),
     this.legacyTemplates = const UnavailableWorkspaceLegacyTemplate(),
   }) : _scope = owner.captureLibraryScope() {
+    this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     _information = OwnerWorkspaceInformation(
       owner: owner,
       templates: definitions ?? builtinWorkspaceDefinitions,
@@ -72,7 +74,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   @override
   final WorkspaceCredentialSource credentials;
   @override
-  final WorkspaceApprovalSource approvals;
+  late final WorkspaceApprovalSource approvals;
   @override
   final WorkspaceGrantHistorySource grantHistory;
   @override
@@ -117,7 +119,17 @@ class OwnerWorkspaceSource implements WorkspaceSource {
               [
                 for (final r in owner.recycleEntries) [r.id, r.version],
               ],
-              owner.queryInbox(limit: 1).pendingCount,
+              [
+                for (final r in owner.informationRequests)
+                  [
+                    r.id,
+                    r.state.name,
+                    r.sessionEnded,
+                    r.grantExpiresAt?.toIso8601String(),
+                    for (final f in r.approvedFields ?? <core.FieldRef>[])
+                      [f.itemId, f.fieldId],
+                  ],
+              ],
               owner.queryProposals(limit: 1).pendingCount,
             ]);
     } on Object {
@@ -154,7 +166,9 @@ class OwnerWorkspaceSource implements WorkspaceSource {
     }
     return WorkspaceSummary(
       records: owner.information.length + owner.credentials.length,
-      pending: owner.queryInbox(limit: 1).pendingCount,
+      pending: owner.informationRequests
+          .where((r) => r.state == core.AccessRequestState.pending)
+          .length,
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );
   });

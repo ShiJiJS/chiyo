@@ -6,6 +6,54 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'legacy requests cannot bypass file protocol checks beyond the catalog first page',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository([
+          for (var i = 0; i < 25; i++)
+            InformationItem('text-$i', 'Text $i', '', 1, [
+              InformationField('f-$i', 'Text', '', 'synthetic', 1),
+            ]),
+          InformationItem('file-item', 'File', '', 1, [
+            InformationField.file(
+              'file-field',
+              'Attachment',
+              '',
+              InformationAttachmentRef('synthetic-file', 1),
+              1,
+            ),
+          ]),
+        ]),
+      );
+      final server = await AgentServer.start(service.agent, port: 0);
+      final client = HttpClient();
+      addTearDown(() async {
+        client.close(force: true);
+        await server.close();
+        await service.close();
+      });
+      expect(service.agent.searchCatalog().items, hasLength(20));
+      expect(service.agent.catalog(), hasLength(26));
+      final request = await client.post('127.0.0.1', server.port, '/request');
+      request.headers.contentType = ContentType.json;
+      request.write(
+        jsonEncode({
+          'sessionSecret': service.agent.openSession('synthetic'),
+          'purpose': 'legacy file request',
+          'fields': [
+            {'itemId': 'file-item', 'fieldId': 'file-field'},
+          ],
+        }),
+      );
+      final response =
+          jsonDecode(await utf8.decoder.bind(await request.close()).join())
+              as Map;
+      expect(response['status'], 'unsupported_capability');
+      expect(service.owner.requests, isEmpty);
+    },
+  );
+
+  test(
     'loopback transport supports approval flow but exposes no management routes',
     () async {
       final service = InformationService.fictional();

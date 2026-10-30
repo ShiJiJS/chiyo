@@ -120,6 +120,7 @@ class ApprovalsController extends ChangeNotifier {
       !reading &&
       readFailure == null &&
       detail != null &&
+      detail!.decisionUnavailableReason == null &&
       !needsReview &&
       writeFailure?.code != 'conflict';
   void _notify() {

@@ -86,10 +86,37 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 ```json
 {"command":"catalog"}
 {"command":"session","chatLabel":"当前聊天的说明"}
-{"command":"request","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
+{"command":"request","operationId":"inspect-host-01","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
 ```
 
 保存 `request` 返回的 `requestId`。返回值还包括创建时间 `createdAt` 和待审批到期时间 `requestExpiresAt`，均为 UTC。默认待审批 30 分钟；用户可以在桌面设置中调整新请求的有效期，已提交请求的截止时间保持不变。
+
+Mac 新开发源码（#71，尚未交付到当前预览）支持 `information-request-operations.v1`。
+新接入应为每个申请意图指定 `operationId`：1–128 个 ASCII 字符，以字母或数字开头，
+其余允许字母、数字、`.`、`_`、`:`、`-`。相同私密会话、编号、用途和字段集合的重试返回
+原请求和固定截止时间，不重复通知；相同编号换用途/字段返回 `operation_conflict`。
+不同编号表示新的明确申请，不按内容自动合并。旧调用可省略编号，但不具备去重/按操作找回能力。
+CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsupported_capability`，不静默降级。
+
+提交后通信中断返回 `request_unknown`，有编号时同时返回原 `operationId`。先查询原操作：
+
+```json
+{"command":"request-status","operationId":"inspect-host-01"}
+```
+
+查询只返回同一私密会话的原请求状态，不创建请求、不返回会话秘密或访问凭据。
+`not_found` 只是当前未找到，不证明之前在途的提交不会稍后到达；不要自动换编号重发。
+页面重开或有效会话重连可找回原申请；服务关闭、会话结束或资料库恢复后，旧会话不再有效，
+不能凭公开请求/操作编号恢复能力。主人可查看保留的无正文历史，异常中止无法确认的结果仍属未知。
+
+同一开发源码的 `catalog` 支持 `query`、`typeId`、`tagId`、`offset`、`limit`（1–100，默认20），
+保留已有 `directoryId` 过滤。返回分页 `items`、`total`、`nextOffset`，以及全部当前标签 `tags`（ID和名称，含尚未使用的标签）；
+每项包含 `typeId`、标签名称/归属和字段说明。无布局旧资料的类型为 `generic`。
+关键词只搜索公开说明和标签名称，不搜索正文；目录树、资料关系、布局快照、文件原文和密钥不公开。
+
+```json
+{"command":"catalog","query":"业务服务器","typeId":"server","tagId":"TAG_ID","offset":0,"limit":20}
+```
 
 以下示例的 `REQUEST_ID` 替换为原来的请求标识：
 

@@ -21,6 +21,7 @@ enum WorkspaceApprovalState {
   pending('待处理'),
   approved('已批准'),
   denied('已拒绝'),
+  cancelled('已取消'),
   revoked('已撤销'),
   expired('已到期'),
   sessionEnded('会话已结束'),
@@ -141,6 +142,7 @@ class WorkspaceApprovalDetail {
     this.fieldExpiresAt,
     this.credentialExpiresAt,
     this.approveUnavailableReason,
+    this.decisionUnavailableReason,
     Iterable<WorkspaceApprovalExecution> executions = const [],
   }) : executions = List.unmodifiable(executions),
        scopes = List.unmodifiable(scopes),
@@ -155,6 +157,10 @@ class WorkspaceApprovalDetail {
   final WorkspaceCredentialUseRequest? credential;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
   final String? approveUnavailableReason;
+
+  /// Applies to all owner decisions, including deny/revoke. A source may expose
+  /// real read-only facts before its transactional decision adapter is ready.
+  final String? decisionUnavailableReason;
   WorkspaceApprovalDetail withExecution(WorkspaceApprovalExecution next) =>
       WorkspaceApprovalDetail(
         request: request,
@@ -167,6 +173,7 @@ class WorkspaceApprovalDetail {
         fieldExpiresAt: fieldExpiresAt,
         credentialExpiresAt: credentialExpiresAt,
         approveUnavailableReason: approveUnavailableReason,
+        decisionUnavailableReason: decisionUnavailableReason,
         executions: [
           for (final e in executions)
             e.operationId == next.operationId ? next : e,
@@ -175,6 +182,7 @@ class WorkspaceApprovalDetail {
   bool get canApprove =>
       request.state == WorkspaceApprovalState.pending &&
       scopes.any((s) => s.available) &&
+      decisionUnavailableReason == null &&
       approveUnavailableReason == null;
 }
 

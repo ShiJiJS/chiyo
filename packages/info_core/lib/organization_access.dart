@@ -383,20 +383,41 @@ class CatalogPage {
 }
 
 extension AgentCatalog on AgentAccess {
+  /// ADR0015: all current label names are public metadata, including unused
+  /// labels. No directory tree, relationships, values or write authority.
+  List<Map<String, String>> catalogTags() {
+    if (_service._closed || _service._backupBusy) {
+      throw const AccessFailure('service_unavailable');
+    }
+    final tags = _service._repository.tags.toList()
+      ..sort((a, b) {
+        final name = a.name.compareTo(b.name);
+        return name == 0 ? a.id.compareTo(b.id) : name;
+      });
+    return List.unmodifiable([
+      for (final tag in tags)
+        Map<String, String>.unmodifiable({'id': tag.id, 'name': tag.name}),
+    ]);
+  }
+
   CatalogPage searchCatalog({
     String query = '',
+    String? typeId,
     String? directoryId,
     String? tagId,
     int offset = 0,
     int limit = 20,
   }) {
-    if (_service._closed) throw const AccessFailure('service_unavailable');
+    if (_service._closed || _service._backupBusy) {
+      throw const AccessFailure('service_unavailable');
+    }
     if (query.length > 200 ||
         offset < 0 ||
         offset > 1000000 ||
         limit < 1 ||
         limit > 100 ||
         [
+          typeId,
           directoryId,
           tagId,
         ].any((id) => id != null && (id.isEmpty || id.length > 200))) {
@@ -407,6 +428,7 @@ extension AgentCatalog on AgentAccess {
         ? null
         : _service.owner._descendantDirectories(directoryId);
     final matches = _catalogMetadata().where((item) {
+      if (typeId != null && item['typeId'] != typeId) return false;
       if (includedDirectories != null &&
           !includedDirectories.contains(item['directoryId'])) {
         return false;
@@ -414,10 +436,13 @@ extension AgentCatalog on AgentAccess {
       if (tagId != null && !(item['tagIds'] as List<String>).contains(tagId)) {
         return false;
       }
-      // Explicit allowlist: no values, owner labels, notes, or search snippets.
+      // Explicit allowlist: public labels are included; no values, directory
+      // names, relationships, private layout descriptors or body snippets.
       final publicText = [
         item['name'],
         item['description'],
+        for (final tag in item['tags'] as List<Map<String, String>>)
+          tag['name'],
         for (final field in item['fields'] as List<Map<String, String>>) ...[
           field['name'],
           field['description'],

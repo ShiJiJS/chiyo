@@ -439,6 +439,8 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             ),
             if (detail.approveUnavailableReason != null)
               _message(context, detail.approveUnavailableReason!),
+            if (detail.decisionUnavailableReason != null)
+              _message(context, detail.decisionUnavailableReason!),
             const SizedBox(height: 20),
             DesktopButton(
               key: const ValueKey('approval-approve'),
@@ -463,6 +465,8 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               r.state.label,
               style: libraryText(context, 25, color: c.accent),
             ),
+            if (detail.decisionUnavailableReason != null)
+              _message(context, detail.decisionUnavailableReason!),
             const SizedBox(height: 18),
             Text(
               '批准 ${detail.approved.length} 项',
