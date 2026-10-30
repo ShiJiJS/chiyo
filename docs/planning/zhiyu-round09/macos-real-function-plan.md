@@ -1,5 +1,22 @@
 # Mac 真实业务首批计划（2026-10-30）
 
+## 当前执行摘要：首批真实功能 tickets（2026-10-30）
+
+本次核对 GitHub 正文、标签、评论及依赖后，沿用 #69 下的四张实现票，不重复建单。优先交付主人保存普通资料、AI 申请、主人审批、AI 限定读取的完整流程。**申请只由 AI 发起，主人负责审批和管理；不增加演示入口或演示模式。**
+
+| 顺序 | Ticket | 负责的结果 | 后续执行重点 |
+| --- | --- | --- | --- |
+| 1 | [#70 真实保存与重启恢复](https://github.com/ShiJiJS/agent-info-manage/issues/70) | 保存、编辑、分类、修订/回收，退出后资料仍在 | 对照原验收项复用已有持久化证据，补交付候选的数据恢复和完整 App 验收缺口 |
+| 2 | [#71 AI 申请与收件箱](https://github.com/ShiJiJS/agent-info-manage/issues/71) | AI 发现公开目录、发起申请，App 显示准确请求 | 核对 App/CLI 的请求与状态一致性，完善实际接入步骤和失败诊断 |
+| 3 | [#72 审批、读取与失效](https://github.com/ShiJiJS/agent-info-manage/issues/72) | 部分批准、拒绝、撤销、到期和结束失效，历史可追溯 | 将已有包内 CLI 和完整界面联调证据对应验收项，只补实际缺口，数据与授权错误必须修复 |
+| 4 | [#73 完整流程与 App 交付](https://github.com/ShiJiJS/agent-info-manage/issues/73) | 同一候选完成真实 AI 聊天闭环，交付可打开的 App 和说明 | 完成真实宿主与交付 App 验收，集中列清本人配合项，交付后清理多余 App/dSYM |
+
+GitHub 已设置 #70 → #71 → #72 → #73 的依赖关系；四票均为 OPEN，并有 enhancement、ready-for-agent 标签。已有实现可以继续复用，不因前票尚未关闭而重复开发；关闭须满足各票完整标准。固定 Release 包和自动化联调已有记录，不能等同于用户已收到可用新版，也不能代替真实宿主验收。以下早期检查点中的“下一步”只代表当时状态，当前排期以上表为准。
+
+附件、托管凭据、AI 提案/整理、插件、完整设置和备份界面放在后续批次，由 #69 跟踪；本次不将这些扩成首批前置。新增数据的迁移与备份兼容仍由相应实现票负责。Windows 适配后置；通知、睡眠及完整安装专项沿用原票。
+
+本次仅整理规划与 GitHub tickets，不运行开发、构建或系统验收，不替换预览 App；保留工作区原有未提交内容。
+
 ## 完整界面联合检查点（2026-10-30）
 
 候选 `b0578cf6` 的包内CLI已与正式完整Flutter界面联调：两个独立Owner进程共12个具名检查通过，覆盖界面保存/编辑、AI申请、部分字段批准与跨聊天拒绝、准确历史/批准时快照、访问计数刷新、历史撤销、界面拒绝、重开显示修正资料及旧授权失效。实现与依赖文件核对匹配候选，CLI摘要匹配包清单。详见 [M04记录](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md) 和 [证据](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/evidence/zhiyu-round09/m04-owner-ui-interop.json)。
