@@ -9,8 +9,12 @@ Future<void> main() async {
       'An explicit owned profile-driver report path is required',
     );
   }
+  final seconds = int.parse(
+    Platform.environment['ZHIYU_PROFILE_DRIVER_TIMEOUT_SECONDS'] ?? '240',
+  );
+  if (seconds < 60 || seconds > 900) throw StateError('Invalid driver timeout');
   await integrationDriver(
-    timeout: const Duration(minutes: 4),
+    timeout: Duration(seconds: seconds),
     writeResponseOnFailure: true,
     responseDataCallback: (data) async {
       await File(

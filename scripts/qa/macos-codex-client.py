@@ -12,14 +12,25 @@ import json,os,queue,subprocess,threading,time,hashlib,tempfile,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume','delegation'],default='lifecycle');parser.add_argument('--delegation-mcp',action='store_true',help='Use an ephemeral process-only MCP bridge inherited by the one synthetic child');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume','delegation','owner-ui'],default='lifecycle');parser.add_argument('--delegation-mcp',action='store_true',help='Use an ephemeral process-only MCP bridge inherited by the one synthetic child');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--package',type=Path,help='Verified new candidate CLI for owner-ui only; existing trusted hook definitions stay unchanged')
 args=parser.parse_args();OUT=args.output.resolve();OUT.relative_to(ROOT/'build/macos-adaptation');OUT.mkdir(exist_ok=False,parents=True)
 PROJECT=args.project.resolve();PROJECT.relative_to(ROOT/'build/macos-adaptation');assert (PROJECT/'preparation.json').is_file()
 PREP=json.loads((PROJECT/'preparation.json').read_text());CLI=Path(PREP['bundle'])/'info-codex'
 for entry in PREP['files']:assert hashlib.sha256((PROJECT/entry['path']).read_bytes()).hexdigest()==entry['sha256']
 CLI.resolve().relative_to(PROJECT.parent);assert CLI.is_file() and not CLI.is_symlink()
+PACKAGE_EVIDENCE={}
+if args.package:
+ assert args.case=='owner-ui'
+ package=args.package.resolve();package.relative_to(ROOT/'build/macos-adaptation')
+ manifest=json.loads((package/'manifest.json').read_text());CLI=package/'cli/info-codex'
+ expected=next(f['sha256'] for f in manifest['files'] if f['path']=='cli/info-codex')
+ assert not CLI.is_symlink() and hashlib.sha256(CLI.read_bytes()).hexdigest()==expected
+ PACKAGE_EVIDENCE={'candidateSource':manifest['sourceCommit'],'infoCodexSha256':expected,'hookScope':'Original approved project/bundle unchanged; current package info-codex consumes actual host hook association.'}
+else:assert args.case!='owner-ui'
+
 host=args.host.resolve();host.relative_to(ROOT/'build/macos-adaptation');CONTROL=json.loads((host/'controller.json').read_text());FIX=Path(CONTROL['root']);assert (FIX/'.qa-owner').read_text()==CONTROL['owner']
-EVENTS=[];CALLS=[];RESULTS={'sourceSha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'scope':__doc__};PROOFS={};DELEGATED={};Q=queue.Queue();COUNTER=0
+EVENTS=[];CALLS=[];RESULTS={'sourceSha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'scope':__doc__,'package':PACKAGE_EVIDENCE};PROOFS={};DELEGATED={};Q=queue.Queue();COUNTER=0
 MCP_PENDING={};MCP_EXPECTED={};MCP_SOCKET=None;MCP_DIRECTORY=None;MCP_CONFIG=[]
 if args.delegation_mcp:
  assert args.case=='delegation'
@@ -97,6 +108,7 @@ def send(v):
  else:P.stdin.write(data.encode()+b'\n');P.stdin.flush()
 
 def cli(args,tid,origin='model'):
+ if globals()['args'].case=='owner-ui':assert args.get('command') in ['catalog','capabilities','request','status','claim','read']
  env=os.environ.copy();env['CODEX_THREAD_ID']=tid
  assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release','credential-catalog','request-use','run-use','operation-status','execution-status','execution-output','cleanup-use','delegate']
  if args.get('command')=='delegate':
@@ -231,6 +243,46 @@ def consume(args):
  data=path.read_bytes();assert data==bytes((i*37+11)%256 for i in range(1024))
  v={'status':'consumed','bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'deliveryId':d['deliveryId'],'readerClosed':True}
  RESULTS.setdefault('consumers',[]).append(v);save();return v
+
+
+def owner_ui_case():
+ RESULTS['scope']='Actual Codex model/SessionStart/SessionEnd and package CLI with native owner widget controls; synthetic library, not physical input or normal Release App/Keychain acceptance'
+ snapshot=owner('status');assert not snapshot['requests']
+ tid=new_thread();RESULTS['ownerUiThread']=tid;save()
+ prompt='In this explicitly approved synthetic acceptance, use your actual SessionStart association and public catalog. Make exactly ONE request for 主机地址 and 登录用户 of Synthetic Mac server. Purpose: native owner UI acceptance. Stop while pending. Never output values or private association; do not reconnect or search files.'
+ turn(tid,prompt)
+ snapshot=owner('status');pending=[r for r in snapshot['requests'] if r['state']=='pending'];assert len(pending)==1
+ rid=pending[0]['id'];RESULTS['ownerUiRequest']=rid
+ RESULTS['approvedSnapshot']=owner('approve',requestId=rid,fields=[snapshot['addressField']])
+ turn(tid,'The owner approved part of the same request. Claim it, read only the approved 主机地址 twice under that request, and report status only. Do not make another request or print values.')
+ reads=[c for c in CALLS if c['threadId']==tid and c['command']=='read'];assert len(reads)==2 and all(c['response'].get('status')=='ok' and c['response'].get('value')=='synthetic-host.invalid' for c in reads)
+ denied=cli({'association':PROOFS[tid],'command':'read','requestId':rid,'itemId':snapshot['textItem'],'fieldId':snapshot['usernameField']},tid,'negative-protocol-probe');assert denied['status']=='unauthorized'
+ other=new_thread();RESULTS['ownerUiOtherThread']=other
+ turn(other,'Use only your own latest SessionStart association. Query status for public request '+rid+' once. Do not connect, request or search files. This synthetic request belongs to a different chat; report refusal status only.')
+ assert any(c['threadId']==other and c['command']=='status' and c['response'].get('status')=='unauthorized' for c in CALLS)
+ RESULTS['revokedSnapshot']=owner('revoke',requestId=rid)
+ turn(tid,'The owner revoked the request. Query its status and attempt one read of the previously approved synthetic 主机地址 using the same request, to verify refusal. No new requests or connections; status only.')
+ assert [c for c in CALLS if c['threadId']==tid and c['command']=='read'][-1]['response'].get('status')=='unauthorized'
+ before={r['id'] for r in owner('status')['requests']}
+ turn(tid,prompt.replace('native owner UI acceptance','native owner deny acceptance'))
+ pending=[r for r in owner('status')['requests'] if r['id'] not in before and r['state']=='pending'];assert len(pending)==1;denied_id=pending[0]['id']
+ RESULTS['deniedSnapshot']=owner('deny',requestId=denied_id)
+ turn(tid,'The owner processed the latest request. Query its status once and report only that result. Do not read or create any request.')
+ assert any(c['threadId']==tid and c['command']=='status' and c['requestId']==denied_id and c['response'].get('status')=='denied' for c in CALLS)
+ before={r['id'] for r in owner('status')['requests']}
+ turn(tid,prompt.replace('native owner UI acceptance','native owner real end acceptance'))
+ pending=[r for r in owner('status')['requests'] if r['id'] not in before and r['state']=='pending'];assert len(pending)==1;ended_id=pending[0]['id']
+ owner('approve',requestId=ended_id,fields=[snapshot['addressField']])
+ request('thread/archive',{'threadId':tid})
+ end=time.monotonic()+10
+ while time.monotonic()<end:
+  final=owner('status');ended=next(r for r in final['requests'] if r['id']==ended_id)
+  if ended['sessionEnded']:break
+  time.sleep(.1)
+ assert ended['sessionEnded'] and ended['state']=='revoked'
+ assert cli({'association':PROOFS[tid],'command':'claim','requestId':ended_id},tid,'negative-protocol-probe')['status']=='unauthorized'
+ request('thread/archive',{'threadId':other})
+ RESULTS['afterEndSnapshot']=final;RESULTS['completeOwnerUiFlow']=True;save();print('OWNER_UI_REAL_CLIENT_COMPLETE',flush=True)
 
 
 def delegation_case():
@@ -395,7 +447,9 @@ try:
  assert all(h['trustStatus']=='trusted' and h['enabled'] for h in hooks['data'][0]['hooks'])
  RESULTS['hookDiscovery']=hooks
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
- if args.case=='delegation':
+ if args.case=='owner-ui':
+  owner_ui_case()
+ elif args.case=='delegation':
   delegation_case()
  elif args.case=='credential':
   credential_case()
@@ -476,5 +530,5 @@ finally:
  for proof in [*PROOFS.values(),*DELEGATED.values()]:assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
  RESULTS['proofReferencesAbsentFromEvidence']=True;save();print('LIFECYCLE_CLIENT_CLOSED',flush=True)
 
-if not (RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow') or RESULTS.get('completeTransportResumeFlow') or RESULTS.get('completeDelegationFlow')):
+if not (RESULTS.get('completeOwnerUiFlow') or RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow') or RESULTS.get('completeTransportResumeFlow') or RESULTS.get('completeDelegationFlow')):
  raise SystemExit(1)

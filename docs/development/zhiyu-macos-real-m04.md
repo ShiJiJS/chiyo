@@ -70,3 +70,28 @@ python3 scripts/qa/check-owner-native.py build/macos-adaptation/m04-native-workf
 [候选完整证据](evidence/zhiyu-round09/m04-package-1443d358.json)记录载荷、检查与边界。保留一个新候选展开目录及ZIP；删除本轮源码克隆、重复解压App、诊断构建树和旧b0578cf6候选的展开目录，旧ZIP及原验证记录仍保留。现有预览52项文件/链接内容核对保持不变，没有新增系统授权请求。
 
 下一步为真实AI宿主与新版界面的联合接入，以及正常Release入口/个人Keychain升级和集中系统配合；不把生成包或只读信任预检等同于这些项目已完成。#70–#73保持OPEN。
+
+## 2026-10-30：真实 Codex 聊天接通新版原生审批控件
+
+新增独立测试入口 `owner_codex_native_test.dart`，复用正式 DesktopLauncher/WorkspaceApp、SQLCipher、本机服务和新版实际表单/审批按钮。测试先在新界面保存合成服务器，再等待外部真实聊天申请；QA命令只选择已登记的合成资料和指定请求，批准、拒绝、撤销由Flutter集成输入操作控件完成。没有产品演示入口或生产管理后门。
+
+```sh
+python3 scripts/qa/check-owner-native.py build/macos-adaptation/m04-real-codex-ui-1 \
+  --real-codex-project 'build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目' \
+  --package build/macos-adaptation/m04-candidate-1443d358/AgentInfoManage
+```
+
+`codex-cli 0.158.0` 使用正式app-server及其默认模型 `gpt-6-astra`，两个独立根聊天共7个已完成回合。模型13次实际工具调用，经匿名stdin调用当前候选的info-codex；另外2次明确标为negative-protocol-probe。没有子Agent、个人资料、认证文件/聊天记录读取或全局配置更改。
+
+- 真实SessionStart取得会话关联，AI查询目录后申请主机地址和登录用户；申请准确出现在新版原生收件箱。
+- 新版控件只批准主机地址；真实模型领取后两次读取成功。未选登录用户的协议负向检查被拒绝。
+- 第二个真实聊天使用自己的关联查询第一聊天公开请求ID，被拒绝。
+- 新版控件撤销后，原模型查询到revoked，继续读取被拒绝。
+- 新版控件拒绝第二条申请，真实模型查询到denied。
+- 第三条申请在界面获批后，通过真实thread/archive触发SessionEnd；其授权撤销，原关联领取被拒绝。两个根聊天均归档，两次SessionStart及两次SessionEnd的完成事件有记录，最终有效授权为0。
+
+原生测试6个步骤通过，客户端/驱动正常退出，desktop静态分析、Python AST和diff检查通过。合成库及测试App/dSYM/Xcode产物已清理，原预览未变。六份已批准项目准备文件的摘要前后相同；旧hook/Skill材料保持原路径与定义，新包info-codex消费真实hook提供的关联，**不是整套旧hook材料已升级为新包的结论**。
+
+[派生证据](evidence/zhiyu-round09/m04-real-codex-ui/verification.json)不包含私密证明或字段正文；[原生截图](evidence/zhiyu-round09/m04-real-codex-ui/partial-approval.png)已查看，显示真实聊天公开标识、准确资料名和部分勾选。截图时收件箱已是0待处理，顶部角标仍是1；源码核对为现有1秒轮询的刷新间隔，并非多出一条申请，保留这个瞬时状态记录，没有据此增加演示或伪造同步。
+
+本次原生App为独立沙盒Debug测试入口，产品源码与1443d358候选一致，使用固定合成密钥及框架输入，驱动仍未成功置前。真实AI请求与新版原生控件已联合通过；正常Release入口、个人Keychain升级、物理输入及系统专项仍未完成，#73和相关未验项继续保持开放。

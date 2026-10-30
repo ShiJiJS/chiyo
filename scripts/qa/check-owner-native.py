@@ -10,6 +10,10 @@ import plistlib
 import shutil
 import subprocess
 import uuid
+import time
+import re
+import socket
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 DESKTOP = ROOT / 'apps/desktop'
@@ -17,12 +21,79 @@ TARGET = 'integration_test/owner_workspace_native_test.dart'
 IDENTITY = 'com.example.infoDesktop.zhiyuOwnerCheck'
 
 
+def drive_with_real_client(command, output, env, workflow_run, project, package):
+    """One owned native test App, with the existing approved synthetic project."""
+    controller = output / 'controller.json'
+    root = None
+    client_code = None
+    with (output / 'drive-real-codex.log').open('w') as log:
+        drive = subprocess.Popen(command, cwd=DESKTOP, env=env, stdout=log, stderr=subprocess.STDOUT)
+        try:
+            deadline = time.monotonic() + 90
+            while time.monotonic() < deadline:
+                matches = re.findall(r'MAC_CODEX_LIVE_ROOT=([^\r\n]+)', (output / 'drive-real-codex.log').read_text())
+                if matches:
+                    root = Path(matches[-1])
+                    expected = Path.home() / 'Library/Containers' / IDENTITY / 'Data'
+                    root.resolve().relative_to(expected.resolve())
+                    if root.is_symlink() or root.name != 'owner-workflow-' + workflow_run or (root / '.qa-owner').read_text() != workflow_run:
+                        raise RuntimeError('Unexpected native controller fixture')
+                    if (root / 'ready.json').is_file():
+                        break
+                if drive.poll() is not None:
+                    raise RuntimeError('Native UI exited before ready')
+                time.sleep(.1)
+            else:
+                raise TimeoutError('Native owner UI startup')
+            with controller.open('x') as stream:
+                os.chmod(controller, 0o600)
+                json.dump({'root': str(root), 'owner': workflow_run}, stream)
+            print('real Codex client: started', flush=True)
+            with (output / 'real-client.log').open('w') as client_log:
+                result = subprocess.run([sys.executable, str(ROOT / 'scripts/qa/macos-codex-client.py'),
+                    str(output / 'real-client'), '--case', 'owner-ui', '--project', str(project),
+                    '--host', str(output), '--package', str(package)], cwd=ROOT, stdout=client_log,
+                    stderr=subprocess.STDOUT, timeout=780)
+            client_code = result.returncode
+            print('real Codex client: exit ' + str(client_code), flush=True)
+        finally:
+            if root is not None and drive.poll() is None and root.is_dir():
+                indices = [int(p.stem.split('-')[1]) for p in root.glob('command-*.json')]
+                command_path = root / f'command-{max(indices, default=0)+1}.json'
+                temporary = command_path.with_suffix('.partial')
+                temporary.write_text(json.dumps({'owner': workflow_run, 'action': 'quit'}))
+                temporary.rename(command_path)
+            try:
+                drive_code = drive.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                drive.terminate()
+                drive_code = drive.wait(timeout=15)
+            controller.unlink(missing_ok=True)
+        if client_code != 0 or drive_code != 0:
+            raise RuntimeError(f'Real client/native driver failed: {client_code}/{drive_code}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--workflow', action='store_true', help='Full owner workflow in two launches of one native test App')
+    parser.add_argument('--real-codex-project', type=Path, help='Existing approved synthetic project; no hook/trust changes')
+    parser.add_argument('--package', type=Path, help='Candidate payload for real Codex CLI')
     args = parser.parse_args()
+    real_codex = args.real_codex_project is not None
+    if real_codex != (args.package is not None) or (real_codex and args.workflow):
+        parser.error('Use --real-codex-project with --package, separately from --workflow')
+    if real_codex:
+        approved = ROOT / 'build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目'
+        if args.real_codex_project.resolve() != approved.resolve():
+            parser.error('Only the explicitly approved synthetic project is supported')
+        with socket.socket() as listener:
+            listener.settimeout(1)
+            if listener.connect_ex(('127.0.0.1', 47125)) == 0:
+                parser.error('Existing service on 47125; do not replace it')
     target = 'integration_test/owner_workflow_native_test.dart' if args.workflow else TARGET
+    if real_codex:
+        target = 'integration_test/owner_codex_native_test.dart'
     workflow_run = uuid.uuid4().hex
     phase_data = []
     OUTPUT = args.output.resolve()
@@ -51,7 +122,7 @@ def main():
                PUB_CACHE=str(ROOT / '.cache/pub'),
                DEVELOPER_DIR='/Applications/Xcode.app/Contents/Developer')
     launcher = str(ROOT / 'scripts/dev-macos.sh')
-    report = {'complete': False, 'previewKernelSha256': original, 'workflowRun': workflow_run if args.workflow else None}
+    report = {'complete': False, 'previewKernelSha256': original, 'workflowRun': workflow_run if args.workflow or real_codex else None}
     def run(args, name, timeout=600):
         print(f'{name}: started', flush=True)
         with (OUTPUT / name).open('w') as log:
@@ -84,9 +155,15 @@ def main():
         for phase in (['live', 'reopen'] if args.workflow else ['basic']):
             driver_file = OUTPUT / ('driver-' + phase + '.json' if args.workflow else 'driver.json')
             env['ZHIYU_PROFILE_DRIVER_REPORT'] = str(driver_file)
-            run([launcher, 'flutter', 'drive', '--debug', '-d', 'macos', '--no-pub',
+            command = [launcher, 'flutter', 'drive', '--debug', '-d', 'macos', '--no-pub',
                  '--target', target, '--driver', 'integration_test/profile_driver.dart',
-                 '--use-application-binary', str(app)], 'drive-' + phase + '.log', 300)
+                 '--use-application-binary', str(app)]
+            if real_codex:
+                env['ZHIYU_PROFILE_DRIVER_TIMEOUT_SECONDS'] = '900'
+                drive_with_real_client(command, OUTPUT, env, workflow_run,
+                                       args.real_codex_project.resolve(), args.package.resolve())
+            else:
+                run(command, 'drive-' + phase + '.log', 300)
             data = json.loads(driver_file.read_text())
             if not isinstance(data, dict):
                 raise RuntimeError('Driver returned no scenario evidence; an empty test run is not a pass')
@@ -104,7 +181,12 @@ def main():
                     (OUTPUT / (name + '.png')).write_bytes(base64.b64decode(value))
                 phase_data.append(data)
             else:
-                (OUTPUT / 'saved-library.png').write_bytes(base64.b64decode(data.pop('imagePngBase64')))
+                (OUTPUT / ('real-ai-approval.png' if real_codex else 'saved-library.png')).write_bytes(base64.b64decode(data.pop('imagePngBase64')))
+            if real_codex:
+                if data.get('passed') is not True or data.get('fixtureRemoved') is not True:
+                    raise RuntimeError('Missing real-client native UI or cleanup evidence')
+                report['nativeOwnerUi'] = data
+                report['realClient'] = json.loads((OUTPUT / 'real-client/real-client-result.json').read_text())['results']
             driver_file.write_text(json.dumps(data, indent=2))
             if hashlib.sha256(kernel.read_bytes()).hexdigest() != fixed_kernel:
                 raise RuntimeError('Native App changed during validation')
@@ -136,7 +218,7 @@ def main():
             shutil.rmtree(products)
         if (OUTPUT / 'xcode').exists() and not still_running:
             shutil.rmtree(OUTPUT / 'xcode')
-        if args.workflow and not still_running:
+        if (args.workflow or real_codex) and not still_running:
             # Remove only this invocation's unique, marked synthetic directory.
             for path in OUTPUT.glob('driver-*.json'):
                 data = json.loads(path.read_text())
