@@ -268,19 +268,19 @@ List<int> _format(_Fixture f) {
 
 void main() {
   test(
-    'Mac fill commits explicitly upgrade format24 to25 and require backup11',
+    'Mac fill commits explicitly upgrade format26 to27 and require backup11',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);
       final (ordinary, ordinaryKey) = await f.backup('ordinary-format7');
-      expect(_format(f), [24, 24]);
+      expect(_format(f), [26, 26]);
       expect(
         (await f.repo.backups.inspect(ordinary, ordinaryKey)).formatVersion,
         7,
       );
       const executable = '/Applications/中文 Browser.app/Contents/MacOS/Browser';
       final r = await f.request(executable: executable);
-      expect(_format(f), [25, 25]);
+      expect(_format(f), [27, 27]);
       final result = await f.fill(r.id, 'synthetic-mac-fill');
       expect(result.state, FocusedFillState.sent);
       final (backup, recovery) = await f.backup('mac-format11');
@@ -305,7 +305,7 @@ void main() {
         throwsA(isA<StorageFailure>()),
       );
       await f.reopen();
-      expect(_format(f), [25, 25]);
+      expect(_format(f), [27, 27]);
       expect(
         f.repo.credentialUseRequests.single.focusedFill!.application.executable,
         executable,
@@ -318,16 +318,16 @@ void main() {
     },
   );
 
-  test('ordinary Windows fill history keeps library24 and backup7', () async {
+  test('ordinary Windows fill history keeps library26 and backup7', () async {
     final f = await _Fixture.create();
     addTearDown(f.close);
     final r = await f.request();
     await f.fill(r.id, 'ordinary');
     final (path, key) = await f.backup('ordinary');
-    expect(_format(f), [24, 24]);
+    expect(_format(f), [26, 26]);
     expect((await f.repo.backups.inspect(path, key)).formatVersion, 7);
     await f.reopen();
-    expect(_format(f), [24, 24]);
+    expect(_format(f), [26, 26]);
   });
 
   test(
@@ -339,7 +339,7 @@ void main() {
         approve: false,
         executable: '/Applications/Synthetic.app/Contents/MacOS/Synthetic',
       );
-      expect(_format(f), [25, 25]);
+      expect(_format(f), [27, 27]);
       final (path, key) = await f.backup('pending-only');
       final preview = await f.repo.backups.inspect(path, key);
       expect(preview.formatVersion, 7);
@@ -353,7 +353,7 @@ void main() {
     },
   );
 
-  test('failed Mac audit rolls marker header and rows back to24', () async {
+  test('failed Mac audit rolls marker header and rows back to26', () async {
     final f = await _Fixture.create();
     addTearDown(f.close);
     final original = await f.request();
@@ -378,13 +378,13 @@ void main() {
       throwsA(isA<CredentialUseFailure>()),
     );
     expect(calls, 3);
-    expect(_format(f), [24, 24]);
+    expect(_format(f), [26, 26]);
     expect(
       f.repo.credentialUseRequests.single.focusedFill!.application.executable,
       r'C:\Synthetic\Browser.exe',
     );
     await f.reopen();
-    expect(_format(f), [24, 24]);
+    expect(_format(f), [26, 26]);
   });
 
   test(
@@ -419,7 +419,7 @@ void main() {
       );
       final failed = _keyedDb('$targetPath/library.db', targetKeys);
       try {
-        expect(_dbFormat(failed), [24, 24]);
+        expect(_dbFormat(failed), [26, 26]);
         expect(
           failed
               .select('SELECT count(*) FROM credential_runtime_requests')
@@ -457,7 +457,7 @@ void main() {
       );
       final current = _keyedDb('$targetPath/library.db', targetKeys);
       try {
-        expect(_dbFormat(current), [25, 25]);
+        expect(_dbFormat(current), [27, 27]);
       } finally {
         current.close();
       }
@@ -508,7 +508,7 @@ void main() {
       try {
         final probe = _keyedDb('$path/library.db', f.keys);
         try {
-          expect(_dbFormat(probe), [25, 25]);
+          expect(_dbFormat(probe), [27, 27]);
         } finally {
           probe.close();
         }
@@ -579,7 +579,7 @@ void main() {
 
   final format22Probe = Platform.environment['INFO_TEST_FORMAT22_PROBE'];
   test(
-    'format22 source reader rejects library25 and backup11 before modifying data',
+    'format22 source reader rejects library27 and backup11 before modifying data',
     () async {
       final f = await _Fixture.create(key: List.filled(32, 61));
       addTearDown(f.close);
@@ -650,7 +650,7 @@ void main() {
       });
       expect(digest(File(backup)), backupDigest);
       await f.reopen();
-      expect(_format(f), [25, 25]);
+      expect(_format(f), [27, 27]);
       expect(f.repo.focusedFillOperations.single.state, FocusedFillState.sent);
     },
     skip: format22Probe == null,

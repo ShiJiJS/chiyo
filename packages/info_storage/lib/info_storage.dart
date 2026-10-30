@@ -23,10 +23,10 @@ part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 
-const _libraryFormat = 24;
+const _libraryFormat = 26;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 25;
+const _portableFocusedFillLibraryFormat = 27;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -81,6 +81,14 @@ InformationItem _informationFromRows(
           kind: FieldKind.values.byName(field['kind'] as String),
         ),
   ],
+  layout: row['layout_json'] == null
+      ? null
+      : InformationLayout.fromJson(
+          decodeProtocolObject(
+            row['layout_json'] as String,
+            maxBytes: InformationLayout.maxBytes,
+          ),
+        ),
   directoryId: row['directory_id'] as String?,
   createdAt: row['created_at'] == null
       ? null
@@ -428,8 +436,8 @@ class EncryptedInformationRepository
         }
         final storedFormat = marker.single['version'] as int;
         // Preserve the portable-fill boundary while upgrading its old format23
-        // to the matching receipt-capable format25 (ordinary22 becomes24).
-        openingFormat = storedFormat == 23
+        // and format25 to27 (ordinary formats upgrade to26).
+        openingFormat = (storedFormat == 23 || storedFormat == 25)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
@@ -1011,7 +1019,7 @@ class EncryptedInformationRepository
   Future<void> _writeItem(InformationItem item) async {
     await _checkItemAttachments(item);
     await _db.customStatement(
-      'INSERT INTO information_items(id,name,description,version,directory_id,created_at,modified_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id,created_at=excluded.created_at,modified_at=excluded.modified_at',
+      'INSERT INTO information_items(id,name,description,version,directory_id,created_at,modified_at,layout_json) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,version=excluded.version,directory_id=excluded.directory_id,created_at=excluded.created_at,modified_at=excluded.modified_at,layout_json=excluded.layout_json',
       [
         item.id,
         item.name,
@@ -1020,6 +1028,7 @@ class EncryptedInformationRepository
         item.directoryId,
         item.createdAt?.toUtc().toIso8601String(),
         item.modifiedAt?.toUtc().toIso8601String(),
+        item.layout == null ? null : jsonEncode(item.layout!.toJson()),
       ],
     );
     await _db.customStatement(
@@ -1469,7 +1478,7 @@ class _InformationDatabase extends GeneratedDatabase {
         'CREATE TABLE settings(name TEXT PRIMARY KEY,value INTEGER NOT NULL)',
       );
       await customStatement(
-        'CREATE TABLE information_items(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,created_at TEXT,modified_at TEXT)',
+        'CREATE TABLE information_items(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,created_at TEXT,modified_at TEXT,layout_json TEXT)',
       );
       await customStatement(
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
@@ -1566,6 +1575,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 20) await _createInformationAttachments();
         if (sourceVersion < 21) await _createInformationDeliveries();
         if (sourceVersion < 24) await _createInformationRecordOperations();
+        if (sourceVersion < 26) await _createInformationLayout();
         await _createLibraryFormat();
       });
     },
@@ -1598,6 +1608,24 @@ class _InformationDatabase extends GeneratedDatabase {
     'CHECK(byte_length>=0),metadata TEXT NOT NULL,body BLOB NOT NULL '
     'CHECK(length(body)=byte_length))',
   );
+
+  Future<void> _createInformationLayout() async {
+    final columns = await customSelect(
+      'PRAGMA table_info(information_items)',
+    ).get();
+    if (columns.any((r) => r.read<String>('name') == 'layout_json')) {
+      // Development/legacy fixtures can carry the empty additive column, but a
+      // downgraded marker must never hide already persisted layout content.
+      final used = await customSelect(
+        'SELECT 1 FROM information_items WHERE layout_json IS NOT NULL LIMIT 1',
+      ).get();
+      if (used.isNotEmpty) throw const StorageFailure('unsupported_schema');
+      return;
+    }
+    await customStatement(
+      'ALTER TABLE information_items ADD COLUMN layout_json TEXT',
+    );
+  }
 
   Future<void> _createInformationRecordOperations() => customStatement(
     'CREATE TABLE IF NOT EXISTS information_record_operations('

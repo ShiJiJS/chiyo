@@ -248,6 +248,7 @@ extension OwnerOrganization on OwnerAccess {
             old.fields,
             directoryId: old.directoryId,
             tagIds: old.tagIds.where((t) => t != id),
+            layout: old.layout,
             createdAt: old.createdAt,
             modifiedAt: now,
           ),
@@ -296,6 +297,7 @@ extension OwnerOrganization on OwnerAccess {
       ],
       directoryId: old.directoryId,
       tagIds: old.tagIds,
+      layout: old.layout,
       createdAt: old.createdAt,
       modifiedAt: _service._clock(),
     );
@@ -333,6 +335,7 @@ extension OwnerOrganization on OwnerAccess {
       old.fields,
       directoryId: directoryId,
       tagIds: selectedTags,
+      layout: old.layout,
       createdAt: old.createdAt,
       modifiedAt: _service._clock(),
     );

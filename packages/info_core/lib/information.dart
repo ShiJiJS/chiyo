@@ -1,3 +1,5 @@
+import 'information_layout.dart';
+export 'information_layout.dart';
 import 'organization_tasks.dart';
 import 'organization.dart';
 export 'organization.dart';
@@ -294,6 +296,7 @@ class InformationItem {
     this.directoryId,
     this.createdAt,
     this.modifiedAt,
+    this.layout,
     Iterable<String> tagIds = const [],
   }) : fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds);
@@ -306,6 +309,7 @@ class InformationItem {
   /// Versions order changes even when the system clock moves backwards.
   final DateTime? createdAt, modifiedAt;
   final List<String> tagIds;
+  final InformationLayout? layout;
 }
 
 /// Owner-side storage seam. Agent transports never receive this capability.

@@ -146,6 +146,7 @@ extension OwnerUpdates on OwnerAccess {
         ],
         directoryId: review.directoryId,
         tagIds: review.tagIds,
+        layout: after.layout,
         createdAt: after.createdAt,
         modifiedAt: after.modifiedAt,
       ),
@@ -155,6 +156,7 @@ extension OwnerUpdates on OwnerAccess {
   InformationItem _applyUpdate(InformationItem previous, UpdateInput input) {
     _validateUpdate(input);
     final fields = previous.fields.toList();
+    final replacedIds = <String, String>{};
     for (final change in input.changes) {
       final index = fields.indexWhere((f) => f.id == change.fieldId);
       if (change.kind != FieldChangeKind.add && index < 0) {
@@ -179,6 +181,7 @@ extension OwnerUpdates on OwnerAccess {
           if (change.kind == FieldChangeKind.add) {
             fields.add(added);
           } else {
+            replacedIds[fields[index].id] = added.id;
             fields[index] = added;
           }
       }
@@ -194,6 +197,7 @@ extension OwnerUpdates on OwnerAccess {
       fields,
       directoryId: previous.directoryId,
       tagIds: previous.tagIds,
+      layout: previous.layout?.remapFields(replacedIds),
       createdAt: previous.createdAt,
       modifiedAt: _service._clock(),
     );

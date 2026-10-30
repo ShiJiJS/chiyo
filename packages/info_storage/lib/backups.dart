@@ -134,6 +134,11 @@ class InformationBackups {
     'information_deliveries': ['id', 'payload'],
   });
 
+  static final _v12Columns = Map<String, List<String>>.unmodifiable({
+    ..._v9Columns,
+    'information_items': [..._v3Columns['information_items']!, 'layout_json'],
+  });
+
   // Portable formats 1–7 keep their table keys independent of the schema17+
   // physical names. Legacy readers must not find a writable old runtime table.
   static const _physicalTables = {
@@ -372,6 +377,19 @@ class InformationBackups {
             return entry['snapshot'] != null &&
                 removedOrganization(entry['snapshot'] as Map<String, dynamic>);
           });
+      final currentLayouts = await _repository._db
+          .customSelect(
+            'SELECT 1 FROM information_items WHERE layout_json IS NOT NULL LIMIT 1',
+          )
+          .get();
+      final hasLayouts =
+          currentLayouts.isNotEmpty ||
+          tables['information_revisions']!.any(
+            (r) => _backupJson(r)['layout'] != null,
+          ) ||
+          tables['recycle_entries']!.any(
+            (r) => (_backupJson(r)['snapshot'] as Map?)?['layout'] != null,
+          );
       // Pending requests are not portable history. Select the new label only
       // after archiving, but before metadata admission/validation or publication.
       _archiveCredentialRuntime(tables, now);
@@ -383,11 +401,18 @@ class InformationBackups {
       if (portableFills && !await _repository._portableFocusedFillFormat()) {
         throw const StorageFailure('invalid_runtime_snapshot');
       }
-      if (detachedHistory || portableFills) {
-        formatVersion = portableFills ? 11 : 10;
-        for (final table in _v9Columns.entries.where(
-          (e) => !tables.containsKey(e.key),
-        )) {
+      if (detachedHistory || portableFills || hasLayouts) {
+        formatVersion = hasLayouts
+            ? 12
+            : portableFills
+            ? 11
+            : 10;
+        for (final table
+            in (hasLayouts ? _v12Columns : _v9Columns).entries.where(
+              (e) =>
+                  !tables.containsKey(e.key) ||
+                  (hasLayouts && e.key == 'information_items'),
+            )) {
           final rows = await _repository._db
               .customSelect(
                 'SELECT ${table.value.join(',')} FROM ${_physicalTables[table.key] ?? table.key} ORDER BY rowid',
@@ -720,7 +745,11 @@ class InformationBackups {
         );
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');
-        if (contents.formatVersion >= 11) {
+        if (_hasPortableFocusedFill(
+          contents._tables['credential_use_requests']!.map(
+            (r) => CredentialUseRequest.fromJson(_backupJson(r)),
+          ),
+        )) {
           await _repository._requirePortableFocusedFillFormat();
         }
         // Directory parents may appear after a moved child in source row order.
@@ -730,7 +759,9 @@ class InformationBackups {
           await _installAttachmentBodies(contents, reader);
         }
         for (final table
-            in (contents.formatVersion >= 9
+            in (contents.formatVersion >= 12
+                    ? _v12Columns
+                    : contents.formatVersion >= 9
                     ? _v9Columns
                     : contents.formatVersion == 8
                     ? _v8Columns
@@ -773,7 +804,7 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].contains(decoded['version'])) {
+        ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     final v8 = (decoded['version'] as int) >= 8;
@@ -792,6 +823,7 @@ class InformationBackups {
       5 || 6 => _v6Columns,
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
+      12 => _v12Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -924,6 +956,14 @@ class InformationBackups {
     }
     for (final row in tables['information_items']!) {
       text(row, 'description', 2000);
+      if (row['layout_json'] != null) {
+        InformationLayout.fromJson(
+          decodeProtocolObject(
+            text(row, 'layout_json', InformationLayout.maxBytes),
+            maxBytes: InformationLayout.maxBytes,
+          ),
+        );
+      }
       if (row['created_at'] != null) _backupDate(row['created_at']);
       if (row['modified_at'] != null) _backupDate(row['modified_at']);
       final directory = row['directory_id'];
@@ -997,6 +1037,7 @@ class InformationBackups {
       availableAttachments: v8 ? available : null,
       deliveries: deliveries,
       allowRemovedOrganization: (decoded['version'] as int) >= 10,
+      allowLayouts: (decoded['version'] as int) >= 12,
     );
     _validateBackupCredentials(
       tables,

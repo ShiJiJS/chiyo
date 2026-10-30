@@ -82,6 +82,7 @@ extension OwnerRevisions on OwnerAccess {
       ],
       directoryId: _existingDirectory(old.directoryId),
       tagIds: _existingTags(old.tagIds),
+      layout: old.layout?.remapFields(resolved),
       createdAt: current.createdAt,
       modifiedAt: _service._clock(),
     );

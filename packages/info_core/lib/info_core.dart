@@ -803,6 +803,7 @@ class OwnerAccess {
               .toList(),
           directoryId: previous.directoryId,
           tagIds: previous.tagIds,
+          layout: previous.layout,
           createdAt: previous.createdAt,
           modifiedAt: _service._clock(),
         );
