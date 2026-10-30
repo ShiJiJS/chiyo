@@ -150,7 +150,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
               ref.itemId,
             ),
             label: field?.name ?? names[ref]?.fieldName ?? '已移除字段',
-            section: '资料字段',
+            section: item?.name ?? names[ref]?.itemName ?? '已移除资料',
             recordName: item?.name ?? names[ref]?.itemName ?? '已移除资料',
             kind: field?.kind == core.FieldKind.file
                 ? WorkspaceApprovalScopeKind.file

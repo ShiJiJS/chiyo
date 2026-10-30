@@ -209,21 +209,25 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
   }
 
   Widget _scopes(BuildContext context) {
-    final grouped = <String, List<WorkspaceApprovalScope>>{};
+    final grouped =
+        <(WorkspaceRecordRef, String), List<WorkspaceApprovalScope>>{};
+    String groupId((WorkspaceRecordRef, String) key) =>
+        jsonEncode([key.$1.key, key.$2]);
     for (final x in model.detail!.scopes) {
-      (grouped[x.section] ??= []).add(x);
+      (grouped[(x.record, x.section)] ??= []).add(x);
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final e in grouped.entries)
           Padding(
+            key: ValueKey('approval-group-${groupId(e.key)}'),
             padding: const EdgeInsets.only(top: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  e.key,
+                  e.key.$2,
                   style: libraryText(
                     context,
                     13,
@@ -235,10 +239,12 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   DesktopButton(
                     key: ValueKey('approval-expand-${e.value.first.entryId}'),
                     kind: DesktopButtonKind.quiet,
-                    onPressed: model.frozen ? null : () => model.expand(e.key),
+                    onPressed: model.frozen
+                        ? null
+                        : () => model.expand(groupId(e.key)),
                     alignment: Alignment.centerLeft,
                     leading: Icon(
-                      model.draft!.expanded.contains(e.key)
+                      model.draft!.expanded.contains(groupId(e.key))
                           ? Icons.expand_less
                           : Icons.expand_more,
                       size: 18,
@@ -247,7 +253,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                       '${model.draft!.selected.intersection(e.value.map((x) => x.id).toSet()).length} / ${e.value.length} 个字段 · 展开核对',
                     ),
                   ),
-                  if (model.draft!.expanded.contains(e.key))
+                  if (model.draft!.expanded.contains(groupId(e.key)))
                     for (final x in e.value) _scope(context, x),
                 ] else
                   for (final x in e.value) _scope(context, x),
@@ -627,14 +633,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     kind: DesktopButtonKind.quiet,
                     onPressed: model.frozen ? null : () => widget.onRecord(ref),
                     child: Text(
-                      d.scopes.firstWhere((s) => s.record == ref).kind ==
-                              WorkspaceApprovalScopeKind.credential
-                          ? d.credential!.credentialName
-                          : d.scopes
-                                .firstWhere((s) => s.record == ref)
-                                .section
-                                .split(' · ')
-                                .first,
+                      d.scopes.firstWhere((s) => s.record == ref).recordName,
                     ),
                   ),
               ],

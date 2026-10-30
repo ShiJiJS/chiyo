@@ -46,3 +46,13 @@ python3 scripts/qa/check-owner-native.py build/macos-adaptation/m04-native-workf
 第一次运行未注册实际场景，驱动输出null；检查器拒绝把空测试算通过。已将异步准备放入同步注册的测试内部，第二次实际执行通过。最终共享场景重新运行包内独立CLI/widget两进程回归通过12项，desktop静态分析无问题，Python AST检查通过。
 
 [原生结果、截图和回归证据](evidence/zhiyu-round09/m04-native-workflow/result.json)保留准确范围与测试源码摘要。#73保持OPEN；接下来修正上述资料辨识问题，然后更新交付候选并继续真实宿主/系统验收。
+
+## 2026-10-30：修正审批资料名称与多资料分组
+
+原生截图发现真实来源将所有字段的 section 写成“资料字段”，界面又把 section 当关联资料名称使用，导致主人看不到实际资料名称；仅以 section 分组也会混合不同资料。已修正为真实资料名称，并按资料身份与 section 分组；展开状态同样按该组合隔离。关联资料按钮直接使用 recordName，不再拆分显示标题，含“ · ”的名称不会截断。
+
+新增真实 Owner 服务控件回归覆盖不同名/同名两份资料、相同字段名称：各自独立分组、完整名称和准确跳转；取消第二份资料字段后批准，仅第一份可读，第二份拒绝，正文不出现在审批页。三个审批相关测试文件共24项通过，desktop静态分析通过。
+
+修正后再次执行 `check-owner-native.py build/macos-adaptation/m04-native-record-labels --workflow`：同一沙盒Debug App的两个独立进程共12个具名检查通过，原生截图已确认申请范围和关联资料显示“界面合成服务器”。[结果](evidence/zhiyu-round09/m04-native-workflow/record-labels-result.json)和[修正截图](evidence/zhiyu-round09/m04-native-workflow/record-labels-corrected.png)保留源码摘要。窗口置前仍未成功，不计物理输入或真实AI宿主验收。
+
+本轮测试库及App/dSYM/Xcode临时产物均已清理，既有预览保持。已保存的Release候选b0578cf6不含此次修正，需要在后续交付时更新；没有将源码修正冒充用户安装完成。#72/#73继续OPEN。
