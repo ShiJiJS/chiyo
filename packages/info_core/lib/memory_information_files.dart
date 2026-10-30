@@ -68,6 +68,9 @@ extension _MemoryInformationAttachments on MemoryInformationRepository {
     InformationDraftChange change,
   ) {
     final key = jsonEncode([change.draftId, change.operationId]);
+    if (_purgedInformationCommits.contains(key)) {
+      throw const AccessFailure('information_purged');
+    }
     final receipt = change.receipt, item = receipt.item;
     if (change.operationReceipt != null &&
         _informationRecordReceipts.containsKey(change.operationId)) {

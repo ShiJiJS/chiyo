@@ -177,9 +177,6 @@ class OwnerWorkspaceHistory {
     WorkspaceRecordChange change,
   ) async {
     _ordinary(change.ref);
-    if (change.action == WorkspaceRecordAction.purge) {
-      throw const WorkspaceFailure('unsupported', '永久清理尚未接入。');
-    }
     try {
       final receipt = await owner.changeInformationLifecycle(
         core.InformationLifecycleCommand(

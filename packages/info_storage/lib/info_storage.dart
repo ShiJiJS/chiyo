@@ -24,11 +24,12 @@ part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
 part 'lifecycle_storage.dart';
+part 'information_purge_storage.dart';
 
-const _libraryFormat = 32;
+const _libraryFormat = 34;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 33;
+const _portableFocusedFillLibraryFormat = 35;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -114,8 +115,12 @@ class EncryptedInformationRepository
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
         InformationLifecycleRepository,
+        InformationPurgeRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
+  @override
+  Future<void> commitInformationPurge(InformationPurgeChange change) =>
+      _commitInformationPurge(change);
   @override
   Future<InformationLifecycleReceipt?> informationLifecycleReceipt(String id) =>
       _lifecycleReceipt(id);
@@ -453,13 +458,14 @@ class EncryptedInformationRepository
         }
         final storedFormat = marker.single['version'] as int;
         // Preserve the portable-fill boundary across older receipt/layout
-        // formats. Format32 adds durable lifecycle operations.
+        // formats. Format34 adds purge receipts and draft tombstones.
         openingFormat =
             (storedFormat == 23 ||
                 storedFormat == 25 ||
                 storedFormat == 27 ||
                 storedFormat == 29 ||
-                storedFormat == 31)
+                storedFormat == 31 ||
+                storedFormat == 33)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
