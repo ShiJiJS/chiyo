@@ -323,17 +323,22 @@ extension OwnerRecycle on OwnerAccess {
 
   Future<void> purgeRecycle() => _serialize(_purgeRecycle);
   Future<void> _purgeRecycle() async {
-    for (final entry in _service._repository.recycleEntries.where(
-      (e) =>
-          e.state == RecycleState.available &&
-          !_service._clock().isBefore(e.expiresAt),
-    )) {
-      await _service._repository.commitRecycleChange(
-        itemId: entry.itemId,
-        item: information.where((i) => i.id == entry.itemId).firstOrNull,
-        entries: [entry.finish(RecycleState.purged)],
-        facts: [_fact(entry, RecycleFactKind.purged, entry.version)],
-      );
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    // Read afresh after each transaction: a whole-item purge may consume other
+    // entries selected by this initial list.
+    final ids = _service._repository.recycleEntries
+        .where(
+          (e) =>
+              e.state == RecycleState.available &&
+              !_service._clock().isBefore(e.expiresAt),
+        )
+        .map((e) => e.id)
+        .toList();
+    for (final id in ids) {
+      final entry = _service._repository.recycleEntries
+          .where((e) => e.id == id && e.state == RecycleState.available)
+          .firstOrNull;
+      if (entry != null) await _purgeInformationEntry(entry, expired: true);
     }
   }
 }

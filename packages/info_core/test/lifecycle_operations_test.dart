@@ -112,4 +112,64 @@ void main() {
       );
     },
   );
+  test(
+    'memory purge erases legacy draft content without allowing its original operation to recreate an item',
+    () async {
+      final repo = MemoryInformationRepository();
+      final service = InformationService(repository: repo);
+      addTearDown(service.close);
+      final draft = await service.owner.beginInformationFileDraft();
+      final input = InformationDraftInput(
+        name: '资料',
+        description: '',
+        fields: [const InformationDraftField.text('正文', '', 'private-body')],
+      );
+      final item = await service.owner.commitInformationDraft(
+        draft,
+        'create',
+        input,
+      );
+      final catalog =
+          (await service.owner.informationClassificationSnapshot()).version;
+      final removed = await service.owner.changeInformationLifecycle(
+        InformationLifecycleCommand(
+          operationId: 'delete',
+          itemId: item.id,
+          action: InformationLifecycleAction.recycle,
+          expectedVersion: 1,
+          expectedCatalogVersion: catalog,
+        ),
+      );
+      final purge = InformationLifecycleCommand(
+        operationId: 'purge',
+        itemId: item.id,
+        action: InformationLifecycleAction.purge,
+        entryId: removed.entryId,
+        expectedVersion: removed.version,
+        expectedCatalogVersion: catalog,
+      );
+      final receipt = await service.owner.changeInformationLifecycle(purge);
+      expect(repo.items, isEmpty);
+      expect(repo.informationRevisions, isEmpty);
+      expect(repo.recycleEntries.single.snapshot, isNull);
+      await expectLater(
+        service.owner.commitInformationDraft(draft, 'create', input),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'purged original result',
+            'information_purged',
+          ),
+        ),
+      );
+      expect(
+        (await service.owner.changeInformationLifecycle(purge)).toJson(),
+        receipt.toJson(),
+      );
+      expect(
+        repo.recycleFacts.where((f) => f.kind == RecycleFactKind.purged),
+        hasLength(1),
+      );
+    },
+  );
 }

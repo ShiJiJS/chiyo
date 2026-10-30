@@ -232,7 +232,7 @@ void main() {
     },
   );
   test(
-    'unsupported purge and credentials never masquerade as success and query errors propagate',
+    'invalid purge and unsupported credentials never masquerade as success and query errors propagate',
     () async {
       final item = await service.owner.createInformation('资料', '', [
         const core.FieldInput('字段', '', 'private'),
@@ -249,8 +249,8 @@ void main() {
         throwsA(
           isA<WorkspaceFailure>().having(
             (e) => e.code,
-            'unsupported',
-            'unsupported',
+            'invalid command',
+            'validation',
           ),
         ),
       );
@@ -268,6 +268,70 @@ void main() {
       await expectLater(
         history.lifecycleOperationReceipt('missing'),
         throwsA(isA<core.AccessFailure>()),
+      );
+    },
+  );
+  test(
+    'dialog deletion carries catalog version and permanent purge returns its exact original intent',
+    () async {
+      final item = await service.owner.createInformation('合成资料', '', [
+        const core.FieldInput('字段', '', 'body'),
+      ]);
+      final deletion = WorkspaceRecordChange(
+        operationId: 'delete-from-dialog',
+        ref: ref(item),
+        expectedVersion: 1,
+        action: WorkspaceRecordAction.recycle,
+        expectedCatalogVersion: await catalog(),
+      );
+      final removed = await history.changeRecord(deletion);
+      expect(
+        (await history.lifecycleOperationReceipt(
+          deletion.operationId,
+        ))!.intent.matches(WorkspaceOperationIntent.change(deletion)),
+        isTrue,
+      );
+      final purge = WorkspaceRecordChange(
+        operationId: 'purge-from-dialog',
+        ref: ref(item),
+        expectedVersion: removed.version,
+        entryId: removed.entryId,
+        action: WorkspaceRecordAction.purge,
+        expectedCatalogVersion: await catalog(),
+      );
+      connect(
+        changed: (_) =>
+            throw StateError('synthetic post-commit refresh failure'),
+      );
+      await expectLater(
+        history.changeRecord(purge),
+        throwsA(
+          isA<WorkspaceFailure>().having(
+            (e) => e.code,
+            'uncertain result',
+            'unknown_outcome',
+          ),
+        ),
+      );
+      final receipt = (await history.lifecycleOperationReceipt(
+        purge.operationId,
+      ))!;
+      expect(
+        receipt.intent.matches(WorkspaceOperationIntent.change(purge)),
+        isTrue,
+      );
+      expect(receipt.result.version, greaterThan(removed.version));
+      expect((await history.queryRecycled()).total, 0);
+      expect(await history.loadRevisions(ref(item)), isEmpty);
+      await expectLater(
+        history.readRecycled(removed.entryId!),
+        throwsA(isA<WorkspaceFailure>()),
+      );
+      connect();
+      await history.changeRecord(purge);
+      expect(
+        repo.recycleFacts.where((f) => f.kind == core.RecycleFactKind.purged),
+        hasLength(1),
       );
     },
   );

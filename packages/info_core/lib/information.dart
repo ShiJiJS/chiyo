@@ -27,6 +27,8 @@ import 'info_core.dart'
         InformationDraftReceipt,
         InformationRecordReceipt,
         InformationLifecycleReceipt,
+        InformationPurgeChange,
+        InformationPurgeRepository,
         InformationLifecycleAction,
         InformationLifecycleRepository,
         InformationRecordOperationRepository,
@@ -41,6 +43,7 @@ import 'info_core.dart'
         SshHostTrustSnapshot;
 part 'memory_information_files.dart';
 part 'memory_classification_operations.dart';
+part 'memory_information_purge.dart';
 
 enum FieldKind { structured, textNote, file }
 
@@ -414,8 +417,13 @@ class MemoryInformationRepository
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
         InformationLifecycleRepository,
+        InformationPurgeRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
+  @override
+  Future<void> commitInformationPurge(InformationPurgeChange change) async =>
+      _commitPurge(change);
+  final _purgedInformationCommits = <String>{};
   final _lifecycleReceipts = <String, InformationLifecycleReceipt>{};
   @override
   Future<InformationLifecycleReceipt?> informationLifecycleReceipt(
@@ -533,7 +541,14 @@ class MemoryInformationRepository
   Future<InformationDraftReceipt?> informationDraftReceipt(
     String draftId,
     String operationId,
-  ) async => _informationCommits[jsonEncode([draftId, operationId])];
+  ) async {
+    final key = jsonEncode([draftId, operationId]);
+    if (_purgedInformationCommits.contains(key)) {
+      throw const AccessFailure('information_purged');
+    }
+    return _informationCommits[key];
+  }
+
   @override
   Future<InformationDraftReceipt> commitInformationDraft(
     InformationDraftChange change,

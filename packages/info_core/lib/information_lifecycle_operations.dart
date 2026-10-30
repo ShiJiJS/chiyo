@@ -1,6 +1,11 @@
 part of 'info_core.dart';
 
-enum InformationLifecycleAction { recycle, restoreRevision, restoreRecycled }
+enum InformationLifecycleAction {
+  recycle,
+  restoreRevision,
+  restoreRecycled,
+  purge,
+}
 
 /// The exact owner intent. Contains identities and versions, never body values.
 final class InformationLifecycleCommand {
@@ -31,13 +36,14 @@ final class InformationLifecycleCommand {
       InformationLifecycleAction.recycle =>
         revisionVersion == null &&
             entryId == null &&
-            expectedCatalogVersion == null &&
             expectedCurrentVersion == null,
       InformationLifecycleAction.restoreRevision =>
         revisionVersion != null &&
             entryId == null &&
             expectedCatalogVersion != null &&
             expectedCurrentVersion == null,
+      InformationLifecycleAction.purge =>
+        revisionVersion == null && entryId != null,
       InformationLifecycleAction.restoreRecycled =>
         revisionVersion == null &&
             entryId != null &&
@@ -108,6 +114,7 @@ final class InformationLifecycleReceipt {
     this.entryId,
   }) {
     if ((command.action != InformationLifecycleAction.restoreRecycled &&
+            command.action != InformationLifecycleAction.purge &&
             version != command.expectedVersion + 1) ||
         version <= command.expectedVersion ||
         (command.expectedCurrentVersion != null &&
@@ -118,7 +125,8 @@ final class InformationLifecycleReceipt {
                 entryId!.codeUnits.any((c) => c < 33 || c > 126))) ||
         (command.action == InformationLifecycleAction.recycle &&
             entryId == null) ||
-        (command.action == InformationLifecycleAction.restoreRecycled &&
+        ((command.action == InformationLifecycleAction.restoreRecycled ||
+                command.action == InformationLifecycleAction.purge) &&
             entryId != command.entryId)) {
       throw const FormatException('Invalid lifecycle receipt');
     }
@@ -257,6 +265,12 @@ extension OwnerInformationLifecycle on OwnerAccess {
           command: command,
           validate: validate,
         );
+      case InformationLifecycleAction.purge:
+        final entry = recycleEntries
+            .where((e) => e.id == command.entryId)
+            .firstOrNull;
+        if (entry == null) throw const AccessFailure('recycle_unavailable');
+        await _purgeInformationEntry(entry, command: command, expired: false);
       case InformationLifecycleAction.restoreRecycled:
         final entry = recycleEntries
             .where((e) => e.id == command.entryId)

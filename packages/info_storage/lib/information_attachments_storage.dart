@@ -235,12 +235,12 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
           variables: [Variable(draftId), Variable(operationId)],
         )
         .get();
-    return rows.isEmpty
-        ? null
-        : InformationDraftReceipt.fromPrivateJson(
-            jsonDecode(rows.single.read<String>('payload'))
-                as Map<String, dynamic>,
-          );
+    if (rows.isEmpty) return null;
+    final payload =
+        jsonDecode(rows.single.read<String>('payload')) as Map<String, dynamic>;
+    if (payload['purged'] == true)
+      throw const AccessFailure('information_purged');
+    return InformationDraftReceipt.fromPrivateJson(payload);
   }
 
   Future<void> _checkItemAttachments(InformationItem item) async {
