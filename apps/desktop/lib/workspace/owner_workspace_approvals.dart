@@ -5,14 +5,14 @@ import 'package:info_core/info_core.dart' as core;
 import 'workspace_approvals.dart';
 import 'workspace_records.dart';
 
-/// Ordinary request metadata from the actual service and retained audit facts.
-/// It neither creates requests nor retains values, private proofs or tokens.
+/// Ordinary owner decisions and metadata from the actual service.
+/// Requests still originate in Agent transport; this source never retains values,
+/// private session proofs or read tokens.
 class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
   OwnerWorkspaceApprovals({required this.owner})
     : _scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
   final core.OwnerLibraryScope _scope;
-  static const _decisionUnavailable = '此版本的审批操作尚未接入。';
 
   Future<T> _read<T>(Future<T> Function() action) async {
     try {
@@ -158,9 +158,14 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
             recordVersion: item?.version ?? 0,
             fieldId: ref.fieldId,
             requested: r.fields.contains(ref),
-            available: field != null && !r.historical,
+            available:
+                field != null &&
+                field.kind != core.FieldKind.file &&
+                !r.historical,
             unavailableReason: field == null
                 ? '原字段已不存在。'
+                : field.kind == core.FieldKind.file
+                ? '文件领取审批尚未接入。'
                 : r.historical
                 ? '历史记录不授予访问能力。'
                 : null,
@@ -175,6 +180,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
               jsonEncode([
                 r.id,
                 stateOf(r).name,
+                r.decisionPending,
                 r.requestExpiresAt.toIso8601String(),
                 r.grantExpiresAt?.toIso8601String(),
                 for (final s in scopes) [s.id, s.recordVersion, s.available],
@@ -186,17 +192,141 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
       approved: (r.approvedFields ?? []).map(key),
       decidedAt: r.approvedAt,
       fieldExpiresAt: r.grantExpiresAt,
-      decisionUnavailableReason: _decisionUnavailable,
+      approveUnavailableReason:
+          scopes.any((s) => s.kind == WorkspaceApprovalScopeKind.file)
+          ? '文件领取审批尚未接入；可以拒绝此申请，或让 AI 另行申请普通字段。'
+          : null,
+      decisionUnavailableReason: r.decisionPending
+          ? '上次决定仍在保存或结果尚未确认，请先核对原操作。'
+          : null,
     );
   });
+
+  WorkspaceApprovalReceipt _receipt(core.InformationApprovalReceipt r) =>
+      WorkspaceApprovalReceipt(
+        operationId: r.operationId,
+        requestId: r.requestId,
+        action: WorkspaceApprovalAction.values.byName(r.action.name),
+        reviewToken: r.reviewToken,
+        revision: r.revision,
+        commandDigest: r.commandDigest,
+      );
 
   @override
   Future<WorkspaceApprovalReceipt> change(
     WorkspaceApprovalChange change,
-  ) async => throw const WorkspaceFailure('unsupported', _decisionUnavailable);
+  ) async {
+    try {
+      return await owner.inLibraryScope(_scope, () async {
+        final old = await owner.informationApprovalReceipt(change.operationId);
+        if (old != null) {
+          if (old.requestId != change.requestId ||
+              old.action.name != change.action.name ||
+              old.reviewToken != change.reviewToken ||
+              old.commandDigest != change.digest) {
+            throw const WorkspaceFailure('conflict', '操作编号与原决定不一致，请重新核对。');
+          }
+          return _receipt(old);
+        }
+        final current = await read(change.requestId);
+        if (current.reviewToken != change.reviewToken) {
+          throw const WorkspaceFailure('conflict', '申请或资料已变化，请重新核对范围。');
+        }
+        if (current.decisionUnavailableReason != null) {
+          throw WorkspaceFailure(
+            'unknown_outcome',
+            current.decisionUnavailableReason!,
+          );
+        }
+        final approving = change.action == WorkspaceApprovalAction.approve;
+        if (approving && current.approveUnavailableReason != null) {
+          throw WorkspaceFailure(
+            'unsupported',
+            current.approveUnavailableReason!,
+          );
+        }
+        if (change.fileVersions.isNotEmpty ||
+            change.selected.toSet().length != change.selected.length ||
+            (approving
+                ? change.selected.isEmpty ||
+                      change.fieldMinutes < 1 ||
+                      change.fieldMinutes > 10080
+                : change.selected.isNotEmpty)) {
+          throw const WorkspaceFailure('invalid_scope', '请核对所选字段和使用期限。');
+        }
+        final scopes = {for (final s in current.scopes) s.id: s};
+        if (change.selected.any(
+          (id) =>
+              scopes[id] == null ||
+              !scopes[id]!.available ||
+              !scopes[id]!.requested ||
+              scopes[id]!.kind != WorkspaceApprovalScopeKind.field,
+        )) {
+          throw const WorkspaceFailure('conflict', '所选字段不可用，请重新核对范围。');
+        }
+        final receipt = await owner.decideInformationRequest(
+          core.InformationApprovalCommand(
+            operationId: change.operationId,
+            requestId: change.requestId,
+            action: core.InformationApprovalAction.values.byName(
+              change.action.name,
+            ),
+            reviewToken: change.reviewToken,
+            commandDigest: change.digest,
+            fields: change.selected.map(
+              (id) =>
+                  core.FieldRef(scopes[id]!.record.id, scopes[id]!.fieldId!),
+            ),
+            itemVersions: {
+              for (final id in change.selected)
+                scopes[id]!.record.id: scopes[id]!.recordVersion,
+            },
+            lifetime: Duration(minutes: change.fieldMinutes),
+          ),
+        );
+        return _receipt(receipt);
+      });
+    } on WorkspaceFailure {
+      rethrow;
+    } on core.AccessFailure catch (e) {
+      throw switch (e.status) {
+        'request_changed' ||
+        'scope_changed' ||
+        'invalid_request' ||
+        'operation_conflict' => const WorkspaceFailure(
+          'conflict',
+          '申请、资料或处理结果已变化，请重新核对。',
+        ),
+        'library_changed' => const WorkspaceFailure(
+          'library_changed',
+          '资料库已替换，请重新打开收件箱。',
+        ),
+        'invalid_scope' || 'invalid_operation' => const WorkspaceFailure(
+          'invalid_scope',
+          '所选范围或操作无效，请重新核对。',
+        ),
+        'service_unavailable' => const WorkspaceFailure(
+          'unavailable',
+          '申请服务不可用，请重新打开收件箱。',
+        ),
+        _ => const WorkspaceFailure(
+          'unknown_outcome',
+          '无法确认审批结果，请核对原操作，勿重复提交。',
+        ),
+      };
+    } on FormatException {
+      throw const WorkspaceFailure('invalid_scope', '审批范围、操作或期限无效。');
+    } on Object {
+      throw const WorkspaceFailure('unknown_outcome', '无法确认审批结果，请核对原操作，勿重复提交。');
+    }
+  }
+
   @override
-  Future<WorkspaceApprovalReceipt?> receipt(String operationId) async =>
-      throw const WorkspaceFailure('unsupported', '审批操作回执尚未接入，不能确认原操作。');
+  Future<WorkspaceApprovalReceipt?> receipt(String operationId) =>
+      _read(() async {
+        final receipt = await owner.informationApprovalReceipt(operationId);
+        return receipt == null ? null : _receipt(receipt);
+      });
   @override
   Future<WorkspaceApprovalExecution> execution(
     String requestId,

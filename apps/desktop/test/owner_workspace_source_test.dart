@@ -280,10 +280,7 @@ void main() {
           source.fileOperationReceipt('unknown'),
           fails('unsupported'),
         );
-        await expectLater(
-          source.approvals.receipt('unknown'),
-          fails('unsupported'),
-        );
+        expect(await source.approvals.receipt('unknown'), isNull);
         await expectLater(source.plugins.load(), fails('unsupported'));
         await expectLater(source.settings.read(), fails('unsupported'));
       },
