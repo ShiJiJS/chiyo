@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-30",
+  "sourceCommit": "447e9801",
+  "branch": "codex/zhiyu-macos",
+  "path": "/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
+  "target": "lib/preview_main.dart",
+  "bundleId": "com.example.infoDesktop.zhiyuPreview",
+  "preview": true,
+  "sandbox": true,
+  "architecture": "arm64",
+  "strictDeepSignature": true,
+  "signing": "local ad-hoc; nested App.framework and enclosing app re-sealed after incremental build; original entitlements preserved",
+  "kernelSha256": "e5f3ab035ea1b586cf1a8a4bc5760d42cbcda17a651e991d882fc2f5524def38",
+  "oneApp": [
+    "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app"
+  ],
+  "noWorker": true,
+  "observedPids": [
+    17041
+  ],
+  "removedUiLabelsAbsentFromKernel": [
+    "设计说明与界面检查",
+    "显示三次凭据使用结果",
+    "恢复预览运行",
+    "重置预览资料",
+    "credential-request-purpose"
+  ],
+  "tests": {
+    "files": 38,
+    "passed": 340,
+    "skipped": 4,
+    "scope": "related desktop widgets, default owner app, injected fixture business regressions and isolation guard; existing conditional skips; no new native input/continuous visual claim"
+  },
+  "fullS5": false,
+  "realDataServicesConnected": false,
+  "windowsChanged": false
+}
