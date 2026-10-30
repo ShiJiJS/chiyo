@@ -1,0 +1,40 @@
+{
+  "removedScratchFiles": [
+    "owner-cleanup-analyze-final.log",
+    "owner-cleanup-build.log",
+    "owner-cleanup-default.log",
+    "owner-cleanup-entitlements.plist",
+    "owner-cleanup-github-receipts.json",
+    "owner-cleanup-github1-after.md",
+    "owner-cleanup-github1-before.md",
+    "owner-cleanup-github1-snapshot.txt",
+    "owner-cleanup-github62-after.md",
+    "owner-cleanup-github62-before.md",
+    "owner-cleanup-github64-after.md",
+    "owner-cleanup-github64-before.md",
+    "owner-cleanup-github64-snapshot.txt",
+    "owner-cleanup-github68-after.md",
+    "owner-cleanup-github68-before.md",
+    "owner-cleanup-github68-snapshot.txt",
+    "owner-cleanup-migrated.log",
+    "owner-cleanup-migrated2.log",
+    "owner-cleanup-owner-runtime.log",
+    "owner-cleanup-owner-runtime2.log",
+    "owner-cleanup-related2.log",
+    "owner-cleanup-runtime.log",
+    "owner-cleanup-suite-final.log",
+    "owner-cleanup-suite.log",
+    "owner-cleanup-tests.log"
+  ],
+  "removedBytes": 887512,
+  "removedOwnedTemporaryReferenceList": true,
+  "singleApp": [
+    "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app"
+  ],
+  "preexistingReleaseSymbolsPreserved": [
+    "apps/desktop/build/macos/Build/Products/Release/App.framework.dSYM",
+    "apps/desktop/build/macos/Build/Products/Release/FlutterMacOS.framework.dSYM",
+    "apps/desktop/build/macos/Build/Products/Release/native_assets/sqlcipher.framework.dSYM"
+  ],
+  "localDirectoryUntouched": ".local/"
+}
