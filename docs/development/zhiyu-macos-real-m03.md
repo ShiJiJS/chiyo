@@ -83,3 +83,14 @@
 日志：`build/macos-adaptation/m03-history-core.log`、`m03-history-storage.log`、`m03-history-desktop.log`。存储全套在新增 Owner 只读历史投影之前执行；之后核心63项和桌面54项覆盖最终投影及存储接缝，存储源码未再更改。源库/目标库为独立测试密钥及连接，Drift多实例提示不代表共用执行器。控件验证使用真实 Owner + 内存仓库，资料来源验证使用 SQLCipher；均不是实际鼠标/系统输入或真实 AI 宿主验收。库代次测试单独使用恢复协调器 fixture，真实备份往返由存储测试覆盖，不拼成同候选实机证据。
 
 本轮没有使用个人资料/Keychain、computer use或 Windows CI；没有新建或替换 App。#72 仍 OPEN，下一步为独立 CLI/故障联调、Mac 构建，再交 #73 固定候选真实宿主及交付验收。
+
+
+## 2026-10-30：独立编译 CLI 与正式 Owner 来源联合验证
+
+新增 `scripts/qa/check-owner-cli.py` 和 `apps/desktop/tool/check_owner_cli.dart`。脚本顺序编译正式 `info`、`info-codex`、`info-codex-hook`，启动独立进程经真实 HTTP 服务访问 SQLCipher 合成库；主人侧使用正式 WorkspaceSource、ApprovalsController 和 GrantHistoryController。支持 `--tools` 指向交付包中的同名 CLI，以便整包之后复用同一检查。
+
+通过14个具名检查：新界面保存、公开目录无正文、待批拒读、操作编号去重/冲突、主人提交响应丢失只查询、不扩大部分批准及跨聊天拒绝、同身份修正与固定期限、历史页撤销阻止缓存凭证、拒绝与到期、AI申请响应丢失后查原操作、合成SessionEnd使一次性客户端失效、应用停止关闭端点、独立Owner进程重开保持资料/历史/回执、重开不恢复旧能力。两阶段Owner进程PID不同；CLI也是独立编译进程。系统平台为NativeDesktopFixture，期限使用可控服务时钟；hook仅接收测试标准输入，未注册、信任或调用真实AI宿主。此前核心竞态测试与本次故障联调证据分别保留，不声称真实宿主验收已完成。
+
+命令：`python3 scripts/qa/check-owner-cli.py --report build/macos-adaptation/m03-cli-interop-2.json`。结果与二进制/探针摘要见该JSON，运行日志为同名 `.log`。首轮探针按整数传入表单端口被正确拒绝，修正为界面合同的文本值后两阶段通过；未修改业务校验来迁就测试。测试目录、固定测试密钥、合成关联文件及临时编译程序均已清理。桌面静态检查通过。
+
+下一步构建固定源码Mac Release包，并用包内CLI重跑；用户预览仍未替换，#72/#73仍OPEN。
