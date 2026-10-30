@@ -455,6 +455,7 @@ class InformationBackups {
                 'library_format',
                 'information_file_stages',
                 'information_draft_commits',
+                'information_record_operations',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -693,6 +694,7 @@ class InformationBackups {
                     'library_format',
                     'information_file_stages',
                     'information_draft_commits',
+                    'information_record_operations',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -710,6 +712,11 @@ class InformationBackups {
         );
         await _repository._db.customStatement(
           'DELETE FROM information_draft_commits',
+        );
+        // A restored library must not acknowledge or replay an old UI intent.
+        // Keep content-free tombstones so lookup cannot mistake it for untried.
+        await _repository._db.customStatement(
+          'UPDATE information_record_operations SET invalidated=1',
         );
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');

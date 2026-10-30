@@ -23,6 +23,8 @@ import 'info_core.dart'
         InformationAttachmentRepository,
         InformationDraftChange,
         InformationDraftReceipt,
+        InformationRecordReceipt,
+        InformationRecordOperationRepository,
         InformationFileDeliveryRepository,
         InformationFileDelivery,
         SshHostTrustRepository,
@@ -395,6 +397,7 @@ class MemoryInformationRepository
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
         InformationFileDeliveryRepository,
+        InformationRecordOperationRepository,
         SshHostTrustRepository {
   final _fileStages = MemoryInformationFileStages();
   final _informationFileDeliveries = <String, InformationFileDelivery>{};
@@ -416,6 +419,11 @@ class MemoryInformationRepository
   final _informationFiles =
       <InformationAttachmentRef, (InformationAttachmentVersion, Uint8List?)>{};
   final _informationCommits = <String, InformationDraftReceipt>{};
+  final _informationRecordReceipts = <String, InformationRecordReceipt>{};
+  @override
+  Future<InformationRecordReceipt?> informationRecordReceipt(
+    String operationId,
+  ) async => _informationRecordReceipts[operationId];
   @override
   Future<InformationFileStage> informationStage(
     String draftId,

@@ -7,13 +7,13 @@ extension _FocusedFillStorage on EncryptedInformationRepository {
                 'SELECT version FROM library_format WHERE singleton=1',
               )
               .getSingle())
-          .read<int>('version') ==
+          .read<int>('version') >=
       _portableFocusedFillLibraryFormat;
 
   /// Called only inside the transaction installing the first portable request
   /// or restore. Both marker and header roll back with all associated facts.
   /// The open Drift connection keeps its initial schema target; no DDL changes
-  /// here. A later open selects target23 from the independent marker.
+  /// here. A later open selects target25 from the independent marker.
   Future<void> _requirePortableFocusedFillFormat() async {
     final version =
         (await _db
@@ -22,7 +22,7 @@ extension _FocusedFillStorage on EncryptedInformationRepository {
                 )
                 .getSingle())
             .read<int>('version');
-    if (version == _portableFocusedFillLibraryFormat) return;
+    if (version >= _portableFocusedFillLibraryFormat) return;
     if (version != _libraryFormat)
       throw const StorageFailure('unsupported_schema');
     await _db.customStatement(

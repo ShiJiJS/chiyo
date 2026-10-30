@@ -312,6 +312,10 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     try {
       var committed = false;
       final receipt = await _db.transaction(() async {
+        if (change.operationReceipt != null &&
+            await informationRecordReceipt(change.operationId) != null) {
+          throw const AccessFailure('operation_conflict');
+        }
         final old = await _draftReceipt(change.draftId, change.operationId);
         if (old != null) {
           if (old.inputHash != change.receipt.inputHash)
@@ -401,14 +405,21 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
             [id, change.draftId],
           );
         }
-        await _db.customStatement(
-          'INSERT INTO information_draft_commits(draft_id,operation_id,payload) VALUES(?,?,?)',
-          [
-            change.draftId,
-            change.operationId,
-            jsonEncode(change.receipt.toPrivateJson()),
-          ],
-        );
+        if (change.operationReceipt case final operation?) {
+          await _db.customStatement(
+            'INSERT INTO information_record_operations(operation_id,payload) VALUES(?,?)',
+            [change.operationId, jsonEncode(operation.toJson())],
+          );
+        } else {
+          await _db.customStatement(
+            'INSERT INTO information_draft_commits(draft_id,operation_id,payload) VALUES(?,?,?)',
+            [
+              change.draftId,
+              change.operationId,
+              jsonEncode(change.receipt.toPrivateJson()),
+            ],
+          );
+        }
         await _checkAttachmentBackupBudget();
         change.validate();
         committed = true;

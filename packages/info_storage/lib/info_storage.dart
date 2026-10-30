@@ -23,10 +23,10 @@ part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 
-const _libraryFormat = 22;
+const _libraryFormat = 24;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 23;
+const _portableFocusedFillLibraryFormat = 25;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -102,7 +102,32 @@ class EncryptedInformationRepository
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
         InformationFileDeliveryRepository,
+        InformationRecordOperationRepository,
         SshHostTrustRepository {
+  @override
+  Future<InformationRecordReceipt?> informationRecordReceipt(
+    String operationId,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    final rows = await _db
+        .customSelect(
+          'SELECT payload,invalidated FROM information_record_operations WHERE operation_id=?',
+          variables: [Variable(operationId)],
+        )
+        .get();
+    if (rows.isEmpty) return null;
+    if (rows.single.read<int>('invalidated') != 0) {
+      throw const AccessFailure('library_changed');
+    }
+    final receipt = InformationRecordReceipt.fromJson(
+      jsonDecode(rows.single.read<String>('payload')) as Map<String, dynamic>,
+    );
+    if (receipt.operationId != operationId) {
+      throw const StorageFailure('invalid_operation_receipt');
+    }
+    return receipt;
+  }
+
   @override
   List<InformationFileDelivery> get informationFileDeliveries {
     if (_closed) throw const StorageFailure('library_closed');
@@ -401,7 +426,12 @@ class EncryptedInformationRepository
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
-        openingFormat = max(_libraryFormat, marker.single['version'] as int);
+        final storedFormat = marker.single['version'] as int;
+        // Preserve the portable-fill boundary while upgrading its old format23
+        // to the matching receipt-capable format25 (ordinary22 becomes24).
+        openingFormat = storedFormat == 23
+            ? _portableFocusedFillLibraryFormat
+            : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
           native
               .select(
@@ -1445,6 +1475,7 @@ class _InformationDatabase extends GeneratedDatabase {
         'CREATE TABLE information_fields(id TEXT PRIMARY KEY,item_id TEXT NOT NULL REFERENCES information_items(id),name TEXT NOT NULL,description TEXT NOT NULL,value TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,kind TEXT NOT NULL DEFAULT \'structured\')',
       );
       await _createInformationAttachments();
+      await _createInformationRecordOperations();
       await _createInformationDeliveries();
       await _organizationSchema();
       await _backupSchema();
@@ -1534,6 +1565,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 19) await _createInformationFileStages();
         if (sourceVersion < 20) await _createInformationAttachments();
         if (sourceVersion < 21) await _createInformationDeliveries();
+        if (sourceVersion < 24) await _createInformationRecordOperations();
         await _createLibraryFormat();
       });
     },
@@ -1565,6 +1597,12 @@ class _InformationDatabase extends GeneratedDatabase {
     'id TEXT PRIMARY KEY,draft_id TEXT NOT NULL,byte_length INTEGER NOT NULL '
     'CHECK(byte_length>=0),metadata TEXT NOT NULL,body BLOB NOT NULL '
     'CHECK(length(body)=byte_length))',
+  );
+
+  Future<void> _createInformationRecordOperations() => customStatement(
+    'CREATE TABLE IF NOT EXISTS information_record_operations('
+    'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,'
+    'invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
   );
 
   Future<void> _createInformationAttachments() async {
