@@ -56,7 +56,9 @@ void _checkBackupAdmissionCounts(
     nested += (fact['restoredFieldIds'] as Map?)?.length ?? 0;
   }
   for (final row in tables['grant_history']!) {
-    nested += (_backupJson(row)['fields'] as List).length;
+    final grant = _backupJson(row);
+    nested += (grant['fields'] as List).length;
+    nested += (grant['itemVersions'] as Map?)?.length ?? 0;
   }
   // Expiring revisions replace one row with one purge fact. Recycling keeps
   // its entry and adds a fact. Reserve these slots before automatic retention.

@@ -31,6 +31,7 @@ class GrantHistoryController extends ChangeNotifier {
   int? lastDays;
   int offset = 0, limit = 20, _generation = 0;
   String? selection, notice;
+  String? _explicitTarget;
   double listScroll = 0, detailScroll = 0;
   bool loading = false, reading = false, _revoking = false, _closed = false;
   bool get frozen => _revoking || decision.frozen;
@@ -89,6 +90,16 @@ class GrantHistoryController extends ChangeNotifier {
           if (_closed || generation != _generation) return;
         }
       }
+      if (_explicitTarget != null && found.selection != _explicitTarget) {
+        results = found;
+        selection = _explicitTarget;
+        detail = null;
+        readFailure = const WorkspaceFailure(
+          'not_found',
+          '指定历史已不存在或已清理，请选择列表中的记录。',
+        );
+        return;
+      }
       if (found.selectionIndex case final index?
           when index < found.offset || index >= found.offset + limit) {
         found = await source.query(
@@ -145,6 +156,7 @@ class GrantHistoryController extends ChangeNotifier {
     kind = null;
     lastDays = null;
     offset = 0;
+    _explicitTarget = id;
     selection = id;
     detail = null;
     notice = null;
@@ -154,6 +166,7 @@ class GrantHistoryController extends ChangeNotifier {
 
   Future<void> select(String id) async {
     if (frozen || _closed) return;
+    _explicitTarget = id;
     selection = id;
     detail = null;
     detailScroll = 0;
@@ -164,6 +177,7 @@ class GrantHistoryController extends ChangeNotifier {
   Future<void> search(String text) async {
     if (frozen || _closed) return;
     keyword = text;
+    _explicitTarget = null;
     selection = null;
     offset = 0;
     listScroll = 0;
@@ -174,6 +188,7 @@ class GrantHistoryController extends ChangeNotifier {
   Future<void> setFilter(WorkspaceGrantFilter value) async {
     if (frozen || _closed) return;
     filter = value;
+    _explicitTarget = null;
     selection = null;
     offset = 0;
     listScroll = 0;
@@ -184,6 +199,7 @@ class GrantHistoryController extends ChangeNotifier {
   Future<void> setKind(WorkspaceApprovalKind? value) async {
     if (frozen || _closed) return;
     kind = value;
+    _explicitTarget = null;
     selection = null;
     offset = 0;
     listScroll = 0;
@@ -194,6 +210,7 @@ class GrantHistoryController extends ChangeNotifier {
   Future<void> setDays(int? value) async {
     if (frozen || _closed) return;
     lastDays = value;
+    _explicitTarget = null;
     selection = null;
     offset = 0;
     listScroll = 0;
@@ -204,6 +221,7 @@ class GrantHistoryController extends ChangeNotifier {
   Future<void> page(int value) async {
     if (frozen || _closed) return;
     offset = value;
+    _explicitTarget = null;
     selection = null;
     listScroll = 0;
     await load();
@@ -234,6 +252,7 @@ class GrantHistoryController extends ChangeNotifier {
 
   void resetView() {
     if (frozen || _closed) return;
+    _explicitTarget = null;
     selection = null;
     detail = null;
     readFailure = null;

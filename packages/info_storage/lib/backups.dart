@@ -401,17 +401,23 @@ class InformationBackups {
       if (portableFills && !await _repository._portableFocusedFillFormat()) {
         throw const StorageFailure('invalid_runtime_snapshot');
       }
-      if (detachedHistory || portableFills || hasLayouts) {
-        formatVersion = hasLayouts
+      final hasGrantVersions = tables['grant_history']!.any(
+        (r) => _backupJson(r).containsKey('itemVersions'),
+      );
+      final extendedColumns = hasLayouts || hasGrantVersions;
+      if (detachedHistory || portableFills || extendedColumns) {
+        formatVersion = hasGrantVersions
+            ? 13
+            : hasLayouts
             ? 12
             : portableFills
             ? 11
             : 10;
         for (final table
-            in (hasLayouts ? _v12Columns : _v9Columns).entries.where(
+            in (extendedColumns ? _v12Columns : _v9Columns).entries.where(
               (e) =>
                   !tables.containsKey(e.key) ||
-                  (hasLayouts && e.key == 'information_items'),
+                  (extendedColumns && e.key == 'information_items'),
             )) {
           final rows = await _repository._db
               .customSelect(
@@ -825,7 +831,21 @@ class InformationBackups {
     if (decoded is! Map<String, dynamic>) invalid();
     if (decoded['format'] != _format ||
         decoded['version'] is! int ||
-        ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].contains(decoded['version'])) {
+        ![
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+        ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     final v8 = (decoded['version'] as int) >= 8;
@@ -844,7 +864,7 @@ class InformationBackups {
       5 || 6 => _v6Columns,
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
-      12 => _v12Columns,
+      12 || 13 => _v12Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1059,6 +1079,7 @@ class InformationBackups {
       deliveries: deliveries,
       allowRemovedOrganization: (decoded['version'] as int) >= 10,
       allowLayouts: (decoded['version'] as int) >= 12,
+      allowGrantVersions: (decoded['version'] as int) >= 13,
     );
     _validateBackupCredentials(
       tables,

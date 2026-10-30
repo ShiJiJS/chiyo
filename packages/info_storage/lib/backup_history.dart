@@ -73,6 +73,7 @@ void _validateBackupHistory(
   Iterable<InformationFileDelivery> deliveries = const [],
   bool allowRemovedOrganization = false,
   bool allowLayouts = false,
+  bool allowGrantVersions = false,
 }) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
@@ -361,7 +362,7 @@ void _validateBackupHistory(
         'fields',
         'events',
       },
-      {'restoredAt'},
+      {'restoredAt', if (allowGrantVersions) 'itemVersions'},
     );
     final id = _backupId(j, 'id');
     _backupId(j, 'requestId');
@@ -394,6 +395,20 @@ void _validateBackupHistory(
       fieldOwner(fieldId, itemId);
       _backupText(f, 'itemName', 200, required: true);
       _backupText(f, 'fieldName', 200, required: true);
+    }
+    if (j.containsKey('itemVersions')) {
+      final versions = j['itemVersions'];
+      final ids = fields.map((f) => (f as Map)['itemId']).toSet();
+      if (versions is! Map<String, dynamic> ||
+          versions.isEmpty ||
+          versions.length != ids.length ||
+          !ids.containsAll(versions.keys) ||
+          versions.values.any(
+            (v) => v is! int || v < 1 || v > 9007199254740991,
+          )) {
+        _backupInvalid();
+      }
+      count(versions.length);
     }
     final events = _backupList(j['events'], 2);
     if (events.isEmpty) _backupInvalid();

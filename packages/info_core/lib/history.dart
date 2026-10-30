@@ -136,8 +136,23 @@ class GrantHistory {
     required Iterable<RecordedField> fields,
     required Iterable<GrantEvent> events,
     this.restoredAt,
-  }) : fields = List.unmodifiable(fields),
-       events = List.unmodifiable(events);
+    Map<String, int> itemVersions = const {},
+  }) : itemVersions = Map.unmodifiable(itemVersions),
+       fields = List.unmodifiable(fields),
+       events = List.unmodifiable(events) {
+    final ids = this.fields.map((f) => f.itemId).toSet();
+    if (itemVersions.isNotEmpty &&
+        (itemVersions.length > 200 ||
+            itemVersions.length != ids.length ||
+            !ids.containsAll(itemVersions.keys) ||
+            itemVersions.values.any((v) => v < 1 || v > 9007199254740991))) {
+      throw const FormatException('Invalid grant item versions');
+    }
+  }
+
+  /// Approval-time provenance only. Empty for legacy grants without evidence;
+  /// never infer an original snapshot from a current item or matching name.
+  final Map<String, int> itemVersions;
   final String id, requestId, sessionId, chatLabel;
   final DateTime approvedAt, expiresAt;
 
@@ -155,6 +170,7 @@ class GrantHistory {
     approvedAt: approvedAt,
     expiresAt: expiresAt,
     fields: fields,
+    itemVersions: itemVersions,
     events: events,
     restoredAt: at,
   );
@@ -166,6 +182,7 @@ class GrantHistory {
     approvedAt: approvedAt,
     expiresAt: expiresAt,
     fields: fields,
+    itemVersions: itemVersions,
     events: [...events, GrantEvent(kind, at)],
     restoredAt: restoredAt,
   );
@@ -178,6 +195,7 @@ class GrantHistory {
     'expiresAt': expiresAt.toUtc().toIso8601String(),
     'fields': fields.map((f) => f.toJson()).toList(),
     'events': events.map((e) => e.toJson()).toList(),
+    if (itemVersions.isNotEmpty) 'itemVersions': itemVersions,
     if (restoredAt != null) 'restoredAt': restoredAt!.toUtc().toIso8601String(),
   };
   factory GrantHistory.fromJson(Map<String, dynamic> json) => GrantHistory(
@@ -193,6 +211,9 @@ class GrantHistory {
     events: (json['events'] as List).map(
       (e) => GrantEvent.fromJson(e as Map<String, dynamic>),
     ),
+    itemVersions: json.containsKey('itemVersions')
+        ? Map<String, int>.from(json['itemVersions'] as Map)
+        : const {},
     restoredAt: json['restoredAt'] == null
         ? null
         : DateTime.parse(json['restoredAt'] as String),
@@ -261,6 +282,15 @@ class AuditHistory {
     'requests': requests.map((r) => r.toJson()).toList(),
     'organizations': organizations.map((t) => t.toJson()).toList(),
   };
+}
+
+/// Owner-only ordinary audit projection, observed using the service clock.
+/// Credential workflows remain in their separate history even if they contain
+/// ordinary information scopes. No capability or field body is included.
+class OwnerInformationHistory {
+  const OwnerInformationHistory(this.history, this.observedAt);
+  final AuditHistory history;
+  final DateTime observedAt;
 }
 
 class AuditRetentionPreview {

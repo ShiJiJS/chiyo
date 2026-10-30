@@ -469,6 +469,168 @@ void main() {
     },
   );
 
+  test(
+    'approval versions survive corrections, revoke, reopen and format13 restore',
+    () async {
+      final item = await seed();
+      final field = FieldRef(item.id, item.fields.single.id);
+      final session = service.agent.openSession('version provenance');
+      final request = service.agent.request(session, 'read one field', [field]);
+      await service.owner.decideInformationRequest(
+        InformationApprovalCommand(
+          operationId: 'version-approve',
+          requestId: request.id,
+          action: InformationApprovalAction.approve,
+          reviewToken: 'a' * 64,
+          commandDigest: 'b' * 64,
+          fields: [field],
+          itemVersions: {item.id: item.version},
+        ),
+      );
+      final bearer = service.agent.claim(session, request.id).token;
+      await service.owner.correctValue(field, 'CORRECTED-SYNTHETIC');
+      expect(await service.agent.read(bearer, field), 'CORRECTED-SYNTHETIC');
+      final original = repo.grantHistory.single;
+      expect(original.itemVersions, {item.id: 1});
+      expect(repo.items.single.version, 2);
+      expect(repo.informationRevisions.single.item.version, 1);
+      final recovery = await enableTestBackups(repo.backups);
+      final file = '${root.path}/versions.aimbackup';
+      await repo.backups.exportTo(file);
+      expect((await repo.backups.inspect(file, recovery)).formatVersion, 13);
+      final target = await EncryptedInformationRepository.open(
+        '${root.path}/version-target',
+        TestKeyStore(),
+        clock: () => now,
+      );
+      try {
+        await target.backups.restoreFrom(file, recovery);
+        expect(target.grantHistory.single.itemVersions, {item.id: 1});
+        expect(target.grantHistory.single.restoredAt, isNotNull);
+        expect(target.grantHistory.single.active, isFalse);
+        expect(
+          target.informationRevisions.single.item.fields.single.value,
+          'PRIVATE-FIELD-VALUE',
+        );
+        final restored = InformationService(
+          repository: target,
+          clock: () => now,
+        );
+        try {
+          expect(restored.owner.requests, isEmpty);
+          await expectLater(
+            restored.agent.read(bearer, field),
+            fails('unauthorized'),
+          );
+        } finally {
+          await restored.close();
+        }
+      } finally {
+        await target.close();
+      }
+      await service.owner.decideInformationRequest(
+        InformationApprovalCommand(
+          operationId: 'version-revoke',
+          requestId: request.id,
+          action: InformationApprovalAction.revoke,
+          reviewToken: 'c' * 64,
+          commandDigest: 'd' * 64,
+        ),
+      );
+      await close();
+      await open();
+      expect(repo.grantHistory.single.itemVersions, {item.id: 1});
+      expect(repo.grantHistory.single.events.last.kind, GrantEventKind.revoked);
+    },
+  );
+
+  test(
+    'legacy grants keep old backup format and no invented version',
+    () async {
+      final item = await seed();
+      await repo.commitInformationApproval(decision(item));
+      final recovery = await enableTestBackups(repo.backups);
+      final file = '${root.path}/legacy-grant.aimbackup';
+      await repo.backups.exportTo(file);
+      expect((await repo.backups.inspect(file, recovery)).formatVersion, 7);
+      await close();
+      await open();
+      expect(repo.grantHistory.single.itemVersions, isEmpty);
+      expect(
+        repo.grantHistory.single.toJson().containsKey('itemVersions'),
+        isFalse,
+      );
+    },
+  );
+
+  test(
+    'backup rejects wrong version provenance and older format declarations',
+    () async {
+      final item = await seed();
+      final field = FieldRef(item.id, item.fields.single.id);
+      final session = service.agent.openSession('synthetic backup');
+      final request = service.agent.request(session, 'synthetic', [field]);
+      await service.owner.decideInformationRequest(
+        InformationApprovalCommand(
+          operationId: 'backup-approve',
+          requestId: request.id,
+          action: InformationApprovalAction.approve,
+          reviewToken: 'a' * 64,
+          commandDigest: 'b' * 64,
+          fields: [field],
+          itemVersions: {item.id: item.version},
+        ),
+      );
+      final recovery = await enableTestBackups(repo.backups);
+      final file = '${root.path}/valid.aimbackup';
+      await repo.backups.exportTo(file);
+      final hex = base64Url
+          .decode(recovery.substring('aim-recovery-v1:'.length))
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+      var index = 0;
+      for (final bad in <Object?>[
+        {},
+        {'unknown-item': 1},
+        {item.id: 0},
+        {item.id: '1'},
+        {item.id: 9007199254740992},
+        null,
+        'old-format',
+      ]) {
+        final path = '${root.path}/bad-${index++}.aimbackup';
+        await File(file).copy(path);
+        final db = sqlite3.open(path);
+        try {
+          db.execute('PRAGMA key = "x\'$hex\'"');
+          final doc =
+              jsonDecode(
+                    db
+                            .select('SELECT payload FROM backup_snapshot')
+                            .single['payload']
+                        as String,
+                  )
+                  as Map<String, dynamic>;
+          if (bad == 'old-format') {
+            doc['version'] = 12;
+          } else {
+            final row = (doc['tables']['grant_history'] as List).single;
+            final grant = jsonDecode(row['payload'] as String);
+            grant['itemVersions'] = bad;
+            row['payload'] = jsonEncode(grant);
+          }
+          db.execute('UPDATE backup_snapshot SET payload=?', [jsonEncode(doc)]);
+        } finally {
+          db.close();
+        }
+        await expectLater(
+          repo.backups.inspect(path, recovery),
+          throwsA(isA<StorageFailure>()),
+        );
+      }
+    },
+  );
+
   for (final old in [34, 35]) {
     test(
       'format $old upgrades preserving data and portable boundary',

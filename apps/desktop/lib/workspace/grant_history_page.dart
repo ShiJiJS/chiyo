@@ -532,7 +532,11 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                         DesktopButton(
                           key: ValueKey('grant-file-${scope.id}'),
                           kind: DesktopButtonKind.quiet,
-                          onPressed: m.frozen || m.loading || m.reading
+                          onPressed:
+                              m.frozen ||
+                                  m.loading ||
+                                  m.reading ||
+                                  scope.fileVersion == null
                               ? null
                               : () => _content(
                                   d.targets.firstWhere(
@@ -541,7 +545,11 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                                   scopeId: scope.id,
                                   fileVersion: scope.fileVersion,
                                 ),
-                          child: Text('查看批准的附件v${scope.fileVersion}'),
+                          child: Text(
+                            scope.fileVersion == null
+                                ? '批准附件版本不可用'
+                                : '查看批准的附件v${scope.fileVersion}',
+                          ),
                         ),
                     ],
                   ),
@@ -668,7 +676,11 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                               onPressed: m.frozen || !t.snapshotAvailable
                                   ? null
                                   : () => _content(t),
-                              child: Text('查看当时资料v${t.version}'),
+                              child: Text(
+                                t.version > 0
+                                    ? '查看当时资料v${t.version}'
+                                    : '当时资料版本未知',
+                              ),
                             ),
                         ],
                       ),
