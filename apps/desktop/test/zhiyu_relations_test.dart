@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -395,14 +396,14 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('relation-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
     if (dark) {
-      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const ValueKey('preview-theme-dark')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-theme-dark')));
       await t.pumpAndSettle();
     }
     return t.widget<LibraryPage>(find.byType(LibraryPage)).controller;

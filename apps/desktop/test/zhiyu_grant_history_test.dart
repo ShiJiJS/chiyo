@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, Finder f) async {
+    if (await prepareFixtureAction(t, f)) return;
     await t.ensureVisible(f);
     await t.pumpAndSettle();
     await t.tap(f);
@@ -78,7 +80,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('history-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
@@ -199,12 +201,7 @@ void main() {
             .onPressed,
         isNull,
       );
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('preview-guide')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('preview-guide')), findsNothing);
       await capture(t, 'history-1440-light-revoke-unknown');
       await tap(t, find.byKey(const ValueKey('grant-reconcile')));
       expect(m.frozen, false);
@@ -365,8 +362,16 @@ void main() {
       final m = model(t);
       Future<void> scenario(String label) async {
         await tap(t, find.byKey(const ValueKey('preview-guide')));
-        await t.ensureVisible(find.text(label));
-        await t.tap(find.text(label));
+        final state = {
+          '空资料': 'empty',
+          '读取失败': 'failure',
+          '持续等待': 'waiting',
+          '正常资料': 'ready',
+        }[label]!;
+        await prepareFixtureAction(
+          t,
+          find.byKey(ValueKey('preview-scenario-$state')),
+        );
         if (label == '持续等待') {
           await t.pump(const Duration(milliseconds: 500));
         } else {
@@ -379,27 +384,24 @@ void main() {
       expect(find.text('没有匹配的授权记录。'), findsOneWidget);
       await scenario('读取失败');
       expect(m.readFailure, isNotNull);
+      fixtureSource(t).setScenario(SampleWorkspaceScenario.ready);
       await tap(t, find.byKey(const ValueKey('grant-retry')));
       expect(m.readFailure, isNull);
       expect(m.results!.total, greaterThan(0));
       await scenario('持续等待');
       expect(m.loading, true);
-      // The modal's full exit, rather than its first closing frame, releases
-      // the guide trigger. Waiting spinners deliberately never settle.
-      final guide = find.byKey(const ValueKey('preview-guide'));
-      for (
-        var i = 0;
-        i < 100 && t.widget<DesktopButton>(guide).onPressed == null;
-        i++
-      ) {
-        await t.pump(const Duration(milliseconds: 20));
-      }
-      expect(t.widget<DesktopButton>(guide).onPressed, isNotNull);
-      await t.tap(guide);
-      await t.pump();
-      await t.pump(const Duration(milliseconds: 500));
-      await t.ensureVisible(find.text('正常资料'));
-      await t.tap(find.text('正常资料'));
+      expect(
+        t
+            .widget<DesktopButton>(
+              find.byKey(const ValueKey('workspace-nav-library')),
+            )
+            .onPressed,
+        isNotNull,
+      );
+      await prepareFixtureAction(
+        t,
+        find.byKey(const ValueKey('preview-scenario-ready')),
+      );
       await ready(t);
       expect(m.loading, false);
       expect(m.results!.total, greaterThan(0));

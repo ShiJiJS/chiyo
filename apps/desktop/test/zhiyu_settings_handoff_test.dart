@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -37,6 +38,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, String key) async {
+    if (await prepareFixtureAction(t, find.byKey(ValueKey(key)))) return;
     final f = find.byKey(ValueKey(key));
     if (f.evaluate().isEmpty && key.startsWith('settings-section-')) {
       final current = t
@@ -90,7 +92,7 @@ void main() {
           await t.pumpWidget(
             const RepaintBoundary(
               key: ValueKey('settings-audit-capture'),
-              child: PreviewWorkspace(),
+              child: PreviewWorkspace(inputsBuilder: fixtureInputs),
             ),
           );
           await ready(t);
@@ -198,7 +200,7 @@ void main() {
         await t.pumpWidget(
           const RepaintBoundary(
             key: ValueKey('settings-audit-capture'),
-            child: PreviewWorkspace(),
+            child: PreviewWorkspace(inputsBuilder: fixtureInputs),
           ),
         );
         await ready(t);

@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -46,6 +47,7 @@ void main() {
         }
 
         Future<void> tap(Finder target) async {
+          if (await prepareFixtureAction(t, target)) return;
           if (target.hitTestable().evaluate().isEmpty) {
             await t.ensureVisible(target);
           }
@@ -63,7 +65,7 @@ void main() {
         await t.pumpWidget(
           const RepaintBoundary(
             key: ValueKey('file-type-capture'),
-            child: PreviewWorkspace(),
+            child: PreviewWorkspace(inputsBuilder: fixtureInputs),
           ),
         );
         await t.pumpAndSettle();

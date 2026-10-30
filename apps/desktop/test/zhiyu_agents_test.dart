@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -34,6 +35,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, String key, {bool pending = false}) async {
+    if (await prepareFixtureAction(t, find.byKey(ValueKey(key)))) return;
     final f = find.byKey(ValueKey(key));
     await t.ensureVisible(f);
     await t.pump();
@@ -80,7 +82,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('agents-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await ready(t);

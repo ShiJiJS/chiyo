@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -84,6 +85,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, Finder target) async {
+    if (await prepareFixtureAction(t, target)) return;
     await t.ensureVisible(target);
     await t.pumpAndSettle();
     await t.tap(target);
@@ -119,7 +121,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('content-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
@@ -507,7 +509,8 @@ void main() {
       await t.pumpAndSettle();
       await tap(t, find.text('核对此次操作'));
       await fileAction(t, 'save');
-      expect(find.text('已另存 unsupported.bin'), findsOneWidget);
+      expect(find.text('已另存 unsupported.bin'), findsNothing);
+      expect(find.text('本机文件打开与另存服务尚未接入，没有打开或保存文件。'), findsOneWidget);
       await capture(t, 'file-1440-light-unknown-format');
       expect(t.takeException(), isNull);
     },

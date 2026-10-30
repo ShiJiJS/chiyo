@@ -6,7 +6,6 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'credential_mutation.dart';
 import 'library_credential_editor.dart';
-import 'library_credential_use.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 
@@ -139,17 +138,6 @@ class _LibraryCredentialState extends State<LibraryCredential> {
       DesktopFeedback.show(context, detail.enabled ? '凭据已停用' : '凭据已重新启用');
       await _load();
     }
-  });
-  Future<void> _use() => _modal(() async {
-    final result = await showDesktopDialog<bool>(
-      context,
-      builder: (_) => CredentialUseDialog(
-        source: widget.source.credentials,
-        ref: widget.ref,
-        onApproval: widget.onApproval,
-      ),
-    );
-    if (result == true && mounted) await _load();
   });
   Future<void> _history() => _modal(() async {
     await showDesktopDialog<void>(
@@ -484,12 +472,6 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                 child: Text(detail.enabled ? '停用凭据' : '重新启用'),
               ),
               DesktopButton(
-                key: const ValueKey('credential-use'),
-                kind: DesktopButtonKind.primary,
-                onPressed: enabled && detail.canRequestUse ? _use : null,
-                child: const Text('申请使用'),
-              ),
-              DesktopButton(
                 key: const ValueKey('credential-history'),
                 onPressed: _busy ? null : _history,
                 child: const Text('使用记录'),
@@ -637,7 +619,7 @@ class _CredentialToggleState extends State<_CredentialToggle> {
           const SizedBox(height: 12),
           Text(
             _enabled
-                ? '重新启用后可重新申请使用；旧授权不会恢复。'
+                ? '重新启用后Agent可重新申请使用；旧授权不会恢复。'
                 : '停用后不能发起新的使用；它不删除历史，也不自动结束已经启动的操作。',
           ),
         ],

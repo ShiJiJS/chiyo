@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -40,6 +41,7 @@ void main() {
         }
       });
   Future<void> tap(WidgetTester t, Finder finder) async {
+    if (await prepareFixtureAction(t, finder)) return;
     await t.ensureVisible(finder);
     await t.pumpAndSettle();
     await t.tap(finder);
@@ -86,7 +88,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('credential-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
@@ -111,7 +113,7 @@ void main() {
   );
 
   check(
-    'credential reading, grouped usage history and failed use request reach one pending receipt',
+    'credential management reads Agent-origin requests without an owner request action',
     (t) async {
       final model = await start(t, 'Azure SSH 私钥');
       expect(textValue('••••••••'), findsOneWidget);
@@ -123,33 +125,8 @@ void main() {
       expect(find.textContaining('已到期'), findsOneWidget);
       await capture(t, 'credential-1440-light-history');
       await tap(t, find.text('关闭').last);
-      await tap(t, find.byKey(const ValueKey('credential-use')));
-      expect(textValue('/usr/bin/ssh'), findsOneWidget);
-      expect(textValue('{{SSH_KEY_FILE}}'), findsOneWidget);
-      await enter(
-        t,
-        find.byKey(const ValueKey('credential-request-purpose')),
-        '核对合成服务器的状态',
-      );
-      (model.source as SampleWorkspaceSource).nextSaveFailure =
-          const WorkspaceFailure('offline', '申请提交失败，内容仍保留。');
-      await tap(t, find.byKey(const ValueKey('credential-request-submit')));
-      expect(find.text('申请提交失败，内容仍保留。'), findsOneWidget);
-      expect(
-        t
-            .widget<DesktopTextField>(
-              find.byKey(const ValueKey('credential-request-purpose')),
-            )
-            .controller!
-            .text,
-        '核对合成服务器的状态',
-      );
-      await capture(t, 'credential-1440-light-request-failure');
-      await tap(t, find.byKey(const ValueKey('credential-request-submit')));
-      expect(find.text('待审批'), findsWidgets);
-      expect(find.text('提交申请不等于批准，也不会启动程序或填充内容。'), findsOneWidget);
-      await capture(t, 'credential-1440-light-request-pending');
-      await tap(t, find.byKey(const ValueKey('credential-request-done')));
+      expect(find.byKey(const ValueKey('credential-use')), findsNothing);
+      await submitAgentCredentialRequest(t, ssh, '核对合成服务器的状态');
       expect((await model.source.loadSummary()).pending, 6);
       expect(
         (await model.source.credentials.requests(
@@ -224,12 +201,7 @@ void main() {
       await capture(t, 'credential-1280-dark-200-disable-confirm');
       await tap(t, find.byKey(const ValueKey('credential-toggle-submit')));
       expect((await model.source.credentials.read(created)).enabled, isFalse);
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('credential-use')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('credential-use')), findsNothing);
       await capture(t, 'credential-1280-dark-200-disabled');
       await tap(t, find.byKey(const ValueKey('credential-toggle')));
       await tap(t, find.byKey(const ValueKey('credential-toggle-submit')));
@@ -244,12 +216,7 @@ void main() {
     (t) async {
       final model = await start(t, 'Vikunja 登录密码', dark: true);
       expect(find.text('Mac本机焦点填充尚未启用。'), findsOneWidget);
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('credential-use')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('credential-use')), findsNothing);
       await capture(t, 'credential-1440-dark-focus-unavailable');
       await tap(t, find.byKey(const ValueKey('preview-guide')));
       await tap(t, find.byKey(const ValueKey('preview-credential-error')));
@@ -268,12 +235,7 @@ void main() {
           .ref;
       await tap(t, find.byKey(ValueKey('library-record-${target.key}')));
       expect(find.text('此类文件当前仅保管，尚不支持运行时使用。'), findsOneWidget);
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('credential-use')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('credential-use')), findsNothing);
       await tap(t, find.byKey(const ValueKey('credential-history')));
       expect(find.text('还没有使用记录。'), findsOneWidget);
       expect((await model.source.loadSummary()).pending, 5);
@@ -415,13 +377,7 @@ void main() {
               .toPlainText(),
           original.binding,
         );
-        await tap(t, find.byKey(const ValueKey('credential-use')));
-        expect(
-          find.byKey(const ValueKey('credential-request-submit')),
-          findsOneWidget,
-        );
-        await tap(t, find.text('取消').last);
-        expect(find.byType(DesktopDialog), findsNothing);
+        expect(find.byKey(const ValueKey('credential-use')), findsNothing);
         await capture(
           t,
           'credential-long-note-actions-${large ? '1280-dark-200' : '1440-light'}',

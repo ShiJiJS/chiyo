@@ -2112,29 +2112,7 @@ class SampleWorkspaceSource
       nextFileActionFailure = null;
       throw error;
     }
-    await _files.verifyVersion(detail, fieldKey, version);
-    _checkFileRead(detail, epoch);
-    if (_fileOperations[operationId] case final committed?) {
-      if (committed.fingerprint != fingerprint ||
-          committed.actionCompleted == null) {
-        throw const WorkspaceFailure('operation_conflict', '同一次操作不能用于不同内容。');
-      }
-      return WorkspaceFileActionResult(
-        completed: committed.actionCompleted!,
-        filename: metadata.filename,
-      );
-    }
-    _fileOperations[operationId] = (
-      fingerprint: fingerprint,
-      record: record,
-      file: metadata.ref,
-      actionCompleted: true,
-    );
-    // The fictional adapter reports its result; it never writes or launches.
-    return WorkspaceFileActionResult(
-      completed: true,
-      filename: metadata.filename,
-    );
+    throw const WorkspaceFailure('unsupported', '本机文件打开与另存服务尚未接入，没有打开或保存文件。');
   }
 
   @override

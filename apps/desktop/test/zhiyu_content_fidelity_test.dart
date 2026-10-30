@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -49,6 +50,7 @@ void main() {
             try {
               Finder key(String id) => find.byKey(ValueKey(id));
               Future<void> tap(Finder target) async {
+                if (await prepareFixtureAction(t, target)) return;
                 if (target.hitTestable().evaluate().isEmpty) {
                   await t.ensureVisible(target);
                 }
@@ -134,7 +136,7 @@ void main() {
                     style: bool.fromEnvironment('UI_OVERLAY_SCROLLBARS')
                         ? DesktopScrollbarStyle.overlay
                         : DesktopScrollbarStyle.legacy,
-                    child: PreviewWorkspace(),
+                    child: PreviewWorkspace(inputsBuilder: fixtureInputs),
                   ),
                 ),
               );

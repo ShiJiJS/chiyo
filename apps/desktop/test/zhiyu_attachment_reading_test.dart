@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -43,6 +44,7 @@ void main() {
           addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
           Finder key(String k) => find.byKey(ValueKey(k));
           Future<void> tap(Finder f) async {
+            if (await prepareFixtureAction(t, f)) return;
             await t.ensureVisible(f);
             await t.tap(f, kind: ui.PointerDeviceKind.mouse);
             await t.pumpAndSettle();
@@ -54,7 +56,7 @@ void main() {
               key: ValueKey('attachment-capture'),
               child: DesktopScrollbarScope(
                 style: DesktopScrollbarStyle.overlay,
-                child: PreviewWorkspace(),
+                child: PreviewWorkspace(inputsBuilder: fixtureInputs),
               ),
             ),
           );

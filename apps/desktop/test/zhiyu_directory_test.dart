@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -371,7 +372,7 @@ void main() {
     await tester.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('directory-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await tester.pumpAndSettle();
@@ -459,9 +460,12 @@ void main() {
     (tester) async {
       final model = await start(tester, scale: 2);
       final source = model.source as SampleWorkspaceSource;
-      await tester.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(tester, find.byKey(const ValueKey('preview-guide')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('preview-theme-dark')));
+      await fixtureTap(
+        tester,
+        find.byKey(const ValueKey('preview-theme-dark')),
+      );
       await tester.pumpAndSettle();
       final create = find.byKey(const ValueKey('library-directory-create'));
       await tester.scrollUntilVisible(

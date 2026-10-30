@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ void main() {
   }
 
   Future<void> guide(WidgetTester t) async {
-    await t.tap(find.byKey(const ValueKey('preview-guide')));
+    await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
     await t.pumpAndSettle();
   }
 
@@ -48,8 +49,7 @@ void main() {
     final button = find.byKey(
       ValueKey('preview-dataset-${stress ? 'stress' : 'reference'}'),
     );
-    await t.ensureVisible(button);
-    await t.tap(button);
+    await fixtureTap(t, button);
     await t.pumpAndSettle();
   }
 
@@ -68,13 +68,13 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('stress-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
     if (dark) {
       await guide(t);
-      await t.tap(find.byKey(const ValueKey('preview-theme-dark')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-theme-dark')));
       await t.pumpAndSettle();
     }
     await dataset(t, true);
@@ -86,6 +86,7 @@ void main() {
     Finder target,
     Finder viewport,
   ) async {
+    if (await prepareFixtureAction(t, target)) return;
     await t.pumpAndSettle();
     final visible = t.getRect(target).intersect(t.getRect(viewport));
     expect(visible.width, greaterThan(10));

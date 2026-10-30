@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -39,6 +40,7 @@ void main() {
     await Directory(evidence).create(recursive: true);
   });
   Future<void> tap(WidgetTester t, Finder f) async {
+    if (await prepareFixtureAction(t, f)) return;
     await t.ensureVisible(f);
     await t.pumpAndSettle();
     await t.tap(f);
@@ -97,7 +99,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('legacy-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();

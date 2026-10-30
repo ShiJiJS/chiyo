@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
@@ -109,7 +110,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    await tester.pumpWidget(const PreviewWorkspace());
+    await tester.pumpWidget(
+      const PreviewWorkspace(inputsBuilder: fixtureInputs),
+    );
     await tester.pumpAndSettle();
   }
 

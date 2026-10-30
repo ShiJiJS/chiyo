@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -39,6 +40,7 @@ void main() {
         }
       });
   Future<void> tap(WidgetTester t, Finder finder) async {
+    if (await prepareFixtureAction(t, finder)) return;
     await t.ensureVisible(finder);
     await t.pumpAndSettle();
     await t.tap(finder);
@@ -85,7 +87,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('credential-lifecycle-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();

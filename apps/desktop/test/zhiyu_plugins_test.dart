@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -37,6 +38,7 @@ void main() {
     await Directory(evidence).create(recursive: true);
   });
   Future<void> tap(WidgetTester t, Finder target) async {
+    if (await prepareFixtureAction(t, target)) return;
     await t.ensureVisible(target);
     await t.pumpAndSettle();
     await t.tap(target);
@@ -82,7 +84,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('plugin-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
@@ -711,6 +713,7 @@ void main() {
       await t.pumpAndSettle();
       expect(m.plugins.selected!.id, 'builtin.profile');
       expect(m.plugins.failure, isNotNull);
+      m.source.setScenario(SampleWorkspaceScenario.ready);
       await tap(t, find.text('重新读取插件'));
       expect(m.plugins.failure, isNull);
       await tap(t, find.byKey(const ValueKey('plugin-filter-disabled')));

@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -52,6 +53,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, Finder f) async {
+    if (await prepareFixtureAction(t, f)) return;
     await t.ensureVisible(f);
     await t.pumpAndSettle();
     await t.tap(f);
@@ -96,7 +98,7 @@ void main() {
   }
 
   Future<void> closed(WidgetTester t) async {
-    final guide = find.byKey(const ValueKey('preview-guide'));
+    final guide = find.byKey(const ValueKey('workspace-nav-library'));
     for (
       var i = 0;
       i < 100 && t.widget<DesktopButton>(guide).onPressed == null;
@@ -123,7 +125,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('proposals-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await t.pumpAndSettle();
@@ -269,12 +271,7 @@ void main() {
             .onPressed,
         isNull,
       );
-      expect(
-        t
-            .widget<DesktopButton>(find.byKey(const ValueKey('preview-guide')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('preview-guide')), findsNothing);
       await capture(t, 'proposals-1440-light-unknown');
       await tap(t, find.byKey(const ValueKey('proposal-reconcile')));
       expect(m.frozen, false);
@@ -463,8 +460,16 @@ void main() {
       final m = model(t);
       Future<void> scenario(String name, {bool waiting = false}) async {
         await tap(t, find.byKey(const ValueKey('preview-guide')));
-        await t.ensureVisible(find.text(name));
-        await t.tap(find.text(name));
+        final state = {
+          '空资料': 'empty',
+          '读取失败': 'failure',
+          '持续等待': 'waiting',
+          '正常资料': 'ready',
+        }[name]!;
+        await prepareFixtureAction(
+          t,
+          find.byKey(ValueKey('preview-scenario-$state')),
+        );
         if (waiting) {
           await t.pump(const Duration(milliseconds: 500));
         } else {
@@ -477,16 +482,20 @@ void main() {
       expect(m.results!.total, 0);
       await scenario('读取失败');
       expect(m.readFailure, isNotNull);
+      expect(fixtureSource(t).scenario, SampleWorkspaceScenario.failure);
+      fixtureSource(t).setScenario(SampleWorkspaceScenario.ready);
       await tap(t, find.byKey(const ValueKey('proposal-retry')));
       expect(m.readFailure, isNull);
       expect(m.results!.total, 2);
       await scenario('持续等待', waiting: true);
       expect(m.loading, true);
-      await t.tap(find.byKey(const ValueKey('preview-guide')));
+      await fixtureTap(t, find.byKey(const ValueKey('preview-guide')));
       await t.pump();
       await t.pump(const Duration(milliseconds: 500));
-      await t.ensureVisible(find.text('正常资料'));
-      await t.tap(find.text('正常资料'));
+      await prepareFixtureAction(
+        t,
+        find.byKey(const ValueKey('preview-scenario-ready')),
+      );
       await ready(t);
       await closed(t);
       expect(m.loading, false);
@@ -941,7 +950,6 @@ void main() {
       await tap(t, find.byKey(const ValueKey('proposal-batch-add-reject')));
       await tap(t, find.byKey(const ValueKey('preview-guide')));
       await tap(t, find.text('下次保存失败'));
-      await tap(t, find.text('完成'));
       await closed(t);
       await openBatch(t);
       await tap(t, find.byKey(const ValueKey('proposal-batch-run')));

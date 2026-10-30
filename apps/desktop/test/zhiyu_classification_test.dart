@@ -1,3 +1,4 @@
+import 'support/workspace_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -30,6 +31,7 @@ void main() {
   }
 
   Future<void> tap(WidgetTester t, Finder f) async {
+    if (await prepareFixtureAction(t, f)) return;
     await t.ensureVisible(f);
     await ready(t);
     await t.tap(f);
@@ -75,7 +77,7 @@ void main() {
     await t.pumpWidget(
       const RepaintBoundary(
         key: ValueKey('classification-capture'),
-        child: PreviewWorkspace(),
+        child: PreviewWorkspace(inputsBuilder: fixtureInputs),
       ),
     );
     await ready(t);
