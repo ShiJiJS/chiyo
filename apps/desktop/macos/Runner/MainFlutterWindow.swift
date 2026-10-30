@@ -439,7 +439,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       }
       DispatchQueue.main.async {
         self.notificationsEnabled = notificationState == "enabled"
-        result(["tray": self.statusEntryAvailable, "notifications": notificationState])
+        result(["tray": self.statusEntryAvailable, "notifications": notificationState,
+                "scrollbarStyle": NSScroller.preferredScrollerStyle == .overlay ? "overlay" : "legacy"])
       }
     }
   }
@@ -453,6 +454,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       (NSWorkspace.shared.notificationCenter, NSWorkspace.screensDidWakeNotification, "resume"),
       (NSWorkspace.shared.notificationCenter, NSWorkspace.sessionDidBecomeActiveNotification, "resume"),
       (NotificationCenter.default, NSApplication.didBecomeActiveNotification, "availability"),
+      (NotificationCenter.default, NSScroller.preferredScrollerStyleDidChangeNotification, "availability"),
     ]
     for (center, name, method) in events {
       let observer = center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in

@@ -542,9 +542,46 @@ class ClaimedGrant {
 }
 
 /// Kept inside the desktop process. Never exposed by the agent transport.
+/// An owner UI binding to one service and one successfully restored library.
+/// This is not an Agent capability and is never serialized or exported.
+class OwnerLibraryScope {
+  OwnerLibraryScope._(this._service, this._generation);
+  final InformationService _service;
+  final int _generation;
+  bool get isCurrent =>
+      !_service._closed && _generation == _service._libraryGeneration;
+}
+
+final _ownerLibraryScopeZoneKey = Object();
+
 class OwnerAccess {
   OwnerAccess._(this._service);
   final InformationService _service;
+  OwnerLibraryScope captureLibraryScope() =>
+      OwnerLibraryScope._(_service, _service._libraryGeneration);
+
+  /// Keep the shared owner write queue while binding an asynchronous form
+  /// operation to its original library. A replacement during an await also
+  /// invalidates the result; callers must not render it in the new library.
+  Future<T> inLibraryScope<T>(
+    OwnerLibraryScope scope,
+    Future<T> Function() action,
+  ) async {
+    void check() {
+      if (!identical(scope._service, _service) || !scope.isCurrent) {
+        throw const AccessFailure('library_changed');
+      }
+    }
+
+    check();
+    final result = await runZoned(
+      action,
+      zoneValues: {_ownerLibraryScopeZoneKey: scope},
+    );
+    check();
+    return result;
+  }
+
   final _informationFileDrafts = <String, InformationFileDraft>{};
   Stream<String> get requestSubmitted => _service._submitted.stream;
   Duration get requestLifetime => _service._requestLifetime;
@@ -702,9 +739,11 @@ class OwnerAccess {
   });
   Future<void> _writes = Future.value();
   Future<T> _serialize<T>(Future<T> Function() action) {
-    final generation = _service._libraryGeneration;
+    final scope = Zone.current[_ownerLibraryScopeZoneKey] as OwnerLibraryScope?;
+    final generation = scope?._generation ?? _service._libraryGeneration;
     final result = _writes.then((_) {
-      if (generation != _service._libraryGeneration) {
+      if (generation != _service._libraryGeneration ||
+          scope != null && !identical(scope._service, _service)) {
         throw const AccessFailure('library_changed');
       }
       return action();

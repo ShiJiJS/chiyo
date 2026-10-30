@@ -22,6 +22,7 @@ import 'window_frame.dart';
 import 'prototype_dialog.dart';
 import 'bundled_focused_fill.dart';
 import 'package:info_core/macos_desktop_control.dart';
+import 'workspace/owner_workspace_host.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ Future<void> main() async {
   });
   runApp(
     DesktopLauncher(
+      useWorkspace: Platform.isMacOS,
       bootstrap: DesktopBootstrap(
         openLibrary: _openLibrary,
         openLibraryWithKeyAccess: Platform.isMacOS
@@ -102,8 +104,13 @@ Future<DesktopLibrary> _openLibrary({bool requestKeyAccess = false}) async {
 }
 
 class DesktopLauncher extends StatefulWidget {
-  const DesktopLauncher({super.key, required this.bootstrap});
+  const DesktopLauncher({
+    super.key,
+    required this.bootstrap,
+    this.useWorkspace = false,
+  });
   final DesktopBootstrap bootstrap;
+  final bool useWorkspace;
   @override
   State<DesktopLauncher> createState() => _DesktopLauncherState();
 }
@@ -150,6 +157,12 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                         : const Text('正在保存并退出…'),
                   ),
                 ),
+              );
+            }
+            if (widget.useWorkspace) {
+              return OwnerWorkspaceHost(
+                key: ValueKey(runtime),
+                runtime: runtime,
               );
             }
             return InformationApp(

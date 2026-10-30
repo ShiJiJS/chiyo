@@ -322,6 +322,11 @@ def main():
             "verificationScope": "build and extracted synthetic checks; no clean-user, Keychain upgrade, native UI or real Codex acceptance",
             "sourceChecksRequested": args.check,
             "flutterRevision": capture(["git", "-C", str(SDK), "rev-parse", "HEAD"]),
+            "macosAotCompatibility": {
+                "upstreamIssue": "https://github.com/flutter/flutter/issues/191575",
+                "buildScriptSha256": digest(ROOT / "scripts/build-macos-release.py"),
+                "scope": "compile unused experimental windowing as false; restore SDK source after build",
+            },
             "dart": capture([str(SDK / "bin/cache/dart-sdk/bin/dart"), "--version"]),
             "sqlcipher": {"desktopSha256": digest(cipher), "desktopCipherVersion": cipher_version(cipher)},
             "appEntitlements": entitlements, "workerEntitlements": worker_entitlements,

@@ -193,7 +193,7 @@ case "$command_name" in
     set -- ${flutter_arguments[@]+"${flutter_arguments[@]}"}
     cd "$project_root/apps/desktop"
     if [[ "$command_name" == build ]]; then
-      flutter build macos --release --no-pub "$@"
+      python3 "$project_root/scripts/build-macos-release.py" "$flutter_root" "$@"
       python3 "$project_root/scripts/bundle-macos-tools.py" \
         "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
       if [[ "$with_focused_fill_candidate" == true ]]; then
