@@ -484,6 +484,7 @@ class InformationBackups {
                 'information_classification_state',
                 'information_classification_operations',
                 'information_lifecycle_operations',
+                'information_approval_operations',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -726,6 +727,7 @@ class InformationBackups {
                     'information_classification_state',
                     'information_classification_operations',
                     'information_lifecycle_operations',
+                    'information_approval_operations',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -754,6 +756,9 @@ class InformationBackups {
         );
         await _repository._db.customStatement(
           'UPDATE information_lifecycle_operations SET invalidated=1',
+        );
+        await _repository._db.customStatement(
+          'UPDATE information_approval_operations SET invalidated=1',
         );
         // Keep local versions monotonic even when restoring an empty catalog.
         await _repository._db.customStatement(

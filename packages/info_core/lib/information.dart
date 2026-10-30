@@ -26,6 +26,9 @@ import 'info_core.dart'
         InformationDraftChange,
         InformationDraftReceipt,
         InformationRecordReceipt,
+        InformationApprovalRepository,
+        InformationApprovalReceipt,
+        InformationApprovalCommit,
         InformationLifecycleReceipt,
         InformationPurgeChange,
         InformationPurgeRepository,
@@ -417,6 +420,7 @@ class MemoryInformationRepository
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
         InformationLifecycleRepository,
+        InformationApprovalRepository,
         InformationPurgeRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
@@ -424,6 +428,44 @@ class MemoryInformationRepository
   Future<void> commitInformationPurge(InformationPurgeChange change) async =>
       _commitPurge(change);
   final _purgedInformationCommits = <String>{};
+  final _approvalReceipts = <String, InformationApprovalReceipt>{};
+  @override
+  Future<InformationApprovalReceipt?> informationApprovalReceipt(
+    String id,
+  ) async => _approvalReceipts[id];
+  @override
+  Future<int> informationApprovalRevision(String id) async => _approvalReceipts
+      .values
+      .where((r) => r.requestId == id)
+      .fold<int>(0, (v, r) => v > r.revision ? v : r.revision);
+  @override
+  Future<void> commitInformationApproval(
+    InformationApprovalCommit change, {
+    void Function()? validate,
+  }) async {
+    final receipt = change.receipt;
+    final revision = _approvalReceipts.values
+        .where((r) => r.requestId == receipt.requestId)
+        .fold<int>(0, (v, r) => v > r.revision ? v : r.revision);
+    if (_approvalReceipts.containsKey(receipt.operationId) ||
+        receipt.revision != revision + 1) {
+      throw const AccessFailure('operation_conflict');
+    }
+    for (final entry in change.itemVersions.entries) {
+      if (_items[entry.key]?.version != entry.value) {
+        throw const AccessFailure('scope_changed');
+      }
+    }
+    change.validatePrevious(
+      _requestHistory[change.request.id],
+      _history[change.grant?.id],
+    );
+    validate?.call();
+    _approvalReceipts[receipt.operationId] = receipt;
+    _requestHistory[change.request.id] = change.request;
+    if (change.grant case final grant?) _history[grant.id] = grant;
+  }
+
   final _lifecycleReceipts = <String, InformationLifecycleReceipt>{};
   @override
   Future<InformationLifecycleReceipt?> informationLifecycleReceipt(
