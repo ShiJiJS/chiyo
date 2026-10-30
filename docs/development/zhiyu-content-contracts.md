@@ -1,5 +1,7 @@
 # U03：页面、来源与真实接入清单
 
+> 排期更新：真实业务已按 [#70–#73 计划](../planning/zhiyu-round09/macos-real-function-plan.md)推进，#70 实施见[进度记录](zhiyu-macos-real-m01.md)。文中历史“全部 UI 就绪后才接入”的前置已取消；业务合同和未验范围继续保留。
+
 当前只接独立、可重置的合成来源。页面使用WorkspaceSource及其凭据专用接口；实际Owner服务、存储、授权及OS动作尚未接入。本清单配合[实施与证据](zhiyu-macos-content.md)、[U02共用合同](zhiyu-library-contracts.md)和[F01接手说明](../planning/zhiyu-round09/issues/F01.md)使用；记录缺口不表示整票已经完成。
 
 ## 共用读取与身份
