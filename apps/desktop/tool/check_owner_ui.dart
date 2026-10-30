@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
+import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/grant_history_page.dart';
@@ -23,7 +24,32 @@ class _Keys implements DatabaseKeyStore {
   Future<void> create(List<int> _) async => throw StateError('test key only');
 }
 
-class _Cli {
+abstract class OwnerUiClient {
+  int? get processId;
+  Future<Map<String, dynamic>> command(Map<String, Object?> value);
+  Future<void> close();
+}
+
+// Test-only injection, shared by the widget and native integration runners.
+class NativeOwnerUiEnvironment {
+  const NativeOwnerUiEnvironment({
+    required this.root,
+    required this.phase,
+    required this.platform,
+    required this.createClient,
+    required this.capture,
+    required this.report,
+    required this.scope,
+  });
+  final Directory root;
+  final String phase, scope;
+  final DesktopPlatform platform;
+  final Future<OwnerUiClient> Function(int port) createClient;
+  final Future<void> Function(GlobalKey boundary, String name) capture;
+  final Future<void> Function(Map<String, Object?> result) report;
+}
+
+class _Cli implements OwnerUiClient {
   _Cli(this.process) {
     lines = StreamIterator(
       process.stdout.transform(utf8.decoder).transform(const LineSplitter()),
@@ -31,8 +57,11 @@ class _Cli {
     errors = process.stderr.transform(utf8.decoder).join();
   }
   final Process process;
+  @override
+  int get processId => process.pid;
   late final StreamIterator<String> lines;
   late final Future<String> errors;
+  @override
   Future<Map<String, dynamic>> command(Map<String, Object?> value) async {
     process.stdin.writeln(jsonEncode(value));
     await process.stdin.flush();
@@ -44,6 +73,7 @@ class _Cli {
     return result;
   }
 
+  @override
   Future<void> close() async {
     await process.stdin.close();
     try {
@@ -59,17 +89,26 @@ class _Cli {
   }
 }
 
-void main() {
+void main() => runOwnerUiCheck();
+
+void runOwnerUiCheck({
+  Future<NativeOwnerUiEnvironment> Function()? createNative,
+}) {
   testWidgets(
-    'full owner shell shares actual requests and history with shipped CLI',
+    'full owner shell shares actual requests and history with an HTTP client',
     (t) async {
-      t.view.physicalSize = const Size(1280, 800);
-      t.view.devicePixelRatio = 1;
-      addTearDown(t.view.resetPhysicalSize);
-      addTearDown(t.view.resetDevicePixelRatio);
+      final native = await createNative?.call();
+      if (native == null) {
+        t.view.physicalSize = const Size(1280, 800);
+        t.view.devicePixelRatio = 1;
+        addTearDown(t.view.resetPhysicalSize);
+        addTearDown(t.view.resetDevicePixelRatio);
+      }
+      final boundary = GlobalKey();
       // Service audit work can be queued in the widget zone. Start I/O in
       // the real zone, then advance both clocks instead of blocking either.
       Future<T> real<T>(Future<T> Function() action) async {
+        if (native != null) return action();
         var complete = false;
         Object? result, error;
         StackTrace? trace;
@@ -102,9 +141,10 @@ void main() {
         return result as T;
       }
 
-      final root = Directory(Platform.environment['OWNER_UI_ROOT']!);
-      final phase = Platform.environment['OWNER_UI_PHASE']!;
-      final executable = Platform.environment['OWNER_UI_CLI']!;
+      final root =
+          native?.root ?? Directory(Platform.environment['OWNER_UI_ROOT']!);
+      final phase = native?.phase ?? Platform.environment['OWNER_UI_PHASE']!;
+      final executable = Platform.environment['OWNER_UI_CLI'];
       expect(
         await real(() => File('${root.path}/fixture-marker').readAsString()),
         'disposable-owner-ui-v1',
@@ -125,17 +165,26 @@ void main() {
       final service = core.InformationService(repository: repo);
       final bootstrap = DesktopBootstrap(
         port: 0,
-        platform: NativeDesktopFixture(),
+        platform: native?.platform ?? NativeDesktopFixture(),
         openLibrary: () async => DesktopLibrary(
           service: service,
           backups: repo.backups,
           close: repo.close,
         ),
       );
-      final clients = <_Cli>[];
+      final clients = <OwnerUiClient>[];
       final checks = <String>[];
       final clientPids = <int>[];
       Future<void> settleFrames() async {
+        if (native != null) {
+          await t.pumpAndSettle(
+            const Duration(milliseconds: 100),
+            EnginePhase.sendSemanticsUpdate,
+            const Duration(seconds: 15),
+          );
+          expect(t.takeException(), isNull);
+          return;
+        }
         final elapsed = Stopwatch()..start();
         do {
           await t.pump(const Duration(milliseconds: 100));
@@ -182,17 +231,19 @@ void main() {
         await settleFrames();
       }
 
-      Future<_Cli> startClient() async {
-        final c = await real(
-          () async => _Cli(
-            await Process.start(executable, [
-              '--port',
-              '${bootstrap.boundPort}',
-            ]),
-          ),
+      Future<OwnerUiClient> startClient() async {
+        final c = await real<OwnerUiClient>(
+          () async => native == null
+              ? _Cli(
+                  await Process.start(executable!, [
+                    '--port',
+                    '${bootstrap.boundPort}',
+                  ]),
+                )
+              : await native.createClient(bootstrap.boundPort!),
         );
         clients.add(c);
-        clientPids.add(c.process.pid);
+        if (c.processId case final processId?) clientPids.add(processId);
         expect(
           (await real(
             () => c.command({'command': 'session', 'chatLabel': '合成界面聊天'}),
@@ -202,16 +253,19 @@ void main() {
         return c;
       }
 
-      Future<Map<String, dynamic>> read(_Cli c, String request, String field) =>
-          real(
-            () => c.command({
-              'command': 'read',
-              'requestId': request,
-              'itemId': state['item'],
-              'fieldId': field,
-            }),
-          );
-      Future<String> request(_Cli c, String operation) async {
+      Future<Map<String, dynamic>> read(
+        OwnerUiClient c,
+        String request,
+        String field,
+      ) => real(
+        () => c.command({
+          'command': 'read',
+          'requestId': request,
+          'itemId': state['item'],
+          'fieldId': field,
+        }),
+      );
+      Future<String> request(OwnerUiClient c, String operation) async {
         final r = await real(
           () => c.command({
             'command': 'request',
@@ -252,7 +306,10 @@ void main() {
         await real(bootstrap.start);
         expect(bootstrap.state, DesktopStartupState.ready);
         await t.pumpWidget(
-          DesktopLauncher(bootstrap: bootstrap, useWorkspace: true),
+          RepaintBoundary(
+            key: boundary,
+            child: DesktopLauncher(bootstrap: bootstrap, useWorkspace: true),
+          ),
         );
         await until(
           () =>
@@ -348,9 +405,12 @@ void main() {
             'unauthorized',
           );
           checks.addAll([
-            'external-cli-request-shows-in-full-inbox',
+            native == null
+                ? 'external-cli-request-shows-in-full-inbox'
+                : 'http-client-request-shows-in-native-inbox',
             'ui-partial-approval-and-cross-chat-denial',
           ]);
+          await native?.capture(boundary, 'partial-approval');
           final deadline = model.detail!.fieldExpiresAt;
           await tap(find.byKey(const ValueKey('workspace-nav-library')));
           await until(
@@ -424,6 +484,7 @@ void main() {
             'approval snapshot retains original value',
           );
           expect(find.text('UI-CORRECTED-HOST'), findsNothing);
+          await native?.capture(boundary, 'approval-snapshot');
           await tap(find.text('关闭').last);
           checks.add('history-snapshot-uses-approval-version-after-ui-edit');
           await tap(find.byKey(const ValueKey('grant-revoke')));
@@ -465,7 +526,11 @@ void main() {
             ))['status'],
             'denied',
           );
-          checks.add('ui-denial-observed-by-external-cli');
+          checks.add(
+            native == null
+                ? 'ui-denial-observed-by-external-cli'
+                : 'native-ui-denial-observed-by-http-client',
+          );
           final live = await request(c, 'ui-left-active');
           await selectRequest(live);
           await tap(find.byKey(const ValueKey('approval-approve')));
@@ -504,6 +569,7 @@ void main() {
             'reopened UI displays corrected saved content',
           );
           expect(find.text('UI-CORRECTED-HOST'), findsWidgets);
+          await native?.capture(boundary, 'reopened-library');
           await tap(find.byKey(const ValueKey('workspace-nav-history')));
           await until(
             () =>
@@ -544,19 +610,25 @@ void main() {
         await real(() => bootstrap.runtime!.stop());
         expect(service.owner.serviceAvailable, isFalse);
         checks.add('formal-runtime-stops-service-and-closes-database');
-        await real(
-          () => File('${root.path}/$phase-result.json').writeAsString(
-            jsonEncode({
-              'passed': true,
-              'phase': phase,
-              'pid': pid,
-              'cliPids': clientPids,
-              'checks': checks,
-              'scope':
-                  'full Flutter shell/widget input + SQLCipher + shipped CLI; platform fixture, not native or AI host acceptance',
-            }),
-          ),
-        );
+        final result = <String, Object?>{
+          'passed': true,
+          'phase': phase,
+          'pid': pid,
+          'cliPids': clientPids,
+          'checks': checks,
+          'scope':
+              native?.scope ??
+              'full Flutter shell/widget input + SQLCipher + shipped CLI; platform fixture, not native or AI host acceptance',
+        };
+        if (native == null) {
+          await real(
+            () => File(
+              '${root.path}/$phase-result.json',
+            ).writeAsString(jsonEncode(result)),
+          );
+        } else {
+          await native.report(result);
+        }
       } finally {
         await t.pumpWidget(const SizedBox());
         await settleFrames();
