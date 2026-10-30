@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-30",
+  "scope": "planning only; no product code or acceptance status changes",
+  "branch": "codex/zhiyu-macos",
+  "created": [
+    70,
+    71,
+    72,
+    73
+  ],
+  "parent": 69,
+  "nativeDependencyEdges": [
+    [
+      71,
+      70
+    ],
+    [
+      72,
+      71
+    ],
+    [
+      73,
+      72
+    ]
+  ],
+  "removedDependencyEdges": [
+    [
+      69,
+      64
+    ],
+    [
+      69,
+      65
+    ],
+    [
+      69,
+      66
+    ],
+    [
+      69,
+      67
+    ],
+    [
+      69,
+      68
+    ]
+  ],
+  "records": [
+    {
+      "number": 70,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/70",
+      "bodySha256": "d2b4d528373b487ea625dc7ed11f181a221de4533f3ec3b849c4f19a7219be61",
+      "bodyMatches": true,
+      "header": "Skip to content\nShiJiJS\nagent-info-manage\nType / to search\nRepository navigation\nCode\nIssues\n45\n (45)\nPull requests\n1\n (1)\nAgents\nActions\nProjects\nSecurity and quality\nInsights\nSettings\n知予 Mac M01：新界面接入真实资料保存与重启恢复\n #70\nNew issue\nOpen\nParent:\n知予 Mac 真实功能路线图 F01：资料保存、AI申请与审批优先\nDescription\nShiJiJS\nopened \n用户结果与范围\n\n主人在现有知予界面创建、查看、修改和管理普通资料，关闭重开仍能读到准确内容。首批支持普通文字字段、服务器/应用资料、文档正文、档案经历的独立叶字段，以及目录、标签和资料关联。普通附件原文、托管凭据和插件安装不在本票；其入口明确未接入，不显示示例成功。\n\n属于 #69 的最小可用阶段；无其他新实现票前置。#62–#68 的非阻塞外观验收不阻挡本票；影响编辑、保存或错误提示的界面问题必须在本票交付前解决。本轮只发布规格，实现尚未开始。\n\n复用与实现接缝\n\n旧版 #24 已按 Windows 优先范围交付，本票复用其核心事务与身份规则，新增的是 Round09 界面到真实来",
+      "relationships": [
+        {
+          "name": "Parent issue",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/69"
+          ]
+        },
+        {
+          "name": "Is blocking1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/71"
+          ]
+        }
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    {
+      "number": 71,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/71",
+      "bodySha256": "158ce7b31bbab4c7cee88f0d7b6f2f587d27e7542d90a75cd5e965e0056d90d4",
+      "bodyMatches": true,
+      "header": "Skip to content\nShiJiJS\nagent-info-manage\nType / to search\nRepository navigation\nCode\nIssues\n45\n (45)\nPull requests\n1\n (1)\nAgents\nActions\nProjects\nSecurity and quality\nInsights\nSettings\n知予 Mac M02：接通 AI 发现资料、发起申请与审批收件箱\n #71\nNew issue\nOpen\nBlocked by:\n知予 Mac M01：新界面接入真实资料保存与重启恢复\nBlocked by 1 issue\nParent:\n知予 Mac 真实功能路线图 F01：资料保存、AI申请与审批优先\nDescription\nShiJiJS\nopened \n用户结果与依赖\n\n真实 AI 通过现有本机 CLI/服务查找资料并提出访问请求；主人在新界面的审批收件箱看到同一请求、用途、字段范围、会话和截止时间。连接不等于授权，提交不等于批准。依赖 M01（#70） 的真实资料及正式组合入口；与 M03（#72） 配套形成可用闭环。本轮只发布规格。\n\n实现范围\n复用 packages/info_core/lib/agent_server.dart、现有 CLI、DesktopRuntime、prepare_codex/c",
+      "relationships": [
+        {
+          "name": "Parent issue",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/69"
+          ]
+        },
+        {
+          "name": "Blocked by1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/70"
+          ]
+        },
+        {
+          "name": "Is blocking1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/72"
+          ]
+        }
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    {
+      "number": 72,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/72",
+      "bodySha256": "ee3d9e7e7f9fdad46b3a64e201ba3cb7b6dad77b1df08c8bac443fa421e45f47",
+      "bodyMatches": true,
+      "header": "Skip to content\nShiJiJS\nagent-info-manage\nType / to search\nRepository navigation\nCode\nIssues\n45\n (45)\nPull requests\n1\n (1)\nAgents\nActions\nProjects\nSecurity and quality\nInsights\nSettings\n知予 Mac M03：接通真实审批、限定读取与授权失效\n #72\nNew issue\nOpen\nBlocked by:\n知予 Mac M02：接通 AI 发现资料、发起申请与审批收件箱\nBlocked by 1 issue\nParent:\n知予 Mac 真实功能路线图 F01：资料保存、AI申请与审批优先\nDescription\nShiJiJS\nopened \n用户结果与依赖\n\n依赖 M01（#70）、M02（#71）。主人批准或拒绝 AI 的访问请求，AI 仅能读获批字段；主人可撤销，期限到达或会话结束后旧能力不可再用。新界面和 AI 查询端显示同一处理结果。本票首批只接普通信息读取；普通附件领取、凭据执行与整理申请后续单列，不以普通读取授权替代。\n\n实现范围\n复用现有 OwnerAccess、核心访问请求/授权/逐请求鉴权及审计，适配 workspace 审批与授权历史合同，不让新界面直接写授权表或生成临时访问凭",
+      "relationships": [
+        {
+          "name": "Parent issue",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/69"
+          ]
+        },
+        {
+          "name": "Blocked by1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/71"
+          ]
+        },
+        {
+          "name": "Is blocking1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/73"
+          ]
+        }
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    {
+      "number": 73,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/73",
+      "bodySha256": "541b2d7057cb7de0825f050492c83558436b4313213c38894c495ef64730eb54",
+      "bodyMatches": true,
+      "header": "Skip to content\nShiJiJS\nagent-info-manage\nType / to search\nRepository navigation\nCode\nIssues\n45\n (45)\nPull requests\n1\n (1)\nAgents\nActions\nProjects\nSecurity and quality\nInsights\nSettings\n知予 Mac M04：验收保存—AI申请—审批闭环并交付可用候选\n #73\nNew issue\nOpen\nBlocked by:\n知予 Mac M03：接通真实审批、限定读取与授权失效\nBlocked by 1 issue\nParent:\n知予 Mac 真实功能路线图 F01：资料保存、AI申请与审批优先\nDescription\nShiJiJS\nopened \n目标与依赖\n\n依赖 M01（#70）、M02（#71）、M03（#72）。从同一固定 Mac ARM64 候选验证主人保存、AI 申请、主人审批、AI 限定读取及失效，再交付可实际使用的 App。此票只验首批业务接缝和形成候选，不重复创建 #50 的全平台安装交付总验收，也不把“最小可用”称为完整产品。本轮仅拆分，未运行验证或重新打包。\n\n验收路径\n固定源码、App/CLI/核心版本和稳定安装目录；普通入口启动实际 SQLCipher/本机服务，新界面不带预置",
+      "relationships": [
+        {
+          "name": "Parent issue",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/69"
+          ]
+        },
+        {
+          "name": "Blocked by1 (1)",
+          "links": [
+            "https://github.com/ShiJiJS/agent-info-manage/issues/72"
+          ]
+        }
+      ],
+      "labels": [
+        "enhancement",
+        "ready-for-agent"
+      ]
+    },
+    {
+      "number": 69,
+      "url": "https://github.com/ShiJiJS/agent-info-manage/issues/69",
+      "bodySha256": "e950e50b134e1af7c9defd10aa2d6cae7d2611d458d9abaea9b85608392c611e",
+      "bodyMatches": true,
+      "header": "Skip to content\nShiJiJS\nagent-info-manage\nType / to search\nRepository navigation\nCode\nIssues\n45\n (45)\nPull requests\n1\n (1)\nAgents\nActions\nProjects\nSecurity and quality\nInsights\nSettings\n知予 Mac 真实功能路线图 F01：资料保存、AI申请与审批优先\n #69\nNew issue\nOpen\n0 / 4\n0 of 4 issues completed\nDescription\nShiJiJS\nopened \nLast edited by ShiJiJS\nMac 真实业务首批计划（2026-10-30）\n\n用户本轮授权规划并拆分 GitHub tickets，未要求本轮开发。新界面基线为 447e9801，验证记录至 4be42d3e；当前 App 仍是内存示例来源，已去掉演示入口，不能把示例保存或批准算作真实业务接通。\n\n本计划替代历史“全部七项 UI 正式验收后才拆真实功能”的排期，领域授权规则和原验收标准不变。资料保存、AI 申请和主人审批优先；不阻挡这条路径的外观检查并行，影响操作或数据安全的问题仍须解决。#62–#68 保持 OPEN 和原未验项。申请由 AI 发起，主人只审批、管理；不增加演",
+      "relationships": []
+    }
+  ]
+}
