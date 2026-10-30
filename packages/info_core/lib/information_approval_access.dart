@@ -322,6 +322,7 @@ extension OwnerInformationApprovals on OwnerAccess {
             final field = item.fields.firstWhere((f) => f.id == ref.fieldId);
             return RecordedField(item.id, field.id, item.name, field.name);
           }),
+          itemVersions: command.itemVersions,
           events: [GrantEvent(GrantEventKind.approved, now)],
         );
       } else if (command.action == InformationApprovalAction.revoke) {

@@ -700,6 +700,14 @@ void main() {
         await service.agent.read(grant.token, const FieldRef('server', 'host')),
         'example.invalid',
       );
+      // A credential workflow may include ordinary reads, but must not be
+      // rendered or revoked as a standalone information request in the new UI.
+      final ordinary = await service.owner.informationHistory();
+      expect((await service.owner.history()).grants, isNotEmpty);
+      expect(ordinary.history.grants, isEmpty);
+      expect(ordinary.history.requests, isEmpty);
+      expect(ordinary.history.accesses, isEmpty);
+
       await expectLater(
         service.agent.consumeCredentialUse(session, request.id),
         throwsA(

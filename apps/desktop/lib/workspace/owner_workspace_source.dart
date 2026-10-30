@@ -4,6 +4,7 @@ import 'package:info_core/info_core.dart' as core;
 import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_classification.dart';
 import 'owner_workspace_history.dart';
+import 'owner_workspace_grant_history.dart';
 import 'owner_workspace_information.dart';
 import 'owner_workspace_approvals.dart';
 import 'owner_workspace_agents.dart';
@@ -24,7 +25,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
     WorkspaceAgentsSource? agents,
     this.credentials = const UnavailableWorkspaceCredential(),
     WorkspaceApprovalSource? approvals,
-    this.grantHistory = const UnavailableWorkspaceGrantHistory(),
+    WorkspaceGrantHistorySource? grantHistory,
     this.proposals = const UnavailableWorkspaceProposal(),
     this.plugins = const UnavailableWorkspacePlugin(),
     this.hosts = const UnavailableWorkspaceHost(),
@@ -32,6 +33,8 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   }) : _scope = owner.captureLibraryScope() {
     this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
+    this.grantHistory =
+        grantHistory ?? OwnerWorkspaceGrantHistory(owner: owner);
     _information = OwnerWorkspaceInformation(
       owner: owner,
       templates: definitions ?? builtinWorkspaceDefinitions,
@@ -78,7 +81,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   @override
   late final WorkspaceApprovalSource approvals;
   @override
-  final WorkspaceGrantHistorySource grantHistory;
+  late final WorkspaceGrantHistorySource grantHistory;
   @override
   final WorkspaceProposalSource proposals;
   @override
@@ -136,6 +139,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
               [
                 for (final s in owner.sessions) [s.id, s.chatLabel, s.ended],
               ],
+              owner.accessRecordObservation,
               owner.queryProposals(limit: 1).pendingCount,
             ]);
     } on Object {

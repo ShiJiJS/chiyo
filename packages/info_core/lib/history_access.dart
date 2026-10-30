@@ -233,6 +233,41 @@ extension OwnerAuditAccess on OwnerAccess {
     if (_service._auditFailed) throw const AccessFailure('audit_unavailable');
   }
 
+  /// Cheap observation of append-only access facts, including retention changes.
+  /// Reading it does not enqueue audit writes or retain content in UI signatures.
+  String get accessRecordObservation {
+    final records = _service._repository.accessRecords;
+    return jsonEncode([
+      auditStorageUnavailable,
+      records.length,
+      records.firstOrNull?.id,
+      records.lastOrNull?.id,
+    ]);
+  }
+
+  Future<OwnerInformationHistory> informationHistory() async {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    final audit = await history();
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    final credentialIds = {
+      ..._service._credentialUseSessions.keys,
+      if (_service._repository case CredentialRuntimeRepository repository)
+        ...repository.credentialUseRequests.map((r) => r.id),
+    };
+    final grants = audit.grants
+        .where((g) => !credentialIds.contains(g.requestId))
+        .toList();
+    final grantIds = grants.map((g) => g.id).toSet();
+    return OwnerInformationHistory(
+      AuditHistory(
+        grants,
+        audit.accesses.where((a) => grantIds.contains(a.grantId)),
+        audit.requests.where((r) => !credentialIds.contains(r.id)),
+      ),
+      _service._clock(),
+    );
+  }
+
   int get auditRetentionDays =>
       _service._repository.readSetting('auditRetentionDays') ?? 90;
 

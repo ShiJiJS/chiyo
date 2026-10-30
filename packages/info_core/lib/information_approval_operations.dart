@@ -96,6 +96,11 @@ final class InformationApprovalCommit {
           grant!.events.single.kind != GrantEventKind.approved ||
           grant!.events.single.at != receipt.recordedAt ||
           !grant!.expiresAt.isAfter(receipt.recordedAt) ||
+          (grant!.itemVersions.isNotEmpty &&
+              (grant!.itemVersions.length != itemVersions.length ||
+                  grant!.itemVersions.entries.any(
+                    (e) => itemVersions[e.key] != e.value,
+                  ))) ||
           ids.length != itemVersions.length ||
           !ids.containsAll(itemVersions.keys) ||
           grant!.fields.any(

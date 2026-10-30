@@ -59,3 +59,27 @@
 - 首次桌面组合回归发现旧测试仍预期审批回执为 unsupported；在真实查询实现接通后改为确认不存在的操作返回 null，其他未接入功能仍保留 unsupported 断言，完整重跑通过。未掩盖存储查询失败为 null。
 
 本轮未运行 Windows CI、未使用 computer use/个人资料/Keychain、未构建或替换 App。完整授权历史/访问记录页面、更多独立 CLI/故障联调、Mac 构建与 #73 同候选真实宿主验证仍待完成。#72 保持 OPEN，完整验收项不勾选。
+
+
+## 2026-10-30：真实授权历史、访问记录与批准版本
+
+`OwnerWorkspaceGrantHistory` 已作为正式来源接入新界面。普通申请、获批范围、实际访问次数及结果来自现有 Owner 审计；凭据流程（包括附带普通字段读取的凭据申请）继续排除在本来源之外。查询支持关键词、日期、状态、分页与原选择定位，日期使用服务时钟；不检索或输出被访问正文。新访问发生时即使申请数量/状态不变也会刷新。
+
+- 授权是否有效逐字段使用核心当前读取决定；部分字段失效显示“部分有效”，撤销、到期、结束、重启和恢复的历史事实不会恢复能力。批准状态事件与访问记录分别显示，“已批准”不计入访问次数。
+- 历史页撤销复用真实审批命令及审阅摘要。显式打开或选择不存在的历史时保留该目标并报错，刷新不会默默选中另一条可撤销授权。
+- 新异步普通审批在同一事务的 GrantHistory 中保存批准时 `itemVersions`，撤销/结束/恢复保留它。快照只按原信息身份和准确版本从当前资料、保留修订或完整回收快照读取；版本未知、内容清理或不匹配时明确不可用，不按名称或当前值替代。列表和访问事件不包含正文，历史正文必须由主人显式打开。
+- 本机数据库继续使用36/37，无新增表列；授权 JSON 的可选版本元数据随现有事务落盘，旧记录没有该键时保持未知，不补造版本。新元数据的备份使用内容触发的格式13，包含布局所需列；无该元数据的资料继续按既有内容选择格式。格式13校验版本映射精确覆盖原获批信息项、正整数及上限，并计入元数据容量预算；格式12不能携带该新键。恢复只保留事实，不携带原操作回执或活跃能力。
+- 普通附件历史领取/预览仍后置，缺少批准附件版本的按钮禁用且说明版本不可用；缺少普通资料版本时不再显示误导性的 v0。
+
+### 本轮证据
+
+| 范围 | 验证 | 结果 |
+| --- | --- | --- |
+| core | grant_history_version / information_approval_access / information_approval_operations / history / session_end / backup_coordinator / workspace / credential_use | 63项通过；含不可变版本依据、旧记录、错误版本拒绝及凭据混合读取不进入普通历史 |
+| storage | `dart test --reporter expanded` 全套 | 223项通过、19项条件跳过；新增真实审批版本在修改/撤销/重开/格式13恢复后保留、旧格式继续使用、错误映射和降报格式拒绝 |
+| desktop | owner_workspace_grant_history / owner_workspace_grant_history_widget / grant_history_controller / workspace_grant_history / owner_workspace_approvals / owner_workspace_source / owner_workspace_host / desktop_runtime | 54项通过；含SQLCipher真实来源、分页/过滤、失效、准确快照、保留期、库代次隔离、缺失精确目标和实际历史撤销按钮 |
+| 静态检查 | core/storage `dart analyze`；desktop `flutter analyze --no-pub --fatal-infos` | 全部通过 |
+
+日志：`build/macos-adaptation/m03-history-core.log`、`m03-history-storage.log`、`m03-history-desktop.log`。存储全套在新增 Owner 只读历史投影之前执行；之后核心63项和桌面54项覆盖最终投影及存储接缝，存储源码未再更改。源库/目标库为独立测试密钥及连接，Drift多实例提示不代表共用执行器。控件验证使用真实 Owner + 内存仓库，资料来源验证使用 SQLCipher；均不是实际鼠标/系统输入或真实 AI 宿主验收。库代次测试单独使用恢复协调器 fixture，真实备份往返由存储测试覆盖，不拼成同候选实机证据。
+
+本轮没有使用个人资料/Keychain、computer use或 Windows CI；没有新建或替换 App。#72 仍 OPEN，下一步为独立 CLI/故障联调、Mac 构建，再交 #73 固定候选真实宿主及交付验收。
