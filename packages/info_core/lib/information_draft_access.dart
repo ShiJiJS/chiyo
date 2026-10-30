@@ -190,6 +190,13 @@ extension OwnerInformationDrafts on OwnerAccess {
       fields,
       directoryId: input.directoryId,
       tagIds: input.tagIds,
+      layout:
+          input.layout?.bind(fields) ??
+          before?.layout?.remapFields({
+            for (var i = 0; i < input.fields.length; i++)
+              if (input.fields[i].fieldId != null)
+                input.fields[i].fieldId!: fields[i].id,
+          }),
       createdAt: before?.createdAt ?? (before == null ? now : null),
       modifiedAt: now,
     );

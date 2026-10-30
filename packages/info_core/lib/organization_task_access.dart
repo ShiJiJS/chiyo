@@ -145,6 +145,7 @@ extension OwnerOrganizationTasks on OwnerAccess {
           old.fields,
           directoryId: location.$1,
           tagIds: location.$2,
+          layout: old.layout,
           createdAt: old.createdAt,
           modifiedAt: now,
         ),

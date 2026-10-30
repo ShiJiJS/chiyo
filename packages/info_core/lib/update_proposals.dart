@@ -187,6 +187,7 @@ Map<String, Object?> informationToJson(InformationItem item) => {
   'createdAt': item.createdAt?.toUtc().toIso8601String(),
   'modifiedAt': item.modifiedAt?.toUtc().toIso8601String(),
   'fields': [for (final f in item.fields) f.toJson()],
+  if (item.layout != null) 'layout': item.layout!.toJson(),
 };
 InformationItem informationFromJson(Map<String, dynamic> json) =>
     InformationItem(
@@ -199,6 +200,9 @@ InformationItem informationFromJson(Map<String, dynamic> json) =>
             (dynamic f) => InformationField.fromJson(f as Map<String, dynamic>),
           )
           .toList(),
+      layout: json['layout'] == null
+          ? null
+          : InformationLayout.fromJson(json['layout'] as Map<String, dynamic>),
       directoryId: json['directoryId'] as String?,
       tagIds: (json['tagIds'] as List).cast<String>(),
       createdAt: json['createdAt'] == null

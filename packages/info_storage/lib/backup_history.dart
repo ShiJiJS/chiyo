@@ -72,6 +72,7 @@ void _validateBackupHistory(
   Set<InformationAttachmentRef>? availableAttachments,
   Iterable<InformationFileDelivery> deliveries = const [],
   bool allowRemovedOrganization = false,
+  bool allowLayouts = false,
 }) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
@@ -113,7 +114,7 @@ void _validateBackupHistory(
         'tagIds',
         'fields',
       },
-      {'createdAt', 'modifiedAt'},
+      {'createdAt', 'modifiedAt', if (allowLayouts) 'layout'},
     );
     if (item['createdAt'] != null) _backupDate(item['createdAt']);
     if (item['modifiedAt'] != null) _backupDate(item['modifiedAt']);

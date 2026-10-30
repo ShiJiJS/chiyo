@@ -136,6 +136,7 @@ extension OwnerLibrary on OwnerAccess {
       ],
       directoryId: directoryId,
       tagIds: selectedTags,
+      layout: updated.layout,
       createdAt: updated.createdAt,
       modifiedAt: updated.modifiedAt,
     );

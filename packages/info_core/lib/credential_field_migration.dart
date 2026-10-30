@@ -122,6 +122,7 @@ extension CredentialFieldMigrationOwner on OwnerAccess {
       before.fields.where((f) => f.id != ref.fieldId).toList(),
       directoryId: before.directoryId,
       tagIds: before.tagIds,
+      layout: before.layout,
       createdAt: before.createdAt,
       modifiedAt: now,
     );

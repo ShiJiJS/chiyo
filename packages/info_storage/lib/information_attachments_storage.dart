@@ -286,7 +286,15 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     final templates = await _db
         .customSelect('SELECT fields_json FROM field_templates')
         .get();
+    final layoutContent = await _db
+        .customSelect(
+          'SELECT 1 FROM information_items WHERE layout_json IS NOT NULL '
+          'UNION ALL SELECT 1 FROM information_revisions WHERE instr(payload,\'"layout":\')>0 '
+          'UNION ALL SELECT 1 FROM recycle_entries WHERE instr(payload,\'"layout":\')>0 LIMIT 1',
+        )
+        .get();
     if (exists.isEmpty &&
+        layoutContent.isEmpty &&
         !templates.any(
           (r) => (jsonDecode(r.read<String>('fields_json')) as List).any(
             (f) => f['kind'] == 'file',

@@ -146,6 +146,7 @@ extension OwnerRecycle on OwnerAccess {
         removed,
         directoryId: before.directoryId,
         tagIds: before.tagIds,
+        layout: before.layout,
         createdAt: before.createdAt,
         modifiedAt: before.modifiedAt,
       ),
@@ -206,6 +207,7 @@ extension OwnerRecycle on OwnerAccess {
             remaining,
             directoryId: before.directoryId,
             tagIds: before.tagIds,
+            layout: before.layout,
             createdAt: before.createdAt,
             modifiedAt: _service._clock(),
           );
@@ -264,6 +266,7 @@ extension OwnerRecycle on OwnerAccess {
       ],
       directoryId: _existingDirectory(source.directoryId),
       tagIds: _existingTags(source.tagIds),
+      layout: source.layout?.restoreBindings(snapshot.layout, restoredIds),
       createdAt: source.createdAt,
       modifiedAt: _service._clock(),
     );

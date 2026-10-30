@@ -55,10 +55,12 @@ final class InformationDraftInput {
     this.itemId,
     this.baseVersion,
     this.directoryId,
+    this.layout,
     Iterable<String> tagIds = const [],
   }) : fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds);
   final String name, description;
+  final InformationDraftLayout? layout;
   final String? itemId, directoryId;
   final int? baseVersion;
   final List<InformationDraftField> fields;
@@ -71,6 +73,7 @@ final class InformationDraftInput {
     'directoryId': directoryId,
     'tagIds': (tagIds.toSet().toList()..sort()),
     'fields': [for (final f in fields) f.toPrivateJson()],
+    if (layout != null) 'layout': layout!.toJson(),
   };
 }
 
@@ -157,4 +160,34 @@ abstract interface class InformationAttachmentRepository
   Future<InformationDraftReceipt> commitInformationDraft(
     InformationDraftChange change,
   );
+}
+
+/// Slot keys are paired with the submitted field order, then bound to identities
+/// allocated by the core. UI keys never become authorization field identities.
+final class InformationDraftLayout {
+  InformationDraftLayout(this.layout, Iterable<String?> fieldKeys)
+    : fieldKeys = List.unmodifiable(fieldKeys) {
+    final keys = this.fieldKeys.whereType<String>().toList();
+    if (this.fieldKeys.length > 200 ||
+        keys.toSet().length != keys.length ||
+        keys.any((k) => k.trim().isEmpty || k.length > 512)) {
+      throw const FormatException('Invalid draft layout');
+    }
+  }
+  final InformationLayout layout;
+  final List<String?> fieldKeys;
+  Map<String, Object?> toJson() => {
+    'layout': layout.toJson(),
+    'fieldKeys': fieldKeys,
+  };
+  InformationLayout bind(List<InformationField> fields) {
+    if (fields.length != fieldKeys.length) {
+      throw const AccessFailure('invalid_information');
+    }
+    return layout.withFieldIds({
+      ...layout.fieldIds,
+      for (var i = 0; i < fields.length; i++)
+        if (fieldKeys[i] != null) fieldKeys[i]!: fields[i].id,
+    });
+  }
 }
