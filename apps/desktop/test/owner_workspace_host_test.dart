@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
@@ -6,12 +7,105 @@ import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/desktop_scroll.dart';
 import 'package:info_desktop/main.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
+import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/runtime_workspace_desktop.dart';
 import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'support/desktop_platform_fixture.dart';
 
+class _DeferredShow extends NativeDesktopFixture {
+  Completer<void>? showGate;
+  @override
+  Future<void> showWindow() async {
+    await showGate?.future;
+    await super.showWindow();
+  }
+}
+
 void main() {
+  test(
+    'notification payload survives delayed show and superseded navigation is dropped',
+    () async {
+      final native = _DeferredShow();
+      final service = InformationService(
+        repository: MemoryInformationRepository([]),
+      );
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      final desktop = RuntimeWorkspaceDesktop(runtime);
+      final requests = <String>[], pages = <WorkspacePage>[];
+      desktop.onOpenRequest = requests.add;
+      desktop.onNavigate = pages.add;
+      final firstGate = Completer<void>();
+      native.showGate = firstGate;
+      native.openedRequestId = 'original-request';
+      final opening = runtime.handleEvent(DesktopEvent.openApprovals);
+      native.openedRequestId = 'later-platform-value';
+      firstGate.complete();
+      await opening;
+      expect(requests, ['original-request']);
+      expect(pages, isEmpty);
+
+      final staleGate = Completer<void>();
+      native.showGate = staleGate;
+      native.openedRequestId = 'stale-request';
+      final stale = runtime.handleEvent(DesktopEvent.openApprovals);
+      native.showGate = null;
+      await runtime.handleEvent(DesktopEvent.openSettings);
+      staleGate.complete();
+      await stale;
+      expect(requests, ['original-request']);
+      expect(pages, [WorkspacePage.settings]);
+      await desktop.setNavigationEnabled(false);
+      final blockedGate = Completer<void>();
+      native.showGate = blockedGate;
+      final blocked = runtime.handleEvent(DesktopEvent.openApprovals);
+      await desktop.setNavigationEnabled(true);
+      blockedGate.complete();
+      await blocked;
+      native.showGate = null;
+      expect(requests, ['original-request']);
+      native.openedRequestId = null;
+      await runtime.handleEvent(DesktopEvent.openApprovals);
+      expect(pages.last, WorkspacePage.approvals);
+      expect(service.owner.requests, isEmpty);
+      desktop.dispose();
+      await runtime.quit();
+      runtime.dispose();
+    },
+  );
+
+  test(
+    'notification received before workspace mount is delivered once with its ID',
+    () async {
+      final native = NativeDesktopFixture()..openedRequestId = 'before-mount';
+      final service = InformationService(
+        repository: MemoryInformationRepository([]),
+      );
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        closeRepository: () async {},
+      );
+      await runtime.start();
+      await runtime.handleEvent(DesktopEvent.openApprovals);
+      final desktop = RuntimeWorkspaceDesktop(runtime);
+      final requests = <String>[];
+      desktop.onOpenRequest = requests.add;
+      desktop.onNavigate = (_) => fail('Expected exact request routing');
+      await runtime.handleEvent(DesktopEvent.availabilityChanged);
+      expect(requests, ['before-mount']);
+      desktop.dispose();
+      await runtime.quit();
+      runtime.dispose();
+    },
+  );
   test(
     'initial navigation uses the most recent runtime event exactly once',
     () async {
@@ -143,6 +237,36 @@ void main() {
         );
       }
 
+      Future<void> driveService(Future<void> Function() action) async {
+        var complete = false;
+        Object? failure;
+        StackTrace? trace;
+        // Start real service I/O without blocking widget-zone audit callbacks.
+        await t.runAsync(() async {
+          unawaited(
+            action().then(
+              (_) {
+                complete = true;
+              },
+              onError: (Object e, StackTrace s) {
+                failure = e;
+                trace = s;
+                complete = true;
+              },
+            ),
+          );
+        });
+        for (var i = 0; i < 30 && !complete; i++) {
+          await settle();
+        }
+        expect(
+          complete,
+          isTrue,
+          reason: 'service action must settle across both clocks',
+        );
+        if (failure != null) Error.throwWithStackTrace(failure!, trace!);
+      }
+
       await t.pumpWidget(
         DesktopLauncher(bootstrap: bootstrap, useWorkspace: true),
       );
@@ -153,7 +277,42 @@ void main() {
               as OwnerWorkspaceSource;
       expect(identical(source.owner, bootstrap.library!.service.owner), isTrue);
       expect(repository.items, isEmpty);
-      await t.runAsync(
+      final service = bootstrap.library!.service;
+      late InformationItem item;
+      await driveService(() async {
+        item = await service.owner.createInformation('合成通知资料', '', [
+          const FieldInput('地址', '公开说明', 'private.synthetic'),
+        ]);
+      });
+      await settle();
+      expect(find.text('private.synthetic'), findsOneWidget);
+      expect(t.takeException(), isNull);
+      final request = service.agent.request(
+        service.agent.openSession('合成通知聊天'),
+        '定位测试',
+        [FieldRef(item.id, item.fields.single.id)],
+      );
+      native.openedRequestId = request.id;
+      await driveService(
+        () => bootstrap.runtime!.handleEvent(DesktopEvent.openApprovals),
+      );
+      await settle();
+      final approval = t
+          .widget<ApprovalsPage>(find.byType(ApprovalsPage))
+          .controller;
+      expect(approval.selection, request.id);
+      expect(approval.detail!.request.id, request.id);
+      expect(approval.detail!.request.state, WorkspaceApprovalState.pending);
+      expect(service.owner.requests.single.state, AccessRequestState.pending);
+      native.openedRequestId = 'not-in-this-library';
+      await driveService(
+        () => bootstrap.runtime!.handleEvent(DesktopEvent.openApprovals),
+      );
+      await settle();
+      expect(approval.readFailure?.code, 'not_found');
+      expect(approval.detail, isNull);
+      expect(service.owner.requests.single.state, AccessRequestState.pending);
+      await driveService(
         () => bootstrap.library!.service.owner.restoreLibrary(() async {}),
       );
       await settle();
@@ -164,7 +323,7 @@ void main() {
       expect(source.isCurrentLibrary, isFalse);
       expect(next.isCurrentLibrary, isTrue);
       expect(opens, 1);
-      await t.runAsync(bootstrap.runtime!.quit);
+      await driveService(bootstrap.runtime!.quit);
       await settle();
       expect(find.byType(WorkspaceApp), findsNothing);
       expect(closes, 1);

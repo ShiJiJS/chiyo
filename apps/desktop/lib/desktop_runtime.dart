@@ -161,6 +161,11 @@ class DesktopRuntime extends ChangeNotifier {
   int searchApprovalsRevision = 0;
   int navigationRevision = 0;
   DesktopEvent? lastNavigationEvent;
+  int _navigationIntent = 0;
+
+  /// A workspace lock transition must also reject native navigation whose
+  /// asynchronous window activation has not finished yet.
+  void discardPendingNavigation() => _navigationIntent++;
   String? openRequestId;
   bool quitting = false;
   bool shutdownFailed = false;
@@ -398,6 +403,15 @@ class DesktopRuntime extends ChangeNotifier {
       return;
     }
     if (quitting) return;
+    final navigationIntent = switch (event) {
+      DesktopEvent.openApprovals ||
+      DesktopEvent.openSettings ||
+      DesktopEvent.searchApprovals => ++_navigationIntent,
+      _ => _navigationIntent,
+    };
+    // Capture the payload before showWindow yields. A newer native event may
+    // replace platform.openedRequestId while this one is still awaiting Cocoa.
+    final requestedId = platform.openedRequestId;
     switch (event) {
       case DesktopEvent.closeWindow:
         try {
@@ -413,7 +427,10 @@ class DesktopRuntime extends ChangeNotifier {
         notifyListeners();
       case DesktopEvent.openApprovals:
         await platform.showWindow();
-        openRequestId = platform.openedRequestId;
+        if (quitting || _stopped || navigationIntent != _navigationIntent) {
+          return;
+        }
+        openRequestId = requestedId;
         openApprovalsRevision++;
         lastNavigationEvent = event;
         navigationRevision++;
@@ -428,18 +445,26 @@ class DesktopRuntime extends ChangeNotifier {
         await (_resuming ??= _resumeDesktop());
       case DesktopEvent.openSettings:
         await _ready.future;
-        if (quitting || _stopped) return;
+        if (quitting || _stopped || navigationIntent != _navigationIntent) {
+          return;
+        }
         await platform.showWindow();
-        if (quitting || _stopped) return;
+        if (quitting || _stopped || navigationIntent != _navigationIntent) {
+          return;
+        }
         openSettingsRevision++;
         lastNavigationEvent = event;
         navigationRevision++;
         notifyListeners();
       case DesktopEvent.searchApprovals:
         await _ready.future;
-        if (quitting || _stopped) return;
+        if (quitting || _stopped || navigationIntent != _navigationIntent) {
+          return;
+        }
         await platform.showWindow();
-        if (quitting || _stopped) return;
+        if (quitting || _stopped || navigationIntent != _navigationIntent) {
+          return;
+        }
         searchApprovalsRevision++;
         lastNavigationEvent = event;
         navigationRevision++;

@@ -49,6 +49,7 @@ class ApprovalsController extends ChangeNotifier {
   WorkspaceApprovalFilter filter = WorkspaceApprovalFilter.pending;
   int offset = 0, limit = 20, _generation = 0;
   String? selection, notice;
+  String? _explicitTarget;
   bool loading = false,
       reading = false,
       busy = false,
@@ -147,6 +148,18 @@ class ApprovalsController extends ChangeNotifier {
         keepSelection: selection,
       );
       if (_closed || generation != _generation) return;
+      if (_explicitTarget != null && found.selection != _explicitTarget) {
+        // A notification/deep link must never silently select an unrelated
+        // request. Keep the missing target through automatic refresh/retry.
+        results = found;
+        selection = _explicitTarget;
+        detail = null;
+        readFailure = const WorkspaceFailure(
+          'not_found',
+          '未找到指定申请，可能已清理或属于其他资料库。请选择列表中的申请。',
+        );
+        return;
+      }
       if (filter == WorkspaceApprovalFilter.pending &&
           selection != null &&
           found.selection != selection &&
@@ -226,6 +239,7 @@ class ApprovalsController extends ChangeNotifier {
 
   Future<void> open(String id) async {
     if (frozen || _closed) return;
+    _explicitTarget = id;
     if (selection != id) {
       detail = null;
       detailScroll = 0;
@@ -241,6 +255,7 @@ class ApprovalsController extends ChangeNotifier {
 
   Future<void> select(String id) async {
     if (frozen || _closed) return;
+    _explicitTarget = null;
     selection = id;
     detail = null;
     detailScroll = 0;
@@ -276,6 +291,7 @@ class ApprovalsController extends ChangeNotifier {
 
   Future<void> search(String text) async {
     if (frozen) return;
+    _explicitTarget = null;
     keyword = text;
     offset = 0;
     selection = null;
@@ -285,6 +301,7 @@ class ApprovalsController extends ChangeNotifier {
 
   Future<void> setFilter(WorkspaceApprovalFilter value) async {
     if (frozen) return;
+    _explicitTarget = null;
     filter = value;
     offset = 0;
     selection = null;
@@ -294,6 +311,7 @@ class ApprovalsController extends ChangeNotifier {
 
   Future<void> page(int value) async {
     if (frozen) return;
+    _explicitTarget = null;
     offset = value;
     selection = null;
     listScroll = 0;

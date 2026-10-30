@@ -11,3 +11,10 @@ abstract interface class WorkspaceDesktop {
   Future<void> setNavigationEnabled(bool enabled);
   Future<void> quit();
 }
+
+/// Optional routing for a native notification. The opaque ID only selects a
+/// record; it never carries or confers permission to decide the request.
+abstract interface class WorkspaceRequestNavigation {
+  void Function(String requestId)? get onOpenRequest;
+  set onOpenRequest(void Function(String requestId)? callback);
+}

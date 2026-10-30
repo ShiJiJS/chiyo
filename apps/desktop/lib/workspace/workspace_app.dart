@@ -103,6 +103,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   bool _runtimeFrozen = false, _runtimeGate = false;
   bool _quitRequested = false;
   late final void Function(WorkspacePage) _desktopNavigation;
+  late final void Function(String) _desktopRequestNavigation;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   int _modalDepth = 0;
   bool? _nativeNavigationEnabled;
@@ -161,6 +162,13 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
       _controller.navigate(page);
       if (page == WorkspacePage.library) _library.focusSearch();
     };
+    _desktopRequestNavigation = (id) {
+      if (_controller.navigationLocked) return;
+      _navigate(WorkspacePage.approvals, id);
+    };
+    if (widget.desktop case final WorkspaceRequestNavigation desktop) {
+      desktop.onOpenRequest = _desktopRequestNavigation;
+    }
     widget.desktop?.onNavigate = _desktopNavigation;
     unawaited(_controller.refresh());
     unawaited(
@@ -281,6 +289,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     unawaited(_summaryChanges?.cancel());
     if (identical(widget.desktop?.onNavigate, _desktopNavigation)) {
       widget.desktop?.onNavigate = null;
+    }
+    if (widget.desktop case final WorkspaceRequestNavigation desktop) {
+      if (identical(desktop.onOpenRequest, _desktopRequestNavigation)) {
+        desktop.onOpenRequest = null;
+      }
     }
     super.dispose();
   }
