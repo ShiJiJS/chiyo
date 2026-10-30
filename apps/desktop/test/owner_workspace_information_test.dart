@@ -386,6 +386,16 @@ void main() {
       expect(
         await source.createRecord(
           WorkspaceCreate(
+            operationId: 'credential',
+            typeId: 'credential',
+            name: '凭据',
+          ),
+        ),
+        rejected('unsupported'),
+      );
+      expect(
+        await source.createRecord(
+          WorkspaceCreate(
             operationId: 'legacy',
             typeId: 'document',
             name: 'legacy',

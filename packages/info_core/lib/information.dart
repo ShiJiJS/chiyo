@@ -27,11 +27,17 @@ import 'info_core.dart'
         InformationDraftReceipt,
         InformationRecordReceipt,
         InformationRecordOperationRepository,
+        InformationClassificationRepository,
+        InformationClassificationChange,
+        InformationClassificationReceipt,
+        InformationClassificationAction,
+        InformationClassificationKind,
         InformationFileDeliveryRepository,
         InformationFileDelivery,
         SshHostTrustRepository,
         SshHostTrustSnapshot;
 part 'memory_information_files.dart';
+part 'memory_classification_operations.dart';
 
 enum FieldKind { structured, textNote, file }
 
@@ -402,7 +408,49 @@ class MemoryInformationRepository
         InformationAttachmentRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
+        InformationClassificationRepository,
         SshHostTrustRepository {
+  final _classificationReceipts = <String, InformationClassificationReceipt>{};
+  int _classificationRevision = 1;
+  String? _classificationFingerprint;
+  @override
+  Future<int> informationClassificationVersion() async =>
+      _classificationVersion();
+  @override
+  Future<InformationClassificationReceipt?> informationClassificationReceipt(
+    String operationId,
+  ) async => _classificationReceipts[operationId];
+  @override
+  Future<InformationClassificationReceipt> commitInformationClassification(
+    InformationClassificationChange change,
+  ) async {
+    change.validate();
+    if (_classificationVersion() != change.command.expectedVersion) {
+      throw const AccessFailure('organization_conflict');
+    }
+    if (_classificationReceipts.containsKey(change.command.operationId)) {
+      throw const AccessFailure('operation_conflict');
+    }
+    if (change.directory != null) {
+      _directories[change.targetId] = change.directory!;
+    }
+    if (change.tag != null) _tags[change.targetId] = change.tag!;
+    if (change.command.action == InformationClassificationAction.delete) {
+      if (change.command.kind == InformationClassificationKind.directory) {
+        _directories.remove(change.targetId);
+      } else {
+        _tags.remove(change.targetId);
+      }
+    }
+    for (final item in change.items) {
+      _items[item.id] = item;
+    }
+    _revisions.addAll(change.previous);
+    final receipt = change.receipt(_classificationVersion());
+    _classificationReceipts[receipt.operationId] = receipt;
+    return receipt;
+  }
+
   final _fileStages = MemoryInformationFileStages();
   final _informationFileDeliveries = <String, InformationFileDelivery>{};
   @override

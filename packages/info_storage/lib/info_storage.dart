@@ -22,11 +22,12 @@ part 'attachment_backup.dart';
 part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
+part 'classification_storage.dart';
 
-const _libraryFormat = 28;
+const _libraryFormat = 30;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 29;
+const _portableFocusedFillLibraryFormat = 31;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -111,7 +112,18 @@ class EncryptedInformationRepository
         InformationAttachmentRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
+        InformationClassificationRepository,
         SshHostTrustRepository {
+  @override
+  Future<int> informationClassificationVersion() => _classificationVersion();
+  @override
+  Future<InformationClassificationReceipt?> informationClassificationReceipt(
+    String operationId,
+  ) => _classificationReceipt(operationId);
+  @override
+  Future<InformationClassificationReceipt> commitInformationClassification(
+    InformationClassificationChange change,
+  ) => _commitClassification(change);
   @override
   Future<InformationRecordReceipt?> informationRecordReceipt(
     String operationId,
@@ -436,9 +448,12 @@ class EncryptedInformationRepository
         }
         final storedFormat = marker.single['version'] as int;
         // Preserve the portable-fill boundary across older receipt/layout
-        // formats. Format28 adds original command metadata to save receipts.
+        // formats. Format30 adds durable classification operations.
         openingFormat =
-            (storedFormat == 23 || storedFormat == 25 || storedFormat == 27)
+            (storedFormat == 23 ||
+                storedFormat == 25 ||
+                storedFormat == 27 ||
+                storedFormat == 29)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
@@ -1488,6 +1503,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _createInformationRecordOperations();
       await _createInformationDeliveries();
       await _organizationSchema();
+      await _createInformationClassification();
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
@@ -1577,6 +1593,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 21) await _createInformationDeliveries();
         if (sourceVersion < 24) await _createInformationRecordOperations();
         if (sourceVersion < 26) await _createInformationLayout();
+        if (sourceVersion < 30) await _createInformationClassification();
         await _createLibraryFormat();
       });
     },
@@ -1633,6 +1650,25 @@ class _InformationDatabase extends GeneratedDatabase {
     'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,'
     'invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
   );
+
+  Future<void> _createInformationClassification() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS information_classification_state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL CHECK(version>=1))',
+    );
+    await customStatement(
+      'INSERT OR IGNORE INTO information_classification_state VALUES(1,1)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS information_classification_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+    );
+    for (final table in ['information_directories', 'information_tags']) {
+      for (final operation in ['INSERT', 'UPDATE', 'DELETE']) {
+        await customStatement(
+          'CREATE TRIGGER IF NOT EXISTS ${table}_${operation.toLowerCase()}_classification AFTER $operation ON $table BEGIN UPDATE information_classification_state SET version=version+1 WHERE singleton=1; END',
+        );
+      }
+    }
+  }
 
   Future<void> _createInformationAttachments() async {
     await customStatement(
