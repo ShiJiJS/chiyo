@@ -220,6 +220,9 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
     if (draft.legacyTemplateId != null || draft.expectedLegacyVersion != null) {
       throw const WorkspaceFailure('unsupported', '旧模板采用尚未接入。');
     }
+    if (draft.typeId == 'credential') {
+      throw const WorkspaceFailure('unsupported', '托管凭据请使用凭据管理入口。');
+    }
     final definition = await loadTemplate(draft.typeId);
     if (draft.expectedTemplateVersion != definition['templateVersion'] ||
         draft.expectedTemplateDigest != definition['packageDigest']) {

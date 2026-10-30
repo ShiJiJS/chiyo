@@ -481,6 +481,8 @@ class InformationBackups {
                 'information_file_stages',
                 'information_draft_commits',
                 'information_record_operations',
+                'information_classification_state',
+                'information_classification_operations',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -720,6 +722,8 @@ class InformationBackups {
                     'information_file_stages',
                     'information_draft_commits',
                     'information_record_operations',
+                    'information_classification_state',
+                    'information_classification_operations',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -742,6 +746,13 @@ class InformationBackups {
         // Keep content-free tombstones so lookup cannot mistake it for untried.
         await _repository._db.customStatement(
           'UPDATE information_record_operations SET invalidated=1',
+        );
+        await _repository._db.customStatement(
+          'UPDATE information_classification_operations SET invalidated=1',
+        );
+        // Keep local versions monotonic even when restoring an empty catalog.
+        await _repository._db.customStatement(
+          'UPDATE information_classification_state SET version=version+1 WHERE singleton=1',
         );
         await _repository._db.customStatement('DELETE FROM settings');
         await _repository._db.customStatement('DELETE FROM organization_tasks');
