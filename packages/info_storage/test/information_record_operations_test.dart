@@ -260,7 +260,7 @@ void main() {
         try {
           expect(
             check.select('PRAGMA user_version').single.values.single,
-            old == 26 ? 36 : 37,
+            old == 26 ? 38 : 39,
           );
           expect(
             check
@@ -268,7 +268,7 @@ void main() {
                 .single
                 .values
                 .single,
-            old == 26 ? 36 : 37,
+            old == 26 ? 38 : 39,
           );
         } finally {
           check.close();

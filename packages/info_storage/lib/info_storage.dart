@@ -25,12 +25,13 @@ part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
 part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
+part 'backup_operations.dart';
 part 'information_purge_storage.dart';
 
-const _libraryFormat = 36;
+const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 37;
+const _portableFocusedFillLibraryFormat = 39;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -470,7 +471,7 @@ class EncryptedInformationRepository
         }
         final storedFormat = marker.single['version'] as int;
         // Preserve the portable-fill boundary across older receipt/layout
-        // formats. Format36 adds atomic approval decision receipts.
+        // formats. Format38 adds local recovery-key operation receipts.
         openingFormat =
             (storedFormat == 23 ||
                 storedFormat == 25 ||
@@ -478,7 +479,8 @@ class EncryptedInformationRepository
                 storedFormat == 29 ||
                 storedFormat == 31 ||
                 storedFormat == 33 ||
-                storedFormat == 35)
+                storedFormat == 35 ||
+                storedFormat == 37)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
@@ -1554,6 +1556,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _createInformationClassification();
       await _createInformationLifecycle();
       await _createInformationApproval();
+      await _createBackupOperations();
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
@@ -1646,6 +1649,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 30) await _createInformationClassification();
         if (sourceVersion < 32) await _createInformationLifecycle();
         if (sourceVersion < 36) await _createInformationApproval();
+        if (sourceVersion < 38) await _createBackupOperations();
         await _createLibraryFormat();
       });
     },
@@ -1853,6 +1857,18 @@ class _InformationDatabase extends GeneratedDatabase {
   Future<void> _createTemplates() => customStatement(
     'CREATE TABLE field_templates(id TEXT PRIMARY KEY,name TEXT NOT NULL,description TEXT NOT NULL,version INTEGER NOT NULL,fields_json TEXT NOT NULL)',
   );
+
+  Future<void> _createBackupOperations() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS backup_operation_state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL CHECK(version>=1))',
+    );
+    await customStatement(
+      'INSERT OR IGNORE INTO backup_operation_state VALUES(1,1)',
+    );
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS backup_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+    );
+  }
 
   Future<void> _backupSchema() async {
     await customStatement(
