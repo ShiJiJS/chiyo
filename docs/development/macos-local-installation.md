@@ -1,5 +1,34 @@
 # Mac 本机预览安装与升级约定（#42 / #50）
 
+## Round09 升级准备（2026-10-30，尚未换入）
+
+固定安装当前仍为 package23（`7b19d34`），不是新的真实功能候选。
+Round09候选 `1443d358` 已在 `build/macos-adaptation/m04-candidate-1443d358/AgentInfoManage`
+准备。两者逐文件/模式/内部链接和 deep/strict 签名已重新核对；候选7983项、
+当前安装7972项（均含manifest）。当前安装没有清单外文件，两个目录保持不变。
+
+新增只做准备的工具：
+
+```sh
+python3 scripts/prepare-macos-upgrade.py \
+  --candidate build/macos-adaptation/m04-candidate-1443d358/AgentInfoManage \
+  --output local/private/mac-round09-upgrade-1443d358
+```
+
+输出目录必须不存在。工具不会换包、启动程序、读取资料库/恢复密钥或安装hooks。
+它逐项核对新旧完整载荷及签名，并把旧安装压成单个 `previous-application.tar.gz`；
+不生成新的展开App。归档逐成员核对文件字节、权限及符号链接，再检查原目录和候选
+未改变。私有目录0700、归档/回执0600；本轮归档120900509字节。
+[准备回执](evidence/zhiyu-round09/m04-upgrade-preparation.json)不含资料或密钥。
+
+**程序归档不包含用户资料，也不能替代资料备份。** 10月22日的历史合成备份已验证
+可由新版恢复、编辑、重开及再导出，但不能推断其等于当前资料库。正式换包仍按下方
+升级顺序执行：由旧版导出最新完整备份并确认恢复密钥另存，正常退出，再整体换包。
+新签名仍可能需要本人在系统提示允许；正常启动不会自动请求密码。当前未使用
+computer use，已向主人集中说明旧版备份页面的这一项操作，尚未收到完成结果。
+
+下面的“当前”描述均为历史快照；安装未变的结论以上方本次实测为准。
+
 2026-10-23 当前构建：`6ff99169`的完整ARM64开发候选已归档，纳入近期Mac适配及
 关闭状态的焦点填充helper；[产物与清理回执](evidence/macos-current-candidate/verification.json)
 明确区分构建检查和系统验收。只保留新ZIP及构建记录，本轮App/dSYM副本已清理；
