@@ -167,16 +167,50 @@ class WorkspaceAgentsPage extends StatelessWidget {
               SettingsPreferenceRow(
                 title: '会话关联',
                 description: v == null
-                    ? '当前聊天关联尚未确认。'
+                    ? '所选会话关联尚未确认。'
                     : v.session.state == WorkspaceAgentSessionState.linked
                     ? '${v.session.label}（Agent 自述） · ${v.session.pendingRequests} 条待处理申请 · ${v.session.activeGrants} 项有效授权。每个聊天独立关联。'
                     : _sessionExplanation(v.session.state),
-                control: DesktopButton(
-                  key: const ValueKey('agents-session'),
-                  onPressed: m.loading
-                      ? null
-                      : () => _open(context, WorkspaceAgentView.session),
-                  child: const Text('查看当前聊天'),
+                control: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (v != null && v.sessions.isNotEmpty)
+                      SizedBox(
+                        width: 260,
+                        child: DesktopSelect<String>(
+                          key: const ValueKey('agents-session-select'),
+                          value:
+                              v.sessions.any((s) => s.id == m.selectedSessionId)
+                              ? m.selectedSessionId
+                              : '',
+                          isExpanded: true,
+                          items: [
+                            const DropdownMenuItem(
+                              value: '',
+                              child: Text('请选择会话'),
+                            ),
+                            for (final s in v.sessions)
+                              DropdownMenuItem(
+                                value: s.id,
+                                child: Text(
+                                  '${s.label} · ${s.id!.substring(0, s.id!.length.clamp(0, 8))} · ${s.state.label}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                          onChanged: m.loading
+                              ? null
+                              : (id) => m.selectSession(id == '' ? null : id),
+                        ),
+                      ),
+                    DesktopButton(
+                      key: const ValueKey('agents-session'),
+                      onPressed: m.loading
+                          ? null
+                          : () => _open(context, WorkspaceAgentView.session),
+                      child: const Text('查看所选会话'),
+                    ),
+                  ],
                 ),
               ),
               SettingsPreferenceRow(
@@ -221,9 +255,10 @@ class WorkspaceAgentsPage extends StatelessWidget {
 }
 
 String _sessionExplanation(WorkspaceAgentSessionState state) => switch (state) {
-  WorkspaceAgentSessionState.linked => '当前聊天已关联；具体内容仍需独立申请。',
+  WorkspaceAgentSessionState.unselected => '请选择要查看的会话；本页不会猜测你正在使用哪个聊天。',
+  WorkspaceAgentSessionState.linked => '所选会话已在服务端关联；具体内容仍需独立申请，宿主信任需另外核对。',
   WorkspaceAgentSessionState.missing =>
-    '当前聊天尚未取得有效关联。按接入流程检查后，在正确的新聊天中接入；不要粘贴聊天 ID 或私密值来猜测关联。',
+    '所选会话尚未取得有效关联。按接入流程检查后，在正确的新聊天中接入；不要粘贴聊天 ID 或私密值来猜测关联。',
   WorkspaceAgentSessionState.mismatch =>
     '私密关联与当前聊天的绑定无法核对。停止复用该关联，在正确聊天重新检查；不能仅凭公开聊天 ID 找回访问能力。',
   WorkspaceAgentSessionState.ended =>
@@ -378,10 +413,10 @@ class _AgentFlowState extends State<_AgentFlow> {
             _text(context, '此定义尚未完整核对。回到宿主正式信任入口审查准确命令；本页不替你信任。', muted: true),
           ],
         ] else
-          _text(context, '未发现该事件的完整定义，请检查接入材料。'),
+          _text(context, '无法核对该事件的宿主定义与信任状态，请在宿主接入设置中检查。'),
       ],
       const SizedBox(height: 18),
-      _heading(context, '当前聊天关联'),
+      _heading(context, '所选会话关联'),
       _text(context, _sessionExplanation(report.session.state)),
       _text(
         context,
@@ -429,7 +464,7 @@ class _AgentFlowState extends State<_AgentFlow> {
           WorkspaceAgentView.setup => 'Agent 接入流程',
           WorkspaceAgentView.rules => 'Agent 录入与整理约定',
           WorkspaceAgentView.diagnostics => '接入诊断',
-          WorkspaceAgentView.session => '当前聊天关联',
+          WorkspaceAgentView.session => '所选会话关联',
         }),
         content: Column(
           mainAxisSize: MainAxisSize.min,

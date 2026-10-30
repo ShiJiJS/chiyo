@@ -6,6 +6,7 @@ import 'owner_workspace_classification.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_information.dart';
 import 'owner_workspace_approvals.dart';
+import 'owner_workspace_agents.dart';
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
@@ -20,7 +21,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
     this.settings = const UnavailableWorkspaceSettings(),
     this.backups = const UnavailableWorkspaceBackup(),
     this.runtime = const UnavailableWorkspaceRuntime(),
-    this.agents = const UnavailableWorkspaceAgents(),
+    WorkspaceAgentsSource? agents,
     this.credentials = const UnavailableWorkspaceCredential(),
     WorkspaceApprovalSource? approvals,
     this.grantHistory = const UnavailableWorkspaceGrantHistory(),
@@ -29,6 +30,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
     this.hosts = const UnavailableWorkspaceHost(),
     this.legacyTemplates = const UnavailableWorkspaceLegacyTemplate(),
   }) : _scope = owner.captureLibraryScope() {
+    this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     _information = OwnerWorkspaceInformation(
       owner: owner,
@@ -70,7 +72,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   @override
   final WorkspaceRuntimeSource runtime;
   @override
-  final WorkspaceAgentsSource agents;
+  late final WorkspaceAgentsSource agents;
   @override
   final WorkspaceCredentialSource credentials;
   @override
@@ -129,6 +131,9 @@ class OwnerWorkspaceSource implements WorkspaceSource {
                     for (final f in r.approvedFields ?? <core.FieldRef>[])
                       [f.itemId, f.fieldId],
                   ],
+              ],
+              [
+                for (final s in owner.sessions) [s.id, s.chatLabel, s.ended],
               ],
               owner.queryProposals(limit: 1).pendingCount,
             ]);

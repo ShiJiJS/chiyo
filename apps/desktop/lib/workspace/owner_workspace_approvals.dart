@@ -26,7 +26,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
     }
   }
 
-  WorkspaceApprovalState _state(core.OwnerRequestSnapshot r) {
+  static WorkspaceApprovalState stateOf(core.OwnerRequestSnapshot r) {
     if (r.sessionEnded ||
         r.applicationClosed ||
         (r.historical && r.state == core.AccessRequestState.approved)) {
@@ -45,7 +45,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
     };
   }
 
-  WorkspaceApprovalSummary _summary(core.OwnerRequestSnapshot r) =>
+  static WorkspaceApprovalSummary summaryOf(core.OwnerRequestSnapshot r) =>
       WorkspaceApprovalSummary(
         id: r.id,
         title: '资料读取申请',
@@ -56,7 +56,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         purpose: r.purpose,
         submittedAt: r.createdAt,
         requestExpiresAt: r.requestExpiresAt,
-        state: _state(r),
+        state: stateOf(r),
       );
 
   @override
@@ -85,7 +85,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         )
         .toList();
     final pending = matching
-        .where((r) => _state(r) == WorkspaceApprovalState.pending)
+        .where((r) => stateOf(r) == WorkspaceApprovalState.pending)
         .length;
     final filtered =
         matching
@@ -93,9 +93,9 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
               (r) => switch (query.filter) {
                 WorkspaceApprovalFilter.all => true,
                 WorkspaceApprovalFilter.pending =>
-                  _state(r) == WorkspaceApprovalState.pending,
+                  stateOf(r) == WorkspaceApprovalState.pending,
                 WorkspaceApprovalFilter.done =>
-                  _state(r) != WorkspaceApprovalState.pending,
+                  stateOf(r) != WorkspaceApprovalState.pending,
               },
             )
             .toList()
@@ -113,7 +113,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         ? selectedIndex
         : offset;
     return WorkspaceApprovalResults(
-      items: filtered.skip(offset).take(query.limit).map(_summary),
+      items: filtered.skip(offset).take(query.limit).map(summaryOf),
       total: filtered.length,
       pending: pending,
       offset: offset,
@@ -168,13 +168,13 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         }(),
     ];
     return WorkspaceApprovalDetail(
-      request: _summary(r),
+      request: summaryOf(r),
       reviewToken: sha256
           .convert(
             utf8.encode(
               jsonEncode([
                 r.id,
-                _state(r).name,
+                stateOf(r).name,
                 r.requestExpiresAt.toIso8601String(),
                 r.grantExpiresAt?.toIso8601String(),
                 for (final s in scopes) [s.id, s.recordVersion, s.available],

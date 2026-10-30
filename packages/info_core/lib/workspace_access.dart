@@ -81,8 +81,32 @@ class InboxPage {
   final int total, allCount, pendingCount, offset, limit;
 }
 
+/// Public service-side association, never a capability or a host trust claim.
+class OwnerSessionSnapshot {
+  const OwnerSessionSnapshot({
+    required this.id,
+    required this.chatLabel,
+    required this.ended,
+  });
+  final String id, chatLabel;
+  final bool ended;
+}
+
 extension OwnerInbox on OwnerAccess {
   bool get serviceAvailable => !_service._closed && !_service._backupBusy;
+
+  /// Includes sessions with no requests. No private session/end proof escapes.
+  List<OwnerSessionSnapshot> get sessions {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    return List.unmodifiable([
+      for (final entry in _service._sessions.entries)
+        OwnerSessionSnapshot(
+          id: _service._sessionBindings[entry.key]!,
+          chatLabel: entry.value,
+          ended: _service._endedSessions.contains(entry.key),
+        ),
+    ]);
+  }
 
   /// Ordinary information requests only. Credential requests have their own
   /// projection even when they also contain ordinary field references.

@@ -12,6 +12,12 @@ class WorkspaceAgentsController extends ChangeNotifier {
   final WorkspaceAgentsSource source;
   late final StreamSubscription<WorkspaceRecordRef?> _changes;
   WorkspaceAgentOverview? value, report;
+  String? selectedSessionId;
+  Future<void> selectSession(String? id) async {
+    selectedSessionId = id;
+    await load();
+  }
+
   WorkspaceAgentSessionDetail? session;
   WorkspaceAgentView? view;
   WorkspaceFailure? readFailure, detailFailure;
@@ -42,7 +48,7 @@ class WorkspaceAgentsController extends ChangeNotifier {
     readFailure = null;
     _notify();
     try {
-      final next = await source.read();
+      final next = await source.read(sessionId: selectedSessionId);
       if (!next.valid) {
         throw const WorkspaceFailure('invalid_observation', '接入观察无法确认，请重新检测。');
       }
