@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "prepared": true,
+  "installed": false,
+  "sourceCommit": "6a1d9ec2e19c03dbab47602e6542bb91d8983bde",
+  "installedRelease": "0.4.1+13-mac-dev.7b19d34b61cf",
+  "candidateRelease": "0.4.1+13-mac-dev.1443d358e606",
+  "candidateSource": "1443d358e6069c5ea923c4e3f3386cfe97fc8fd3",
+  "candidateManifestSha256": "36472b97ff01f36f227130b1df587a337328a8193f9cb02c40608dda4cc67f9d",
+  "installedManifestSha256": "951833e3168bccafdb1b06c2de70d0064c8541a2596dd1257c09b042351f1036",
+  "installedFiles": 7972,
+  "candidateFiles": 7983,
+  "extraInstalledFilesPreserved": [],
+  "applicationBackupIsNotDataBackup": true,
+  "libraryOpened": false,
+  "keychainAccessed": false,
+  "remaining": [
+    "fresh owner-exported encrypted backup and separately saved recovery key",
+    "normal exit and stopped process/listener check immediately before replacement",
+    "whole-directory replacement, normal Release launch and Keychain decision if needed",
+    "verify original data and normal independent reopen before deleting recovery artifacts"
+  ],
+  "archiveBytes": 120900509,
+  "archiveSha256": "9b1a4a786f32eca01e083e66226508051a7433a5c1187a3d7cb1c1b018094aa8",
+  "archiveMembersVerified": 7972,
+  "installedPayloadUnchanged": true,
+  "candidatePayloadUnchanged": true,
+  "checkerSha256": "f19e243ba7771de8eb4f6d93e02e0b8282eee211c0e9f93272055e0a6fcddee5"
+}
