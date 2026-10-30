@@ -14,6 +14,7 @@ enum WorkspaceAgentCheck {
 }
 
 enum WorkspaceAgentSessionState {
+  unselected('请选择会话'),
   linked('已关联'),
   missing('尚未关联'),
   mismatch('绑定不符'),
@@ -24,6 +25,7 @@ enum WorkspaceAgentSessionState {
 }
 
 enum WorkspaceAgentConnection {
+  unverified('接入状态待核对'),
   ready('已连接'),
   serviceUnavailable('服务不可用'),
   toolsMissing('接入工具未就绪'),
@@ -119,13 +121,16 @@ class WorkspaceAgentOverview {
     required Iterable<WorkspaceAgentHook> hooks,
     required this.session,
     this.serviceReason,
-  }) : hooks = List.unmodifiable(hooks);
+    Iterable<WorkspaceAgentSession> sessions = const [],
+  }) : hooks = List.unmodifiable(hooks),
+       sessions = List.unmodifiable(sessions);
   final int version;
   final DateTime observedAt;
   final bool serviceAvailable;
   final WorkspaceAgentCheck cli, skill;
   final List<WorkspaceAgentHook> hooks;
   final WorkspaceAgentSession session;
+  final List<WorkspaceAgentSession> sessions;
   final String? serviceReason;
   static const requiredEvents = ['SessionStart', 'SubagentStart', 'SessionEnd'];
   bool get hooksReady => requiredEvents.every(
@@ -136,15 +141,22 @@ class WorkspaceAgentOverview {
   bool get valid =>
       version > 0 &&
       session.valid &&
+      sessions.every((s) => s.valid && s.id != null) &&
+      sessions.map((s) => s.id).toSet().length == sessions.length &&
       hooks.map((h) => h.event).toSet().length == hooks.length &&
       hooks.every((h) => requiredEvents.contains(h.event));
   WorkspaceAgentConnection get connection => !serviceAvailable
       ? WorkspaceAgentConnection.serviceUnavailable
+      : cli == WorkspaceAgentCheck.unavailable ||
+            skill == WorkspaceAgentCheck.unavailable
+      ? WorkspaceAgentConnection.unverified
       : cli != WorkspaceAgentCheck.ready || skill != WorkspaceAgentCheck.ready
       ? WorkspaceAgentConnection.toolsMissing
       : !hooksReady
       ? WorkspaceAgentConnection.hooksUntrusted
       : switch (session.state) {
+          WorkspaceAgentSessionState.unselected =>
+            WorkspaceAgentConnection.associationMissing,
           WorkspaceAgentSessionState.linked => WorkspaceAgentConnection.ready,
           WorkspaceAgentSessionState.missing =>
             WorkspaceAgentConnection.associationMissing,
@@ -165,6 +177,7 @@ class WorkspaceAgentOverview {
             'skill': skill.name,
             'hooks': hooks.map((h) => h.json).toList(),
             'session': session.json,
+            'sessions': sessions.map((s) => s.json).toList(),
           }),
         ),
       )
@@ -198,7 +211,7 @@ class WorkspaceAgentSessionDetail {
 /// Read-only observations. No hook trust/configuration mutation, process launch,
 /// private association, authentication file or chat transcript crosses this port.
 abstract interface class WorkspaceAgentsSource {
-  Future<WorkspaceAgentOverview> read();
+  Future<WorkspaceAgentOverview> read({String? sessionId});
   Future<WorkspaceAgentOverview> diagnose(int expectedVersion);
   Future<WorkspaceAgentSessionDetail> currentSession(int expectedVersion);
 }

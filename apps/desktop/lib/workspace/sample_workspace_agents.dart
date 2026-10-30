@@ -99,7 +99,7 @@ class SampleWorkspaceAgents implements WorkspaceAgentsSource {
     session: _session(),
   );
   @override
-  Future<WorkspaceAgentOverview> read() async {
+  Future<WorkspaceAgentOverview> read({String? sessionId}) async {
     await _ready();
     if (nextReadFailure case final error?) {
       nextReadFailure = null;

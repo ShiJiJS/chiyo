@@ -55,3 +55,20 @@
 首次启动器测试遇到跨真实/模拟时钟的审计收尾挂起，沿用上一检查点的排空原则，让恢复/退出先启动、再驱动两种调度并有界核对完成；中止的运行不计成功。随后真实旧资料触发上述详情异常，修复后完整40项通过。小型日志保留在 `build/macos-adaptation/m02-routing-test.log`，没有新 App/dSYM、个人资料/Keychain、CUA 或 Windows CI。
 
 下一步仍为 Agent 接入诊断和 #72 审批写入：必须区分交付 CLI、Skill 安装、宿主 hook 定义与正式信任。当前聊天需要可核对的会话选择依据，不能把最后一条申请的会话冒充当前聊天，也不能从个人关联文件或公开聊天 ID 恢复能力。#71 保持 OPEN。
+
+## 真实服务会话观察与明确选择（2026-10-30）
+
+正式 `OwnerWorkspaceSource` 现在使用 `OwnerWorkspaceAgents`，替换 Agent 页的不可用来源。核心新增仅供主人端的公开会话快照，包含未提交申请的会话；不返回私密会话证明或仅撤销凭据，也未新增 Agent 端接口。列表合并当前关联与保留的普通资料申请历史，已结束/服务重开的历史不恢复活跃授权；统计范围明确仅含普通资料申请。
+
+主人明确选择会话后才能查看该会话的关联申请；同名会话以公开标识区分，不从最新请求推断正在使用的聊天。选择丢失不会切到别的会话。刷新签名包含空会话创建/结束；诊断和会话详情重新读取真实事实，状态变化或较新读取使旧观察失效。收件箱与会话页复用同一请求状态映射。
+
+本轮只接服务端可观察事实。CLI 载荷/网络连通、个人 Skill 安装和宿主正式信任仍显示“无法核对”，顶部为“接入状态待核对”，不是已连接，也不把未观察到 hook 当作未安装。未扫描个人配置、关联文件或聊天记录，未执行 hook、修改信任或创建申请。
+
+验证：
+
+- desktop 六文件共 **34 项通过**：`owner_workspace_agents_test.dart`（4项真实 SQLCipher/控制器检查）、`owner_workspace_agents_widget_test.dart`（1项实际选择器与详情交互，MemoryInformationRepository）、`workspace_agents_test.dart`、`zhiyu_agents_test.dart`、`owner_workspace_approvals_test.dart`、`owner_workspace_source_test.dart`。
+- core `workspace_test.dart` + `session_end_transport_test.dart` **4 项通过**；desktop/core 静态检查通过，`git diff --check` 通过。
+- 新检查覆盖无请求同名会话、公开标识不能鉴权、未选择/缺失目标不猜测、选定会话保持、批准/到期/结束使旧观察失效、加密库重开只保留历史、空会话变化通知。
+- Widget 曾在清理阶段因跨模拟/真实时钟的异步关闭停留，诊断运行被中断，不计通过。最终拆分持久化与界面测试，按同一 widget 时钟分别发起来源/服务关闭并推进两个时钟，完整重跑通过；不以测试修复宣称实机验收。
+
+未生成 App/dSYM、未替换用户预览；没有个人资料/Keychain、computer use 或 Windows CI。#71 仍 OPEN：配套工具的实际核对、宿主接入说明/可观察边界、请求来源说明完善及 #72 联调继续推进；#73 的真实宿主与同一候选交付尚未完成。

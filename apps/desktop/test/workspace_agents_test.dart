@@ -13,7 +13,8 @@ class AgentPort implements WorkspaceAgentsSource {
   Future<WorkspaceAgentSessionDetail> Function()? sessionOverride;
   int diagnostics = 0;
   @override
-  Future<WorkspaceAgentOverview> read() => readOverride?.call() ?? inner.read();
+  Future<WorkspaceAgentOverview> read({String? sessionId}) =>
+      readOverride?.call() ?? inner.read(sessionId: sessionId);
   @override
   Future<WorkspaceAgentOverview> diagnose(int version) {
     diagnostics++;

@@ -61,7 +61,7 @@ class UnavailableWorkspaceRuntime implements WorkspaceRuntimeSource {
 class UnavailableWorkspaceAgents implements WorkspaceAgentsSource {
   const UnavailableWorkspaceAgents();
   @override
-  Future<WorkspaceAgentOverview> read() => _unavailable();
+  Future<WorkspaceAgentOverview> read({String? sessionId}) => _unavailable();
   @override
   Future<WorkspaceAgentOverview> diagnose(int expectedVersion) =>
       _unavailable();
