@@ -95,7 +95,7 @@ class WorkspaceInformationCodec {
             {
               'kind': 'fields',
               'title': '资料',
-              'fields': [for (final f in descriptors) f['key']],
+              'keys': [for (final f in descriptors) f['key']],
             },
           ],
           'relations': <Object?>[],

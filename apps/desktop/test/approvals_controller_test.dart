@@ -75,6 +75,25 @@ void main() {
   });
 
   test(
+    'missing explicit request stays missing through refresh until owner selects another',
+    () async {
+      await m.open('does-not-exist');
+      expect(m.selection, 'does-not-exist');
+      expect(m.detail, isNull);
+      expect(m.readFailure?.code, 'not_found');
+      expect(m.canDecide, isFalse);
+      expect(m.results!.items, isNotEmpty);
+      await m.load();
+      expect(m.selection, 'does-not-exist');
+      expect(m.readFailure?.code, 'not_found');
+      await m.select('server');
+      expect(m.detail!.request.id, 'server');
+      expect(m.readFailure, isNull);
+      expect(port.writes, 0);
+    },
+  );
+
+  test(
     'late query/read and late failure cannot replace newer selection or leave it busy',
     () async {
       await m.load();
