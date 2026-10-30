@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:info_cli/macos_agent_bundle.dart';
+import 'owner_workspace_agents.dart';
 import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
@@ -18,6 +20,7 @@ class OwnerWorkspaceHost extends StatefulWidget {
 
 class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   late OwnerWorkspaceSource _source;
+  final _bundle = MacAgentBundle();
   late final RuntimeWorkspaceDesktop _desktop;
   StreamSubscription<WorkspaceRecordRef?>? _changes;
   @override
@@ -28,7 +31,13 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   }
 
   void _bind() {
-    _source = OwnerWorkspaceSource(owner: widget.runtime.service.owner);
+    _source = OwnerWorkspaceSource(
+      owner: widget.runtime.service.owner,
+      agents: OwnerWorkspaceAgents(
+        owner: widget.runtime.service.owner,
+        readBundle: _bundle.read,
+      ),
+    );
     _changes = _source.changes.listen((_) {
       if (!mounted ||
           _source.isCurrentLibrary ||
