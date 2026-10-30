@@ -65,6 +65,10 @@ extension OwnerInformationDrafts on OwnerAccess {
       return previousReceipt.item;
     }
     _checkInformationFileDraft(draft);
+    if (input.command != null &&
+        input.command!.typeId != input.layout?.layout.typeId) {
+      throw const AccessFailure('invalid_information');
+    }
     final before = input.itemId == null
         ? null
         : information.where((i) => i.id == input.itemId).firstOrNull;
@@ -223,6 +227,7 @@ extension OwnerInformationDrafts on OwnerAccess {
                 itemId: item.id,
                 version: item.version,
                 baseVersion: input.baseVersion,
+                command: input.command,
               )
             : null,
       ),

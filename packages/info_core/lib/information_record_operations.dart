@@ -1,5 +1,31 @@
 part of 'info_core.dart';
 
+/// Original owner command identity, independent of later edits or deletion.
+/// Only a type identifier and a digest are retained, never form content.
+final class InformationRecordCommand {
+  InformationRecordCommand({required this.typeId, required this.digest}) {
+    if (typeId.trim().isEmpty ||
+        typeId.length > 512 ||
+        typeId.codeUnits.any((c) => c < 32) ||
+        !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest)) {
+      throw const FormatException('Invalid information record command');
+    }
+  }
+  final String typeId, digest;
+  Map<String, Object?> toJson() => {'typeId': typeId, 'digest': digest};
+  factory InformationRecordCommand.fromJson(Map<String, dynamic> json) {
+    if (json.length != 2 ||
+        json['typeId'] is! String ||
+        json['digest'] is! String) {
+      throw const FormatException('Invalid information record command');
+    }
+    return InformationRecordCommand(
+      typeId: json['typeId'] as String,
+      digest: json['digest'] as String,
+    );
+  }
+}
+
 /// Owner-only proof of a committed save. Contains neither field values nor a
 /// retained item snapshot, so purging content does not leave a second copy here.
 final class InformationRecordReceipt {
@@ -9,20 +35,25 @@ final class InformationRecordReceipt {
     required this.itemId,
     required this.version,
     required this.baseVersion,
+    this.command,
   });
   final String operationId, inputHash, itemId;
   final int version;
   final int? baseVersion;
+  final InformationRecordCommand? command;
   Map<String, Object?> toJson() => {
     'operationId': operationId,
     'inputHash': inputHash,
     'itemId': itemId,
     'version': version,
     'baseVersion': baseVersion,
+    if (command != null) 'command': command!.toJson(),
   };
 
   factory InformationRecordReceipt.fromJson(Map<String, dynamic> json) {
-    if (json.length != 5 ||
+    if (json.length != (json.containsKey('command') ? 6 : 5) ||
+        (json.containsKey('command') &&
+            json['command'] is! Map<String, dynamic>) ||
         json['operationId'] is! String ||
         json['itemId'] is! String ||
         (json['itemId'] as String).isEmpty ||
@@ -48,6 +79,11 @@ final class InformationRecordReceipt {
       itemId: json['itemId'] as String,
       version: json['version'] as int,
       baseVersion: json['baseVersion'] as int?,
+      command: json.containsKey('command')
+          ? InformationRecordCommand.fromJson(
+              json['command'] as Map<String, dynamic>,
+            )
+          : null,
     );
   }
 }
@@ -137,6 +173,7 @@ extension OwnerInformationRecords on OwnerAccess {
         itemId: item.id,
         version: item.version,
         baseVersion: input.baseVersion,
+        command: input.command,
       );
     } finally {
       draft._active = false;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'workspace_records.dart';
 import 'workspace_entries.dart';
@@ -7,6 +8,62 @@ import 'workspace_files.dart';
 /// Owner-only translation. No sample source, database or agent transport lives
 /// here. Bodies remain in core fields; snapshots carry descriptors and order.
 class WorkspaceInformationCodec {
+  core.InformationRecordCommand createCommand(WorkspaceCreate draft) =>
+      _command(draft.typeId, {
+        'kind': 'create',
+        'typeId': draft.typeId,
+        'name': draft.name,
+        'description': draft.description,
+        'directoryId': draft.directoryId,
+        'tagIds': draft.tagIds.toList()..sort(),
+        'values': draft.values,
+        'relations': _commandRelations(draft.relations),
+        'fileSelections': draft.fileSelections,
+        'expectedTemplateVersion': draft.expectedTemplateVersion,
+        'expectedTemplateDigest': draft.expectedTemplateDigest,
+        'legacyTemplateId': draft.legacyTemplateId,
+        'expectedLegacyVersion': draft.expectedLegacyVersion,
+      });
+
+  core.InformationRecordCommand editCommand(WorkspaceEdit edit) =>
+      _command(edit.record.type.id, {
+        'kind': 'edit',
+        'record': edit.record.ref.key,
+        'expectedVersion': edit.expectedVersion,
+        'typeId': edit.record.type.id,
+        'name': edit.record.name,
+        'description': edit.record.description,
+        'directoryId': edit.record.directoryId,
+        'tagIds': edit.record.tags.map((t) => t.id).toList()..sort(),
+        'values': edit.values,
+        'relations': _commandRelations(edit.relations),
+      });
+
+  Map<String, Object?> _commandRelations(
+    Map<String, List<WorkspaceRecordRef>> relations,
+  ) => {
+    for (final e in relations.entries) e.key: [for (final r in e.value) r.key],
+  };
+
+  core.InformationRecordCommand _command(
+    String type,
+    Map<String, Object?> value,
+  ) {
+    Object? canonical(Object? value) => switch (value) {
+      Map<String, Object?> map => {
+        for (final key in map.keys.toList()..sort()) key: canonical(map[key]),
+      },
+      List list => list.map(canonical).toList(),
+      _ => value,
+    };
+    return core.InformationRecordCommand(
+      typeId: type,
+      digest: sha256
+          .convert(utf8.encode(jsonEncode(canonical(value))))
+          .toString(),
+    );
+  }
+
   static String _fieldSlot(String key) => jsonEncode(['field', key]);
   static String _entrySlot(String key, String id, String part) =>
       jsonEncode(['entry', key, id, part]);
@@ -25,7 +82,7 @@ class WorkspaceInformationCodec {
         for (final f in item.fields) _descriptor(f, _legacyKey(f.id)),
       ];
       return WorkspaceDetail(
-        record: _summary(item, tagNames),
+        record: summary(item, tagNames: tagNames),
         version: item.version,
         templateState: layout == null
             ? WorkspaceTemplateState.available
@@ -67,7 +124,7 @@ class WorkspaceInformationCodec {
           Map<String, Object?>.from(f as Map),
       ];
       final base = WorkspaceDetail(
-        record: _summary(item, tagNames),
+        record: summary(item, tagNames: tagNames),
         version: item.version,
         definition: definition,
         fieldOverrides: overrides,
@@ -140,7 +197,7 @@ class WorkspaceInformationCodec {
         ids[key] = field.id;
       }
       return WorkspaceDetail(
-        record: _summary(item, tagNames),
+        record: summary(item, tagNames: tagNames),
         version: item.version,
         definition: definition,
         values: values,
@@ -156,10 +213,10 @@ class WorkspaceInformationCodec {
     }
   }
 
-  WorkspaceRecordSummary _summary(
-    core.InformationItem item,
-    Map<String, String> names,
-  ) {
+  WorkspaceRecordSummary summary(
+    core.InformationItem item, {
+    Map<String, String> tagNames = const {},
+  }) {
     final rawType = item.layout?.snapshot['type'];
     final type = rawType is Map ? rawType : null;
     return WorkspaceRecordSummary(
@@ -168,15 +225,17 @@ class WorkspaceInformationCodec {
       description: item.description,
       type: WorkspaceType(
         item.layout?.typeId ?? 'generic',
-        type?['name'] as String? ?? '通用资料',
-        type?['icon'] as String? ?? 'file',
+        type?['name'] is String ? type!['name'] as String : '通用资料',
+        type?['icon'] is String ? type!['icon'] as String : 'file',
       ),
       updatedAt:
           item.modifiedAt ??
           item.createdAt ??
           DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
       directoryId: item.directoryId,
-      tags: [for (final id in item.tagIds) WorkspaceTag(id, names[id] ?? id)],
+      tags: [
+        for (final id in item.tagIds) WorkspaceTag(id, tagNames[id] ?? id),
+      ],
     );
   }
 
@@ -246,6 +305,7 @@ class WorkspaceInformationCodec {
         values: draft.values,
         relations: draft.relations,
       ),
+      command: createCommand(draft),
     );
   }
 
@@ -276,13 +336,19 @@ class WorkspaceInformationCodec {
       values: {...previous.values, ...edit.values},
       relations: {...previous.relations, ...edit.relations},
     );
-    return _encode(detail, current: current, previous: previous);
+    return _encode(
+      detail,
+      current: current,
+      previous: previous,
+      command: editCommand(edit),
+    );
   }
 
   core.InformationDraftInput _encode(
     WorkspaceDetail detail, {
     core.InformationItem? current,
     WorkspaceDetail? previous,
+    required core.InformationRecordCommand command,
   }) {
     final errors = <String, String>{}, metadataErrors = <String, String>{};
     final record = detail.record;
@@ -530,6 +596,7 @@ class WorkspaceInformationCodec {
       directoryId: record.directoryId,
       tagIds: record.tags.map((t) => t.id),
       fields: fields,
+      command: command,
       layout: core.InformationDraftLayout(
         core.InformationLayout(
           typeId: record.type.id,

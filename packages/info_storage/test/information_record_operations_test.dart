@@ -121,6 +121,169 @@ void main() {
     },
   );
 
+  InformationDraftInput commandInput({
+    String typeId = 'document',
+    String? digest,
+  }) => InformationDraftInput(
+    name: '合成文档',
+    description: '',
+    fields: const [
+      InformationDraftField.text('正文', '', 'private-command-body'),
+    ],
+    layout: InformationDraftLayout(
+      InformationLayout(typeId: 'document', snapshot: {}, fieldIds: {}),
+      ['body'],
+    ),
+    command: InformationRecordCommand(
+      typeId: typeId,
+      digest: digest ?? 'a' * 64,
+    ),
+  );
+
+  test(
+    'original command metadata is atomic, content-free and excluded from backups',
+    () async {
+      final db = inspect();
+      try {
+        db.execute(
+          "CREATE TRIGGER reject_command BEFORE INSERT ON information_record_operations BEGIN SELECT RAISE(ABORT,'synthetic failure'); END",
+        );
+        await expectLater(
+          service.owner.saveInformationRecord('command', commandInput()),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(repository.items, isEmpty);
+        expect(await service.owner.informationRecordReceipt('command'), isNull);
+        db.execute('DROP TRIGGER reject_command');
+      } finally {
+        db.close();
+      }
+      final receipt = await service.owner.saveInformationRecord(
+        'command',
+        commandInput(),
+      );
+      await reopen();
+      final recovered = (await service.owner.informationRecordReceipt(
+        'command',
+      ))!;
+      expect(recovered.command!.toJson(), receipt.command!.toJson());
+      expect(
+        jsonEncode(recovered.toJson()),
+        isNot(contains('private-command-body')),
+      );
+      await expectLater(
+        service.owner.saveInformationRecord(
+          'command',
+          commandInput(digest: 'b' * 64),
+        ),
+        throwsA(
+          isA<AccessFailure>().having(
+            (f) => f.status,
+            'conflict',
+            'operation_conflict',
+          ),
+        ),
+      );
+      final recovery = await enableTestBackups(repository.backups);
+      final path = '${folder.path}/command.aimbackup';
+      await repository.backups.exportTo(path);
+      final target = await EncryptedInformationRepository.open(
+        '${folder.path}/target',
+        TestKeyStore(),
+      );
+      try {
+        await target.backups.restoreFrom(path, recovery);
+        expect(target.items.single.fields.single.value, 'private-command-body');
+        expect(await target.informationRecordReceipt('command'), isNull);
+      } finally {
+        await target.close();
+      }
+    },
+  );
+
+  test(
+    'command identity cannot claim another type or retain an arbitrary payload',
+    () async {
+      await expectLater(
+        service.owner.saveInformationRecord(
+          'wrong-type',
+          commandInput(typeId: 'other'),
+        ),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(repository.items, isEmpty);
+      expect(
+        () => InformationRecordCommand.fromJson({
+          'typeId': 'document',
+          'digest': 'a' * 64,
+          'body': 'not allowed',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => InformationRecordCommand(
+          typeId: 'document',
+          digest: 'not a digest',
+        ),
+        throwsFormatException,
+      );
+    },
+  );
+
+  for (final old in [26, 27]) {
+    test(
+      'format$old upgrades while preserving old receipts and portable format identity',
+      () async {
+        final receipt = await service.owner.saveInformationRecord(
+          'old',
+          input(),
+        );
+        await service.close();
+        await repository.close();
+        final db = inspect();
+        try {
+          db.execute('UPDATE library_format SET version=$old');
+          db.execute('PRAGMA user_version=$old');
+        } finally {
+          db.close();
+        }
+        repository = await EncryptedInformationRepository.open(
+          folder.path,
+          keys,
+        );
+        service = InformationService(repository: repository, clock: () => now);
+        expect(
+          (await service.owner.informationRecordReceipt('old'))!.toJson(),
+          receipt.toJson(),
+        );
+        final check = inspect();
+        try {
+          expect(
+            check.select('PRAGMA user_version').single.values.single,
+            old == 26 ? 28 : 29,
+          );
+          expect(
+            check
+                .select('SELECT version FROM library_format')
+                .single
+                .values
+                .single,
+            old == 26 ? 28 : 29,
+          );
+        } finally {
+          check.close();
+        }
+        expect(
+          (await service.owner.saveInformationRecord(
+            'new',
+            commandInput(),
+          )).command!.typeId,
+          'document',
+        );
+      },
+    );
+  }
+
   test('failed receipt write rolls back the item and can be retried', () async {
     final db = inspect();
     try {

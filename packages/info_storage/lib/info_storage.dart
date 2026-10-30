@@ -23,10 +23,10 @@ part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 
-const _libraryFormat = 26;
+const _libraryFormat = 28;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 27;
+const _portableFocusedFillLibraryFormat = 29;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -435,9 +435,10 @@ class EncryptedInformationRepository
           throw const StorageFailure('unsupported_schema');
         }
         final storedFormat = marker.single['version'] as int;
-        // Preserve the portable-fill boundary while upgrading its old format23
-        // and format25 to27 (ordinary formats upgrade to26).
-        openingFormat = (storedFormat == 23 || storedFormat == 25)
+        // Preserve the portable-fill boundary across older receipt/layout
+        // formats. Format28 adds original command metadata to save receipts.
+        openingFormat =
+            (storedFormat == 23 || storedFormat == 25 || storedFormat == 27)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
