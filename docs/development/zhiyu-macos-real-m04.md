@@ -2,6 +2,22 @@
 
 对应 #73，前置业务范围为 #70–#72。本记录区分候选打包、完整界面接缝、原生系统以及真实AI宿主，不把分项证据拼成已经日用交付的结论。
 
+## 2026-10-30：实际旧版导出与新界面适配层兼容
+
+新增 `check-owner-legacy-export.py` / `check_owner_legacy_export.dart`，限定读取既有 package23 普通 App 导出的合成备份（格式9）和另存恢复文件，原件前后摘要一致。未打开原资料库、调用系统钥匙串或替换已安装 App。旧安装仍为 `7b19d34`，当前产品候选仍为 `1443d358`；当前改动只有检查工具与记录。
+
+```sh
+python3 scripts/qa/check-owner-legacy-export.py build/macos-adaptation/m04-legacy-export-3
+```
+
+三个独立 Flutter 测试进程通过：恢复到空 SQLCipher 库 → 从生产 OwnerWorkspaceSource 编辑一个旧文字字段 → 独立重开、核对持久编辑回执，并重新导出格式12、恢复到另一空库。覆盖2条资料、5份凭据/7个版本、3份附件/3073字节及原授权/访问/执行/交付历史；新增修订后为4条修订。恢复后的有效能力为空。附件支持仍是底层保留与恢复证据，不代表新版附件操作界面已接入。
+
+直接对照已认证原备份的资料/字段行与新版详情映射，检查原名称、字段身份、类型和值；独立参考恢复在内存中比较资料、凭据材料、历史及逐块附件字节。编辑后保留其他字段及附件引用，不输出正文、凭据或恢复密钥。服务编辑时钟固定到同一时刻，独立参考可准确核对修订时间；比较报告中的原始计数来自格式9预览，实际修订数单列，格式12往返计数为编辑后的结果。
+
+首次运行发现检查器把文件字段当文本访问而失败，修正检查器后通过；不是产品数据丢失。最终静态分析通过。临时恢复库、再导出文件及合成密钥均已清理，无新增 App/dSYM，未操作已有预览或 Windows。
+
+[完整证据](evidence/zhiyu-round09/m04-legacy-export.json)。本项证明真实旧导出兼容及新界面适配层编辑/重开，不证明正常 Release 原地升级、Keychain 授权、原生输入或备份界面接入。正式换包前仍需最新资料保护；旧备份不是今天原库的完整快照。#70/#73 保持 OPEN。
+
 ## 2026-10-30：完整 Flutter 界面与包内 CLI
 
 新增 `scripts/qa/check-owner-ui.py` / `apps/desktop/tool/check_owner_ui.dart`，在两个独立Owner测试进程运行正式DesktopLauncher/OwnerWorkspaceHost/WorkspaceApp。SQLCipher、HTTP服务和包内独立CLI为真实实现；OS平台使用NativeDesktopFixture，界面输入使用WidgetTester。没有产品代码变更或另加演示模式。
