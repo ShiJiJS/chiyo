@@ -69,6 +69,10 @@ extension _MemoryInformationAttachments on MemoryInformationRepository {
   ) {
     final key = jsonEncode([change.draftId, change.operationId]);
     final receipt = change.receipt, item = receipt.item;
+    if (change.operationReceipt != null &&
+        _informationRecordReceipts.containsKey(change.operationId)) {
+      throw const AccessFailure('operation_conflict');
+    }
     final old = _informationCommits[key];
     if (old != null) {
       if (old.inputHash != receipt.inputHash) {
@@ -130,7 +134,11 @@ extension _MemoryInformationAttachments on MemoryInformationRepository {
       _recycle[entry.id] = entry;
     }
     _recycleFacts.addAll(change.facts);
-    _informationCommits[key] = receipt;
+    if (change.operationReceipt case final operation?) {
+      _informationRecordReceipts[change.operationId] = operation;
+    } else {
+      _informationCommits[key] = receipt;
+    }
     _fileStages.consume(change.draftId, stageIds);
     _reconcileInformationFiles(item.modifiedAt!.toUtc());
     return receipt;

@@ -114,6 +114,7 @@ final class InformationDraftChange {
     required this.entries,
     required this.facts,
     required this.validate,
+    this.operationReceipt,
   });
   final String draftId, operationId;
   final InformationDraftReceipt receipt;
@@ -122,6 +123,7 @@ final class InformationDraftChange {
   final List<RecycleEntry> entries;
   final List<RecycleFact> facts;
   final void Function() validate;
+  final InformationRecordReceipt? operationReceipt;
 }
 
 abstract interface class InformationAttachmentRepository

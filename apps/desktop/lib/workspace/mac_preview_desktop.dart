@@ -2,15 +2,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import '../desktop_scroll.dart';
 import 'workspace_source.dart';
+import 'workspace_desktop.dart';
 
 /// The preview runner exposes navigation and host appearance. No desktop service
 /// is initialized to obtain menus, a title or a normal Cocoa quit action.
-class MacPreviewDesktop {
+class MacPreviewDesktop implements WorkspaceDesktop {
   static const windowTitle = '知予 · 界面预览·示例数据';
   static const channel = MethodChannel('agent_info_manage/interface_preview');
+  @override
   void Function(WorkspacePage page)? onNavigate;
   bool _navigationEnabled = true;
-  final scrollbarStyle = ValueNotifier(DesktopScrollbarStyle.legacy);
+  @override
+  final ValueNotifier<DesktopScrollbarStyle> scrollbarStyle = ValueNotifier(
+    DesktopScrollbarStyle.legacy,
+  );
   bool _disposed = false;
   bool _initialized = false;
   int _scrollbarRevision = -1;
@@ -73,12 +78,14 @@ class MacPreviewDesktop {
     }
   }
 
+  @override
   Future<void> setNavigationEnabled(bool enabled) {
     // An already queued native event must also respect the current Dart gate.
     _navigationEnabled = enabled;
     return channel.invokeMethod<void>('setNavigationEnabled', enabled);
   }
 
+  @override
   Future<void> quit() => channel.invokeMethod<void>('quit');
 
   void dispose() {

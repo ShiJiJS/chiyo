@@ -19,7 +19,14 @@ extension OwnerInformationDrafts on OwnerAccess {
     InformationFileDraft draft,
     String operationId,
     InformationDraftInput input,
-  ) => _serialize(() async {
+  ) => _serialize(() => _commitInformationDraft(draft, operationId, input));
+
+  Future<InformationItem> _commitInformationDraft(
+    InformationFileDraft draft,
+    String operationId,
+    InformationDraftInput input, {
+    bool durableReceipt = false,
+  }) async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
     if (!identical(draft._owner, this) ||
         draft._generation != _service._libraryGeneration) {
@@ -202,9 +209,18 @@ extension OwnerInformationDrafts on OwnerAccess {
             ? const []
             : [_fact(recycled, RecycleFactKind.deleted, item.version)],
         validate: () => _checkInformationFileDraft(draft),
+        operationReceipt: durableReceipt
+            ? InformationRecordReceipt(
+                operationId: operationId,
+                inputHash: hash,
+                itemId: item.id,
+                version: item.version,
+                baseVersion: input.baseVersion,
+              )
+            : null,
       ),
     );
     if (before != null) _invalidateRemoved(before, receipt.item);
     return receipt.item;
-  });
+  }
 }
