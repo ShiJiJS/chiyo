@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
+import 'package:info_cli/macos_agent_bundle.dart';
+import 'package:info_desktop/workspace/owner_workspace_agents.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/agents_controller.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
@@ -207,4 +209,70 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(events, hasLength(2));
   });
+  test(
+    'verified delivery stays separate from host trust and stale package observations',
+    () async {
+      var digest = 'first-manifest';
+      final refreshes = <bool>[];
+      final agents = OwnerWorkspaceAgents(
+        owner: service.owner,
+        readBundle: ({bool rehash = false}) async {
+          refreshes.add(rehash);
+          return MacAgentBundleObservation(
+            status: 'verified',
+            directory: '/synthetic/完整包',
+            sourceCommit: 'a' * 40,
+            manifestDigest: digest,
+          );
+        },
+      );
+      final first = await agents.read();
+      expect(first.cli, WorkspaceAgentCheck.ready);
+      expect(first.skill, WorkspaceAgentCheck.unavailable);
+      expect(first.hooks, isEmpty);
+      expect(first.connection, WorkspaceAgentConnection.unverified);
+      expect(first.cliReason, contains('不代表宿主已安装或信任'));
+      expect(first.packageDirectory, '/synthetic/完整包');
+      expect(
+        (await agents.diagnose(first.version)).fingerprint,
+        first.fingerprint,
+      );
+      expect(refreshes, [false, true]);
+      digest = 'replacement-manifest';
+      await expectLater(
+        agents.diagnose(first.version),
+        fails('observation_changed'),
+      );
+      final next = await agents.read();
+      expect(next.packageDigest, digest);
+      expect(next.fingerprint, isNot(first.fingerprint));
+      expect(service.owner.sessions, isEmpty);
+    },
+  );
+
+  test(
+    'missing delivery or probe failure cannot manufacture trusted or installed state',
+    () async {
+      for (final status in [
+        'not_packaged',
+        'manifest_missing',
+        'bundle_invalid',
+        'exception',
+      ]) {
+        final agents = OwnerWorkspaceAgents(
+          owner: service.owner,
+          readBundle: ({bool rehash = false}) async {
+            if (status == 'exception') throw StateError('PRIVATE-PATH');
+            return MacAgentBundleObservation(status: status);
+          },
+        );
+        final v = await agents.read();
+        expect(v.cli, WorkspaceAgentCheck.unavailable);
+        expect(v.connection, WorkspaceAgentConnection.unverified);
+        expect(v.packageDirectory, isNull);
+        expect(v.cliReason, isNot(contains('PRIVATE-PATH')));
+        expect(v.cliReason, isNotEmpty);
+      }
+    },
+  );
 }

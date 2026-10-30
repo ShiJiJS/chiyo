@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
+import 'package:info_cli/macos_agent_bundle.dart';
 import 'owner_workspace_approvals.dart';
 import 'workspace_agents.dart';
 import 'workspace_approvals.dart';
@@ -8,9 +9,10 @@ import 'workspace_records.dart';
 /// Read-only service observations. No private association files, transcripts,
 /// global configuration or trust stores are searched to infer the active chat.
 class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
-  OwnerWorkspaceAgents({required this.owner})
+  OwnerWorkspaceAgents({required this.owner, this.readBundle})
     : _scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
+  final Future<MacAgentBundleObservation> Function({bool rehash})? readBundle;
   final core.OwnerLibraryScope _scope;
   int _version = 0;
   _Observation? _current;
@@ -28,7 +30,28 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
     }
   }
 
-  Future<_Observation> _observe(String? selectedId, int version) async {
+  Future<_Observation> _observe(
+    String? selectedId,
+    int version, {
+    bool rehash = false,
+  }) async {
+    MacAgentBundleObservation bundle;
+    try {
+      bundle =
+          await readBundle?.call(rehash: rehash) ??
+          const MacAgentBundleObservation(status: 'not_observed');
+    } on Object {
+      bundle = const MacAgentBundleObservation(status: 'not_observed');
+    }
+    final cliReason = switch (bundle.status) {
+      'verified' =>
+        'App 主程序及身份文件、配套 CLI、Skill 模板和接入说明与随包清单一致。此核对不执行程序、不验证签名或网络连接，也不代表宿主已安装或信任。',
+      'not_packaged' =>
+        '当前 App 不在完整交付目录中。请从保留 app、cli 和 manifest.json 的整包启动；单独复制 App 无法核对配套工具。',
+      'manifest_missing' => '未找到整包清单。请恢复完整交付目录后重新检测，不要混用另一版本的 CLI。',
+      'bundle_invalid' => '配套文件缺失、发生变化或与清单不一致。请恢复完整同版本交付包后重新检测。',
+      _ => '尚未取得配套文件观察，无法确认 CLI 是否就绪。',
+    };
     final available = owner.serviceAvailable;
     final requests = available
         ? (await owner.informationRequestInbox())
@@ -87,7 +110,13 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
       serviceReason: available
           ? '本机资料服务可用；尚未核对 CLI 网络连通性及宿主安装和信任。会话列表仅表示服务端关联，统计仅包含普通资料申请。'
           : '本机资料服务已关闭或正在恢复资料，当前不能接收申请。',
-      cli: WorkspaceAgentCheck.unavailable,
+      cli: bundle.verified
+          ? WorkspaceAgentCheck.ready
+          : WorkspaceAgentCheck.unavailable,
+      cliReason: cliReason,
+      packageDirectory: bundle.verified ? bundle.directory : null,
+      packageCommit: bundle.verified ? bundle.sourceCommit : null,
+      packageDigest: bundle.verified ? bundle.manifestDigest : null,
       skill: WorkspaceAgentCheck.unavailable,
       hooks: const [],
       session: selected,
@@ -95,6 +124,10 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
     );
     final signature = jsonEncode([
       available,
+      bundle.status,
+      bundle.directory,
+      bundle.sourceCommit,
+      bundle.manifestDigest,
       selectedId,
       selected.json,
       for (final s in sessions) s.json,
@@ -120,25 +153,30 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
     return next.overview;
   });
 
-  Future<_Observation> _checked(int version) => _read(() async {
-    final expected = _current;
-    if (expected == null ||
-        _version != version ||
-        expected.overview.version != version) {
-      throw const WorkspaceFailure('observation_changed', '会话观察已变化，请重新检测。');
-    }
-    final fresh = await _observe(expected.selectedId, version);
-    if (_version != version ||
-        !identical(expected, _current) ||
-        fresh.signature != expected.signature) {
-      throw const WorkspaceFailure('observation_changed', '会话状态已变化，请重新检测。');
-    }
-    return expected;
-  });
+  Future<_Observation> _checked(int version, {bool rehash = false}) =>
+      _read(() async {
+        final expected = _current;
+        if (expected == null ||
+            _version != version ||
+            expected.overview.version != version) {
+          throw const WorkspaceFailure('observation_changed', '会话观察已变化，请重新检测。');
+        }
+        final fresh = await _observe(
+          expected.selectedId,
+          version,
+          rehash: rehash,
+        );
+        if (_version != version ||
+            !identical(expected, _current) ||
+            fresh.signature != expected.signature) {
+          throw const WorkspaceFailure('observation_changed', '会话状态已变化，请重新检测。');
+        }
+        return expected;
+      });
 
   @override
   Future<WorkspaceAgentOverview> diagnose(int expectedVersion) async =>
-      (await _checked(expectedVersion)).overview;
+      (await _checked(expectedVersion, rehash: true)).overview;
 
   @override
   Future<WorkspaceAgentSessionDetail> currentSession(

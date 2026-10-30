@@ -121,6 +121,10 @@ class WorkspaceAgentOverview {
     required Iterable<WorkspaceAgentHook> hooks,
     required this.session,
     this.serviceReason,
+    this.cliReason,
+    this.packageDirectory,
+    this.packageCommit,
+    this.packageDigest,
     Iterable<WorkspaceAgentSession> sessions = const [],
   }) : hooks = List.unmodifiable(hooks),
        sessions = List.unmodifiable(sessions);
@@ -131,7 +135,15 @@ class WorkspaceAgentOverview {
   final List<WorkspaceAgentHook> hooks;
   final WorkspaceAgentSession session;
   final List<WorkspaceAgentSession> sessions;
-  final String? serviceReason;
+  final String? serviceReason,
+      cliReason,
+      packageDirectory,
+      packageCommit,
+      packageDigest;
+  String get cliLabel =>
+      cli == WorkspaceAgentCheck.ready && packageDirectory != null
+      ? '配套文件已核对'
+      : cli.label;
   static const requiredEvents = ['SessionStart', 'SubagentStart', 'SessionEnd'];
   bool get hooksReady => requiredEvents.every(
     (event) =>
@@ -174,6 +186,10 @@ class WorkspaceAgentOverview {
             'service': serviceAvailable,
             'serviceReason': serviceReason,
             'cli': cli.name,
+            'cliReason': cliReason,
+            'packageDirectory': packageDirectory,
+            'packageCommit': packageCommit,
+            'packageDigest': packageDigest,
             'skill': skill.name,
             'hooks': hooks.map((h) => h.json).toList(),
             'session': session.json,

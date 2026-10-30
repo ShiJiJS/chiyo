@@ -143,7 +143,7 @@ class WorkspaceAgentsPage extends StatelessWidget {
                 title: '连接诊断',
                 description: v == null
                     ? '正在核对本机服务、CLI、Skill 与 hooks…'
-                    : '本机服务${v.serviceAvailable ? '可用' : '不可用'} · CLI ${v.cli.label} · Skill ${v.skill.label}。连接状态与资料权限分开核对。',
+                    : '本机服务${v.serviceAvailable ? '可用' : '不可用'} · CLI ${v.cliLabel} · Skill ${v.skill.label}。连接状态与资料权限分开核对。',
                 control: Wrap(
                   spacing: 10,
                   runSpacing: 10,
@@ -382,9 +382,18 @@ class _AgentFlowState extends State<_AgentFlow> {
       ),
       SettingsPreferenceRow(
         title: '配套 CLI',
-        description: '使用随包、经核对的 CLI；不通过另一个启动路径掩盖接入错误。',
-        control: Text(report.cli.label, style: libraryText(context, 14)),
+        description: report.cliReason ?? '使用随包、经核对的 CLI；不通过另一个启动路径掩盖接入错误。',
+        control: Text(report.cliLabel, style: libraryText(context, 14)),
       ),
+      if (report.packageDirectory case final directory?) ...[
+        _text(context, '已核对的交付目录'),
+        SelectableText(directory, style: libraryText(context, 13)),
+        _text(
+          context,
+          '接入步骤见该目录中的 CODEX-INTEGRATION.md。生成材料不会安装或信任 hooks。',
+          muted: true,
+        ),
+      ],
       SettingsPreferenceRow(
         title: '访问 Skill',
         description: '核对已审阅的访问约定和配套工具。诊断不安装或更新个人 Skill。',

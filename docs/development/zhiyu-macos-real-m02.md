@@ -72,3 +72,18 @@
 - Widget 曾在清理阶段因跨模拟/真实时钟的异步关闭停留，诊断运行被中断，不计通过。最终拆分持久化与界面测试，按同一 widget 时钟分别发起来源/服务关闭并推进两个时钟，完整重跑通过；不以测试修复宣称实机验收。
 
 未生成 App/dSYM、未替换用户预览；没有个人资料/Keychain、computer use 或 Windows CI。#71 仍 OPEN：配套工具的实际核对、宿主接入说明/可观察边界、请求来源说明完善及 #72 联调继续推进；#73 的真实宿主与同一候选交付尚未完成。
+
+## 配套文件核对与接入说明（2026-10-30）
+
+正式 `OwnerWorkspaceHost` 向 Agent 来源注入 `MacAgentBundle`。探针只按当前 App 的已知交付结构读取整包清单和必需文件：App 主程序/Info.plist、五个 CLI 程序、Skill 及两份协议参考、接入说明。核对架构/正式身份声明、源码号、文件大小/权限/摘要、规范路径与模板文件集合；不执行程序，不读个人配置/关联，不搜索 PATH 或另一 App。单独 App、缺清单、重复条目、缺文件、不一致摘要、不可执行文件、重定向路径及额外模板材料均不能报就绪。
+
+这只是磁盘配套文件与随包清单的一致性检查，不是发行者真实性、签名、公证、运行进程身份或网络连通性的证明。正常刷新对路径/大小/权限/修改与变更时间未变的文件复用摘要，查看诊断强制重新计算；重算期间变更文件/清单返回不可用。读取体积和模板遍历有上限。
+
+Agent 诊断显示实际原因及核对通过的整包目录，安装/宿主信任继续显示无法核对，顶部不会因配套文件完整就报已连接。配套观察进入版本签名，清单或文件状态变化使旧诊断失效。`MACOS-INTEGRATION.md` 增加诊断与路径说明，明确当前 Round09 首批交付边界；底层 capability 不能当作新界面附件/凭据流程已接通。
+
+验证：
+- CLI `macos_agent_bundle_test.dart`（8项）与既有 `macos_bundled_tools_test.dart`（3项）共 **11 项通过**；全部为临时合成文件，探针不执行合成程序。
+- desktop `owner_workspace_agents_test.dart`、`owner_workspace_agents_widget_test.dart`、`workspace_agents_test.dart`、`zhiyu_agents_test.dart`、`owner_workspace_host_test.dart` 共 **32 项通过**。新增配套就绪与宿主信任分离、强制重算/过期诊断、异常不泄漏、实际诊断弹窗目录与说明显示检查。
+- desktop/CLI 静态检查通过。首次诊断界面测试使用默认 Material 主题触发旧 AlertDialog 的 intrinsic 布局异常；改为正式 Workspace 使用的 `zhiyuTheme` 后完整重跑通过，没有修改旧 Windows 对话框。
+
+未生成新 App/dSYM、未替换用户预览、未触及个人 Keychain/hooks/信任、未用 computer use 或 Windows CI。#71 仍 OPEN，配套实际交付及 CLI 网络连通在 #73 同候选串验；接下来推进 #72 的真实审批写入、持久结果查询和授权失效，再完成两票联调。宿主信任未知保持明确，不为使诊断变绿而伪造状态。
