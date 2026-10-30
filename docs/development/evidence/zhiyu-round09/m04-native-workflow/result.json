@@ -1,0 +1,78 @@
+{
+  "complete": true,
+  "previewKernelSha256": "302791799a10fb288c7a5befed09206bf03e6d147ea19ac7b8875fb4211ce125",
+  "workflowRun": "7cf22838f2a94614a81614bf0c7318ba",
+  "phases": [
+    {
+      "passed": true,
+      "phase": "live",
+      "pid": 2352,
+      "cliPids": [],
+      "checks": [
+        "formal-shell-creates-real-encrypted-record",
+        "http-client-request-shows-in-native-inbox",
+        "ui-partial-approval-and-cross-chat-denial",
+        "ui-edit-preserves-field-identity-and-fixed-grant",
+        "history-target-and-live-access-count",
+        "history-snapshot-uses-approval-version-after-ui-edit",
+        "history-revoke-and-original-request-return",
+        "native-ui-denial-observed-by-http-client",
+        "formal-runtime-stops-service-and-closes-database"
+      ],
+      "scope": "native Cocoa/Flutter Debug shell, SQLCipher and in-process CLI AgentClient over real HTTP; synthetic key/widget input, not packaged Release or actual AI host acceptance",
+      "runtime": {
+        "platform": "macos",
+        "debugMode": true
+      },
+      "nativeFonts": [
+        "platform",
+        "Zhiyu System",
+        "PingFang SC",
+        "Menlo"
+      ]
+    },
+    {
+      "passed": true,
+      "phase": "reopen",
+      "pid": 2525,
+      "cliPids": [],
+      "checks": [
+        "independent-owner-process-renders-saved-data-and-history",
+        "reopened-history-does-not-restore-old-grant",
+        "formal-runtime-stops-service-and-closes-database"
+      ],
+      "scope": "native Cocoa/Flutter Debug shell, SQLCipher and in-process CLI AgentClient over real HTTP; synthetic key/widget input, not packaged Release or actual AI host acceptance",
+      "runtime": {
+        "platform": "macos",
+        "debugMode": true
+      },
+      "nativeFonts": [
+        "platform",
+        "Zhiyu System",
+        "PingFang SC",
+        "Menlo"
+      ],
+      "fixtureRemoved": true
+    }
+  ],
+  "nativeKernelSha256": "d443df16c1720634d82a8a107d1f73bde33f1b62a74fb1692d78b00367c611a7",
+  "scope": "native Cocoa/Flutter Debug shell, SQLCipher and in-process CLI AgentClient over real HTTP; synthetic key/widget input, not packaged Release or actual AI host acceptance",
+  "previewUnchanged": true,
+  "processStillRunning": false,
+  "temporaryProductsRemoved": true,
+  "sourceBase": "cf854fc3",
+  "productCandidate": "b0578cf6ed9890a2c689ec7ee65af5f6ba869bb4",
+  "testSourceSha256": {
+    "apps/desktop/tool/check_owner_ui.dart": "741cf9a5a8d3dd6723f52821fe5616189ac7dc99bdcba6c57bbea2f5359b8f35",
+    "apps/desktop/integration_test/owner_workflow_native_test.dart": "829e955d539c191ca5ef21a2ee13e2c56fc4fe88ab42ba0044e37749fe8fe69d",
+    "scripts/qa/check-owner-native.py": "b30d395463490fa8c3fb7b11c6721b27868d8b5f024fbf4f677eef5f6b92da8b"
+  },
+  "physicalInputVerified": false,
+  "foregroundSucceeded": false,
+  "screenshotsReviewed": [
+    "partial-approval.png",
+    "approval-snapshot.png",
+    "reopened-library.png"
+  ],
+  "visualFinding": "Approval grouping and related-record buttons show generic 资料字段 instead of record names; requires product fix."
+}

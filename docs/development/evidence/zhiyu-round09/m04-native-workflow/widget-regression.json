@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "candidateSource": "b0578cf6ed9890a2c689ec7ee65af5f6ba869bb4",
+  "ownerSourceCommit": "8abfcc2c410db3f93867f1ac85703f01cad462ab",
+  "ownerImplementationMatchesCandidate": true,
+  "cliSha256": "de6df3693ce66c06dba3551f2721560b5c1a1be0b01f3c6f277fd04cf8c11909",
+  "probeSha256": "741cf9a5a8d3dd6723f52821fe5616189ac7dc99bdcba6c57bbea2f5359b8f35",
+  "phases": [
+    {
+      "passed": true,
+      "phase": "live",
+      "pid": 5813,
+      "cliPids": [
+        5911,
+        5912
+      ],
+      "checks": [
+        "formal-shell-creates-real-encrypted-record",
+        "external-cli-request-shows-in-full-inbox",
+        "ui-partial-approval-and-cross-chat-denial",
+        "ui-edit-preserves-field-identity-and-fixed-grant",
+        "history-target-and-live-access-count",
+        "history-snapshot-uses-approval-version-after-ui-edit",
+        "history-revoke-and-original-request-return",
+        "ui-denial-observed-by-external-cli",
+        "formal-runtime-stops-service-and-closes-database"
+      ],
+      "scope": "full Flutter shell/widget input + SQLCipher + shipped CLI; platform fixture, not native or AI host acceptance"
+    },
+    {
+      "passed": true,
+      "phase": "reopen",
+      "pid": 5964,
+      "cliPids": [
+        5973
+      ],
+      "checks": [
+        "independent-owner-process-renders-saved-data-and-history",
+        "reopened-history-does-not-restore-old-grant",
+        "formal-runtime-stops-service-and-closes-database"
+      ],
+      "scope": "full Flutter shell/widget input + SQLCipher + shipped CLI; platform fixture, not native or AI host acceptance"
+    }
+  ],
+  "fixtureRemoved": true,
+  "scope": "complete owner Flutter UI + HTTP + SQLCipher + shipped CLI; platform fixture, not native or actual AI host"
+}

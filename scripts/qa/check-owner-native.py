@@ -9,6 +9,7 @@ from pathlib import Path
 import plistlib
 import shutil
 import subprocess
+import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
 DESKTOP = ROOT / 'apps/desktop'
@@ -19,7 +20,11 @@ IDENTITY = 'com.example.infoDesktop.zhiyuOwnerCheck'
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--workflow', action='store_true', help='Full owner workflow in two launches of one native test App')
     args = parser.parse_args()
+    target = 'integration_test/owner_workflow_native_test.dart' if args.workflow else TARGET
+    workflow_run = uuid.uuid4().hex
+    phase_data = []
     OUTPUT = args.output.resolve()
     OUTPUT.relative_to(ROOT / 'build/macos-adaptation')
     OUTPUT.mkdir(parents=True, exist_ok=False)
@@ -46,7 +51,7 @@ def main():
                PUB_CACHE=str(ROOT / '.cache/pub'),
                DEVELOPER_DIR='/Applications/Xcode.app/Contents/Developer')
     launcher = str(ROOT / 'scripts/dev-macos.sh')
-    report = {'complete': False, 'previewKernelSha256': original}
+    report = {'complete': False, 'previewKernelSha256': original, 'workflowRun': workflow_run if args.workflow else None}
     def run(args, name, timeout=600):
         print(f'{name}: started', flush=True)
         with (OUTPUT / name).open('w') as log:
@@ -56,7 +61,8 @@ def main():
         result.check_returncode()
     try:
         run([launcher, 'flutter', 'build', 'macos', '--debug', '--config-only',
-             '--no-pub', '--target', TARGET, '--dart-define=OWNER_NATIVE_SYNTHETIC=true',
+             '--no-pub', '--target', target, '--dart-define=OWNER_NATIVE_SYNTHETIC=true',
+             '--dart-define=OWNER_NATIVE_WORKFLOW_RUN=' + workflow_run,
              '--dart-define=INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'], 'configure.log')
         run(['xcodebuild', '-workspace', 'macos/Runner.xcworkspace', '-scheme', 'Runner',
              '-configuration', 'Debug', '-derivedDataPath', str(OUTPUT / 'xcode'),
@@ -73,14 +79,43 @@ def main():
         if plistlib.loads(signed.stdout).get('com.apple.security.app-sandbox') is not True:
             raise RuntimeError('Native check must remain sandboxed')
         run(['codesign', '--verify', '--deep', '--strict', str(app)], 'signature.log')
-        run([launcher, 'flutter', 'drive', '--debug', '-d', 'macos', '--no-pub',
-             '--target', TARGET, '--driver', 'integration_test/profile_driver.dart',
-             '--use-application-binary', str(app)], 'drive.log', 300)
-        data = json.loads((OUTPUT / 'driver.json').read_text())
-        if data.get('runtime', {}).get('platform') != 'macos' or len(data.get('checks', [])) != 6:
-            raise RuntimeError('Missing native check evidence')
-        (OUTPUT / 'saved-library.png').write_bytes(base64.b64decode(data.pop('imagePngBase64')))
-        (OUTPUT / 'driver.json').write_text(json.dumps(data, indent=2))
+        kernel = app / 'Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'
+        fixed_kernel = hashlib.sha256(kernel.read_bytes()).hexdigest()
+        for phase in (['live', 'reopen'] if args.workflow else ['basic']):
+            driver_file = OUTPUT / ('driver-' + phase + '.json' if args.workflow else 'driver.json')
+            env['ZHIYU_PROFILE_DRIVER_REPORT'] = str(driver_file)
+            run([launcher, 'flutter', 'drive', '--debug', '-d', 'macos', '--no-pub',
+                 '--target', target, '--driver', 'integration_test/profile_driver.dart',
+                 '--use-application-binary', str(app)], 'drive-' + phase + '.log', 300)
+            data = json.loads(driver_file.read_text())
+            if not isinstance(data, dict):
+                raise RuntimeError('Driver returned no scenario evidence; an empty test run is not a pass')
+            expected = (9 if phase == 'live' else 3) if args.workflow else 6
+            if data.get('runtime', {}).get('platform') != 'macos' or len(data.get('checks', [])) != expected:
+                raise RuntimeError('Missing native check evidence')
+            if args.workflow:
+                if data.get('passed') is not True or data.get('phase') != phase:
+                    raise RuntimeError('Native fixture did not advance across launches')
+                expected_images = {'partial-approval', 'approval-snapshot'} if phase == 'live' else {'reopened-library'}
+                images = data.pop('imagesPngBase64')
+                if set(images) != expected_images:
+                    raise RuntimeError('Missing native workflow screenshots')
+                for name, value in images.items():
+                    (OUTPUT / (name + '.png')).write_bytes(base64.b64decode(value))
+                phase_data.append(data)
+            else:
+                (OUTPUT / 'saved-library.png').write_bytes(base64.b64decode(data.pop('imagePngBase64')))
+            driver_file.write_text(json.dumps(data, indent=2))
+            if hashlib.sha256(kernel.read_bytes()).hexdigest() != fixed_kernel:
+                raise RuntimeError('Native App changed during validation')
+        if args.workflow:
+            if phase_data[0]['pid'] == phase_data[1]['pid'] or phase_data[0]['fixtureDirectory'] != phase_data[1]['fixtureDirectory']:
+                raise RuntimeError('Expected distinct native processes reopening the same synthetic library')
+            if phase_data[1].get('fixtureRemoved') is not True:
+                raise RuntimeError('Native synthetic library was not cleaned')
+            report['phases'] = phase_data
+            report['nativeKernelSha256'] = fixed_kernel
+            report['scope'] = phase_data[0]['scope']
         report['complete'] = True
     finally:
         if original != preview_hash():
@@ -101,6 +136,24 @@ def main():
             shutil.rmtree(products)
         if (OUTPUT / 'xcode').exists() and not still_running:
             shutil.rmtree(OUTPUT / 'xcode')
+        if args.workflow and not still_running:
+            # Remove only this invocation's unique, marked synthetic directory.
+            for path in OUTPUT.glob('driver-*.json'):
+                data = json.loads(path.read_text())
+                directory = data.get('fixtureDirectory') if isinstance(data, dict) else None
+                if not directory:
+                    continue
+                fixture = Path(directory)
+                if not fixture.exists():
+                    continue
+                resolved = fixture.resolve()
+                allowed = [ROOT / '.cache/tmp', Path.home() / 'Library/Containers' / IDENTITY / 'Data']
+                if (fixture.is_symlink() or fixture.name != 'owner-workflow-' + workflow_run or
+                        not any(resolved.is_relative_to(base.resolve()) for base in allowed) or
+                        (fixture / 'fixture-marker').read_text() != 'disposable-owner-ui-v1'):
+                    raise RuntimeError('Unexpected native fixture path; preserved for inspection')
+                shutil.rmtree(fixture)
+                report['failedFixtureCleaned'] = True
         report['temporaryProductsRemoved'] = not products.exists()
         (OUTPUT / 'result.json').write_text(json.dumps(report, indent=2))
     if not report['previewUnchanged']:
