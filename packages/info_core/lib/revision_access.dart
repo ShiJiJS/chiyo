@@ -82,7 +82,7 @@ extension OwnerRevisions on OwnerAccess {
       ],
       directoryId: _existingDirectory(old.directoryId),
       tagIds: _existingTags(old.tagIds),
-      layout: old.layout?.remapFields(resolved),
+      layout: _existingLayoutRelations(old.layout?.remapFields(resolved)),
       createdAt: current.createdAt,
       modifiedAt: _service._clock(),
     );
@@ -93,7 +93,17 @@ extension OwnerRevisions on OwnerAccess {
     String itemId,
     int revisionVersion,
     int expectedVersion,
-  ) => _serialize(() async {
+  ) => _serialize(
+    () => _restoreRevision(itemId, revisionVersion, expectedVersion),
+  );
+
+  Future<InformationItem> _restoreRevision(
+    String itemId,
+    int revisionVersion,
+    int expectedVersion, {
+    InformationLifecycleCommand? command,
+    void Function()? validate,
+  }) async {
     await _purgeRevisions();
     final preview = previewRevision(itemId, revisionVersion, expectedVersion);
     if (preview.requiresRecycleRestore) {
@@ -105,6 +115,14 @@ extension OwnerRevisions on OwnerAccess {
     final entry = removed ? _recycle(preview.current, preview.restored) : null;
     await _service._repository.commitRecycleChange(
       itemId: itemId,
+      lifecycleReceipt: command == null
+          ? null
+          : InformationLifecycleReceipt(
+              command: command,
+              version: preview.restored.version,
+              entryId: entry?.id,
+            ),
+      validate: validate,
       item: preview.restored,
       previous: InformationRevision(preview.current, _service._clock()),
       entries: entry == null ? const [] : [entry],
@@ -114,7 +132,7 @@ extension OwnerRevisions on OwnerAccess {
     );
     _invalidateRemoved(preview.current, preview.restored);
     return preview.restored;
-  });
+  }
 
   Future<void> purgeRevisions() => _serialize(_purgeRevisions);
   Future<void> _purgeRevisions() async {

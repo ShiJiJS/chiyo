@@ -25,6 +25,8 @@ class _FailingWrites extends MemoryInformationRepository {
     required List<RecycleEntry> entries,
     required List<RecycleFact> facts,
     DeleteProposal? proposal,
+    InformationLifecycleReceipt? lifecycleReceipt,
+    void Function()? validate,
   }) async {
     if (fail) throw StateError('synthetic write failure');
     await super.commitRecycleChange(
@@ -34,6 +36,8 @@ class _FailingWrites extends MemoryInformationRepository {
       entries: entries,
       facts: facts,
       proposal: proposal,
+      lifecycleReceipt: lifecycleReceipt,
+      validate: validate,
     );
   }
 

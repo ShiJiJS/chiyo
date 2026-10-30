@@ -187,6 +187,8 @@ extension OwnerRecycle on OwnerAccess {
     int expectedVersion, {
     String? fieldId,
     DeleteProposal? proposal,
+    InformationLifecycleCommand? command,
+    void Function()? validate,
   }) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     final found = information.where((i) => i.id == itemId);
@@ -218,6 +220,14 @@ extension OwnerRecycle on OwnerAccess {
       previous: InformationRevision(before, _service._clock()),
       entries: [entry],
       facts: [_fact(entry, RecycleFactKind.deleted, entry.version)],
+      lifecycleReceipt: command == null
+          ? null
+          : InformationLifecycleReceipt(
+              command: command,
+              version: entry.version,
+              entryId: entry.id,
+            ),
+      validate: validate,
       proposal: proposal?.finish(
         DeleteProposalState.confirmed,
         entryId: entry.id,
@@ -227,7 +237,13 @@ extension OwnerRecycle on OwnerAccess {
     return entry;
   }
 
-  Future<InformationItem> restoreRecycled(String id) => _serialize(() async {
+  Future<InformationItem> restoreRecycled(String id) =>
+      _serialize(() => _restoreRecycled(id));
+  Future<InformationItem> _restoreRecycled(
+    String id, {
+    InformationLifecycleCommand? command,
+    void Function()? validate,
+  }) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     await _purgeRecycle();
     final found = recycleEntries.where((e) => e.id == id);
@@ -266,7 +282,9 @@ extension OwnerRecycle on OwnerAccess {
       ],
       directoryId: _existingDirectory(source.directoryId),
       tagIds: _existingTags(source.tagIds),
-      layout: source.layout?.restoreBindings(snapshot.layout, restoredIds),
+      layout: _existingLayoutRelations(
+        source.layout?.restoreBindings(snapshot.layout, restoredIds),
+      ),
       createdAt: source.createdAt,
       modifiedAt: _service._clock(),
     );
@@ -279,6 +297,14 @@ extension OwnerRecycle on OwnerAccess {
       previous: previous == null
           ? null
           : InformationRevision(previous, _service._clock()),
+      lifecycleReceipt: command == null
+          ? null
+          : InformationLifecycleReceipt(
+              command: command,
+              version: restored.version,
+              entryId: entry.id,
+            ),
+      validate: validate,
       entries: [entry.finish(RecycleState.restored)],
       facts: [
         RecycleFact(
@@ -293,7 +319,8 @@ extension OwnerRecycle on OwnerAccess {
       ],
     );
     return restored;
-  });
+  }
+
   Future<void> purgeRecycle() => _serialize(_purgeRecycle);
   Future<void> _purgeRecycle() async {
     for (final entry in _service._repository.recycleEntries.where(
