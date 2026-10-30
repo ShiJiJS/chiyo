@@ -29,6 +29,8 @@ class CaptureRepository extends MemoryInformationRepository {
     required List<RecycleEntry> entries,
     required List<RecycleFact> facts,
     DeleteProposal? proposal,
+    InformationLifecycleReceipt? lifecycleReceipt,
+    void Function()? validate,
   }) async {
     if (fail) throw StateError('synthetic failure');
     await super.commitRecycleChange(
@@ -38,6 +40,8 @@ class CaptureRepository extends MemoryInformationRepository {
       entries: entries,
       facts: facts,
       proposal: proposal,
+      lifecycleReceipt: lifecycleReceipt,
+      validate: validate,
     );
   }
 }

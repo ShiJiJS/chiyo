@@ -23,11 +23,12 @@ part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
+part 'lifecycle_storage.dart';
 
-const _libraryFormat = 30;
+const _libraryFormat = 32;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
-const _portableFocusedFillLibraryFormat = 31;
+const _portableFocusedFillLibraryFormat = 33;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -112,8 +113,12 @@ class EncryptedInformationRepository
         InformationAttachmentRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
+        InformationLifecycleRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
+  @override
+  Future<InformationLifecycleReceipt?> informationLifecycleReceipt(String id) =>
+      _lifecycleReceipt(id);
   @override
   Future<int> informationClassificationVersion() => _classificationVersion();
   @override
@@ -448,12 +453,13 @@ class EncryptedInformationRepository
         }
         final storedFormat = marker.single['version'] as int;
         // Preserve the portable-fill boundary across older receipt/layout
-        // formats. Format30 adds durable classification operations.
+        // formats. Format32 adds durable lifecycle operations.
         openingFormat =
             (storedFormat == 23 ||
                 storedFormat == 25 ||
                 storedFormat == 27 ||
-                storedFormat == 29)
+                storedFormat == 29 ||
+                storedFormat == 31)
             ? _portableFocusedFillLibraryFormat
             : max(_libraryFormat, storedFormat);
       } else if (headerVersion > _libraryFormat ||
@@ -1425,10 +1431,18 @@ class EncryptedInformationRepository
     required List<RecycleEntry> entries,
     required List<RecycleFact> facts,
     DeleteProposal? proposal,
+    InformationLifecycleReceipt? lifecycleReceipt,
+    void Function()? validate,
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
       await _db.transaction(() async {
+        validate?.call();
+        if (lifecycleReceipt != null) {
+          if (lifecycleReceipt.command.itemId != itemId)
+            throw const AccessFailure('invalid_information');
+          await _validateLifecycle(lifecycleReceipt);
+        }
         if (item != null) {
           await _writeItem(item);
         } else {
@@ -1448,7 +1462,17 @@ class EncryptedInformationRepository
         if (previous != null) await _writeRevision(previous);
         await _writeRecycle(entries, facts);
         if (proposal != null) await _writeDelete(proposal);
+        if (lifecycleReceipt != null) {
+          await _db.customStatement(
+            'INSERT INTO information_lifecycle_operations(operation_id,payload) VALUES(?,?)',
+            [
+              lifecycleReceipt.command.operationId,
+              jsonEncode(lifecycleReceipt.toJson()),
+            ],
+          );
+        }
         await _checkAttachmentBackupBudget();
+        validate?.call();
       });
       if (item == null) {
         _items.remove(itemId);
@@ -1461,7 +1485,12 @@ class EncryptedInformationRepository
       }
       _recycleFacts.addAll(facts);
       if (proposal != null) _deletes[proposal.id] = proposal;
-    } catch (_) {
+    } catch (error) {
+      // Legacy callers retain their storage-failure contract. Commands with
+      // explicit version/generation checks expose those conflicts to the UI.
+      if (error is AccessFailure &&
+          (lifecycleReceipt != null || validate != null))
+        rethrow;
       throw const StorageFailure('save_failed');
     }
   }
@@ -1504,6 +1533,7 @@ class _InformationDatabase extends GeneratedDatabase {
       await _createInformationDeliveries();
       await _organizationSchema();
       await _createInformationClassification();
+      await _createInformationLifecycle();
       await _backupSchema();
     },
     onUpgrade: (_, from, to) async {
@@ -1594,6 +1624,7 @@ class _InformationDatabase extends GeneratedDatabase {
         if (sourceVersion < 24) await _createInformationRecordOperations();
         if (sourceVersion < 26) await _createInformationLayout();
         if (sourceVersion < 30) await _createInformationClassification();
+        if (sourceVersion < 32) await _createInformationLifecycle();
         await _createLibraryFormat();
       });
     },
@@ -1649,6 +1680,10 @@ class _InformationDatabase extends GeneratedDatabase {
     'CREATE TABLE IF NOT EXISTS information_record_operations('
     'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,'
     'invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+  );
+
+  Future<void> _createInformationLifecycle() => customStatement(
+    'CREATE TABLE IF NOT EXISTS information_lifecycle_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
   );
 
   Future<void> _createInformationClassification() async {

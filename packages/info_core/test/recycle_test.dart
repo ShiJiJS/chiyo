@@ -252,5 +252,7 @@ class FailedRecycleRepository extends MemoryInformationRepository {
     required List<RecycleEntry> entries,
     required List<RecycleFact> facts,
     DeleteProposal? proposal,
+    InformationLifecycleReceipt? lifecycleReceipt,
+    void Function()? validate,
   }) async => throw StateError('external store unavailable');
 }

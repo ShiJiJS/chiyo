@@ -26,6 +26,9 @@ import 'info_core.dart'
         InformationDraftChange,
         InformationDraftReceipt,
         InformationRecordReceipt,
+        InformationLifecycleReceipt,
+        InformationLifecycleAction,
+        InformationLifecycleRepository,
         InformationRecordOperationRepository,
         InformationClassificationRepository,
         InformationClassificationChange,
@@ -396,6 +399,8 @@ abstract interface class InformationRepository {
     required List<RecycleEntry> entries,
     required List<RecycleFact> facts,
     DeleteProposal? proposal,
+    InformationLifecycleReceipt? lifecycleReceipt,
+    void Function()? validate,
   });
 }
 
@@ -408,8 +413,14 @@ class MemoryInformationRepository
         InformationAttachmentRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
+        InformationLifecycleRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
+  final _lifecycleReceipts = <String, InformationLifecycleReceipt>{};
+  @override
+  Future<InformationLifecycleReceipt?> informationLifecycleReceipt(
+    String id,
+  ) async => _lifecycleReceipts[id];
   final _classificationReceipts = <String, InformationClassificationReceipt>{};
   int _classificationRevision = 1;
   String? _classificationFingerprint;
@@ -729,7 +740,40 @@ class MemoryInformationRepository
     required List<RecycleEntry> entries,
     required List<RecycleFact> facts,
     DeleteProposal? proposal,
+    InformationLifecycleReceipt? lifecycleReceipt,
+    void Function()? validate,
   }) async {
+    validate?.call();
+    if (lifecycleReceipt != null &&
+        _lifecycleReceipts.containsKey(lifecycleReceipt.command.operationId)) {
+      throw const AccessFailure('operation_conflict');
+    }
+    if (lifecycleReceipt != null) {
+      final command = lifecycleReceipt.command;
+      if (command.itemId != itemId) {
+        throw const AccessFailure('invalid_information');
+      }
+      if (command.expectedCatalogVersion != null &&
+          _classificationVersion() != command.expectedCatalogVersion) {
+        throw const AccessFailure('organization_conflict');
+      }
+      final current = _items[itemId]?.version;
+      if (command.action == InformationLifecycleAction.restoreRecycled) {
+        final entry = _recycle[command.entryId];
+        if (entry == null || entry.state != RecycleState.available) {
+          throw const AccessFailure('recycle_unavailable');
+        }
+        if (entry.itemId != itemId ||
+            entry.version != command.expectedVersion ||
+            current != command.expectedCurrentVersion ||
+            (entry.wholeItem && current != null) ||
+            (!entry.wholeItem && current == null)) {
+          throw const AccessFailure('recycle_conflict');
+        }
+      } else if (current != command.expectedVersion) {
+        throw const AccessFailure('revision_conflict');
+      }
+    }
     if (item == null) {
       _items.remove(itemId);
     } else {
@@ -741,6 +785,10 @@ class MemoryInformationRepository
     }
     _recycleFacts.addAll(facts);
     if (proposal != null) _deletes[proposal.id] = proposal;
+    if (lifecycleReceipt != null) {
+      _lifecycleReceipts[lifecycleReceipt.command.operationId] =
+          lifecycleReceipt;
+    }
     _reconcileInformationFiles(
       (facts.lastOrNull?.at ??
               item?.modifiedAt ??
