@@ -30,7 +30,7 @@ GitHub 已有依赖 **#70 → #71 → #72 → #73**，五张票均属于 #69，�
 
 1. **#70–#72：核对证据与原验收项的差额。** 复用已有测试和实现，只修补真实缺口；准确区分测试入口、正常 Release 入口、真实 AI 聊天与物理系统操作。
 2. **#73：完成固定安装交付。** 旧程序归档及候选载荷核对已完成，固定旧安装尚未替换。先保护最新资料并验证可恢复，再正常退出、整体换包、普通启动和必要系统允许；最终核对保存/重开、接入、审批和失效，提供一份实际可用说明。
-3. **#74：真实来源已接正式组合，继续最终交付验证。** 持久操作、文件发布失败核对、Owner备份来源、恢复重绑及新版控件联合检查已有实现和证据；三个独立测试进程验证了结果恢复。M05完整Release候选f1bd29ea已打包，旧版混合资料经新版入口四进程往返通过。外部文件访问恢复及明确重选接缝已实现并通过定向检查，仍需同源码完整构建、正式沙箱原生面板及外部位置重开；不能把测试进程等同于已安装 App 可日用。原#73待换包候选尚未擅自替换。
+3. **#74：真实来源已接正式组合，继续最终交付验证。** 持久操作、文件发布失败核对、Owner备份来源、恢复重绑及新版控件联合检查已有实现和证据；三个独立测试进程验证了结果恢复。M05完整Release候选f1bd29ea已打包，旧版混合资料经新版入口四进程往返通过。外部文件访问恢复及明确重选接缝已实现；e3117d4a完整Release的20阶段及独立签名沙箱两进程检查通过，仍需正式Flutter App原生面板及外部位置重开；不能把测试进程等同于已安装 App 可日用。原#73待换包候选尚未擅自替换。
 
 最新实施及证据：[M01](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m01.md)、[M02](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m02.md)、[M03](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m03.md)、[M04](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)、[M05](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m05.md)。这些记录保留具体来源与验证边界；未验事项不勾选、整票不提前关闭。
 
