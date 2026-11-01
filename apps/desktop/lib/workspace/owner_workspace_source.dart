@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
 import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_classification.dart';
+import 'owner_workspace_credentials.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
 import 'owner_workspace_information.dart';
@@ -44,7 +45,7 @@ class OwnerWorkspaceSource
     this.backups = const UnavailableWorkspaceBackup(),
     this.runtime = const UnavailableWorkspaceRuntime(),
     WorkspaceAgentsSource? agents,
-    this.credentials = const UnavailableWorkspaceCredential(),
+    WorkspaceCredentialSource? credentials,
     WorkspaceApprovalSource? approvals,
     WorkspaceGrantHistorySource? grantHistory,
     this.proposals = const UnavailableWorkspaceProposal(),
@@ -52,6 +53,7 @@ class OwnerWorkspaceSource
     this.hosts = const UnavailableWorkspaceHost(),
     this.legacyTemplates = const UnavailableWorkspaceLegacyTemplate(),
   }) : _scope = owner.captureLibraryScope() {
+    this.credentials = credentials ?? OwnerWorkspaceCredentials(owner);
     this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     this.grantHistory =
@@ -132,7 +134,7 @@ class OwnerWorkspaceSource
   @override
   late final WorkspaceAgentsSource agents;
   @override
-  final WorkspaceCredentialSource credentials;
+  late final WorkspaceCredentialSource credentials;
   @override
   late final WorkspaceApprovalSource approvals;
   @override
