@@ -51,7 +51,7 @@ final class MacBackupPublication {
     }
     for (final key in strings.skip(2).take(3)) {
       if (!RegExp(
-        r'^macos:-?\d+:\d+:\d+:\d+:\d+$',
+        r'^macos:-?\d+:\d+:\d+:\d+:\d+:\d+$',
       ).hasMatch(json[key] as String)) {
         throw const BackupPublicationFailure('invalid_publication');
       }
@@ -430,7 +430,7 @@ class _MacFiles {
         throw const BackupPublicationFailure('identity_changed');
       }
       if (private || !directory) checkAcl(fd);
-      return 'macos:${v.device}:${v.inode}:${v.birthSeconds}:${v.birthNanos}:${v.generation}';
+      return 'macos:${v.device}:${v.inode}:${v.birthSeconds}:${v.birthNanos}:${v.generation}:${v.mode}';
     } finally {
       calloc.free(ptr);
     }
