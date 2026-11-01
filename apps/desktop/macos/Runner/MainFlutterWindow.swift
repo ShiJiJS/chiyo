@@ -28,6 +28,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var navigationEnabled = false
   private var notificationsEnabled = false
   private let backupStaging = BackupStagingRegistry()
+  private let pdfPreviewQueue = DispatchQueue(label: "agent_info_manage.owner_pdf_preview", qos: .userInitiated)
+  private var renderingPdf = false
   private var informationOutputs: [String: URL] = [:]
   private var informationStaging: [String: URL] = [:]
   private var toolAccess: ToolAccessStore?
@@ -113,6 +115,31 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         } catch {
           reply(FlutterError(code: "key_unavailable", message: "System key unavailable", details: nil))
         }
+      }
+    }
+
+    let pdfPreviews = FlutterMethodChannel(name: "agent_info_manage/owner_pdf_preview", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    pdfPreviews.setMethodCallHandler { [weak self] call, reply in
+      guard call.method == "renderPage" else { reply(FlutterMethodNotImplemented); return }
+      guard let window = self else { reply(FlutterError(code: "preview_unavailable", message: "Window unavailable", details: nil)); return }
+      guard let args = call.arguments as? [String: Any], args.count == 2,
+            let bytes = args["bytes"] as? FlutterStandardTypedData,
+            bytes.data.count > 0, bytes.data.count <= OwnerPdfPreview.byteLimit,
+            let page = args["page"] as? Int, page >= 0 else {
+        reply(FlutterError(code: "invalid_request", message: "Invalid PDF preview request", details: nil)); return
+      }
+      guard !window.renderingPdf else { reply(FlutterError(code: "preview_busy", message: "PDF preview busy", details: nil)); return }
+      window.renderingPdf = true
+      window.pdfPreviewQueue.async { [weak window] in
+        let value: Any
+        do {
+          let rendered = try autoreleasepool { try OwnerPdfPreview.render(bytes.data, page: page) }
+          value = ["png": FlutterStandardTypedData(bytes: rendered.png), "width": rendered.width,
+                   "height": rendered.height, "page": rendered.page, "pageCount": rendered.pageCount]
+        } catch let failure as OwnerPdfPreview.Failure {
+          value = FlutterError(code: failure.code, message: "PDF preview unavailable", details: nil)
+        } catch { value = FlutterError(code: "preview_unavailable", message: "PDF preview unavailable", details: nil) }
+        DispatchQueue.main.async { window?.renderingPdf = false; reply(value) }
       }
     }
 

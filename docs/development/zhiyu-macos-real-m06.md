@@ -4,6 +4,36 @@
 [#76](https://github.com/ShiJiJS/agent-info-manage/issues/76)，均归属#69。不新增申请入口、
 演示数据或模式，不改变#73当前换包前置，Windows适配后置。
 
+## 2026-11-01：Mac原生PDF分页预览
+
+OwnerWorkspaceFiles对PDF复用同一Owner校验原文读取，传入本机字节及零起始页码，
+NativeOwnerPdfPreview通过独立MethodChannel调用生产OwnerPdfPreview。
+CoreGraphics从内存解析、绘制指定cropBox/旋转页面，返回单页PNG及准确页数/尺寸。
+不使用外部阅读器、PDF动作执行或临时原文文件，不新增系统权限。单请求10MiB、
+最多4096页、单边1600像素；原生串行后台队列且只接纳一个进行中的请求，避免
+大PDF阻塞窗口事件或堆积原文请求。Flutter端再次核对响应页码/页数、像素范围、PNG
+签名/IHDR与元数据；原生错误只映射准确业务状态，不向界面泄漏路径/诊断。
+
+非法页码、损坏PDF、密码锁定、超出页数/页面边界及繁忙分别可辨；不添加密码输入、
+不猜密码、不把无法预览当作原文丢失。正常文字/图片仍只接受page0，历史附件引用和
+库代次边界沿用原读取流程。已有LibraryFilePreviewView呈现图片并使用原翻页控件。
+
+原生RenderChecks生成真实双页含字体PDF和URL注释，检查实际红/蓝页面像素与页码、
+旋转/裁切几何、1600边界、超4096页、锁定、损坏/空/超10MiB及越界拒绝。
+首次像素检查发现CoreGraphics的getDrawingTransform只缩小不放大，小页面在2x位图
+中居中留白；已依据本机SDK头文件分离栅格密度缩放，原像素检查通过，未放宽阈值。
+四张实际PNG已目视，含字体的两页也单独复看；不是正式Flutter页面截图或S5验收。
+坏PDF拒绝场景有CoreGraphics诊断，日志保留，不称无警告执行。
+
+Flutter定向19项、包含Owner/Host/附件阅读的相关48项通过，静态分析通过；包括真实
+SQLCipher原文字节/页码到通道（mock渲染）、响应身份/大小/PNG不符和原生错误映射。
+Xcode项目结构和MainFlutterWindow语法通过。原生像素为实际CoreGraphics运行；通道
+mock不冒充同一App端到端运行。[证据](evidence/zhiyu-round09/m06-pdf.json)。
+
+本段仍待同源码完整App编译/实际原生通道验收；未替换正式安装和预览。#75不关闭，
+导入/替换/版本恢复/主人另存仍待实现；#76尚未接入。本轮只用合成原文，不使用
+个人资料、Keychain、computer use、全局hooks或Windows CI。
+
 ## 2026-11-01：Owner校验读取与真实版本/文字/图片预览
 
 新增Owner-only `readInformationAttachment`，在现有串行队列和原文固定事务下读取
