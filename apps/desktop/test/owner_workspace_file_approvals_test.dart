@@ -14,12 +14,23 @@ import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/owner_workspace_approvals.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/workspace/approvals_controller.dart';
+import 'package:info_desktop/workspace/grant_history_controller.dart';
+import 'package:info_desktop/workspace/grant_history_page.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 class _RealHttp extends HttpOverrides {}
+
+class _CleanupFiles extends core.NativeInformationDeliveryFiles {
+  bool fail = true;
+  @override
+  Future<void> cleanup(core.InformationDeliveryLease lease) async {
+    if (fail) throw const core.RuntimeMaterialFailure('cleanup_failed');
+    await super.cleanup(lease);
+  }
+}
 
 class _Keys implements DatabaseKeyStore {
   List<int>? key;
@@ -120,7 +131,10 @@ void main() {
   final clients = <_Cli>[];
   final bytes = utf8.encode('SYNTHETIC-ORIGINAL-FILE');
   var isOpen = false;
-  Future<void> open({bool files = true}) async {
+  Future<void> open({
+    bool files = true,
+    core.InformationDeliveryFiles? driver,
+  }) async {
     repo = await EncryptedInformationRepository.open(
       '${root.path}/library',
       keys,
@@ -128,7 +142,7 @@ void main() {
     service = core.InformationService(
       repository: repo,
       informationDeliveryFiles: files
-          ? core.NativeInformationDeliveryFiles()
+          ? driver ?? core.NativeInformationDeliveryFiles()
           : null,
       clock: () => now,
     );
@@ -785,6 +799,300 @@ void main() {
       expect((await real(t, () => service.owner.history())).grants.length, 1);
       await t.pumpWidget(const SizedBox.shrink());
       model.dispose();
+      await real(t, close);
+    },
+  );
+  test(
+    'approval snapshot and actual deliveries retain distinct exact versions, not current content',
+    () async {
+      final r = await request();
+      await source.approvals.change(await command(r.id, mixed: false));
+      final hid = 'request:${r.id}';
+      var h = await source.grantHistory.read(hid);
+      expect(h.summary.kind, WorkspaceApprovalKind.file);
+      expect(h.scopes.single.fileVersion, 1);
+      expect(h.scopeNotice, contains('不锁定后续领取版本'));
+      expect(
+        (await source.grantHistory.filePreview(hid, scope())).text,
+        utf8.decode(bytes),
+      );
+      await fetch(r.session, r.id, 'history-v1');
+      item = await seed(utf8.encode('SYNTHETIC-HISTORY-V2'), previous: item);
+      await fetch(r.session, r.id, 'history-v2');
+      h = await source.grantHistory.read(hid);
+      final deliveries = h.events.where((e) => e.fileScopeId != null).toList();
+      expect(deliveries, hasLength(2));
+      expect(h.scopes.single.fileVersion, 1);
+      expect(h.summary.operationCount, 2);
+      for (final e in deliveries) {
+        final p = await source.grantHistory.filePreview(hid, e.fileScopeId!);
+        expect(p.file.ref.version, e.fileVersion);
+        expect(
+          p.text,
+          e.fileVersion == 1 ? utf8.decode(bytes) : 'SYNTHETIC-HISTORY-V2',
+        );
+      }
+      expect(
+        (await source.grantHistory.filePreview(hid, scope())).text,
+        utf8.decode(bytes),
+      );
+      expect(
+        jsonEncode(h.events.map((e) => [e.description, e.result]).toList()),
+        isNot(contains(root.path)),
+      );
+      expect(
+        (await source.grantHistory.query(
+          const WorkspaceGrantQuery(kind: WorkspaceApprovalKind.file),
+        )).total,
+        1,
+      );
+      expect(
+        (await source.grantHistory.query(
+          const WorkspaceGrantQuery(keyword: 'SYNTHETIC-HISTORY-V2'),
+        )).total,
+        0,
+      );
+      final other = await request();
+      await source.approvals.change(
+        await command(other.id, op: 'other-approved', mixed: false),
+      );
+      await expectLater(
+        source.grantHistory.filePreview(
+          'request:${other.id}',
+          deliveries.first.fileScopeId!,
+        ),
+        fails('not_found'),
+      );
+      await expectLater(
+        source.grantHistory.filePreview(
+          hid,
+          jsonEncode([item.id, item.fields.first.id]),
+        ),
+        fails('not_found'),
+      );
+      await expectLater(
+        source.grantHistory.filePreview(hid, scope(), page: 1),
+        fails('invalid_request'),
+      );
+      await close();
+      await open();
+      h = await source.grantHistory.read(hid);
+      expect(h.summary.state.isActive, false);
+      expect(h.events.where((e) => e.fileScopeId != null), hasLength(2));
+      expect(
+        (await source.grantHistory.filePreview(hid, scope())).text,
+        utf8.decode(bytes),
+      );
+      expect(service.owner.sessions, isEmpty);
+    },
+  );
+
+  test(
+    'real copy cleanup failure stays pending in history until actual cleanup succeeds',
+    () async {
+      await close();
+      final driver = _CleanupFiles();
+      await open(driver: driver);
+      item = service.owner.information.single;
+      final r = await request();
+      await source.approvals.change(await command(r.id, mixed: false));
+      final result =
+          (await fetch(r.session, r.id, 'pending-cleanup'))['delivery'] as Map;
+      final path = result['path'] as String;
+      try {
+        final d = await source.approvals.read(r.id);
+        await source.approvals.change(
+          WorkspaceApprovalChange(
+            operationId: 'revoke-pending',
+            requestId: r.id,
+            reviewToken: d.reviewToken,
+            action: WorkspaceApprovalAction.revoke,
+          ),
+        );
+        await service.owner.reconcileInformationFileDeliveries();
+        var h = await source.grantHistory.read('request:${r.id}');
+        final event = h.events.singleWhere((e) => e.fileScopeId != null);
+        expect(event.result, contains('待清理，不能认作已回收'));
+        expect(event.result, contains('副本清理失败'));
+        expect(File(path).existsSync(), true);
+        expect(h.summary.state, WorkspaceGrantState.revoked);
+        driver.fail = false;
+        await service.owner.reconcileInformationFileDeliveries();
+        h = await source.grantHistory.read('request:${r.id}');
+        expect(
+          h.events.singleWhere((e) => e.fileScopeId != null).result,
+          contains('登记副本路径已移除'),
+        );
+        expect(File(path).existsSync(), false);
+      } finally {
+        driver.fail = false;
+        await service.owner.reconcileInformationFileDeliveries();
+      }
+    },
+  );
+
+  test(
+    'stored unknown delivery facts do not imply success; delivery state changes refresh source',
+    () async {
+      final r = await request();
+      await source.approvals.change(await command(r.id, mixed: false));
+      await fetch(r.session, r.id, 'unknown-projection');
+      service.agent.endSession(r.session);
+      await service.owner.reconcileInformationFileDeliveries();
+      final prior = service.owner.informationFileDeliveries.single;
+      expect(prior.lease, null);
+      var changes = 0;
+      final sub = source.changes.listen((_) => changes++);
+      try {
+        source.refreshFromOwner();
+        await Future<void>.delayed(Duration.zero);
+        changes = 0;
+        // Synthetic persisted unknown fact, not a simulated successful delivery.
+        await repo.saveInformationFileDelivery(
+          core.InformationFileDelivery.fromArchiveJson({
+            ...prior.toArchiveJson(),
+            'id': 'synthetic-unknown-history',
+            'operationId': 'synthetic-unknown-operation',
+            'state': 'unknown',
+            'reason': 'delivery_unknown',
+          }),
+        );
+        source.refreshFromOwner();
+        await Future<void>.delayed(Duration.zero);
+        expect(changes, 1);
+        final h = await source.grantHistory.read('request:${r.id}');
+        final e = h.events.singleWhere(
+          (e) => e.id == 'delivery:synthetic-unknown-history',
+        );
+        expect(e.result, contains('交付结果未知'));
+        expect(e.result, contains('仅历史事实'));
+        expect(e.result, isNot(contains('副本已准备')));
+      } finally {
+        await sub.cancel();
+      }
+    },
+  );
+
+  test(
+    'corrupt historical bytes or lost approval snapshot never fall back to current attachment',
+    () async {
+      final r = await request();
+      await source.approvals.change(await command(r.id, mixed: false));
+      await fetch(r.session, r.id, 'historical-original');
+      final hid = 'request:${r.id}';
+      final event = (await source.grantHistory.read(
+        hid,
+      )).events.singleWhere((e) => e.fileScopeId != null);
+      final old = item.fields.last.attachment!;
+      item = await seed(utf8.encode('SYNTHETIC-CURRENT-ONLY'), previous: item);
+      // Equal-length corrupt original in this isolated fixture; current v2 remains intact.
+      sql(
+        'UPDATE information_attachment_versions SET body=? WHERE attachment_id=? AND version=?',
+        [
+          List<int>.filled(bytes.length, 0),
+          old.attachmentId,
+          old.attachmentVersion,
+        ],
+      );
+      await expectLater(
+        source.grantHistory.filePreview(hid, scope()),
+        fails('attachment_integrity_failed'),
+      );
+      await expectLater(
+        source.grantHistory.filePreview(hid, event.fileScopeId!),
+        fails('attachment_integrity_failed'),
+      );
+      expect(
+        (await service.owner.readInformationAttachment(
+          item.fields.last.attachment!,
+        )).bytes,
+        utf8.encode('SYNTHETIC-CURRENT-ONLY'),
+      );
+      sql(
+        'UPDATE information_attachment_versions SET body=? WHERE attachment_id=? AND version=?',
+        [bytes, old.attachmentId, old.attachmentVersion],
+      );
+      now = now.add(const Duration(days: 31));
+      await service.owner.purgeRevisions();
+      expect(
+        (await source.grantHistory.read(hid)).scopes.single.fileVersion,
+        null,
+      );
+      await expectLater(
+        source.grantHistory.filePreview(hid, scope()),
+        fails('snapshot_unavailable'),
+      );
+      // Delivery identity remains, but retention can remove its old original.
+      await expectLater(
+        source.grantHistory.filePreview(hid, event.fileScopeId!),
+        fails('attachment_missing'),
+      );
+      expect(
+        (await source.grantHistory.read(
+          hid,
+        )).events.singleWhere((e) => e.fileScopeId != null).fileVersion,
+        1,
+      );
+    },
+  );
+
+  testWidgets(
+    'real history controls preview approval snapshot and distinct delivered original',
+    (t) async {
+      final r = await real(t, request);
+      await real(t, () async {
+        await source.approvals.change(await command(r.id, mixed: false));
+        item = await seed(
+          utf8.encode('SYNTHETIC-DELIVERED-V2'),
+          previous: item,
+        );
+        await fetch(r.session, r.id, 'widget-history');
+      });
+      final m = GrantHistoryController(
+        source.grantHistory,
+        source.approvals,
+        const Stream.empty(),
+      );
+      await real(t, () => m.open('request:${r.id}'));
+      t.view.physicalSize = const Size(1440, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      await t.pumpWidget(
+        MaterialApp(
+          theme: zhiyuTheme(Brightness.light),
+          home: Scaffold(
+            body: GrantHistoryPage(
+              controller: m,
+              onRecord: (_) {},
+              onRequest: (_) {},
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      var button = find.byKey(ValueKey('grant-file-${scope()}'));
+      await t.ensureVisible(button);
+      await t.tap(button);
+      await settle(
+        t,
+        () => find.text(utf8.decode(bytes)).evaluate().isNotEmpty,
+      );
+      expect(find.text('SYNTHETIC-DELIVERED-V2'), findsNothing);
+      await t.tap(find.widgetWithText(DesktopButton, '关闭'));
+      await t.pumpAndSettle();
+      final event = m.detail!.events.singleWhere((e) => e.fileScopeId != null);
+      button = find.byKey(ValueKey('grant-delivery-${event.id}'));
+      await t.ensureVisible(button);
+      await t.tap(button);
+      await settle(
+        t,
+        () => find.text('SYNTHETIC-DELIVERED-V2').evaluate().isNotEmpty,
+      );
+      expect(find.text('实际交付的附件v2'), findsOneWidget);
+      expect(t.takeException(), null);
+      await t.pumpWidget(const SizedBox.shrink());
+      m.dispose();
       await real(t, close);
     },
   );

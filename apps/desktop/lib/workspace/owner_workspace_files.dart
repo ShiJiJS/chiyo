@@ -86,9 +86,61 @@ class OwnerWorkspaceFiles {
       resolved.ref.attachmentId,
       version ?? resolved.ref.attachmentVersion,
     );
+    return OwnerWorkspaceAttachmentPreview(
+      owner,
+      pdf: pdf,
+    ).read(ref, page: page);
+  }
+}
+
+/// Shared Owner renderer. Callers resolve and validate a current field or exact
+/// historical attachment reference before entering this content read.
+class OwnerWorkspaceAttachmentPreview {
+  const OwnerWorkspaceAttachmentPreview(
+    this.owner, {
+    this.pdf = const NativeOwnerPdfPreview(),
+  });
+  final core.OwnerAccess owner;
+  final OwnerPdfPreviewRenderer pdf;
+
+  Future<WorkspaceFilePreview> read(
+    core.InformationAttachmentRef ref, {
+    int page = 0,
+  }) => _read(ref, page: page);
+
+  Future<WorkspaceFilePreview> delivered(
+    core.InformationFileDelivery delivery, {
+    int page = 0,
+  }) => _read(delivery.attachment, page: page, original: delivery);
+
+  Future<WorkspaceFilePreview> _read(
+    core.InformationAttachmentRef ref, {
+    int page = 0,
+    core.InformationFileDelivery? original,
+  }) async {
+    if (page < 0) throw const WorkspaceFailure('invalid_request', '页码无效。');
     try {
       final content = await owner.readInformationAttachment(ref);
-      final file = _version(content.version);
+      final v = content.version;
+      if (original != null &&
+          (v.reference != original.attachment ||
+              v.sha256 != original.sha256 ||
+              v.byteLength != original.byteLength ||
+              v.originalName != original.fileName ||
+              v.mediaType != original.mediaType)) {
+        throw const core.AccessFailure('attachment_integrity_failed');
+      }
+      final file = WorkspaceFileVersion(
+        ref: WorkspaceFileRef(
+          v.reference.attachmentId,
+          v.reference.attachmentVersion,
+        ),
+        filename: v.originalName,
+        mediaType: v.mediaType,
+        byteLength: v.byteLength,
+        createdAt: v.createdAt,
+        available: v.available,
+      );
       if (file.mediaType == 'application/pdf') {
         return await pdf.render(file, content.bytes, page);
       }

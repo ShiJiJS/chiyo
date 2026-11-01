@@ -55,7 +55,8 @@ class OwnerWorkspaceSource
     this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     this.grantHistory =
-        grantHistory ?? OwnerWorkspaceGrantHistory(owner: owner);
+        grantHistory ??
+        OwnerWorkspaceGrantHistory(owner: owner, pdfPreview: pdfPreview);
     _information = OwnerWorkspaceInformation(
       owner: owner,
       templates: definitions ?? builtinWorkspaceDefinitions,
@@ -194,6 +195,18 @@ class OwnerWorkspaceSource
                 for (final s in owner.sessions) [s.id, s.chatLabel, s.ended],
               ],
               owner.accessRecordObservation,
+              [
+                for (final d in owner.informationFileDeliveries)
+                  [
+                    d.id,
+                    d.state,
+                    d.targetState,
+                    d.reason,
+                    d.cleanupError,
+                    d.holdsCopy,
+                    d.restoredAt?.toIso8601String(),
+                  ],
+              ],
               owner.queryProposals(limit: 1).pendingCount,
             ]);
     } on Object {

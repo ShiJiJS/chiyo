@@ -98,6 +98,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
     WorkspaceGrantTarget target, {
     String? scopeId,
     int? fileVersion,
+    String? contentLabel,
   }) async {
     if (m.frozen || m.detail == null) return;
     final id = m.detail!.summary.id;
@@ -110,9 +111,11 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
           changes: m.changes,
           historyId: id,
           record: target.record,
-          label: scopeId == null
-              ? '${target.name} · 当时资料v${target.version}'
-              : '${target.name} · 批准附件v$fileVersion',
+          label:
+              contentLabel ??
+              (scopeId == null
+                  ? '${target.name} · 当时资料v${target.version}'
+                  : '${target.name} · 批准附件v$fileVersion'),
           scopeId: scopeId,
         ),
       );
@@ -554,11 +557,12 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                     ],
                   ),
                 ),
-              if (d.scopes.any(
-                (s) => s.kind == WorkspaceApprovalScopeKind.field,
-              ))
+              if (d.scopeNotice != null ||
+                  d.scopes.any(
+                    (s) => s.kind == WorkspaceApprovalScopeKind.field,
+                  ))
                 Text(
-                  '批准成员固定；有效期内读取这些字段的最新内容。附件版本另外固定。',
+                  d.scopeNotice ?? '批准成员固定；有效期内读取这些字段的最新内容。附件版本另外固定。',
                   style: libraryText(context, 12, color: c.muted, height: 1.8),
                 ),
             ]),
@@ -603,6 +607,23 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                               e.result,
                               style: libraryText(context, 13, color: c.muted),
                             ),
+                            if (e.fileScopeId != null && e.fileRecord != null)
+                              DesktopButton(
+                                key: ValueKey('grant-delivery-${e.id}'),
+                                kind: DesktopButtonKind.quiet,
+                                onPressed: m.frozen || m.loading || m.reading
+                                    ? null
+                                    : () => _content(
+                                        d.targets.firstWhere(
+                                          (v) => v.record == e.fileRecord,
+                                        ),
+                                        scopeId: e.fileScopeId,
+                                        fileVersion: e.fileVersion,
+                                        contentLabel:
+                                            '实际交付的附件v${e.fileVersion}',
+                                      ),
+                                child: Text('查看交付的附件v${e.fileVersion}'),
+                              ),
                             if (e.proposalId != null)
                               DesktopButton(
                                 key: ValueKey(

@@ -115,9 +115,14 @@ class WorkspaceGrantEvent {
     this.description,
     this.result, {
     this.proposalId,
+    this.fileScopeId,
+    this.fileVersion,
+    this.fileRecord,
   });
+  final WorkspaceRecordRef? fileRecord;
   final String id, description, result;
-  final String? proposalId;
+  final String? proposalId, fileScopeId;
+  final int? fileVersion;
   final DateTime at;
 }
 
@@ -132,6 +137,7 @@ class WorkspaceGrantDetail {
     this.fieldExpiresAt,
     this.credentialExpiresAt,
     this.legacyNotice,
+    this.scopeNotice,
   }) : scopes = List.unmodifiable(scopes),
        targets = List.unmodifiable(targets),
        events = List.unmodifiable(events);
@@ -139,7 +145,7 @@ class WorkspaceGrantDetail {
   final List<WorkspaceGrantedScope> scopes;
   final List<WorkspaceGrantTarget> targets;
   final List<WorkspaceGrantEvent> events;
-  final String? reviewToken, legacyNotice;
+  final String? reviewToken, legacyNotice, scopeNotice;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
   bool get canRevoke => summary.requestId != null && summary.state.isActive;
 }
