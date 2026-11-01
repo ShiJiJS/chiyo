@@ -82,7 +82,7 @@ class OwnerInformationEditorSession {
     final next = await owner.stageInformationFile(
       form,
       path,
-      mediaType: _mediaType(path),
+      mediaType: informationFileMediaType(path),
     );
     final previous = field.stage;
     if (previous != null) {
@@ -147,7 +147,7 @@ class OwnerInformationEditorSession {
   }
 }
 
-String _mediaType(String path) => switch (path
+String informationFileMediaType(String path) => switch (path
     .split(RegExp(r'[/\\]'))
     .last
     .split('.')
@@ -159,6 +159,7 @@ String _mediaType(String path) => switch (path
   'doc' => 'application/msword',
   'txt' || 'md' => 'text/plain',
   'png' => 'image/png',
+  'webp' => 'image/webp',
   'jpg' || 'jpeg' => 'image/jpeg',
   _ => 'application/octet-stream',
 };

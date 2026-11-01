@@ -85,16 +85,25 @@ Future<WorkspaceRecordRef?> showLibraryFileImport(
     return null;
   }
   final candidate = selected;
-  if (candidate == null || !context.mounted) return null;
-  return showDesktopDialog<WorkspaceRecordRef>(
-    context,
-    builder: (_) => _ImportFile(
-      source: source,
-      catalog: catalog,
-      selected: candidate,
-      directoryId: directoryId,
-    ),
-  );
+  if (candidate == null) return null;
+  try {
+    if (!context.mounted) return null;
+    return await showDesktopDialog<WorkspaceRecordRef>(
+      context,
+      builder: (_) => _ImportFile(
+        source: source,
+        catalog: catalog,
+        selected: candidate,
+        directoryId: directoryId,
+      ),
+    );
+  } finally {
+    if (source is WorkspaceFileSelectionReleaser) {
+      await (source as WorkspaceFileSelectionReleaser).releaseFileSelection(
+        candidate.selectionId,
+      );
+    }
+  }
 }
 
 class _ImportFile extends StatefulWidget {
@@ -120,7 +129,7 @@ class _ImportFileState extends State<_ImportFile> {
       : widget.directoryId;
   bool _busy = false, _discard = false, _dirty = false;
   WorkspaceFailure? _failure;
-  String? _operation;
+  String? _operation, _submittedDigest;
   bool get _uncertain => _failure?.code == 'unknown_outcome';
   void _close(WorkspaceRecordRef ref) {
     setState(() {
@@ -137,6 +146,15 @@ class _ImportFileState extends State<_ImportFile> {
       final receipt = await widget.source.fileOperationReceipt(_operation!);
       if (!mounted) return;
       if (receipt != null) {
+        if (receipt.commandDigest != null &&
+            (receipt.commandDigest != _submittedDigest ||
+                receipt.file == null ||
+                receipt.record.kind != WorkspaceRecordKind.information)) {
+          throw const WorkspaceFailure(
+            'unknown_outcome',
+            '文件回执与原导入操作不符，请继续核对。',
+          );
+        }
         _close(receipt.record);
         return;
       }
@@ -172,15 +190,15 @@ class _ImportFileState extends State<_ImportFile> {
       _failure = null;
     });
     try {
-      final ref = await widget.source.importFile(
-        WorkspaceFileImport(
-          operationId: _operation ??= workspaceFileOperationId(),
-          selectionId: widget.selected.selectionId,
-          name: _name.text,
-          description: _description.text,
-          directoryId: _directory,
-        ),
+      final command = WorkspaceFileImport(
+        operationId: _operation ??= workspaceFileOperationId(),
+        selectionId: widget.selected.selectionId,
+        name: _name.text,
+        description: _description.text,
+        directoryId: _directory,
       );
+      _submittedDigest = command.digest;
+      final ref = await widget.source.importFile(command);
       if (!mounted) return;
       _close(ref);
     } catch (error) {
@@ -200,9 +218,9 @@ class _ImportFileState extends State<_ImportFile> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-    canPop: !_busy && !_dirty,
+    canPop: !_busy && !_dirty && !_uncertain,
     onPopInvokedWithResult: (popped, _) {
-      if (!popped && !_busy) setState(() => _discard = true);
+      if (!popped && !_busy && !_uncertain) setState(() => _discard = true);
     },
     child: DesktopDialog(
       title: const Text('导入文件'),
@@ -292,16 +310,18 @@ class _ImportFileState extends State<_ImportFile> {
           ),
         if (_discard)
           DesktopButton(
-            onPressed: () {
-              setState(() => _dirty = false);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) Navigator.pop(context);
-              });
-            },
+            onPressed: _busy || _uncertain
+                ? null
+                : () {
+                    setState(() => _dirty = false);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) Navigator.pop(context);
+                    });
+                  },
             child: const Text('放弃修改'),
           ),
         DesktopButton(
-          onPressed: _busy
+          onPressed: _busy || _uncertain
               ? null
               : () {
                   if (_dirty) {
@@ -332,17 +352,27 @@ Future<bool?> showLibraryFileChange(
   WorkspaceFileHistory history, {
   WorkspaceFileCandidate? selected,
   int? restoreVersion,
-}) => showDesktopDialog<bool>(
-  context,
-  builder: (_) => _FileChange(
-    source: source,
-    record: record,
-    fieldKey: fieldKey,
-    history: history,
-    selected: selected,
-    restoreVersion: restoreVersion,
-  ),
-);
+}) async {
+  try {
+    return await showDesktopDialog<bool>(
+      context,
+      builder: (_) => _FileChange(
+        source: source,
+        record: record,
+        fieldKey: fieldKey,
+        history: history,
+        selected: selected,
+        restoreVersion: restoreVersion,
+      ),
+    );
+  } finally {
+    if (selected != null && source is WorkspaceFileSelectionReleaser) {
+      await (source as WorkspaceFileSelectionReleaser).releaseFileSelection(
+        selected.selectionId,
+      );
+    }
+  }
+}
 
 class _FileChange extends StatefulWidget {
   const _FileChange({
@@ -367,7 +397,7 @@ class _FileChangeState extends State<_FileChange> {
   bool _busy = false;
   WorkspaceFailure? _failure;
   late WorkspaceFileHistory _history = widget.history;
-  String? _operation;
+  String? _operation, _submittedDigest;
   late final WorkspaceFileRef? _restoreRef = widget.history.versions
       .where((file) => file.ref.version == widget.restoreVersion)
       .firstOrNull
@@ -375,7 +405,7 @@ class _FileChangeState extends State<_FileChange> {
   WorkspaceFileVersion? get _restoreTarget =>
       _history.versions.where((file) => file.ref == _restoreRef).firstOrNull;
   bool get _targetAvailable =>
-      widget.selected != null || _restoreTarget != null;
+      widget.selected != null || _restoreTarget?.available == true;
   Future<void> _submit() async {
     if (_busy || !_targetAvailable) return;
     setState(() {
@@ -383,20 +413,20 @@ class _FileChangeState extends State<_FileChange> {
       _failure = null;
     });
     try {
-      await widget.source.changeFile(
-        WorkspaceFileChange(
-          operationId: _operation ??= workspaceFileOperationId(),
-          record: widget.record,
-          fieldKey: widget.fieldKey,
-          expectedRecordVersion: _history.recordVersion,
-          expectedFileVersion: _history.current.ref.version,
-          kind: widget.restoreVersion == null
-              ? WorkspaceFileChangeKind.replace
-              : WorkspaceFileChangeKind.restore,
-          selectionId: widget.selected?.selectionId,
-          restoreVersion: widget.restoreVersion,
-        ),
+      final command = WorkspaceFileChange(
+        operationId: _operation ??= workspaceFileOperationId(),
+        record: widget.record,
+        fieldKey: widget.fieldKey,
+        expectedRecordVersion: _history.recordVersion,
+        expectedFileVersion: _history.current.ref.version,
+        kind: widget.restoreVersion == null
+            ? WorkspaceFileChangeKind.replace
+            : WorkspaceFileChangeKind.restore,
+        selectionId: widget.selected?.selectionId,
+        restoreVersion: widget.restoreVersion,
       );
+      _submittedDigest = command.digest;
+      await widget.source.changeFile(command);
       if (mounted) {
         setState(() => _busy = false);
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -422,6 +452,17 @@ class _FileChangeState extends State<_FileChange> {
         final receipt = await widget.source.fileOperationReceipt(_operation!);
         if (!mounted) return;
         if (receipt != null) {
+          if (receipt.commandDigest != null &&
+              (receipt.commandDigest != _submittedDigest ||
+                  receipt.record != widget.record ||
+                  receipt.file?.id != _history.current.ref.id ||
+                  (receipt.file?.version ?? 0) <=
+                      _history.current.ref.version)) {
+            throw const WorkspaceFailure(
+              'unknown_outcome',
+              '文件回执与原变更操作不符，请继续核对。',
+            );
+          }
           setState(() => _busy = false);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) Navigator.pop(context, true);
@@ -456,7 +497,7 @@ class _FileChangeState extends State<_FileChange> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-    canPop: !_busy,
+    canPop: !_busy && _failure?.code != 'unknown_outcome',
     child: DesktopDialog(
       title: Text(widget.restoreVersion == null ? '替换文件' : '恢复文件版本'),
       content: Column(
@@ -533,7 +574,9 @@ class _FileChangeState extends State<_FileChange> {
             child: const Text('重新读取核对'),
           ),
         DesktopButton(
-          onPressed: _busy ? null : () => Navigator.pop(context, false),
+          onPressed: _busy || _failure?.code == 'unknown_outcome'
+              ? null
+              : () => Navigator.pop(context, false),
           child: const Text('取消'),
         ),
         DesktopButton(

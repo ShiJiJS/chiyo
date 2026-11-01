@@ -57,12 +57,14 @@ final class InformationDraftInput {
     this.directoryId,
     this.layout,
     this.command,
+    this.fileCommand,
     Iterable<String> tagIds = const [],
   }) : fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds);
   final String name, description;
   final InformationDraftLayout? layout;
   final InformationRecordCommand? command;
+  final InformationFileCommand? fileCommand;
   final String? itemId, directoryId;
   final int? baseVersion;
   final List<InformationDraftField> fields;
@@ -77,6 +79,7 @@ final class InformationDraftInput {
     'fields': [for (final f in fields) f.toPrivateJson()],
     if (layout != null) 'layout': layout!.toJson(),
     if (command != null) 'command': command!.toJson(),
+    if (fileCommand != null) 'fileCommand': fileCommand!.toJson(),
   };
 }
 

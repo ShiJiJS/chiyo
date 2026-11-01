@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output',type=Path)
+    parser.add_argument('--file-changes',action='store_true',help='Also use production import, replace and retained-version restore')
     args=parser.parse_args()
     out=args.output.resolve();out.relative_to(ROOT/'build/macos-adaptation');out.mkdir(parents=True,exist_ok=False)
     source=out/'source';products=out/'products';run=uuid.uuid4().hex
@@ -46,7 +47,7 @@ def main():
         env.update(XCODE_XCCONFIG_FILE=str(config),ZHIYU_PROFILE_DRIVER_REPORT=str(out/'driver.json'))
         target='integration_test/owner_pdf_native_test.dart'
         call('configure',[launcher,'flutter','build','macos','--debug','--config-only','--no-pub','--target',target,
-             '--dart-define=OWNER_PDF_NATIVE_RUN='+run,'--dart-define=INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'],desktop)
+             '--dart-define=OWNER_PDF_NATIVE_RUN='+run,'--dart-define=OWNER_PDF_FILE_CHANGES='+str(args.file_changes).lower(),'--dart-define=INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'],desktop)
         call('build',['xcodebuild','-workspace','macos/Runner.xcworkspace','-scheme','Runner','-configuration','Debug',
              '-derivedDataPath',str(out/'xcode'),'-destination','generic/platform=macOS','OBJROOT='+str(out/'xcode/Build/Intermediates.noindex'),
              'SYMROOT='+str(products),'ARCHS=arm64','COMPILER_INDEX_STORE_ENABLE=NO','-quiet'],desktop)
@@ -60,7 +61,7 @@ def main():
         call('drive',[launcher,'flutter','drive','--debug','-d','macos','--no-pub','--target',target,
              '--driver','integration_test/profile_driver.dart','--use-application-binary',str(app)],desktop,300)
         data=json.loads((out/'driver.json').read_text())
-        if not isinstance(data,dict) or data.get('passed') is not True or data.get('fixtureRemoved') is not True or len(data.get('checks',[]))!=6:
+        if not isinstance(data,dict) or data.get('passed') is not True or data.get('fixtureRemoved') is not True or len(data.get('checks',[]))!=(9 if args.file_changes else 6):
             raise RuntimeError('Missing native PDF evidence/cleanup')
         report['native']=data;report['complete']=True
     finally:

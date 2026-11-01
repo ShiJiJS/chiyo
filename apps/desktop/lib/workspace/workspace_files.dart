@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'dart:convert';
+import 'package:crypto/crypto.dart' as crypto;
 import 'dart:math';
 import 'workspace_records.dart';
 
@@ -121,6 +123,21 @@ class WorkspaceFileChange {
   final WorkspaceFileChangeKind kind;
   final String? selectionId;
   final int? restoreVersion;
+  String get digest => crypto.sha256
+      .convert(
+        utf8.encode(
+          jsonEncode({
+            'action': kind.name,
+            'record': record.key,
+            'field': fieldKey,
+            'recordVersion': expectedRecordVersion,
+            'fileVersion': expectedFileVersion,
+            'selection': selectionId,
+            'restoreVersion': restoreVersion,
+          }),
+        ),
+      )
+      .toString();
 }
 
 class WorkspaceFileImport {
@@ -135,6 +152,20 @@ class WorkspaceFileImport {
   final String operationId, selectionId, name, description;
   final String? directoryId;
   final List<String> tagIds;
+  String get digest => crypto.sha256
+      .convert(
+        utf8.encode(
+          jsonEncode({
+            'action': 'import',
+            'selection': selectionId,
+            'name': name,
+            'description': description,
+            'directory': directoryId,
+            'tags': tagIds.toList()..sort(),
+          }),
+        ),
+      )
+      .toString();
 }
 
 enum WorkspaceFileAction { saveAs, open }
@@ -158,8 +189,15 @@ class WorkspaceFileOperationReceipt {
     this.record,
     this.file, {
     this.actionCompleted,
+    this.commandDigest,
   });
   final WorkspaceRecordRef record;
   final WorkspaceFileRef? file;
   final bool? actionCompleted;
+  final String? commandDigest;
+}
+
+/// Optional owner staging cleanup for a closed file form.
+abstract interface class WorkspaceFileSelectionReleaser {
+  Future<void> releaseFileSelection(String selectionId);
 }
