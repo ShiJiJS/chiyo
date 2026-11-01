@@ -14,6 +14,8 @@ abstract class BackupFilePicker {
   const BackupFilePicker();
   Future<String?> recoveryKeyOutput();
   Future<String?> backupOutput();
+  Future<String?> ownerFileOutput(String originalName) async =>
+      throw const StorageFailure('file_output_unavailable');
   Future<String?> backupInput();
   Future<String?> recoveryKeyInput() async => null;
   Future<BackupStaging?> prepareStaging(String output) async => null;
@@ -46,6 +48,9 @@ class NativeBackupFilePicker extends BackupFilePicker {
   @override
   Future<String?> backupOutput() =>
       _channel.invokeMethod<String>('backupOutput');
+  @override
+  Future<String?> ownerFileOutput(String originalName) =>
+      _channel.invokeMethod<String>('ownerFileOutput', originalName);
   @override
   Future<String?> backupInput() => _channel.invokeMethod<String>('backupInput');
   @override

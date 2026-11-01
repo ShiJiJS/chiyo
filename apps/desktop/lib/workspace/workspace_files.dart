@@ -174,7 +174,9 @@ class WorkspaceFileActionResult {
   const WorkspaceFileActionResult({
     required this.completed,
     required this.filename,
+    this.cleanupPending = false,
   });
+  final bool cleanupPending;
   final bool completed;
   final String filename;
 }
@@ -190,14 +192,56 @@ class WorkspaceFileOperationReceipt {
     this.file, {
     this.actionCompleted,
     this.commandDigest,
+    this.cleanupPending = false,
   });
   final WorkspaceRecordRef record;
   final WorkspaceFileRef? file;
   final bool? actionCompleted;
+  final bool cleanupPending;
   final String? commandDigest;
 }
 
 /// Optional owner staging cleanup for a closed file form.
 abstract interface class WorkspaceFileSelectionReleaser {
   Future<void> releaseFileSelection(String selectionId);
+}
+
+/// Canonical identity of the page's original action. Paths are never commands.
+String workspaceFileActionDigest(
+  WorkspaceRecordRef record,
+  String fieldKey,
+  int version,
+  WorkspaceFileAction action,
+) => crypto.sha256
+    .convert(
+      utf8.encode(
+        jsonEncode({
+          'action': action.name,
+          'record': record.key,
+          'field': fieldKey,
+          'version': version,
+        }),
+      ),
+    )
+    .toString();
+
+class WorkspacePendingFileAction {
+  const WorkspacePendingFileAction(this.operationId, this.digest, this.file);
+  final String operationId, digest;
+  final WorkspaceFileRef file;
+}
+
+class WorkspaceFileActionState {
+  const WorkspaceFileActionState({this.pending, this.cleanupPending = 0});
+  final WorkspacePendingFileAction? pending;
+  final int cleanupPending;
+}
+
+abstract interface class WorkspaceFileActionRecovery {
+  Future<WorkspaceFileActionState> fileActionState(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  );
+  Future<void> recoverFileActionAccess(String operationId);
+  Future<void> cleanupFileActions(WorkspaceRecordRef record, String fieldKey);
 }

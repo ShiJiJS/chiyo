@@ -1,3 +1,6 @@
+import 'package:info_storage/info_storage.dart';
+import '../backups.dart';
+import 'owner_workspace_file_actions.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
@@ -19,9 +22,14 @@ import 'workspace_source.dart';
 /// lifetime and must replace this source after a successful library restore.
 /// Unsupported modules fail explicitly instead of showing fictional results.
 class OwnerWorkspaceSource
-    implements WorkspaceSource, WorkspaceFileSelectionReleaser {
+    implements
+        WorkspaceSource,
+        WorkspaceFileSelectionReleaser,
+        WorkspaceFileActionRecovery {
   OwnerWorkspaceSource({
     required this.owner,
+    InformationFileOutputs? fileOutputs,
+    BackupFilePicker outputPicker = const NativeBackupFilePicker(),
     OwnerPdfPreviewRenderer pdfPreview = const NativeOwnerPdfPreview(),
     OwnerWorkspaceFileSelections? fileSelections,
     Map<String, Map<String, Object?>>? definitions,
@@ -48,6 +56,15 @@ class OwnerWorkspaceSource
       onChanged: _changed,
     );
     _files = OwnerWorkspaceFiles(owner, _information, pdf: pdfPreview);
+    _fileActions = fileOutputs == null
+        ? null
+        : OwnerWorkspaceFileActions(
+            owner,
+            _information,
+            _files,
+            fileOutputs,
+            outputPicker,
+          );
     selections = fileSelections ?? OwnerWorkspaceFileSelections(owner);
     _fileChanges = OwnerWorkspaceFileChanges(
       owner,
@@ -77,6 +94,7 @@ class OwnerWorkspaceSource
   bool get isCurrentLibrary => !_disposed && _scope.isCurrent;
   late final OwnerWorkspaceInformation _information;
   late final OwnerWorkspaceFiles _files;
+  late final OwnerWorkspaceFileActions? _fileActions;
   late final OwnerWorkspaceFileSelections selections;
   late final OwnerWorkspaceFileChanges _fileChanges;
   late final OwnerWorkspaceClassification _classification;
@@ -326,7 +344,14 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
     String operationId,
-  ) => _read(() => _fileChanges.receipt(operationId));
+  ) => _read(() async {
+    final mutation = await _fileChanges.receipt(operationId);
+    final output = await _fileActions?.receipt(operationId);
+    if (mutation != null && output != null) {
+      throw const WorkspaceFailure('unknown_outcome', '操作编号对应多种结果，无法确认。');
+    }
+    return output ?? mutation;
+  });
   @override
   Future<WorkspaceFileActionResult> fileAction(
     WorkspaceRecordRef record,
@@ -334,7 +359,34 @@ class OwnerWorkspaceSource
     int version,
     WorkspaceFileAction action, {
     required String operationId,
-  }) => _unsupported();
+  }) => _read(() async {
+    if (action != WorkspaceFileAction.saveAs || _fileActions == null) {
+      return _unsupported();
+    }
+    if (await _fileChanges.receipt(operationId) != null) {
+      throw const WorkspaceFailure('operation_conflict', '此编号已用于文件更改。');
+    }
+    return _fileActions.save(record, fieldKey, version, operationId);
+  });
+
+  @override
+  Future<WorkspaceFileActionState> fileActionState(
+    WorkspaceRecordRef record,
+    String key,
+  ) => _read(
+    () async =>
+        await _fileActions?.state(record, key) ??
+        const WorkspaceFileActionState(),
+  );
+  @override
+  Future<void> recoverFileActionAccess(String id) => _read(() async {
+    await _fileActions?.recoverAccess(id);
+  });
+  @override
+  Future<void> cleanupFileActions(WorkspaceRecordRef record, String key) =>
+      _read(() async {
+        await _fileActions?.cleanup(record, key);
+      });
 
   @override
   Future<void> releaseFileSelection(String id) => selections.release(id);
@@ -342,6 +394,7 @@ class OwnerWorkspaceSource
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
+    _fileActions?.dispose();
     _timer?.cancel();
     await selections.dispose();
     await _requests.cancel();

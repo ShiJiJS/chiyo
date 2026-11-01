@@ -10,6 +10,7 @@ import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/library_file.dart';
 import 'package:info_desktop/information_files.dart';
+import 'package:info_desktop/backups.dart';
 import 'package:info_desktop/workspace/owner_workspace_file_selections.dart';
 
 class _Keys implements DatabaseKeyStore {
@@ -27,6 +28,27 @@ class _Picker implements InformationFilePicker {
   Future<String?> choose() async => next;
   @override
   Future<String?> saveAs(String name) async => null;
+}
+
+// Only the OS selection/allocation is supplied by this synthetic harness.
+// Publication, SQLCipher journal and production source remain real.
+class _OutputPicker extends BackupFilePicker {
+  _OutputPicker(this.root);
+  final Directory root;
+  @override
+  Future<String?> recoveryKeyOutput() async => null;
+  @override
+  Future<String?> backupOutput() async => null;
+  @override
+  Future<String?> backupInput() async => null;
+  @override
+  Future<String?> ownerFileOutput(String name) async =>
+      '${root.path}/synthetic-saved.pdf';
+  @override
+  Future<BackupStaging?> prepareStaging(String path) async =>
+      BackupStaging((await root.createTemp('output-stage-')).path, 'synthetic');
+  @override
+  Future<void> releaseRecordedStaging(Map<String, Object?> directory) async {}
 }
 
 List<int> _pdf({bool inverted = false}) {
@@ -63,6 +85,7 @@ void main() {
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   const run = String.fromEnvironment('OWNER_PDF_NATIVE_RUN');
   const fileChanges = bool.fromEnvironment('OWNER_PDF_FILE_CHANGES');
+  const fileOutputs = bool.fromEnvironment('OWNER_FILE_OUTPUTS');
   if (!Platform.isMacOS || !RegExp(r'^[a-f0-9]{32}$').hasMatch(run)) {
     throw StateError('Explicit synthetic PDF native invocation required');
   }
@@ -100,6 +123,8 @@ void main() {
         service = core.InformationService(repository: repo!);
         source = OwnerWorkspaceSource(
           owner: service!.owner,
+          fileOutputs: fileOutputs ? repo!.fileOutputs : null,
+          outputPicker: _OutputPicker(root!),
           refreshInterval: Duration.zero,
           fileSelections: OwnerWorkspaceFileSelections(
             service!.owner,
@@ -273,6 +298,38 @@ void main() {
           );
         });
       }
+      if (fileOutputs) {
+        await tester.runAsync(() async {
+          final ref = WorkspaceRecordRef(
+            WorkspaceRecordKind.information,
+            item.id,
+          );
+          final history = await source!.loadFileHistory(ref, field);
+          final saved = await source!.fileAction(
+            ref,
+            field,
+            history.current.ref.version,
+            WorkspaceFileAction.saveAs,
+            operationId: 'native-save-as',
+          );
+          expect(saved.completed, true);
+          expect(saved.cleanupPending, false);
+          expect(
+            await File('${root!.path}/synthetic-saved.pdf').readAsBytes(),
+            _pdf(),
+          );
+          expect(
+            (await source!.fileOperationReceipt(
+              'native-save-as',
+            ))!.actionCompleted,
+            true,
+          );
+          expect((await source!.fileActionState(ref, field)).cleanupPending, 0);
+          checks.add(
+            'real sandbox no-overwrite Save As and durable receipt; synthetic OS selection only',
+          );
+        });
+      }
       await tester.runAsync(() async {
         await source!.dispose();
         await service!.close();
@@ -284,6 +341,8 @@ void main() {
         service = core.InformationService(repository: repo!);
         source = OwnerWorkspaceSource(
           owner: service!.owner,
+          fileOutputs: fileOutputs ? repo!.fileOutputs : null,
+          outputPicker: _OutputPicker(root!),
           refreshInterval: Duration.zero,
         );
         final reopened = await source!.readFilePreview(
@@ -299,6 +358,30 @@ void main() {
               'native-restore',
             ))!.commandDigest,
             restoredCommand!.digest,
+          );
+        }
+        if (fileOutputs) {
+          final ref = WorkspaceRecordRef(
+            WorkspaceRecordKind.information,
+            item.id,
+          );
+          final current = await source!.loadFileHistory(ref, field);
+          expect(
+            (await source!.fileAction(
+              ref,
+              field,
+              current.current.ref.version,
+              WorkspaceFileAction.saveAs,
+              operationId: 'native-save-as',
+            )).completed,
+            true,
+          );
+          expect(
+            await File('${root!.path}/synthetic-saved.pdf').readAsBytes(),
+            _pdf(),
+          );
+          checks.add(
+            'reopened sandbox Save As reuses original receipt without another publication',
           );
         }
         checks.add('SQLCipher/service reopen returns identical native page');

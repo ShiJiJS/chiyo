@@ -513,7 +513,7 @@ extension BackupOutputOperations on InformationBackups {
     _checkOpen();
     final rows = await _repository._db
         .customSelect(
-          'SELECT operation_id FROM backup_operations WHERE invalidated=0',
+          "SELECT operation_id FROM backup_operations WHERE invalidated=0 AND operation_id NOT LIKE 'file-output:%'",
         )
         .get();
     final pending = (await pendingOutputStaging()).toSet();

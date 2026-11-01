@@ -32,6 +32,7 @@ part 'backup_restore_operations.dart';
 part 'backup_staging_operations.dart';
 part 'backup_owner_operations.dart';
 part 'information_purge_storage.dart';
+part 'information_file_outputs.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -391,6 +392,7 @@ class EncryptedInformationRepository
   static final _openDirectories = <String>{};
   late final String _directory;
   late final backups = InformationBackups._(this);
+  late final fileOutputs = InformationFileOutputs._(this);
 
   static Future<EncryptedInformationRepository> open(
     String directory,

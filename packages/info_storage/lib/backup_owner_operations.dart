@@ -367,7 +367,7 @@ extension BackupOwnerOperations on InformationBackups {
     _checkOpen();
     final rows = await _repository._db
         .customSelect(
-          'SELECT operation_id FROM backup_operations WHERE invalidated=0',
+          "SELECT operation_id FROM backup_operations WHERE invalidated=0 AND operation_id NOT LIKE 'file-output:%'",
         )
         .get();
     final result = <String>[];
@@ -392,7 +392,7 @@ extension BackupOwnerOperations on InformationBackups {
     _checkOpen();
     final rows = await _repository._db
         .customSelect(
-          'SELECT operation_id FROM backup_operations WHERE invalidated=0',
+          "SELECT operation_id FROM backup_operations WHERE invalidated=0 AND operation_id NOT LIKE 'file-output:%'",
         )
         .get();
     _BackupOutputRecord? latest;

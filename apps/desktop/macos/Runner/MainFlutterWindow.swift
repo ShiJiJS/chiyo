@@ -255,6 +255,18 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           if response == .OK, let url = panel.url { window.informationOutputs[url.path] = url }
           result(response == .OK ? panel.url?.path : nil)
         }
+      } else if call.method == "ownerFileOutput" {
+        guard let name = call.arguments as? String, !name.isEmpty, name.utf8.count <= 4096 else {
+          result(FlutterError(code: "file_dialog_failed", message: "Invalid file name", details: nil)); return
+        }
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = name.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: ":", with: "_")
+        panel.canCreateDirectories = true
+        panel.beginSheetModal(for: window) { response in
+          guard response == .OK, let url = panel.url else { result(nil); return }
+          do { result(try window.backupStaging.selectOutput(url, recovery: false)) }
+          catch { result(FlutterError(code: "file_dialog_failed", message: "Selected destination unavailable", details: nil)) }
+        }
       } else if call.method == "backupOutput" || call.method == "recoveryKeyOutput" {
         let recovery = call.method == "recoveryKeyOutput"
         let panel = NSSavePanel()

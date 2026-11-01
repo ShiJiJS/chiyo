@@ -102,6 +102,7 @@ Future<DesktopLibrary> _openLibrary({bool requestKeyAccess = false}) async {
     ),
     close: repository.close,
     backups: repository.backups,
+    fileOutputs: repository.fileOutputs,
   );
 }
 
@@ -166,6 +167,7 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                 key: ValueKey(runtime),
                 runtime: runtime,
                 backups: startup.library!.backups,
+                fileOutputs: startup.library!.fileOutputs,
               );
             }
             return InformationApp(

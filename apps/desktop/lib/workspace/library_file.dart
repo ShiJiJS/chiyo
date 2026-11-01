@@ -37,6 +37,9 @@ class _LibraryFileState extends State<LibraryFile> {
   int _generation = 0, _page = 0;
   String? _pendingAction;
   WorkspaceFileAction? _pendingKind;
+  String? _pendingDigest;
+  WorkspaceFileRef? _pendingFile;
+  int _cleanupPending = 0;
   @override
   void initState() {
     super.initState();
@@ -55,6 +58,9 @@ class _LibraryFileState extends State<LibraryFile> {
         _page = 0;
         _history = null;
         _preview = null;
+        _pendingAction = _pendingDigest = null;
+        _pendingFile = null;
+        _cleanupPending = 0;
       }
       unawaited(_load());
     }
@@ -77,8 +83,22 @@ class _LibraryFileState extends State<LibraryFile> {
         widget.detail.record.ref,
         widget.fieldKey,
       );
+      final recovery = widget.source;
+      final state = recovery is WorkspaceFileActionRecovery
+          ? await (recovery as WorkspaceFileActionRecovery).fileActionState(
+              widget.detail.record.ref,
+              widget.fieldKey,
+            )
+          : null;
       if (!mounted || generation != _generation) return;
       setState(() {
+        if (state?.pending case final pending?) {
+          _pendingAction = pending.operationId;
+          _pendingDigest = pending.digest;
+          _pendingFile = pending.file;
+          _pendingKind = WorkspaceFileAction.saveAs;
+        }
+        _cleanupPending = state?.cleanupPending ?? 0;
         if (_history?.current.ref != history.current.ref) _page = 0;
         _history = history;
         _loading = false;
@@ -216,6 +236,13 @@ class _LibraryFileState extends State<LibraryFile> {
       _actionFailure = null;
       _pendingAction = operation;
       _pendingKind = action;
+      _pendingFile = _history!.current.ref;
+      _pendingDigest = workspaceFileActionDigest(
+        widget.detail.record.ref,
+        widget.fieldKey,
+        _history!.current.ref.version,
+        action,
+      );
     });
     try {
       final result = await widget.source.fileAction(
@@ -229,6 +256,7 @@ class _LibraryFileState extends State<LibraryFile> {
       setState(() {
         _busy = false;
         _pendingAction = null;
+        if (result.cleanupPending) _cleanupPending++;
       });
       if (result.completed) {
         DesktopFeedback.show(
@@ -246,7 +274,12 @@ class _LibraryFileState extends State<LibraryFile> {
       setState(() {
         _busy = false;
         _actionFailure = failure;
-        if (failure.code != 'unknown_outcome') _pendingAction = null;
+        if (!{
+          'unknown_outcome',
+          'file_access_required',
+        }.contains(failure.code)) {
+          _pendingAction = null;
+        }
       });
     }
   }
@@ -257,10 +290,19 @@ class _LibraryFileState extends State<LibraryFile> {
     try {
       final receipt = await widget.source.fileOperationReceipt(_pendingAction!);
       if (!mounted) return;
+      if (receipt != null &&
+          (receipt.record != widget.detail.record.ref ||
+              receipt.file != _pendingFile ||
+              receipt.actionCompleted == null ||
+              receipt.commandDigest != null &&
+                  receipt.commandDigest != _pendingDigest)) {
+        throw const WorkspaceFailure('unknown_outcome', '返回的结果与原操作不一致，请继续核对。');
+      }
       setState(() {
         _busy = false;
         _pendingAction = null;
         _actionFailure = null;
+        if (receipt?.cleanupPending == true) _cleanupPending++;
       });
       if (receipt?.actionCompleted == true) {
         DesktopFeedback.show(
@@ -268,16 +310,52 @@ class _LibraryFileState extends State<LibraryFile> {
           _pendingKind == WorkspaceFileAction.saveAs ? '另存操作已完成' : '打开操作已完成',
         );
       }
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         setState(() {
           _busy = false;
-          _actionFailure = const WorkspaceFailure(
-            'unknown_outcome',
-            '仍无法确认操作结果，请稍后核对。',
-          );
+          _actionFailure = error is WorkspaceFailure
+              ? error
+              : const WorkspaceFailure('unknown_outcome', '仍无法确认操作结果，请稍后核对。');
         });
       }
+    }
+  }
+
+  Future<void> _recoverAccess() async {
+    final recovery = widget.source;
+    if (recovery is! WorkspaceFileActionRecovery ||
+        _pendingAction == null ||
+        _busy) {
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await (recovery as WorkspaceFileActionRecovery).recoverFileActionAccess(
+        _pendingAction!,
+      );
+    } catch (e) {
+      if (mounted) setState(() => _actionFailure = _failure(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (mounted) await _lookupAction();
+  }
+
+  Future<void> _cleanup() async {
+    final recovery = widget.source;
+    if (recovery is! WorkspaceFileActionRecovery || _busy) return;
+    setState(() => _busy = true);
+    try {
+      await (recovery as WorkspaceFileActionRecovery).cleanupFileActions(
+        widget.detail.record.ref,
+        widget.fieldKey,
+      );
+      if (mounted) await _load();
+    } catch (e) {
+      if (mounted) setState(() => _actionFailure = _failure(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -426,6 +504,28 @@ class _LibraryFileState extends State<LibraryFile> {
               onPressed: _lookupAction,
               child: const Text('核对此次操作'),
             ),
+          ),
+        if (_pendingAction != null &&
+            !_busy &&
+            widget.source is WorkspaceFileActionRecovery)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DesktopButton(
+              onPressed: _recoverAccess,
+              child: const Text('重新选择原文件并核对'),
+            ),
+          ),
+        if (_cleanupPending > 0)
+          Wrap(
+            spacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text('有 $_cleanupPending 项另存暂存等待清理'),
+              DesktopButton(
+                onPressed: _busy ? null : _cleanup,
+                child: const Text('重试清理暂存'),
+              ),
+            ],
           ),
         if (!visiblePreview) const SizedBox(height: 16),
         if (_previewLoading)
