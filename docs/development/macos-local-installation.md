@@ -1,5 +1,29 @@
 # Mac 本机预览安装与升级约定（#42 / #50）
 
+## Round09正常升级（2026-11-01：等待当前Keychain决定）
+
+固定目录已整体换入 `0a5e3500`（M07修正完整候选）；旧版package23在正常退出后
+保留程序回退，原程序归档逐成员重验并复用。当前旧版导出的最新完整加密备份及
+独立恢复文件已在私有位置验证可恢复；关闭后的原资料另有压缩保护。换包不修改
+资料目录或Keychain，启动前原资料字节保持。
+
+当前正常入口已启动，但尚在等待本机密码/始终允许；没有正常开库、原资料核对或
+正常独立重开成功结论。助手接手备份与升级不等于可以代输系统密码。
+具体当前动作见[本人配合说明](macos-owner-assisted-acceptance.md)，证据见
+[当前升级状态](evidence/zhiyu-round09/m07-installation-pending.json)。
+
+复用旧回退归档的准备命令（已完成，不另复制App或再压缩程序）：
+
+```sh
+python3 scripts/prepare-macos-upgrade.py \
+  --candidate build/macos-adaptation/m07-release-3/AgentInfoManage \
+  --output local/private/mac-round09-upgrade-0a5e3500 \
+  --reuse-preparation local/private/mac-round09-upgrade-1443d358/preparation.json
+```
+
+此工具只核对/准备；实际换包在备份验证及正常退出后执行。下方2026-10-30“尚未换入”
+是当时的历史状态，不再描述当前程序目录；它的备份和回退规则继续有效。
+
 ## Round09 升级准备（2026-10-30，尚未换入）
 
 固定安装当前仍为 package23（`7b19d34`），不是新的真实功能候选。
