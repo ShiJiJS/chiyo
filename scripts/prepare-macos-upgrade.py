@@ -91,6 +91,11 @@ def archive_payload(root, output, expected):
         os.fchmod(file.fileno(), 0o600)
         with tarfile.open(fileobj=file, mode='w:gz', dereference=False) as archive:
             archive.add(root, arcname='AgentInfoManage', recursive=True)
+    verify_archive(root, output, expected)
+
+
+def verify_archive(root, output, expected):
+    """Verify every archived file without extracting or adding another App."""
     seen = set()
     with tarfile.open(output, 'r:gz') as archive:
         for member in archive:
@@ -120,6 +125,8 @@ def main():
     parser.add_argument('--candidate', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True,
                         help='New directory beneath this checkout local/private/')
+    parser.add_argument('--reuse-preparation', type=Path,
+                        help='Existing verified preparation; recheck and reuse its exact program archive')
     args = parser.parse_args()
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         parser.error('Run on the target ARM64 Mac')
@@ -133,6 +140,22 @@ def main():
     new, new_files, _ = check_payload(candidate, allow_extras=False)
     if old['sourceCommit'] == new['sourceCommit']:
         parser.error('Candidate is already installed')
+    reused = None
+    if args.reuse_preparation is not None:
+        previous = args.reuse_preparation.absolute()
+        previous.relative_to(ROOT / 'local/private')
+        if previous.resolve() != previous or not previous.is_file():
+            parser.error('Previous preparation must be an existing unlinked local/private file')
+        receipt = json.loads(previous.read_text())
+        if (receipt.get('prepared') is not True or receipt.get('installed') is not False
+                or receipt.get('installedManifestSha256') != digest(INSTALL / 'manifest.json')
+                or receipt.get('installedRelease') != old['release']):
+            parser.error('Previous preparation does not protect this exact installation')
+        reused = Path(receipt.get('applicationArchive', previous.parent / 'previous-application.tar.gz'))
+        reused.relative_to(ROOT / 'local/private')
+        if reused.resolve() != reused or not reused.is_file() or digest(reused) != receipt['archiveSha256']:
+            parser.error('Previous program archive differs')
+        verify_archive(INSTALL, reused, old_files)
     output.mkdir(mode=0o700)
     report = {'format': 1, 'prepared': False, 'installed': False,
               'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
@@ -149,13 +172,15 @@ def main():
                             'whole-directory replacement, normal Release launch and Keychain decision if needed',
                             'verify original data and normal independent reopen before deleting recovery artifacts']}
     try:
-        archive = output / 'previous-application.tar.gz'
-        archive_payload(INSTALL, archive, old_files)
+        archive = reused or output / 'previous-application.tar.gz'
+        if reused is None:
+            archive_payload(INSTALL, archive, old_files)
         if inventory(candidate) != new_files:
             raise RuntimeError('Candidate changed during preparation')
         report.update(prepared=True, archiveBytes=archive.stat().st_size,
                       archiveSha256=digest(archive), archiveMembersVerified=len(old_files),
-                      installedPayloadUnchanged=True, candidatePayloadUnchanged=True)
+                      installedPayloadUnchanged=True, candidatePayloadUnchanged=True,
+                      applicationArchive=str(archive), archiveReused=reused is not None)
     finally:
         with (output / 'preparation.json').open('x') as stream:
             os.fchmod(stream.fileno(), 0o600)
