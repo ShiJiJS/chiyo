@@ -20,11 +20,21 @@ abstract class BackupFilePicker {
   Future<void> releaseStaging(BackupStaging staging) async {}
   Future<void> releaseRecordedStaging(Map<String, Object?> directory) async =>
       throw const StorageFailure('backup_staging_failed');
+  Future<String> outputBookmark(BackupStaging staging) async =>
+      throw const StorageFailure('backup_access_required');
+  Future<String> acquireAccess(
+    Map<String, String> access, {
+    required bool needsOutput,
+  }) async => throw const StorageFailure('backup_access_required');
+  Future<void> releaseAccess(String token) async {}
+  Future<String?> reselectOutput(String expectedPath) async =>
+      throw const StorageFailure('backup_access_required');
 }
 
 class BackupStaging {
-  const BackupStaging(this.directory, this.token);
+  const BackupStaging(this.directory, this.token, {this.stagingBookmark});
   final String directory, token;
+  final String? stagingBookmark;
 }
 
 class NativeBackupFilePicker extends BackupFilePicker {
@@ -48,10 +58,17 @@ class NativeBackupFilePicker extends BackupFilePicker {
       'prepareBackupStaging',
       output,
     );
-    if (value == null || value['directory'] == null || value['token'] == null) {
+    if (value == null ||
+        value['directory'] == null ||
+        value['token'] == null ||
+        value['stagingBookmark'] == null) {
       throw const StorageFailure('backup_staging_failed');
     }
-    return BackupStaging(value['directory']!, value['token']!);
+    return BackupStaging(
+      value['directory']!,
+      value['token']!,
+      stagingBookmark: value['stagingBookmark'],
+    );
   }
 
   @override
@@ -61,6 +78,35 @@ class NativeBackupFilePicker extends BackupFilePicker {
   @override
   Future<void> releaseRecordedStaging(Map<String, Object?> directory) =>
       _channel.invokeMethod<void>('releaseRegisteredBackupStaging', directory);
+
+  Future<String?> _access(String method, Object arguments) async {
+    try {
+      return await _channel.invokeMethod<String>(method, arguments);
+    } on PlatformException {
+      throw const StorageFailure('backup_access_required');
+    }
+  }
+
+  @override
+  Future<String> outputBookmark(BackupStaging staging) async =>
+      await _access('captureBackupOutputBookmark', staging.token) ??
+      (throw const StorageFailure('backup_access_required'));
+  @override
+  Future<String> acquireAccess(
+    Map<String, String> access, {
+    required bool needsOutput,
+  }) async =>
+      await _access('acquireBackupAccess', {
+        'access': access,
+        'needsOutput': needsOutput,
+      }) ??
+      (throw const StorageFailure('backup_access_required'));
+  @override
+  Future<void> releaseAccess(String token) =>
+      _channel.invokeMethod<void>('releaseBackupAccess', token);
+  @override
+  Future<String?> reselectOutput(String expectedPath) =>
+      _access('reselectBackupOutput', expectedPath);
 }
 
 String _backupFailure(Object error) => switch (error) {

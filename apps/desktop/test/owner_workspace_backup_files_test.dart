@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:info_storage/info_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/backups.dart';
@@ -35,6 +37,70 @@ void main() {
   });
   Matcher fails(String code) =>
       throwsA(isA<WorkspaceFailure>().having((e) => e.code, 'code', code));
+
+  test(
+    'native backup scope channel preserves capabilities and hides platform diagnostics',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      const channel = MethodChannel('agent_info_manage/backup_files');
+      const native = NativeBackupFilePicker();
+      final calls = <MethodCall>[];
+      var denied = false;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            calls.add(call);
+            if (denied) {
+              throw PlatformException(
+                code: 'native',
+                message: '/private/original-key.txt',
+              );
+            }
+            return switch (call.method) {
+              'prepareBackupStaging' => {
+                'directory': '/synthetic/stage',
+                'token': 'stage',
+                'stagingBookmark': 'AQID',
+              },
+              'captureBackupOutputBookmark' => 'BAUG',
+              'acquireBackupAccess' => 'lease',
+              _ => null,
+            };
+          });
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+      final staging = (await native.prepareStaging('/synthetic/output'))!;
+      expect(staging.stagingBookmark, 'AQID');
+      expect(await native.outputBookmark(staging), 'BAUG');
+      expect(
+        await native.acquireAccess({
+          'stagingBookmark': 'AQID',
+        }, needsOutput: true),
+        'lease',
+      );
+      expect(calls.last.arguments, {
+        'access': {'stagingBookmark': 'AQID'},
+        'needsOutput': true,
+      });
+      await native.releaseAccess('lease');
+      expect(calls.last.arguments, 'lease');
+      expect(await native.reselectOutput('/synthetic/output'), isNull);
+      expect(calls.last.method, 'reselectBackupOutput');
+      denied = true;
+      await expectLater(
+        native.reselectOutput('/synthetic/output'),
+        throwsA(
+          isA<StorageFailure>().having(
+            (e) => e.code,
+            'code',
+            'backup_access_required',
+          ),
+        ),
+      );
+    },
+  );
 
   test(
     'same names remain distinct, cancel retains selection and reselect invalidates old handle',

@@ -23,7 +23,11 @@ class BackupController extends ChangeNotifier {
   int _generation = 0;
   WorkspaceBackupChange? _command;
   WorkspaceBackupCounts? _expectedRestore;
-  bool get uncertain => failure?.code == 'unknown_outcome';
+  bool get uncertain =>
+      {'unknown_outcome', 'backup_access_required'}.contains(failure?.code);
+  bool get needsAccess =>
+      failure?.code == 'backup_access_required' &&
+      source is WorkspaceBackupAccessRecovery;
   bool get frozen => busy || uncertain;
   bool get available =>
       !frozen && !loading && readFailure == null && value != null;
@@ -322,13 +326,37 @@ class BackupController extends ChangeNotifier {
           await load();
           return;
         }
-        failure = const WorkspaceFailure(
-          'unknown_outcome',
-          '仍无法确认原备份操作，请继续核对。',
-        );
+        failure =
+            error is WorkspaceFailure && error.code == 'backup_access_required'
+            ? error
+            : const WorkspaceFailure('unknown_outcome', '仍无法确认原备份操作，请继续核对。');
         _notify();
       }
     }
+  }
+
+  Future<void> recoverAccess() async {
+    if (_closed || !needsAccess || busy || _command == null) return;
+    busy = true;
+    _notify();
+    var selected = false;
+    try {
+      selected = await (source as WorkspaceBackupAccessRecovery)
+          .requestRecoveryAccess(_command!.operationId);
+    } catch (_) {
+      if (!_closed) {
+        failure = const WorkspaceFailure(
+          'backup_access_required',
+          '原文件访问仍无法确认，请选择上次保存的原文件；原操作保持待核对。',
+        );
+      }
+    } finally {
+      if (!_closed) {
+        busy = false;
+        _notify();
+      }
+    }
+    if (!_closed && selected) await reconcile();
   }
 
   Future<bool> closeFlow() async {
