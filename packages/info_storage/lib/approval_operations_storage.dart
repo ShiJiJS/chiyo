@@ -59,6 +59,53 @@ extension _EncryptedApprovalOperations on EncryptedInformationRepository {
             throw const AccessFailure('scope_changed');
           }
         }
+        if (receipt.action == InformationApprovalAction.approve) {
+          for (final f in change.grant!.fields) {
+            final rows = await _db
+                .customSelect(
+                  'SELECT f.kind,ff.attachment_id,ff.attachment_version FROM information_fields f LEFT JOIN information_file_fields ff ON ff.field_id=f.id WHERE f.item_id=? AND f.id=?',
+                  variables: [Variable(f.itemId), Variable(f.fieldId)],
+                )
+                .get();
+            if (rows.length != 1) throw const AccessFailure('scope_changed');
+            final expected =
+                change.expectedFiles[FieldRef(f.itemId, f.fieldId)];
+            final row = rows.single;
+            if (row.read<String>('kind') == 'file'
+                ? expected == null ||
+                      row.readNullable<String>('attachment_id') !=
+                          expected.attachmentId ||
+                      row.readNullable<int>('attachment_version') !=
+                          expected.attachmentVersion
+                : expected != null) {
+              throw const AccessFailure('scope_changed');
+            }
+          }
+          for (final ref in change.expectedFiles.values.toSet()) {
+            final version = await _attachmentVersion(ref);
+            if (version == null || !version.available)
+              throw const AccessFailure('attachment_missing');
+            final hash = _AttachmentBackupHash();
+            for (
+              var offset = 0;
+              offset < version.byteLength;
+              offset += AttachmentBackupContainer.chunkBytes
+            ) {
+              hash.add(
+                await _readAttachmentChunk(
+                  ref,
+                  offset,
+                  min(
+                    AttachmentBackupContainer.chunkBytes,
+                    version.byteLength - offset,
+                  ),
+                ),
+              );
+            }
+            if (hash.finish() != version.sha256)
+              throw const AccessFailure('attachment_integrity_failed');
+          }
+        }
         final oldRequests = await _db
             .customSelect(
               'SELECT payload FROM request_history WHERE id=?',

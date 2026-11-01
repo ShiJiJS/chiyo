@@ -59,7 +59,9 @@ final class InformationApprovalCommit {
     required this.request,
     this.grant,
     Map<String, int> itemVersions = const {},
-  }) : itemVersions = Map.unmodifiable(itemVersions) {
+    Map<FieldRef, InformationAttachmentRef> expectedFiles = const {},
+  }) : itemVersions = Map.unmodifiable(itemVersions),
+       expectedFiles = Map.unmodifiable(expectedFiles) {
     final expectedState = switch (receipt.action) {
       InformationApprovalAction.approve => AccessRequestState.approved,
       InformationApprovalAction.deny => AccessRequestState.denied,
@@ -69,6 +71,16 @@ final class InformationApprovalCommit {
         request.state != expectedState ||
         request.recordedAt != receipt.recordedAt ||
         request.restoredAt != null ||
+        expectedFiles.length > 200 ||
+        expectedFiles.keys.any(
+          (ref) =>
+              grant == null ||
+              !grant!.fields.any(
+                (f) => f.itemId == ref.itemId && f.fieldId == ref.fieldId,
+              ),
+        ) ||
+        receipt.action != InformationApprovalAction.approve &&
+            expectedFiles.isNotEmpty ||
         itemVersions.length > 200 ||
         itemVersions.values.any((v) => v < 1) ||
         (receipt.action == InformationApprovalAction.deny
@@ -159,6 +171,9 @@ final class InformationApprovalCommit {
   final RequestHistory request;
   final GrantHistory? grant;
   final Map<String, int> itemVersions;
+
+  /// Transient transaction precondition; not a new grant or backup payload.
+  final Map<FieldRef, InformationAttachmentRef> expectedFiles;
 }
 
 abstract interface class InformationApprovalRepository {
@@ -166,6 +181,8 @@ abstract interface class InformationApprovalRepository {
     String operationId,
   );
   Future<int> informationApprovalRevision(String requestId);
+  /// Atomically check current file bindings and complete original integrity
+  /// for expectedFiles before publishing any receipt or history facts.
   Future<void> commitInformationApproval(
     InformationApprovalCommit change, {
     void Function()? validate,

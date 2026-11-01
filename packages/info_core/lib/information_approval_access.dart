@@ -11,9 +11,11 @@ final class InformationApprovalCommand {
     required this.commandDigest,
     Iterable<FieldRef> fields = const [],
     Map<String, int> itemVersions = const {},
+    Map<FieldRef, InformationAttachmentRef> expectedFiles = const {},
     this.lifetime = const Duration(minutes: 30),
   }) : fields = List.unmodifiable(fields),
-       itemVersions = Map.unmodifiable(itemVersions) {
+       itemVersions = Map.unmodifiable(itemVersions),
+       expectedFiles = Map.unmodifiable(expectedFiles) {
     InformationApprovalReceipt(
       operationId: operationId,
       requestId: requestId,
@@ -25,6 +27,8 @@ final class InformationApprovalCommand {
     );
     if (this.fields.length > 200 ||
         this.fields.toSet().length != this.fields.length ||
+        this.expectedFiles.length > 200 ||
+        this.expectedFiles.keys.any((ref) => !this.fields.contains(ref)) ||
         this.itemVersions.length > 200 ||
         this.itemVersions.values.any((v) => v < 1) ||
         (action == InformationApprovalAction.approve
@@ -44,6 +48,8 @@ final class InformationApprovalCommand {
   final InformationApprovalAction action;
   final List<FieldRef> fields;
   final Map<String, int> itemVersions;
+  /// Approval-time current-version check, not a version-pinned grant.
+  final Map<FieldRef, InformationAttachmentRef> expectedFiles;
   final Duration lifetime;
 
   bool matches(InformationApprovalReceipt receipt) =>
@@ -83,6 +89,11 @@ final class _InformationDecision {
               .firstOrNull
               ?.version !=
           entry.value) {
+        throw const AccessFailure('scope_changed');
+      }
+    }
+    for (final entry in change.expectedFiles.entries) {
+      if (service._field(entry.key)?.attachment != entry.value) {
         throw const AccessFailure('scope_changed');
       }
     }
@@ -195,6 +206,8 @@ extension _InformationDecisionService on InformationService {
 }
 
 extension OwnerInformationApprovals on OwnerAccess {
+  bool get informationFileDeliveryAvailable =>
+      _service.agent.informationFileDeliveryAvailable;
   InformationApprovalRepository get _approvalOperations {
     if (_service._repository
         case final InformationApprovalRepository repository) {
@@ -283,14 +296,23 @@ extension OwnerInformationApprovals on OwnerAccess {
         request.state != expected) {
       throw const AccessFailure('request_changed');
     }
-    if (command.action == InformationApprovalAction.approve &&
-        command.fields.any(
-          (f) =>
-              !request.fields.contains(f) ||
-              _service._field(f) == null ||
-              _service._field(f)!.kind == FieldKind.file,
-        )) {
-      throw const AccessFailure('invalid_scope');
+    if (command.action == InformationApprovalAction.approve) {
+      for (final ref in command.fields) {
+        final field = _service._field(ref);
+        if (!request.fields.contains(ref) || field == null) {
+          throw const AccessFailure('invalid_scope');
+        }
+        if (field.kind == FieldKind.file) {
+          if (!informationFileDeliveryAvailable) {
+            throw const AccessFailure('unsupported_capability');
+          }
+          if (command.expectedFiles[ref] != field.attachment) {
+            throw const AccessFailure('scope_changed');
+          }
+        } else if (command.expectedFiles.containsKey(ref)) {
+          throw const AccessFailure('invalid_scope');
+        }
+      }
     }
     // Block competing legacy owner decisions and reads before any await.
     request.informationDecisionPending = true;
@@ -356,6 +378,7 @@ extension OwnerInformationApprovals on OwnerAccess {
         ),
         grant: grant,
         itemVersions: command.itemVersions,
+        expectedFiles: command.expectedFiles,
       );
       decision = _InformationDecision(_service, request, change);
       decision.validate();

@@ -473,10 +473,12 @@ void main() {
           utf8.decode(body),
         );
       } finally {
-        if (await File(lease.filePath).exists())
+        if (await File(lease.filePath).exists()) {
           await File(lease.filePath).delete();
-        if (await File(moved).exists())
+        }
+        if (await File(moved).exists()) {
           await File(moved).rename(lease.filePath);
+        }
         await source.closeOpenFileCopies(record, field);
         await core.NativeInformationDeliveryFiles().cleanup(lease);
       }

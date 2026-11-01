@@ -177,7 +177,11 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               key: ValueKey('approval-file-${scope.id}'),
               value: d.files[scope.id],
               isExpanded: true,
-              decoration: const InputDecoration(labelText: '普通附件版本'),
+              decoration: InputDecoration(
+                labelText: current.fileVersionPolicy == null
+                    ? '普通附件版本'
+                    : '当前附件版本',
+              ),
               items: [
                 if (d.files[scope.id] != null &&
                     !scope.fileVersions.any(
@@ -191,6 +195,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                 for (final v in scope.fileVersions)
                   DropdownMenuItem(
                     value: v.ref.version,
+                    enabled: v.available,
                     child: Text(
                       'v${v.ref.version} · ${v.filename} · ${v.mediaType} · ${(v.byteLength / 1024).toStringAsFixed(1)} KB',
                     ),
@@ -219,6 +224,18 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (model.detail!.fileVersionPolicy case final policy?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              policy,
+              style: libraryText(
+                context,
+                13,
+                color: UiPalette.of(context).muted,
+              ),
+            ),
+          ),
         for (final e in grouped.entries)
           Padding(
             key: ValueKey('approval-group-${groupId(e.key)}'),
@@ -271,7 +288,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       WorkspaceApprovalKind.information =>
         '批准的是固定字段集合。当前会话和期限内读取这些字段的最新内容，后来新增的字段不会加入。',
       WorkspaceApprovalKind.file =>
-        '批准指定字段和附件版本后，Agent通过CLI领取受管副本。撤销或到期会阻止后续交付，但不能收回已经读到或上传的内容。普通附件与凭据文件分别管理。',
+        model.detail!.fileVersionPolicy == null
+            ? '批准指定字段和附件版本后，Agent通过CLI领取受管副本。撤销或到期会阻止后续交付，但不能收回已经读到或上传的内容。普通附件与凭据文件分别管理。'
+            : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
       WorkspaceApprovalKind.organization =>
         '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。最长30分钟。',
       WorkspaceApprovalKind.focus =>
@@ -613,7 +632,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   Text(
                     d.request.kind == WorkspaceApprovalKind.organization
                         ? '只读限定资料的元数据，并允许自动调整目录与标签；不读取字段值，不修改正文。'
-                        : '只提供批准的固定字段和文件版本。新增内容不进入旧授权，撤销不能收回已经读到的副本。',
+                        : d.fileVersionPolicy == null
+                        ? '只提供批准的固定字段和文件版本。新增内容不进入旧授权，撤销不能收回已经读到的副本。'
+                        : '只提供批准的固定字段及其当前内容。后续新增字段不进入旧授权，撤销不能收回已读取的副本。',
                     style: libraryText(context, 14, height: 1.95),
                   ),
               ],
