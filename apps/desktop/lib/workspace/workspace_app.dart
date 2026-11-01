@@ -411,8 +411,16 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
               message: '上次备份操作结果未确认。只核对原操作，不重新导出或恢复。',
               child: DesktopButton(
                 key: const ValueKey('backup-root-reconcile'),
-                onPressed: _backups.busy ? null : _backups.reconcile,
-                child: Text(_backups.busy ? '正在核对备份…' : '核对上次备份操作'),
+                onPressed: _backups.busy
+                    ? null
+                    : (_backups.needsAccess
+                          ? _backups.recoverAccess
+                          : _backups.reconcile),
+                child: Text(
+                  _backups.busy
+                      ? '正在核对备份…'
+                      : (_backups.needsAccess ? '重新选择原文件并核对' : '核对上次备份操作'),
+                ),
               ),
             ),
     ),

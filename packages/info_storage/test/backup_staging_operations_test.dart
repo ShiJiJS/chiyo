@@ -47,16 +47,18 @@ void main() {
   Future<void> register(
     String id, {
     BackupOutputAction action = BackupOutputAction.saveKey,
+    String? bookmark,
   }) => repo.backups.registerOutputStaging(
     operationId: id,
     commandDigest: 'a' * 64,
     expectedVersion: 2,
     action: action,
     directory: staging.path,
+    stagingBookmark: bookmark,
     destination: '${root.path}/$id.output',
   );
-  Future<MacBackupPublication> prepareKey(String id) async {
-    await register(id);
+  Future<MacBackupPublication> prepareKey(String id, {String? bookmark}) async {
+    await register(id, bookmark: bookmark);
     MacBackupPublicationFiles.writeRecoveryKey(
       '${staging.path}/prepared',
       utf8.encode((await repo.backups.recoveryKey())!),
@@ -93,6 +95,81 @@ void main() {
   });
 
   group('Mac persistent staging', () {
+    test(
+      'native capability persists before bytes, publication interruption is not replayed',
+      () async {
+        final bookmark = base64Encode([1, 2, 3]);
+        final outputBookmark = base64Encode([4, 5, 6]);
+        final publication = await prepareKey('scope', bookmark: bookmark);
+        expect(
+          (await repo.backups.outputStagingAccess(
+            'scope',
+          ))!.toNativeArguments()['stagingBookmark'],
+          bookmark,
+        );
+        await expectLater(
+          repo.backups.recordOutputBookmark('scope', outputBookmark),
+          fails('operation_conflict'),
+        );
+        var callbacks = 0;
+        await expectLater(
+          repo.backups.publishOutputOperation(
+            'scope',
+            afterPublication: () async {
+              callbacks++;
+              await repo.backups.recordOutputBookmark('scope', outputBookmark);
+              throw const StorageFailure('backup_outcome_unknown');
+            },
+          ),
+          fails('backup_outcome_unknown'),
+        );
+        expect(File(publication.destination).existsSync(), isTrue);
+        expect(
+          await repo.backups.outputOperationPhase('scope'),
+          BackupOutputPhase.publishing,
+        );
+        await close();
+        await open();
+        expect(
+          (await repo.backups.outputStagingAccess(
+            'scope',
+          ))!.toNativeArguments()['outputBookmark'],
+          outputBookmark,
+        );
+        final receipt = await repo.backups.publishOutputOperation(
+          'scope',
+          afterPublication: () async {
+            callbacks++;
+          },
+        );
+        expect(callbacks, 1);
+        expect(receipt.operationId, 'scope');
+        await repo.backups.cleanupRegisteredOutputStaging('scope');
+        expect(await repo.backups.outputStagingAccess('scope'), isNull);
+        await expectLater(
+          repo.backups.recordOutputBookmark('scope', outputBookmark),
+          fails('operation_conflict'),
+        );
+      },
+    );
+    test(
+      'malformed native capabilities are rejected without registration',
+      () async {
+        for (final value in [
+          '',
+          'not-base64',
+          base64Encode(List.filled(65537, 1)),
+        ]) {
+          await expectLater(
+            register('invalid', bookmark: value),
+            fails('invalid_backup_operation_receipt'),
+          );
+        }
+        expect(await repo.backups.pendingOutputStaging(), isEmpty);
+        await register('legacy');
+        expect(await repo.backups.outputStagingAccess('legacy'), isNull);
+      },
+    );
     test(
       'key publication cleanup removes only staging and survives a lost cleanup acknowledgement',
       () async {

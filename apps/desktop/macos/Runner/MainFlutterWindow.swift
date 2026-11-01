@@ -154,6 +154,39 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         } catch {
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging unavailable", details: nil))
         }
+      } else if call.method == "captureBackupOutputBookmark" {
+        guard let token = call.arguments as? String else {
+          result(FlutterError(code: "backup_access_required", message: "Invalid backup access", details: nil)); return
+        }
+        do { result(try window.backupStaging.outputBookmark(token)) }
+        catch { result(FlutterError(code: "backup_access_required", message: "Original output access unavailable", details: nil)) }
+      } else if call.method == "acquireBackupAccess" {
+        guard let args = call.arguments as? [String: Any], let access = args["access"] as? [String: String],
+              let needsOutput = args["needsOutput"] as? Bool else {
+          result(FlutterError(code: "backup_access_required", message: "Invalid backup access", details: nil)); return
+        }
+        do { result(try window.backupStaging.acquireRecordedAccess(access, needsOutput: needsOutput)) }
+        catch { result(FlutterError(code: "backup_access_required", message: "Original backup access unavailable", details: nil)) }
+      } else if call.method == "releaseBackupAccess" {
+        guard let token = call.arguments as? String else {
+          result(FlutterError(code: "backup_access_required", message: "Invalid backup access", details: nil)); return
+        }
+        window.backupStaging.releaseAccess(token); result(nil)
+      } else if call.method == "reselectBackupOutput" {
+        guard let expected = call.arguments as? String, expected.hasPrefix("/") else {
+          result(FlutterError(code: "backup_access_required", message: "Invalid original output", details: nil)); return
+        }
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        panel.message = "请选择上次保存的原文件，仅用于核对原操作结果；不会再次导出或覆盖文件。"
+        panel.prompt = "核对原文件"
+        panel.beginSheetModal(for: window) { response in
+          guard response == .OK, let url = panel.url else { result(nil); return }
+          do { result(try window.backupStaging.reselectedOutputBookmark(url, expectedPath: expected)) }
+          catch { result(FlutterError(code: "backup_access_required", message: "Original output selection unavailable", details: nil)) }
+        }
       } else if call.method == "releaseRegisteredBackupStaging" {
         guard let value = call.arguments as? [String: String] else {
           result(FlutterError(code: "backup_staging_failed", message: "Invalid registered staging", details: nil)); return

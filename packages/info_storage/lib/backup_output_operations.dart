@@ -372,7 +372,10 @@ extension BackupOutputOperations on InformationBackups {
 
   /// At most one publish attempt, only from a freshly registered in-process
   /// intent. Reopen/retry can observe the original result, never republish.
-  Future<BackupOutputReceipt> publishOutputOperation(String id) async {
+  Future<BackupOutputReceipt> publishOutputOperation(
+    String id, {
+    Future<void> Function()? afterPublication,
+  }) async {
     _checkOpen();
     if (!_activeBackupOutputs.add(id))
       throw const StorageFailure('backup_operation_busy');
@@ -414,6 +417,9 @@ extension BackupOutputOperations on InformationBackups {
         }
         throw const StorageFailure('backup_outcome_unknown');
       }
+      // Native output access can only be bookmarked once this file exists.
+      // Callback failure is not success or absence: publishing stays durable.
+      await afterPublication?.call();
       return await _finishOutput(id);
     } on StorageFailure {
       rethrow;

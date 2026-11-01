@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,41 @@ class _Picker extends BackupFilePicker {
   _Picker(this.root);
   final Directory root;
   String? next;
-  bool failRelease = false;
+  bool failRelease = false,
+      scoped = false,
+      failBookmark = false,
+      cancelReselect = false;
+  int leases = 0, stopped = 0, reselections = 0;
+  @override
+  Future<String> outputBookmark(BackupStaging staging) async {
+    if (failBookmark) throw const StorageFailure('backup_access_required');
+    return base64Encode([4, 5, 6]);
+  }
+
+  @override
+  Future<String> acquireAccess(
+    Map<String, String> access, {
+    required bool needsOutput,
+  }) async {
+    if (needsOutput && access['outputBookmark']!.isEmpty) {
+      throw const StorageFailure('backup_access_required');
+    }
+    leases++;
+    return 'lease-$leases';
+  }
+
+  @override
+  Future<void> releaseAccess(String token) async {
+    stopped++;
+  }
+
+  @override
+  Future<String?> reselectOutput(String path) async {
+    reselections++;
+    expect(File(path).existsSync(), isTrue);
+    return cancelReselect ? null : base64Encode([7, 8, 9]);
+  }
+
   int preparations = 0, releases = 0;
   @override
   Future<String?> recoveryKeyOutput() async => next;
@@ -48,7 +83,11 @@ class _Picker extends BackupFilePicker {
   Future<BackupStaging?> prepareStaging(String output) async {
     preparations++;
     final dir = await root.createTemp('stage-');
-    return BackupStaging(dir.path, 'token-$preparations');
+    return BackupStaging(
+      dir.path,
+      'token-$preparations',
+      stagingBookmark: scoped ? base64Encode([1, 2, 3]) : null,
+    );
   }
 
   @override
@@ -173,6 +212,52 @@ void main() {
     await root.delete(recursive: true);
   });
 
+  test(
+    'reopen restores original pending operation; cancelled access selection never replays',
+    () async {
+      await enable();
+      picker.scoped = true;
+      picker.failBookmark = true;
+      await expectLater(saveKey(), fails('backup_access_required'));
+      expect(picker.preparations, 1);
+      expect((await source.status()).pending!.command.operationId, 'save-key');
+      await close();
+      await open();
+      final controller = BackupController(source, const Stream.empty());
+      await controller.load();
+      await controller.reconcile();
+      expect(controller.needsAccess, isTrue);
+      picker.cancelReselect = true;
+      await controller.recoverAccess();
+      expect(controller.frozen, isTrue);
+      expect(picker.preparations, 1);
+      picker.cancelReselect = false;
+      await controller.recoverAccess();
+      expect(controller.result!.operationId, 'save-key');
+      expect(controller.frozen, isFalse);
+      expect(picker.preparations, 1);
+      expect(picker.reselections, 2);
+      expect(picker.leases, picker.stopped);
+      expect((await source.status()).keySaved, isTrue);
+      controller.dispose();
+    },
+  );
+  test(
+    'completed scoped receipt needs no file access after cleanup and reopen',
+    () async {
+      await enable();
+      picker.scoped = true;
+      await saveKey();
+      expect(await repo.backups.outputStagingAccess('save-key'), isNull);
+      final before = picker.leases;
+      await File('${root.path}/恢复 密钥.txt').delete();
+      await close();
+      await open();
+      expect((await source.receipt('save-key'))!.operationId, 'save-key');
+      expect(picker.leases, before);
+      expect(picker.leases, picker.stopped);
+    },
+  );
   test(
     'actual key save and export survive reopen, recovery needs no source library',
     () async {

@@ -1,5 +1,27 @@
 part of 'info_storage.dart';
 
+/// Private native capabilities, never a page resource or portable backup.
+final class BackupStagingAccess {
+  const BackupStagingAccess._(
+    this.directory,
+    this.destination,
+    this.stagingBookmark,
+    this.outputBookmark,
+  );
+  final MacBackupStagingDirectory directory;
+  final String destination, stagingBookmark;
+  final String? outputBookmark;
+  Map<String, String> toNativeArguments() => {
+    'path': directory.path,
+    'parentIdentity': directory.parentIdentity,
+    'destination': destination,
+    'stagingBookmark': stagingBookmark,
+    'outputBookmark': outputBookmark ?? '',
+  };
+  @override
+  String toString() => 'BackupStagingAccess([private])';
+}
+
 final class _BackupStagingRecord {
   _BackupStagingRecord({
     required this.operationId,
@@ -11,6 +33,8 @@ final class _BackupStagingRecord {
     required this.root,
     this.child,
     this.cleanupPending = true,
+    this.stagingBookmark,
+    this.outputBookmark,
   });
   final String operationId, outputId, digest, destination;
   final int expectedVersion;
@@ -18,9 +42,12 @@ final class _BackupStagingRecord {
   final MacBackupStagingDirectory root;
   final MacBackupStagingDirectory? child;
   final bool cleanupPending;
+  final String? stagingBookmark, outputBookmark;
   _BackupStagingRecord change({
     MacBackupStagingDirectory? child,
     bool? cleanupPending,
+    String? outputBookmark,
+    bool clearAccess = false,
   }) => _BackupStagingRecord(
     operationId: operationId,
     outputId: outputId,
@@ -31,9 +58,11 @@ final class _BackupStagingRecord {
     root: root,
     child: child ?? this.child,
     cleanupPending: cleanupPending ?? this.cleanupPending,
+    stagingBookmark: clearAccess ? null : stagingBookmark,
+    outputBookmark: clearAccess ? null : outputBookmark ?? this.outputBookmark,
   );
   Map<String, Object?> toPrivateJson() => {
-    'format': 4,
+    'format': stagingBookmark == null ? 4 : 7,
     'action': 'staging',
     'operationId': operationId,
     'outputId': outputId,
@@ -44,17 +73,33 @@ final class _BackupStagingRecord {
     'root': root.toPrivateJson(),
     'child': child?.toPrivateJson(),
     'cleanupPending': cleanupPending,
+    if (stagingBookmark != null) ...{
+      'stagingBookmark': stagingBookmark,
+      'outputBookmark': outputBookmark,
+    },
   };
 }
 
 extension BackupStagingOperations on InformationBackups {
+  void _validateNativeBookmark(String value) {
+    try {
+      if (value.isEmpty || value.length > 87384) throw const FormatException();
+      final bytes = base64Decode(value);
+      if (bytes.isEmpty || bytes.length > 65536 || base64Encode(bytes) != value)
+        throw const FormatException();
+    } on Object {
+      throw const StorageFailure('invalid_backup_operation_receipt');
+    }
+  }
+
   String _stagingId(String outputId) =>
       'backup_stage_${crypto.sha256.convert(utf8.encode(outputId))}';
 
   _BackupStagingRecord _decodeStaging(Map<String, dynamic> value) {
     try {
-      if (value.length != 11 ||
-          value['format'] != 4 ||
+      final withAccess = value['format'] == 7;
+      if (value.length != (withAccess ? 13 : 11) ||
+          !{4, 7}.contains(value['format']) ||
           value['action'] != 'staging') {
         throw const FormatException();
       }
@@ -73,6 +118,14 @@ extension BackupStagingOperations on InformationBackups {
               value['child'] as Map<String, dynamic>,
             );
       final destination = value['destination'] as String;
+      final stagingBookmark = withAccess
+          ? value['stagingBookmark'] as String
+          : null;
+      final outputBookmark = withAccess
+          ? value['outputBookmark'] as String?
+          : null;
+      if (stagingBookmark != null) _validateNativeBookmark(stagingBookmark);
+      if (outputBookmark != null) _validateNativeBookmark(outputBookmark);
       if (!File(destination).isAbsolute ||
           destination.contains('\x00') ||
           destination == root.path ||
@@ -94,6 +147,8 @@ extension BackupStagingOperations on InformationBackups {
         root: root,
         child: child,
         cleanupPending: value['cleanupPending'] as bool,
+        stagingBookmark: stagingBookmark,
+        outputBookmark: outputBookmark,
       );
     } on Object {
       throw const StorageFailure('invalid_backup_operation_receipt');
@@ -154,6 +209,7 @@ extension BackupStagingOperations on InformationBackups {
     required BackupOutputAction action,
     required String directory,
     required String destination,
+    String? stagingBookmark,
   }) async {
     _checkOpen();
     _validateKeyOperation(operationId, commandDigest, expectedVersion);
@@ -177,6 +233,7 @@ extension BackupStagingOperations on InformationBackups {
           outputAction: action,
           destination: destination,
           root: MacBackupPublicationFiles.captureStaging(directory),
+          stagingBookmark: stagingBookmark,
         );
         _decodeStaging(record.toPrivateJson().cast<String, dynamic>());
         await _repository._db.customStatement(
@@ -189,6 +246,43 @@ extension BackupStagingOperations on InformationBackups {
     } on Object {
       throw const StorageFailure('backup_staging_failed');
     }
+  }
+
+  Future<BackupStagingAccess?> outputStagingAccess(String id) async {
+    _checkOpen();
+    final record = await _stagingFor(id, invalidated: true);
+    if (record == null ||
+        !record.cleanupPending ||
+        record.stagingBookmark == null)
+      return null;
+    return BackupStagingAccess._(
+      record.root,
+      record.destination,
+      record.stagingBookmark!,
+      record.outputBookmark,
+    );
+  }
+
+  /// Capture after publication, or replace only after an explicit native
+  /// selection of the exact original output. This is access, never a receipt.
+  Future<void> recordOutputBookmark(String id, String bookmark) async {
+    _checkOpen();
+    _validateNativeBookmark(bookmark);
+    await _repository._db.transaction(() async {
+      final record = await _stagingFor(id);
+      final output = await _outputRecord(id);
+      if (record == null ||
+          record.stagingBookmark == null ||
+          !record.cleanupPending ||
+          output == null ||
+          output.phase != BackupOutputPhase.publishing ||
+          output.digest != record.digest ||
+          output.publication.destination != record.destination ||
+          output.publication.sourceDirectoryIdentity != record.root.identity) {
+        throw const StorageFailure('operation_conflict');
+      }
+      await _writeStaging(record.change(outputBookmark: bookmark));
+    });
   }
 
   /// Pass this to exportTo.onStagingCreated. It runs before SQLCipher creates
@@ -327,7 +421,9 @@ extension BackupStagingOperations on InformationBackups {
       }
       await releaseNative?.call();
       await _repository._db.transaction(() async {
-        await _writeStaging(record.change(cleanupPending: false));
+        await _writeStaging(
+          record.change(cleanupPending: false, clearAccess: true),
+        );
         if (output != null) {
           await _repository._db.customStatement(
             'UPDATE backup_operations SET payload=? WHERE operation_id=?',

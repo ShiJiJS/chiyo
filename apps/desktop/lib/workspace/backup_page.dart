@@ -144,8 +144,10 @@ class WorkspaceBackupPage extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: DesktopButton(
                 key: const ValueKey('backup-page-reconcile'),
-                onPressed: m.busy ? null : m.reconcile,
-                child: const Text('核对原备份操作'),
+                onPressed: m.busy
+                    ? null
+                    : (m.needsAccess ? m.recoverAccess : m.reconcile),
+                child: Text(m.needsAccess ? '重新选择原文件并核对' : '核对原备份操作'),
               ),
             ),
         ],
@@ -483,8 +485,10 @@ class _BackupFlowState extends State<_BackupFlow> {
             if (m.uncertain)
               DesktopButton(
                 key: const ValueKey('backup-reconcile'),
-                onPressed: m.busy ? null : m.reconcile,
-                child: const Text('核对原备份操作'),
+                onPressed: m.busy
+                    ? null
+                    : (m.needsAccess ? m.recoverAccess : m.reconcile),
+                child: Text(m.needsAccess ? '重新选择原文件并核对' : '核对原备份操作'),
               ),
             if (m.result?.action == WorkspaceBackupAction.restore)
               DesktopButton(

@@ -9,7 +9,8 @@ import 'workspace_source.dart';
 
 /// Production Owner adapter. Pages see opaque selections/receipts only. All
 /// storage and native work is serialized behind the existing Owner barrier.
-class OwnerWorkspaceBackups implements WorkspaceBackupSource {
+class OwnerWorkspaceBackups
+    implements WorkspaceBackupSource, WorkspaceBackupAccessRecovery {
   OwnerWorkspaceBackups({
     required this.owner,
     required this.backups,
@@ -82,6 +83,10 @@ class OwnerWorkspaceBackups implements WorkspaceBackupSource {
       'backup_cleanup_pending' => const WorkspaceFailure(
         'cleanup_pending',
         '暂存清理尚未完成，可以重试清理剩余项。',
+      ),
+      'backup_access_required' => const WorkspaceFailure(
+        'backup_access_required',
+        '原文件访问无法恢复，请重新选择上次保存的原文件后核对；不会再次导出。',
       ),
       'backup_outcome_unknown' || 'invalid_backup_operation_receipt' =>
         const WorkspaceFailure('unknown_outcome', '原操作结果尚未确认，请核对原操作。'),
@@ -297,7 +302,14 @@ class OwnerWorkspaceBackups implements WorkspaceBackupSource {
         return _keyReceipt((await backups.recoveryKeyOperationReceipt(id))!);
       case 'saveKey':
       case 'export':
-        final result = await backups.reconcileOutputOperation(id);
+        final result = await _withAccess(
+          id,
+          needsOutput: true,
+          activateAccess:
+              await backups.outputOperationPhase(id) ==
+              BackupOutputPhase.publishing,
+          action: () => backups.reconcileOutputOperation(id),
+        );
         return result == null ? null : _outputReceipt(result);
       case 'restore':
         return _restoreReceipt((await backups.restoreOperationReceipt(id))!);
@@ -351,11 +363,76 @@ class OwnerWorkspaceBackups implements WorkspaceBackupSource {
       await backups.cleanupOutputOperation(id);
       return;
     }
-    await backups.cleanupRegisteredOutputStaging(
+    await _withAccess(
       id,
-      releaseNative: () =>
-          picker.releaseRecordedStaging(directory.toPrivateJson()),
+      needsOutput: false,
+      action: () => backups.cleanupRegisteredOutputStaging(
+        id,
+        releaseNative: () =>
+            picker.releaseRecordedStaging(directory.toPrivateJson()),
+      ),
     );
+  }
+
+  Future<T> _withAccess<T>(
+    String id, {
+    required bool needsOutput,
+    bool activateAccess = true,
+    required Future<T> Function() action,
+  }) async {
+    final access = activateAccess
+        ? await backups.outputStagingAccess(id)
+        : null;
+    if (access == null) {
+      return action(); // Older journals and non-native fixtures.
+    }
+    final token = await picker.acquireAccess(
+      access.toNativeArguments(),
+      needsOutput: needsOutput,
+    );
+    try {
+      return await action();
+    } finally {
+      await picker.releaseAccess(token);
+    }
+  }
+
+  @override
+  Future<bool> requestRecoveryAccess(String operationId) async {
+    _current();
+    try {
+      // The file panel must not hold the library lock. Revalidate the exact
+      // intent and generation after it returns, before storing any capability.
+      final before = await owner.exportLibrary(() async {
+        _current();
+        final intent = await backups.ownerOperationIntent(operationId);
+        final access = await backups.outputStagingAccess(operationId);
+        if (intent == null ||
+            !intent.pending ||
+            access == null ||
+            !{'saveKey', 'export'}.contains(intent.action) ||
+            await backups.outputOperationPhase(operationId) !=
+                BackupOutputPhase.publishing) {
+          throw const StorageFailure('backup_outcome_unknown');
+        }
+        return (intent: intent, access: access);
+      });
+      final bookmark = await picker.reselectOutput(before.access.destination);
+      if (bookmark == null) return false;
+      return await owner.exportLibrary(() async {
+        _current();
+        final intent = await backups.ownerOperationIntent(operationId);
+        if (intent == null ||
+            !intent.pending ||
+            intent.digest != before.intent.digest) {
+          throw const StorageFailure('backup_outcome_unknown');
+        }
+        await backups.recordOutputBookmark(operationId, bookmark);
+        return true;
+      });
+    } catch (e) {
+      throw _failure(e, uncertain: true);
+    }
   }
 
   Future<void> _cleanupAll() async {
@@ -389,6 +466,7 @@ class OwnerWorkspaceBackups implements WorkspaceBackupSource {
             : BackupOutputAction.export,
         directory: staging.directory,
         destination: path,
+        stagingBookmark: staging.stagingBookmark,
       );
       registered = true;
       final prepared = '${staging.directory}/prepared';
@@ -420,7 +498,15 @@ class OwnerWorkspaceBackups implements WorkspaceBackupSource {
         publication: publication,
       );
       return _outputReceipt(
-        await backups.publishOutputOperation(c.operationId),
+        await backups.publishOutputOperation(
+          c.operationId,
+          afterPublication: staging.stagingBookmark == null
+              ? null
+              : () async {
+                  final bookmark = await picker.outputBookmark(staging!);
+                  await backups.recordOutputBookmark(c.operationId, bookmark);
+                },
+        ),
       );
     } finally {
       // Success and cleanup are independent. The durable queue retains any
@@ -549,6 +635,9 @@ class OwnerWorkspaceBackups implements WorkspaceBackupSource {
         });
         if (recovered != null) return recovered;
       } catch (check) {
+        if (check is StorageFailure && check.code == 'backup_access_required') {
+          throw _failure(check, uncertain: true);
+        }
         if (check is WorkspaceFailure && check.code == 'cleanup_pending') {
           rethrow;
         }

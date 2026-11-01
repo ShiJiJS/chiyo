@@ -178,3 +178,8 @@ abstract interface class WorkspaceBackupSource {
   /// Null is definitive non-submission, not a lookup failure or missing artifact.
   Future<WorkspaceBackupReceipt?> receipt(String operationId);
 }
+
+/// Optional Owner capability. No private file path or bookmark reaches a page.
+abstract interface class WorkspaceBackupAccessRecovery {
+  Future<bool> requestRecoveryAccess(String operationId);
+}
