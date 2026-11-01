@@ -103,6 +103,21 @@ void main() {
     await open();
   }
 
+  CredentialRecordInput lifecycle(
+    ManagedCredential c,
+    CredentialRecordAction action, {
+    int? selected,
+    int? catalog,
+  }) => CredentialRecordInput(
+    action: action,
+    commandDigest: 'c' * 64,
+    credentialId: c.id,
+    expectedRevision: c.revision,
+    expectedMaterialVersion: c.version,
+    retainedMaterialVersion: selected,
+    expectedCatalogVersion: catalog,
+  );
+
   setUp(() async {
     now = DateTime.utc(2026, 11, 1);
     folder = await Directory.systemTemp.createTemp(
@@ -291,9 +306,17 @@ void main() {
       expect(service.owner.credentialGrantState(grant), 'version_invalidated');
       expect(repo.credentialMaterials.map((m) => m.version), [1, 2]);
       expect(repo.credentialMaterials.first.retiredAt, now);
+      c = repo.managedCredentials.single;
+      await service.owner.saveCredentialRecord(
+        'restore-approved-old-material',
+        lifecycle(c, CredentialRecordAction.restoreMaterial, selected: 1),
+      );
+      expect(repo.managedCredentials.single.version, 3);
+      expect(repo.managedCredentials.single.enabled, isFalse);
+      expect(service.owner.credentialGrantState(grant), 'version_invalidated');
       await reopen();
       expect(service.owner.sessions, isEmpty);
-      expect(repo.managedCredentials.single.version, 2);
+      expect(repo.managedCredentials.single.version, 3);
       expect(
         (await service.owner.credentialRecordReceipt('replace'))!.toJson(),
         replaced.toJson(),
@@ -675,6 +698,245 @@ void main() {
           throwsFormatException,
         );
       }
+    },
+  );
+  for (final form in CredentialForm.values) {
+    test(
+      'durable ${form.name} material and recycle restore create disabled new generations',
+      () async {
+        await service.owner.saveCredentialRecord(
+          'seed',
+          create(
+            form: form,
+            filename: form == CredentialForm.file ? 'synthetic.pem' : null,
+          ),
+        );
+        var c = repo.managedCredentials.single;
+        await service.owner.saveCredentialRecord(
+          'replace',
+          edit(
+            c,
+            action: CredentialRecordAction.replaceMaterial,
+            bytes: utf8.encode('SYNTHETIC-v2'),
+            filename: form == CredentialForm.file ? 'second.pem' : null,
+          ),
+        );
+        c = repo.managedCredentials.single;
+        final command = lifecycle(
+          c,
+          CredentialRecordAction.restoreMaterial,
+          selected: 1,
+        );
+        final restored = await service.owner.saveCredentialRecord(
+          'restore',
+          command,
+        );
+        expect(restored.materialVersion, 3);
+        expect(restored.useGeneration, 3);
+        expect(repo.managedCredentials.single.enabled, isFalse);
+        expect(repo.managedCredentials.single.privateNote, note);
+        expect(repo.credentialMaterials.last.bytes, utf8.encode(secret));
+        await reopen();
+        expect(
+          (await service.owner.saveCredentialRecord(
+            'restore',
+            command,
+          )).toJson(),
+          restored.toJson(),
+        );
+        expect(repo.credentialMaterials, hasLength(3));
+        c = repo.managedCredentials.single;
+        await service.owner.saveCredentialRecord(
+          'recycle',
+          lifecycle(c, CredentialRecordAction.recycle),
+        );
+        c = repo.managedCredentials.single;
+        expect(service.owner.credentials, isEmpty);
+        expect(service.owner.recycledCredentials.single.id, c.id);
+        await service.owner.saveCredentialRecord(
+          'recycle-restore',
+          lifecycle(c, CredentialRecordAction.restoreRecycled),
+        );
+        await reopen();
+        c = repo.managedCredentials.single;
+        expect(c.version, 4);
+        expect(c.useGeneration, 5);
+        expect(c.enabled, isFalse);
+        expect(c.deletedAt, isNull);
+        expect(repo.credentialMaterials.last.bytes, utf8.encode(secret));
+      },
+    );
+  }
+
+  test(
+    'recycle restore prunes removed categories and stale catalogue is atomic conflict',
+    () async {
+      final directory = await service.owner.createDirectory(
+        'synthetic-directory',
+      );
+      final tag = await service.owner.createTag('synthetic-tag');
+      await service.owner.saveCredentialRecord(
+        'seed',
+        CredentialRecordInput(
+          action: CredentialRecordAction.create,
+          commandDigest: 'a' * 64,
+          form: CredentialForm.string,
+          name: '合成分类凭据',
+          publicPurpose: '',
+          privateNote: note,
+          suggestedBinding: 'SYNTHETIC',
+          material: utf8.encode(secret),
+          updateClassification: true,
+          directoryId: directory.id,
+          tagIds: [tag.id],
+        ),
+      );
+      var c = repo.managedCredentials.single;
+      await service.owner.saveCredentialRecord(
+        'recycle',
+        lifecycle(c, CredentialRecordAction.recycle),
+      );
+      c = repo.managedCredentials.single;
+      final version =
+          (await service.owner.informationClassificationSnapshot()).version;
+      await service.owner.deleteDirectory(directory.id, directory.version);
+      await expectLater(
+        service.owner.saveCredentialRecord(
+          'stale',
+          lifecycle(
+            c,
+            CredentialRecordAction.restoreRecycled,
+            catalog: version,
+          ),
+        ),
+        access('credential_conflict'),
+      );
+      expect(await service.owner.credentialRecordReceipt('stale'), isNull);
+      final current =
+          (await service.owner.informationClassificationSnapshot()).version;
+      await service.owner.saveCredentialRecord(
+        'restore',
+        lifecycle(c, CredentialRecordAction.restoreRecycled, catalog: current),
+      );
+      expect(repo.managedCredentials.single.directoryId, isNull);
+      expect(repo.managedCredentials.single.tagIds, [tag.id]);
+    },
+  );
+
+  test(
+    'permanent credential purge scrubs private metadata and material but retains exact receipt',
+    () async {
+      await service.owner.saveCredentialRecord(
+        'seed',
+        create(form: CredentialForm.file, filename: 'synthetic-private.pem'),
+      );
+      var c = repo.managedCredentials.single;
+      await service.owner.saveCredentialRecord(
+        'recycle',
+        lifecycle(c, CredentialRecordAction.recycle),
+      );
+      c = repo.managedCredentials.single;
+      final command = lifecycle(c, CredentialRecordAction.purge);
+      final receipt = await service.owner.saveCredentialRecord(
+        'purge',
+        command,
+      );
+      await reopen();
+      expect(
+        (await service.owner.saveCredentialRecord('purge', command)).toJson(),
+        receipt.toJson(),
+      );
+      expect(repo.credentialMaterials, isEmpty);
+      expect(service.owner.recycledCredentials, isEmpty);
+      c = repo.managedCredentials.single;
+      expect(c.purgedAt, isNotNull);
+      expect(c.privateNote, isEmpty);
+      expect(c.fileName, 'removed.bin');
+      final db = inspect();
+      try {
+        final persisted = jsonEncode([
+          db.select('SELECT payload FROM managed_credentials'),
+          db.select('SELECT payload FROM credential_materials'),
+          db.select('SELECT payload FROM information_record_operations'),
+        ]);
+        for (final value in [secret, note, 'synthetic-private.pem']) {
+          expect(persisted, isNot(contains(value)));
+        }
+      } finally {
+        db.close();
+      }
+      await expectLater(
+        service.owner.restoreCredential(c.id),
+        access('credential_material_purged'),
+      );
+    },
+  );
+
+  test(
+    '30 day maintenance removes expired recycle metadata exactly at cutoff',
+    () async {
+      await service.owner.saveCredentialRecord('seed', create());
+      await service.owner.saveCredentialRecord(
+        'recycle',
+        lifecycle(
+          repo.managedCredentials.single,
+          CredentialRecordAction.recycle,
+        ),
+      );
+      now = now
+          .add(const Duration(days: 30))
+          .subtract(const Duration(microseconds: 1));
+      await service.owner.purgeExpiredCredentialMaterial();
+      expect(service.owner.recycledCredentials, hasLength(1));
+      expect(repo.credentialMaterials, hasLength(1));
+      now = now.add(const Duration(microseconds: 1));
+      await service.owner.purgeExpiredCredentialMaterial();
+      expect(repo.credentialMaterials, isEmpty);
+      expect(repo.managedCredentials.single.privateNote, isEmpty);
+      expect(repo.managedCredentials.single.purgedAt, now);
+      final revision = repo.managedCredentials.single.revision;
+      await service.owner.purgeExpiredCredentialMaterial();
+      expect(repo.managedCredentials.single.revision, revision);
+      await reopen();
+      expect(service.owner.recycledCredentials, isEmpty);
+      expect(repo.credentialMaterials, isEmpty);
+    },
+  );
+
+  test(
+    'lifecycle receipt failure rolls back material and metadata; wrong retry conflicts',
+    () async {
+      await service.owner.saveCredentialRecord('seed', create());
+      final command = lifecycle(
+        repo.managedCredentials.single,
+        CredentialRecordAction.recycle,
+      );
+      final db = inspect();
+      db.execute(
+        "CREATE TRIGGER reject_lifecycle BEFORE INSERT ON information_record_operations WHEN NEW.operation_id='fail' BEGIN SELECT RAISE(ABORT,'injected'); END",
+      );
+      db.close();
+      await expectLater(
+        service.owner.saveCredentialRecord('fail', command),
+        storage('credential_save_failed'),
+      );
+      expect(repo.managedCredentials.single.deletedAt, isNull);
+      expect(repo.credentialMaterials.single.retiredAt, isNull);
+      expect(await service.owner.credentialRecordReceipt('fail'), isNull);
+      final clear = inspect();
+      clear.execute('DROP TRIGGER reject_lifecycle');
+      clear.close();
+      await service.owner.saveCredentialRecord('done', command);
+      await expectLater(
+        service.owner.saveCredentialRecord(
+          'done',
+          lifecycle(
+            repo.managedCredentials.single,
+            CredentialRecordAction.purge,
+          ),
+        ),
+        access('operation_conflict'),
+      );
     },
   );
 }

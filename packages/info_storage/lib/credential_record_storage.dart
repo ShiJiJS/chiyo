@@ -33,6 +33,16 @@ extension _CredentialRecordStorage on EncryptedInformationRepository {
     try {
       change.validate();
       await _writeMetadata(() async {
+        if (change.expectedCatalogVersion != null &&
+            (await _db
+                        .customSelect(
+                          'SELECT version FROM information_classification_state WHERE singleton=1',
+                        )
+                        .getSingle())
+                    .read<int>('version') !=
+                change.expectedCatalogVersion) {
+          throw const AccessFailure('credential_conflict');
+        }
         final before =
             (await _db
                     .customSelect('SELECT payload FROM managed_credentials')
@@ -58,7 +68,7 @@ extension _CredentialRecordStorage on EncryptedInformationRepository {
         if (credentialVaultDigest(before, materials) != change.previousDigest) {
           throw const AccessFailure('credential_conflict');
         }
-        _validateCredentialRecordChange(change, before, materials);
+        await _validateCredentialRecordChange(change, before, materials);
         _validateVault(change.credentials, change.materials);
         await _writeCredentialSnapshot(change.credentials, change.materials);
         await _db.customStatement(
@@ -74,13 +84,50 @@ extension _CredentialRecordStorage on EncryptedInformationRepository {
     }
   }
 
-  void _validateCredentialRecordChange(
+  Future<void> _validateCredentialRecordChange(
     CredentialRecordChange change,
     List<ManagedCredential> before,
     List<CredentialMaterial> materials,
-  ) {
+  ) async {
     final r = change.receipt;
     final old = before.where((c) => c.id == r.credentialId).firstOrNull;
+    if (r.action.lifecycle) {
+      if (old == null ||
+          old.revision != r.baseRevision ||
+          old.version != r.baseMaterialVersion) {
+        throw const AccessFailure('credential_conflict');
+      }
+      // Recompute from current SQL identities, never the caller's proposed set.
+      final current = change.credentials.where((c) => c.id == old.id).single;
+      final expected = credentialLifecycleSnapshot(
+        old: old,
+        materials: materials,
+        action: r.action,
+        selectedVersion: change.retainedMaterialVersion,
+        now: current.modifiedAt,
+        directoryIds:
+            (await _db
+                    .customSelect('SELECT id FROM information_directories')
+                    .get())
+                .map((r) => r.read<String>('id'))
+                .toSet(),
+        tagIds:
+            (await _db.customSelect('SELECT id FROM information_tags').get())
+                .map((r) => r.read<String>('id'))
+                .toSet(),
+      );
+      if (current.revision != r.revision ||
+          current.version != r.materialVersion ||
+          current.useGeneration != r.useGeneration ||
+          credentialVaultDigest(change.credentials, change.materials) !=
+              credentialVaultDigest([
+                for (final c in before)
+                  c.id == old.id ? expected.credential : c,
+              ], expected.materials)) {
+        throw const StorageFailure('invalid_credential_change');
+      }
+      return;
+    }
     final matches = change.credentials
         .where((c) => c.id == r.credentialId)
         .toList();

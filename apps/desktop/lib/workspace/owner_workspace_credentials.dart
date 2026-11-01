@@ -5,6 +5,36 @@ import 'package:info_core/info_core.dart' as core;
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
+String ownerCredentialRecycleId(String id, int revision) =>
+    'credential_${id}_$revision';
+
+WorkspaceRecycleEntry ownerCredentialRecycleEntry(
+  core.OwnerAccess owner,
+  core.ManagedCredential c,
+) => WorkspaceRecycleEntry(
+  id: ownerCredentialRecycleId(c.id, c.revision),
+  record: WorkspaceRecordSummary(
+    ref: WorkspaceRecordRef(WorkspaceRecordKind.credential, c.id),
+    name: c.name,
+    description: c.publicPurpose,
+    type: const WorkspaceType('credential', '凭据', 'key'),
+    updatedAt: c.modifiedAt,
+    directoryId: c.directoryId,
+    tags: [
+      for (final id in c.tagIds)
+        for (final t in owner.tags.where((t) => t.id == id))
+          WorkspaceTag(id, t.name),
+    ],
+  ),
+  version: c.revision,
+  deletedAt: c.deletedAt!,
+  expiresAt: c.deletedAt!.add(const Duration(days: 30)),
+  directoryName: owner.directories
+      .where((d) => d.id == c.directoryId)
+      .firstOrNull
+      ?.name,
+);
+
 /// Owner credential management. Secret staging is Host-owned; workspace DTOs
 /// contain metadata/opaque identities only. AI use remains a separate adapter.
 class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
@@ -141,6 +171,10 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
       '凭据或原操作已变化，请重新核对。',
     ),
     'credential_deleted' => const WorkspaceFailure('not_found', '凭据已回收或不存在。'),
+    'credential_material_purged' => const WorkspaceFailure(
+      'not_found',
+      '保留材料已到期或清理，不能恢复。',
+    ),
     'unsupported_capability' => const WorkspaceFailure(
       'unsupported',
       '当前资料库不支持凭据持久操作。',
@@ -156,16 +190,20 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
     ),
     _ => const WorkspaceFailure('unavailable', '凭据资料服务暂不可用。'),
   };
-  WorkspaceCredentialReceipt _receipt(core.CredentialRecordReceipt receipt) =>
-      WorkspaceCredentialReceipt(
-        WorkspaceRecordRef(
-          WorkspaceRecordKind.credential,
-          receipt.credentialId,
-        ),
-        receipt.revision,
-        receipt.materialVersion,
-        commandDigest: receipt.commandDigest,
-      );
+  WorkspaceCredentialReceipt _receipt(
+    core.CredentialRecordReceipt receipt,
+  ) => WorkspaceCredentialReceipt(
+    WorkspaceRecordRef(WorkspaceRecordKind.credential, receipt.credentialId),
+    receipt.revision,
+    receipt.materialVersion,
+    commandDigest: receipt.commandDigest,
+    entryId: receipt.action == core.CredentialRecordAction.recycle
+        ? ownerCredentialRecycleId(receipt.credentialId, receipt.revision)
+        : receipt.action == core.CredentialRecordAction.restoreRecycled ||
+              receipt.action == core.CredentialRecordAction.purge
+        ? ownerCredentialRecycleId(receipt.credentialId, receipt.baseRevision!)
+        : null,
+  );
   Future<core.CredentialRecordReceipt?> _previous(
     String id,
     String digest,
@@ -219,6 +257,84 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
       );
     }
   }
+
+  @override
+  Future<WorkspaceCredentialRecycled> readRecycled(String entryId) =>
+      _read(() async {
+        final c = owner.recycledCredentials
+            .where((c) => ownerCredentialRecycleId(c.id, c.revision) == entryId)
+            .firstOrNull;
+        if (c == null) {
+          throw const WorkspaceFailure('not_found', '凭据已恢复、到期或清理，请刷新回收站。');
+        }
+        final catalog = await owner.informationClassificationSnapshot();
+        final dirs = catalog.directories.map((d) => d.id).toSet(),
+            tags = catalog.tags.map((t) => t.id).toSet();
+        final restored = c.copy(
+          restore: true,
+          enabled: false,
+          version: c.version + 1,
+          modifiedAt: c.modifiedAt,
+          invalidateUse: true,
+          clearDirectory: !dirs.contains(c.directoryId),
+          tagIds: c.tagIds.where(tags.contains),
+        );
+        return WorkspaceCredentialRecycled(
+          ownerCredentialRecycleEntry(owner, c),
+          _detail(c),
+          restored: _detail(restored),
+          catalogVersion: catalog.version,
+          notices: [
+            if (c.directoryId != restored.directoryId ||
+                c.tagIds.length != restored.tagIds.length)
+              '已移除的目录或标签不会重建；凭据恢复后停用，旧授权不会恢复。',
+          ],
+        );
+      });
+
+  @override
+  Future<WorkspaceCredentialReceipt> change(WorkspaceCredentialChange change) =>
+      _read(() async {
+        final prior = await _previous(change.operationId, change.commandDigest);
+        if (prior != null) return _receipt(prior);
+        if (change.ref.kind != WorkspaceRecordKind.credential) {
+          throw const WorkspaceFailure('validation', '此入口只管理托管凭据。');
+        }
+        final recycled =
+            change.action == WorkspaceCredentialAction.restoreRecycled ||
+            change.action == WorkspaceCredentialAction.purge;
+        if (recycled) {
+          if (change.entryId !=
+                  ownerCredentialRecycleId(
+                    change.ref.id,
+                    change.expectedRecordVersion,
+                  ) ||
+              change.expectedCatalogVersion == null) {
+            throw const WorkspaceFailure('conflict', '回收对象或分类预览已变化，请重新核对。');
+          }
+        } else if (change.entryId != null ||
+            change.expectedCatalogVersion != null) {
+          throw const WorkspaceFailure('validation', '凭据操作范围不匹配。');
+        }
+        if ((change.action == WorkspaceCredentialAction.restoreMaterial) !=
+            (change.materialVersion != null)) {
+          throw const WorkspaceFailure('validation', '请重新选择保留的材料版本。');
+        }
+        return _commit(
+          change.operationId,
+          core.CredentialRecordInput(
+            action: core.CredentialRecordAction.values.byName(
+              change.action.name,
+            ),
+            commandDigest: change.commandDigest,
+            credentialId: change.ref.id,
+            expectedRevision: change.expectedRecordVersion,
+            expectedMaterialVersion: change.expectedMaterialVersion,
+            retainedMaterialVersion: change.materialVersion,
+            expectedCatalogVersion: change.expectedCatalogVersion,
+          ),
+        );
+      });
 
   @override
   Future<void> releaseCandidate(String candidateId) async =>

@@ -93,12 +93,39 @@ extension CredentialOwnerAccess on OwnerAccess {
   }
 
   Future<void> purgeExpiredCredentialMaterial() => _serialize(() async {
-    final cutoff = _service._clock().subtract(const Duration(days: 30));
-    final keep = _vault.credentialMaterials
-        .where((m) => m.retiredAt == null || m.retiredAt!.isAfter(cutoff))
+    final now = _service._clock().toUtc();
+    final cutoff = now.subtract(const Duration(days: 30));
+    final expired = _vault.managedCredentials
+        .where(
+          (c) =>
+              c.deletedAt != null &&
+              c.purgedAt == null &&
+              !c.deletedAt!.isAfter(cutoff),
+        )
         .toList();
-    if (keep.length != _vault.credentialMaterials.length) {
-      await _vault.commitCredentials(_vault.managedCredentials, keep);
+    final tombstones = {
+      for (final c in expired)
+        c.id: credentialLifecycleSnapshot(
+          old: c,
+          materials: _vault.credentialMaterials,
+          action: CredentialRecordAction.purge,
+          now: now,
+          directoryIds: const {},
+          tagIds: const {},
+        ).credential,
+    };
+    final keep = _vault.credentialMaterials
+        .where(
+          (m) =>
+              !tombstones.containsKey(m.credentialId) &&
+              (m.retiredAt == null || m.retiredAt!.isAfter(cutoff)),
+        )
+        .toList();
+    if (keep.length != _vault.credentialMaterials.length ||
+        tombstones.isNotEmpty) {
+      await _vault.commitCredentials([
+        for (final c in _vault.managedCredentials) tombstones[c.id] ?? c,
+      ], keep);
     }
   });
   Future<void> permanentlyDeleteCredential(String id, int revision) =>
@@ -107,16 +134,15 @@ extension CredentialOwnerAccess on OwnerAccess {
         if (old.revision != revision || old.deletedAt == null) {
           throw const AccessFailure('credential_conflict');
         }
-        await _saveCredential(
-          old.copy(
-            invalidateUse: true,
-            purgedAt: _service._clock().toUtc(),
-            modifiedAt: _service._clock(),
-          ),
-          materials: _vault.credentialMaterials
-              .where((m) => m.credentialId != id)
-              .toList(),
+        final next = credentialLifecycleSnapshot(
+          old: old,
+          materials: _vault.credentialMaterials,
+          action: CredentialRecordAction.purge,
+          now: _service._clock().toUtc(),
+          directoryIds: const {},
+          tagIds: const {},
         );
+        await _saveCredential(next.credential, materials: next.materials);
       });
   ManagedCredential credential(String id) =>
       _vault.managedCredentials.where((c) => c.id == id).firstOrNull ??

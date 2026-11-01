@@ -188,6 +188,7 @@ class OwnerWorkspaceSource
               ],
               [
                 for (final r in owner.recycleEntries) [r.id, r.version],
+                for (final c in owner.recycledCredentials) [c.id, c.revision],
               ],
               [
                 for (final r in owner.informationRequests)

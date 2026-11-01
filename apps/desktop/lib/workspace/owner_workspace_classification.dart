@@ -76,7 +76,8 @@ class OwnerWorkspaceClassification {
       directoryCounts: counts,
       tagCounts: tagCounts,
       version: snapshot.version,
-      recycledCount: owner.recycleEntries.length,
+      recycledCount:
+          owner.recycleEntries.length + owner.recycledCredentials.length,
     );
   }
 
