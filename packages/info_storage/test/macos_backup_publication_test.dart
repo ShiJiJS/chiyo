@@ -302,6 +302,23 @@ void main() {
       );
       expect(File(output).readAsBytesSync(), bytes);
     });
+
+    test(
+      'prepared recovery-key permissions cannot become broader before publication',
+      () {
+        final value = prepare();
+        expect(Process.runSync('/bin/chmod', ['644', source]).exitCode, 0);
+        expect(
+          () => MacBackupPublicationFiles.publish(value),
+          failure('prepared_file_changed'),
+        );
+        expect(File(output).existsSync(), isFalse);
+        expect(Process.runSync('/bin/chmod', ['600', source]).exitCode, 0);
+        MacBackupPublicationFiles.publish(value);
+        expect(File(output).statSync().mode & 0x1ff, 0x180);
+        MacBackupPublicationFiles.cleanup(value);
+      },
+    );
     test(
       'independent process reconciles published inode without rewriting output',
       () async {

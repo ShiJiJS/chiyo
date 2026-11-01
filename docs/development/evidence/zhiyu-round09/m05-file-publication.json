@@ -3,7 +3,7 @@
   "issue": 74,
   "baseCommit": "7ec44797",
   "scope": "Native macOS retained-inode file publication; not yet wired to the persistent backup journal or production workspace.",
-  "passed": 15,
+  "passed": 16,
   "skipped": 0,
   "analysis": "passed",
   "testNames": [
@@ -20,14 +20,15 @@
     "native macOS retained-inode publication non-private staging, inherited ACL and symlink parent are refused",
     "native macOS retained-inode publication invalid journal data and file types fail without side effects",
     "native macOS retained-inode publication a prepared source with pre-existing hard links is rejected",
+    "native macOS retained-inode publication prepared recovery-key permissions cannot become broader before publication",
     "native macOS retained-inode publication independent process reconciles published inode without rewriting output",
     "native macOS retained-inode publication real encrypted export remains independently restorable after anchor cleanup and source close"
   ],
-  "logSha256": "2b8b48bf9476aa7720fca468250f38ffe3792b9c2cf76cb61ce83282d896fe7c",
+  "logSha256": "0f959864d999c70ff3c42664c6d8f1112116206e9e56243c1e6a6b48d43e9205",
   "analysisSha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
   "sources": {
-    "packages/info_storage/lib/macos_backup_publication.dart": "d3a0ecfbd015e14de31363a4df1c61f074b7bb3c2a2bca63aeed93b8960c6c03",
-    "packages/info_storage/test/macos_backup_publication_test.dart": "4481df88bf9cdaebad073cbb556a56a80fac600422d0b37a58306af6b7198fd7",
+    "packages/info_storage/lib/macos_backup_publication.dart": "a4ae9144ee860e7a72d7c7a2466d0c8b248e98b586674cab4ffb71c2397f860d",
+    "packages/info_storage/test/macos_backup_publication_test.dart": "e48c81e23ef98616471ecf817017b382a6473d529fa3b12c6ca128bee54caf15",
     "packages/info_storage/test/fixtures/macos_backup_publication_process.dart": "f29fbcaefd96da9a6bbd974881d8aa89e2353e912806d9b488f5ea28599db37b"
   },
   "limitations": [
