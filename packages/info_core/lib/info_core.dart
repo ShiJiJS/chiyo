@@ -57,6 +57,7 @@ part 'information_attachment_access.dart';
 part 'information_delivery_models.dart';
 part 'information_delivery_access.dart';
 part 'credential_access.dart';
+part 'credential_record_operations.dart';
 part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';

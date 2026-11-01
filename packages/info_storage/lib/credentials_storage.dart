@@ -1,6 +1,38 @@
 part of 'info_storage.dart';
 
 extension _CredentialSnapshotValidation on EncryptedInformationRepository {
+  Future<void> _writeCredentialSnapshot(
+    List<ManagedCredential> credentials,
+    List<CredentialMaterial> materials,
+  ) async {
+    await _db.customStatement('DELETE FROM credential_materials');
+    await _db.customStatement('DELETE FROM managed_credentials');
+    for (final c in credentials) {
+      await _db.customStatement(
+        'INSERT INTO managed_credentials(id,payload) VALUES(?,?)',
+        [c.id, jsonEncode(c.toJson())],
+      );
+    }
+    for (final m in materials) {
+      await _db.customStatement(
+        'INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)',
+        [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
+      );
+    }
+  }
+
+  void _publishCredentialSnapshot(
+    List<ManagedCredential> credentials,
+    List<CredentialMaterial> materials,
+  ) {
+    _credentials
+      ..clear()
+      ..addAll(credentials);
+    _credentialMaterials
+      ..clear()
+      ..addAll(materials);
+  }
+
   Future<void> _migrateCredentialField(CredentialFieldMigration change) async {
     if (_closed) throw const StorageFailure('library_closed');
     final before = change.previous.item,
