@@ -1,0 +1,104 @@
+{
+  "date": "2026-11-01",
+  "issue": 77,
+  "scope": "M08-C Host credential input, opaque staging, exact UI command matching and real Owner SQLCipher writes.",
+  "validation": {
+    "relatedDesktopSuite": {
+      "passed": 76,
+      "newCredentialWriteCases": 13
+    },
+    "finalTargetedAfterScopeCleanupAndStyleFix": {
+      "passed": 23,
+      "notAddedToRelatedSuiteCount": true
+    },
+    "coreAnalysis": "passed",
+    "storageAnalysis": "passed",
+    "desktopFinalAnalysis": "passed",
+    "visualReview": "Four final5 synthetic widget screenshots reviewed."
+  },
+  "covered": [
+    "Complete WorkspaceApp parent route opens existing credentials through metadata-only shell; dedicated credential reader remains authoritative.",
+    "Complete WorkspaceApp string material replacement through Host secure editor channel and opaque staging commits actual SQLCipher v2.",
+    "Complete WorkspaceApp file creation through injected picker persists exact bytes/metadata and reopens repository/source.",
+    "Default private credential and explicit AI discovery choice persist; discovery never includes private note or material.",
+    "Exact command digest binds original operation/target/versions; wrong-command same-target result remains unknown.",
+    "Committed response loss is recovered using original durable receipt without duplicate writes.",
+    "Actual SQL receipt insert failure preserves pending Host material after form release until absence is confirmed.",
+    "Candidate is exclusive to one unresolved operation; owned buffers clear on consumption/cancel/dispose/stale scope.",
+    "String 65536-byte/file 1MiB limits and bounded 16-candidate/16MiB staging; filename/path and NUL validation.",
+    "Late file result after dialog cancellation does not stage or save; wrong material form and unsupported classification fail explicitly.",
+    "Metadata-only linked information selection, real enable/edit/replace and receipt replay across repository/source reopen.",
+    "Sample contract regressions for typed save/toggle/material/recycle receipts stay green; no new demo UI."
+  ],
+  "securityBoundary": {
+    "genericDtoContainsMaterialOrFullFilePath": false,
+    "journalContainsMaterialOrPrivateNoteSnapshot": false,
+    "ownedMutableStagingBuffersCleared": true,
+    "immutableStringsNativeEditorOsCopiesErasureClaimed": false,
+    "defaultDiscoverable": false,
+    "newAiUseRequestCreated": false
+  },
+  "priorEvidenceCorrection": "M08-A dedicated reader/widget/list checks did not cover full WorkspaceApp parent readDetail route. That actual route still rejected credential kind; M08-C fixes and exercises it.",
+  "harnessCorrections": [
+    "Initial UI checks failed Flutter platform override invariant; reset in try/finally before binding invariant.",
+    "Real SQLCipher close from widget fake zone initially hung; bounded test helper drives actual async scheduler and fake frames, asserts close done. Interrupted runs are not passes.",
+    "Pending picker spinner cannot pumpAndSettle before cancel; cancel directly then verify late result.",
+    "Old five ordinary creatable types assertion updated to additionally expect actual durable credential capability.",
+    "Intermediate static analysis had one brace style lint; final desktop analysis clean."
+  ],
+  "limits": [
+    "Widget tests with mocked existing Mac secure editor MethodChannel and injected file picker, not physical NSSecureTextField/NSOpenPanel acceptance.",
+    "Same-process repository/service/source reopen of isolated encrypted fixtures, not installed normal App independent restart.",
+    "Credential classification/tag persistent model and backup compatibility remain pending; nonempty classification is rejected, never silently dropped.",
+    "Credential lifecycle restore/recycle/purge and full 30-day private note/material metadata removal remain pending.",
+    "AI credential use approval/execution adapter remains unavailable; only formal AI can initiate requests.",
+    "Current fixed installed 0a5e3500 does not include this source. Read-only control probe still starting (pid 72542), normal open/reopen not proven."
+  ],
+  "screenshots": [
+    {
+      "path": "m08-owner-inputs/secure-input.png",
+      "sha256": "5dcb69bd11755c74d53953d15ecaca8638e76e12da0d3b25777ef3b34ddd4a55"
+    },
+    {
+      "path": "m08-owner-inputs/opaque-material-selected.png",
+      "sha256": "6472d01bf95027dd4856399ea9c472f53b0887a91e8df470b231bdafc54ec4ce"
+    },
+    {
+      "path": "m08-owner-inputs/persisted-material-version.png",
+      "sha256": "be4e02055c7b26e454a0ac5723334a2acd20713e6ae8b2fe6a684e60adc97d6f"
+    },
+    {
+      "path": "m08-owner-inputs/created-file-credential.png",
+      "sha256": "57c90eb95a1f0a76d28d13b700986320f7c3b228ebda5e13196e957a6c060787"
+    }
+  ],
+  "localLogs": [
+    {
+      "localPath": "build/macos-adaptation/m08-input-related-tests-final.log",
+      "sha256": "72b3eb5c70f3a416ecf4a71a1f988c1c02a0aec4e5f814152d8e1f7cd3e52f55"
+    },
+    {
+      "localPath": "build/macos-adaptation/m08-input-targeted-final.log",
+      "sha256": "952ce74d1315ffa2a2897bd7ba30318fd342e33d0c315863249716607a04b77e"
+    },
+    {
+      "localPath": "build/macos-adaptation/m08-input-core-analysis-final.log",
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232"
+    },
+    {
+      "localPath": "build/macos-adaptation/m08-input-storage-analysis-final.log",
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041"
+    },
+    {
+      "localPath": "build/macos-adaptation/m08-input-desktop-analysis-final.log",
+      "sha256": "c4e0506573b49023dafe1f24e16969a4ab1db4fe07ffe33514960083304aa930"
+    }
+  ],
+  "newAppOrDsymBuilt": false,
+  "normalInstallationReplaced": false,
+  "keychainRequestRepeated": false,
+  "personalLibraryUsedByTests": false,
+  "hooksOrTrustChanged": false,
+  "windowsCiRun": false,
+  "sourceCommit": "a812d3be"
+}
