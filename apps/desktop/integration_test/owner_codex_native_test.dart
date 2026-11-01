@@ -171,7 +171,7 @@ void main() {
           );
           final saved = await service.owner.commitInformationDraft(
             draft,
-            'Synthetic AI file intake',
+            'native-ai-file-intake',
             core.InformationDraftInput(
               name: 'Synthetic ordinary file',
               description: 'Synthetic-only file acceptance',
