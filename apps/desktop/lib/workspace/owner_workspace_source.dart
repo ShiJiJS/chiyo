@@ -6,6 +6,7 @@ import 'owner_workspace_classification.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
 import 'owner_workspace_information.dart';
+import 'owner_workspace_files.dart';
 import 'owner_workspace_approvals.dart';
 import 'owner_workspace_agents.dart';
 import 'unavailable_workspace_sources.dart';
@@ -40,6 +41,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
       templates: definitions ?? builtinWorkspaceDefinitions,
       onChanged: _changed,
     );
+    _files = OwnerWorkspaceFiles(owner, _information);
     _classification = OwnerWorkspaceClassification(
       owner: owner,
       information: _information,
@@ -61,6 +63,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   final core.OwnerLibraryScope _scope;
   bool get isCurrentLibrary => !_disposed && _scope.isCurrent;
   late final OwnerWorkspaceInformation _information;
+  late final OwnerWorkspaceFiles _files;
   late final OwnerWorkspaceClassification _classification;
   late final OwnerWorkspaceHistory _history;
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
@@ -289,14 +292,16 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   Future<WorkspaceFileHistory> loadFileHistory(
     WorkspaceRecordRef record,
     String fieldKey,
-  ) => _unsupported();
+  ) => _read(() => _files.history(record, fieldKey));
   @override
   Future<WorkspaceFilePreview> readFilePreview(
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
     int page = 0,
-  }) => _unsupported();
+  }) => _read(
+    () => _files.preview(record, fieldKey, version: version, page: page),
+  );
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
       _unsupported();

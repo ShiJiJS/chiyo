@@ -830,6 +830,8 @@ class _FileVersionsState extends State<_FileVersions> {
             createdAt: file.createdAt,
           ),
         ],
+        if (_selectedVersion?.available == false)
+          const Text('该版本原文已清理，仅保留版本记录，不能恢复。'),
         if (_loading)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
@@ -878,7 +880,10 @@ class _FileVersionsState extends State<_FileVersions> {
         DesktopButton(
           key: const ValueKey('library-file-restore'),
           kind: DesktopButtonKind.primary,
-          onPressed: _loading || _restoring ? null : _restore,
+          onPressed:
+              _loading || _restoring || _selectedVersion?.available != true
+              ? null
+              : _restore,
           child: const Text('恢复此版本'),
         ),
     ],

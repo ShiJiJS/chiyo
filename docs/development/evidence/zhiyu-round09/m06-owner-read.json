@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-01",
+  "issues": {
+    "owner": 75,
+    "agentFollowup": 76,
+    "parent": 69
+  },
+  "branch": "codex/zhiyu-macos",
+  "baseCommit": "2cbc225b",
+  "checks": {
+    "coreFull": {
+      "passed": 357,
+      "skipped": 6
+    },
+    "desktopRelated": {
+      "passed": 33,
+      "realSqlCipherOwnerFileCases": 4
+    },
+    "analysis": {
+      "core": "passed",
+      "desktop": "passed"
+    }
+  },
+  "scope": [
+    "Owner-only bounded exact-version original read with byte length/SHA256 verified before return",
+    "No body files or Agent capabilities",
+    "Real SQLCipher current/retained metadata and plain text/image preview through OwnerWorkspaceSource",
+    "History exposes actual original availability; cleaned versions cannot be restored",
+    "Existing retention purge applied before reading originals"
+  ],
+  "coverage": [
+    "Immutable returned bytes",
+    "Short/digest/IO/source transaction-end faults refuse partial read",
+    "Delete external original then reopen SQLCipher objects and read text/old versions",
+    "Exact field resolution; invalid page/version refused",
+    "PDF unsupported and original bytes preserved",
+    "Malformed UTF8 refusal",
+    "Real 2x3 decoded PNG",
+    "31-day cleanup retains metadata and current body"
+  ],
+  "limits": [
+    "PDF pagination not implemented",
+    "Import/replace/restore-version/save-as actions remain unsupported",
+    "Same Flutter process repository reopen, not independent App launch",
+    "No native panels/full App build or installation for this source",
+    "M07 AI file approval/delivery not connected"
+  ],
+  "logs": "build/macos-adaptation/m06-owner-files-1"
+}

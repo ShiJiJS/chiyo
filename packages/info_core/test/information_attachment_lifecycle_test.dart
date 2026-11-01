@@ -76,6 +76,30 @@ void main() {
     return result;
   }
 
+  test(
+    'owner read verifies immutable bytes without materializing a filesystem copy',
+    () async {
+      final item = await save([0, 255, 1]);
+      final result = await service.owner.readInformationAttachment(
+        item.fields.single.attachment!,
+      );
+      expect(result.bytes, [0, 255, 1]);
+      expect(result.version.reference, item.fields.single.attachment);
+      expect(() => result.bytes[0] = 8, throwsUnsupportedError);
+      expect(root.listSync().whereType<Directory>(), isEmpty);
+    },
+  );
+  for (final fault in ['short', 'digest', 'io', 'source-close']) {
+    test('owner read returns no body after $fault failure', () async {
+      final item = await save([0, 255, 1]);
+      repo.fault = fault;
+      await expectLater(
+        service.owner.readInformationAttachment(item.fields.single.attachment!),
+        fails('attachment_integrity_failed'),
+      );
+    });
+  }
+
   bool noPartials() => !root.listSync().whereType<Directory>().any(
     (d) => d.uri.pathSegments.any((s) => s.startsWith('.info-file-export-')),
   );
