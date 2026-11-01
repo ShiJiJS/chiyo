@@ -66,7 +66,10 @@ void main() {
     () async {
       final empty = await classification.loadCatalog();
       expect(empty.directoryCounts['all'], 0);
-      expect(empty.creatableTypes.single.id, 'generic');
+      expect(
+        empty.creatableTypes.map((t) => t.id),
+        containsAll(['generic', 'credential', 'file']),
+      );
       final command = WorkspaceDirectoryChange(
         operationId: 'directory',
         expectedVersion: empty.version,

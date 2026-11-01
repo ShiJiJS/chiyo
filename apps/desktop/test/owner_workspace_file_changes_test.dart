@@ -16,6 +16,8 @@ import 'package:info_desktop/information_files.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/owner_workspace_file_selections.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
+import 'package:info_desktop/workspace/workspace_app.dart';
+import 'package:info_desktop/workspace/workspace_inputs.dart';
 
 class _Keys implements DatabaseKeyStore {
   List<int>? key;
@@ -171,6 +173,53 @@ void main() {
     }
     fail('Owner file UI did not settle');
   }
+
+  testWidgets(
+    'full workspace add menu reaches the real ordinary-file importer',
+    (t) async {
+      t.view.physicalSize = const Size(1440, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final input = File('${root.path}/synthetic-menu.txt');
+      await real(t, () => input.writeAsString('SYNTHETIC-menu-original'));
+      picker.next = input.path;
+      await t.pumpWidget(
+        WorkspaceApp(
+          source: source,
+          windowTitle: '合成文件入口',
+          inputsBuilder: (_) => WorkspaceInputs(file: files.pick),
+        ),
+      );
+      await settle(t, () => find.byTooltip('添加资料').evaluate().isNotEmpty);
+      await t.tap(find.byTooltip('添加资料').first);
+      await settle(t, () => find.text('普通文件').evaluate().isNotEmpty);
+      await t.tap(find.text('普通文件').last);
+      await settle(
+        t,
+        () => find
+            .byKey(const ValueKey('library-file-import-submit'))
+            .evaluate()
+            .isNotEmpty,
+      );
+      await t.tap(find.byKey(const ValueKey('library-file-import-submit')));
+      await settle(t, () => service.owner.information.isNotEmpty);
+      expect(
+        service.owner.information.single.fields.single.kind,
+        core.FieldKind.file,
+      );
+      final ref = WorkspaceRecordRef(
+        WorkspaceRecordKind.information,
+        service.owner.information.single.id,
+      );
+      expect(
+        (await real(t, () => source.readFilePreview(ref, 'file'))).text,
+        'SYNTHETIC-menu-original',
+      );
+      await t.pumpWidget(const SizedBox.shrink());
+      await real(t, close);
+    },
+  );
 
   testWidgets(
     'real import controls keep lost response frozen, reject wrong receipt, then reconcile',

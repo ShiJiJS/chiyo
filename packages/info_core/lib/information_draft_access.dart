@@ -1,6 +1,10 @@
 part of 'info_core.dart';
 
 extension OwnerInformationDrafts on OwnerAccess {
+  bool get informationFileManagementSupported =>
+      serviceAvailable &&
+      _service._repository is InformationAttachmentRepository;
+
   InformationAttachmentRepository get _attachments {
     if (_service._repository case final InformationAttachmentRepository repo) {
       return repo;
