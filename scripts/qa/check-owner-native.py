@@ -172,7 +172,7 @@ def main():
             data = json.loads(driver_file.read_text())
             if not isinstance(data, dict):
                 raise RuntimeError('Driver returned no scenario evidence; an empty test run is not a pass')
-            expected = (9 if phase == 'live' else 3) if args.workflow else (10 if args.file_codex else 6)
+            expected = (9 if phase == 'live' else 3) if args.workflow else (11 if args.file_codex else 6)
             if data.get('runtime', {}).get('platform') != 'macos' or len(data.get('checks', [])) != expected:
                 raise RuntimeError('Missing native check evidence')
             if args.workflow:

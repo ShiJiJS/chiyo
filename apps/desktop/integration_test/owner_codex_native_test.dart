@@ -275,7 +275,7 @@ void main() {
         if (action == 'history' && fileScenario) {
           final id = data['requestId'] as String;
           final expected = data['state'] as String;
-          if (!['ready', 'released', 'ended'].contains(expected) ||
+          if (!['ready', 'released', 'revoked', 'ended'].contains(expected) ||
               !service.owner.informationFileDeliveries.any(
                 (d) =>
                     d.requestId == id &&
@@ -313,7 +313,13 @@ void main() {
             expect(events.any((e) => e.result.contains('受管副本已准备')), true);
           } else {
             expect(events.every((e) => e.result.contains('登记副本路径已移除')), true);
+            expect(events.every((e) => !e.result.contains('已到期')), true);
+            if (expected == 'revoked') {
+              expect(history.summary.state, WorkspaceGrantState.revoked);
+              expect(events.any((e) => e.result.contains('授权已撤销或失效')), true);
+            }
             if (expected == 'ended') {
+              expect(events.every((e) => e.result.contains('会话已结束')), true);
               expect(history.summary.state.isActive, false);
             }
           }

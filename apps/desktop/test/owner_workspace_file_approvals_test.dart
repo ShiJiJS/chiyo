@@ -629,6 +629,12 @@ void main() {
       expect((await fetch(r.session, r.id, 'expired'))['status'], 'expired');
       await service.agent.drainInformationFileDeliveries();
       expect(File(copy['path'] as String).existsSync(), false);
+      expect(
+        (await source.grantHistory.read(
+          'request:${r.id}',
+        )).events.singleWhere((e) => e.fileScopeId != null).result,
+        contains('授权已到期'),
+      );
       final ended = await request();
       await source.approvals.change(await command(ended.id, op: 'approve-end'));
       final active =
@@ -641,6 +647,11 @@ void main() {
         'unauthorized',
       );
       expect(File(active['path'] as String).existsSync(), false);
+      final event = (await source.grantHistory.read(
+        'request:${ended.id}',
+      )).events.singleWhere((e) => e.fileScopeId != null);
+      expect(event.result, contains('会话已结束'));
+      expect(event.result, isNot(contains('已到期')));
     },
   );
   test(
@@ -924,6 +935,11 @@ void main() {
           contains('登记副本路径已移除'),
         );
         expect(File(path).existsSync(), false);
+        final result = h.events
+            .singleWhere((e) => e.fileScopeId != null)
+            .result;
+        expect(result, contains('授权已撤销或失效'));
+        expect(result, isNot(contains('已到期')));
       } finally {
         driver.fail = false;
         await service.owner.reconcileInformationFileDeliveries();

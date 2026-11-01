@@ -423,7 +423,7 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
       'preparing' => '正在准备，尚未确认交付',
       'ready' => '受管副本已准备，不代表Agent已经读取',
       'released' => '登记副本路径已移除',
-      'expired' => '已到期，登记副本路径已移除',
+      'expired' => '副本已失效，登记副本路径已移除',
       'cleanup_pending' => '待清理，不能认作已回收',
       'failed' => '交付失败',
       _ => '交付结果未知',
