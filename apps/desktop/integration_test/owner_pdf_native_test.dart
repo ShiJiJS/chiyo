@@ -519,6 +519,24 @@ void main() {
           );
           expect(previous.canApprove, false);
           expect(service!.owner.sessions, isEmpty);
+          final oldHistory = await source!.grantHistory.read(
+            'request:${evidence.requestId}',
+          );
+          final delivered = oldHistory.events.singleWhere(
+            (e) => e.fileScopeId != null,
+          );
+          expect(oldHistory.summary.state.isActive, false);
+          expect(
+            (await source!.grantHistory.filePreview(
+              oldHistory.summary.id,
+              delivered.fileScopeId!,
+              page: 1,
+            )).image,
+            second.image,
+          );
+          checks.add(
+            'reopened history retains delivery facts and exact original native PDF preview without reviving capability',
+          );
           checks.add(
             'reopened SQLCipher keeps original file approval receipt and terminal facts without reviving a session',
           );

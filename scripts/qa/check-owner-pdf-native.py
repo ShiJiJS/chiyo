@@ -69,7 +69,7 @@ def main():
         call('drive',[launcher,'flutter','drive','--debug','-d','macos','--no-pub','--target',target,
              '--driver','integration_test/profile_driver.dart','--use-application-binary',str(app)],desktop,300)
         data=json.loads((out/'driver.json').read_text())
-        if not isinstance(data,dict) or data.get('passed') is not True or data.get('fixtureRemoved') is not True or len(data.get('checks',[]))!=((9 if args.file_changes else 6)+(2 if args.file_outputs else 0)+(3 if args.file_opens else 0)+(5 if args.file_approvals else 0)):
+        if not isinstance(data,dict) or data.get('passed') is not True or data.get('fixtureRemoved') is not True or len(data.get('checks',[]))!=((9 if args.file_changes else 6)+(2 if args.file_outputs else 0)+(3 if args.file_opens else 0)+(7 if args.file_approvals else 0)):
             raise RuntimeError('Missing native PDF evidence/cleanup')
         report['native']=data;report['complete']=True
     finally:

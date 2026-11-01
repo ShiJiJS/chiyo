@@ -235,6 +235,27 @@ Future<NativeFileApprovalEvidence> checkNativeFileApprovals(
         'real SQLCipher to native protected copy to AOT CLI; exact bytes, original operation reuse and cross-session refusal',
       );
     });
+    await t.runAsync(() async {
+      final h = await source.grantHistory.read('request:$requestId');
+      final fileScope = h.scopes.singleWhere(
+        (s) => s.kind == WorkspaceApprovalScopeKind.file,
+      );
+      final delivery = h.events.singleWhere((e) => e.fileScopeId != null);
+      expect(fileScope.fileVersion, delivery.fileVersion);
+      expect(delivery.result, contains('受管副本已准备'));
+      final preview = await source.grantHistory.filePreview(
+        h.summary.id,
+        delivery.fileScopeId!,
+        page: 1,
+      );
+      expect(preview.file.ref.version, delivery.fileVersion);
+      expect(preview.page, 1);
+      expect(preview.pageCount, 2);
+      expect(preview.image, isNotEmpty);
+      checks.add(
+        'real grant history projects exact managed delivery and renders its original PDF through the production native channel',
+      );
+    });
     await tap('approval-revoke');
     await ready(() => !model!.busy && !model!.loading && !model!.reading);
     expect(model!.writeFailure, null);
@@ -249,6 +270,12 @@ Future<NativeFileApprovalEvidence> checkNativeFileApprovals(
       );
       await service.agent.drainInformationFileDeliveries();
       expect(await File(path).exists(), false);
+      final history = await source.grantHistory.read('request:$requestId');
+      expect(history.summary.state, WorkspaceGrantState.revoked);
+      expect(
+        history.events.singleWhere((e) => e.fileScopeId != null).result,
+        contains('登记副本路径已移除'),
+      );
       checks.add(
         'real revoke control blocks subsequent AOT CLI fetch and reclaims its registered copy',
       );
