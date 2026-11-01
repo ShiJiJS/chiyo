@@ -1,3 +1,4 @@
+import 'owner_workspace_additional_approvals.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
@@ -11,8 +12,10 @@ import 'workspace_files.dart';
 /// private session proofs or read tokens.
 class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
   OwnerWorkspaceApprovals({required this.owner})
-    : _scope = owner.captureLibraryScope();
+    : _scope = owner.captureLibraryScope(),
+      _additional = OwnerWorkspaceAdditionalApprovals(owner);
   final core.OwnerAccess owner;
+  final OwnerWorkspaceAdditionalApprovals _additional;
   final core.OwnerLibraryScope _scope;
 
   Future<T> _read<T>(Future<T> Function() action) async {
@@ -115,21 +118,44 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
       throw const WorkspaceFailure('invalid_query', '申请查询条件无效。');
     }
     final needle = query.keyword.trim().toLowerCase();
-    final matching = (await owner.informationRequestInbox())
-        .where(
-          (r) =>
-              needle.isEmpty ||
-              [
-                r.id,
-                r.sessionId,
-                r.chatLabel,
-                r.purpose,
-                ...r.recordedFields.expand((f) => [f.itemName, f.fieldName]),
-              ].any((s) => s.toLowerCase().contains(needle)),
-        )
-        .toList();
+    final credentialIds = owner.credentialUseRequests.map((r) => r.id).toSet();
+    final ordinary = await owner.informationRequestInbox();
+    final metadataMatches = <String>{
+      for (final r in ordinary)
+        if (r.recordedFields.any(
+          (f) =>
+              f.itemName.toLowerCase().contains(needle) ||
+              f.fieldName.toLowerCase().contains(needle),
+        ))
+          r.id,
+      for (final r in owner.credentialUseRequests)
+        if ((r.credentialName ?? '').toLowerCase().contains(needle)) r.id,
+      for (final t in owner.organizationTasks)
+        if (t.itemNames.values.any((n) => n.toLowerCase().contains(needle)))
+          t.id,
+    };
+    final matching =
+        <WorkspaceApprovalSummary>[
+              for (final r in ordinary)
+                if (!credentialIds.contains(r.id))
+                  summaryOf(r, file: _hasCurrentFile(r)),
+              ..._additional.summaries(),
+            ]
+            .where(
+              (r) =>
+                  needle.isEmpty ||
+                  metadataMatches.contains(r.id) ||
+                  [
+                    r.id,
+                    r.sessionId,
+                    r.chatClaim,
+                    r.purpose,
+                    r.title,
+                  ].any((s) => s.toLowerCase().contains(needle)),
+            )
+            .toList();
     final pending = matching
-        .where((r) => stateOf(r) == WorkspaceApprovalState.pending)
+        .where((r) => r.state == WorkspaceApprovalState.pending)
         .length;
     final filtered =
         matching
@@ -137,14 +163,14 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
               (r) => switch (query.filter) {
                 WorkspaceApprovalFilter.all => true,
                 WorkspaceApprovalFilter.pending =>
-                  stateOf(r) == WorkspaceApprovalState.pending,
+                  r.state == WorkspaceApprovalState.pending,
                 WorkspaceApprovalFilter.done =>
-                  stateOf(r) != WorkspaceApprovalState.pending,
+                  r.state != WorkspaceApprovalState.pending,
               },
             )
             .toList()
           ..sort((a, b) {
-            final time = b.createdAt.compareTo(a.createdAt);
+            final time = b.submittedAt.compareTo(a.submittedAt);
             return time != 0 ? time : a.id.compareTo(b.id);
           });
     final offset = filtered.isEmpty
@@ -157,10 +183,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         ? selectedIndex
         : offset;
     return WorkspaceApprovalResults(
-      items: filtered
-          .skip(offset)
-          .take(query.limit)
-          .map((r) => summaryOf(r, file: _hasCurrentFile(r))),
+      items: filtered.skip(offset).take(query.limit),
       total: filtered.length,
       pending: pending,
       offset: offset,
@@ -171,6 +194,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
 
   @override
   Future<WorkspaceApprovalDetail> read(String id) => _read(() async {
+    if (_additional.contains(id)) return _additional.read(id);
     final r = (await owner.informationRequestInbox())
         .where((r) => r.id == id)
         .firstOrNull;
@@ -300,6 +324,10 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
   ) async {
     try {
       return await owner.inLibraryScope(_scope, () async {
+        if (_additional.contains(change.requestId) ||
+            await _additional.receipt(change.operationId) != null) {
+          return _additional.change(change);
+        }
         final old = await owner.informationApprovalReceipt(change.operationId);
         if (old != null) {
           if (old.requestId != change.requestId ||
@@ -442,11 +470,15 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
   Future<WorkspaceApprovalReceipt?> receipt(String operationId) =>
       _read(() async {
         final receipt = await owner.informationApprovalReceipt(operationId);
-        return receipt == null ? null : _receipt(receipt);
+        final extra = await _additional.receipt(operationId);
+        if (receipt != null && extra != null) {
+          throw const WorkspaceFailure('unknown_outcome', '原操作存在多种回执，请保留现场。');
+        }
+        return receipt == null ? extra : _receipt(receipt);
       });
   @override
   Future<WorkspaceApprovalExecution> execution(
     String requestId,
     String operationId,
-  ) async => throw const WorkspaceFailure('unsupported', '普通资料读取没有凭据执行结果。');
+  ) => _read(() => _additional.execution(requestId, operationId));
 }

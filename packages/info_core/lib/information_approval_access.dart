@@ -48,6 +48,7 @@ final class InformationApprovalCommand {
   final InformationApprovalAction action;
   final List<FieldRef> fields;
   final Map<String, int> itemVersions;
+
   /// Approval-time current-version check, not a version-pinned grant.
   final Map<FieldRef, InformationAttachmentRef> expectedFiles;
   final Duration lifetime;
@@ -201,6 +202,13 @@ extension _InformationDecisionService on InformationService {
     for (final entry in _uncertainInformationDecisions.entries.toList()) {
       await owner._resolveInformationDecision(entry.key, entry.value);
     }
+    if (_repository is AdditionalApprovalRepository) {
+      for (final id in _uncertainCredentialDecisions.keys.toList()) {
+        final receipt = await (_repository as AdditionalApprovalRepository)
+            .additionalApprovalReceipt(id);
+        _uncertainCredentialDecisions.remove(id)?.call(receipt != null);
+      }
+    }
     await owner.retryAuditStorage();
   }
 }
@@ -267,6 +275,12 @@ extension OwnerInformationApprovals on OwnerAccess {
     InformationApprovalCommand command,
   ) async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    if (_service._repository is AdditionalApprovalRepository &&
+        await (_service._repository as AdditionalApprovalRepository)
+                .additionalApprovalReceipt(command.operationId) !=
+            null) {
+      throw const AccessFailure('operation_conflict');
+    }
     final repository = _approvalOperations;
     final pending =
         _service._uncertainInformationDecisions[command.operationId];

@@ -6,6 +6,7 @@ import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/library_credential.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
+import 'package:info_desktop/workspace/owner_workspace_credentials.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/unavailable_workspace_sources.dart';
 
@@ -24,6 +25,14 @@ class _UnreadableLinks extends OwnerWorkspaceSource {
   Future<List<WorkspaceRecordSummary>> readSummaries(
     Iterable<WorkspaceRecordRef> refs,
   ) async => throw const WorkspaceFailure('unavailable', '合成关联查询失败');
+}
+
+class _UnreadableRequests extends OwnerWorkspaceCredentials {
+  _UnreadableRequests(super.owner);
+  @override
+  Future<List<WorkspaceCredentialUseRequest>> requests({
+    WorkspaceRecordRef? ref,
+  }) async => throw const WorkspaceFailure('unavailable', '合成申请读取失败');
 }
 
 void main() {
@@ -97,8 +106,8 @@ void main() {
       expect(detail.materialVersion, c.version);
       expect(detail.useGeneration, c.useGeneration);
       expect(detail.mask, '••••••••');
-      expect(detail.canRequestUse, isFalse);
-      expect(detail.unavailableReason, contains('尚未接入'));
+      expect(detail.canRequestUse, isTrue);
+      expect(detail.unavailableReason, isNull);
       expect(
         jsonEncode([
           list.items.single.name,
@@ -237,7 +246,7 @@ void main() {
   );
 
   test(
-    'unwired AI use and stale lifecycle fail while receipt lookup reports actual absence',
+    'empty real AI history and stale lifecycle preserve vault and actual receipt absence',
     () async {
       final c = await create();
       final before = jsonEncode(c.toJson());
@@ -247,10 +256,8 @@ void main() {
         ),
         fails('validation'),
       );
-      await expectLater(
-        source.credentials.requests(ref: ref(c)),
-        fails('unsupported'),
-      );
+      expect(await source.credentials.requests(ref: ref(c)), isEmpty);
+      expect(await source.credentials.history(ref(c)), isEmpty);
       await expectLater(
         source.credentials.change(
           WorkspaceCredentialChange(
@@ -277,6 +284,11 @@ void main() {
       t.view.devicePixelRatio = 1;
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
+      final requestsFailed = OwnerWorkspaceSource(
+        owner: service.owner,
+        refreshInterval: Duration.zero,
+        credentials: _UnreadableRequests(service.owner),
+      );
       await t.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -284,7 +296,7 @@ void main() {
               child: LibraryCredential(
                 ref: ref(c),
                 revision: 1,
-                source: source,
+                source: requestsFailed,
                 onOpen: (_) {},
               ),
             ),
@@ -294,7 +306,7 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('凭据字符串'), findsOneWidget);
       expect(find.text('Owner私有备注', findRichText: true), findsOneWidget);
-      expect(find.text('使用暂不可用'), findsOneWidget);
+      expect(find.text('可使用'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('credential-request-read-failure')),
         findsOneWidget,
@@ -353,6 +365,7 @@ void main() {
       await t.pumpWidget(const SizedBox.shrink());
       await t.runAsync(changed.dispose);
       await t.runAsync(linksFailed.dispose);
+      await t.runAsync(requestsFailed.dispose);
     },
   );
 }

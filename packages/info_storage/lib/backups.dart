@@ -19,6 +19,14 @@ class BackupContents {
   int get directoryCount => _tables['information_directories']!.length;
   int get tagCount => _tables['information_tags']!.length;
   int get templateCount => _tables['field_templates']!.length;
+  int get templatePackageCount => _tables['template_packages']?.length ?? 0;
+  int get templatePackageTemplateCount =>
+      (_tables['template_packages'] ?? const <Map<String, Object?>>[]).fold(
+        0,
+        (n, row) =>
+            n +
+            (_templatePackageFromRow(row).definition?.templates.length ?? 0),
+      );
   int get revisionCount => _tables['information_revisions']!.length;
   int get recycleCount => _tables['recycle_entries']!
       .where((r) => jsonDecode(r['payload'] as String)['state'] == 'available')
@@ -139,6 +147,10 @@ class InformationBackups {
   static final _v12Columns = Map<String, List<String>>.unmodifiable({
     ..._v9Columns,
     'information_items': [..._v3Columns['information_items']!, 'layout_json'],
+  });
+  static final _v15Columns = Map<String, List<String>>.unmodifiable({
+    ..._v12Columns,
+    'template_packages': ['id', 'source', 'enabled', 'origin', 'legacy_json'],
   });
 
   // Portable formats 1–7 keep their table keys independent of the schema17+
@@ -415,10 +427,20 @@ class InformationBackups {
             _backupJson(r).containsKey('directoryId') ||
             _backupJson(r).containsKey('tagIds'),
       );
+      final templatePackages =
+          (await _repository._db
+                  .customSelect('SELECT id FROM template_packages LIMIT 1')
+                  .get())
+              .isNotEmpty;
       final extendedColumns =
-          hasLayouts || hasGrantVersions || credentialClassification;
+          hasLayouts ||
+          hasGrantVersions ||
+          credentialClassification ||
+          templatePackages;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = credentialClassification
+        formatVersion = templatePackages
+            ? 15
+            : credentialClassification
             ? 14
             : hasGrantVersions
             ? 13
@@ -428,11 +450,17 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (extendedColumns ? _v12Columns : _v9Columns).entries.where(
-              (e) =>
-                  !tables.containsKey(e.key) ||
-                  (extendedColumns && e.key == 'information_items'),
-            )) {
+            in (templatePackages
+                    ? _v15Columns
+                    : extendedColumns
+                    ? _v12Columns
+                    : _v9Columns)
+                .entries
+                .where(
+                  (e) =>
+                      !tables.containsKey(e.key) ||
+                      (extendedColumns && e.key == 'information_items'),
+                )) {
           final rows = await _repository._db
               .customSelect(
                 'SELECT ${table.value.join(',')} FROM ${_physicalTables[table.key] ?? table.key} ORDER BY rowid',
@@ -505,6 +533,10 @@ class InformationBackups {
                 'information_classification_operations',
                 'information_lifecycle_operations',
                 'information_approval_operations',
+                'desktop_preference_operations',
+                'owner_proposal_operations',
+                'template_package_operations',
+                'additional_approval_operations',
                 'backup_operations',
                 'backup_operation_state',
               }.contains(name),
@@ -763,6 +795,10 @@ class InformationBackups {
                     'information_classification_operations',
                     'information_lifecycle_operations',
                     'information_approval_operations',
+                    'desktop_preference_operations',
+                    'owner_proposal_operations',
+                    'template_package_operations',
+                    'additional_approval_operations',
                     'backup_operations',
                     'backup_operation_state',
                   }.contains(name),
@@ -812,6 +848,12 @@ class InformationBackups {
         await _repository._db.customStatement(
           'UPDATE owner_proposal_operations SET invalidated=1',
         );
+        await _repository._db.customStatement(
+          'UPDATE template_package_operations SET invalidated=1',
+        );
+        await _repository._db.customStatement(
+          'UPDATE additional_approval_operations SET invalidated=1',
+        );
         await _repository._db.customStatement('DELETE FROM organization_tasks');
         if (_hasPortableFocusedFill(
           contents._tables['credential_use_requests']!.map(
@@ -823,6 +865,9 @@ class InformationBackups {
         if (contents.formatVersion >= 14) {
           await _repository._requireCredentialClassificationFormat();
         }
+        if (contents.formatVersion >= 15) {
+          await _repository._requireTemplatePackageFormat();
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -830,7 +875,9 @@ class InformationBackups {
           await _installAttachmentBodies(contents, reader);
         }
         for (final table
-            in (contents.formatVersion >= 12
+            in (contents.formatVersion >= 15
+                    ? _v15Columns
+                    : contents.formatVersion >= 12
                     ? _v12Columns
                     : contents.formatVersion >= 9
                     ? _v9Columns
@@ -891,6 +938,7 @@ class InformationBackups {
           12,
           13,
           14,
+          15,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -911,6 +959,7 @@ class InformationBackups {
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
       12 || 13 || 14 => _v12Columns,
+      15 => _v15Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -961,8 +1010,9 @@ class InformationBackups {
         final fieldId = row['field_id'];
         if (fieldId is! String ||
             !fileFields.add(fieldId) ||
-            fields[fieldId]?['kind'] != 'file')
+            fields[fieldId]?['kind'] != 'file') {
           invalid();
+        }
         final ref = InformationAttachmentRef.fromJson({
           'attachmentId': row['attachment_id'],
           'attachmentVersion': row['attachment_version'],
@@ -1131,6 +1181,18 @@ class InformationBackups {
       tables,
       formatVersion: decoded['version'] as int,
     );
+    final packageIds = <String>{};
+    final packages =
+        tables['template_packages'] ?? const <Map<String, Object?>>[];
+    if (packages.length > 100) invalid();
+    for (final row in packages) {
+      try {
+        final p = _templatePackageFromRow(row);
+        if (!packageIds.add(p.id)) invalid();
+      } on Object {
+        invalid();
+      }
+    }
     return BackupContents._(
       Map.unmodifiable(tables),
       createdAt,

@@ -3,18 +3,54 @@ part of 'info_core.dart';
 /// Original owner command identity, independent of later edits or deletion.
 /// Only a type identifier and a digest are retained, never form content.
 final class InformationRecordCommand {
-  InformationRecordCommand({required this.typeId, required this.digest}) {
-    if (typeId.trim().isEmpty ||
-        typeId.length > 512 ||
-        typeId.codeUnits.any((c) => c < 32) ||
-        !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest)) {
+  InformationRecordCommand({
+    required this.typeId,
+    required this.digest,
+    this.legacyTemplateId,
+    this.legacyTemplateVersion,
+    this.adoptionPlanId,
+    this.templateCatalogVersion,
+  }) {
+    bool validId(String? s) =>
+        s == null ||
+        (s.isNotEmpty && s.length <= 512 && !s.codeUnits.any((c) => c < 32));
+    if (!validId(typeId) ||
+        typeId.isEmpty ||
+        !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest) ||
+        !validId(legacyTemplateId) ||
+        !validId(adoptionPlanId) ||
+        (legacyTemplateId == null) != (legacyTemplateVersion == null) ||
+        (adoptionPlanId == null) != (templateCatalogVersion == null) ||
+        (legacyTemplateVersion != null && legacyTemplateVersion! < 1) ||
+        (templateCatalogVersion != null && templateCatalogVersion! < 1) ||
+        legacyTemplateId != null && adoptionPlanId != null) {
       throw const FormatException('Invalid information record command');
     }
   }
   final String typeId, digest;
-  Map<String, Object?> toJson() => {'typeId': typeId, 'digest': digest};
+  final String? legacyTemplateId, adoptionPlanId;
+  final int? legacyTemplateVersion, templateCatalogVersion;
+  Map<String, Object?> toJson() => {
+    'typeId': typeId,
+    'digest': digest,
+    if (legacyTemplateId != null) ...{
+      'legacyTemplateId': legacyTemplateId,
+      'legacyTemplateVersion': legacyTemplateVersion,
+    },
+    if (adoptionPlanId != null) ...{
+      'adoptionPlanId': adoptionPlanId,
+      'templateCatalogVersion': templateCatalogVersion,
+    },
+  };
   factory InformationRecordCommand.fromJson(Map<String, dynamic> json) {
-    if (json.length != 2 ||
+    if (json.keys.toSet().difference({
+          'typeId',
+          'digest',
+          'legacyTemplateId',
+          'legacyTemplateVersion',
+          'adoptionPlanId',
+          'templateCatalogVersion',
+        }).isNotEmpty ||
         json['typeId'] is! String ||
         json['digest'] is! String) {
       throw const FormatException('Invalid information record command');
@@ -22,6 +58,10 @@ final class InformationRecordCommand {
     return InformationRecordCommand(
       typeId: json['typeId'] as String,
       digest: json['digest'] as String,
+      legacyTemplateId: json['legacyTemplateId'] as String?,
+      legacyTemplateVersion: json['legacyTemplateVersion'] as int?,
+      adoptionPlanId: json['adoptionPlanId'] as String?,
+      templateCatalogVersion: json['templateCatalogVersion'] as int?,
     );
   }
 }
@@ -125,12 +165,60 @@ extension OwnerInformationRecords on OwnerAccess {
     return _recordOperations.informationRecordReceipt(operationId);
   });
 
+  /// Complete Owner form with ordinary attachments already staged in this
+  /// form lifetime. Content, promotions and original intent share one commit.
+  Future<InformationRecordReceipt> saveInformationFormRecord(
+    InformationFileDraft draft,
+    String operationId,
+    InformationDraftInput input,
+  ) => _serialize(() async {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    _validateRecordOperationId(operationId);
+    if (input.command == null || input.fileCommand != null) {
+      throw const AccessFailure('invalid_information');
+    }
+    if (!identical(draft._owner, this) ||
+        draft._generation != _service._libraryGeneration) {
+      throw const AccessFailure('stage_unavailable');
+    }
+    final hash = sha256
+        .convert(utf8.encode(jsonEncode(input.toPrivateJson())))
+        .toString();
+    final old = await _recordOperations.informationRecordReceipt(operationId);
+    if (await _lifecycleOperations.informationLifecycleReceipt(operationId) !=
+        null) {
+      throw const AccessFailure('operation_conflict');
+    }
+    if (old != null) {
+      if (old.inputHash != hash || old.command == null) {
+        throw const AccessFailure('operation_conflict');
+      }
+      return old;
+    }
+    final item = await _commitInformationDraft(
+      draft,
+      operationId,
+      input,
+      durableReceipt: true,
+    );
+    return InformationRecordReceipt(
+      operationId: operationId,
+      inputHash: hash,
+      itemId: item.id,
+      version: item.version,
+      baseVersion: input.baseVersion,
+      command: input.command,
+      file: _fileReceipt(input, item),
+    );
+  });
+
   /// A stable operation ID survives the UI/form/process lifetime. This entry
   /// handles text and unchanged attachments; new file bytes use staged forms.
   Future<InformationRecordReceipt> saveInformationRecord(
     String operationId,
-    InformationDraftInput input,
-  ) => _serialize(() async {
+    InformationDraftInput input, {
+    void Function()? validate,
+  }) => _serialize(() async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
     _validateRecordOperationId(operationId);
     final generation = _service._libraryGeneration;
@@ -178,6 +266,7 @@ extension OwnerInformationRecords on OwnerAccess {
         operationId,
         input,
         durableReceipt: true,
+        validateOwner: validate,
       );
       return InformationRecordReceipt(
         operationId: operationId,

@@ -16,15 +16,23 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
   Future<void> _saveSshTrust(SshHostTrustSnapshot? snapshot) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeMetadata(() async {
-        await _db.customStatement('DELETE FROM ssh_host_trust');
-        if (snapshot != null) {
-          await _db.customStatement(
-            'INSERT INTO ssh_host_trust(id,payload) VALUES(1,?)',
-            [jsonEncode(snapshot.toStorageJson())],
-          );
-        }
-      });
+      await _writeMetadata(
+        () async {
+          await _db.customStatement('DELETE FROM ssh_host_trust');
+          if (snapshot != null) {
+            await _db.customStatement(
+              'INSERT INTO ssh_host_trust(id,payload) VALUES(1,?)',
+              [jsonEncode(snapshot.toStorageJson())],
+            );
+          }
+          if (pendingAdditionalApproval?.kind == 'ssh') {
+            await _additionalApprovalCommit('ssh-trust', 'ssh');
+          }
+        },
+        validate: pendingAdditionalApproval?.kind == 'ssh'
+            ? pendingAdditionalApproval!.validate
+            : null,
+      );
       _sshHostTrust = snapshot;
     } on Object {
       throw const StorageFailure('ssh_trust_save_failed');
@@ -153,6 +161,30 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
             ],
           );
         }
+        final approval = pendingAdditionalApproval;
+        if (approval?.kind == 'credential' && approval?.written == false) {
+          final r = requests.singleWhere(
+            (r) => r.id == approval!.command.requestId,
+          );
+          final previous = _credentialUseRequests
+              .where((v) => v.id == r.id)
+              .firstOrNull;
+          final action = approval!.command.action;
+          if (previous == null ||
+              (action == InformationApprovalAction.revoke
+                  ? r.invalidatedCode != 'grant_revoked' ||
+                        previous.invalidatedCode == 'grant_revoked'
+                  : previous.state != 'pending' ||
+                        (action == InformationApprovalAction.deny
+                            ? r.state != 'denied'
+                            : !{
+                                'approved',
+                                'partially_approved',
+                              }.contains(r.state)))) {
+            throw const AccessFailure('request_changed');
+          }
+          await _additionalApprovalCommit(r.id, 'credential');
+        }
         validate?.call();
       }, validate: validate);
       _credentialUseRequests
@@ -183,8 +215,9 @@ void _validateRuntimeSnapshot(
   Never invalid() => throw const StorageFailure('invalid_runtime_snapshot');
   final byId = {for (final r in requests) r.id: r};
   if (byId.length != requests.length ||
-      executions.map((e) => e.id).toSet().length != executions.length)
+      executions.map((e) => e.id).toSet().length != executions.length) {
     invalid();
+  }
   final operations = <String, Set<String>>{},
       executionById = <String, CredentialExecution>{};
   for (final e in executions) {
@@ -192,8 +225,9 @@ void _validateRuntimeSnapshot(
     if (r == null ||
         r.isFocusedFill ||
         e.protocolVersion != r.protocolVersion ||
-        !{1, 2}.contains(e.protocolVersion))
+        !{1, 2}.contains(e.protocolVersion)) {
       invalid();
+    }
     if (e.protocolVersion == 2) {
       if (!r.credentialApproved ||
           e.operationId == null ||
@@ -208,15 +242,17 @@ void _validateRuntimeSnapshot(
           !RegExp(
             r'^sha256:[0-9a-f]{64}$',
           ).hasMatch(e.operationPlan!.executable.sha256) ||
-          e.operationPlan!.receiver != r.plan.receiver)
+          e.operationPlan!.receiver != r.plan.receiver) {
         invalid();
+      }
       final values = [...e.operationPlan!.argv, ...e.operationPlan!.env.values];
       if (values.any(
         (v) =>
             {LaunchValueKind.secret, LaunchValueKind.file}.contains(v.kind) &&
             v.value != r.alias,
-      ))
+      )) {
         invalid();
+      }
     }
     executionById[e.id] = e;
   }
@@ -234,7 +270,8 @@ void _validateRuntimeSnapshot(
             (r.executionId == null
                 ? r.attemptedAt != null || operations.containsKey(r.id)
                 : executionById[r.executionId]?.requestId != r.id ||
-                      r.attemptedAt == null)))
+                      r.attemptedAt == null))) {
       invalid();
+    }
   }
 }

@@ -1,6 +1,7 @@
 import Cocoa
 import FlutterMacOS
 import UserNotifications
+import UniformTypeIdentifiers
 
 class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDelegate {
   private var textEditingMenu: NativeTextEditingMenu?
@@ -232,11 +233,15 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           // Failed/nonempty cleanup keeps native ownership and remains retryable.
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging cleanup incomplete", details: nil))
         }
-      } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" || call.method == "knownHostsInput" || call.method == "informationFileInput" {
+      } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" || call.method == "knownHostsInput" || call.method == "informationFileInput" || call.method == "templatePackageInput" {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
+        if call.method == "templatePackageInput" {
+          panel.title = "选择模板插件包"
+          panel.allowedContentTypes = [.json]
+        }
         if call.method == "backupInput" || call.method == "recoveryKeyInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
         panel.beginSheetModal(for: window) { response in
           guard response == .OK, let url = panel.url else { result(nil); return }

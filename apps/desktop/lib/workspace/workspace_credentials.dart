@@ -207,6 +207,7 @@ enum WorkspaceCredentialRequestState {
   revoked('已撤销'),
   expired('已到期'),
   sessionEnded('会话已结束'),
+  unavailable('许可未启用'),
   superseded('凭据已更换'),
   disabled('凭据已停用'),
   recycled('凭据已回收');

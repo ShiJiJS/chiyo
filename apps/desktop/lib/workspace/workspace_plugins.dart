@@ -1,11 +1,9 @@
 import 'workspace_records.dart';
+import 'package:info_core/template_packages.dart' as core;
 
 /// Stable scoped template IDs; the three existing host types retain their IDs.
 String workspaceTemplateTypeId(String package, String template) =>
-    package == 'builtin.$template' &&
-        const {'server', 'service', 'profile'}.contains(template)
-    ? template
-    : '$package/$template';
+    core.templatePackageTypeId(package, template);
 
 class WorkspacePluginTemplate {
   WorkspacePluginTemplate({

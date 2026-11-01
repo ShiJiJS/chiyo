@@ -30,6 +30,7 @@ extension OwnerInformationDrafts on OwnerAccess {
     String operationId,
     InformationDraftInput input, {
     bool durableReceipt = false,
+    void Function()? validateOwner,
   }) async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
     if (!identical(draft._owner, this) ||
@@ -69,6 +70,8 @@ extension OwnerInformationDrafts on OwnerAccess {
       return previousReceipt.item;
     }
     _checkInformationFileDraft(draft);
+    validateOwner?.call();
+    _validatePresentation(input);
     if (input.command != null &&
         input.command!.typeId != input.layout?.layout.typeId) {
       throw const AccessFailure('invalid_information');
@@ -246,7 +249,11 @@ extension OwnerInformationDrafts on OwnerAccess {
         facts: recycled == null
             ? const []
             : [_fact(recycled, RecycleFactKind.deleted, item.version)],
-        validate: () => _checkInformationFileDraft(draft),
+        validate: () {
+          _checkInformationFileDraft(draft);
+          validateOwner?.call();
+          _validatePresentation(input);
+        },
         operationReceipt: durableReceipt
             ? InformationRecordReceipt(
                 operationId: operationId,

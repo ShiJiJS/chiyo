@@ -29,6 +29,9 @@ extension _CredentialRuntimeService on InformationService {
   }
 
   ManagedCredential _useEligible(CredentialUseRequest r) {
+    if (_inactiveCredentialApprovals.contains(r.id)) {
+      throw const CredentialUseFailure('grant_revoked');
+    }
     final credential = _guardUseEligibility(
       r.credentialId,
       r.version,
@@ -111,6 +114,9 @@ extension _CredentialRuntimeService on InformationService {
   }
 
   String _useGrantState(CredentialUseRequest r) {
+    if (_inactiveCredentialApprovals.contains(r.id)) {
+      return 'revoked';
+    }
     if (r.attemptConsumed) return 'consumed';
     if (!r.credentialApproved) return 'not_approved';
     if (r.invalidatedCode != null) return 'revoked';
@@ -901,6 +907,10 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
 
   /// Current permission, independently from the immutable recorded decision.
   /// This reads the live authorization model without writing/pruning history.
+  /// Owner diagnostic only. Querying a receipt never activates this grant.
+  bool credentialUseDecisionUnconfirmed(CredentialUseRequest request) =>
+      _service._inactiveCredentialApprovals.contains(request.id);
+
   String credentialFieldGrantState(CredentialUseRequest request) {
     if (request.approvedFields.isEmpty) return 'not_approved';
     if (request.fieldExpiresAt == null ||
@@ -1032,35 +1042,74 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       if (fields.any((f) => _service._field(f) == null)) {
         throw const CredentialUseFailure('invalid_reference');
       }
+      if (reviewedVersions != null &&
+          fields.any(
+            (f) => reviewedVersions[f] != _service._field(f)!.version,
+          )) {
+        throw const CredentialUseFailure('scope_changed');
+      }
     }
 
-    await _service._saveUse(
-      request: changed,
-      fieldGrant: fieldGrant,
-      fieldRequest: fieldRequest,
-      validate: validate,
-    );
-    if (fields.isNotEmpty) {
-      final request =
-          _Request(
-              id,
-              session,
-              r.purpose,
-              Set.unmodifiable(r.fields),
-              r.createdAt,
-              r.requestExpiresAt,
-            )
-            ..approvedAt = now
-            ..recordedFields = recorded
-            ..history = fieldGrant
-            ..state = AccessRequestState.approved
-            ..grant = ClaimedGrant(
-              _service._secret(),
-              fields,
-              now.add(effectiveFieldLifetime),
-            );
-      _service._requests[id] = request;
-      _service._grants[request.grant!.token] = request;
+    void publishFields() {
+      if (!_service._sessionActive(session) ||
+          _service._requests.containsKey(id)) {
+        return;
+      }
+      if (fields.isNotEmpty) {
+        final request =
+            _Request(
+                id,
+                session,
+                r.purpose,
+                Set.unmodifiable(r.fields),
+                r.createdAt,
+                r.requestExpiresAt,
+              )
+              ..approvedAt = now
+              ..recordedFields = recorded
+              ..history = fieldGrant
+              ..state = AccessRequestState.approved
+              ..grant = ClaimedGrant(
+                _service._secret(),
+                fields,
+                now.add(effectiveFieldLifetime),
+              );
+        _service._requests[id] = request;
+        _service._grants[request.grant!.token] = request;
+      }
     }
+
+    try {
+      await _service._saveUse(
+        request: changed,
+        fieldGrant: fieldGrant,
+        fieldRequest: fieldRequest,
+        validate: validate,
+      );
+    } on CredentialUseFailure {
+      final operation = pendingAdditionalApproval;
+      if (operation != null) {
+        try {
+          final receipt = await _additionalApprovals.additionalApprovalReceipt(
+            operation.command.operationId,
+          );
+          if (receipt != null) {
+            publishFields();
+            return;
+          }
+        } on Object {
+          // Original decision could not confirm commit. A later metadata query
+          // may report its fact, but must never activate a new permission.
+          _service._inactiveCredentialApprovals.add(id);
+          _service._uncertainCredentialDecisions[operation
+              .command
+              .operationId] = (committed) {
+            if (!committed) _service._inactiveCredentialApprovals.remove(id);
+          };
+        }
+      }
+      rethrow;
+    }
+    publishFields();
   });
 }

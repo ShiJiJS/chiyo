@@ -270,7 +270,7 @@ void main() {
     },
   );
   test(
-    'file actions report cancellation, failure or one committed fact without changing file version',
+    'unconnected sample file actions report cancellation or failure and never fabricate native success',
     () async {
       source.cancelNextFileAction = true;
       final cancel = await source.fileAction(
@@ -296,37 +296,17 @@ void main() {
         throwsA(failure('unknown_outcome')),
       );
       expect(await source.fileOperationReceipt('open-unknown'), isNull);
-      final result = await source.fileAction(
-        resume,
-        'file',
-        1,
-        WorkspaceFileAction.saveAs,
-        operationId: 'save-old',
-      );
-      expect(result.completed, isTrue);
-      expect(
-        (await source.fileOperationReceipt('save-old'))!.actionCompleted,
-        isTrue,
-      );
-      final oldReads = reads.length;
-      await source.fileAction(
-        resume,
-        'file',
-        1,
-        WorkspaceFileAction.saveAs,
-        operationId: 'save-old',
-      );
-      expect(reads.length, oldReads);
       await expectLater(
         source.fileAction(
           resume,
           'file',
           1,
-          WorkspaceFileAction.open,
+          WorkspaceFileAction.saveAs,
           operationId: 'save-old',
         ),
-        throwsA(failure('operation_conflict')),
+        throwsA(failure('unsupported')),
       );
+      expect(await source.fileOperationReceipt('save-old'), isNull);
       expect(
         (await source.loadFileHistory(resume, 'file')).current.ref.version,
         2,

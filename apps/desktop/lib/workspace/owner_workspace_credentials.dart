@@ -1,3 +1,4 @@
+import 'owner_credential_use_projection.dart';
 import 'dart:async';
 import 'package:info_storage/info_storage.dart';
 import 'owner_credential_staging.dart';
@@ -96,6 +97,17 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
   WorkspaceCredentialDetail _detail(core.ManagedCredential credential) {
     final file = credential.form == core.CredentialForm.file;
     final availability = owner.credentialAvailability(credential);
+    final admittedFilePlan =
+        !file ||
+        owner.credentialUseRequests.any(
+          (r) =>
+              r.credentialId == credential.id &&
+              r.version == credential.version &&
+              r.useGeneration == credential.useGeneration &&
+              !r.isFocusedFill &&
+              r.restoredAt == null,
+        );
+
     return WorkspaceCredentialDetail(
       record: WorkspaceRecordSummary(
         ref: WorkspaceRecordRef(WorkspaceRecordKind.credential, credential.id),
@@ -115,10 +127,14 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
       useGeneration: credential.useGeneration,
       enabled: credential.enabled,
       discoverable: credential.discoverable,
-      useSupported: false,
+      useSupported:
+          availability == core.CredentialAvailability.available &&
+          admittedFilePlan,
       useUnavailableReason: availability == core.CredentialAvailability.expired
           ? '凭据已到期，不能批准新的使用。'
-          : '新版凭据使用审批尚未接入，可管理和更换凭据。',
+          : !admittedFilePlan
+          ? '文件已保管；由 AI 选择使用方式并发起申请，再核对具体接收计划。'
+          : null,
       form: file
           ? WorkspaceCredentialForm.file
           : WorkspaceCredentialForm.string,
@@ -160,6 +176,80 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
           retiredAt: version.retiredAt,
         ),
     ]);
+  });
+  @override
+  Future<List<WorkspaceCredentialUseRequest>> requests({
+    WorkspaceRecordRef? ref,
+  }) => _read(() {
+    if (ref != null && ref.kind != WorkspaceRecordKind.credential) {
+      throw const WorkspaceFailure('invalid_reference', '请选择凭据。');
+    }
+    final projection = OwnerCredentialUseProjection(owner);
+    return [
+      for (final r in owner.credentialUseRequests)
+        if (ref == null || r.credentialId == ref.id) projection.request(r),
+    ]..sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
+  });
+  @override
+  Future<List<WorkspaceCredentialUseHistory>> history(
+    WorkspaceRecordRef ref,
+  ) => _read(() {
+    final projection = OwnerCredentialUseProjection(owner);
+    if (ref.kind != WorkspaceRecordKind.credential) {
+      throw const WorkspaceFailure('invalid_reference', '请选择凭据。');
+    }
+    return [
+      for (final r in owner.credentialUseRequests.where(
+        (r) => r.credentialId == ref.id,
+      ))
+        () {
+          final request = projection.request(r);
+          return WorkspaceCredentialUseHistory(
+            grantId: r.id,
+            credentialName: request.credentialName,
+            materialVersion: r.version,
+            delivery: request.delivery,
+            session: request.session,
+            purpose: r.purpose,
+            expiresAt: r.credentialExpiresAt ?? r.requestExpiresAt,
+            state: request.state.label,
+            operations: [
+              if (r.decidedAt != null)
+                WorkspaceCredentialUseOperation(
+                  'decision:${r.id}',
+                  r.decidedAt!,
+                  '主人审批',
+                  r.state,
+                ),
+              if (r.revokedAt != null)
+                WorkspaceCredentialUseOperation(
+                  'revoke:${r.id}',
+                  r.revokedAt!,
+                  '主人撤销',
+                  '已撤销',
+                ),
+              for (final f in owner.focusedFillOperations.where(
+                (f) => f.requestId == r.id,
+              ))
+                WorkspaceCredentialUseOperation(
+                  f.operationId,
+                  f.createdAt,
+                  '本机焦点填充',
+                  f.state.name,
+                ),
+              for (final e in owner.credentialExecutions.where(
+                (e) => e.requestId == r.id,
+              ))
+                WorkspaceCredentialUseOperation(
+                  e.operationId ?? e.id,
+                  e.createdAt ?? r.createdAt,
+                  '接收计划执行',
+                  '${e.state} · ${e.exitCode == null ? e.errorCode ?? '尚无退出码' : '退出码 ${e.exitCode}'} · ${e.cleanupState}',
+                ),
+            ],
+          );
+        }(),
+    ];
   });
   WorkspaceFailure _failure(core.AccessFailure error) => switch (error.status) {
     'library_changed' => const WorkspaceFailure(

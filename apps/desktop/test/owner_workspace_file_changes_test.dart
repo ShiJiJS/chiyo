@@ -1,6 +1,8 @@
 @TestOn('mac-os')
 library;
 
+import 'package:info_desktop/workspace/owner_workspace_legacy_templates.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -567,10 +569,11 @@ void main() {
     );
   });
   test(
-    'reselect invalidates old handle and late closed panel never writes',
+    'explicit release invalidates only its handle and late closed panel never writes',
     () async {
       final first = await pick('one');
       await pick('two');
+      await files.release(first.selectionId);
       await expectLater(
         source.importFile(
           WorkspaceFileImport(
@@ -588,6 +591,58 @@ void main() {
       picker.pending!.complete(picker.next);
       await expectLater(pending, fails('unavailable'));
       expect(service.owner.information, isEmpty);
+      expect((await service.owner.informationAttachmentUsage()).stagedFiles, 0);
+    },
+  );
+  test(
+    'legacy multi-file form saves all originals and fields in one atomic record',
+    () async {
+      final template = await service.owner.createTemplate('合成多附件模板', '', [
+        const core.TemplateFieldInput('标题', ''),
+        const core.TemplateFieldInput('附件一', '', kind: core.FieldKind.file),
+        const core.TemplateFieldInput('附件二', '', kind: core.FieldKind.file),
+      ]);
+      final definition = OwnerWorkspaceLegacyTemplates.project(
+        template,
+      ).definition;
+      final fields = definition['fields'] as List;
+      final first = await pick('FIRST-ORIGINAL'),
+          second = await pick('SECOND-ORIGINAL');
+      final operation = workspaceOperationId();
+      final result = await source.createRecord(
+        WorkspaceCreate(
+          operationId: operation,
+          typeId: 'generic',
+          name: '合成多附件',
+          legacyTemplateId: template.id,
+          expectedLegacyVersion: template.version,
+          values: {fields[0]['key'] as String: '合成标题'},
+          fileSelections: {
+            fields[1]['key'] as String: first.selectionId,
+            fields[2]['key'] as String: second.selectionId,
+          },
+        ),
+      );
+      expect(result, isA<WorkspaceSaved>());
+      final detail = (result as WorkspaceSaved).detail;
+      final item = service.owner.information.single;
+      expect(item.fields.length, 3);
+      expect(item.fields.where((f) => f.kind == core.FieldKind.file).length, 2);
+      final originals = <String>[];
+      for (final f in item.fields.where((f) => f.kind == core.FieldKind.file)) {
+        originals.add(
+          utf8.decode(
+            (await service.owner.readInformationAttachment(
+              f.attachment!,
+            )).bytes,
+          ),
+        );
+      }
+      expect(originals, containsAll(['FIRST-ORIGINAL', 'SECOND-ORIGINAL']));
+      expect(
+        (await source.recordOperationReceipt(operation))!.result.ref,
+        detail.record.ref,
+      );
       expect((await service.owner.informationAttachmentUsage()).stagedFiles, 0);
     },
   );

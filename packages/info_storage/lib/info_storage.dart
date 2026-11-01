@@ -37,6 +37,8 @@ part 'information_file_outputs.dart';
 part 'information_file_opens.dart';
 part 'desktop_preferences_storage.dart';
 part 'proposal_operations_storage.dart';
+part 'additional_approval_storage.dart';
+part 'template_packages_storage.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -45,6 +47,7 @@ const _portableFocusedFillLibraryFormat = 39;
 // Only libraries that actually retain credential classification require this
 // reader. Older binaries must reject instead of silently discarding metadata.
 const _credentialClassificationLibraryFormat = 40;
+const _templatePackageLibraryFormat = 41;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -136,7 +139,25 @@ class EncryptedInformationRepository
         InformationClassificationRepository,
         DesktopPreferencesRepository,
         OwnerProposalOperationRepository,
+        AdditionalApprovalRepository,
+        TemplatePackageRepository,
         SshHostTrustRepository {
+  final _templatePackages = <String, InstalledTemplatePackage>{};
+  @override
+  List<InstalledTemplatePackage> get installedTemplatePackages {
+    if (_closed) throw const StorageFailure('library_closed');
+    return List.unmodifiable(_templatePackages.values);
+  }
+
+  @override
+  Future<TemplatePackageReceipt?> templatePackageReceipt(String id) =>
+      _templateReceipt(id);
+  @override
+  Future<void> commitTemplatePackage(
+    TemplatePackageReceipt receipt,
+    InstalledTemplatePackage? package, {
+    required void Function() validate,
+  }) => _commitTemplatePackage(receipt, package, validate);
   @override
   Future<OwnerProposalReceipt?> ownerProposalReceipt(String id) =>
       _proposalReceipt(id);
@@ -468,7 +489,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _credentialClassificationLibraryFormat) {
+      if (headerVersion > _templatePackageLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -483,8 +504,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) >
-                _credentialClassificationLibraryFormat ||
+            (marker.single['version'] as int) > _templatePackageLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -746,6 +766,7 @@ class EncryptedInformationRepository
     for (final row in await _db.customSelect('SELECT * FROM settings').get()) {
       _settings[row.read<String>('name')] = row.read<int>('value');
     }
+    await _loadTemplatePackages();
     final items = await _db
         .customSelect('SELECT * FROM information_items ORDER BY rowid')
         .get();
@@ -1144,11 +1165,21 @@ class EncryptedInformationRepository
     return List.unmodifiable(_organizationTasks.values);
   }
 
+  @override
+  Future<InformationApprovalReceipt?> additionalApprovalReceipt(String id) =>
+      _additionalApprovalReceipt(id);
+  @override
+  Future<int> additionalApprovalRevision(String requestId) =>
+      _additionalApprovalRevision(requestId);
+
   Future<void> _writeOrganizationTask(OrganizationTask task) async {
     await _db.customStatement(
       'INSERT INTO organization_tasks(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [task.id, jsonEncode(task.toJson())],
     );
+    if (pendingAdditionalApproval?.kind == 'organization') {
+      await _additionalApprovalCommit(task.id, 'organization');
+    }
     if ({
       OrganizationTaskState.confirmed,
       OrganizationTaskState.rejected,
@@ -1180,7 +1211,7 @@ class EncryptedInformationRepository
               OrganizationTaskState.rejected,
             }.contains(task.state)
             ? pendingOwnerProposalOperation?.validate
-            : null,
+            : pendingAdditionalApproval?.validate,
       );
       _organizationTasks[task.id] = task;
     } catch (_) {
@@ -1597,8 +1628,9 @@ class EncryptedInformationRepository
       await _db.transaction(() async {
         validate?.call();
         if (lifecycleReceipt != null) {
-          if (lifecycleReceipt.command.itemId != itemId)
+          if (lifecycleReceipt.command.itemId != itemId) {
             throw const AccessFailure('invalid_information');
+          }
           await _validateLifecycle(lifecycleReceipt);
         }
         if (item != null) {
@@ -1648,8 +1680,9 @@ class EncryptedInformationRepository
       // Legacy callers retain their storage-failure contract. Commands with
       // explicit version/generation checks expose those conflicts to the UI.
       if (error is AccessFailure &&
-          (lifecycleReceipt != null || validate != null))
+          (lifecycleReceipt != null || validate != null)) {
         rethrow;
+      }
       throw const StorageFailure('save_failed');
     }
   }
@@ -1808,6 +1841,17 @@ class _InformationDatabase extends GeneratedDatabase {
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS owner_proposal_operations('
+        'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS template_packages('
+        'id TEXT PRIMARY KEY,source TEXT,enabled INTEGER NOT NULL CHECK(enabled IN (0,1)),origin TEXT NOT NULL,legacy_json TEXT)',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS additional_approval_operations(operation_id TEXT PRIMARY KEY,request_id TEXT NOT NULL,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0)',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS template_package_operations('
         'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
       );
     },

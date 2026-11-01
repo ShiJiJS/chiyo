@@ -1,3 +1,4 @@
+import 'owner_workspace_additional_approvals.dart';
 import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_cli/macos_agent_bundle.dart';
@@ -55,10 +56,16 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
       _ => '尚未取得配套文件观察，无法确认 CLI 是否就绪。',
     };
     final available = owner.serviceAvailable;
+    final credentialIds = available
+        ? owner.credentialUseRequests.map((r) => r.id).toSet()
+        : <String>{};
     final requests = available
-        ? (await owner.informationRequestInbox())
-              .map(OwnerWorkspaceApprovals.summaryOf)
-              .toList()
+        ? <WorkspaceApprovalSummary>[
+            for (final r in await owner.informationRequestInbox())
+              if (!credentialIds.contains(r.id))
+                OwnerWorkspaceApprovals.summaryOf(r),
+            ...OwnerWorkspaceAdditionalApprovals(owner).summaries(),
+          ]
         : <WorkspaceApprovalSummary>[];
     // Read live associations after the asynchronous history query, including
     // empty sessions. Historical associations cannot revive old capabilities.
@@ -110,7 +117,7 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
       observedAt: DateTime.now().toUtc(),
       serviceAvailable: available,
       serviceReason: available
-          ? '本机资料服务可用；尚未核对 CLI 网络连通性及宿主安装和信任。会话列表仅表示服务端关联，统计仅包含普通资料申请。'
+          ? '本机资料服务可用；尚未核对 CLI 网络连通性及宿主安装和信任。会话列表仅表示服务端关联，统计包含资料、凭据及分类整理申请。'
           : '本机资料服务已关闭或正在恢复资料，当前不能接收申请。',
       cli: bundle.verified
           ? WorkspaceAgentCheck.ready
