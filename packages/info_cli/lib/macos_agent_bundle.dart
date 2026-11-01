@@ -9,9 +9,13 @@ class MacAgentBundleObservation {
     this.directory,
     this.sourceCommit,
     this.manifestDigest,
+    this.embedded = false,
   });
   final String status;
   final String? directory, sourceCommit, manifestDigest;
+
+  /// Checks the signed app's integration resources, not its external siblings.
+  final bool embedded;
   bool get verified => status == 'verified';
 }
 
@@ -37,6 +41,10 @@ class MacAgentBundle {
     'cli/template/references/information-files.md',
     'CODEX-INTEGRATION.md',
   ];
+  static const embeddedDirectory = 'Resources/AgentIntegration';
+  static final embeddedFiles = requiredFiles
+      .where((p) => !p.startsWith('app/'))
+      .toList(growable: false);
   String _stamp(FileStat s) =>
       '${s.type}:${s.size}:${s.mode}:'
       '${s.modified.microsecondsSinceEpoch}:${s.changed.microsecondsSinceEpoch}';
@@ -52,15 +60,31 @@ class MacAgentBundle {
 
   Future<MacAgentBundleObservation> read({bool rehash = false}) async {
     final binary = File(_executable).absolute;
-    if (!binary.path.endsWith('/$appExecutable')) {
+    const suffix = '/Contents/MacOS/info_desktop';
+    if (!binary.path.endsWith(suffix)) {
       return const MacAgentBundleObservation(status: 'not_packaged');
     }
     try {
-      final rootPath = binary.path.substring(
-        0,
-        binary.path.length - appExecutable.length - 1,
-      );
+      final contents = binary.parent.parent.path;
+      final embeddedRoot = '$contents/$embeddedDirectory';
+      // Production resources are inside the sandbox-readable signed app. Do
+      // not fall back to external files when an embedded tree is damaged.
+      final embedded =
+          await FileSystemEntity.type(embeddedRoot, followLinks: false) !=
+          FileSystemEntityType.notFound;
+      if (!embedded && !binary.path.endsWith('/$appExecutable')) {
+        return const MacAgentBundleObservation(status: 'not_packaged');
+      }
+      final rootPath = embedded
+          ? embeddedRoot
+          : binary.path.substring(
+              0,
+              binary.path.length - appExecutable.length - 1,
+            );
       final root = await Directory(rootPath).resolveSymbolicLinks();
+      if (embedded && root != embeddedRoot) {
+        throw const FormatException('redirected integration root');
+      }
       final manifestFile = File('$root/manifest.json');
       if (!await manifestFile.exists()) {
         return const MacAgentBundleObservation(status: 'manifest_missing');
@@ -78,7 +102,8 @@ class MacAgentBundle {
       }
       final manifest = jsonDecode(utf8.decode(bytes));
       if (manifest is! Map ||
-          manifest['format'] != 1 ||
+          manifest['format'] != (embedded ? 2 : 1) ||
+          (embedded && manifest['scope'] != 'app_integration') ||
           manifest['architecture'] != 'macos-arm64' ||
           manifest['appIdentity'] != 'com.example.infoDesktop' ||
           manifest['sourceDirty'] != false ||
@@ -90,7 +115,20 @@ class MacAgentBundle {
         throw const FormatException('manifest identity');
       }
       final rows = manifest['files'] as List;
-      final expectedTemplate = requiredFiles
+      if (embedded) {
+        final identity = await _file(contents, 'Resources/agent-source.json');
+        if (await identity.length() > 1024) {
+          throw const FormatException('app source size');
+        }
+        final source = jsonDecode(await identity.readAsString());
+        if (source is! Map ||
+            source['appIdentity'] != manifest['appIdentity'] ||
+            source['sourceCommit'] != manifest['sourceCommit']) {
+          throw const FormatException('app source differs');
+        }
+      }
+      final required = embedded ? embeddedFiles : requiredFiles;
+      final expectedTemplate = required
           .where((p) => p.startsWith('cli/template/'))
           .toSet();
       final actualTemplate = <String>{};
@@ -117,7 +155,7 @@ class MacAgentBundle {
           !actualTemplate.containsAll(expectedTemplate)) {
         throw const FormatException('unexpected template files');
       }
-      for (final relative in requiredFiles) {
+      for (final relative in required) {
         final matches = rows.where((r) => r is Map && r['path'] == relative);
         if (matches.length != 1) throw const FormatException('entry count');
         final row = matches.single as Map, expected = row['sha256'];
@@ -162,6 +200,7 @@ class MacAgentBundle {
         directory: root,
         sourceCommit: manifest['sourceCommit'] as String,
         manifestDigest: sha256.convert(bytes).toString(),
+        embedded: embedded,
       );
     } on Object {
       _hashes.clear();

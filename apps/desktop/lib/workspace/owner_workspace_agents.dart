@@ -45,7 +45,9 @@ class OwnerWorkspaceAgents implements WorkspaceAgentsSource {
     }
     final cliReason = switch (bundle.status) {
       'verified' =>
-        'App 主程序及身份文件、配套 CLI、Skill 模板和接入说明与随包清单一致。此核对不执行程序、不验证签名或网络连接，也不代表宿主已安装或信任。',
+        bundle.embedded
+            ? 'App 内配套 CLI、Skill 模板和接入说明与同源清单一致。此核对不包含 App 外的 CLI 副本，不执行程序、不验证签名或网络连接，也不代表宿主已安装或信任。'
+            : 'App 主程序及身份文件、配套 CLI、Skill 模板和接入说明与随包清单一致。此核对不执行程序、不验证签名或网络连接，也不代表宿主已安装或信任。',
       'not_packaged' =>
         '当前 App 不在完整交付目录中。请从保留 app、cli 和 manifest.json 的整包启动；单独复制 App 无法核对配套工具。',
       'manifest_missing' => '未找到整包清单。请恢复完整交付目录后重新检测，不要混用另一版本的 CLI。',

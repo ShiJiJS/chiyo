@@ -245,6 +245,23 @@ def main():
         shutil.copy2(tools_root / "manifest.json", provenance / "macos-tools.json")
         shutil.copytree(tools_root / "notices", notices / "macos-tools")
         shutil.copy2(ROOT / "integrations/codex/MACOS-INTEGRATION.md", payload / "CODEX-INTEGRATION.md")
+        # A sandboxed app cannot read its enclosing delivery directory. Keep a
+        # same-source integration payload inside its signed resources. External
+        # CLI paths remain available for existing host installations.
+        embedded = app / "Contents/Resources/AgentIntegration"
+        shutil.copytree(cli, embedded / "cli")
+        shutil.copy2(payload / "CODEX-INTEGRATION.md", embedded / "CODEX-INTEGRATION.md")
+        identity = {"appIdentity": "com.example.infoDesktop", "sourceCommit": commit}
+        (app / "Contents/Resources/agent-source.json").write_text(json.dumps(identity) + "\n")
+        (embedded / "manifest.json").write_text(json.dumps({
+            "format": 2, "scope": "app_integration", "architecture": "macos-arm64",
+            "sourceDirty": False, **identity, "files": inventory(embedded),
+        }, indent=2) + "\n")
+        entitlement_file = output / "app-entitlements.plist"
+        entitlement_file.write_bytes(subprocess.check_output(
+            ["/usr/bin/codesign", "-d", "--entitlements", ":-", str(app)], stderr=subprocess.DEVNULL))
+        run("sign-app-integration", ["/usr/bin/codesign", "--force", "--sign", "-",
+            "--entitlements", str(entitlement_file), str(app)])
         notice_archives = list(app.rglob("NOTICES.Z"))
         if len(notice_archives) != 1:
             raise RuntimeError("Expected Flutter's bundled license registry")
