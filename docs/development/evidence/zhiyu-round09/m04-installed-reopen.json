@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-01",
+  "issue": 73,
+  "sourceCommit": "0a5e35001f4bb7a8a39546d373fbc3e9fae63678",
+  "installedPath": "local/中文 Mac 预览/AgentInfoManage",
+  "flow": "Normal fixed Release installation using original library, after owner handled existing Keychain prompt.",
+  "phases": [
+    {
+      "phase": "afterOwnerPermission",
+      "controlStatus": "running",
+      "pid": 72542,
+      "originalLibraryListVisuallyPresent": true
+    },
+    {
+      "phase": "normalCmdQ",
+      "controlStatus": "not_running",
+      "oldProcessAbsent": true,
+      "forceKilled": false
+    },
+    {
+      "phase": "reopenSameInstalledApp",
+      "controlStatus": "running",
+      "pid": 27005,
+      "originalLibraryListVisuallyPresent": true,
+      "keychainPromptObservedAgain": false
+    }
+  ],
+  "dataModifiedByThisCheck": false,
+  "libraryReset": false,
+  "credentialOrKeychainReset": false,
+  "newCandidateInstalled": false,
+  "newAppBuilt": false,
+  "ownerScreenshotOrRecordNamesPublishedToGit": false,
+  "m08SourceIncluded": false,
+  "remaining": [
+    "Same installed Release ordinary-information save and reread validation remains separately pending; read-only reopen is not new-write verification.",
+    "Physical input, actual system panels, notifications and sleep/wake retain their existing evidence boundaries.",
+    "Old rollback program and private verified backup remain protected until broader normal installation checks complete."
+  ]
+}
