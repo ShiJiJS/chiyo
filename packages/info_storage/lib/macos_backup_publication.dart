@@ -81,12 +81,162 @@ final class BackupPublicationFailure implements Exception {
 /// cannot prove a previously submitted publication never occurred.
 enum BackupPublicationObservation { matching, absent, different }
 
+/// Identity of an empty private directory reserved for one backup operation.
+/// Persist this before creating material inside it. Never send it to a page.
+final class MacBackupStagingDirectory {
+  const MacBackupStagingDirectory._(
+    this.path,
+    this.identity,
+    this.parentIdentity,
+  );
+  final String path, identity, parentIdentity;
+  Map<String, Object?> toPrivateJson() => {
+    'path': path,
+    'identity': identity,
+    'parentIdentity': parentIdentity,
+  };
+  factory MacBackupStagingDirectory.fromPrivateJson(Map<String, dynamic> json) {
+    if (json.length != 3 ||
+        json['path'] is! String ||
+        json['identity'] is! String ||
+        json['parentIdentity'] is! String) {
+      throw const BackupPublicationFailure('invalid_staging');
+    }
+    _MacFiles.path(json['path'] as String);
+    for (final key in ['identity', 'parentIdentity']) {
+      if (!RegExp(
+        r'^macos:-?\d+:\d+:\d+:\d+:\d+:\d+$',
+      ).hasMatch(json[key] as String)) {
+        throw const BackupPublicationFailure('invalid_staging');
+      }
+    }
+    return MacBackupStagingDirectory._(
+      json['path'] as String,
+      json['identity'] as String,
+      json['parentIdentity'] as String,
+    );
+  }
+  @override
+  String toString() => 'MacBackupStagingDirectory([private])';
+}
+
 /// macOS same-volume publication with a retained inode anchor. The caller must
 /// durably journal [prepare]'s result BEFORE calling [publish], then commit the
 /// success receipt BEFORE [cleanup]. Reconciliation never republishes a file.
 /// Only the private registered staging names are removed; never the output.
 class MacBackupPublicationFiles {
   static final _native = _MacFiles();
+
+  static MacBackupStagingDirectory captureStaging(String path) {
+    final (parent, _) = _MacFiles.path(path);
+    final dir = _native.directory(path, private: true);
+    var parentFd = -1;
+    try {
+      parentFd = _native.directory(parent);
+      if (Directory(path).listSync(followLinks: false).isNotEmpty) {
+        throw const BackupPublicationFailure('staging_not_empty');
+      }
+      return MacBackupStagingDirectory._(
+        path,
+        _native.identity(dir, directory: true, private: true),
+        _native.identity(parentFd, directory: true),
+      );
+    } finally {
+      if (parentFd >= 0) _native.close(parentFd);
+      _native.close(dir);
+    }
+  }
+
+  /// False means the registered name is absent, never a different directory.
+  static bool stagingExists(MacBackupStagingDirectory value) {
+    final (parent, name) = _MacFiles.path(value.path);
+    final parentFd = _native.directory(parent);
+    var dir = -1;
+    try {
+      if (_native.identity(parentFd, directory: true) != value.parentIdentity) {
+        throw const BackupPublicationFailure('identity_changed');
+      }
+      dir = _native.at(parentFd, name, flags: 0x100000, missing: true);
+      if (dir < 0) return false;
+      if (_native.identity(dir, directory: true, private: true) !=
+          value.identity) {
+        throw const BackupPublicationFailure('identity_changed');
+      }
+      return true;
+    } finally {
+      if (dir >= 0) _native.close(dir);
+      _native.close(parentFd);
+    }
+  }
+
+  /// Only exact generated basenames in the previously registered private
+  /// directory may be removed. Unknown entries, links and replaced directories
+  /// preserve the whole directory. No recursive deletion or output cleanup.
+  static void cleanupStaging(
+    MacBackupStagingDirectory value, {
+    Set<String> generatedFiles = const {},
+  }) {
+    for (final name in generatedFiles) {
+      if (name.isEmpty ||
+          name == '.' ||
+          name == '..' ||
+          name.contains('/') ||
+          name.contains('\x00')) {
+        throw const BackupPublicationFailure('invalid_staging');
+      }
+    }
+    final (parent, name) = _MacFiles.path(value.path);
+    final parentFd = _native.directory(parent);
+    var dir = -1;
+    try {
+      if (_native.identity(parentFd, directory: true) != value.parentIdentity) {
+        throw const BackupPublicationFailure('identity_changed');
+      }
+      dir = _native.at(parentFd, name, flags: 0x100000, missing: true);
+      if (dir < 0) return;
+      if (_native.identity(dir, directory: true, private: true) !=
+          value.identity) {
+        throw const BackupPublicationFailure('identity_changed');
+      }
+      final entries = Directory(value.path).listSync(followLinks: false);
+      for (final entry in entries) {
+        final child = entry.uri.pathSegments.last;
+        if (!generatedFiles.contains(child)) {
+          throw const BackupPublicationFailure('staging_not_empty');
+        }
+        final fd = _native.at(dir, child);
+        try {
+          _native.identity(fd);
+        } finally {
+          _native.close(fd);
+        }
+      }
+      // Recheck the path binding after enumeration; deletion uses the retained
+      // directory descriptor, never paths supplied by a page or recursive walk.
+      final check = _native.at(parentFd, name, flags: 0x100000);
+      try {
+        if (_native.identity(check, directory: true, private: true) !=
+            value.identity) {
+          throw const BackupPublicationFailure('identity_changed');
+        }
+      } finally {
+        _native.close(check);
+      }
+      for (final entry in entries) {
+        _native.unlink(dir, entry.uri.pathSegments.last);
+      }
+      _native.flush(dir);
+      _native.name(name, (p) {
+        if (_native.unlinkAt(parentFd, p, 0x80) != 0) {
+          throw const BackupPublicationFailure('staging_not_empty');
+        }
+      });
+      _native.flush(parentFd);
+    } finally {
+      if (dir >= 0) _native.close(dir);
+      _native.close(parentFd);
+    }
+  }
 
   static void writeRecoveryKey(String path, List<int> bytes) {
     if (bytes.isEmpty ||

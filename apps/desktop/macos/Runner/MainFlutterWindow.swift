@@ -28,7 +28,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var navigationEnabled = false
   private var notificationsEnabled = false
   private var backupOutputs: [String: URL] = [:]
-  private var backupStaging: [String: URL] = [:]
+  private let backupStaging = BackupStagingRegistry()
   private var informationOutputs: [String: URL] = [:]
   private var informationStaging: [String: URL] = [:]
   private var toolAccess: ToolAccessStore?
@@ -151,25 +151,19 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           result(FlutterError(code: "backup_staging_failed", message: "No selected backup destination", details: nil)); return
         }
         do {
-          let directory = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: destination, create: true)
-          let token = UUID().uuidString
-          window.backupStaging[token] = directory
-          result(["directory": directory.path, "token": token])
+          result(try window.backupStaging.prepare(for: destination))
         } catch {
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging unavailable", details: nil))
         }
       } else if call.method == "releaseBackupStaging" {
-        guard let token = call.arguments as? String, let directory = window.backupStaging.removeValue(forKey: token) else {
+        guard let token = call.arguments as? String else {
           result(FlutterError(code: "backup_staging_failed", message: "Unknown backup staging", details: nil)); return
         }
-        // Only this native-created URL can be released; no arbitrary paths or
-        // recursive deletion supplied by Dart. Failed cleanup preserves files.
         do {
-          if try FileManager.default.contentsOfDirectory(atPath: directory.path).isEmpty {
-            try FileManager.default.removeItem(at: directory)
-          }
+          try window.backupStaging.release(token)
           result(nil)
         } catch {
+          // Failed/nonempty cleanup keeps native ownership and remains retryable.
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging cleanup incomplete", details: nil))
         }
       } else if call.method == "backupInput" || call.method == "recoveryKeyInput" || call.method == "credentialInput" || call.method == "knownHostsInput" || call.method == "informationFileInput" {

@@ -33,6 +33,9 @@ final class AttachmentBackupContainer {
     required List<AttachmentBackupSource> attachments,
     int formatVersion = 8,
     String? stagingParent,
+    // Already created and registered by InformationBackups before it starts
+    // the source read transaction. Other callers keep the original allocation.
+    String? registeredStagingDirectory,
   }) async {
     InformationBackups._decodeKey(recoveryKey);
     sqlite.Database? db;
@@ -63,9 +66,16 @@ final class AttachmentBackupContainer {
           FileSystemEntityType.notFound) {
         throw const StorageFailure('output_exists');
       }
-      staging = await Directory(
-        stagingParent ?? output.parent.path,
-      ).createTemp('.agent-info-backup8-');
+      if (registeredStagingDirectory != null) {
+        staging = Directory(registeredStagingDirectory);
+        if ((await staging.list(followLinks: false).toList()).isNotEmpty) {
+          throw const StorageFailure('backup_staging_failed');
+        }
+      } else {
+        staging = await Directory(
+          stagingParent ?? output.parent.path,
+        ).createTemp('.agent-info-backup8-');
+      }
       final temporary = File('${staging.path}/backup.partial');
       db = sqlite.sqlite3.open(temporary.path);
       InformationBackups._key(db, recoveryKey);
