@@ -1,3 +1,11 @@
+## 2026-11-01：#74 原生导出失败已定位并修复，待最终 App 联合检查
+
+真实沙箱 NSSavePanel 选择外部输出后，O_RDONLY 打开目标父目录返回 EPERM；文件授权不含列举父目录。发布器改为 Darwin O_SEARCH 获取准确父目录描述符，保留 fstat身份、openat/renameatx_np(EXCL)、fsync及原操作核对，不要求扩大文件夹权限。
+
+隔离签名原生helper＋生产BackupStagingRegistry＋生产Dart AOT发布器实际通过：外部保存选择、发布确认、重复拒绝覆盖、输出书签和暂存清理。定向SQLCipher发布/暂存24项通过。仅合成字节，无Keychain；临时App已删除。完整新版合成库经Flutter新界面导出/空库恢复/重开留到本轮最终同候选检查，不冒充已验。
+
+本轮按主人新授权清除旧库/备份，不再以历史个人库或旧包恢复为前置；新版备份功能仍须完成。
+
 # 知予 Mac M05：真实备份与恢复接入记录
 
 对应 [#74](https://github.com/ShiJiJS/agent-info-manage/issues/74)，归属 #69 后续功能。
