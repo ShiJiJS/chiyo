@@ -70,6 +70,7 @@ part 'credential_material_access.dart';
 part 'credential_history_access.dart';
 part 'ssh_host_trust.dart';
 part 'proposal_access.dart';
+part 'proposal_operations.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -831,12 +832,14 @@ class OwnerAccess {
   Future<void> _writes = Future.value();
   Future<T> _serialize<T>(Future<T> Function() action) {
     final scope = Zone.current[_ownerLibraryScopeZoneKey] as OwnerLibraryScope?;
+    final proposal = pendingOwnerProposalOperation;
     final generation = scope?._generation ?? _service._libraryGeneration;
-    final result = _writes.then((_) {
+    final result = _writes.then((_) async {
       if (generation != _service._libraryGeneration ||
           scope != null && !identical(scope._service, _service)) {
         throw const AccessFailure('library_changed');
       }
+      if (proposal != null) await proposal._before(this);
       return action();
     });
     _writes = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});

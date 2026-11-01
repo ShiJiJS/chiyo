@@ -809,6 +809,9 @@ class InformationBackups {
         await _repository._db.customStatement(
           'UPDATE desktop_preference_operations SET invalidated=1',
         );
+        await _repository._db.customStatement(
+          'UPDATE owner_proposal_operations SET invalidated=1',
+        );
         await _repository._db.customStatement('DELETE FROM organization_tasks');
         if (_hasPortableFocusedFill(
           contents._tables['credential_use_requests']!.map(

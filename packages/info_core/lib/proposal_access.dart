@@ -70,6 +70,7 @@ extension OwnerProposals on OwnerAccess {
   ProposalPage queryProposals({
     String search = '',
     ProposalFilter filter = ProposalFilter.pending,
+    ProposalKind? kind,
     int offset = 0,
     int limit = 8,
     String? focusProposalId,
@@ -214,24 +215,25 @@ extension OwnerProposals on OwnerAccess {
     final matching = entries
         .where(
           (entry) =>
-              needle.isEmpty ||
-              [
-                entry.id,
-                entry.chatLabel,
-                entry.agentName,
-                entry.purpose,
-                entry.kindLabel,
-                entry.stateLabel,
-                for (final item in information.where(
-                  (item) => entry.itemIds.contains(item.id),
-                ))
-                  item.name,
-                if (entry.kind == ProposalKind.addition)
-                  for (final p in importProposals.where(
-                    (p) => p.id == entry.id,
-                  ))
-                    ...p.itemNames,
-              ].any((value) => value.toLowerCase().contains(needle)),
+              (kind == null || entry.kind == kind) &&
+              (needle.isEmpty ||
+                  [
+                    entry.id,
+                    entry.chatLabel,
+                    entry.agentName,
+                    entry.purpose,
+                    entry.kindLabel,
+                    entry.stateLabel,
+                    for (final item in information.where(
+                      (item) => entry.itemIds.contains(item.id),
+                    ))
+                      item.name,
+                    if (entry.kind == ProposalKind.addition)
+                      for (final p in importProposals.where(
+                        (p) => p.id == entry.id,
+                      ))
+                        ...p.itemNames,
+                  ].any((value) => value.toLowerCase().contains(needle))),
         )
         .toList();
     final filtered =

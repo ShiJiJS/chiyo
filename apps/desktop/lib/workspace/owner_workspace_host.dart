@@ -3,6 +3,7 @@ import 'package:info_cli/macos_agent_bundle.dart';
 import 'owner_workspace_agents.dart';
 import 'owner_workspace_settings.dart';
 import 'owner_workspace_runtime.dart';
+import 'owner_workspace_proposals.dart';
 import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
@@ -87,6 +88,11 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         picker: widget.filePicker,
       ),
       backups: _backups ?? const UnavailableWorkspaceBackup(),
+      proposals: OwnerWorkspaceProposals(
+        owner: widget.runtime.service.owner,
+        library: () => _source,
+        changed: () => _source.notifyExternalChange(),
+      ),
       runtime: OwnerWorkspaceRuntime(
         runtime: widget.runtime,
         changed: () => _source.notifyExternalChange(),

@@ -36,6 +36,7 @@ part 'information_purge_storage.dart';
 part 'information_file_outputs.dart';
 part 'information_file_opens.dart';
 part 'desktop_preferences_storage.dart';
+part 'proposal_operations_storage.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -134,7 +135,11 @@ class EncryptedInformationRepository
         InformationPurgeRepository,
         InformationClassificationRepository,
         DesktopPreferencesRepository,
+        OwnerProposalOperationRepository,
         SshHostTrustRepository {
+  @override
+  Future<OwnerProposalReceipt?> ownerProposalReceipt(String id) =>
+      _proposalReceipt(id);
   @override
   Future<DesktopPreferencesReceipt?> desktopPreferencesReceipt(String id) =>
       _desktopReceipt(id);
@@ -1139,17 +1144,44 @@ class EncryptedInformationRepository
     return List.unmodifiable(_organizationTasks.values);
   }
 
-  Future<void> _writeOrganizationTask(
-    OrganizationTask task,
-  ) => _db.customStatement(
-    'INSERT INTO organization_tasks(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-    [task.id, jsonEncode(task.toJson())],
-  );
+  Future<void> _writeOrganizationTask(OrganizationTask task) async {
+    await _db.customStatement(
+      'INSERT INTO organization_tasks(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+      [task.id, jsonEncode(task.toJson())],
+    );
+    if ({
+      OrganizationTaskState.confirmed,
+      OrganizationTaskState.rejected,
+    }.contains(task.state)) {
+      await _proposalCommit(
+        task.id,
+        ProposalKind.organization,
+        task.state == OrganizationTaskState.confirmed,
+        2,
+        task.state == OrganizationTaskState.confirmed
+            ? [
+                for (final c in task.changes)
+                  OwnerProposalTarget(c.itemId, c.baseVersion + 1),
+              ]
+            : [],
+      );
+    }
+  }
+
   @override
   Future<void> saveOrganizationTask(OrganizationTask task) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeMetadata(() => _writeOrganizationTask(task));
+      await _writeMetadata(
+        () => _writeOrganizationTask(task),
+        validate:
+            {
+              OrganizationTaskState.confirmed,
+              OrganizationTaskState.rejected,
+            }.contains(task.state)
+            ? pendingOwnerProposalOperation?.validate
+            : null,
+      );
       _organizationTasks[task.id] = task;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1182,6 +1214,7 @@ class EncryptedInformationRepository
         }
         await _writeOrganizationTask(task);
         await _checkAttachmentBackupBudget();
+        pendingOwnerProposalOperation?.validate();
         validate?.call();
       });
       for (final d in newDirectories) {
@@ -1206,16 +1239,32 @@ class EncryptedInformationRepository
     return List.unmodifiable(_proposals.values);
   }
 
-  Future<void> _writeProposal(ImportProposal proposal) => _db.customStatement(
-    'INSERT INTO import_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-    [proposal.id, jsonEncode(proposal.toJson())],
-  );
+  Future<void> _writeProposal(ImportProposal proposal) async {
+    await _db.customStatement(
+      'INSERT INTO import_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+      [proposal.id, jsonEncode(proposal.toJson())],
+    );
+    if (proposal.state != ImportProposalState.pending) {
+      await _proposalCommit(
+        proposal.id,
+        ProposalKind.addition,
+        proposal.state == ImportProposalState.confirmed,
+        proposal.version,
+        proposal.receipts.map((r) => OwnerProposalTarget(r.id, r.version)),
+      );
+    }
+  }
 
   @override
   Future<void> saveImportProposal(ImportProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeMetadata(() => _writeProposal(proposal));
+      await _writeMetadata(
+        () => _writeProposal(proposal),
+        validate: proposal.state != ImportProposalState.pending
+            ? pendingOwnerProposalOperation?.validate
+            : null,
+      );
       _proposals[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1243,6 +1292,7 @@ class EncryptedInformationRepository
         }
         await _writeProposal(proposal);
         await _checkAttachmentBackupBudget();
+        pendingOwnerProposalOperation?.validate();
       });
       for (final directory in newDirectories) {
         _directories[directory.id] = directory;
@@ -1340,10 +1390,32 @@ class EncryptedInformationRepository
     }
   }
 
-  Future<void> _writeUpdate(UpdateProposal proposal) => _db.customStatement(
-    'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-    [proposal.id, jsonEncode(proposal.toJson())],
-  );
+  Future<void> _writeUpdate(UpdateProposal proposal) async {
+    await _db.customStatement(
+      'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+      [proposal.id, jsonEncode(proposal.toJson())],
+    );
+    if ({
+      UpdateProposalState.confirmed,
+      UpdateProposalState.rejected,
+    }.contains(proposal.state)) {
+      await _proposalCommit(
+        proposal.id,
+        ProposalKind.modification,
+        proposal.state == UpdateProposalState.confirmed,
+        proposal.version,
+        proposal.result == null
+            ? []
+            : [
+                OwnerProposalTarget(
+                  proposal.result!.itemId,
+                  proposal.result!.version,
+                ),
+              ],
+      );
+    }
+  }
+
   Future<void> _writeRevision(InformationRevision revision) async {
     await _checkItemAttachments(revision.item);
     await _db.customStatement(
@@ -1361,7 +1433,16 @@ class EncryptedInformationRepository
   Future<void> saveUpdateProposal(UpdateProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeMetadata(() => _writeUpdate(proposal));
+      await _writeMetadata(
+        () => _writeUpdate(proposal),
+        validate:
+            {
+              UpdateProposalState.confirmed,
+              UpdateProposalState.rejected,
+            }.contains(proposal.state)
+            ? pendingOwnerProposalOperation?.validate
+            : null,
+      );
       _updates[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1403,6 +1484,7 @@ class EncryptedInformationRepository
         await _writeUpdate(proposal);
         await _writeRecycle(recycled, facts);
         await _checkAttachmentBackupBudget();
+        pendingOwnerProposalOperation?.validate();
       });
       _items[item.id] = item;
       _revisions.add(previous);
@@ -1434,15 +1516,47 @@ class EncryptedInformationRepository
     return List.unmodifiable(_deletes.values);
   }
 
-  Future<void> _writeDelete(DeleteProposal proposal) => _db.customStatement(
-    'INSERT INTO delete_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-    [proposal.id, jsonEncode(proposal.toJson())],
-  );
+  Future<void> _writeDelete(DeleteProposal proposal) async {
+    await _db.customStatement(
+      'INSERT INTO delete_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+      [proposal.id, jsonEncode(proposal.toJson())],
+    );
+    if ({
+      DeleteProposalState.confirmed,
+      DeleteProposalState.rejected,
+    }.contains(proposal.state)) {
+      await _proposalCommit(
+        proposal.id,
+        ProposalKind.deletion,
+        proposal.state == DeleteProposalState.confirmed,
+        proposal.version,
+        proposal.state == DeleteProposalState.confirmed
+            ? [
+                OwnerProposalTarget(
+                  proposal.itemId,
+                  proposal.baseVersion + 1,
+                  recycleId: proposal.entryId,
+                ),
+              ]
+            : [],
+      );
+    }
+  }
+
   @override
   Future<void> saveDeleteProposal(DeleteProposal proposal) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeMetadata(() => _writeDelete(proposal));
+      await _writeMetadata(
+        () => _writeDelete(proposal),
+        validate:
+            {
+              DeleteProposalState.confirmed,
+              DeleteProposalState.rejected,
+            }.contains(proposal.state)
+            ? pendingOwnerProposalOperation?.validate
+            : null,
+      );
       _deletes[proposal.id] = proposal;
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1517,6 +1631,7 @@ class EncryptedInformationRepository
         }
         await _checkAttachmentBackupBudget();
         validate?.call();
+        if (proposal != null) pendingOwnerProposalOperation?.validate();
       });
       if (item == null) {
         _items.remove(itemId);
@@ -1689,6 +1804,10 @@ class _InformationDatabase extends GeneratedDatabase {
       // Local receipts add no portable content or live capabilities.
       await customStatement(
         'CREATE TABLE IF NOT EXISTS desktop_preference_operations('
+        'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS owner_proposal_operations('
         'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
       );
     },
