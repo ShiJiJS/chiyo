@@ -10,6 +10,64 @@ import 'support/desktop_platform_fixture.dart';
 
 void main() {
   test(
+    'Owner copy maintenance runs at start/resume and shutdown cleanup precedes repository close',
+    () async {
+      final service = InformationService.fictional();
+      final native = _ResumeDesktopFixture();
+      var maintained = 0;
+      final order = <String>[];
+      final runtime = DesktopRuntime(
+        service: service,
+        platform: native,
+        closeServer: () async {},
+        maintainOwnerFiles: () async {
+          maintained++;
+          return maintained == 1 ? 1 : 0;
+        },
+        closeOwnerFiles: () async {
+          expect(service.owner.serviceAvailable, false);
+          order.add('copies');
+        },
+        closeRepository: () async {
+          order.add('repository');
+        },
+      );
+      await runtime.start();
+      expect(maintained, 1);
+      expect(runtime.ownerFileCleanupFailed, true);
+      await native.events!(DesktopEvent.resumed);
+      expect(maintained, 2);
+      expect(runtime.ownerFileCleanupFailed, false);
+      await runtime.quit();
+      expect(order, ['copies', 'repository']);
+      expect(runtime.stopped, true);
+    },
+  );
+  test('Owner copy shutdown failure preserves repository for retry', () async {
+    final service = InformationService.fictional();
+    final native = _ResumeDesktopFixture();
+    var fail = true, closed = false;
+    final runtime = DesktopRuntime(
+      service: service,
+      platform: native,
+      closeServer: () async {},
+      closeOwnerFiles: () async {
+        if (fail) throw StateError('synthetic journal failure');
+      },
+      closeRepository: () async {
+        closed = true;
+      },
+    );
+    await runtime.start();
+    await runtime.quit();
+    expect(runtime.shutdownFailed, true);
+    expect(closed, false);
+    fail = false;
+    await runtime.quit();
+    expect(runtime.stopped, true);
+    expect(closed, true);
+  });
+  test(
     'resume reconciles expired material once without opening or replaying',
     () async {
       var now = DateTime.utc(2026, 10, 1);

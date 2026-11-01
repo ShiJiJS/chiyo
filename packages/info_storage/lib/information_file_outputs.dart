@@ -301,7 +301,8 @@ class InformationFileOutputs {
     );
     _decode(Map<String, dynamic>.from(r.toPrivateJson()), operationId);
     await _repository._db.transaction(() async {
-      if (await _read(operationId, invalidated: true) != null) {
+      if (await _repository.fileOpens.status(operationId) != null ||
+          await _read(operationId, invalidated: true) != null) {
         throw const StorageFailure('operation_conflict');
       }
       for (final table in [

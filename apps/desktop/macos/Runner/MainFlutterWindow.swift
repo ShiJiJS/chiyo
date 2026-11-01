@@ -28,6 +28,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var navigationEnabled = false
   private var notificationsEnabled = false
   private let backupStaging = BackupStagingRegistry()
+  private let ownerFileOpener = OwnerFileOpener { NSWorkspace.shared.open($0) }
   private let pdfPreviewQueue = DispatchQueue(label: "agent_info_manage.owner_pdf_preview", qos: .userInitiated)
   private var renderingPdf = false
   private var informationOutputs: [String: URL] = [:]
@@ -279,6 +280,27 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           catch { result(FlutterError(code: "file_dialog_failed", message: "Selected backup destination unavailable", details: nil)) }
         }
       } else { result(FlutterMethodNotImplemented) }
+    }
+
+    let fileOpenChannel = FlutterMethodChannel(name: "agent_info_manage/owner_file_open", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    fileOpenChannel.setMethodCallHandler { [weak self] call, result in
+      guard let self = self else { result(FlutterError(code: "file_open_unavailable", message: "File open unavailable", details: nil)); return }
+      do {
+        if call.method == "open", let value = call.arguments as? [String: Any] {
+          result(try self.ownerFileOpener.open(value).rawValue)
+        } else if call.method == "status", let value = call.arguments as? [String: String], value.count == 2,
+          let id = value["operationId"], let digest = value["commandDigest"] {
+          result(try self.ownerFileOpener.status(id, digest: digest)?.rawValue)
+        } else { result(FlutterMethodNotImplemented) }
+      } catch OwnerFileOpener.Failure.invalid {
+        result("notOpened")
+      } catch OwnerFileOpener.Failure.busy {
+        result("notOpened")
+      } catch OwnerFileOpener.Failure.changed {
+        result("notOpened")
+      } catch {
+        result(FlutterError(code: "file_open_unavailable", message: "File open unavailable", details: nil))
+      }
     }
 
     let desktopChannel = FlutterMethodChannel(name: "agent_info_manage/desktop", binaryMessenger: flutterViewController.engine.binaryMessenger)

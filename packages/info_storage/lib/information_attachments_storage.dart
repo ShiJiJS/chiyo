@@ -323,8 +323,11 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
         if (change.operationReceipt != null &&
             (await _db
                     .customSelect(
-                      'SELECT 1 FROM backup_operations WHERE operation_id=?',
-                      variables: [Variable(_fileOutputKey(change.operationId))],
+                      'SELECT 1 FROM backup_operations WHERE operation_id IN (?,?)',
+                      variables: [
+                        Variable(_fileOutputKey(change.operationId)),
+                        Variable(_fileOpenKey(change.operationId)),
+                      ],
                     )
                     .get())
                 .isNotEmpty) {

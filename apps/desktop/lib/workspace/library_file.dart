@@ -39,7 +39,7 @@ class _LibraryFileState extends State<LibraryFile> {
   WorkspaceFileAction? _pendingKind;
   String? _pendingDigest;
   WorkspaceFileRef? _pendingFile;
-  int _cleanupPending = 0;
+  int _cleanupPending = 0, _openCopies = 0, _openCleanupPending = 0;
   @override
   void initState() {
     super.initState();
@@ -60,7 +60,7 @@ class _LibraryFileState extends State<LibraryFile> {
         _preview = null;
         _pendingAction = _pendingDigest = null;
         _pendingFile = null;
-        _cleanupPending = 0;
+        _cleanupPending = _openCopies = _openCleanupPending = 0;
       }
       unawaited(_load());
     }
@@ -96,9 +96,11 @@ class _LibraryFileState extends State<LibraryFile> {
           _pendingAction = pending.operationId;
           _pendingDigest = pending.digest;
           _pendingFile = pending.file;
-          _pendingKind = WorkspaceFileAction.saveAs;
+          _pendingKind = pending.action;
         }
         _cleanupPending = state?.cleanupPending ?? 0;
+        _openCopies = state?.openCopies ?? 0;
+        _openCleanupPending = state?.openCleanupPending ?? 0;
         if (_history?.current.ref != history.current.ref) _page = 0;
         _history = history;
         _loading = false;
@@ -257,13 +259,16 @@ class _LibraryFileState extends State<LibraryFile> {
         _busy = false;
         _pendingAction = null;
         if (result.cleanupPending) _cleanupPending++;
+        if (result.completed && action == WorkspaceFileAction.open) {
+          _openCopies++;
+        }
       });
       if (result.completed) {
         DesktopFeedback.show(
           context,
           action == WorkspaceFileAction.saveAs
               ? '已另存 ${result.filename}'
-              : '已打开 ${result.filename}',
+              : '已交给本机程序打开 ${result.filename}',
         );
       }
     } catch (error) {
@@ -281,6 +286,9 @@ class _LibraryFileState extends State<LibraryFile> {
           _pendingAction = null;
         }
       });
+      if ({'not_opened', 'previous_pending'}.contains(failure.code)) {
+        await _load();
+      }
     }
   }
 
@@ -302,12 +310,23 @@ class _LibraryFileState extends State<LibraryFile> {
         _busy = false;
         _pendingAction = null;
         _actionFailure = null;
-        if (receipt?.cleanupPending == true) _cleanupPending++;
+        if (receipt?.cleanupPending == true) {
+          if (_pendingKind == WorkspaceFileAction.open) {
+            _openCleanupPending++;
+          } else {
+            _cleanupPending++;
+          }
+        }
+        if (receipt?.actionCompleted == true &&
+            receipt?.openCopyHeld != false &&
+            _pendingKind == WorkspaceFileAction.open) {
+          _openCopies++;
+        }
       });
       if (receipt?.actionCompleted == true) {
         DesktopFeedback.show(
           context,
-          _pendingKind == WorkspaceFileAction.saveAs ? '另存操作已完成' : '打开操作已完成',
+          _pendingKind == WorkspaceFileAction.saveAs ? '另存操作已完成' : '系统已接收打开请求',
         );
       }
     } catch (error) {
@@ -354,6 +373,43 @@ class _LibraryFileState extends State<LibraryFile> {
       if (mounted) await _load();
     } catch (e) {
       if (mounted) setState(() => _actionFailure = _failure(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _finishOpen({bool all = false}) async {
+    final recovery = widget.source;
+    if (recovery is! WorkspaceFileOpenRecovery || _busy) return;
+    final id = _pendingAction;
+    setState(() => _busy = true);
+    try {
+      if (all) {
+        await (recovery as WorkspaceFileOpenRecovery).closeOpenFileCopies(
+          widget.detail.record.ref,
+          widget.fieldKey,
+        );
+      } else if (id != null) {
+        await (recovery as WorkspaceFileOpenRecovery).finishFileOpen(id);
+      }
+      if (mounted) {
+        setState(() {
+          if (all || _pendingKind == WorkspaceFileAction.open) {
+            _pendingAction = null;
+          }
+          _actionFailure = null;
+        });
+        DesktopFeedback.show(
+          context,
+          all ? '临时副本已清理' : '已结束核对并清理临时副本；未确认的打开结果仍保持未知',
+        );
+        await _load();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _actionFailure = _failure(e));
+        await _load();
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -507,7 +563,8 @@ class _LibraryFileState extends State<LibraryFile> {
           ),
         if (_pendingAction != null &&
             !_busy &&
-            widget.source is WorkspaceFileActionRecovery)
+            widget.source is WorkspaceFileActionRecovery &&
+            _pendingKind == WorkspaceFileAction.saveAs)
           Align(
             alignment: Alignment.centerLeft,
             child: DesktopButton(
@@ -527,6 +584,31 @@ class _LibraryFileState extends State<LibraryFile> {
               ),
             ],
           ),
+        if (_pendingAction != null &&
+            _pendingKind == WorkspaceFileAction.open &&
+            widget.source is WorkspaceFileOpenRecovery)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DesktopButton(
+              onPressed: _busy ? null : () => _finishOpen(),
+              child: const Text('结束核对并清理临时副本'),
+            ),
+          ),
+        if (_openCopies > 0 || _openCleanupPending > 0) ...[
+          Text(
+            '本机打开使用临时副本，修改不会自动写回资料库；退出应用时清理。',
+            style: libraryText(context, 13),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DesktopButton(
+              onPressed: _busy ? null : () => _finishOpen(all: true),
+              child: Text(
+                _openCleanupPending > 0 ? '重试清理本机打开副本' : '结束使用并清理本机打开副本',
+              ),
+            ),
+          ),
+        ],
         if (!visiblePreview) const SizedBox(height: 16),
         if (_previewLoading)
           const Text('正在读取预览…')
