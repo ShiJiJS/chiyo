@@ -16,6 +16,7 @@ part 'backup_history.dart';
 part 'backup_credentials.dart';
 part 'backup_metadata_budget.dart';
 part 'credentials_storage.dart';
+part 'credential_record_storage.dart';
 part 'credential_runtime_storage.dart';
 part 'focused_fill_storage.dart';
 part 'information_files_storage.dart';
@@ -118,6 +119,7 @@ class EncryptedInformationRepository
     implements
         InformationRepository,
         CredentialRepository,
+        CredentialRecordRepository,
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
@@ -355,6 +357,13 @@ class EncryptedInformationRepository
   List<CredentialMaterial> get credentialMaterials =>
       List.unmodifiable(_credentialMaterials);
   @override
+  Future<CredentialRecordReceipt?> credentialRecordReceipt(String id) =>
+      _credentialRecordReceipt(id);
+  @override
+  Future<void> commitCredentialRecord(CredentialRecordChange change) =>
+      _commitCredentialRecord(change);
+
+  @override
   Future<void> commitCredentials(
     List<ManagedCredential> credentials,
     List<CredentialMaterial> materials,
@@ -363,27 +372,9 @@ class EncryptedInformationRepository
     _validateVault(credentials, materials);
     try {
       await _writeMetadata(() async {
-        await _db.customStatement('DELETE FROM credential_materials');
-        await _db.customStatement('DELETE FROM managed_credentials');
-        for (final c in credentials) {
-          await _db.customStatement(
-            'INSERT INTO managed_credentials(id,payload) VALUES(?,?)',
-            [c.id, jsonEncode(c.toJson())],
-          );
-        }
-        for (final m in materials) {
-          await _db.customStatement(
-            'INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)',
-            [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
-          );
-        }
+        await _writeCredentialSnapshot(credentials, materials);
       });
-      _credentials
-        ..clear()
-        ..addAll(credentials);
-      _credentialMaterials
-        ..clear()
-        ..addAll(materials);
+      _publishCredentialSnapshot(credentials, materials);
     } catch (_) {
       throw const StorageFailure('credential_save_failed');
     }
