@@ -5,6 +5,11 @@ enum InboxFilter { all, pending, handled }
 enum DesktopColorTheme { purple, green, blue, mono }
 
 extension OwnerDesktopPreferences on OwnerAccess {
+  /// Public association only. Never returns the private transport session key.
+  String? credentialRequestSessionId(String requestId) {
+    final session = _service._credentialUseSessions[requestId];
+    return session == null ? null : _service._sessionBindings[session];
+  }
   bool get notificationsEnabled =>
       _service._repository.readSetting('desktopNotificationsEnabled') != 0;
   Future<void> setNotificationsEnabled(bool enabled) => _serialize(() async {
