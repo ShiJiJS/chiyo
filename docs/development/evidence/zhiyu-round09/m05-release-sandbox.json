@@ -1,0 +1,179 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "sourceCommit": "e3117d4a17567c6517cd08be1c503e4ce36a6679",
+  "branch": "codex/zhiyu-macos",
+  "release": {
+    "sourceCommit": "e3117d4a17567c6517cd08be1c503e4ce36a6679",
+    "nativeEntryPoints": {
+      "captureBackupOutputBookmark": true,
+      "acquireBackupAccess": true,
+      "releaseBackupAccess": true,
+      "reselectBackupOutput": true
+    },
+    "packagePhases": 20,
+    "notes": [
+      "Private Swift names/selectors are not reliable string gates in optimized Release. Channel constants confirm entry inclusion; full clean-source compile and signed native probe provide separate evidence."
+    ],
+    "zip": {
+      "file": "agent-info-manage-0.4.1+13-mac-dev.e3117d4a1756-macos-arm64.zip",
+      "bytes": 131503823,
+      "sha256": "bcf6e2b6f57735c22b101415dfc19254a9d046659cd1dc92d12a2bdb328d7539"
+    }
+  },
+  "build": {
+    "complete": true,
+    "phases": [
+      {
+        "name": "release-build",
+        "exit": 0
+      },
+      {
+        "name": "compile-info",
+        "exit": 0
+      },
+      {
+        "name": "sign-info",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-codex",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-codex",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-codex-hook",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-codex-hook",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-runtime-worker",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-runtime-worker",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-prepare-codex",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-prepare-codex",
+        "exit": 0
+      },
+      {
+        "name": "diagnostic-build",
+        "exit": 0
+      },
+      {
+        "name": "sign-diagnostic-macos-storage-check",
+        "exit": 0
+      },
+      {
+        "name": "sign-diagnostic-libsqlcipher.dylib",
+        "exit": 0
+      },
+      {
+        "name": "app-signature",
+        "exit": 0
+      },
+      {
+        "name": "archive",
+        "exit": 0
+      },
+      {
+        "name": "extract",
+        "exit": 0
+      },
+      {
+        "name": "extracted-app-signature",
+        "exit": 0
+      },
+      {
+        "name": "extracted-storage",
+        "exit": 0
+      },
+      {
+        "name": "extracted-cli-and-worker",
+        "exit": 0
+      }
+    ],
+    "previewKernelUnchanged": true,
+    "disposableCheckoutRemoved": true,
+    "adHocNotNotarized": true,
+    "logsHaveWarnings": true
+  },
+  "sandboxProbe": {
+    "sourceCommit": "e3117d4a17567c6517cd08be1c503e4ce36a6679",
+    "complete": true,
+    "identity": "com.example.infoDesktop.backupScopeQA.a241001040c147d484cddeda1f933f4c",
+    "phases": [
+      {
+        "name": "compile",
+        "exit": 0
+      },
+      {
+        "name": "sign",
+        "exit": 0
+      },
+      {
+        "name": "verify-signature",
+        "exit": 0
+      },
+      {
+        "name": "seed",
+        "exit": 0
+      },
+      {
+        "name": "recover",
+        "exit": 0
+      }
+    ],
+    "limits": [
+      "Container-contained output; no NSOpenPanel/NSSavePanel",
+      "No external-volume grant or stale-bookmark App acceptance",
+      "Standalone signed helper, not the Flutter App"
+    ],
+    "entitlements": {
+      "com.apple.security.app-sandbox": true,
+      "com.apple.security.files.bookmarks.app-scope": true,
+      "com.apple.security.files.user-selected.read-write": true,
+      "com.apple.security.network.client": true,
+      "com.apple.security.network.server": true
+    },
+    "cleanupWarning": "macOS retained protected test-container metadata",
+    "containerRemoved": false,
+    "temporaryAppRemoved": true
+  },
+  "sandboxCoverage": [
+    "Signed sandbox entitlement verified",
+    "NSHomeDirectory is inside exact random application container",
+    "External synthetic file read is denied with NSFileReadNoPermissionError in both processes",
+    "Production registry prepares real allocation and captures bookmarks before process exits",
+    "Fresh process restores both scopes, validates original directory, releases/cleans exact allocation"
+  ],
+  "limitations": [
+    "Probe output is container-contained; no user-selected outside directory",
+    "No actual Flutter NSOpenPanel/NSSavePanel or external-volume/stale-bookmark acceptance",
+    "No installed App upgrade or personal library access",
+    "Old source f1bd29ea package preserved only as ZIP; new payload not installed"
+  ],
+  "initialFindings": [
+    "First cleanup returned EPERM on protected containermanagerd metadata; runner now reports preservation and still removes temporary App",
+    "Private Swift method/selector names absent from optimized Release strings; fixed artifact checker to check the four real channel constants rather than nonexistent symbols"
+  ],
+  "localLogs": [
+    "build/macos-adaptation/m05-release-e3117d4a",
+    "build/macos-adaptation/m05-sandbox-scope-3"
+  ],
+  "registrySha256": "86d87ace31f370376715931da27be3a0a4d3587a26bb6aaf3a4f477a634bd11a",
+  "probeSha256": "4bfcd751b2f091b0be4b2ffb77ea0d55f2c8013969ae8c23db9e2d437759d306",
+  "registryMatchesPackageCommit": true
+}

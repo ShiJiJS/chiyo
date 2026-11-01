@@ -3,6 +3,39 @@
 对应 [#74](https://github.com/ShiJiJS/agent-info-manage/issues/74)，归属 #69 后续功能。
 本票不阻挡已准备的1443d358候选换包；本轮未替换App或请求系统授权。
 
+## 2026-11-01：文件访问恢复源码完整打包及独立沙箱重开
+
+`e3117d4a17567c6517cd08be1c503e4ce36a6679` 已形成完整 ARM64 Release
+`0.4.1+13-mac-dev.e3117d4a1756`：20个打包阶段通过，包括实际 Swift/AOT 编译、
+签名/沙箱权限、中文路径提取逐项核对、SQLCipher诊断与随包CLI/worker检查。
+包内确认存在四个新增备份访问通道常量。优化后的私有Swift方法名/selector不可靠，
+初始字符串探针未命中；改以实际通道常量核对入口纳入，另以完整编译和原生运行验证行为。
+Xcode仍输出exit-code-0诊断与弃用警告，保留日志；不称无警告构建。
+
+最新展开载荷：`build/macos-adaptation/m05-release-e3117d4a/AgentInfoManage`。
+同目录 ZIP `agent-info-manage-0.4.1+13-mac-dev.e3117d4a1756-macos-arm64.zip`，
+131503823字节，SHA256 `bcf6e2b6f57735c22b101415dfc19254a9d046659cd1dc92d12a2bdb328d7539`。
+这是ad-hoc本机开发包，未公证、未安装；原固定安装/预览与1443d358交付安排保持。
+独立源码副本、重复App/dSYM/提取树已清理，原预览kernel摘要不变。旧f1bd29ea的重复
+展开载荷已移除，只保留ZIP和日志，M05仅保留这份最新展开载荷。
+
+新增可重复的 `scripts/qa/check-macos-backup-sandbox.py <新build目录>`，使用独立随机
+应用身份和生产 BackupStagingRegistry（源码与包提交逐字节一致），不打开Flutter界面。
+签名启用真实App Sandbox与app-scope书签；两个进程均验证NSHomeDirectory映射到
+本次容器，并且无法读取宿主已确认存在的合成文件（NSFileReadNoPermissionError），
+防止把仅有容器路径误当已实际限制。seed创建同卷暂存/输出并保存真实书签后退出；
+recover进程重新激活准确目录/文件scope，核对身份，释放并清理，两个进程通过。
+仅使用合成字节，不读取个人库或Keychain，无系统面板、通知或computer use。
+
+沙箱测试程序的合成根已自行删净，临时App与外部拒读样本均清理。首次脚本在清理
+容器时遇到macOS保护的containermanagerd元数据EPERM，已改为如实记录保留、继续
+清理临时App，使用新随机身份完整重跑通过；少量受保护测试容器元数据保留，不申请
+提权/全盘访问，也不宣称全部容器目录已删除。
+
+[完整证据](evidence/zhiyu-round09/m05-release-sandbox.json)。该检查只证明独立签名
+沙箱helper的容器内文件书签跨进程恢复；**不证明**正式Flutter App的真实文件面板、
+主人选择的外部位置、外接卷/过期书签已验收。这些仍属#74剩余工作，整票保持OPEN。
+
 ## 2026-11-01：原操作绑定的外部文件访问恢复
 
 暂存分配目录在生成材料前建立 security-scoped bookmark，随准确暂存身份登记在
