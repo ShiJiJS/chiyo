@@ -191,6 +191,20 @@ class DesktopRuntime extends ChangeNotifier {
   // Native termination may fail after the repository is already closed. The
   // launcher must keep repository-backed widgets unmounted in that state.
   bool get stopped => _stopped;
+  bool windowHidden = false;
+  Future<bool> hideWorkingWindow() async {
+    final hidden = await platform.hideWindow();
+    windowHidden = hidden;
+    notifyListeners();
+    return hidden;
+  }
+
+  Future<void> showWorkingWindow() async {
+    await platform.showWindow();
+    windowHidden = false;
+    notifyListeners();
+  }
+
   final _ready = Completer<void>();
 
   Future<void> start() async {
@@ -401,7 +415,7 @@ class DesktopRuntime extends ChangeNotifier {
       } else if (event == DesktopEvent.openApprovals ||
           event == DesktopEvent.openSettings ||
           event == DesktopEvent.searchApprovals) {
-        await platform.showWindow();
+        await showWorkingWindow();
       }
       return;
     }
@@ -424,8 +438,12 @@ class DesktopRuntime extends ChangeNotifier {
     final requestedId = platform.openedRequestId;
     switch (event) {
       case DesktopEvent.closeWindow:
+        if (shutdownFailed || !service.owner.desktopPreferences.background) {
+          await quit();
+          return;
+        }
         try {
-          if (await platform.hideWindow()) return;
+          if (await hideWorkingWindow()) return;
         } on Object {
           /* Keep the visible window reachable if the tray failed. */
         }
@@ -436,7 +454,7 @@ class DesktopRuntime extends ChangeNotifier {
         );
         notifyListeners();
       case DesktopEvent.openApprovals:
-        await platform.showWindow();
+        await showWorkingWindow();
         if (quitting || _stopped || navigationIntent != _navigationIntent) {
           return;
         }
@@ -458,7 +476,7 @@ class DesktopRuntime extends ChangeNotifier {
         if (quitting || _stopped || navigationIntent != _navigationIntent) {
           return;
         }
-        await platform.showWindow();
+        await showWorkingWindow();
         if (quitting || _stopped || navigationIntent != _navigationIntent) {
           return;
         }
@@ -471,7 +489,7 @@ class DesktopRuntime extends ChangeNotifier {
         if (quitting || _stopped || navigationIntent != _navigationIntent) {
           return;
         }
-        await platform.showWindow();
+        await showWorkingWindow();
         if (quitting || _stopped || navigationIntent != _navigationIntent) {
           return;
         }
@@ -518,13 +536,14 @@ class DesktopRuntime extends ChangeNotifier {
     shutdownFailed = false;
     try {
       await stop();
+      windowHidden = false;
       await platform.terminate();
     } on Object {
       shutdownFailed = true;
       quitting = false;
       _quit = null;
       try {
-        await platform.showWindow();
+        await showWorkingWindow();
       } on Object {
         /* Preserve unsaved facts. */
       }

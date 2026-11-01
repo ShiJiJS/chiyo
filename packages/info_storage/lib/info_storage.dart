@@ -35,6 +35,7 @@ part 'backup_owner_operations.dart';
 part 'information_purge_storage.dart';
 part 'information_file_outputs.dart';
 part 'information_file_opens.dart';
+part 'desktop_preferences_storage.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -132,7 +133,17 @@ class EncryptedInformationRepository
         InformationApprovalRepository,
         InformationPurgeRepository,
         InformationClassificationRepository,
+        DesktopPreferencesRepository,
         SshHostTrustRepository {
+  @override
+  Future<DesktopPreferencesReceipt?> desktopPreferencesReceipt(String id) =>
+      _desktopReceipt(id);
+  @override
+  Future<void> commitDesktopPreferences(
+    DesktopPreferencesReceipt receipt,
+    DesktopHistoryCleanup cleanup, {
+    required void Function() validate,
+  }) => _commitDesktop(receipt, cleanup, validate);
   @override
   Future<InformationApprovalReceipt?> informationApprovalReceipt(String id) =>
       _approvalReceipt(id);
@@ -1675,6 +1686,11 @@ class _InformationDatabase extends GeneratedDatabase {
       // An unpublished development schema 8 preceded the reserved audit
       // tables. Backfill only after rejecting unknown future versions.
       await _createAudit();
+      // Local receipts add no portable content or live capabilities.
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS desktop_preference_operations('
+        'operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+      );
     },
   );
 

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:info_cli/macos_agent_bundle.dart';
 import 'owner_workspace_agents.dart';
+import 'owner_workspace_settings.dart';
+import 'owner_workspace_runtime.dart';
 import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
@@ -56,7 +58,10 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     super.initState();
     _desktop = RuntimeWorkspaceDesktop(widget.runtime);
     _bind();
+    widget.runtime.addListener(_runtimeChanged);
   }
+
+  void _runtimeChanged() => _source.notifyExternalChange();
 
   void _bind() {
     if (widget.backups != null) {
@@ -82,6 +87,15 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         picker: widget.filePicker,
       ),
       backups: _backups ?? const UnavailableWorkspaceBackup(),
+      runtime: OwnerWorkspaceRuntime(
+        runtime: widget.runtime,
+        changed: () => _source.notifyExternalChange(),
+      ),
+      settings: OwnerWorkspaceSettings(
+        owner: widget.runtime.service.owner,
+        runtime: widget.runtime,
+        changed: () => _source.refreshFromOwner(),
+      ),
       agents: OwnerWorkspaceAgents(
         owner: widget.runtime.service.owner,
         readBundle: _bundle.read,
@@ -106,6 +120,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   @override
   void dispose() {
     unawaited(_changes?.cancel());
+    widget.runtime.removeListener(_runtimeChanged);
     unawaited(_source.dispose());
     _backups?.dispose();
     _desktop.dispose();

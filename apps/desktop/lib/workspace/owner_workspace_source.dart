@@ -155,6 +155,9 @@ class OwnerWorkspaceSource
     if (!_disposed) _changes.add(ref);
   }
 
+  /// Native runtime/preferences changed without a library record mutation.
+  void notifyExternalChange() => _changed(null);
+
   /// Also used after native resume. No body, capability or key is retained in
   /// the observation signature, and it is never written to disk or logs.
   void refreshFromOwner() {
@@ -206,6 +209,7 @@ class OwnerWorkspaceSource
                 for (final s in owner.sessions) [s.id, s.chatLabel, s.ended],
               ],
               owner.accessRecordObservation,
+              owner.desktopPreferences.version,
               [
                 for (final d in owner.informationFileDeliveries)
                   [

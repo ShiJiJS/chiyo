@@ -42,6 +42,7 @@ part 'recycle_access.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
 part 'workspace_access.dart';
+part 'desktop_preferences.dart';
 part 'library_access.dart';
 part 'information_file_access.dart';
 part 'information_draft_models.dart';

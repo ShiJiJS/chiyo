@@ -386,7 +386,7 @@ class _AgentFlowState extends State<_AgentFlow> {
         control: Text(report.cliLabel, style: libraryText(context, 14)),
       ),
       if (report.packageDirectory case final directory?) ...[
-        _text(context, '已核对的交付目录'),
+        _text(context, '已核对的接入材料目录'),
         SelectableText(directory, style: libraryText(context, 13)),
         _text(
           context,

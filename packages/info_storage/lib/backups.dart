@@ -806,6 +806,9 @@ class InformationBackups {
           'UPDATE information_classification_state SET version=version+1 WHERE singleton=1',
         );
         await _repository._db.customStatement('DELETE FROM settings');
+        await _repository._db.customStatement(
+          'UPDATE desktop_preference_operations SET invalidated=1',
+        );
         await _repository._db.customStatement('DELETE FROM organization_tasks');
         if (_hasPortableFocusedFill(
           contents._tables['credential_use_requests']!.map(
