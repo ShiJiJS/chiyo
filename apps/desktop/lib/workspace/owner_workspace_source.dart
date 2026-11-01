@@ -222,7 +222,27 @@ class OwnerWorkspaceSource
                     d.restoredAt?.toIso8601String(),
                   ],
               ],
-              owner.queryProposals(limit: 1).pendingCount,
+              [
+                for (final p in owner.importProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+              [
+                for (final p in owner.updateProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+              [
+                for (final p in owner.deleteProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+              [
+                for (final p in owner.organizationTasks)
+                  [
+                    p.id,
+                    owner.organizationState(p).name,
+                    p.approvedAt?.toIso8601String(),
+                    p.completedAt?.toIso8601String(),
+                  ],
+              ],
             ]);
     } on Object {
       observed = 'unavailable';
@@ -258,9 +278,7 @@ class OwnerWorkspaceSource
     }
     return WorkspaceSummary(
       records: owner.information.length + owner.credentials.length,
-      pending: owner.informationRequests
-          .where((r) => r.state == core.AccessRequestState.pending)
-          .length,
+      pending: owner.queryInbox(limit: 1).pendingCount,
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );
   });
