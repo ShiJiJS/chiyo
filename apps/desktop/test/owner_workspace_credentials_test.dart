@@ -237,7 +237,7 @@ void main() {
   );
 
   test(
-    'unwired use and lifecycle still fail while durable receipt lookup reports actual absence',
+    'unwired AI use and stale lifecycle fail while receipt lookup reports actual absence',
     () async {
       final c = await create();
       final before = jsonEncode(c.toJson());
@@ -254,14 +254,14 @@ void main() {
       await expectLater(
         source.credentials.change(
           WorkspaceCredentialChange(
-            operationId: 'not-wired',
+            operationId: 'stale-lifecycle',
             ref: ref(c),
-            expectedRecordVersion: c.revision,
+            expectedRecordVersion: c.revision + 1,
             expectedMaterialVersion: c.version,
             action: WorkspaceCredentialAction.recycle,
           ),
         ),
-        fails('unsupported'),
+        fails('conflict'),
       );
       expect(await source.credentials.receipt('unknown-operation'), isNull);
       expect(jsonEncode(service.owner.credential(c.id).toJson()), before);

@@ -1,5 +1,6 @@
 import 'package:info_core/info_core.dart' as core;
 import 'owner_workspace_information.dart';
+import 'owner_workspace_credentials.dart';
 import 'workspace_history.dart';
 import 'workspace_information_codec.dart';
 import 'workspace_records.dart';
@@ -143,6 +144,13 @@ class OwnerWorkspaceHistory {
           wholeItem: entry.wholeItem,
         ),
       );
+    }
+    for (final credential in owner.recycledCredentials) {
+      final entry = ownerCredentialRecycleEntry(owner, credential);
+      final metadata =
+          '${entry.record.name} ${entry.record.description} 凭据 ${entry.record.tags.map((t) => t.name).join(' ')}'
+              .toLowerCase();
+      if (words.every(metadata.contains)) entries.add(entry);
     }
     entries.sort((a, b) {
       final time = b.deletedAt.compareTo(a.deletedAt);

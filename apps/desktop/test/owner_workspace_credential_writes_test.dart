@@ -788,4 +788,82 @@ void main() {
       }
     },
   );
+
+  testWidgets(
+    'real workspace material restore and recycle restore/purge use durable lifecycle source',
+    (t) async {
+      t.view.physicalSize = const Size(1440, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      try {
+        final vault = getVault();
+        final ref = (await t.runAsync(() async {
+          final first = await vault.save(
+            write('seed', candidate: vault.staging.string(secret)),
+          );
+          final detail = await vault.read(first.ref);
+          await vault.save(
+            write(
+              'replace',
+              detail: detail,
+              candidate: vault.staging.string('SYNTHETIC-second'),
+            ),
+          );
+          return first;
+        }))!.ref;
+        await t.pumpWidget(
+          WorkspaceApp(
+            source: source,
+            windowTitle: '合成凭据生命周期',
+            initialSelection: ref,
+          ),
+        );
+        await settle(t);
+        await tap(t, find.byKey(const ValueKey('library-record-actions')));
+        await tap(t, find.text('材料版本').last);
+        await tap(t, find.byKey(const ValueKey('credential-material-1')));
+        await tap(t, find.byKey(const ValueKey('credential-material-restore')));
+        expect(
+          find.byKey(const ValueKey('credential-material-confirm')),
+          findsOneWidget,
+        );
+        expect(find.text(secret), findsNothing);
+        await tap(t, find.byKey(const ValueKey('credential-material-restore')));
+        expect(repo.managedCredentials.single.version, 3);
+        expect(repo.managedCredentials.single.enabled, isFalse);
+        expect(repo.credentialMaterials.last.bytes, utf8.encode(secret));
+        await tap(t, find.byKey(const ValueKey('library-record-actions')));
+        await tap(t, find.text('移到回收站').last);
+        await tap(t, find.byKey(const ValueKey('credential-recycle-submit')));
+        expect(service.owner.credentials, isEmpty);
+        await tap(t, find.byKey(const ValueKey('library-open-recycle')));
+        expect(find.text('查看与恢复'), findsOneWidget);
+        await tap(t, find.text('查看与恢复'));
+        expect(find.text('恢复凭据'), findsOneWidget);
+        await tap(t, find.byKey(const ValueKey('credential-recycle-submit')));
+        expect(repo.managedCredentials.single.version, 4);
+        expect(repo.managedCredentials.single.enabled, isFalse);
+        // Return through the real parent so the restored credential can be managed.
+        await tap(t, find.byKey(const ValueKey('library-recycle-back')));
+        await settle(t);
+        await tap(t, find.byKey(const ValueKey('library-record-actions')));
+        await tap(t, find.text('移到回收站').last);
+        await tap(t, find.byKey(const ValueKey('credential-recycle-submit')));
+        await tap(t, find.byKey(const ValueKey('library-open-recycle')));
+        await tap(t, find.text('查看与恢复'));
+        await tap(t, find.byKey(const ValueKey('credential-recycle-purge')));
+        expect(repo.credentialMaterials, isNotEmpty);
+        await tap(t, find.byKey(const ValueKey('credential-recycle-submit')));
+        expect(repo.credentialMaterials, isEmpty);
+        expect(repo.managedCredentials.single.privateNote, isEmpty);
+        expect(service.owner.recycledCredentials, isEmpty);
+        expect(service.owner.credentialUseRequests, isEmpty);
+        expect(t.takeException(), isNull);
+      } finally {
+        await t.pumpWidget(const SizedBox.shrink());
+        await closeWidget(t);
+      }
+    },
+  );
 }

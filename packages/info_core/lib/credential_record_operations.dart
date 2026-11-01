@@ -1,6 +1,18 @@
 part of 'info_core.dart';
 
-enum CredentialRecordAction { create, edit, replaceMaterial, setEnabled }
+enum CredentialRecordAction {
+  create,
+  edit,
+  replaceMaterial,
+  setEnabled,
+  recycle,
+  restoreMaterial,
+  restoreRecycled,
+  purge;
+
+  bool get lifecycle => index >= CredentialRecordAction.recycle.index;
+  bool get restores => this == restoreMaterial || this == restoreRecycled;
+}
 
 /// Trusted Owner input. Material may enter this boundary but never a workspace
 /// record, receipt or Agent response. Copy bytes before the first await.
@@ -26,6 +38,8 @@ final class CredentialRecordInput {
     this.updateClassification = false,
     this.directoryId,
     Iterable<String>? tagIds,
+    this.retainedMaterialVersion,
+    this.expectedCatalogVersion,
   }) : material = material == null ? null : List.unmodifiable(material),
        tagIds = tagIds == null ? null : List.unmodifiable(tagIds),
        linkedItemIds = linkedItemIds == null
@@ -40,6 +54,7 @@ final class CredentialRecordInput {
       suggestedBinding,
       fileName;
   final int? expectedRevision, expectedMaterialVersion;
+  final int? retainedMaterialVersion, expectedCatalogVersion;
   final CredentialForm? form;
   final List<int>? material;
   final List<String>? linkedItemIds;
@@ -76,6 +91,12 @@ final class CredentialRecordInput {
             if (updateClassification) ...{
               'directoryId': directoryId,
               'tagIds': tagIds == null ? null : (List.of(tagIds!)..sort()),
+            },
+            if (action.lifecycle ||
+                retainedMaterialVersion != null ||
+                expectedCatalogVersion != null) ...{
+              'retainedMaterialVersion': retainedMaterialVersion,
+              'expectedCatalogVersion': expectedCatalogVersion,
             },
           }),
         ),
@@ -118,7 +139,8 @@ final class CredentialRecordReceipt {
                   revision != baseRevision! + 1 ||
                   materialVersion !=
                       baseMaterialVersion! +
-                          (action == CredentialRecordAction.replaceMaterial
+                          (action == CredentialRecordAction.replaceMaterial ||
+                                  action.restores
                               ? 1
                               : 0))) {
       throw const FormatException('Invalid credential record receipt');
@@ -197,6 +219,8 @@ final class CredentialRecordChange {
     required Iterable<ManagedCredential> credentials,
     required Iterable<CredentialMaterial> materials,
     required this.validate,
+    this.retainedMaterialVersion,
+    this.expectedCatalogVersion,
   }) : credentials = List.unmodifiable(credentials),
        materials = List.unmodifiable(materials);
   final CredentialRecordReceipt receipt;
@@ -204,6 +228,7 @@ final class CredentialRecordChange {
   final List<ManagedCredential> credentials;
   final List<CredentialMaterial> materials;
   final void Function() validate;
+  final int? retainedMaterialVersion, expectedCatalogVersion;
 }
 
 abstract interface class CredentialRecordRepository {
@@ -264,6 +289,13 @@ extension OwnerCredentialRecords on OwnerAccess {
         throw const AccessFailure('operation_conflict');
       }
       return previous;
+    }
+    if (input.action.lifecycle) {
+      return _changeCredentialLifecycle(id, input, hash, check);
+    }
+    if (input.retainedMaterialVersion != null ||
+        input.expectedCatalogVersion != null) {
+      throw const AccessFailure('invalid_credential_operation');
     }
     final create = input.action == CredentialRecordAction.create;
     final toggle = input.action == CredentialRecordAction.setEnabled;
@@ -454,4 +486,210 @@ extension OwnerCredentialRecords on OwnerAccess {
     );
     return receipt;
   });
+
+  Future<CredentialRecordReceipt> _changeCredentialLifecycle(
+    String id,
+    CredentialRecordInput input,
+    String hash,
+    void Function() check,
+  ) async {
+    if (input.credentialId == null ||
+        input.expectedRevision == null ||
+        input.expectedMaterialVersion == null ||
+        input.form != null ||
+        input.name != null ||
+        input.publicPurpose != null ||
+        input.privateNote != null ||
+        input.suggestedBinding != null ||
+        input.material != null ||
+        input.fileName != null ||
+        input.enabled != null ||
+        input.discoverable != null ||
+        input.updateExpiry ||
+        input.expiresAt != null ||
+        input.linkedItemIds != null ||
+        input.updateClassification ||
+        input.directoryId != null ||
+        input.tagIds != null ||
+        (input.action == CredentialRecordAction.restoreMaterial
+            ? input.retainedMaterialVersion == null
+            : input.retainedMaterialVersion != null)) {
+      throw const AccessFailure('invalid_credential_operation');
+    }
+    if (input.expectedCatalogVersion != null &&
+        await _classificationRepository.informationClassificationVersion() !=
+            input.expectedCatalogVersion) {
+      throw const AccessFailure('credential_conflict');
+    }
+    check();
+    final old = credential(input.credentialId!);
+    if (old.revision != input.expectedRevision ||
+        old.version != input.expectedMaterialVersion) {
+      throw const AccessFailure('credential_conflict');
+    }
+    final now = _service._clock().toUtc(), vault = _vault;
+    final next = credentialLifecycleSnapshot(
+      old: old,
+      materials: vault.credentialMaterials,
+      action: input.action,
+      selectedVersion: input.retainedMaterialVersion,
+      now: now,
+      directoryIds: directories.map((d) => d.id).toSet(),
+      tagIds: tags.map((t) => t.id).toSet(),
+    );
+    final c = next.credential;
+    void validate() {
+      check();
+      if (input.action.restores) {
+        final selectedVersion =
+            input.action == CredentialRecordAction.restoreRecycled
+            ? old.version
+            : input.retainedMaterialVersion;
+        final selected = vault.credentialMaterials
+            .where(
+              (m) => m.credentialId == old.id && m.version == selectedVersion,
+            )
+            .single;
+        final current = _service._clock().toUtc();
+        if (selected.retiredAt != null &&
+                !current.isBefore(
+                  selected.retiredAt!.add(const Duration(days: 30)),
+                ) ||
+            old.deletedAt != null &&
+                !current.isBefore(
+                  old.deletedAt!.add(const Duration(days: 30)),
+                )) {
+          throw const AccessFailure('credential_material_purged');
+        }
+      }
+    }
+
+    final receipt = CredentialRecordReceipt(
+      operationId: id,
+      action: input.action,
+      inputHash: hash,
+      commandDigest: input.commandDigest,
+      credentialId: c.id,
+      baseRevision: old.revision,
+      baseMaterialVersion: old.version,
+      revision: c.revision,
+      materialVersion: c.version,
+      useGeneration: c.useGeneration,
+    );
+    await _credentialRecords.commitCredentialRecord(
+      CredentialRecordChange(
+        receipt: receipt,
+        previousDigest: credentialVaultDigest(
+          vault.managedCredentials,
+          vault.credentialMaterials,
+        ),
+        credentials: [
+          for (final value in vault.managedCredentials)
+            value.id == c.id ? c : value,
+        ],
+        materials: next.materials,
+        retainedMaterialVersion: input.retainedMaterialVersion,
+        expectedCatalogVersion: input.expectedCatalogVersion,
+        validate: validate,
+      ),
+    );
+    return receipt;
+  }
+}
+
+/// Deterministic transition shared by Owner validation and the durable CAS
+/// boundary. No secret snapshot enters an operation receipt.
+({ManagedCredential credential, List<CredentialMaterial> materials})
+credentialLifecycleSnapshot({
+  required ManagedCredential old,
+  required List<CredentialMaterial> materials,
+  required CredentialRecordAction action,
+  required DateTime now,
+  required Set<String> directoryIds,
+  required Set<String> tagIds,
+  int? selectedVersion,
+}) {
+  if (!action.lifecycle ||
+      old.purgedAt != null ||
+      !now.isUtc ||
+      ((action == CredentialRecordAction.recycle ||
+              action == CredentialRecordAction.restoreMaterial)
+          ? old.deletedAt != null
+          : old.deletedAt == null)) {
+    throw const AccessFailure('credential_conflict');
+  }
+  if (action == CredentialRecordAction.restoreRecycled &&
+      !now.isBefore(old.deletedAt!.add(const Duration(days: 30)))) {
+    throw const AccessFailure('credential_material_purged');
+  }
+  final restoring = action.restores;
+  CredentialMaterial? selected;
+  if (restoring) {
+    final version = action == CredentialRecordAction.restoreRecycled
+        ? old.version
+        : selectedVersion;
+    if (version == null ||
+        action == CredentialRecordAction.restoreMaterial &&
+            version == old.version) {
+      throw const AccessFailure('credential_conflict');
+    }
+    selected = materials
+        .where((m) => m.credentialId == old.id && m.version == version)
+        .firstOrNull;
+    if (selected == null ||
+        selected.retiredAt != null &&
+            !now.isBefore(selected.retiredAt!.add(const Duration(days: 30)))) {
+      throw const AccessFailure('credential_material_purged');
+    }
+  }
+  final purge = action == CredentialRecordAction.purge;
+  final c = old.copy(
+    name: purge ? '已清理凭据' : null,
+    publicPurpose: purge ? '' : null,
+    privateNote: purge ? '' : null,
+    suggestedBinding: purge ? '' : null,
+    discoverable: purge ? false : null,
+    enabled: false,
+    deletedAt: action == CredentialRecordAction.recycle ? now : null,
+    purgedAt: purge ? now : null,
+    version: restoring ? old.version + 1 : null,
+    fileName: purge && old.form == CredentialForm.file
+        ? 'removed.bin'
+        : selected?.fileName,
+    byteLength: purge ? 1 : selected?.bytes.length,
+    linkedItemIds: purge ? const [] : null,
+    clearExpiry: purge,
+    restore: restoring,
+    directoryId: restoring && directoryIds.contains(old.directoryId)
+        ? old.directoryId
+        : null,
+    clearDirectory:
+        purge || restoring && !directoryIds.contains(old.directoryId),
+    tagIds: purge
+        ? const []
+        : restoring
+        ? old.tagIds.where(tagIds.contains)
+        : null,
+    invalidateUse: true,
+    modifiedAt: now,
+  );
+  return (
+    credential: c,
+    materials: [
+      for (final m in materials)
+        if (!(purge && m.credentialId == old.id))
+          m.credentialId == old.id &&
+                  (restoring || action == CredentialRecordAction.recycle)
+              ? m.retire(now)
+              : m,
+      if (selected != null)
+        CredentialMaterial(
+          credentialId: old.id,
+          version: c.version,
+          bytes: selected.bytes,
+          createdAt: now,
+          fileName: selected.fileName,
+        ),
+    ],
+  );
 }
