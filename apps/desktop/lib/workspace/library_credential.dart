@@ -35,7 +35,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
   WorkspaceCredentialDetail? _detail;
   List<WorkspaceRecordSummary> _links = [];
   List<WorkspaceCredentialUseRequest> _requests = [];
-  WorkspaceFailure? _failure;
+  WorkspaceFailure? _failure, _requestFailure, _linksFailure;
   bool _loading = true, _busy = false;
   int _generation = 0;
   @override
@@ -47,12 +47,16 @@ class _LibraryCredentialState extends State<LibraryCredential> {
   @override
   void didUpdateWidget(LibraryCredential oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.ref != widget.ref) {
+    if (oldWidget.ref != widget.ref || oldWidget.source != widget.source) {
       _detail = null;
       _links = [];
       _requests = [];
+      _requestFailure = null;
+      _linksFailure = null;
     }
-    if (oldWidget.ref != widget.ref || oldWidget.revision != widget.revision) {
+    if (oldWidget.ref != widget.ref ||
+        oldWidget.source != widget.source ||
+        oldWidget.revision != widget.revision) {
       unawaited(_load());
     }
   }
@@ -65,15 +69,31 @@ class _LibraryCredentialState extends State<LibraryCredential> {
     });
     try {
       final detail = await widget.source.credentials.read(widget.ref);
-      final links = await widget.source.readSummaries(detail.linkedInformation);
-      final requests = await widget.source.credentials.requests(
-        ref: widget.ref,
-      );
+      List<WorkspaceRecordSummary> links = [];
+      WorkspaceFailure? linksFailure;
+      try {
+        links = await widget.source.readSummaries(detail.linkedInformation);
+      } catch (error) {
+        linksFailure = error is WorkspaceFailure
+            ? error
+            : const WorkspaceFailure('unavailable', '关联资料暂不可读取。');
+      }
+      List<WorkspaceCredentialUseRequest> requests = [];
+      WorkspaceFailure? requestFailure;
+      try {
+        requests = await widget.source.credentials.requests(ref: widget.ref);
+      } catch (error) {
+        requestFailure = error is WorkspaceFailure
+            ? error
+            : const WorkspaceFailure('unavailable', '使用申请记录暂不可读取。');
+      }
       if (mounted && generation == _generation) {
         setState(() {
           _detail = detail;
           _links = links;
+          _linksFailure = linksFailure;
           _requests = requests;
+          _requestFailure = requestFailure;
           _loading = false;
         });
       }
@@ -242,7 +262,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        detail.filename ?? 'Token 字符串',
+                        detail.filename ?? detail.format,
                         key: const ValueKey('credential-summary-title'),
                         style: libraryText(
                           context,
@@ -294,7 +314,9 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                         ? '可使用'
                         : detail.delivery == WorkspaceCredentialDelivery.focus
                         ? '本机填充未启用'
-                        : '仅保管',
+                        : detail.delivery == WorkspaceCredentialDelivery.storage
+                        ? '仅保管'
+                        : '使用暂不可用',
                     style: libraryText(
                       context,
                       13,
@@ -424,20 +446,27 @@ class _LibraryCredentialState extends State<LibraryCredential> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final (index, ref) in detail.linkedInformation.indexed)
-                if (_links.where((r) => r.ref == ref).firstOrNull
-                    case final linked?)
-                  LibraryRelationRow(
-                    record: linked,
-                    first: index == 0,
-                    onPressed: () => widget.onOpen(ref),
-                  )
-                else
-                  Text(
-                    '关联资料已不可用。',
-                    style: libraryText(context, 13, color: c.muted),
-                  ),
-              if (detail.linkedInformation.isEmpty)
+              if (_linksFailure case final failure?)
+                Text(
+                  '关联资料未能读取：${failure.message}',
+                  key: const ValueKey('credential-link-read-failure'),
+                  style: libraryText(context, 13, color: c.warning),
+                ),
+              if (_linksFailure == null)
+                for (final (index, ref) in detail.linkedInformation.indexed)
+                  if (_links.where((r) => r.ref == ref).firstOrNull
+                      case final linked?)
+                    LibraryRelationRow(
+                      record: linked,
+                      first: index == 0,
+                      onPressed: () => widget.onOpen(ref),
+                    )
+                  else
+                    Text(
+                      '关联资料已不可用。',
+                      style: libraryText(context, 13, color: c.muted),
+                    ),
+              if (_linksFailure == null && detail.linkedInformation.isEmpty)
                 Text(
                   '尚未关联资料。',
                   style: libraryText(context, 13, color: c.muted),
@@ -484,6 +513,15 @@ class _LibraryCredentialState extends State<LibraryCredential> {
             ],
           ),
         ),
+        if (_requestFailure case final failure?)
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Text(
+              '使用申请记录未能读取：${failure.message}',
+              key: const ValueKey('credential-request-read-failure'),
+              style: libraryText(context, 13, color: c.warning),
+            ),
+          ),
         if (_requests.isNotEmpty)
           _section(
             '使用申请',
