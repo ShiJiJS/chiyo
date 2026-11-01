@@ -175,4 +175,55 @@ void main() {
     ).writeAsString('unexpected');
     expect((await probe.read()).status, 'bundle_invalid');
   });
+
+  test(
+    'app-contained integration works without external delivery files',
+    () async {
+      final contents = '${root.path}/app/info_desktop.app/Contents';
+      final embedded = Directory(
+        '$contents/${MacAgentBundle.embeddedDirectory}',
+      );
+      await embedded.create(recursive: true);
+      for (final path in MacAgentBundle.embeddedFiles) {
+        final target = File('${embedded.path}/$path');
+        await target.parent.create(recursive: true);
+        await file(path).copy(target.path);
+        await Process.run('/bin/chmod', [
+          (file(path).statSync().mode & 0xfff).toRadixString(8),
+          target.path,
+        ]);
+      }
+      final inner = File('${embedded.path}/manifest.json');
+      await inner.writeAsString(
+        jsonEncode({
+          ...manifest,
+          'format': 2,
+          'scope': 'app_integration',
+          'files': (manifest['files'] as List)
+              .where((r) => MacAgentBundle.embeddedFiles.contains(r['path']))
+              .toList(),
+        }),
+      );
+      final identity = File('$contents/Resources/agent-source.json');
+      await identity.writeAsString(
+        jsonEncode({
+          'appIdentity': manifest['appIdentity'],
+          'sourceCommit': manifest['sourceCommit'],
+        }),
+      );
+      await file('manifest.json').delete();
+      await Directory('${root.path}/cli').delete(recursive: true);
+      final valid = await probe.read();
+      expect(valid.verified, isTrue);
+      expect(valid.embedded, isTrue);
+      expect(valid.directory, embedded.path);
+      await identity.writeAsString(
+        jsonEncode({
+          'appIdentity': manifest['appIdentity'],
+          'sourceCommit': 'b' * 40,
+        }),
+      );
+      expect((await probe.read()).status, 'bundle_invalid');
+    },
+  );
 }
