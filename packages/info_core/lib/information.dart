@@ -29,6 +29,8 @@ import 'info_core.dart'
         InformationApprovalRepository,
         InformationApprovalReceipt,
         InformationApprovalCommit,
+        InformationApprovalAction,
+        FieldRef,
         InformationLifecycleReceipt,
         InformationPurgeChange,
         InformationPurgeRepository,
@@ -454,6 +456,32 @@ class MemoryInformationRepository
     for (final entry in change.itemVersions.entries) {
       if (_items[entry.key]?.version != entry.value) {
         throw const AccessFailure('scope_changed');
+      }
+    }
+    if (change.receipt.action == InformationApprovalAction.approve) {
+      for (final recorded in change.grant!.fields) {
+        final field = _items[recorded.itemId]?.fields
+            .where((f) => f.id == recorded.fieldId)
+            .firstOrNull;
+        final expected =
+            change.expectedFiles[FieldRef(recorded.itemId, recorded.fieldId)];
+        if (field == null ||
+            (field.kind == FieldKind.file
+                ? expected != field.attachment
+                : expected != null)) {
+          throw const AccessFailure('scope_changed');
+        }
+      }
+      for (final ref in change.expectedFiles.values.toSet()) {
+        final original = _informationFiles[ref];
+        if (original == null || !original.$1.available || original.$2 == null) {
+          throw const AccessFailure('attachment_missing');
+        }
+        if (original.$2!.length != original.$1.byteLength ||
+            crypto.sha256.convert(original.$2!).toString() !=
+                original.$1.sha256) {
+          throw const AccessFailure('attachment_integrity_failed');
+        }
       }
     }
     change.validatePrevious(

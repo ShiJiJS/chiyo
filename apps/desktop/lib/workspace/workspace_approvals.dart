@@ -142,6 +142,7 @@ class WorkspaceApprovalDetail {
     this.fieldExpiresAt,
     this.credentialExpiresAt,
     this.approveUnavailableReason,
+    this.fileVersionPolicy,
     this.decisionUnavailableReason,
     Iterable<WorkspaceApprovalExecution> executions = const [],
   }) : executions = List.unmodifiable(executions),
@@ -156,7 +157,7 @@ class WorkspaceApprovalDetail {
   final Map<String, int> fileVersions;
   final WorkspaceCredentialUseRequest? credential;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
-  final String? approveUnavailableReason;
+  final String? approveUnavailableReason, fileVersionPolicy;
 
   /// Applies to all owner decisions, including deny/revoke. A source may expose
   /// real read-only facts before its transactional decision adapter is ready.
@@ -173,6 +174,7 @@ class WorkspaceApprovalDetail {
         fieldExpiresAt: fieldExpiresAt,
         credentialExpiresAt: credentialExpiresAt,
         approveUnavailableReason: approveUnavailableReason,
+        fileVersionPolicy: fileVersionPolicy,
         decisionUnavailableReason: decisionUnavailableReason,
         executions: [
           for (final e in executions)

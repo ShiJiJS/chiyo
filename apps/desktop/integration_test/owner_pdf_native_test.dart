@@ -1,5 +1,6 @@
 // Test entry only. No production bootstrap, Keychain, hooks or OS input.
 import 'dart:convert';
+import 'owner_file_approvals_native.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -113,6 +114,7 @@ void main() {
   const fileChanges = bool.fromEnvironment('OWNER_PDF_FILE_CHANGES');
   const fileOutputs = bool.fromEnvironment('OWNER_FILE_OUTPUTS');
   const fileOpens = bool.fromEnvironment('OWNER_FILE_OPENS');
+  const fileApprovals = bool.fromEnvironment('OWNER_FILE_APPROVALS');
   if (!Platform.isMacOS || !RegExp(r'^[a-f0-9]{32}$').hasMatch(run)) {
     throw StateError('Explicit synthetic PDF native invocation required');
   }
@@ -135,6 +137,7 @@ void main() {
     final picker = _Picker();
     final receiver = _OpenReceiver();
     WorkspaceFileChange? restoredCommand;
+    NativeFileApprovalEvidence? approvalEvidence;
     try {
       await tester.runAsync(() async {
         root = await Directory.systemTemp.createTemp('owner-pdf-$run-');
@@ -148,7 +151,10 @@ void main() {
           '${root!.path}/library',
           _Keys(),
         );
-        service = core.InformationService(repository: repo!);
+        service = core.InformationService(
+          repository: repo!,
+          informationDeliveryFiles: core.NativeInformationDeliveryFiles(),
+        );
         source = OwnerWorkspaceSource(
           owner: service!.owner,
           fileOutputs: fileOutputs ? repo!.fileOutputs : null,
@@ -400,6 +406,16 @@ void main() {
           );
         });
       }
+      if (fileApprovals) {
+        approvalEvidence = await checkNativeFileApprovals(
+          tester,
+          service!,
+          source!,
+          item,
+          _pdf(),
+          checks,
+        );
+      }
       await tester.runAsync(() async {
         await source!.dispose();
         await service!.close();
@@ -408,7 +424,10 @@ void main() {
           '${root!.path}/library',
           _Keys(),
         );
-        service = core.InformationService(repository: repo!);
+        service = core.InformationService(
+          repository: repo!,
+          informationDeliveryFiles: core.NativeInformationDeliveryFiles(),
+        );
         source = OwnerWorkspaceSource(
           owner: service!.owner,
           fileOutputs: fileOutputs ? repo!.fileOutputs : null,
@@ -483,6 +502,25 @@ void main() {
           );
           checks.add(
             'reopened sandbox closes previous Owner copy without redispatch and preserves original outcome',
+          );
+        }
+        if (approvalEvidence case final evidence?) {
+          expect(
+            (await source!.approvals.receipt(evidence.operationId))!.requestId,
+            evidence.requestId,
+          );
+          final previous = await source!.approvals.read(evidence.requestId);
+          expect(
+            previous.request.state,
+            isIn([
+              WorkspaceApprovalState.revoked,
+              WorkspaceApprovalState.sessionEnded,
+            ]),
+          );
+          expect(previous.canApprove, false);
+          expect(service!.owner.sessions, isEmpty);
+          checks.add(
+            'reopened SQLCipher keeps original file approval receipt and terminal facts without reviving a session',
           );
         }
         checks.add('SQLCipher/service reopen returns identical native page');

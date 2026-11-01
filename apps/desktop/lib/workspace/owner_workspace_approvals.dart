@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'workspace_approvals.dart';
 import 'workspace_records.dart';
+import 'workspace_files.dart';
 
 /// Ordinary owner decisions and metadata from the actual service.
 /// Requests still originate in Agent transport; this source never retains values,
@@ -45,19 +46,62 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
     };
   }
 
-  static WorkspaceApprovalSummary summaryOf(core.OwnerRequestSnapshot r) =>
-      WorkspaceApprovalSummary(
-        id: r.id,
-        title: '资料读取申请',
-        kind: WorkspaceApprovalKind.information,
-        agentClaim: '未提供 Agent 名称',
-        sessionId: r.sessionId,
-        chatClaim: r.chatLabel,
-        purpose: r.purpose,
-        submittedAt: r.createdAt,
-        requestExpiresAt: r.requestExpiresAt,
-        state: stateOf(r),
-      );
+  static WorkspaceApprovalSummary summaryOf(
+    core.OwnerRequestSnapshot r, {
+    bool file = false,
+  }) => WorkspaceApprovalSummary(
+    id: r.id,
+    title: file ? '文件与字段申请' : '资料读取申请',
+    kind: file ? WorkspaceApprovalKind.file : WorkspaceApprovalKind.information,
+    agentClaim: '未提供 Agent 名称',
+    sessionId: r.sessionId,
+    chatClaim: r.chatLabel,
+    purpose: r.purpose,
+    submittedAt: r.createdAt,
+    requestExpiresAt: r.requestExpiresAt,
+    state: stateOf(r),
+  );
+
+  bool _hasCurrentFile(core.OwnerRequestSnapshot r) => r.fields.any(
+    (ref) =>
+        owner.information
+            .where((i) => i.id == ref.itemId)
+            .firstOrNull
+            ?.fields
+            .where((f) => f.id == ref.fieldId)
+            .firstOrNull
+            ?.kind ==
+        core.FieldKind.file,
+  );
+
+  Future<WorkspaceFileVersion?> _currentFile(
+    core.InformationAttachmentRef ref,
+  ) async {
+    try {
+      final v = (await owner.informationAttachmentVersions(
+        ref.attachmentId,
+      )).where((v) => v.reference == ref).firstOrNull;
+      return v == null
+          ? null
+          : WorkspaceFileVersion(
+              ref: WorkspaceFileRef(ref.attachmentId, ref.attachmentVersion),
+              filename: v.originalName,
+              mediaType: v.mediaType,
+              byteLength: v.byteLength,
+              createdAt: v.createdAt,
+              available: v.available,
+            );
+    } on core.AccessFailure catch (e) {
+      if ({
+        'attachment_missing',
+        'attachment_integrity_failed',
+        'invalid_information_file',
+      }.contains(e.status)) {
+        return null;
+      }
+      rethrow;
+    }
+  }
 
   @override
   Future<WorkspaceApprovalResults> query(
@@ -113,7 +157,10 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         ? selectedIndex
         : offset;
     return WorkspaceApprovalResults(
-      items: filtered.skip(offset).take(query.limit).map(summaryOf),
+      items: filtered
+          .skip(offset)
+          .take(query.limit)
+          .map((r) => summaryOf(r, file: _hasCurrentFile(r))),
       total: filtered.length,
       pending: pending,
       offset: offset,
@@ -136,6 +183,16 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
     };
     final refs = {...r.fields, ...?r.approvedFields};
     String key(core.FieldRef ref) => jsonEncode([ref.itemId, ref.fieldId]);
+    final versions = <core.FieldRef, WorkspaceFileVersion?>{};
+    if (!r.historical) {
+      for (final ref in refs) {
+        final file = records[ref.itemId]?.fields
+            .where((f) => f.id == ref.fieldId)
+            .firstOrNull
+            ?.attachment;
+        if (file != null) versions[ref] = await _currentFile(file);
+      }
+    }
     final scopes = [
       for (final ref in refs)
         () {
@@ -160,20 +217,30 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
             requested: r.fields.contains(ref),
             available:
                 field != null &&
-                field.kind != core.FieldKind.file &&
-                !r.historical,
+                !r.historical &&
+                (field.kind != core.FieldKind.file ||
+                    owner.informationFileDeliveryAvailable &&
+                        versions[ref]?.available == true),
             unavailableReason: field == null
                 ? '原字段已不存在。'
-                : field.kind == core.FieldKind.file
-                ? '文件领取审批尚未接入。'
                 : r.historical
-                ? '历史记录不授予访问能力。'
+                ? '历史记录不授予访问能力，也不以当前版本冒充原附件。'
+                : field.kind == core.FieldKind.file &&
+                      !owner.informationFileDeliveryAvailable
+                ? '当前运行实例未启用附件领取。'
+                : field.kind == core.FieldKind.file &&
+                      versions[ref]?.available != true
+                ? '当前文件原文不可用，不能批准该文件；可以减选它后审批其他字段。'
                 : null,
+            fileVersions: versions[ref] == null ? const [] : [versions[ref]!],
           );
         }(),
     ];
     return WorkspaceApprovalDetail(
-      request: summaryOf(r),
+      request: summaryOf(
+        r,
+        file: scopes.any((s) => s.kind == WorkspaceApprovalScopeKind.file),
+      ),
       reviewToken: sha256
           .convert(
             utf8.encode(
@@ -183,7 +250,20 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
                 r.decisionPending,
                 r.requestExpiresAt.toIso8601String(),
                 r.grantExpiresAt?.toIso8601String(),
-                for (final s in scopes) [s.id, s.recordVersion, s.available],
+                for (final s in scopes)
+                  [
+                    s.id,
+                    s.recordVersion,
+                    s.available,
+                    for (final file in s.fileVersions)
+                      [
+                        file.ref.toJson(),
+                        file.filename,
+                        file.mediaType,
+                        file.byteLength,
+                        file.available,
+                      ],
+                  ],
               ]),
             ),
           )
@@ -192,9 +272,11 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
       approved: (r.approvedFields ?? []).map(key),
       decidedAt: r.approvedAt,
       fieldExpiresAt: r.grantExpiresAt,
-      approveUnavailableReason:
+      fileVersionPolicy:
           scopes.any((s) => s.kind == WorkspaceApprovalScopeKind.file)
-          ? '文件领取审批尚未接入；可以拒绝此申请，或让 AI 另行申请普通字段。'
+          ? r.historical
+                ? '这里是历史决定。原附件版本须以批准时快照或具体交付记录核对，不能以当前附件冒充；历史不会恢复许可。'
+                : '核对的是当前附件版本。批准固定字段和期限，之后领取读取该字段当前版本；这里不授予保留旧版本的领取能力。'
           : null,
       decisionUnavailableReason: r.decisionPending
           ? '上次决定仍在保存或结果尚未确认，请先核对原操作。'
@@ -245,13 +327,13 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
             current.approveUnavailableReason!,
           );
         }
-        if (change.fileVersions.isNotEmpty ||
-            change.selected.toSet().length != change.selected.length ||
+        if (change.selected.toSet().length != change.selected.length ||
             (approving
                 ? change.selected.isEmpty ||
                       change.fieldMinutes < 1 ||
                       change.fieldMinutes > 10080
-                : change.selected.isNotEmpty)) {
+                : change.selected.isNotEmpty ||
+                      change.fileVersions.isNotEmpty)) {
           throw const WorkspaceFailure('invalid_scope', '请核对所选字段和使用期限。');
         }
         final scopes = {for (final s in current.scopes) s.id: s};
@@ -260,9 +342,25 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
               scopes[id] == null ||
               !scopes[id]!.available ||
               !scopes[id]!.requested ||
-              scopes[id]!.kind != WorkspaceApprovalScopeKind.field,
+              !{
+                WorkspaceApprovalScopeKind.field,
+                WorkspaceApprovalScopeKind.file,
+              }.contains(scopes[id]!.kind),
         )) {
           throw const WorkspaceFailure('conflict', '所选字段不可用，请重新核对范围。');
+        }
+        final selectedFiles = change.selected
+            .where((id) => scopes[id]!.kind == WorkspaceApprovalScopeKind.file)
+            .toList();
+        if (change.fileVersions.length != selectedFiles.length ||
+            selectedFiles.any(
+              (id) =>
+                  scopes[id]!.fileVersions.length != 1 ||
+                  !scopes[id]!.fileVersions.single.available ||
+                  change.fileVersions[id] !=
+                      scopes[id]!.fileVersions.single.ref.version,
+            )) {
+          throw const WorkspaceFailure('conflict', '请选择当前可用文件版本；旧版本或额外文件不能获批。');
         }
         final receipt = await owner.decideInformationRequest(
           core.InformationApprovalCommand(
@@ -280,6 +378,16 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
             itemVersions: {
               for (final id in change.selected)
                 scopes[id]!.record.id: scopes[id]!.recordVersion,
+            },
+            expectedFiles: {
+              for (final id in selectedFiles)
+                core.FieldRef(
+                  scopes[id]!.record.id,
+                  scopes[id]!.fieldId!,
+                ): core.InformationAttachmentRef(
+                  scopes[id]!.fileVersions.single.ref.id,
+                  change.fileVersions[id]!,
+                ),
             },
             lifetime: Duration(minutes: change.fieldMinutes),
           ),
@@ -300,6 +408,15 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
         'library_changed' => const WorkspaceFailure(
           'library_changed',
           '资料库已替换，请重新打开收件箱。',
+        ),
+        'attachment_missing' ||
+        'attachment_integrity_failed' => const WorkspaceFailure(
+          'file_unavailable',
+          '文件原文缺失或校验失败，未批准；请重新核对范围。',
+        ),
+        'unsupported_capability' => const WorkspaceFailure(
+          'unsupported',
+          '当前实例未启用文件领取，请重新检查运行版本。',
         ),
         'invalid_scope' || 'invalid_operation' => const WorkspaceFailure(
           'invalid_scope',
