@@ -23,5 +23,25 @@
   "controlTests": {
     "passed": 9,
     "conditionalSkip": 1
+  },
+  "finalDelivery": {
+    "date": "2026-11-01",
+    "sourceCommit": "d50c1790b6125fbeb8d4e8e5deeca334a2449773",
+    "packagePhases": 20,
+    "installedAtFixedEntry": true,
+    "oldProgramRemoved": true,
+    "freshEmptyProfile": true,
+    "obsoleteExactSoftwareKeyRemoved": true,
+    "otherKeychainItemsTouched": false,
+    "oldDataBackedUp": false,
+    "normalStartupRunning": true,
+    "normalStartupEmptyUiObserved": true,
+    "normalCliQuit": "exited",
+    "normalExitCodeInvented": false,
+    "stoppedConfirmed": true,
+    "manualSystemPasswordRequired": false,
+    "independentReopenRunning": true,
+    "newPasswordPromptObserved": false,
+    "version": "0.4.1+13-mac-dev.d50c1790b612"
   }
 }
