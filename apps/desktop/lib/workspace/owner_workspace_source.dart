@@ -1,3 +1,5 @@
+import 'owner_workspace_file_opens.dart';
+import 'owner_file_open_dispatcher.dart';
 import 'package:info_storage/info_storage.dart';
 import '../backups.dart';
 import 'owner_workspace_file_actions.dart';
@@ -25,10 +27,14 @@ class OwnerWorkspaceSource
     implements
         WorkspaceSource,
         WorkspaceFileSelectionReleaser,
-        WorkspaceFileActionRecovery {
+        WorkspaceFileActionRecovery,
+        WorkspaceFileOpenRecovery {
   OwnerWorkspaceSource({
     required this.owner,
     InformationFileOutputs? fileOutputs,
+    InformationFileOpens? fileOpens,
+    OwnerFileOpenDispatcher openDispatcher =
+        const NativeOwnerFileOpenDispatcher(),
     BackupFilePicker outputPicker = const NativeBackupFilePicker(),
     OwnerPdfPreviewRenderer pdfPreview = const NativeOwnerPdfPreview(),
     OwnerWorkspaceFileSelections? fileSelections,
@@ -64,6 +70,17 @@ class OwnerWorkspaceSource
             _files,
             fileOutputs,
             outputPicker,
+            opens: fileOpens,
+          );
+    _fileOpens = fileOpens == null
+        ? null
+        : OwnerWorkspaceFileOpens(
+            owner,
+            _information,
+            _files,
+            fileOpens,
+            openDispatcher,
+            outputs: fileOutputs,
           );
     selections = fileSelections ?? OwnerWorkspaceFileSelections(owner);
     _fileChanges = OwnerWorkspaceFileChanges(
@@ -95,6 +112,7 @@ class OwnerWorkspaceSource
   late final OwnerWorkspaceInformation _information;
   late final OwnerWorkspaceFiles _files;
   late final OwnerWorkspaceFileActions? _fileActions;
+  late final OwnerWorkspaceFileOpens? _fileOpens;
   late final OwnerWorkspaceFileSelections selections;
   late final OwnerWorkspaceFileChanges _fileChanges;
   late final OwnerWorkspaceClassification _classification;
@@ -347,10 +365,16 @@ class OwnerWorkspaceSource
   ) => _read(() async {
     final mutation = await _fileChanges.receipt(operationId);
     final output = await _fileActions?.receipt(operationId);
-    if (mutation != null && output != null) {
+    final opened = await _fileOpens?.receipt(operationId);
+    if ([
+          mutation,
+          output,
+          opened,
+        ].whereType<WorkspaceFileOperationReceipt>().length >
+        1) {
       throw const WorkspaceFailure('unknown_outcome', '操作编号对应多种结果，无法确认。');
     }
-    return output ?? mutation;
+    return opened ?? output ?? mutation;
   });
   @override
   Future<WorkspaceFileActionResult> fileAction(
@@ -360,11 +384,23 @@ class OwnerWorkspaceSource
     WorkspaceFileAction action, {
     required String operationId,
   }) => _read(() async {
-    if (action != WorkspaceFileAction.saveAs || _fileActions == null) {
-      return _unsupported();
-    }
     if (await _fileChanges.receipt(operationId) != null) {
       throw const WorkspaceFailure('operation_conflict', '此编号已用于文件更改。');
+    }
+    final pending = (await fileActionState(record, fieldKey)).pending;
+    if (pending != null && pending.operationId != operationId) {
+      throw const WorkspaceFailure('previous_pending', '原文件操作尚未确认，已切回原操作供你核对。');
+    }
+    if (action == WorkspaceFileAction.open) {
+      if (_fileOpens == null) return _unsupported();
+      if (await _fileActions?.receipt(operationId) != null) {
+        throw const WorkspaceFailure('operation_conflict', '此编号已用于另存。');
+      }
+      return _fileOpens.open(record, fieldKey, version, operationId);
+    }
+    if (_fileActions == null) return _unsupported();
+    if (await _fileOpens?.receipt(operationId) != null) {
+      throw const WorkspaceFailure('operation_conflict', '此编号已用于打开。');
     }
     return _fileActions.save(record, fieldKey, version, operationId);
   });
@@ -373,11 +409,26 @@ class OwnerWorkspaceSource
   Future<WorkspaceFileActionState> fileActionState(
     WorkspaceRecordRef record,
     String key,
-  ) => _read(
-    () async =>
+  ) => _read(() async {
+    final saved =
         await _fileActions?.state(record, key) ??
-        const WorkspaceFileActionState(),
-  );
+        const WorkspaceFileActionState();
+    final opened =
+        await _fileOpens?.state(record, key) ??
+        const WorkspaceFileActionState();
+    if (saved.pending != null && opened.pending != null) {
+      throw const WorkspaceFailure(
+        'unknown_outcome',
+        '存在多种未确认文件操作，请先结束使用并清理临时副本。',
+      );
+    }
+    return WorkspaceFileActionState(
+      pending: saved.pending ?? opened.pending,
+      cleanupPending: saved.cleanupPending,
+      openCopies: opened.openCopies,
+      openCleanupPending: opened.openCleanupPending,
+    );
+  });
   @override
   Future<void> recoverFileActionAccess(String id) => _read(() async {
     await _fileActions?.recoverAccess(id);
@@ -387,6 +438,15 @@ class OwnerWorkspaceSource
       _read(() async {
         await _fileActions?.cleanup(record, key);
       });
+  @override
+  Future<void> finishFileOpen(String id) => _read(() async {
+    await _fileOpens?.finish(id);
+  });
+  @override
+  Future<void> closeOpenFileCopies(WorkspaceRecordRef record, String key) =>
+      _read(() async {
+        await _fileOpens?.closeCopies(record, key);
+      });
 
   @override
   Future<void> releaseFileSelection(String id) => selections.release(id);
@@ -395,6 +455,7 @@ class OwnerWorkspaceSource
     if (_disposed) return;
     _disposed = true;
     _fileActions?.dispose();
+    _fileOpens?.dispose();
     _timer?.cancel();
     await selections.dispose();
     await _requests.cancel();

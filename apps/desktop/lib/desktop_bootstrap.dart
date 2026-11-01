@@ -17,11 +17,13 @@ class DesktopLibrary {
     required this.close,
     this.backups,
     this.fileOutputs,
+    this.fileOpens,
   });
   final InformationService service;
   final Future<void> Function() close;
   final InformationBackups? backups;
   final InformationFileOutputs? fileOutputs;
+  final InformationFileOpens? fileOpens;
 }
 
 enum DesktopStartupState { idle, starting, ready, failed }
@@ -172,6 +174,16 @@ class DesktopBootstrap extends ChangeNotifier {
           await server.close();
         },
         closeRepository: library!.close,
+        maintainOwnerFiles: library!.fileOpens == null
+            ? null
+            : () => library!.service.owner.exportLibrary(
+                () => library!.fileOpens!.maintain(closePrevious: true),
+              ),
+        closeOwnerFiles: library!.fileOpens == null
+            ? null
+            : () async {
+                await library!.fileOpens!.maintain(closeAll: true);
+              },
       );
       await runtime!.start();
       await library!.service.owner.retryAuditStorage();

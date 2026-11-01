@@ -25,12 +25,14 @@ class OwnerWorkspaceHost extends StatefulWidget {
     required this.runtime,
     this.backups,
     this.fileOutputs,
+    this.fileOpens,
     this.backupPicker = const NativeBackupFilePicker(),
     this.filePicker = const NativeInformationFilePicker(),
   });
   final DesktopRuntime runtime;
   final InformationBackups? backups;
   final InformationFileOutputs? fileOutputs;
+  final InformationFileOpens? fileOpens;
   final BackupFilePicker backupPicker;
   final InformationFilePicker filePicker;
   @override
@@ -68,6 +70,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     _source = OwnerWorkspaceSource(
       owner: widget.runtime.service.owner,
       fileOutputs: widget.fileOutputs,
+      fileOpens: widget.fileOpens,
       outputPicker: widget.backupPicker,
       fileSelections: OwnerWorkspaceFileSelections(
         widget.runtime.service.owner,

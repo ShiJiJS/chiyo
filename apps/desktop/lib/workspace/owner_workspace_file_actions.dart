@@ -13,14 +13,16 @@ class OwnerWorkspaceFileActions {
     this.information,
     this.files,
     this.outputs,
-    this.picker,
-  ) : scope = owner.captureLibraryScope();
+    this.picker, {
+    this.opens,
+  }) : scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
   final core.OwnerLibraryScope scope;
   final OwnerWorkspaceInformation information;
   final OwnerWorkspaceFiles files;
   final InformationFileOutputs outputs;
   final BackupFilePicker picker;
+  final InformationFileOpens? opens;
   bool _disposed = false;
   void dispose() {
     _disposed = true;
@@ -269,7 +271,7 @@ class OwnerWorkspaceFileActions {
       // A previous process's uncertain write blocks a new write to this field.
       final state = await this.state(record, key);
       if (state.pending != null) {
-        throw const WorkspaceFailure('unknown_outcome', '原另存操作尚未确认，请先核对。');
+        throw const WorkspaceFailure('previous_pending', '原另存操作尚未确认，请先核对。');
       }
       final history = await files.history(record, key);
       if (history.current.ref.version != version) {
@@ -300,6 +302,20 @@ class OwnerWorkspaceFileActions {
             .firstOrNull;
         if (current?.attachment != ref) {
           throw const WorkspaceFailure('conflict', '文件已变化，请重新打开后另存。');
+        }
+        final oldSave = (await outputs.pending()).any(
+          (s) => s.itemId == record.id && s.fieldKey == key && s.uncertain,
+        );
+        final oldOpen = (await opens?.copies() ?? <InformationFileOpenStatus>[])
+            .any(
+              (s) =>
+                  s.itemId == record.id &&
+                  s.fieldKey == key &&
+                  !s.closed &&
+                  s.uncertain,
+            );
+        if (oldSave || oldOpen) {
+          throw const WorkspaceFailure('previous_pending', '原文件操作尚未确认，请先核对。');
         }
         staging = await picker.prepareStaging(path);
         if (staging == null) {

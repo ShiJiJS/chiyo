@@ -22,6 +22,7 @@
 
 /* Begin PBXBuildFile section */
 		7BAF00752611010000000001 /* OwnerPdfPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00752611010000000002 /* OwnerPdfPreview.swift */; };
+		7BAF00752611010000000003 /* OwnerFileOpener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00752611010000000004 /* OwnerFileOpener.swift */; };
 		7BAF00742611010000000001 /* BackupStagingRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00742611010000000002 /* BackupStagingRegistry.swift */; };
 		7BAF00512610230000000001 /* FocusedFillContract.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00512610230000000002 /* FocusedFillContract.swift */; };
 		7BAF00522610230000000001 /* FocusProcessIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BAF00522610230000000002 /* FocusProcessIdentity.swift */; };
@@ -74,6 +75,7 @@
 
 /* Begin PBXFileReference section */
 		7BAF00752611010000000002 /* OwnerPdfPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerPdfPreview.swift; sourceTree = "<group>"; };
+		7BAF00752611010000000004 /* OwnerFileOpener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerFileOpener.swift; sourceTree = "<group>"; };
 		7BAF00742611010000000002 /* BackupStagingRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupStagingRegistry.swift; sourceTree = "<group>"; };
 		7BAF00512610230000000002 /* FocusedFillContract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusedFillContract.swift; sourceTree = "<group>"; };
 		7BAF00522610230000000002 /* FocusProcessIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusProcessIdentity.swift; sourceTree = "<group>"; };
@@ -207,6 +209,7 @@
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				7BAF00742611010000000002 /* BackupStagingRegistry.swift */,
 				7BAF00752611010000000002 /* OwnerPdfPreview.swift */,
+				7BAF00752611010000000004 /* OwnerFileOpener.swift */,
 				7BAF00482610220000000002 /* NativeTextEditingMenu.swift */,
 				7BAF00492610220000000002 /* NativeSecretEditor.swift */,
 				7BAF00502610220000000002 /* NativeTextFieldAccessibility.swift */,
@@ -421,6 +424,7 @@
 				7BAF00552610230000000001 /* FocusedFillBridge.swift in Sources */,
 				7BAF00742611010000000001 /* BackupStagingRegistry.swift in Sources */,
 				7BAF00752611010000000001 /* OwnerPdfPreview.swift in Sources */,
+				7BAF00752611010000000003 /* OwnerFileOpener.swift in Sources */,
 				7BAF00482610220000000001 /* NativeTextEditingMenu.swift in Sources */,
 				7BAF00492610220000000001 /* NativeSecretEditor.swift in Sources */,
 				7BAF00502610220000000001 /* NativeTextFieldAccessibility.swift in Sources */,

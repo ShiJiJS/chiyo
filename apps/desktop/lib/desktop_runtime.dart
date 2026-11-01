@@ -150,11 +150,16 @@ class DesktopRuntime extends ChangeNotifier {
     required this.platform,
     required this.closeServer,
     required this.closeRepository,
+    this.maintainOwnerFiles,
+    this.closeOwnerFiles,
   });
   final InformationService service;
   final DesktopPlatform platform;
   final Future<void> Function() closeServer;
   final Future<void> Function() closeRepository;
+  final Future<int> Function()? maintainOwnerFiles;
+  final Future<void> Function()? closeOwnerFiles;
+  bool ownerFileCleanupFailed = false;
   DesktopAvailability availability = DesktopAvailability.unavailable;
   int openApprovalsRevision = 0;
   int openSettingsRevision = 0;
@@ -241,6 +246,11 @@ class DesktopRuntime extends ChangeNotifier {
       credentialCleanupFailed = true;
     }
     await _checkInformationFiles();
+    try {
+      ownerFileCleanupFailed = (await maintainOwnerFiles?.call() ?? 0) > 0;
+    } catch (_) {
+      ownerFileCleanupFailed = true;
+    }
     await reconcileRuntimeMaterialCleanup();
     try {
       await service.owner.pruneCredentialUseHistory();
@@ -495,6 +505,7 @@ class DesktopRuntime extends ChangeNotifier {
         _maintenance,
         if (_requests case final requests?) requests.cancel(),
       ]);
+      await closeOwnerFiles?.call();
       await closeRepository();
       _stopped = true;
     } on Object {

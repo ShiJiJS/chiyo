@@ -336,7 +336,7 @@ void main() {
         source.fileOperationReceipt('file-save'),
         fails('file_access_required'),
       );
-      await expectLater(save('another'), fails('unknown_outcome'));
+      await expectLater(save('another'), fails('previous_pending'));
       expect(picker.panels, 1);
       await source.recoverFileActionAccess('file-save');
       expect(

@@ -11,6 +11,7 @@ import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/library_file.dart';
 import 'package:info_desktop/information_files.dart';
 import 'package:info_desktop/backups.dart';
+import 'package:info_desktop/workspace/owner_file_open_dispatcher.dart';
 import 'package:info_desktop/workspace/owner_workspace_file_selections.dart';
 
 class _Keys implements DatabaseKeyStore {
@@ -51,6 +52,31 @@ class _OutputPicker extends BackupFilePicker {
   Future<void> releaseRecordedStaging(Map<String, Object?> directory) async {}
 }
 
+// The document receiver is injected: no external app or user window is opened.
+// The Owner copy, encrypted journal, native file driver and cleanup are real.
+class _OpenReceiver implements OwnerFileOpenDispatcher {
+  int calls = 0;
+  core.InformationDeliveryLease? lease;
+  @override
+  Future<OwnerFileDispatchOutcome> open(
+    String id,
+    String digest,
+    core.InformationDeliveryLease value,
+    int length,
+    String hash,
+  ) async {
+    calls++;
+    lease = value;
+    await core.NativeInformationDeliveryFiles().verify(value, length, hash);
+    expect(await File(value.filePath).readAsBytes(), _pdf());
+    return OwnerFileDispatchOutcome.opened;
+  }
+
+  @override
+  Future<OwnerFileDispatchOutcome?> status(String id, String digest) async =>
+      OwnerFileDispatchOutcome.opened;
+}
+
 List<int> _pdf({bool inverted = false}) {
   final objects = [
     '<< /Type /Catalog /Pages 2 0 R >>',
@@ -86,6 +112,7 @@ void main() {
   const run = String.fromEnvironment('OWNER_PDF_NATIVE_RUN');
   const fileChanges = bool.fromEnvironment('OWNER_PDF_FILE_CHANGES');
   const fileOutputs = bool.fromEnvironment('OWNER_FILE_OUTPUTS');
+  const fileOpens = bool.fromEnvironment('OWNER_FILE_OPENS');
   if (!Platform.isMacOS || !RegExp(r'^[a-f0-9]{32}$').hasMatch(run)) {
     throw StateError('Explicit synthetic PDF native invocation required');
   }
@@ -106,6 +133,7 @@ void main() {
     late String field;
     late WorkspaceFilePreview first;
     final picker = _Picker();
+    final receiver = _OpenReceiver();
     WorkspaceFileChange? restoredCommand;
     try {
       await tester.runAsync(() async {
@@ -124,6 +152,8 @@ void main() {
         source = OwnerWorkspaceSource(
           owner: service!.owner,
           fileOutputs: fileOutputs ? repo!.fileOutputs : null,
+          fileOpens: fileOpens ? repo!.fileOpens : null,
+          openDispatcher: receiver,
           outputPicker: _OutputPicker(root!),
           refreshInterval: Duration.zero,
           fileSelections: OwnerWorkspaceFileSelections(
@@ -330,6 +360,46 @@ void main() {
           );
         });
       }
+      if (fileOpens) {
+        await tester.runAsync(() async {
+          expect(
+            await const NativeOwnerFileOpenDispatcher().status(
+              'native-absent',
+              'a' * 64,
+            ),
+            null,
+          );
+          checks.add(
+            'actual production Owner file-open channel reports native cache absence without opening a program',
+          );
+          final ref = WorkspaceRecordRef(
+            WorkspaceRecordKind.information,
+            item.id,
+          );
+          final h = await source!.loadFileHistory(ref, field);
+          expect(
+            (await source!.fileAction(
+              ref,
+              field,
+              h.current.ref.version,
+              WorkspaceFileAction.open,
+              operationId: 'native-owner-open',
+            )).completed,
+            true,
+          );
+          expect(receiver.calls, 1);
+          expect(receiver.lease!.filePath, contains('/Library/Containers/'));
+          expect(
+            (await source!.fileOperationReceipt(
+              'native-owner-open',
+            ))!.openCopyHeld,
+            true,
+          );
+          checks.add(
+            'real sandbox Owner temporary copy and persistent accepted dispatch; document receiver injected',
+          );
+        });
+      }
       await tester.runAsync(() async {
         await source!.dispose();
         await service!.close();
@@ -342,6 +412,8 @@ void main() {
         source = OwnerWorkspaceSource(
           owner: service!.owner,
           fileOutputs: fileOutputs ? repo!.fileOutputs : null,
+          fileOpens: fileOpens ? repo!.fileOpens : null,
+          openDispatcher: receiver,
           outputPicker: _OutputPicker(root!),
           refreshInterval: Duration.zero,
         );
@@ -384,6 +456,35 @@ void main() {
             'reopened sandbox Save As reuses original receipt without another publication',
           );
         }
+        if (fileOpens) {
+          final ref = WorkspaceRecordRef(
+            WorkspaceRecordKind.information,
+            item.id,
+          );
+          await repo!.fileOpens.maintain(closePrevious: true);
+          expect(await File(receiver.lease!.filePath).exists(), false);
+          final h = await source!.loadFileHistory(ref, field);
+          expect(
+            (await source!.fileAction(
+              ref,
+              field,
+              h.current.ref.version,
+              WorkspaceFileAction.open,
+              operationId: 'native-owner-open',
+            )).completed,
+            true,
+          );
+          expect(receiver.calls, 1);
+          expect(
+            (await source!.fileOperationReceipt(
+              'native-owner-open',
+            ))!.openCopyHeld,
+            false,
+          );
+          checks.add(
+            'reopened sandbox closes previous Owner copy without redispatch and preserves original outcome',
+          );
+        }
         checks.add('SQLCipher/service reopen returns identical native page');
       });
       binding.reportData!['passed'] = true;
@@ -392,6 +493,7 @@ void main() {
       await tester.runAsync(() async {
         await source?.dispose();
         await service?.close();
+        await repo?.fileOpens.maintain(closeAll: true);
         await repo?.close();
         if (root != null) await root!.delete(recursive: true);
         binding.reportData!['fixtureRemoved'] =

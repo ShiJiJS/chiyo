@@ -191,12 +191,13 @@ class WorkspaceFileOperationReceipt {
     this.record,
     this.file, {
     this.actionCompleted,
+    this.openCopyHeld,
     this.commandDigest,
     this.cleanupPending = false,
   });
   final WorkspaceRecordRef record;
   final WorkspaceFileRef? file;
-  final bool? actionCompleted;
+  final bool? actionCompleted, openCopyHeld;
   final bool cleanupPending;
   final String? commandDigest;
 }
@@ -226,15 +227,26 @@ String workspaceFileActionDigest(
     .toString();
 
 class WorkspacePendingFileAction {
-  const WorkspacePendingFileAction(this.operationId, this.digest, this.file);
+  const WorkspacePendingFileAction(
+    this.operationId,
+    this.digest,
+    this.file, {
+    this.action = WorkspaceFileAction.saveAs,
+  });
   final String operationId, digest;
   final WorkspaceFileRef file;
+  final WorkspaceFileAction action;
 }
 
 class WorkspaceFileActionState {
-  const WorkspaceFileActionState({this.pending, this.cleanupPending = 0});
+  const WorkspaceFileActionState({
+    this.pending,
+    this.cleanupPending = 0,
+    this.openCopies = 0,
+    this.openCleanupPending = 0,
+  });
   final WorkspacePendingFileAction? pending;
-  final int cleanupPending;
+  final int cleanupPending, openCopies, openCleanupPending;
 }
 
 abstract interface class WorkspaceFileActionRecovery {
@@ -244,4 +256,9 @@ abstract interface class WorkspaceFileActionRecovery {
   );
   Future<void> recoverFileActionAccess(String operationId);
   Future<void> cleanupFileActions(WorkspaceRecordRef record, String fieldKey);
+}
+
+abstract interface class WorkspaceFileOpenRecovery {
+  Future<void> finishFileOpen(String operationId);
+  Future<void> closeOpenFileCopies(WorkspaceRecordRef record, String fieldKey);
 }
