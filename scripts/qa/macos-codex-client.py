@@ -609,5 +609,16 @@ finally:
  for proof in [*PROOFS.values(),*DELEGATED.values()]:assert proof.encode() not in (OUT/'real-client-result.json').read_bytes()
  RESULTS['proofReferencesAbsentFromEvidence']=True;save();print('LIFECYCLE_CLIENT_CLOSED',flush=True)
 
-if not (RESULTS.get('completeOwnerUiFlow') or RESULTS.get('completeLifecycleFlow') or RESULTS.get('completeEndedResumeFlow') or RESULTS.get('completeCredentialFlow') or RESULTS.get('completeExpiryRestartFlow') or RESULTS.get('completeTransportResumeFlow') or RESULTS.get('completeDelegationFlow')):
+completion = {
+ 'lifecycle':'completeLifecycleFlow',
+ 'credential':'completeCredentialFlow',
+ 'expiry-restart':'completeExpiryRestartFlow',
+ 'transport-resume':'completeTransportResumeFlow',
+ 'delegation':'completeDelegationFlow',
+ 'owner-ui':'completeOwnerUiFlow',
+ 'owner-file-ui':'completeOwnerFileUiFlow',
+}[args.case]
+if args.resume_ended:
+ completion='completeEndedResumeFlow'
+if RESULTS.get('failure') or RESULTS.get(completion) is not True:
  raise SystemExit(1)
