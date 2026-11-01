@@ -30,9 +30,28 @@ SQLCipher原文字节/页码到通道（mock渲染）、响应身份/大小/PNG�
 Xcode项目结构和MainFlutterWindow语法通过。原生像素为实际CoreGraphics运行；通道
 mock不冒充同一App端到端运行。[证据](evidence/zhiyu-round09/m06-pdf.json)。
 
-本段仍待同源码完整App编译/实际原生通道验收；未替换正式安装和预览。#75不关闭，
-导入/替换/版本恢复/主人另存仍待实现；#76尚未接入。本轮只用合成原文，不使用
-个人资料、Keychain、computer use、全局hooks或Windows CI。
+同源完整ARM64 Release `87a920989d76ea89399e1f2959a80d0b6fc54a9b` 已构建，20阶段
+通过，包内确认PDF通道及原生渲染类。短方法名renderPage可能以Swift小字符串内联，
+初始字符串检查未命中；实际通道调用另由下述原生App检查证明，不以短字面量作门槛。
+ZIP `agent-info-manage-0.4.1+13-mac-dev.87a920989d76-macos-arm64.zip` 共131577036字节，
+SHA256 `2595f71ed512c4ae2482645b19a95fa1a75890c364aa61a7717442b93cfe9900`。
+载荷位于 `build/macos-adaptation/m06-release-87a92098/AgentInfoManage`，ad-hoc未公证，
+未替换固定安装或预览。Xcode仍有exit-code-0诊断和弃用警告，完整命令和产物检查通过。
+
+`scripts/qa/check-owner-pdf-native.py` 在独立源码副本/随机沙箱身份中构建实际Cocoa/
+Flutter Debug App（d31cd7a4，生产lib/macos/packages与87a92098逐字节相同），
+6个具名检查通过：真实SQLCipher导入合成双页PDF后删除源文件；实际Owner→通道→
+Swift返回第1页及准确尺寸；生产阅读器下一页控件选择第2页；第2页不同且越界明确
+拒绝；上一页控件回第1页；库/service/source同进程重开仍返回相同原生渲染字节。
+签名及真实App Sandbox启用，未使用通道mock、原生面板或computer use。
+该证据是同源Debug原生通道及控件，不能称已运行Release二进制/个人原地升级或
+独立App进程重开；完整S5/本人输入和文件选择仍未验。
+
+测试合成库由App删净，测试App/dSYM/派生构建树/独立源码副本清理且进程已退出。
+旧M05 e3117d4a重复展开载荷移除，仅留ZIP和日志，当前只保留最新M06展开包；
+M04原交付候选及旧安装保护保持。原预览kernel摘要仍为30279179…1ce125。
+#75不关闭，导入/替换/版本恢复/主人另存继续实现；#76尚未接入。本轮只用合成原文，
+不使用个人资料、Keychain、全局hooks或Windows CI。
 
 ## 2026-11-01：Owner校验读取与真实版本/文字/图片预览
 
