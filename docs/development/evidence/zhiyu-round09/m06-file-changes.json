@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-01",
+  "issue": 75,
+  "sourceCommit": "f3dd9de859e059a29d192f8dbd77bc2000206c57",
+  "branch": "codex/zhiyu-macos",
+  "checks": {
+    "core": {
+      "passed": 357,
+      "skipped": 6
+    },
+    "storage": {
+      "passed": 287,
+      "skipped": 19
+    },
+    "desktopRelated": {
+      "passed": 46,
+      "ownerFileCases": 9
+    },
+    "analysis": {
+      "core": "passed",
+      "storage": "passed",
+      "desktop": "passed"
+    }
+  },
+  "native": {
+    "sourceCommit": "f3dd9de859e059a29d192f8dbd77bc2000206c57",
+    "complete": true,
+    "phases": [
+      {
+        "name": "clone",
+        "exit": 0
+      },
+      {
+        "name": "sparse",
+        "exit": 0
+      },
+      {
+        "name": "checkout",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_core",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_cli",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_storage",
+        "exit": 0
+      },
+      {
+        "name": "pub-desktop",
+        "exit": 0
+      },
+      {
+        "name": "configure",
+        "exit": 0
+      },
+      {
+        "name": "build",
+        "exit": 0
+      },
+      {
+        "name": "signature",
+        "exit": 0
+      },
+      {
+        "name": "drive",
+        "exit": 0
+      }
+    ],
+    "previewKernelBefore": "302791799a10fb288c7a5befed09206bf03e6d147ea19ac7b8875fb4211ce125",
+    "identity": "com.example.infoDesktop.zhiyuOwnerPdfCheck.7d8b1596d03640dfac5d4f64efe7826a",
+    "entitlements": {
+      "com.apple.security.app-sandbox": true,
+      "com.apple.security.cs.allow-jit": true,
+      "com.apple.security.files.bookmarks.app-scope": true,
+      "com.apple.security.files.user-selected.read-write": true,
+      "com.apple.security.get-task-allow": true,
+      "com.apple.security.network.client": true,
+      "com.apple.security.network.server": true
+    },
+    "native": {
+      "passed": true,
+      "runtime": {
+        "platform": "macos"
+      },
+      "checks": [
+        "real SQLCipher intake; external original deleted",
+        "actual native channel returns first PDF page and exact metadata",
+        "production reader next-page control selects page1",
+        "second actual page differs; out-of-range error preserved",
+        "production reader previous-page control selects page0",
+        "actual source replacement promotes encrypted PDF and renders new bytes",
+        "retained PDF restore creates v3 and renders exact old bytes",
+        "persistent exact file receipt prevents duplicate restore",
+        "SQLCipher/service reopen returns identical native page"
+      ],
+      "fixtureRemoved": true
+    },
+    "processStillRunning": false,
+    "temporaryProductsRemoved": true,
+    "previewPreserved": true
+  },
+  "invariants": [
+    "Native picker default wired to formal Host; fixture substitutes picker only",
+    "Selected bytes enter encrypted staging before page sees opaque descriptor; source path not retained",
+    "Atomic staged-body/item/history/global file proof commit",
+    "Restore creates new file version, keeps identity and mixed fields/layout",
+    "Exact digest replay before stage/current state lookup",
+    "Cross-store operation collision refused; corrupt proof is unknown",
+    "Cancelling form releases its own encrypted stage, original file preserved",
+    "Unknown UI result cannot close or accept mismatched receipt",
+    "Portable archive restores original bytes and excludes local file operation proofs"
+  ],
+  "initialFindings": [
+    "Empty layout maps inferred dynamic keys, fixed explicit map types without weakening validation",
+    "Widget real I/O awaited fake-zone Owner queue; stopped two live own test processes and reused dual-clock advancement",
+    "Initial regression expected file receipts unsupported and named a nonexistent suite; assertion now tests true absent/ambiguous results and suite corrected",
+    "Unknown file dialogs previously permitted cancellation; frozen until exact reconciliation",
+    "Late picker required another library/closed check after releasing previous stage"
+  ],
+  "limits": [
+    "Native App is isolated Debug, not packaged Release or personal installed App",
+    "Native selection substituted; actual OS Open/Save panels untested",
+    "Repository/service reopen in one process, not independent App restart",
+    "Owner save-as/external open and AI file workflows remain unsupported",
+    "Latest87a92098 release predates these mutations"
+  ],
+  "logs": [
+    "build/macos-adaptation/m06-file-changes-1",
+    "build/macos-adaptation/m06-file-changes-native-1"
+  ]
+}
