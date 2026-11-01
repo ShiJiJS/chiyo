@@ -51,8 +51,9 @@ extension _AttachmentBackupIntegration on InformationBackups {
   }
 
   Future<BackupContents> _restoreAttachmentBackup(
-    BackupContents preview,
-  ) async {
+    BackupContents preview, {
+    _BackupRestoreIntent? intent,
+  }) async {
     final origin = preview._origin;
     if (origin == null) throw const StorageFailure('invalid_backup');
     final reader = await AttachmentBackupContainer.openValidated(
@@ -64,7 +65,7 @@ extension _AttachmentBackupIntegration on InformationBackups {
       if (_fingerprint(current) != origin.fingerprint)
         throw const StorageFailure('backup_changed');
       // Validation and all reads during installation use this same locked source.
-      return await _installBackup(current, reader: reader);
+      return await _installBackup(current, reader: reader, intent: intent);
     } finally {
       reader.close();
     }

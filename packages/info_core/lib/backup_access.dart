@@ -10,10 +10,30 @@ extension OwnerLibraryBackup on OwnerAccess {
   Future<T> restoreLibrary<T>(Future<T> Function() restore) =>
       _withLibrarySnapshot(restore, restore: true);
 
+  /// Reconcile an exact durable intent while holding the Owner write lock.
+  /// [previous] must only read and validate that intent's receipt: null means
+  /// definitely uncommitted, and uncertainty/conflicts must throw. Callbacks
+  /// must not re-enter Owner writes. Only a new atomic storage restore enters
+  /// the delivery barrier and invalidates the current runtime associations.
+  Future<T> restoreLibraryOnce<T extends Object>({
+    required Future<T?> Function() previous,
+    required Future<T> Function() restore,
+  }) => _serialize(() async {
+    if (_service._closed) throw const AccessFailure('service_unavailable');
+    final receipt = await previous();
+    if (receipt != null) return receipt;
+    return _runLibrarySnapshot(restore, restore: true);
+  });
+
   Future<T> _withLibrarySnapshot<T>(
     Future<T> Function() action, {
     required bool restore,
-  }) => _serialize(() async {
+  }) => _serialize(() => _runLibrarySnapshot(action, restore: restore));
+
+  Future<T> _runLibrarySnapshot<T>(
+    Future<T> Function() action, {
+    required bool restore,
+  }) async {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     final barrier = Completer<void>();
     _service._backupBarrier = barrier;
@@ -56,5 +76,5 @@ extension OwnerLibraryBackup on OwnerAccess {
       _service._backupBarrier = null;
       barrier.complete();
     }
-  });
+  }
 }

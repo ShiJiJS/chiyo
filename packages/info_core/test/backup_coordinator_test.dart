@@ -274,4 +274,110 @@ void main() {
       );
     },
   );
+
+  test(
+    'restore reconciliation keeps fresh grants and never executes on unknown receipt',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final owner = service.owner;
+      var restores = 0;
+      String? receipt;
+      Future<String> run() => owner.restoreLibraryOnce(
+        previous: () async => receipt,
+        restore: () async {
+          restores++;
+          receipt = 'committed';
+          return receipt!;
+        },
+      );
+      final originalScope = owner.captureLibraryScope();
+      expect(await run(), 'committed');
+      expect(originalScope.isCurrent, isFalse);
+      final currentScope = owner.captureLibraryScope();
+      final item = await owner.createInformation('new', '', [
+        const FieldInput('value', '', 'fresh'),
+      ]);
+      final field = FieldRef(item.id, item.fields.single.id);
+      final session = service.agent.openSession('new chat');
+      final request = service.agent.request(session, 'read', [field]);
+      owner.approve(request.id, [field]);
+      final token = service.agent.claim(session, request.id).token;
+      expect(await run(), 'committed');
+      expect(restores, 1);
+      expect(currentScope.isCurrent, isTrue);
+      expect(await service.agent.read(token, field), 'fresh');
+      await expectLater(
+        owner.restoreLibraryOnce<String>(
+          previous: () async => throw StateError('unknown receipt'),
+          restore: () async {
+            restores++;
+            return 'should not run';
+          },
+        ),
+        throwsStateError,
+      );
+      expect(restores, 1);
+      expect(currentScope.isCurrent, isTrue);
+      expect(await service.agent.read(token, field), 'fresh');
+      await service.close();
+    },
+  );
+
+  test(
+    'restore lookup waits behind owner writes and stale queued forms still fail',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      final entered = Completer<void>(), finish = Completer<void>();
+      final restoring = service.owner.restoreLibraryOnce<String>(
+        previous: () async => null,
+        restore: () async {
+          entered.complete();
+          await finish.future;
+          return 'done';
+        },
+      );
+      await entered.future;
+      final stale = service.owner.createInformation('stale', '', [
+        const FieldInput('value', '', 'stale'),
+      ]);
+      final rejected = expectLater(
+        stale,
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'library_changed',
+          ),
+        ),
+      );
+      expect(
+        () => service.agent.openSession('during restore'),
+        throwsA(isA<AccessFailure>()),
+      );
+      finish.complete();
+      await restoring;
+      await rejected;
+      final edit = service.owner.createInformation('fresh', '', [
+        const FieldInput('value', '', 'fresh'),
+      ]);
+      var committed = false;
+      await service.owner.restoreLibraryOnce<String>(
+        previous: () async {
+          expect(service.owner.information.single.name, 'fresh');
+          return 'done';
+        },
+        restore: () async {
+          committed = true;
+          return 'bad';
+        },
+      );
+      await edit;
+      expect(committed, isFalse);
+      await service.close();
+    },
+  );
 }

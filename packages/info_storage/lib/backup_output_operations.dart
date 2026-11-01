@@ -131,6 +131,10 @@ extension BackupOutputOperations on InformationBackups {
       await recoveryKeyOperationReceipt(id);
       return 'enableKey';
     }
+    if (payload['action'] == 'restore') {
+      _decodeRestoreReceipt(payload);
+      return 'restore';
+    }
     return _decodeOutput(payload).action.name;
   }
 
@@ -192,7 +196,7 @@ extension BackupOutputOperations on InformationBackups {
   Future<_BackupOutputRecord?> _outputRecord(String id) async {
     final value = await _backupOperationPayload(id);
     if (value == null) return null;
-    if (value['action'] == 'enableKey')
+    if (value['action'] == 'enableKey' || value['action'] == 'restore')
       throw const StorageFailure('operation_conflict');
     return _decodeOutput(value);
   }
@@ -486,7 +490,8 @@ extension BackupOutputOperations on InformationBackups {
     var count = 0;
     for (final row in rows) {
       final id = row.read<String>('operation_id');
-      if (await backupOperationAction(id) == 'enableKey') continue;
+      final action = await backupOperationAction(id);
+      if (action == 'enableKey' || action == 'restore') continue;
       if ((await _outputRecord(id))!.cleanupPending) count++;
     }
     return count;

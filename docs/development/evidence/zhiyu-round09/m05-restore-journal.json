@@ -1,0 +1,71 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "baseCommit": "1f9d1cbb",
+  "scope": "Atomic SQLCipher restore receipt and Owner read-only reconciliation boundary; production settings source/Host remains unconnected.",
+  "checks": {
+    "storage-canonical.log": {
+      "sha256": "d527ba64ad5587b8c95eb081657e15a0992823176b91f61ac16904ea725a1956",
+      "success": true,
+      "passed": 271,
+      "skipped": 19
+    },
+    "core-final.log": {
+      "sha256": "ac65b2f3fff167745788d1beb1d0021e0ab55a8e3735da847c1d1465e6f1b9b1",
+      "success": true,
+      "passed": 14,
+      "skipped": 0
+    },
+    "desktop.log": {
+      "sha256": "f8f49071342537a42dcb2f2f6cb274826944045b1fc920244b1f99ef9cd12eac",
+      "success": true,
+      "passed": 13,
+      "skipped": 0
+    },
+    "storage-analysis.log": {
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+      "success": true
+    },
+    "core-analysis.log": {
+      "sha256": "d9ebd39d330d44ff327dbf6cf5ce8566791da694504d82a7b989e78e27969232",
+      "success": true
+    }
+  },
+  "sources": {
+    "packages/info_storage/lib/backup_restore_operations.dart": "6714b2b9f55f4c194398f2cc89c4a7c310a33768bf35695bd2e01d8708b407a9",
+    "packages/info_storage/lib/backups.dart": "0d817fdd6d2103ab7e4383672383c3623a54efc4bcb6778a8e5857de973c0d9f",
+    "packages/info_storage/lib/attachment_backup_integration.dart": "2ea364b27f83c4bc24159dd2cb480428bb902a7d78988a1c644f44abe859a3d9",
+    "packages/info_storage/lib/backup_output_operations.dart": "ecb23e802618f8c140595051eb8229d3cb84c3066b766a36931aa0288d62295f",
+    "packages/info_storage/lib/info_storage.dart": "5dc2b17a63a2bb12954d6441ff2273145b74af93ba183f45875698185ff63b56",
+    "packages/info_core/lib/backup_access.dart": "751b7f4db61f7ec5dbe9692852ed2ad1773f204f3506b1ccca07ce08c37ef394",
+    "packages/info_storage/test/backup_restore_operations_test.dart": "a7fa63309ed3f2d464dded3e32c2a2d6f8f4fc2f53a059fc9fea78905d433276",
+    "packages/info_core/test/backup_coordinator_test.dart": "8a67d82c06b14ea7b2e0f95a775cdf8fd26d98c27ee3fb0923ae373442bb6c6f"
+  },
+  "restoreCases": [
+    "Legacy format7 preview and restore with grants restored as facts only",
+    "Receipt insertion failure rolls back data, caches, old receipt invalidation and operation version",
+    "Reopened database acknowledgement after archive deletion without replay or new session loss",
+    "Wrong key, modified encrypted archive, nonempty recipient, changed resource identity",
+    "Released preview, reopened/other recipient, stale operation version and retention-count change",
+    "Empty restore invalidates earlier receipt; receipts excluded from subsequent portable export",
+    "Corrupt receipt and action collision never interpreted as absent",
+    "Attachment installation and old draft deletion commit with receipt; failure preserves draft and rolls back BLOBs",
+    "Concurrent empty restores cannot both consume the same recipient version"
+  ],
+  "environmentCorrection": {
+    "initialLogSha256": "c580c58c54a4fc1b3172f6142bf608c58e0301ed3204a04f77a557fffd4042ba",
+    "initialResult": "44 runner errors: noncanonical /var temporary paths tripped existing fixture cleanup and AOT path checks. No product change was made to bypass those checks. Full rerun used TMPDIR=/private/tmp and passed.",
+    "cleanup": {
+      "removedDirectories": 46,
+      "removedBytes": 718810517
+    }
+  },
+  "limitations": [
+    "Synthetic libraries and memory test key stores only.",
+    "New receipt reopen tests rebuild SQLCipher/Owner objects in one test process; not independent installed App processes. Existing full-suite AOT restore tests do not prove the new receipt path across production processes.",
+    "Desktop native panels are mocked. No new source/Host composition, native UI or installed Release acceptance.",
+    "Staging lease/directory lifecycle, invalidated cleanup bookkeeping, persistent UI unknown-operation recovery and workspace rebinding remain pending.",
+    "No personal library, Keychain, CUA, Windows CI or replacement App/dSYM."
+  ],
+  "candidateUnchanged": "1443d358"
+}
