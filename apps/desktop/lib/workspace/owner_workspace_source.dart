@@ -170,7 +170,14 @@ class OwnerWorkspaceSource
               ],
               [
                 for (final c in owner.credentials)
-                  [c.id, c.modifiedAt.toIso8601String()],
+                  [
+                    c.id,
+                    c.revision,
+                    c.version,
+                    c.useGeneration,
+                    owner.credentialAvailability(c).name,
+                    c.modifiedAt.toIso8601String(),
+                  ],
               ],
               [
                 for (final d in owner.directories) [d.id, d.parentId, d.name],
