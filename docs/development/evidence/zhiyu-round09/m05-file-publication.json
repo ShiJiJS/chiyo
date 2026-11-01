@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "baseCommit": "7ec44797",
+  "scope": "Native macOS retained-inode file publication; not yet wired to the persistent backup journal or production workspace.",
+  "passed": 15,
+  "skipped": 0,
+  "analysis": "passed",
+  "testNames": [
+    "native macOS retained-inode publication private file, durable identity round-trip, publish and cleanup leave owner output",
+    "native macOS retained-inode publication identical pre-existing bytes are not evidence of this operation and cannot be replaced",
+    "native macOS retained-inode publication a repeated publish cannot overwrite; original successful identity remains observable",
+    "native macOS retained-inode publication changed prepared bytes refuse publication even with unchanged inode",
+    "native macOS retained-inode publication replacement source with identical bytes is neither published nor deleted",
+    "native macOS retained-inode publication replacement directory identities reject publication and cleanup",
+    "native macOS retained-inode publication destination directory replacement rejects publication and never receives material",
+    "native macOS retained-inode publication symlink source and existing symlink destination are never followed",
+    "native macOS retained-inode publication unknown staging publication name makes cleanup fail without deleting prepared anchor",
+    "native macOS retained-inode publication deletion or replacement after publication is observable, never replayed",
+    "native macOS retained-inode publication non-private staging, inherited ACL and symlink parent are refused",
+    "native macOS retained-inode publication invalid journal data and file types fail without side effects",
+    "native macOS retained-inode publication a prepared source with pre-existing hard links is rejected",
+    "native macOS retained-inode publication independent process reconciles published inode without rewriting output",
+    "native macOS retained-inode publication real encrypted export remains independently restorable after anchor cleanup and source close"
+  ],
+  "logSha256": "2b8b48bf9476aa7720fca468250f38ffe3792b9c2cf76cb61ce83282d896fe7c",
+  "analysisSha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+  "sources": {
+    "packages/info_storage/lib/macos_backup_publication.dart": "d3a0ecfbd015e14de31363a4df1c61f074b7bb3c2a2bca63aeed93b8960c6c03",
+    "packages/info_storage/test/macos_backup_publication_test.dart": "4481df88bf9cdaebad073cbb556a56a80fac600422d0b37a58306af6b7198fd7",
+    "packages/info_storage/test/fixtures/macos_backup_publication_process.dart": "f29fbcaefd96da9a6bbd974881d8aa89e2353e912806d9b488f5ea28599db37b"
+  },
+  "limitations": [
+    "All files and SQLCipher libraries are isolated synthetic fixtures.",
+    "Two independent Dart processes use a fixture journal; not a production SQLCipher operation receipt.",
+    "No native file panels, sandbox Release installation, Keychain, personal library, computer use or Windows tests.",
+    "Filesystem absence/replacement does not prove a submitted operation never published; reconciliation never republishes.",
+    "Caller must retain staging and journal publication identity before publish; cleanup only after a durable success receipt."
+  ]
+}
