@@ -1,0 +1,374 @@
+{
+  "date": "2026-11-01",
+  "issue": 76,
+  "branch": "codex/zhiyu-macos",
+  "package": {
+    "sourceCommit": "b3fe1964831f19ba201c15ca7cea8be79ea321ba",
+    "complete": true,
+    "phases": [
+      {
+        "name": "clone",
+        "exit": 0
+      },
+      {
+        "name": "sparse",
+        "exit": 0
+      },
+      {
+        "name": "checkout",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_core",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_cli",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_storage",
+        "exit": 0
+      },
+      {
+        "name": "pub-desktop",
+        "exit": 0
+      },
+      {
+        "name": "package",
+        "exit": 0
+      }
+    ],
+    "previewBefore": "302791799a10fb288c7a5befed09206bf03e6d147ea19ac7b8875fb4211ce125",
+    "package": {
+      "sourceCommit": "b3fe1964831f19ba201c15ca7cea8be79ea321ba",
+      "complete": true,
+      "phases": [
+        {
+          "name": "release-build",
+          "exit": 0
+        },
+        {
+          "name": "compile-info",
+          "exit": 0
+        },
+        {
+          "name": "sign-info",
+          "exit": 0
+        },
+        {
+          "name": "compile-info-codex",
+          "exit": 0
+        },
+        {
+          "name": "sign-info-codex",
+          "exit": 0
+        },
+        {
+          "name": "compile-info-codex-hook",
+          "exit": 0
+        },
+        {
+          "name": "sign-info-codex-hook",
+          "exit": 0
+        },
+        {
+          "name": "compile-info-runtime-worker",
+          "exit": 0
+        },
+        {
+          "name": "sign-info-runtime-worker",
+          "exit": 0
+        },
+        {
+          "name": "compile-info-prepare-codex",
+          "exit": 0
+        },
+        {
+          "name": "sign-info-prepare-codex",
+          "exit": 0
+        },
+        {
+          "name": "diagnostic-build",
+          "exit": 0
+        },
+        {
+          "name": "sign-diagnostic-macos-storage-check",
+          "exit": 0
+        },
+        {
+          "name": "sign-diagnostic-libsqlcipher.dylib",
+          "exit": 0
+        },
+        {
+          "name": "app-signature",
+          "exit": 0
+        },
+        {
+          "name": "archive",
+          "exit": 0
+        },
+        {
+          "name": "extract",
+          "exit": 0
+        },
+        {
+          "name": "extracted-app-signature",
+          "exit": 0
+        },
+        {
+          "name": "extracted-storage",
+          "exit": 0
+        },
+        {
+          "name": "extracted-cli-and-worker",
+          "exit": 0
+        }
+      ],
+      "shippedDocumentationLinks": [
+        {
+          "document": "README.md",
+          "target": "app/info_desktop.app"
+        },
+        {
+          "document": "README.md",
+          "target": "manifest.json"
+        },
+        {
+          "document": "README.md",
+          "target": "cli/info"
+        },
+        {
+          "document": "README.md",
+          "target": "CODEX-INTEGRATION.md"
+        },
+        {
+          "document": "README.md",
+          "target": "app/"
+        },
+        {
+          "document": "README.md",
+          "target": "cli/"
+        },
+        {
+          "document": "README.md",
+          "target": "diagnostics/"
+        },
+        {
+          "document": "README.md",
+          "target": "notices/"
+        },
+        {
+          "document": "README.md",
+          "target": "provenance/"
+        },
+        {
+          "document": "CODEX-INTEGRATION.md",
+          "target": "cli/template/references/credential-use.md"
+        },
+        {
+          "document": "CODEX-INTEGRATION.md",
+          "target": "cli/template/references/information-files.md"
+        }
+      ],
+      "archive": "agent-info-manage-0.4.1+13-mac-dev.b3fe1964831f-macos-arm64.zip",
+      "archiveSha256": "d373facb2c02087a1d8b464aa41a157f78e1fb6cc1e7738f68e97c0307aa45da",
+      "scope": "build and extracted synthetic checks; no clean-user, Keychain upgrade, native UI or real Codex acceptance",
+      "extractedDirectory": "verify/中文 空格 路径/AgentInfoManage"
+    },
+    "release": "0.4.1+13-mac-dev.b3fe1964831f",
+    "sourceProcessStillRunning": false,
+    "temporaryCheckoutRemoved": true,
+    "previewPreserved": true
+  },
+  "archiveBytes": 131680981,
+  "nativeRoundTrip": {
+    "sourceCommit": "f43a507ab378c89d800882573bd6323091e44b89",
+    "complete": true,
+    "phases": [
+      {
+        "name": "clone",
+        "exit": 0
+      },
+      {
+        "name": "sparse",
+        "exit": 0
+      },
+      {
+        "name": "checkout",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_core",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_cli",
+        "exit": 0
+      },
+      {
+        "name": "pub-info_storage",
+        "exit": 0
+      },
+      {
+        "name": "pub-desktop",
+        "exit": 0
+      },
+      {
+        "name": "configure",
+        "exit": 0
+      },
+      {
+        "name": "build",
+        "exit": 0
+      },
+      {
+        "name": "compile-info",
+        "exit": 0
+      },
+      {
+        "name": "sign-info",
+        "exit": 0
+      },
+      {
+        "name": "resign-app",
+        "exit": 0
+      },
+      {
+        "name": "signature",
+        "exit": 0
+      },
+      {
+        "name": "drive-live",
+        "exit": 0
+      },
+      {
+        "name": "drive-reopen",
+        "exit": 0
+      },
+      {
+        "name": "drive-restore",
+        "exit": 0
+      },
+      {
+        "name": "drive-restored-read",
+        "exit": 0
+      }
+    ],
+    "previewKernelBefore": "302791799a10fb288c7a5befed09206bf03e6d147ea19ac7b8875fb4211ce125",
+    "identity": "com.example.infoDesktop.zhiyuFileRoundTrip.3941d379c68a4f1bb1072e11e06ffcea",
+    "entitlements": {
+      "com.apple.security.app-sandbox": true,
+      "com.apple.security.cs.allow-jit": true,
+      "com.apple.security.files.bookmarks.app-scope": true,
+      "com.apple.security.files.user-selected.read-write": true,
+      "com.apple.security.get-task-allow": true,
+      "com.apple.security.network.client": true,
+      "com.apple.security.network.server": true
+    },
+    "native": {
+      "passed": true,
+      "launches": [
+        {
+          "passed": true,
+          "checks": [
+            "production import and replace persist both PDF originals; external inputs removed",
+            "actual inherited-sandbox AOT CLI request is the production file approval record and metadata",
+            "real production approval controls commit a partial file/text grant used by the independent CLI",
+            "real SQLCipher to native protected copy to AOT CLI; exact bytes, original operation reuse and cross-session refusal",
+            "real grant history projects exact managed delivery and renders its original PDF through the production native channel",
+            "real revoke control blocks subsequent AOT CLI fetch and reclaims its registered copy",
+            "full encrypted backup includes retained originals and real delivery/grant facts while a separate grant is active",
+            "normal native process shutdown removes its registered active copy before close completes"
+          ],
+          "pid": 36259,
+          "runtime": {
+            "platform": "macos"
+          },
+          "phase": "live",
+          "fixtureDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuFileRoundTrip.3941d379c68a4f1bb1072e11e06ffcea/Data/tmp/owner-file-roundtrip-3941d379c68a4f1bb1072e11e06ffcea",
+          "fixtureRemoved": false
+        },
+        {
+          "passed": true,
+          "checks": [
+            "independent App process reads current and retained originals byte-for-byte",
+            "original approval/delivery identity and native PDF page survive independent reopen or restore",
+            "previous active bearer and session are refused; neither history nor restore recreates a managed copy",
+            "local original approval and replacement receipts remain available after App process restart"
+          ],
+          "pid": 36330,
+          "runtime": {
+            "platform": "macos"
+          },
+          "phase": "reopen",
+          "fixtureDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuFileRoundTrip.3941d379c68a4f1bb1072e11e06ffcea/Data/tmp/owner-file-roundtrip-3941d379c68a4f1bb1072e11e06ffcea",
+          "fixtureRemoved": false
+        },
+        {
+          "passed": true,
+          "checks": [
+            "full encrypted archive restores through Owner barrier into empty library with a different database key",
+            "independent App process reads current and retained originals byte-for-byte",
+            "original approval/delivery identity and native PDF page survive independent reopen or restore",
+            "previous active bearer and session are refused; neither history nor restore recreates a managed copy",
+            "portable restoration excludes local receipts/leases while preserving read-only delivery history"
+          ],
+          "pid": 36391,
+          "runtime": {
+            "platform": "macos"
+          },
+          "phase": "restore",
+          "fixtureDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuFileRoundTrip.3941d379c68a4f1bb1072e11e06ffcea/Data/tmp/owner-file-roundtrip-3941d379c68a4f1bb1072e11e06ffcea",
+          "fixtureRemoved": false
+        },
+        {
+          "passed": true,
+          "checks": [
+            "independent App process reads current and retained originals byte-for-byte",
+            "original approval/delivery identity and native PDF page survive independent reopen or restore",
+            "previous active bearer and session are refused; neither history nor restore recreates a managed copy",
+            "portable restoration excludes local receipts/leases while preserving read-only delivery history"
+          ],
+          "pid": 36442,
+          "runtime": {
+            "platform": "macos"
+          },
+          "phase": "restored-read",
+          "fixtureDirectory": "/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuFileRoundTrip.3941d379c68a4f1bb1072e11e06ffcea/Data/tmp/owner-file-roundtrip-3941d379c68a4f1bb1072e11e06ffcea",
+          "fixtureRemoved": true
+        }
+      ],
+      "nativeKernelSha256": "fbd73cb19051f7a9f7936b815968c19cea315684ff57a1aff64bc53936bb611e"
+    },
+    "processStillRunning": false,
+    "temporaryProductsRemoved": true,
+    "previewPreserved": true
+  },
+  "productionSourceEquality": {
+    "releaseCommit": "b3fe1964831f19ba201c15ca7cea8be79ea321ba",
+    "nativeQaCommit": "f43a507ab378c89d800882573bd6323091e44b89",
+    "paths": [
+      "apps/desktop/lib",
+      "apps/desktop/macos",
+      "packages/info_core/lib",
+      "packages/info_storage/lib",
+      "packages/info_cli/lib",
+      "packages/info_cli/bin"
+    ],
+    "changedFiles": []
+  },
+  "analysis": {
+    "desktop": "passed",
+    "pythonCompile": "passed"
+  },
+  "boundaries": {
+    "native": "Four independent native Cocoa/Flutter Debug App processes with actual SQLCipher, production Owner adapters/approval controls, inherited-sandbox AOT CLI and native PDF channel. Unique synthetic App identity and fixed synthetic database keys.",
+    "backup": "Source exports actual full encrypted backup with separately saved synthetic recovery material; empty restored library uses a different database key. Reopen/restore deny previous active bearer and session, do not recreate copies, keep exact version/delivery facts. Portable restore excludes local operation receipts and runtime leases.",
+    "package": "Full ARM64 release, 20 build/extract phases, six extracted CLI/worker tests, actual SQLCipher diagnostic, ad-hoc, no notarization. Source checks not rerun during package; production source identical to previously tested M07 and this native QA.",
+    "notDone": "Actual shipped normal-entry GUI with outside-package CLI and a real AI file chat; system panels/default receiver, personal upgrade/Keychain and final installation remain separately unverified.",
+    "cleanup": "One primary unpacked candidate plus ZIP retained. Packaging clone, verification duplicate App, diagnostic build and dSYMs removed. Native source/App/dSYM/derived trees and marked synthetic fixture removed; fixed preview untouched.",
+    "privacy": "No personal library, Keychain, CUA, global hooks or Windows CI. Private synthetic bearer/session/recovery remained in 0700 fixture/0600 state and were removed, never exported to evidence.",
+    "failedRuns": "m07-release-1 stopped at clean-source check because directory-only exclude did not match SDK links. m07-roundtrip-native-1 was correctly refused before export because recovery key had not been saved. Neither counted as a pass; protections unchanged."
+  }
+}
