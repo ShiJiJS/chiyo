@@ -336,6 +336,7 @@ def owner_file_ui_case():
   RESULTS['fileDeadlineUnchanged']=True
   RESULTS['fileRevokedSnapshot']=owner('revoke',requestId=rid)
   snapshot_ready(rid,clean=True);assert not Path(second['path']).exists()
+  RESULTS['fileRevokedHistory']=owner('history',requestId=rid,state='revoked')
   turn(root,'The owner revoked that request. Query status and attempt one protocolVersion 2 file-fetch of the same original field/request using operationId "m07-after-revoke-refused". Expect refusal. No new request or reconnect. Public status only.')
   assert [c for c in CALLS if c['threadId']==root and c['command']=='file-fetch'][-1]['response']['status']=='unauthorized'
   prompt='Synthetic M07 next request. Use the same current association and public catalog to request ONLY Attachment of Synthetic ordinary file once. Purpose "M07 real file DENY". Stop pending. No fetch, reconnect or values.'
