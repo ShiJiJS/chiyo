@@ -280,7 +280,7 @@ class MacBackupPublicationFiles {
     final from = _native.directory(sourceParent, private: true);
     var to = -1, file = -1;
     try {
-      to = _native.directory(targetParent);
+      to = _native.directory(targetParent, searchOnly: true);
       file = _native.at(from, sourceName);
       final identity = _native.identity(file, singleLink: true);
       final content = _native.content(file);
@@ -310,7 +310,7 @@ class MacBackupPublicationFiles {
     final from = _native.directory(sourceParent, private: true);
     var to = -1;
     try {
-      to = _native.directory(targetParent);
+      to = _native.directory(targetParent, searchOnly: true);
       if (_native.identity(from, directory: true) !=
               value.sourceDirectoryIdentity ||
           _native.identity(to, directory: true) !=
@@ -560,12 +560,27 @@ class _MacFiles {
     }
   }
 
-  int directory(String path, {bool private = false, bool missing = false}) {
+  int directory(
+    String path, {
+    bool private = false,
+    bool missing = false,
+    bool searchOnly = false,
+  }) {
     try {
       if (Directory(path).resolveSymbolicLinksSync() != path) {
         throw const BackupPublicationFailure('identity_changed');
       }
-      final fd = name(path, (p) => open(p, 0x100000 | 0x100 | 0x1000000, 0));
+      // NSSavePanel grants the selected file, not directory enumeration. Darwin
+      // O_SEARCH retains fstat/openat/renameat/fsync on the exact parent without
+      // requesting its contents. Sandbox checks still apply to every child.
+      final fd = name(
+        path,
+        (p) => open(
+          p,
+          (searchOnly ? 0x40000000 : 0) | 0x100000 | 0x100 | 0x1000000,
+          0,
+        ),
+      );
       if (fd < 0 && missing && errno().value == 2) return -1;
       if (fd < 0) throw const BackupPublicationFailure('directory_unavailable');
       try {
