@@ -192,21 +192,40 @@ class MacBackupPublicationFiles {
     _native.flush(from);
   });
 
+  static void verifyPrepared(MacBackupPublication value) =>
+      _with(value, (from, _, source, _) => _verify(from, source, value));
+
   static BackupPublicationObservation observe(MacBackupPublication value) =>
-      _with(value, (from, to, source, target) {
-        _verify(from, source, value);
-        final fd = _native.at(to, target, missing: true);
-        if (fd < 0) return BackupPublicationObservation.absent;
-        try {
-          if (_native.identity(fd) != value.sourceIdentity ||
-              _native.content(fd) != (value.bytes, value.digest)) {
-            return BackupPublicationObservation.different;
-          }
-          return BackupPublicationObservation.matching;
-        } finally {
-          _native.close(fd);
-        }
-      });
+      _observe(value, flush: false);
+
+  /// Before committing success, retry durability checks that may have failed
+  /// after rename. This never creates or republishes an output.
+  static BackupPublicationObservation confirmPublished(
+    MacBackupPublication value,
+  ) => _observe(value, flush: true);
+
+  static BackupPublicationObservation _observe(
+    MacBackupPublication value, {
+    required bool flush,
+  }) => _with(value, (from, to, source, target) {
+    _verify(from, source, value);
+    final fd = _native.at(to, target, missing: true);
+    if (fd < 0) return BackupPublicationObservation.absent;
+    try {
+      if (_native.identity(fd) != value.sourceIdentity ||
+          _native.content(fd) != (value.bytes, value.digest)) {
+        return BackupPublicationObservation.different;
+      }
+      if (flush) {
+        _native.flush(fd);
+        _native.flush(to);
+        _native.flush(from);
+      }
+      return BackupPublicationObservation.matching;
+    } finally {
+      _native.close(fd);
+    }
+  });
 
   static void cleanup(MacBackupPublication value) {
     final (parent, source) = _MacFiles.path(value.source);
