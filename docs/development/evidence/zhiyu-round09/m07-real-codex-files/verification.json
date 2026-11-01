@@ -1,0 +1,560 @@
+{
+  "passed": true,
+  "candidateSource": "0a5e35001f4bb7a8a39546d373fbc3e9fae63678",
+  "qaSource": "0a5e35001f4bb7a8a39546d373fbc3e9fae63678",
+  "productSourcesMatchCandidate": true,
+  "infoCodexSha256": "c5fc2c7313b9fd80ce3213e386f70cef06a5b0fda951de5d2b1a84654b9e6eb1",
+  "codexVersion": "0.158.0",
+  "model": "gpt-6-astra",
+  "scope": "Actual Codex model/SessionStart/SessionEnd + extracted package info-codex + native owner file approval/history controls. Synthetic ordinary file; native Debug QA entry, not installed Release/Keychain/system-panel acceptance.",
+  "hookScope": "Original approved project/bundle unchanged; current package info-codex consumes actual host hook association.",
+  "native": {
+    "passed": true,
+    "runtime": {
+      "platform": "macos",
+      "debugMode": true
+    },
+    "checks": [
+      "native-owner-ui-saves-synthetic-record",
+      "native-owner-intakes-synthetic-file-original",
+      "native-ui-approve",
+      "native-file-history-ready",
+      "native-file-history-released",
+      "native-ui-revoke",
+      "native-file-history-revoked",
+      "native-ui-deny",
+      "native-ui-approve",
+      "native-file-history-ended",
+      "native-runtime-closed"
+    ],
+    "pid": 56353,
+    "scope": "real Codex host + package info-codex + native Debug owner widgets; synthetic key and framework input, not normal Release/Keychain/physical acceptance",
+    "fixtureRemoved": true
+  },
+  "turns": [
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 4
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19618-bba0-7cc3-9bf4-de06a924dc05",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 1
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 1
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    },
+    {
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "status": "completed",
+      "calls": 2
+    }
+  ],
+  "modelToolCalls": 22,
+  "negativeProtocolProbes": 3,
+  "calls": [
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "capabilities",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "invalid_request",
+      "errorCode": "unknown_field"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "capabilities",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "pending"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "claim",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-fetch",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-real-file-01",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "zsMLVjhUeuxBlzBpzTpZmOnadTVvPKTfXJAgJqX_Er4=",
+        "attachmentVersion": 1,
+        "state": "ready",
+        "expiresAt": "2026-11-01T08:22:09.866261Z",
+        "byteLength": 1024
+      }
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-status",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": "m07-real-file-01",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "zsMLVjhUeuxBlzBpzTpZmOnadTVvPKTfXJAgJqX_Er4=",
+        "attachmentVersion": 1,
+        "state": "ready",
+        "expiresAt": "2026-11-01T08:22:09.866261Z"
+      }
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-fetch",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-real-file-01",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "zsMLVjhUeuxBlzBpzTpZmOnadTVvPKTfXJAgJqX_Er4=",
+        "attachmentVersion": 1,
+        "state": "ready",
+        "expiresAt": "2026-11-01T08:22:09.866261Z",
+        "byteLength": 1024
+      }
+    },
+    {
+      "origin": "negative-protocol-probe",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "read",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "-yJhfCinBK6NT5BDOkKYEQhkAvmwa3OuDgzEbDL3Yac=",
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "unauthorized"
+    },
+    {
+      "origin": "negative-protocol-probe",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "read",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "file_delivery_required"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19618-bba0-7cc3-9bf4-de06a924dc05",
+      "command": "status",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "unauthorized"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19618-bba0-7cc3-9bf4-de06a924dc05",
+      "command": "file-fetch",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-cross-chat-refused",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "unauthorized",
+      "errorCode": "not_authorized"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-release",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "zsMLVjhUeuxBlzBpzTpZmOnadTVvPKTfXJAgJqX_Er4=",
+        "attachmentVersion": 1,
+        "state": "released",
+        "expiresAt": "2026-11-01T08:22:09.866261Z",
+        "errorCode": "released"
+      }
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-status",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": "m07-real-file-01",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "zsMLVjhUeuxBlzBpzTpZmOnadTVvPKTfXJAgJqX_Er4=",
+        "attachmentVersion": 1,
+        "state": "released",
+        "expiresAt": "2026-11-01T08:22:09.866261Z",
+        "errorCode": "released"
+      }
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-fetch",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-real-file-02",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "JwyZhv-A_sPqLVf24ObB6kgdNUW7zLzpQeB5VStPVJo=",
+        "attachmentVersion": 1,
+        "state": "ready",
+        "expiresAt": "2026-11-01T08:22:09.866261Z",
+        "byteLength": 1024
+      }
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "status",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "revoked"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-fetch",
+      "requestId": "DfNTkfZjFMgpnqUj1954naiznH5ixHwQu_7HooSj3zw=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-after-revoke-refused",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "unauthorized",
+      "errorCode": "not_authorized"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "pending"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "status",
+      "requestId": "Mctr1VMnWYNnSErDAO1MCxhiuq_fussYHAWZ4ech3uo=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "denied"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "catalog",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "request",
+      "requestId": null,
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "pending"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "claim",
+      "requestId": "Ew5U9-FKTRWjzgdwORY1HYVy6V0mu2LmWC8Ikg8Lxl4=",
+      "fieldId": null,
+      "operationId": null,
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok"
+    },
+    {
+      "origin": "model",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-fetch",
+      "requestId": "Ew5U9-FKTRWjzgdwORY1HYVy6V0mu2LmWC8Ikg8Lxl4=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-session-end-copy",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "ok",
+      "delivery": {
+        "deliveryId": "idHyCnSJtUXNSvdyyPRiOJljH2Cc7ZY0Ya-oxVDfnqY=",
+        "attachmentVersion": 1,
+        "state": "ready",
+        "expiresAt": "2026-11-01T08:24:05.690496Z",
+        "byteLength": 1024
+      }
+    },
+    {
+      "origin": "negative-protocol-probe",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "command": "file-fetch",
+      "requestId": "Ew5U9-FKTRWjzgdwORY1HYVy6V0mu2LmWC8Ikg8Lxl4=",
+      "fieldId": "Wd8XGoWiQHYnnO828miKexynoSsVMOhHbBKwybB-jqQ=",
+      "operationId": "m07-after-end-refused",
+      "exitCode": 0,
+      "separateStdin": true,
+      "argvCount": 1,
+      "argvInspectedBeforeStdin": true,
+      "status": "unauthorized",
+      "errorCode": "session_ended"
+    }
+  ],
+  "consumers": [
+    {
+      "status": "consumed",
+      "bytes": 1024,
+      "sha256": "ffbad8f947474cfdd5b2bb22d7e0bf5ee8ba2b7af859d0c2bb28622db6a4be47",
+      "deliveryId": "zsMLVjhUeuxBlzBpzTpZmOnadTVvPKTfXJAgJqX_Er4=",
+      "readerClosed": true
+    }
+  ],
+  "hookEvents": [
+    {
+      "method": "hook/completed",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "turnId": "01a19617-d611-7ff1-882c-564c93f6c89e",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "durationMs": 96
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a19618-bba0-7cc3-9bf4-de06a924dc05",
+      "turnId": "01a19618-c0b7-7a51-94da-99eddefec902",
+      "id": "session-start:0:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "eventName": "sessionStart",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "durationMs": 36
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a19617-d541-7c70-b551-b42741130a18",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "durationMs": 33
+    },
+    {
+      "method": "hook/completed",
+      "threadId": "01a19618-bba0-7cc3-9bf4-de06a924dc05",
+      "turnId": "auto-compact-0",
+      "id": "session-end:1:/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "eventName": "sessionEnd",
+      "status": "completed",
+      "sourcePath": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue49-codex-preparation-1/独立 Mac Codex 验收项目/.codex/hooks.json",
+      "durationMs": 24
+    }
+  ],
+  "fixedDeadlineUnchanged": true,
+  "finalDeliveryStates": [
+    {
+      "operationId": "m07-real-file-01",
+      "state": "released",
+      "holdsCopy": false,
+      "cleanupError": null
+    },
+    {
+      "operationId": "m07-real-file-02",
+      "state": "expired",
+      "holdsCopy": false,
+      "cleanupError": null
+    },
+    {
+      "operationId": "m07-session-end-copy",
+      "state": "expired",
+      "holdsCopy": false,
+      "cleanupError": null
+    }
+  ],
+  "finalActiveGrants": 0,
+  "threadsArchived": true,
+  "preparedFilesUnchanged": true,
+  "proofReferencesAbsentFromEvidence": true,
+  "previewUnchanged": true,
+  "temporaryProductsRemoved": true,
+  "failedRuns": {
+    "run1": "Synthetic intake operation ID contained spaces; invalid_information before real model use. Fixed test identifier without changing validation.",
+    "run2": "All runtime actions completed, but exit predicate did not recognize the new scenario. Retained as failed.",
+    "run3": "Passed pre-fix actual workflow. Inspection exposed expired meaning general invalidation; final run4 uses corrected UI and explicit revoked/end reason checks."
+  },
+  "limits": [
+    "Native Debug QA entry and synthetic keys/framework input; normal installed Release and Keychain remain separate.",
+    "Original approved hooks/Skill were unchanged, not upgraded as a bundle.",
+    "No unrelated files, personal data, shell/exec, subagents, global hooks, Windows CI or CUA in this synthetic run."
+  ]
+}
