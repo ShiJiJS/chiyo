@@ -58,6 +58,12 @@ class _OrganizationPlan {
 }
 
 extension OwnerOrganization on OwnerAccess {
+  List<ManagedCredential> get _classificationCredentials =>
+      _service._repository is CredentialRepository
+      ? (_service._repository as CredentialRepository).managedCredentials
+            .where((c) => c.deletedAt == null)
+            .toList()
+      : const [];
   List<InformationDirectory> get directories =>
       _service._repository.directories;
   List<InformationTag> get tags => _service._repository.tags;
@@ -194,7 +200,8 @@ extension OwnerOrganization on OwnerAccess {
           throw const AccessFailure('organization_conflict');
         }
         if (directories.any((d) => d.parentId == id) ||
-            information.any((i) => i.directoryId == id)) {
+            information.any((i) => i.directoryId == id) ||
+            _classificationCredentials.any((c) => c.directoryId == id)) {
           throw const AccessFailure('directory_not_empty');
         }
       }
@@ -212,6 +219,12 @@ extension OwnerOrganization on OwnerAccess {
     int expectedVersion, {
     Map<String, int>? reviewedInformation,
   }) => _serialize(() async {
+    // The old review only counts ordinary information. Never silently remove
+    // credential assignments that its owner has not reviewed; use the unified
+    // classification command and its exact combined preview instead.
+    if (_classificationCredentials.any((c) => c.tagIds.contains(id))) {
+      throw const AccessFailure('organization_conflict');
+    }
     final originals = information.where((i) => i.tagIds.contains(id)).toList();
     if (reviewedInformation != null &&
         (reviewedInformation.length != originals.length ||

@@ -294,7 +294,76 @@ void main() {
   );
 
   test(
-    'classification is rejected explicitly and wrong material shape does not replace a credential',
+    'credential classification reaches catalog counts filters details and reviewed tag deletion',
+    () async {
+      final parent = await service.owner.createDirectory('合成父目录');
+      final child = await service.owner.createDirectory(
+        '合成子目录',
+        parentId: parent.id,
+      );
+      final tag = await service.owner.createTag('合成可搜索标签');
+      final receipt = await getVault().save(
+        write(
+          'classified',
+          candidate: getVault().staging.string(secret),
+          directory: child.id,
+          tags: [tag.id],
+        ),
+      );
+      var catalog = await source.loadCatalog();
+      expect(catalog.directoryCounts[parent.id], 1);
+      expect(catalog.directoryCounts[child.id], 1);
+      expect(catalog.directoryCounts['unfiled'], 0);
+      expect(catalog.tagCounts[tag.id], 1);
+      final detail = await getVault().read(receipt.ref);
+      expect(detail.record.directoryId, child.id);
+      expect(detail.record.tags.single.name, tag.name);
+      expect(
+        (await source.readDetail(receipt.ref)).record.tags.single.id,
+        tag.id,
+      );
+      final matches = await source.queryRecords(
+        WorkspaceQuery(
+          directoryId: parent.id,
+          tagId: tag.id,
+          keyword: tag.name,
+        ),
+      );
+      expect(matches.items.single.ref, receipt.ref);
+      expect(
+        (await source.queryRecords(
+          const WorkspaceQuery(directoryId: 'unfiled'),
+        )).items,
+        isEmpty,
+      );
+      final preview = await source.previewTagRemoval(tag.id);
+      expect(preview.affectedCount, 1);
+      await source.changeClassification(
+        WorkspaceTagChange(
+          operationId: 'remove-tag',
+          expectedVersion: preview.catalogVersion,
+          action: WorkspaceTagAction.delete,
+          tagId: tag.id,
+          removalToken: preview.token,
+        ),
+      );
+      catalog = await source.loadCatalog();
+      expect(catalog.tags, isEmpty);
+      expect((await getVault().read(receipt.ref)).record.tags, isEmpty);
+      await close();
+      await open();
+      expect((await getVault().read(receipt.ref)).record.directoryId, child.id);
+      expect(
+        (await source.queryRecords(
+          WorkspaceQuery(directoryId: parent.id),
+        )).items.single.ref,
+        receipt.ref,
+      );
+    },
+  );
+
+  test(
+    'missing classification is rejected and wrong material shape does not replace a credential',
     () async {
       final vault = getVault();
       final candidate = vault.staging.string(secret);
@@ -306,7 +375,7 @@ void main() {
             directory: 'chosen-folder',
           ),
         ),
-        fails('unsupported'),
+        fails('validation'),
       );
       expect(repo.managedCredentials, isEmpty);
       final created = await vault.save(write('create', candidate: candidate));
@@ -590,6 +659,12 @@ void main() {
         );
       WorkspaceRecordRef? saved;
       try {
+        final directory = (await t.runAsync(
+          () => service.owner.createDirectory('合成凭据目录'),
+        ))!;
+        final tag = (await t.runAsync(
+          () => service.owner.createTag('合成凭据标签'),
+        ))!;
         await t.pumpWidget(
           RepaintBoundary(
             key: const ValueKey('owner-credential-capture'),
@@ -625,6 +700,9 @@ void main() {
           find.byKey(const ValueKey('credential-edit-note')),
           '文件合成备注',
         );
+        await tap(t, find.text('未分类').last);
+        await tap(t, find.text('合成凭据目录').last);
+        await tap(t, find.text('合成凭据标签').last);
         await tap(
           t,
           find.byKey(const ValueKey('credential-edit-discoverable')),
@@ -632,6 +710,8 @@ void main() {
         await tap(t, find.byKey(const ValueKey('credential-edit-save')));
         expect(repo.managedCredentials, hasLength(1));
         expect(repo.managedCredentials.single.discoverable, isTrue);
+        expect(repo.managedCredentials.single.directoryId, directory.id);
+        expect(repo.managedCredentials.single.tagIds, [tag.id]);
         expect(service.agent.credentialCatalog().credentials, hasLength(1));
         saved = WorkspaceRecordRef(
           WorkspaceRecordKind.credential,
@@ -652,6 +732,8 @@ void main() {
       final reopened = await t.runAsync(() => getVault().read(saved!));
       expect(reopened!.filename, 'synthetic-new.bin');
       expect(reopened.privateNote, '文件合成备注');
+      expect(reopened.record.tags.single.name, '合成凭据标签');
+      expect(reopened.record.directoryId, isNotNull);
       await closeWidget(t);
     },
   );

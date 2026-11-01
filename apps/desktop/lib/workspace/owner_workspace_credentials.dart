@@ -73,6 +73,12 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
         description: credential.publicPurpose,
         type: const WorkspaceType('credential', '凭据', 'key'),
         updatedAt: credential.modifiedAt,
+        directoryId: credential.directoryId,
+        tags: [
+          for (final id in credential.tagIds)
+            for (final tag in owner.tags.where((t) => t.id == id))
+              WorkspaceTag(id, tag.name),
+        ],
       ),
       recordVersion: credential.revision,
       materialVersion: credential.version,
@@ -143,6 +149,7 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
     'invalid_credential_content' ||
     'invalid_credential_file' ||
     'invalid_credential_links' ||
+    'invalid_credential_classification' ||
     'invalid_credential_operation' => const WorkspaceFailure(
       'validation',
       '请核对凭据名称、用途、备注、引用及所选材料。',
@@ -218,75 +225,72 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
       staging.release(candidateId);
 
   @override
-  Future<WorkspaceCredentialReceipt> save(
-    WorkspaceCredentialWrite write,
-  ) => _read(() async {
-    final prior = await _previous(write.operationId, write.commandDigest);
-    if (prior != null) {
-      staging.resolve(write.operationId, committed: true);
-      _pending.remove(write.operationId);
-      return _receipt(prior);
-    }
-    // These selections must never be silently omitted from an accepted save.
-    // Their persistent credential classification model is the next M08 segment.
-    if (write.directoryId != null || write.tagIds.isNotEmpty) {
-      throw const WorkspaceFailure('unsupported', '凭据目录和标签保存尚未接入，未提交本次更改。');
-    }
-    final creating = write.ref == null;
-    final old = creating ? null : _credential(write.ref!);
-    if ((!creating &&
-            (write.expectedRecordVersion == null ||
-                write.expectedMaterialVersion == null)) ||
-        (creating &&
-            (write.expectedRecordVersion != null ||
-                write.expectedMaterialVersion != null)) ||
-        (write.linkedInformation?.any(
-              (r) => r.kind != WorkspaceRecordKind.information,
-            ) ??
-            false)) {
-      throw const WorkspaceFailure('validation', '凭据版本或关联类型不匹配，请重新核对。');
-    }
-    if (creating && write.candidateId == null) {
-      throw const WorkspaceFailure('validation', '请先输入或选择凭据材料。');
-    }
-    OwnerCredentialStage? stage;
-    if (write.candidateId != null) {
-      stage = staging.claim(write.candidateId!, write.operationId);
-      if (old != null &&
-          (stage.metadata.form == WorkspaceCredentialForm.file) !=
-              (old.form == core.CredentialForm.file)) {
-        staging.resolve(write.operationId, committed: false);
-        throw const WorkspaceFailure('validation', '更换材料须保持原有字符串或文件形态。');
-      }
-    }
-    return _commit(
-      write.operationId,
-      core.CredentialRecordInput(
-        action: creating
-            ? core.CredentialRecordAction.create
-            : stage != null
-            ? core.CredentialRecordAction.replaceMaterial
-            : core.CredentialRecordAction.edit,
-        commandDigest: write.commandDigest,
-        credentialId: write.ref?.id,
-        expectedRevision: write.expectedRecordVersion,
-        expectedMaterialVersion: write.expectedMaterialVersion,
-        form: creating
-            ? stage!.metadata.form == WorkspaceCredentialForm.file
-                  ? core.CredentialForm.file
-                  : core.CredentialForm.string
-            : null,
-        discoverable: write.discoverable,
-        name: write.name,
-        publicPurpose: write.purpose,
-        privateNote: write.privateNote,
-        suggestedBinding: write.binding,
-        material: stage?.bytes,
-        fileName: stage?.metadata.filename,
-        linkedItemIds: write.linkedInformation?.map((r) => r.id),
-      ),
-    );
-  });
+  Future<WorkspaceCredentialReceipt> save(WorkspaceCredentialWrite write) =>
+      _read(() async {
+        final prior = await _previous(write.operationId, write.commandDigest);
+        if (prior != null) {
+          staging.resolve(write.operationId, committed: true);
+          _pending.remove(write.operationId);
+          return _receipt(prior);
+        }
+        final creating = write.ref == null;
+        final old = creating ? null : _credential(write.ref!);
+        if ((!creating &&
+                (write.expectedRecordVersion == null ||
+                    write.expectedMaterialVersion == null)) ||
+            (creating &&
+                (write.expectedRecordVersion != null ||
+                    write.expectedMaterialVersion != null)) ||
+            (write.linkedInformation?.any(
+                  (r) => r.kind != WorkspaceRecordKind.information,
+                ) ??
+                false)) {
+          throw const WorkspaceFailure('validation', '凭据版本或关联类型不匹配，请重新核对。');
+        }
+        if (creating && write.candidateId == null) {
+          throw const WorkspaceFailure('validation', '请先输入或选择凭据材料。');
+        }
+        OwnerCredentialStage? stage;
+        if (write.candidateId != null) {
+          stage = staging.claim(write.candidateId!, write.operationId);
+          if (old != null &&
+              (stage.metadata.form == WorkspaceCredentialForm.file) !=
+                  (old.form == core.CredentialForm.file)) {
+            staging.resolve(write.operationId, committed: false);
+            throw const WorkspaceFailure('validation', '更换材料须保持原有字符串或文件形态。');
+          }
+        }
+        return _commit(
+          write.operationId,
+          core.CredentialRecordInput(
+            action: creating
+                ? core.CredentialRecordAction.create
+                : stage != null
+                ? core.CredentialRecordAction.replaceMaterial
+                : core.CredentialRecordAction.edit,
+            commandDigest: write.commandDigest,
+            credentialId: write.ref?.id,
+            expectedRevision: write.expectedRecordVersion,
+            expectedMaterialVersion: write.expectedMaterialVersion,
+            form: creating
+                ? stage!.metadata.form == WorkspaceCredentialForm.file
+                      ? core.CredentialForm.file
+                      : core.CredentialForm.string
+                : null,
+            discoverable: write.discoverable,
+            name: write.name,
+            publicPurpose: write.purpose,
+            privateNote: write.privateNote,
+            suggestedBinding: write.binding,
+            material: stage?.bytes,
+            fileName: stage?.metadata.filename,
+            linkedItemIds: write.linkedInformation?.map((r) => r.id),
+            updateClassification: true,
+            directoryId: write.directoryId,
+            tagIds: write.tagIds,
+          ),
+        );
+      });
 
   @override
   Future<WorkspaceCredentialReceipt> setEnabled(

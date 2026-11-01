@@ -168,15 +168,20 @@ final class InformationClassificationChange {
     this.tag,
     Iterable<InformationItem> items = const [],
     Iterable<InformationRevision> previous = const [],
+    Iterable<ManagedCredential> credentials = const [],
+    Iterable<ManagedCredential> previousCredentials = const [],
     required this.validate,
   }) : items = List.unmodifiable(items),
-       previous = List.unmodifiable(previous);
+       previous = List.unmodifiable(previous),
+       credentials = List.unmodifiable(credentials),
+       previousCredentials = List.unmodifiable(previousCredentials);
   final InformationClassificationCommand command;
   final String targetId;
   final InformationDirectory? directory;
   final InformationTag? tag;
   final List<InformationItem> items;
   final List<InformationRevision> previous;
+  final List<ManagedCredential> credentials, previousCredentials;
   final void Function() validate;
   InformationClassificationReceipt receipt(int version) =>
       InformationClassificationReceipt(
@@ -240,6 +245,9 @@ extension OwnerClassificationOperations on OwnerAccess {
     final affected =
         information.where((item) => item.tagIds.contains(id)).toList()
           ..sort((a, b) => a.id.compareTo(b.id));
+    final affectedCredentials =
+        _classificationCredentials.where((c) => c.tagIds.contains(id)).toList()
+          ..sort((a, b) => a.id.compareTo(b.id));
     final token = sha256
         .convert(
           utf8.encode(
@@ -249,11 +257,20 @@ extension OwnerClassificationOperations on OwnerAccess {
               'items': [
                 for (final item in affected) [item.id, item.version],
               ],
+              if (affectedCredentials.isNotEmpty)
+                'credentials': [
+                  for (final c in affectedCredentials) [c.id, c.revision],
+                ],
             }),
           ),
         )
         .toString();
-    return InformationTagRemovalPreview(token, id, version, affected.length);
+    return InformationTagRemovalPreview(
+      token,
+      id,
+      version,
+      affected.length + affectedCredentials.length,
+    );
   }
 
   Future<InformationTagRemovalPreview> previewInformationTagRemoval(
@@ -300,6 +317,8 @@ extension OwnerClassificationOperations on OwnerAccess {
     InformationDirectory? directory;
     InformationTag? tag;
     var items = <InformationItem>[], previous = <InformationRevision>[];
+    var changedCredentials = <ManagedCredential>[],
+        previousCredentials = <ManagedCredential>[];
     if (command.kind == InformationClassificationKind.directory) {
       final current = directories.where((d) => d.id == id).firstOrNull;
       if (!creating && current == null) {
@@ -307,7 +326,8 @@ extension OwnerClassificationOperations on OwnerAccess {
       }
       if (deleting) {
         if (directories.any((d) => d.parentId == id) ||
-            information.any((i) => i.directoryId == id)) {
+            information.any((i) => i.directoryId == id) ||
+            _classificationCredentials.any((c) => c.directoryId == id)) {
           throw const AccessFailure('directory_not_empty');
         }
       } else {
@@ -335,6 +355,13 @@ extension OwnerClassificationOperations on OwnerAccess {
           throw const AccessFailure('organization_conflict');
         }
         final now = _service._clock();
+        previousCredentials = _classificationCredentials
+            .where((c) => c.tagIds.contains(id))
+            .toList();
+        changedCredentials = [
+          for (final c in previousCredentials)
+            c.copy(tagIds: c.tagIds.where((t) => t != id), modifiedAt: now),
+        ];
         final originals = information
             .where((i) => i.tagIds.contains(id))
             .toList();
@@ -375,6 +402,8 @@ extension OwnerClassificationOperations on OwnerAccess {
         tag: tag,
         items: items,
         previous: previous,
+        credentials: changedCredentials,
+        previousCredentials: previousCredentials,
         validate: () {
           _classificationAvailable();
           if (generation != _service._libraryGeneration) {

@@ -40,6 +40,9 @@ const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
 // Older readers reject this independent marker before loading portable fills.
 const _portableFocusedFillLibraryFormat = 39;
+// Only libraries that actually retain credential classification require this
+// reader. Older binaries must reject instead of silently discarding metadata.
+const _credentialClassificationLibraryFormat = 40;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -449,7 +452,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _portableFocusedFillLibraryFormat) {
+      if (headerVersion > _credentialClassificationLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -465,7 +468,7 @@ class EncryptedInformationRepository
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
             (marker.single['version'] as int) >
-                _portableFocusedFillLibraryFormat ||
+                _credentialClassificationLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -545,6 +548,11 @@ class EncryptedInformationRepository
         ),
       );
     }
+    if (_credentials.any((c) => c.directoryId != null || c.tagIds.isNotEmpty) &&
+        !await _credentialClassificationFormat()) {
+      throw const StorageFailure('unsupported_schema');
+    }
+    await _validateCredentialClassification(_credentials);
     final cutoff = _clock().subtract(const Duration(days: 30));
     final retained = _credentialMaterials
         .where((m) => m.retiredAt == null || m.retiredAt!.isAfter(cutoff))
@@ -987,6 +995,10 @@ class EncryptedInformationRepository
     try {
       await _db.transaction(() async {
         validate();
+        await _guardCredentialClassificationRemoval(
+          directoryId: directoryId,
+          tagId: tagId,
+        );
         for (final item in items) {
           await _writeItem(item);
         }

@@ -43,6 +43,13 @@ extension _EncryptedClassification on EncryptedInformationRepository {
           throw const AccessFailure('organization_conflict');
         if (await _classificationReceipt(change.command.operationId) != null)
           throw const AccessFailure('operation_conflict');
+        if (change.command.kind == InformationClassificationKind.directory &&
+            change.command.action == InformationClassificationAction.delete) {
+          await _guardCredentialClassificationRemoval(
+            directoryId: change.targetId,
+          );
+        }
+        await _removeCredentialTagAssignments(change);
         if (change.directory != null) await _writeDirectory(change.directory!);
         if (change.tag != null) await _writeTag(change.tag!);
         for (final item in change.items) {
@@ -91,10 +98,61 @@ extension _EncryptedClassification on EncryptedInformationRepository {
         _items[item.id] = item;
       }
       _revisions.addAll(change.previous);
+      for (final c in change.credentials) {
+        final index = _credentials.indexWhere((old) => old.id == c.id);
+        _credentials[index] = c;
+      }
       return receipt;
     } catch (error) {
       if (error is AccessFailure) rethrow;
       throw const StorageFailure('save_failed');
+    }
+  }
+
+  Future<void> _removeCredentialTagAssignments(
+    InformationClassificationChange change,
+  ) async {
+    final deleting =
+        change.command.kind == InformationClassificationKind.tag &&
+        change.command.action == InformationClassificationAction.delete;
+    if (!deleting) {
+      if (change.credentials.isNotEmpty ||
+          change.previousCredentials.isNotEmpty)
+        throw const StorageFailure('invalid_credential_change');
+      return;
+    }
+    final actual = (await _storedCredentials())
+        .where((c) => c.deletedAt == null && c.tagIds.contains(change.targetId))
+        .toList();
+    if (actual.length != change.previousCredentials.length ||
+        actual.length != change.credentials.length ||
+        change.previousCredentials.map((c) => c.id).toSet().length !=
+            actual.length ||
+        change.credentials.map((c) => c.id).toSet().length != actual.length)
+      throw const AccessFailure('organization_conflict');
+    for (final old in actual) {
+      final previous = change.previousCredentials
+          .where((c) => c.id == old.id)
+          .firstOrNull;
+      final next = change.credentials.where((c) => c.id == old.id).firstOrNull;
+      if (previous == null ||
+          next == null ||
+          jsonEncode(previous.toJson()) != jsonEncode(old.toJson()) ||
+          jsonEncode(next.toJson()) !=
+              jsonEncode(
+                old
+                    .copy(
+                      tagIds: old.tagIds.where((id) => id != change.targetId),
+                      modifiedAt: next.modifiedAt,
+                    )
+                    .toJson(),
+              )) {
+        throw const AccessFailure('organization_conflict');
+      }
+      await _db.customStatement(
+        'UPDATE managed_credentials SET payload=? WHERE id=?',
+        [jsonEncode(next.toJson()), next.id],
+      );
     }
   }
 }

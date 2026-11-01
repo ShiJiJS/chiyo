@@ -12,6 +12,10 @@ extension _MemoryClassification on MemoryInformationRepository {
       [
         for (final t in tags) [t.id, t.name, t.version],
       ],
+      [
+        for (final c in _credentials.where((c) => c.deletedAt == null))
+          [c.id, c.directoryId, c.tagIds],
+      ],
     ]);
     if (_classificationFingerprint != fingerprint) {
       if (_classificationFingerprint != null) _classificationRevision++;

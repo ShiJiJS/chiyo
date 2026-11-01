@@ -23,7 +23,11 @@ final class CredentialRecordInput {
     this.updateExpiry = false,
     this.expiresAt,
     Iterable<String>? linkedItemIds,
+    this.updateClassification = false,
+    this.directoryId,
+    Iterable<String>? tagIds,
   }) : material = material == null ? null : List.unmodifiable(material),
+       tagIds = tagIds == null ? null : List.unmodifiable(tagIds),
        linkedItemIds = linkedItemIds == null
            ? null
            : List.unmodifiable(linkedItemIds);
@@ -39,6 +43,9 @@ final class CredentialRecordInput {
   final CredentialForm? form;
   final List<int>? material;
   final List<String>? linkedItemIds;
+  final bool updateClassification;
+  final String? directoryId;
+  final List<String>? tagIds;
   final bool? enabled, discoverable;
   final bool updateExpiry;
   final DateTime? expiresAt;
@@ -65,6 +72,11 @@ final class CredentialRecordInput {
             'linkedItemIds': linkedItemIds == null
                 ? null
                 : (List.of(linkedItemIds!)..sort()),
+            // Preserve exact hashes of pre-classification submitted commands.
+            if (updateClassification) ...{
+              'directoryId': directoryId,
+              'tagIds': tagIds == null ? null : (List.of(tagIds!)..sort()),
+            },
           }),
         ),
       )
@@ -287,10 +299,13 @@ extension OwnerCredentialRecords on OwnerAccess {
                 input.fileName != null ||
                 input.linkedItemIds != null ||
                 input.discoverable != null ||
+                input.updateClassification ||
                 input.updateExpiry ||
                 input.expiresAt != null)) ||
         (!toggle && input.enabled != null) ||
-        (!input.updateExpiry && input.expiresAt != null)) {
+        (!input.updateExpiry && input.expiresAt != null) ||
+        (!input.updateClassification &&
+            (input.directoryId != null || input.tagIds != null))) {
       throw const AccessFailure('invalid_credential_operation');
     }
     final form = input.form ?? old!.form;
@@ -340,6 +355,16 @@ extension OwnerCredentialRecords on OwnerAccess {
       throw const AccessFailure('invalid_credential_links');
     }
     final now = _service._clock().toUtc();
+    if (input.updateClassification) {
+      if (input.tagIds == null ||
+          input.tagIds!.length > 100 ||
+          input.tagIds!.toSet().length != input.tagIds!.length ||
+          input.directoryId != null &&
+              !directories.any((d) => d.id == input.directoryId) ||
+          input.tagIds!.any((id) => !tags.any((t) => t.id == id))) {
+        throw const AccessFailure('invalid_credential_classification');
+      }
+    }
     final c = create
         ? ManagedCredential(
             id: _service._secret(),
@@ -357,6 +382,8 @@ extension OwnerCredentialRecords on OwnerAccess {
             expiresAt: input.expiresAt?.toUtc(),
             discoverable: input.discoverable ?? false,
             linkedItemIds: links,
+            directoryId: input.updateClassification ? input.directoryId : null,
+            tagIds: input.updateClassification ? input.tagIds! : const [],
           )
         : old!.copy(
             name: toggle ? null : input.name!.trim(),
@@ -371,6 +398,10 @@ extension OwnerCredentialRecords on OwnerAccess {
             expiresAt: input.updateExpiry ? input.expiresAt?.toUtc() : null,
             clearExpiry: input.updateExpiry && input.expiresAt == null,
             linkedItemIds: input.linkedItemIds,
+            directoryId: input.updateClassification ? input.directoryId : null,
+            clearDirectory:
+                input.updateClassification && input.directoryId == null,
+            tagIds: input.updateClassification ? input.tagIds : null,
             invalidateUse:
                 toggle ||
                 replace ||

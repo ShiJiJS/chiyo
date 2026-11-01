@@ -535,6 +535,10 @@ class MemoryInformationRepository
       _items[item.id] = item;
     }
     _revisions.addAll(change.previous);
+    for (final credential in change.credentials) {
+      final index = _credentials.indexWhere((c) => c.id == credential.id);
+      if (index >= 0) _credentials[index] = credential;
+    }
     final receipt = change.receipt(_classificationVersion());
     _classificationReceipts[receipt.operationId] = receipt;
     return receipt;

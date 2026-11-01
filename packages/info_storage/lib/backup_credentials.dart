@@ -8,27 +8,62 @@ void _validateBackupCredentials(
 }) {
   final credentials = <String, ManagedCredential>{};
   for (final row in tables['managed_credentials']!) {
-    final j = _backupObject(_backupJson(row), {
-      'id',
-      'name',
-      'publicPurpose',
-      'privateNote',
-      'form',
-      'version',
-      'revision',
-      'useGeneration',
-      'suggestedBinding',
-      'createdAt',
-      'modifiedAt',
-      'discoverable',
-      'enabled',
-      'expiresAt',
-      'deletedAt',
-      'purgedAt',
-      'fileName',
-      'byteLength',
-      'linkedItemIds',
-    });
+    final j = _backupObject(
+      _backupJson(row),
+      {
+        'id',
+        'name',
+        'publicPurpose',
+        'privateNote',
+        'form',
+        'version',
+        'revision',
+        'useGeneration',
+        'suggestedBinding',
+        'createdAt',
+        'modifiedAt',
+        'discoverable',
+        'enabled',
+        'expiresAt',
+        'deletedAt',
+        'purgedAt',
+        'fileName',
+        'byteLength',
+        'linkedItemIds',
+      },
+      {
+        if (formatVersion >= 14) ...{'directoryId', 'tagIds'},
+      },
+    );
+    if (j.containsKey('directoryId') != j.containsKey('tagIds'))
+      _backupInvalid();
+    if (j.containsKey('directoryId')) {
+      final directory = j['directoryId'];
+      final tags = _backupList(j['tagIds'], 100);
+      if (directory != null &&
+              (directory is! String ||
+                  directory.isEmpty ||
+                  directory.length > 200 ||
+                  directory.contains('\u0000')) ||
+          tags.any(
+            (id) =>
+                id is! String ||
+                id.isEmpty ||
+                id.length > 200 ||
+                id.contains('\u0000'),
+          ) ||
+          tags.toSet().length != tags.length)
+        _backupInvalid();
+      if (j['deletedAt'] == null &&
+          (directory != null &&
+                  !tables['information_directories']!.any(
+                    (d) => d['id'] == directory,
+                  ) ||
+              tags.any(
+                (id) => !tables['information_tags']!.any((t) => t['id'] == id),
+              )))
+        _backupInvalid();
+    }
     final id = _backupId(j, 'id');
     if (row['id'] != id || credentials.containsKey(id)) _backupInvalid();
     _backupText(j, 'name', 60, required: true);
