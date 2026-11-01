@@ -704,6 +704,7 @@ class InformationBackups {
   Future<BackupContents> _installBackup(
     BackupContents contents, {
     AttachmentBackupReader? reader,
+    _BackupRestoreIntent? intent,
   }) async {
     _checkOpen();
     if (_repository.managedCredentials.isNotEmpty) {
@@ -719,6 +720,7 @@ class InformationBackups {
       // afterward due to a payload decode or a second database read.
       final install = _prepareInstall(contents);
       await _repository._db.transaction(() async {
+        if (intent != null) await _checkRestoreIntent(intent, contents);
         final existingTables = await _repository._db
             .customSelect(
               "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
@@ -831,6 +833,7 @@ class InformationBackups {
           }
         }
         await _repository._checkAttachmentBackupBudget();
+        if (intent != null) await _commitRestoreReceipt(intent, contents);
       });
       install();
       return contents;
