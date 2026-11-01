@@ -47,6 +47,7 @@ part 'information_file_access.dart';
 part 'information_draft_models.dart';
 part 'information_draft_access.dart';
 part 'information_record_operations.dart';
+part 'information_file_operations.dart';
 part 'information_approval_operations.dart';
 part 'information_approval_access.dart';
 part 'information_classification_operations.dart';

@@ -11,7 +11,11 @@ final class OwnerInformationAttachment {
 extension OwnerInformationAttachments on OwnerAccess {
   Future<OwnerInformationAttachment> readInformationAttachment(
     InformationAttachmentRef ref,
-  ) => _serialize(() async {
+  ) => _serialize(() => _readInformationAttachment(ref));
+
+  Future<OwnerInformationAttachment> _readInformationAttachment(
+    InformationAttachmentRef ref,
+  ) async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
     final generation = _service._libraryGeneration;
     try {
@@ -56,7 +60,7 @@ extension OwnerInformationAttachments on OwnerAccess {
     } on Object {
       throw const AccessFailure('attachment_integrity_failed');
     }
-  });
+  }
 
   Future<InformationAttachmentUsage> informationAttachmentUsage() =>
       _serialize(() async {

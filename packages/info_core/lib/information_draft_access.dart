@@ -77,6 +77,29 @@ extension OwnerInformationDrafts on OwnerAccess {
         : before == null || before.version != input.baseVersion) {
       throw const AccessFailure('version_conflict');
     }
+    if (input.fileCommand case final command?) {
+      final staged = input.fields.where((f) => f.stageId != null).toList();
+      final target = staged.length == 1 ? staged.single : null;
+      final old = before?.fields
+          .where((f) => f.id == command.fieldId)
+          .firstOrNull;
+      if (!durableReceipt ||
+          target == null ||
+          target.kind != FieldKind.file ||
+          (command.action == 'import'
+              ? before != null ||
+                    input.fields.length != 1 ||
+                    target.fieldId != null
+              : before == null ||
+                    old == null ||
+                    old.kind != FieldKind.file ||
+                    old.attachment != command.expected ||
+                    target.fieldId != old.id ||
+                    target.replaceIdentity ||
+                    target.name.trim() != old.name)) {
+        throw const AccessFailure('invalid_information');
+      }
+    }
     _checkOrganizationName(input.name);
     _checkParent(input.directoryId);
     if (input.description.length > 2000 ||
@@ -228,6 +251,7 @@ extension OwnerInformationDrafts on OwnerAccess {
                 version: item.version,
                 baseVersion: input.baseVersion,
                 command: input.command,
+                file: _fileReceipt(input, item),
               )
             : null,
       ),

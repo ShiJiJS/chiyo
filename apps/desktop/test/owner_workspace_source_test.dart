@@ -277,9 +277,10 @@ void main() {
           fails('unknown_outcome'),
         );
         await expectLater(
-          source.fileOperationReceipt('unknown'),
-          fails('unsupported'),
+          source.fileOperationReceipt('shared-id'),
+          fails('unknown_outcome'),
         );
+        expect(await source.fileOperationReceipt('unknown'), isNull);
         expect(await source.approvals.receipt('unknown'), isNull);
         await expectLater(source.plugins.load(), fails('unsupported'));
         await expectLater(source.settings.read(), fails('unsupported'));

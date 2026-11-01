@@ -36,6 +36,17 @@ final _commonRelations = [
 
 final _definitions = <Map<String, Object?>>[
   {
+    'id': 'file',
+    'name': '文件',
+    'icon': 'file',
+    'fields': [_field('file', '文件', 'file')],
+    'sections': [
+      _section('文件', ['file']),
+      {'kind': 'relations', 'title': '关联资料', 'key': 'related'},
+    ],
+    'relations': [_relation('related', '关联资料')],
+  },
+  {
     'id': 'generic',
     'name': '通用资料',
     'icon': 'file',

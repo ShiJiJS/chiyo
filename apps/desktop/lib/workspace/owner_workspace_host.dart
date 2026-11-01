@@ -10,6 +10,8 @@ import 'workspace_app.dart';
 import 'workspace_source.dart';
 import 'package:info_storage/info_storage.dart';
 import '../backups.dart';
+import '../information_files.dart';
+import 'owner_workspace_file_selections.dart';
 import 'owner_workspace_backup_files.dart';
 import 'owner_workspace_backups.dart';
 import 'unavailable_workspace_sources.dart';
@@ -23,10 +25,12 @@ class OwnerWorkspaceHost extends StatefulWidget {
     required this.runtime,
     this.backups,
     this.backupPicker = const NativeBackupFilePicker(),
+    this.filePicker = const NativeInformationFilePicker(),
   });
   final DesktopRuntime runtime;
   final InformationBackups? backups;
   final BackupFilePicker backupPicker;
+  final InformationFilePicker filePicker;
   @override
   State<OwnerWorkspaceHost> createState() => _OwnerWorkspaceHostState();
 }
@@ -61,6 +65,10 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     }
     _source = OwnerWorkspaceSource(
       owner: widget.runtime.service.owner,
+      fileSelections: OwnerWorkspaceFileSelections(
+        widget.runtime.service.owner,
+        picker: widget.filePicker,
+      ),
       backups: _backups ?? const UnavailableWorkspaceBackup(),
       agents: OwnerWorkspaceAgents(
         owner: widget.runtime.service.owner,
@@ -97,6 +105,9 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     source: _source,
     desktop: _desktop,
     windowTitle: '知予',
-    inputsBuilder: (_) => WorkspaceInputs(backup: _backupFiles?.pick),
+    inputsBuilder: (_) => WorkspaceInputs(
+      backup: _backupFiles?.pick,
+      file: _source.selections.pick,
+    ),
   );
 }

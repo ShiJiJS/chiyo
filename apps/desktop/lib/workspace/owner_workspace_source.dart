@@ -7,6 +7,8 @@ import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
 import 'owner_workspace_information.dart';
 import 'owner_workspace_files.dart';
+import 'owner_workspace_file_selections.dart';
+import 'owner_workspace_file_changes.dart';
 import 'owner_pdf_preview.dart';
 import 'owner_workspace_approvals.dart';
 import 'owner_workspace_agents.dart';
@@ -16,10 +18,12 @@ import 'workspace_source.dart';
 /// One owner projection of one library. Its caller owns service/repository
 /// lifetime and must replace this source after a successful library restore.
 /// Unsupported modules fail explicitly instead of showing fictional results.
-class OwnerWorkspaceSource implements WorkspaceSource {
+class OwnerWorkspaceSource
+    implements WorkspaceSource, WorkspaceFileSelectionReleaser {
   OwnerWorkspaceSource({
     required this.owner,
     OwnerPdfPreviewRenderer pdfPreview = const NativeOwnerPdfPreview(),
+    OwnerWorkspaceFileSelections? fileSelections,
     Map<String, Map<String, Object?>>? definitions,
     Duration refreshInterval = const Duration(seconds: 1),
     this.settings = const UnavailableWorkspaceSettings(),
@@ -44,6 +48,13 @@ class OwnerWorkspaceSource implements WorkspaceSource {
       onChanged: _changed,
     );
     _files = OwnerWorkspaceFiles(owner, _information, pdf: pdfPreview);
+    selections = fileSelections ?? OwnerWorkspaceFileSelections(owner);
+    _fileChanges = OwnerWorkspaceFileChanges(
+      owner,
+      _information,
+      selections,
+      _changed,
+    );
     _classification = OwnerWorkspaceClassification(
       owner: owner,
       information: _information,
@@ -66,6 +77,8 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   bool get isCurrentLibrary => !_disposed && _scope.isCurrent;
   late final OwnerWorkspaceInformation _information;
   late final OwnerWorkspaceFiles _files;
+  late final OwnerWorkspaceFileSelections selections;
+  late final OwnerWorkspaceFileChanges _fileChanges;
   late final OwnerWorkspaceClassification _classification;
   late final OwnerWorkspaceHistory _history;
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
@@ -306,14 +319,14 @@ class OwnerWorkspaceSource implements WorkspaceSource {
   );
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
-      _unsupported();
+      _read(() => _fileChanges.importFile(input));
   @override
   Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change) =>
-      _unsupported();
+      _read(() => _fileChanges.change(change));
   @override
   Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
     String operationId,
-  ) => _unsupported();
+  ) => _read(() => _fileChanges.receipt(operationId));
   @override
   Future<WorkspaceFileActionResult> fileAction(
     WorkspaceRecordRef record,
@@ -323,10 +336,14 @@ class OwnerWorkspaceSource implements WorkspaceSource {
     required String operationId,
   }) => _unsupported();
 
+  @override
+  Future<void> releaseFileSelection(String id) => selections.release(id);
+
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
     _timer?.cancel();
+    await selections.dispose();
     await _requests.cancel();
     await _changes.close();
   }

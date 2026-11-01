@@ -9,6 +9,8 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/library_file.dart';
+import 'package:info_desktop/information_files.dart';
+import 'package:info_desktop/workspace/owner_workspace_file_selections.dart';
 
 class _Keys implements DatabaseKeyStore {
   @override
@@ -19,14 +21,22 @@ class _Keys implements DatabaseKeyStore {
       throw StateError('Synthetic key already exists');
 }
 
-List<int> _pdf() {
+class _Picker implements InformationFilePicker {
+  String? next;
+  @override
+  Future<String?> choose() async => next;
+  @override
+  Future<String?> saveAs(String name) async => null;
+}
+
+List<int> _pdf({bool inverted = false}) {
   final objects = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>',
     '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 5 0 R >>',
     '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 6 0 R >>',
   ];
-  for (final color in ['1 0 0', '0 0 1']) {
+  for (final color in (inverted ? ['0 0 1', '1 0 0'] : ['1 0 0', '0 0 1'])) {
     final stream = '$color rg 0 0 200 100 re f\n';
     objects.add(
       '<< /Length ${ascii.encode(stream).length} >>\nstream\n${stream}endstream',
@@ -52,6 +62,7 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   const run = String.fromEnvironment('OWNER_PDF_NATIVE_RUN');
+  const fileChanges = bool.fromEnvironment('OWNER_PDF_FILE_CHANGES');
   if (!Platform.isMacOS || !RegExp(r'^[a-f0-9]{32}$').hasMatch(run)) {
     throw StateError('Explicit synthetic PDF native invocation required');
   }
@@ -71,6 +82,8 @@ void main() {
     late core.InformationItem item;
     late String field;
     late WorkspaceFilePreview first;
+    final picker = _Picker();
+    WorkspaceFileChange? restoredCommand;
     try {
       await tester.runAsync(() async {
         root = await Directory.systemTemp.createTemp('owner-pdf-$run-');
@@ -88,27 +101,46 @@ void main() {
         source = OwnerWorkspaceSource(
           owner: service!.owner,
           refreshInterval: Duration.zero,
+          fileSelections: OwnerWorkspaceFileSelections(
+            service!.owner,
+            picker: picker,
+          ),
         );
         final input = File('${root!.path}/synthetic.pdf');
         await input.writeAsBytes(_pdf());
-        final draft = await service!.owner.beginInformationFileDraft();
-        final stage = await service!.owner.stageInformationFile(
-          draft,
-          input.path,
-          mediaType: 'application/pdf',
-        );
-        item = await service!.owner.commitInformationDraft(
-          draft,
-          'save',
-          core.InformationDraftInput(
-            name: 'Synthetic PDF',
-            description: '',
-            fields: [
-              core.InformationDraftField.stagedFile('PDF', '', stage.id),
-            ],
-          ),
-        );
-        await service!.owner.releaseInformationFileDraft(draft);
+        if (fileChanges) {
+          picker.next = input.path;
+          final selected = (await source!.selections.pick())!;
+          final record = await source!.importFile(
+            WorkspaceFileImport(
+              operationId: 'native-import',
+              selectionId: selected.selectionId,
+              name: 'Synthetic PDF',
+            ),
+          );
+          item = service!.owner.information.singleWhere(
+            (i) => i.id == record.id,
+          );
+        } else {
+          final draft = await service!.owner.beginInformationFileDraft();
+          final stage = await service!.owner.stageInformationFile(
+            draft,
+            input.path,
+            mediaType: 'application/pdf',
+          );
+          item = await service!.owner.commitInformationDraft(
+            draft,
+            'save',
+            core.InformationDraftInput(
+              name: 'Synthetic PDF',
+              description: '',
+              fields: [
+                core.InformationDraftField.stagedFile('PDF', '', stage.id),
+              ],
+            ),
+          );
+          await service!.owner.releaseInformationFileDraft(draft);
+        }
         await input.delete();
         checks.add('real SQLCipher intake; external original deleted');
         final ref = WorkspaceRecordRef(
@@ -174,6 +206,73 @@ void main() {
       await tester.pump();
       expect(next, 0);
       checks.add('production reader previous-page control selects page0');
+      if (fileChanges) {
+        await tester.runAsync(() async {
+          final input = File('${root!.path}/replacement.pdf');
+          await input.writeAsBytes(_pdf(inverted: true));
+          picker.next = input.path;
+          final selected = (await source!.selections.pick())!;
+          await input.delete();
+          final ref = WorkspaceRecordRef(
+            WorkspaceRecordKind.information,
+            item.id,
+          );
+          final history = await source!.loadFileHistory(ref, field);
+          final replacement = await source!.changeFile(
+            WorkspaceFileChange(
+              operationId: 'native-replace',
+              record: ref,
+              fieldKey: field,
+              expectedRecordVersion: history.recordVersion,
+              expectedFileVersion: history.current.ref.version,
+              kind: WorkspaceFileChangeKind.replace,
+              selectionId: selected.selectionId,
+            ),
+          );
+          expect(replacement.version, 2);
+          expect(
+            (await source!.readFilePreview(ref, field, page: 1)).image,
+            first.image,
+          );
+          checks.add(
+            'actual source replacement promotes encrypted PDF and renders new bytes',
+          );
+          final updated = await source!.loadFileHistory(ref, field);
+          restoredCommand = WorkspaceFileChange(
+            operationId: 'native-restore',
+            record: ref,
+            fieldKey: field,
+            expectedRecordVersion: updated.recordVersion,
+            expectedFileVersion: updated.current.ref.version,
+            kind: WorkspaceFileChangeKind.restore,
+            restoreVersion: 1,
+          );
+          final restored = await source!.changeFile(restoredCommand!);
+          expect(restored.version, 3);
+          expect(restored.id, replacement.id);
+          expect(
+            (await source!.readFilePreview(ref, field, page: 1)).image,
+            second.image,
+          );
+          checks.add(
+            'retained PDF restore creates v3 and renders exact old bytes',
+          );
+          expect(
+            (await source!.fileOperationReceipt(
+              'native-restore',
+            ))!.commandDigest,
+            restoredCommand!.digest,
+          );
+          expect(await source!.changeFile(restoredCommand!), restored);
+          expect(
+            (await source!.loadFileHistory(ref, field)).versions.length,
+            3,
+          );
+          checks.add(
+            'persistent exact file receipt prevents duplicate restore',
+          );
+        });
+      }
       await tester.runAsync(() async {
         await source!.dispose();
         await service!.close();
@@ -193,6 +292,15 @@ void main() {
           page: 1,
         );
         expect(reopened.image, second.image);
+        if (restoredCommand != null) {
+          expect((await source!.changeFile(restoredCommand!)).version, 3);
+          expect(
+            (await source!.fileOperationReceipt(
+              'native-restore',
+            ))!.commandDigest,
+            restoredCommand!.digest,
+          );
+        }
         checks.add('SQLCipher/service reopen returns identical native page');
       });
       binding.reportData!['passed'] = true;

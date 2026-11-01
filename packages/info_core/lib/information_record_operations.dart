@@ -36,11 +36,13 @@ final class InformationRecordReceipt {
     required this.version,
     required this.baseVersion,
     this.command,
+    this.file,
   });
   final String operationId, inputHash, itemId;
   final int version;
   final int? baseVersion;
   final InformationRecordCommand? command;
+  final InformationFileReceipt? file;
   Map<String, Object?> toJson() => {
     'operationId': operationId,
     'inputHash': inputHash,
@@ -48,10 +50,14 @@ final class InformationRecordReceipt {
     'version': version,
     'baseVersion': baseVersion,
     if (command != null) 'command': command!.toJson(),
+    if (file != null) 'file': file!.toJson(),
   };
 
   factory InformationRecordReceipt.fromJson(Map<String, dynamic> json) {
-    if (json.length != (json.containsKey('command') ? 6 : 5) ||
+    if (json.length !=
+            5 +
+                (json.containsKey('command') ? 1 : 0) +
+                (json.containsKey('file') ? 1 : 0) ||
         (json.containsKey('command') &&
             json['command'] is! Map<String, dynamic>) ||
         json['operationId'] is! String ||
@@ -79,6 +85,11 @@ final class InformationRecordReceipt {
       itemId: json['itemId'] as String,
       version: json['version'] as int,
       baseVersion: json['baseVersion'] as int?,
+      file: json.containsKey('file')
+          ? InformationFileReceipt.fromJson(
+              json['file'] as Map<String, dynamic>,
+            )
+          : null,
       command: json.containsKey('command')
           ? InformationRecordCommand.fromJson(
               json['command'] as Map<String, dynamic>,
@@ -137,7 +148,8 @@ extension OwnerInformationRecords on OwnerAccess {
         )) {
       throw const AccessFailure('invalid_information');
     }
-    if (input.fields.any((f) => f.stageId != null)) {
+    if (input.fileCommand != null ||
+        input.fields.any((f) => f.stageId != null)) {
       throw const AccessFailure('stage_unavailable');
     }
     final hash = sha256
