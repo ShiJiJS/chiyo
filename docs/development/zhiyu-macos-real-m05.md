@@ -1,3 +1,9 @@
+## 2026-11-01：新版实际导出、空库恢复和独立重开已通过
+
+同源隔离Release App使用正式DesktopLauncher/OwnerWorkspaceHost、新版设置和真实NSOpenPanel/NSSavePanel，完成恢复密钥另存取消（未选择/未写）→真实另存密钥→完整加密导出→正常退出→另一空库经原生面板恢复→正常退出→独立进程重开。格式14含普通资料2条、附件3版本共75字节、凭据1项及目录/标签；正文、原字节、私有备注、分类与独立参考恢复逐项一致。3次正常进程退出，Flutter错误0；系统Keychain未使用。原生输入不是替换picker返回值。
+
+旧个人库/旧版本兼容不作为本轮前置；错误密钥、非空目标拒绝、取消不写及不复活授权复用既有有效存储/界面证据。合成库、恢复文件、导出、临时App/dSYM及源码副本已清理。最后只待正式包集中安装，不扩展外接卷/过期书签矩阵。[本轮联合记录](evidence/zhiyu-round09/finite-macos-completion.json)。
+
 ## 2026-11-01：#74 原生导出失败已定位并修复，待最终 App 联合检查
 
 真实沙箱 NSSavePanel 选择外部输出后，O_RDONLY 打开目标父目录返回 EPERM；文件授权不含列举父目录。发布器改为 Darwin O_SEARCH 获取准确父目录描述符，保留 fstat身份、openat/renameatx_np(EXCL)、fsync及原操作核对，不要求扩大文件夹权限。

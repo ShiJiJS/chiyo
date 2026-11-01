@@ -145,6 +145,7 @@ void main() {
         expect(
           catalog.creatableTypes.map((t) => t.id),
           unorderedEquals([
+            'file',
             'credential',
             'generic',
             'document',

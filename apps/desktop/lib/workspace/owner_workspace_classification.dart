@@ -50,6 +50,8 @@ class OwnerWorkspaceClassification {
       }
     }
     final creatable = [
+      if (owner.informationFileManagementSupported)
+        const WorkspaceType('file', '普通文件', 'file'),
       if (owner.credentialRecordOperationsSupported)
         const WorkspaceType('credential', '凭据', 'key'),
       for (final entry in information.templates.entries)

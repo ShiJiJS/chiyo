@@ -1,0 +1,27 @@
+{
+  "complete": true,
+  "isolatedNativeApp": true,
+  "productionKeychainUsed": false,
+  "nativeFileImportReplaceRestoreSaveAsAndTextEdit": true,
+  "managedOpenCopyRemovedOnNormalClose": true,
+  "nativeKeySaveCancelAndRealSave": true,
+  "nativeCurrentFormat14ExportAndEmptyTargetRestore": true,
+  "independentProcessReopenExactPrivateComparison": true,
+  "credentialAndAttachmentClassificationPreserved": true,
+  "threeNormalProcessExits": true,
+  "scope": "Current Mac only; earlier valid AI/negative-path evidence reused; no old personal library migration",
+  "syntheticLibrariesKeysAndExportsRemoved": true,
+  "temporaryAppAndSymbolsRemoved": true,
+  "date": "2026-11-01",
+  "nativeEntry": "apps/desktop/integration_test/macos_finite_delivery_manual.dart",
+  "implementationFilesMatched": 316,
+  "implementationDigest": "2a6d66ce9458fe7b896e7ba51b3d53c891a7d49214dd9e3b6ba1e0ca10346d3e",
+  "fileMenuRelatedTests": 14,
+  "credentialLifecycleStorageTests": 20,
+  "credentialUiHistoryTests": 28,
+  "coreCredentialTests": 7,
+  "controlTests": {
+    "passed": 9,
+    "conditionalSkip": 1
+  }
+}
