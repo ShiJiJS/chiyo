@@ -165,6 +165,7 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
               return OwnerWorkspaceHost(
                 key: ValueKey(runtime),
                 runtime: runtime,
+                backups: startup.library!.backups,
               );
             }
             return InformationApp(

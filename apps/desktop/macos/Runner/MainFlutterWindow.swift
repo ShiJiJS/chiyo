@@ -27,7 +27,6 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   }
   private var navigationEnabled = false
   private var notificationsEnabled = false
-  private var backupOutputs: [String: URL] = [:]
   private let backupStaging = BackupStagingRegistry()
   private var informationOutputs: [String: URL] = [:]
   private var informationStaging: [String: URL] = [:]
@@ -147,14 +146,20 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           result(FlutterError(code: "file_export_failed", message: "File staging cleanup incomplete", details: nil))
         }
       } else if call.method == "prepareBackupStaging" {
-        guard let path = call.arguments as? String, let destination = window.backupOutputs.removeValue(forKey: path) else {
+        guard let path = call.arguments as? String else {
           result(FlutterError(code: "backup_staging_failed", message: "No selected backup destination", details: nil)); return
         }
         do {
-          result(try window.backupStaging.prepare(for: destination))
+          result(try window.backupStaging.prepareSelected(path))
         } catch {
           result(FlutterError(code: "backup_staging_failed", message: "Backup staging unavailable", details: nil))
         }
+      } else if call.method == "releaseRegisteredBackupStaging" {
+        guard let value = call.arguments as? [String: String] else {
+          result(FlutterError(code: "backup_staging_failed", message: "Invalid registered staging", details: nil)); return
+        }
+        do { try window.backupStaging.releaseRecorded(value); result(nil) }
+        catch { result(FlutterError(code: "backup_staging_failed", message: "Registered staging cleanup incomplete", details: nil)) }
       } else if call.method == "releaseBackupStaging" {
         guard let token = call.arguments as? String else {
           result(FlutterError(code: "backup_staging_failed", message: "Unknown backup staging", details: nil)); return
@@ -173,7 +178,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         panel.allowsMultipleSelection = false
         if call.method == "backupInput" || call.method == "recoveryKeyInput" { panel.allowedFileTypes = [call.method == "recoveryKeyInput" ? "txt" : "aimbackup"] }
         panel.beginSheetModal(for: window) { response in
-          result(response == .OK ? panel.url?.path : nil)
+          guard response == .OK, let url = panel.url else { result(nil); return }
+          if call.method == "backupInput" || call.method == "recoveryKeyInput" {
+            do { result(try window.backupStaging.inputPath(url)) }
+            catch { result(FlutterError(code: "file_dialog_failed", message: "Selected backup file unavailable", details: nil)) }
+          } else { result(url.path) }
         }
       } else if call.method == "informationFileOutput" {
         guard let name = call.arguments as? String, !name.isEmpty, name.utf8.count <= 4096 else {
@@ -193,8 +202,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         panel.nameFieldStringValue = recovery ? "agent-info-recovery-key.txt" : "information-backup.aimbackup"
         panel.canCreateDirectories = true
         panel.beginSheetModal(for: window) { response in
-          if response == .OK, !recovery, let url = panel.url { window.backupOutputs[url.path] = url }
-          result(response == .OK ? panel.url?.path : nil)
+          guard response == .OK, let url = panel.url else { result(nil); return }
+          do { result(try window.backupStaging.selectOutput(url, recovery: recovery)) }
+          catch { result(FlutterError(code: "file_dialog_failed", message: "Selected backup destination unavailable", details: nil)) }
         }
       } else { result(FlutterMethodNotImplemented) }
     }

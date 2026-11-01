@@ -1,6 +1,6 @@
 # Mac 首批可用版本：执行路线图
 
-更新：2026-10-30。总票 [#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)。本轮只整理规划和 tickets，保留已有实现及未提交工作，不开发、不安装或替换 App。
+更新：2026-11-01。总票 [#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)。当前按 tickets 推进实现；已安装 App 与准备好的候选仍分别保留。
 
 ## 首批要交付什么
 
@@ -30,7 +30,7 @@ GitHub 已有依赖 **#70 → #71 → #72 → #73**，五张票均属于 #69，�
 
 1. **#70–#72：核对证据与原验收项的差额。** 复用已有测试和实现，只修补真实缺口；准确区分测试入口、正常 Release 入口、真实 AI 聊天与物理系统操作。
 2. **#73：完成固定安装交付。** 旧程序归档及候选载荷核对已完成，固定旧安装尚未替换。先保护最新资料并验证可恢复，再正常退出、整体换包、普通启动和必要系统允许；最终核对保存/重开、接入、审批和失效，提供一份实际可用说明。
-3. **#74：继续补真实备份来源。** 文件选择资源边界已有独立模块，尚未挂入正式组合。持久操作、文件发布失败核对、实际备份来源、恢复重绑与新版控件联合检查仍需完成，不把局部实现当作备份 UI 已可用。
+3. **#74：真实来源已接正式组合，继续最终交付验证。** 持久操作、文件发布失败核对、Owner备份来源、恢复重绑及新版控件联合检查已有实现和证据；三个独立测试进程验证了结果恢复。仍需最终沙箱包、同候选原生文件面板及重开后的沙箱访问，不能把测试进程等同于已安装 App 可日用。
 
 最新实施及证据：[M01](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m01.md)、[M02](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m02.md)、[M03](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m03.md)、[M04](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)、[M05](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m05.md)。这些记录保留具体来源与验证边界；未验事项不勾选、整票不提前关闭。
 

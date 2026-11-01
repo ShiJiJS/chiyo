@@ -30,6 +30,7 @@ part 'backup_operations.dart';
 part 'backup_output_operations.dart';
 part 'backup_restore_operations.dart';
 part 'backup_staging_operations.dart';
+part 'backup_owner_operations.dart';
 part 'information_purge_storage.dart';
 
 const _libraryFormat = 38;

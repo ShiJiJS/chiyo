@@ -49,7 +49,17 @@ class BackupController extends ChangeNotifier {
     _notify();
     try {
       final next = await source.status();
-      if (!_closed && generation == _generation && !frozen) value = next;
+      if (!_closed && generation == _generation && !frozen) {
+        value = next;
+        if (next.pending != null) {
+          _command = next.pending!.command;
+          _expectedRestore = next.pending!.restoreCounts;
+          failure = const WorkspaceFailure(
+            'unknown_outcome',
+            '上次备份操作尚未确认，请核对原操作；不会自动重新执行。',
+          );
+        }
+      }
     } catch (error) {
       if (!_closed && generation == _generation) {
         readFailure = _readError(error, '备份服务暂时不可用，请重试。');
@@ -299,9 +309,19 @@ class BackupController extends ChangeNotifier {
       } else {
         await _finish(_check(r));
       }
-    } catch (_) {
+    } catch (error) {
       if (!_closed) {
         busy = false;
+        if (_command?.action == WorkspaceBackupAction.cleanup &&
+            error is WorkspaceFailure &&
+            error.code == 'cleanup_pending') {
+          _command = null;
+          _expectedRestore = null;
+          failure = error;
+          _notify();
+          await load();
+          return;
+        }
         failure = const WorkspaceFailure(
           'unknown_outcome',
           '仍无法确认原备份操作，请继续核对。',
