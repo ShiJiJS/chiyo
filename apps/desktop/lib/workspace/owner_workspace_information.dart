@@ -37,6 +37,11 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
           description: credential.publicPurpose,
           type: const WorkspaceType('credential', '凭据', 'key'),
           updatedAt: credential.modifiedAt,
+          directoryId: credential.directoryId,
+          tags: [
+            for (final id in credential.tagIds)
+              if (names[id] != null) WorkspaceTag(id, names[id]!),
+          ],
         ),
     ];
   }

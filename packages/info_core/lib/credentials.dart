@@ -25,8 +25,20 @@ class ManagedCredential {
     this.purgedAt,
     this.fileName,
     this.byteLength = 0,
+    this.directoryId,
+    Iterable<String> tagIds = const [],
     Iterable<String> linkedItemIds = const [],
-  }) : linkedItemIds = List.unmodifiable(linkedItemIds);
+  }) : linkedItemIds = List.unmodifiable(linkedItemIds),
+       tagIds = List.unmodifiable(tagIds) {
+    bool invalidId(String id) =>
+        id.isEmpty || id.length > 200 || id.contains('\u0000');
+    if (directoryId != null && invalidId(directoryId!) ||
+        this.tagIds.length > 100 ||
+        this.tagIds.toSet().length != this.tagIds.length ||
+        this.tagIds.any(invalidId)) {
+      throw const FormatException('Invalid credential classification');
+    }
+  }
   final String id, name, publicPurpose, privateNote, suggestedBinding;
   final CredentialForm form;
   final int version, revision, byteLength, useGeneration;
@@ -35,6 +47,8 @@ class ManagedCredential {
   final bool discoverable, enabled;
   final String? fileName;
   final List<String> linkedItemIds;
+  final String? directoryId;
+  final List<String> tagIds;
   CredentialAvailability availability(DateTime now) => deletedAt != null
       ? CredentialAvailability.deleted
       : !enabled
@@ -62,35 +76,46 @@ class ManagedCredential {
     'fileName': fileName,
     'byteLength': byteLength,
     'linkedItemIds': linkedItemIds,
+    if (directoryId != null || tagIds.isNotEmpty) ...{
+      'directoryId': directoryId,
+      'tagIds': tagIds,
+    },
   };
-  factory ManagedCredential.fromJson(Map<String, dynamic> j) =>
-      ManagedCredential(
-        id: j['id'] as String,
-        name: j['name'] as String,
-        publicPurpose: j['publicPurpose'] as String,
-        privateNote: j['privateNote'] as String,
-        form: CredentialForm.values.byName(j['form'] as String),
-        version: j['version'] as int,
-        revision: j['revision'] as int,
-        useGeneration: j['useGeneration'] as int? ?? 1,
-        suggestedBinding: j['suggestedBinding'] as String,
-        createdAt: DateTime.parse(j['createdAt'] as String),
-        modifiedAt: DateTime.parse(j['modifiedAt'] as String),
-        discoverable: j['discoverable'] as bool,
-        enabled: j['enabled'] as bool,
-        expiresAt: j['expiresAt'] == null
-            ? null
-            : DateTime.parse(j['expiresAt'] as String),
-        deletedAt: j['deletedAt'] == null
-            ? null
-            : DateTime.parse(j['deletedAt'] as String),
-        purgedAt: j['purgedAt'] == null
-            ? null
-            : DateTime.parse(j['purgedAt'] as String),
-        fileName: j['fileName'] as String?,
-        byteLength: j['byteLength'] as int,
-        linkedItemIds: (j['linkedItemIds'] as List).cast<String>(),
-      );
+  factory ManagedCredential.fromJson(Map<String, dynamic> j) {
+    if (j.containsKey('directoryId') != j.containsKey('tagIds') ||
+        j.containsKey('tagIds') && j['tagIds'] is! List) {
+      throw const FormatException('Invalid credential classification');
+    }
+    return ManagedCredential(
+      id: j['id'] as String,
+      name: j['name'] as String,
+      publicPurpose: j['publicPurpose'] as String,
+      privateNote: j['privateNote'] as String,
+      form: CredentialForm.values.byName(j['form'] as String),
+      version: j['version'] as int,
+      revision: j['revision'] as int,
+      useGeneration: j['useGeneration'] as int? ?? 1,
+      suggestedBinding: j['suggestedBinding'] as String,
+      createdAt: DateTime.parse(j['createdAt'] as String),
+      modifiedAt: DateTime.parse(j['modifiedAt'] as String),
+      discoverable: j['discoverable'] as bool,
+      enabled: j['enabled'] as bool,
+      expiresAt: j['expiresAt'] == null
+          ? null
+          : DateTime.parse(j['expiresAt'] as String),
+      deletedAt: j['deletedAt'] == null
+          ? null
+          : DateTime.parse(j['deletedAt'] as String),
+      purgedAt: j['purgedAt'] == null
+          ? null
+          : DateTime.parse(j['purgedAt'] as String),
+      fileName: j['fileName'] as String?,
+      byteLength: j['byteLength'] as int,
+      linkedItemIds: (j['linkedItemIds'] as List).cast<String>(),
+      directoryId: j['directoryId'] as String?,
+      tagIds: (j['tagIds'] as List? ?? const []).cast<String>(),
+    );
+  }
   ManagedCredential copy({
     String? name,
     String? publicPurpose,
@@ -107,6 +132,9 @@ class ManagedCredential {
     String? fileName,
     int? byteLength,
     Iterable<String>? linkedItemIds,
+    String? directoryId,
+    bool clearDirectory = false,
+    Iterable<String>? tagIds,
     required DateTime modifiedAt,
     bool invalidateUse = false,
   }) => ManagedCredential(
@@ -129,6 +157,8 @@ class ManagedCredential {
     fileName: fileName ?? this.fileName,
     byteLength: byteLength ?? this.byteLength,
     linkedItemIds: linkedItemIds ?? this.linkedItemIds,
+    directoryId: clearDirectory ? null : directoryId ?? this.directoryId,
+    tagIds: tagIds ?? this.tagIds,
   );
 }
 

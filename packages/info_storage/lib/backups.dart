@@ -410,9 +410,17 @@ class InformationBackups {
       final hasGrantVersions = tables['grant_history']!.any(
         (r) => _backupJson(r).containsKey('itemVersions'),
       );
-      final extendedColumns = hasLayouts || hasGrantVersions;
+      final credentialClassification = tables['managed_credentials']!.any(
+        (r) =>
+            _backupJson(r).containsKey('directoryId') ||
+            _backupJson(r).containsKey('tagIds'),
+      );
+      final extendedColumns =
+          hasLayouts || hasGrantVersions || credentialClassification;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = hasGrantVersions
+        formatVersion = credentialClassification
+            ? 14
+            : hasGrantVersions
             ? 13
             : hasLayouts
             ? 12
@@ -806,6 +814,9 @@ class InformationBackups {
         )) {
           await _repository._requirePortableFocusedFillFormat();
         }
+        if (contents.formatVersion >= 14) {
+          await _repository._requireCredentialClassificationFormat();
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -873,6 +884,7 @@ class InformationBackups {
           11,
           12,
           13,
+          14,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -892,7 +904,7 @@ class InformationBackups {
       5 || 6 => _v6Columns,
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
-      12 || 13 => _v12Columns,
+      12 || 13 || 14 => _v12Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

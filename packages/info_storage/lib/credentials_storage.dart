@@ -5,6 +5,29 @@ extension _CredentialSnapshotValidation on EncryptedInformationRepository {
     List<ManagedCredential> credentials,
     List<CredentialMaterial> materials,
   ) async {
+    await _validateCredentialClassification(credentials);
+    if (credentials.any((c) => c.directoryId != null || c.tagIds.isNotEmpty)) {
+      await _requireCredentialClassificationFormat();
+    }
+    final old = await _storedCredentials();
+    String assignments(Iterable<ManagedCredential> records) => jsonEncode(
+      records
+          .where(
+            (c) =>
+                c.deletedAt == null &&
+                (c.directoryId != null || c.tagIds.isNotEmpty),
+          )
+          .map(
+            (c) => jsonEncode([c.id, c.directoryId, c.tagIds.toList()..sort()]),
+          )
+          .toList()
+        ..sort(),
+    );
+    if (assignments(old) != assignments(credentials)) {
+      await _db.customStatement(
+        'UPDATE information_classification_state SET version=version+1 WHERE singleton=1',
+      );
+    }
     await _db.customStatement('DELETE FROM credential_materials');
     await _db.customStatement('DELETE FROM managed_credentials');
     for (final c in credentials) {
@@ -18,6 +41,73 @@ extension _CredentialSnapshotValidation on EncryptedInformationRepository {
         'INSERT INTO credential_materials(credential_id,version,payload) VALUES(?,?,?)',
         [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
       );
+    }
+  }
+
+  Future<List<ManagedCredential>> _storedCredentials() async =>
+      (await _db.customSelect('SELECT payload FROM managed_credentials').get())
+          .map(
+            (r) => ManagedCredential.fromJson(
+              jsonDecode(r.read<String>('payload')) as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+
+  Future<bool> _credentialClassificationFormat() async =>
+      (await _db
+              .customSelect(
+                'SELECT version FROM library_format WHERE singleton=1',
+              )
+              .getSingle())
+          .read<int>('version') >=
+      _credentialClassificationLibraryFormat;
+
+  Future<void> _requireCredentialClassificationFormat() async {
+    if (await _credentialClassificationFormat()) return;
+    await _db.customStatement(
+      'UPDATE library_format SET version=? WHERE singleton=1',
+      [_credentialClassificationLibraryFormat],
+    );
+    await _db.customStatement(
+      'PRAGMA user_version = $_credentialClassificationLibraryFormat',
+    );
+  }
+
+  Future<void> _validateCredentialClassification(
+    Iterable<ManagedCredential> credentials,
+  ) async {
+    final directories =
+        (await _db.customSelect('SELECT id FROM information_directories').get())
+            .map((r) => r.read<String>('id'))
+            .toSet();
+    final tags =
+        (await _db.customSelect('SELECT id FROM information_tags').get())
+            .map((r) => r.read<String>('id'))
+            .toSet();
+    if (credentials
+        .where((c) => c.deletedAt == null)
+        .any(
+          (c) =>
+              c.directoryId != null && !directories.contains(c.directoryId) ||
+              c.tagIds.any((id) => !tags.contains(id)),
+        )) {
+      throw const AccessFailure('invalid_credential_classification');
+    }
+  }
+
+  Future<void> _guardCredentialClassificationRemoval({
+    String? directoryId,
+    String? tagId,
+  }) async {
+    final active = (await _storedCredentials()).where(
+      (c) => c.deletedAt == null,
+    );
+    if (directoryId != null &&
+        active.any((c) => c.directoryId == directoryId)) {
+      throw const AccessFailure('directory_not_empty');
+    }
+    if (tagId != null && active.any((c) => c.tagIds.contains(tagId))) {
+      throw const AccessFailure('organization_conflict');
     }
   }
 

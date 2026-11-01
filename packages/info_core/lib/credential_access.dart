@@ -296,6 +296,9 @@ extension CredentialOwnerAccess on OwnerAccess {
       invalidateUse: true,
       restore: restore,
       enabled: restore ? false : old.enabled,
+      directoryId: restore ? _existingDirectory(old.directoryId) : null,
+      clearDirectory: restore && _existingDirectory(old.directoryId) == null,
+      tagIds: restore ? _existingTags(old.tagIds) : null,
     );
     await _saveCredential(
       c,
@@ -526,6 +529,13 @@ extension CredentialAgentAccess on AgentAccess {
           'form': c.form.name,
           'version': c.version,
           'availability': c.availability(_service._clock()).name,
+          if (c.tagIds.isNotEmpty) 'tagIds': c.tagIds,
+          if (c.tagIds.isNotEmpty)
+            'tags': [
+              for (final id in c.tagIds)
+                for (final tag in source.tags.where((t) => t.id == id))
+                  {'id': id, 'name': tag.name},
+            ],
         },
       ),
       start + page.length < list.length ? page.last.id : null,

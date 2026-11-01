@@ -368,7 +368,7 @@ final class _AttachmentBackupManifest {
     );
     if (json['format'] != InformationBackups._format ||
         json['version'] is! int ||
-        !{8, 9, 10, 11, 12, 13}.contains(json['version'])) {
+        !{8, 9, 10, 11, 12, 13, 14}.contains(json['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
     if (json.length != 5 ||
