@@ -1,6 +1,6 @@
 # Mac 首批可用版本：执行路线图
 
-更新：2026-11-01。总票 [#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)。当前按 tickets 推进实现；固定安装0a5e3500已获系统允许并通过正常开库/独立重开；继续同安装写入核对与后续功能。
+更新：2026-11-01。总票 [#69](https://github.com/ShiJiJS/agent-info-manage/issues/69)。当前按 tickets 推进实现；固定安装已换入adaf475a凭据管理候选，等待这份新签名的一次系统允许；优先完成启动、保存与重开后交付，后置功能继续排队。
 
 ## 首批要交付什么
 
@@ -37,7 +37,7 @@ GitHub 已有依赖 **#70 → #71 → #72 → #73**，八张实现票 #70–#77 
 
 4. **#75/#76：普通附件后续适配。** #75已接Owner有界校验读取、真实版本及文字/图片/PDF分页预览；PDF完整Release构建和同源隔离沙箱Debug原生通道/翻页6项检查通过，导入/替换/保留版本恢复及持久回执已接并通过真实存储/控件回归，同源独立沙箱Debug导入/替换/恢复9项通过，主人另存已接持久发布/原结果核对/暂存清理，存储300、桌面45及同源真实沙箱11项通过；本机打开已接Owner临时副本/持久结果/清理及原生调度，存储313、桌面74+启动16及同源沙箱14项通过；实际默认程序接收/显示、文件面板和同候选正式交付仍待，#76已接真实当前文件元数据核对、部分审批及准确原文事务校验，核心363/6、存储313/19、桌面43及实际沙箱App→AOT CLI的19项联合检查通过；真实交付/清理历史与批准/交付各自准确预览已接，相关桌面及正式Host56项、同源实际沙箱21项通过；b3fe1964完整ARM64候选20阶段通过，运行库同源的隔离原生App四个独立进程21项重开/完整恢复通过；0a5e3500修正撤销/结束误写为到期的问题并重新打完整包；同包外部CLI与真实AI文件聊天及新版原生审批/历史控件11项已通过，22次模型调用与两个真实开始/结束事件完成。正常Release固定安装已换入且允许后正常开库/独立重开成功；同安装新增写入和其他系统项仍待，合成QA不替代这些结论。未增加演示入口。
 
-5. **#77：托管凭据管理。** 已从#69后置范围单列，750899d8接已有凭据的Owner元数据和保留材料版本，fee8e4a7补纯时间到期刷新，SQLCipher/控件相关54项及最终严格分析通过。申请和关联读取失败独立提示，换来源不沿用旧私有备注。38c8c860已补Owner新建/编辑/更换/启停的同事务准确回执，核心363/6、存储全套325/19及最终14项定向、三侧分析通过。Host安全输入/有界不透明暂存、准确UI命令及真实写入/启停已接，完整WorkspaceApp的凭据父级详情与关联入口也已补通；默认不公开，允许AI发现须显式选择。相关桌面76项及最终定向23项、三侧严格分析通过；系统输入/文件面板仅验证通道合同，未冒充实际面板验收。尚需分类与备份、生命周期隐私清理及同源交付，AI使用审批后续适配。本段未重打包或替换0a5e3500；随后主人允许该旧固定候选访问Keychain，正常开库/独立重开通过，仍不含本段源码。
+5. **#77：托管凭据管理。** 已从#69后置范围单列，750899d8接已有凭据的Owner元数据和保留材料版本，fee8e4a7补纯时间到期刷新，SQLCipher/控件相关54项及最终严格分析通过。申请和关联读取失败独立提示，换来源不沿用旧私有备注。38c8c860已补Owner新建/编辑/更换/启停的同事务准确回执，核心363/6、存储全套325/19及最终14项定向、三侧分析通过。Host安全输入/有界不透明暂存、准确UI命令及真实写入/启停已接，完整WorkspaceApp的凭据父级详情与关联入口也已补通；默认不公开，允许AI发现须显式选择。相关桌面76项及最终定向23项、三侧严格分析通过；系统输入/文件面板仅验证通道合同，未冒充实际面板验收。adaf475a已补分类持久、共同标签删除预览及格式14备份，六个独立进程验证当前往返与真实旧reader拒绝；最终核心363/6、存储337/19、桌面77及分析通过。完整包已通过20阶段并换入固定目录，等待新签名的一次系统允许；不再等生命周期隐私清理或AI使用审批适配才交付。
 
 最新实施及证据：[M01](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m01.md)、[M02](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m02.md)、[M03](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m03.md)、[M04](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)、[M05](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m05.md)、[M06](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m06.md)、[M07](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m07.md)、[M08](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m08.md)。这些记录保留具体来源与验证边界；未验事项不勾选、整票不提前关闭。
 
