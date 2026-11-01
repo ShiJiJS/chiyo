@@ -119,6 +119,7 @@ class MacDesktopControlHost {
   }
 
   void _accept(Socket socket) {
+    _observeSocketCompletion(socket);
     if (_closed || _clients.length >= 8) {
       socket.destroy();
       return;
@@ -347,6 +348,7 @@ class MacDesktopControl {
             record['port'] as int,
             timeout: wait,
           );
+          _observeSocketCompletion(socket);
           final command = quit && !requested ? 'quit' : 'status';
           // Mark consumed BEFORE writing. A response/flush timeout only polls.
           if (command == 'quit') requested = true;
@@ -391,6 +393,15 @@ class MacDesktopControl {
       return result('control_unavailable', processId);
     }
   }
+}
+
+void _observeSocketCompletion(Socket socket) {
+  // The sink's completion can fail independently of the input stream/flush
+  // when normal app termination resets the connection. Observe that future;
+  // the caller still requires the pinned process and durable exit commitment.
+  unawaited(
+    socket.done.then<void>((_) {}, onError: (Object _, StackTrace _) {}),
+  );
 }
 
 Future<String> _canonical(String path) async {
