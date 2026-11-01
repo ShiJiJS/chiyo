@@ -129,6 +129,29 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
   Future<WorkspaceResults> queryRelationCandidates(
     WorkspaceRelationQuery query,
   ) async {
+    if (query.typeId == 'credential') {
+      _available();
+      if (query.key != 'related' ||
+          (query.source != null &&
+              (query.source!.kind != WorkspaceRecordKind.credential ||
+                  !owner.credentials.any((c) => c.id == query.source!.id)))) {
+        throw const WorkspaceFailure('conflict', '凭据关联来源已变化，请重新打开。');
+      }
+      final items = _summaries()
+          .where(
+            (r) =>
+                r.ref.kind == WorkspaceRecordKind.information &&
+                _keyword(r, query.keyword),
+          )
+          .toList();
+      sortWorkspaceSummaries(items, WorkspaceSort.name);
+      final offset = _offset(query.offset, query.limit, items.length);
+      return WorkspaceResults(
+        items: items.skip(offset).take(query.limit),
+        total: items.length,
+        offset: offset,
+      );
+    }
     final item = query.source == null ? null : _item(query.source!);
     if (item != null && (item.layout?.typeId ?? 'generic') != query.typeId) {
       throw const WorkspaceFailure('conflict', '来源资料类型已变化。');

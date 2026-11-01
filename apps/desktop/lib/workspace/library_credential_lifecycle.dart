@@ -96,17 +96,16 @@ class _MaterialsState extends State<_Materials> {
   Future<void> submit() async {
     final d = history!.current;
     setState(() => outcome = null);
-    final receipt = await mutation.submit(
-      (id) => widget.source.change(
-        WorkspaceCredentialChange(
-          operationId: id,
-          ref: widget.ref,
-          expectedRecordVersion: d.recordVersion,
-          expectedMaterialVersion: d.materialVersion,
-          action: WorkspaceCredentialAction.restoreMaterial,
-          materialVersion: selected,
-        ),
+    final receipt = await mutation.submitCommand(
+      (id) => WorkspaceCredentialChange(
+        operationId: id,
+        ref: widget.ref,
+        expectedRecordVersion: d.recordVersion,
+        expectedMaterialVersion: d.materialVersion,
+        action: WorkspaceCredentialAction.restoreMaterial,
+        materialVersion: selected,
       ),
+      widget.source.change,
     );
     if (mounted && receipt != null) Navigator.pop(context, true);
   }
@@ -467,22 +466,21 @@ class _RecycleState extends State<_Recycle> {
   Future<void> submit() async {
     final d = detail!;
     setState(() => outcome = null);
-    final receipt = await mutation.submit(
-      (id) => widget.source.credentials.change(
-        WorkspaceCredentialChange(
-          operationId: id,
-          ref: widget.ref,
-          expectedRecordVersion: d.recordVersion,
-          expectedMaterialVersion: d.materialVersion,
-          action: widget.entry == null
-              ? WorkspaceCredentialAction.recycle
-              : purge
-              ? WorkspaceCredentialAction.purge
-              : WorkspaceCredentialAction.restoreRecycled,
-          entryId: widget.entry?.id,
-          expectedCatalogVersion: recycled?.catalogVersion,
-        ),
+    final receipt = await mutation.submitCommand(
+      (id) => WorkspaceCredentialChange(
+        operationId: id,
+        ref: widget.ref,
+        expectedRecordVersion: d.recordVersion,
+        expectedMaterialVersion: d.materialVersion,
+        action: widget.entry == null
+            ? WorkspaceCredentialAction.recycle
+            : purge
+            ? WorkspaceCredentialAction.purge
+            : WorkspaceCredentialAction.restoreRecycled,
+        entryId: widget.entry?.id,
+        expectedCatalogVersion: recycled?.catalogVersion,
       ),
+      widget.source.credentials.change,
     );
     if (mounted && receipt != null) complete(receipt);
   }

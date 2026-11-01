@@ -116,7 +116,9 @@ void main() {
         )).total,
         0,
       );
-      await expectLater(source.readDetail(ref(c)), fails('unsupported'));
+      final shell = await source.readDetail(ref(c));
+      expect(shell.values, isEmpty);
+      expect(shell.record.ref, ref(c));
       expect(repo.credentialMaterials.single.bytes, utf8.encode(secret));
     },
   );
@@ -155,10 +157,7 @@ void main() {
       expect(summaries.single.description, isNot(contains(secret)));
       final catalog = await source.loadCatalog();
       expect(catalog.types.map((t) => t.id), contains('credential'));
-      expect(
-        catalog.creatableTypes.map((t) => t.id),
-        isNot(contains('credential')),
-      );
+      expect(catalog.creatableTypes.map((t) => t.id), contains('credential'));
     },
   );
 
@@ -238,40 +237,33 @@ void main() {
   );
 
   test(
-    'unwired writes and receipt queries fail without modifying vault or requesting use',
+    'unwired use and lifecycle still fail while durable receipt lookup reports actual absence',
     () async {
       final c = await create();
       final before = jsonEncode(c.toJson());
       await expectLater(
         source.credentials.save(
-          WorkspaceCredentialWrite(
-            operationId: 'unsupported-save',
-            name: '改名',
-            ref: ref(c),
-          ),
+          WorkspaceCredentialWrite(operationId: 'missing-input', name: '新建'),
         ),
-        fails('unsupported'),
-      );
-      await expectLater(
-        source.credentials.setEnabled(
-          WorkspaceCredentialToggle(
-            operationId: 'unsupported-toggle',
-            ref: ref(c),
-            expectedRecordVersion: c.revision,
-            expectedMaterialVersion: c.version,
-            enabled: false,
-          ),
-        ),
-        fails('unsupported'),
-      );
-      await expectLater(
-        source.credentials.receipt('unknown-operation'),
-        fails('unsupported'),
+        fails('validation'),
       );
       await expectLater(
         source.credentials.requests(ref: ref(c)),
         fails('unsupported'),
       );
+      await expectLater(
+        source.credentials.change(
+          WorkspaceCredentialChange(
+            operationId: 'not-wired',
+            ref: ref(c),
+            expectedRecordVersion: c.revision,
+            expectedMaterialVersion: c.version,
+            action: WorkspaceCredentialAction.recycle,
+          ),
+        ),
+        fails('unsupported'),
+      );
+      expect(await source.credentials.receipt('unknown-operation'), isNull);
       expect(jsonEncode(service.owner.credential(c.id).toJson()), before);
       expect(service.owner.credentialUseRequests, isEmpty);
     },

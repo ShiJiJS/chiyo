@@ -602,16 +602,15 @@ class _CredentialToggleState extends State<_CredentialToggle> {
   }
 
   Future<void> _save() async {
-    final result = await _mutation.submit(
-      (id) => widget.source.setEnabled(
-        WorkspaceCredentialToggle(
-          operationId: id,
-          ref: _current.record.ref,
-          expectedRecordVersion: _current.recordVersion,
-          expectedMaterialVersion: _current.materialVersion,
-          enabled: _enabled,
-        ),
+    final result = await _mutation.submitCommand(
+      (id) => WorkspaceCredentialToggle(
+        operationId: id,
+        ref: _current.record.ref,
+        expectedRecordVersion: _current.recordVersion,
+        expectedMaterialVersion: _current.materialVersion,
+        enabled: _enabled,
       ),
+      widget.source.setEnabled,
     );
     if (mounted && result != null) _close();
   }

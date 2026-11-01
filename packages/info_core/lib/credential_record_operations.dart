@@ -205,6 +205,8 @@ abstract interface class CredentialRecordRepository {
 }
 
 extension OwnerCredentialRecords on OwnerAccess {
+  bool get credentialRecordOperationsSupported =>
+      serviceAvailable && _service._repository is CredentialRecordRepository;
   CredentialRecordRepository get _credentialRecords =>
       switch (_service._repository) {
         final CredentialRecordRepository r => r,

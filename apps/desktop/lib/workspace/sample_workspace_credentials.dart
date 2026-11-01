@@ -60,11 +60,12 @@ class _CredentialState {
     this.version = 1,
     this.generation = 1,
     this.enabled = true,
+    this.discoverable = true,
   });
   final WorkspaceCredentialCandidate candidate;
   final String binding, note;
   final int version, generation;
-  final bool enabled;
+  final bool enabled, discoverable;
 }
 
 /// Opaque session snapshot; contains only the synthetic vault's metadata.
@@ -347,6 +348,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       materialVersion: state.version,
       useGeneration: state.generation,
       enabled: state.enabled,
+      discoverable: state.discoverable,
       useSupported: [
         WorkspaceCredentialDelivery.environment,
         WorkspaceCredentialDelivery.file,
@@ -405,6 +407,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       binding: current.binding,
     ),
     binding: current.binding,
+    discoverable: current.discoverable,
     note: current.note,
     version: current.version + 1,
     generation: current.generation + 1,
@@ -456,16 +459,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     WorkspaceCredentialChange change,
   ) async {
     await readable();
-    final fingerprint = _fingerprint({
-      'kind': 'lifecycle',
-      'action': change.action.name,
-      'ref': change.ref.key,
-      'record': change.expectedRecordVersion,
-      'material': change.expectedMaterialVersion,
-      'selected': change.materialVersion,
-      'entry': change.entryId,
-      'catalog': change.expectedCatalogVersion,
-    });
+    final fingerprint = change.commandDigest;
     if (_replay(change.operationId, fingerprint) case final receipt?) {
       return receipt;
     }
@@ -542,6 +536,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
         _states[change.ref] = _CredentialState(
           old.candidate,
           binding: old.binding,
+          discoverable: old.discoverable,
           note: old.note,
           version: old.version,
           generation: old.generation + 1,
@@ -567,6 +562,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       restored?.version ?? old.version,
       entryId: entryId,
       notices: List.unmodifiable(notices),
+      commandDigest: change.commandDigest,
     );
     _operations[change.operationId] = (
       fingerprint: fingerprint,
@@ -624,20 +620,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     WorkspaceCredentialWrite write,
   ) async {
     await readable();
-    final fingerprint = _fingerprint({
-      'kind': 'save',
-      'ref': write.ref?.key,
-      'record': write.expectedRecordVersion,
-      'version': write.expectedMaterialVersion,
-      'name': write.name,
-      'purpose': write.purpose,
-      'note': write.privateNote,
-      'binding': write.binding,
-      'candidate': write.candidateId,
-      'directory': write.directoryId,
-      'tags': write.tagIds,
-      'links': write.linkedInformation?.map((r) => r.key).toList(),
-    });
+    final fingerprint = write.commandDigest;
     if (_replay(write.operationId, fingerprint) case final receipt?) {
       return receipt;
     }
@@ -711,6 +694,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
           ? 1
           : old!.generation + (candidate == null ? 0 : 1),
       enabled: old?.enabled ?? true,
+      discoverable: write.discoverable ?? old?.discoverable ?? false,
     );
     records.commitCredentialRecord(prepared);
     _states[ref] = state;
@@ -722,6 +706,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       ref,
       prepared.version,
       state.version,
+      commandDigest: write.commandDigest,
     );
     _operations[write.operationId] = (
       fingerprint: fingerprint,
@@ -736,13 +721,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
     WorkspaceCredentialToggle change,
   ) async {
     await readable();
-    final fingerprint = _fingerprint({
-      'kind': 'enabled',
-      'ref': change.ref.key,
-      'record': change.expectedRecordVersion,
-      'version': change.expectedMaterialVersion,
-      'enabled': change.enabled,
-    });
+    final fingerprint = change.commandDigest;
     if (_replay(change.operationId, fingerprint) case final receipt?) {
       return receipt;
     }
@@ -763,12 +742,14 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       version: old.version,
       generation: old.generation + 1,
       enabled: change.enabled,
+      discoverable: old.discoverable,
     );
     _invalidate(change.ref, WorkspaceCredentialRequestState.disabled);
     final receipt = WorkspaceCredentialReceipt(
       change.ref,
       prepared.version,
       old.version,
+      commandDigest: change.commandDigest,
     );
     _operations[change.operationId] = (
       fingerprint: fingerprint,

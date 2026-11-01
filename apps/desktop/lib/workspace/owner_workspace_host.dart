@@ -11,6 +11,9 @@ import 'workspace_source.dart';
 import 'package:info_storage/info_storage.dart';
 import '../backups.dart';
 import '../information_files.dart';
+import '../credential_files.dart';
+import 'owner_credential_input.dart';
+import 'owner_workspace_credentials.dart';
 import 'owner_workspace_file_selections.dart';
 import 'owner_workspace_backup_files.dart';
 import 'owner_workspace_backups.dart';
@@ -28,6 +31,7 @@ class OwnerWorkspaceHost extends StatefulWidget {
     this.fileOpens,
     this.backupPicker = const NativeBackupFilePicker(),
     this.filePicker = const NativeInformationFilePicker(),
+    this.credentialFiles = const NativeCredentialFilePicker(),
   });
   final DesktopRuntime runtime;
   final InformationBackups? backups;
@@ -35,6 +39,7 @@ class OwnerWorkspaceHost extends StatefulWidget {
   final InformationFileOpens? fileOpens;
   final BackupFilePicker backupPicker;
   final InformationFilePicker filePicker;
+  final CredentialFilePicker credentialFiles;
   @override
   State<OwnerWorkspaceHost> createState() => _OwnerWorkspaceHostState();
 }
@@ -112,9 +117,18 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     source: _source,
     desktop: _desktop,
     windowTitle: '知予',
-    inputsBuilder: (_) => WorkspaceInputs(
-      backup: _backupFiles?.pick,
-      file: _source.selections.pick,
-    ),
+    inputsBuilder: (context) {
+      final source = _source;
+      return WorkspaceInputs(
+        backup: _backupFiles?.pick,
+        file: source.selections.pick,
+        credential: (form) => showOwnerCredentialInput(
+          context,
+          (source.credentials as OwnerWorkspaceCredentials).staging,
+          form,
+          files: widget.credentialFiles,
+        ),
+      );
+    },
   );
 }
