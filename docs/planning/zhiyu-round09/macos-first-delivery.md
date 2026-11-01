@@ -21,8 +21,9 @@
 | 后续 | [#74 M05：新版备份与恢复](https://github.com/ShiJiJS/agent-info-manage/issues/74) | 新版设置接恢复密钥、原生文件选择、真实加密导出、空库恢复及原操作核对 | 独立恢复成功且不复活授权；取消/错误/重复操作不覆盖原数据，恢复后旧界面操作失效 |
 | 后续 | [#75 M06：普通附件管理](https://github.com/ShiJiJS/agent-info-manage/issues/75) | 原文验证读取、真实版本/预览、导入/替换/恢复版本/另存 | 先接Owner读取，再接原生选择与持久操作；实际面板另验 |
 | 后续 | [#76 M07：AI文件申请与交付](https://github.com/ShiJiJS/agent-info-manage/issues/76) | 新版文件审批、准确版本、受管副本和交付历史 | AI申请，主人审批；复用现有协议，核对失效和清理 |
+| 后续 | [#77 M08：托管凭据真实管理](https://github.com/ShiJiJS/agent-info-manage/issues/77) | 真实元数据/版本、安全录入、更换、启停及生命周期 | 先接已有凭据读取，再接持久原操作；AI使用审批后续单列，不增加主人申请入口 |
 
-GitHub 已有依赖 **#70 → #71 → #72 → #73**，原五张票及新增#75/#76均属于 #69，均保持 OPEN；实现票带 `enhancement`、`ready-for-agent`。完成顺序不要求重复开发已有能力，能独立推进的后续工作可复用现有接缝。
+GitHub 已有依赖 **#70 → #71 → #72 → #73**，八张实现票 #70–#77 均属于 #69，均保持 OPEN；实现票带 `enhancement`、`ready-for-agent`。完成顺序不要求重复开发已有能力，能独立推进的后续工作可复用现有接缝。
 
 #74 是后续增强，可以在等待 #73 的本人操作期间推进；**不成为当前候选交付的新前置**。首批新增数据的迁移和可恢复性仍属于 #70–#73，不能因完整备份界面后置而省略。
 
@@ -36,13 +37,15 @@ GitHub 已有依赖 **#70 → #71 → #72 → #73**，原五张票及新增#75/#
 
 4. **#75/#76：普通附件后续适配。** #75已接Owner有界校验读取、真实版本及文字/图片/PDF分页预览；PDF完整Release构建和同源隔离沙箱Debug原生通道/翻页6项检查通过，导入/替换/保留版本恢复及持久回执已接并通过真实存储/控件回归，同源独立沙箱Debug导入/替换/恢复9项通过，主人另存已接持久发布/原结果核对/暂存清理，存储300、桌面45及同源真实沙箱11项通过；本机打开已接Owner临时副本/持久结果/清理及原生调度，存储313、桌面74+启动16及同源沙箱14项通过；实际默认程序接收/显示、文件面板和同候选正式交付仍待，#76已接真实当前文件元数据核对、部分审批及准确原文事务校验，核心363/6、存储313/19、桌面43及实际沙箱App→AOT CLI的19项联合检查通过；真实交付/清理历史与批准/交付各自准确预览已接，相关桌面及正式Host56项、同源实际沙箱21项通过；b3fe1964完整ARM64候选20阶段通过，运行库同源的隔离原生App四个独立进程21项重开/完整恢复通过；0a5e3500修正撤销/结束误写为到期的问题并重新打完整包；同包外部CLI与真实AI文件聊天及新版原生审批/历史控件11项已通过，22次模型调用与两个真实开始/结束事件完成。正常Release固定安装已换入，但仍等待系统允许及正常开库/重开；合成QA不替代这些结论。未增加演示入口。
 
+5. **#77：托管凭据管理。** 已从#69后置范围单列，750899d8接已有凭据的Owner元数据和保留材料版本，SQLCipher/控件相关53项及严格分析通过。申请和关联读取失败独立提示，换来源不沿用旧私有备注。安全录入、持久写入/回执、生命周期与同源交付继续实施；本段没有重打包或替换当前等待Keychain的0a5e3500。
+
 最新实施及证据：[M01](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m01.md)、[M02](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m02.md)、[M03](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m03.md)、[M04](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)、[M05](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m05.md)、[M06](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m06.md)、[M07](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m07.md)。这些记录保留具体来源与验证边界；未验事项不勾选、整票不提前关闭。
 
 ## 后置范围与原票归属
 
 | 范围 | 安排 |
 | --- | --- |
-| 普通附件与托管凭据 | 普通附件已拆为 #75/#76，详见[实施顺序](macos-ordinary-attachments.md)；先推进Owner读取，凭据管理后续单列。复用既有底层，原#73换包不等待本增强 |
+| 普通附件与托管凭据 | 普通附件已拆为 #75/#76，详见[实施顺序](macos-ordinary-attachments.md)；凭据管理已单列 #77，AI使用审批/执行适配后续拆分。复用既有底层，原#73换包不等待本增强 |
 | AI 录入/修改提案、整理 | 后续按 #67 界面合同接真实能力；请求仍由 AI 发起 |
 | 插件与其他设置 | 后续按 #65/#68 及领域决策细化；备份部分已单列 #74 |
 | Mac 生命周期、通知、完整界面及安装 | 沿用 #46/#47/#48/#50，#73 回填同候选证据；系统通知不是首批接收请求的唯一通道 |
@@ -52,6 +55,6 @@ GitHub 已有依赖 **#70 → #71 → #72 → #73**，原五张票及新增#75/#
 
 ## 执行约束与历史
 
-保持 `codex/zhiyu-macos` 独立分支，不改 main/Windows。只用隔离合成资料做自动验证，不扩大个人 hooks、信任或资料访问范围。交付后保留一个当前安装，清理本轮可重建的多余 App/dSYM；不动个人资料、旧版回退保护或来源不明文件。
+保持 `codex/zhiyu-macos` 独立分支，不改 main/Windows。只用隔离合成资料做自动验证，不扩大个人 hooks、信任或资料访问范围。已逐项验证保留ZIP后清理M04/M06/旧M07三份展开载荷，约1.10GB逻辑大小，当前候选和旧安装回退仍保留。交付后保留一个当前安装，清理本轮可重建的多余 App/dSYM；不动个人资料、旧版回退保护或来源不明文件。
 
 [历史规划与阶段记录](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/planning/zhiyu-round09/macos-real-function-plan.md)保留供追溯，其中旧检查点的“下一步”不再作为当前排期。各子票原规格与未验项保持，本路线图不降低验收要求。

@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-01",
+  "issue": 77,
+  "sourceCommit": "750899d8",
+  "scope": "Owner credential metadata and retained material versions only; future mutation/use modules remain explicitly unavailable.",
+  "sqlcipherAndWidgetTests": {
+    "passed": 53,
+    "newCredentialAdapterScenarios": 7,
+    "log": "build/macos-adaptation/m08-related-tests.log"
+  },
+  "desktopAnalysis": "passed",
+  "covered": [
+    "persisted string/file credentials via unified list",
+    "exact record/material/use-generation metadata and owner note",
+    "no secret in generic metadata or search",
+    "exact association identity and metadata-only target lookup",
+    "core retained material versions and 30-day boundary",
+    "expired/recycled/wrong-kind/stale-library reads",
+    "unwired mutations/receipts/use fail without write or fabricated absence",
+    "actual widget retains metadata when requests/links fail, accurately reports failure",
+    "changing source clears old owner detail even with same record ID and revision"
+  ],
+  "firstAttempts": [
+    "Wrong relative test output path stopped file creation, then rerun with absolute path; failed command not counted.",
+    "Rotation preserves enabled state; corrected fixture expectation to existing core contract, restoration still requires disabled per spec.",
+    "Standalone detail component shows material format, while record name belongs to parent header; corrected target assertion, record-name metadata remains directly verified.",
+    "Widget teardown crossed real/fake scheduler zones; stopped observed live test and disposed real stream subscription using runAsync; production lifecycle unchanged."
+  ],
+  "schemaChanged": false,
+  "backupFormatChanged": false,
+  "candidateRebuilt": false,
+  "installedSourceRemains": "0a5e35001f4bb7a8a39546d373fbc3e9fae63678",
+  "existingKeychainRequestUntouched": true,
+  "personalLibraryUsed": false,
+  "windowsCiRun": false,
+  "remaining": [
+    "secure input/native file staging",
+    "persistent create/edit/rotate/enable and exact operation reconciliation",
+    "material/recycle restoration and purge",
+    "independent reopen/backup and same-source delivery",
+    "AI credential request/approval/execution adapter as subsequent task"
+  ]
+}
