@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-01",
+  "issue": 75,
+  "baseCommit": "6e56b1d3",
+  "branch": "codex/zhiyu-macos",
+  "scope": "Owner PDF bytes to bounded CoreGraphics page PNG via production native channel",
+  "checks": {
+    "flutterTargeted": 19,
+    "flutterRelated": 48,
+    "desktopAnalysis": "passed",
+    "mainWindowSyntax": "passed",
+    "xcodeProjectPlist": "passed",
+    "nativeCoreGraphics": "passed"
+  },
+  "nativeCases": [
+    "two real pages with embedded font drawing and URL annotation",
+    "exact red/blue rendered pixels",
+    "negative and out-of-range page",
+    "invalid/empty/oversize original",
+    "password-locked original",
+    "4097-page original refused",
+    "rotated page",
+    "cropBox",
+    "1600-pixel maximum edge",
+    "unsupported media geometry"
+  ],
+  "initialFailures": [
+    "2x raster had centered 1x PDF because CGPDF drawing transform only downscales; separate raster scale fixed actual pixel checks",
+    "New fixture import/braces analysis issues corrected"
+  ],
+  "limits": [
+    "Flutter channel tests mock native response",
+    "Standalone CoreGraphics runner is not the installed Flutter App",
+    "Full clean-source App compile pending for this commit",
+    "No OS input, personal library, external PDF viewer or AI file capability"
+  ],
+  "figures": {
+    "page-1.png": "12d0de6b4d8084290198de1386b48dd8a21e1a21271f09a0c894872d47539bfb",
+    "page-2.png": "b573209040c50e90313dca3569cc4f422bd7cf2b9afc5c17cdbc3bc042f78a9e",
+    "rotated.png": "04ae371d2fe39e372ecd0dc06a06f7d2aaecd739f4e1462925f7de47ea29f6a4",
+    "cropped.png": "4c8bb931531dd4d905e70c1a83f0d952f1f76bbdfb2a1087f1e80b7d1da47413"
+  },
+  "logs": "build/macos-adaptation/m06-pdf-1"
+}

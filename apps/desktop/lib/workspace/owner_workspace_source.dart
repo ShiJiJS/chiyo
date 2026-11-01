@@ -7,6 +7,7 @@ import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
 import 'owner_workspace_information.dart';
 import 'owner_workspace_files.dart';
+import 'owner_pdf_preview.dart';
 import 'owner_workspace_approvals.dart';
 import 'owner_workspace_agents.dart';
 import 'unavailable_workspace_sources.dart';
@@ -18,6 +19,7 @@ import 'workspace_source.dart';
 class OwnerWorkspaceSource implements WorkspaceSource {
   OwnerWorkspaceSource({
     required this.owner,
+    OwnerPdfPreviewRenderer pdfPreview = const NativeOwnerPdfPreview(),
     Map<String, Map<String, Object?>>? definitions,
     Duration refreshInterval = const Duration(seconds: 1),
     this.settings = const UnavailableWorkspaceSettings(),
@@ -41,7 +43,7 @@ class OwnerWorkspaceSource implements WorkspaceSource {
       templates: definitions ?? builtinWorkspaceDefinitions,
       onChanged: _changed,
     );
-    _files = OwnerWorkspaceFiles(owner, _information);
+    _files = OwnerWorkspaceFiles(owner, _information, pdf: pdfPreview);
     _classification = OwnerWorkspaceClassification(
       owner: owner,
       information: _information,

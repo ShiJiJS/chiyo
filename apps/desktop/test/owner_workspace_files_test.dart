@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
@@ -137,7 +139,7 @@ void main() {
   test(
     'unsupported and invalid originals are explicit and remain stored',
     () async {
-      final item = await save([0, 255, 7], media: 'application/pdf');
+      final item = await save([0, 255, 7], media: 'application/octet-stream');
       final key = await fieldKey(item);
       expect(
         (await source.readFilePreview(ref(item), key)).kind,
@@ -174,6 +176,59 @@ void main() {
       );
       expect(history.current.available, isTrue);
       expect((await source.readFilePreview(ref(current), key)).text, 'current');
+    },
+  );
+  test(
+    'SQLCipher PDF source passes verified bytes and exact page to native renderer',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      const channel = MethodChannel('agent_info_manage/owner_pdf_preview');
+      final recorder = ui.PictureRecorder();
+      ui.Canvas(recorder).drawPaint(ui.Paint());
+      final picture = recorder.endRecording();
+      final image = await picture.toImage(2, 3);
+      picture.dispose();
+      final png = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+      image.dispose();
+      final raw = utf8.encode('%PDF synthetic channel input');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            expect(call.method, 'renderPage');
+            final args = call.arguments as Map;
+            expect(args['bytes'], raw);
+            final page = args['page'] as int;
+            if (page > 1) {
+              throw PlatformException(
+                code: 'invalid_request',
+                message: '/private/not-for-ui',
+              );
+            }
+            return {
+              'png': png.buffer.asUint8List(
+                png.offsetInBytes,
+                png.lengthInBytes,
+              ),
+              'width': 2,
+              'height': 3,
+              'page': page,
+              'pageCount': 2,
+            };
+          });
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+      final item = await save(raw, media: 'application/pdf');
+      final key = await fieldKey(item);
+      final preview = await source.readFilePreview(ref(item), key, page: 1);
+      expect(preview.page, 1);
+      expect(preview.pageCount, 2);
+      expect(preview.pixelHeight, 3);
+      await expectLater(
+        source.readFilePreview(ref(item), key, page: 2),
+        fails('invalid_request'),
+      );
     },
   );
   test('image bytes decode to a real bounded PNG preview', () async {

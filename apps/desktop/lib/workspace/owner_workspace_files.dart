@@ -2,12 +2,18 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:info_core/info_core.dart' as core;
 import 'owner_workspace_information.dart';
+import 'owner_pdf_preview.dart';
 import 'workspace_source.dart';
 
 /// Owner-only ordinary attachment reads. Page keys resolve through the current
 /// record codec; callers cannot supply a free attachment ID or filesystem path.
 class OwnerWorkspaceFiles {
-  OwnerWorkspaceFiles(this.owner, this.information);
+  OwnerWorkspaceFiles(
+    this.owner,
+    this.information, {
+    this.pdf = const NativeOwnerPdfPreview(),
+  });
+  final OwnerPdfPreviewRenderer pdf;
   final core.OwnerAccess owner;
   final OwnerWorkspaceInformation information;
 
@@ -73,7 +79,7 @@ class OwnerWorkspaceFiles {
     int page = 0,
   }) async {
     final resolved = await _resolve(record, key);
-    if (page != 0 || (version != null && version < 1)) {
+    if (page < 0 || (version != null && version < 1)) {
       throw const WorkspaceFailure('invalid_request', '页码或文件版本无效。');
     }
     final ref = core.InformationAttachmentRef(
@@ -83,6 +89,10 @@ class OwnerWorkspaceFiles {
     try {
       final content = await owner.readInformationAttachment(ref);
       final file = _version(content.version);
+      if (file.mediaType == 'application/pdf') {
+        return await pdf.render(file, content.bytes, page);
+      }
+      if (page != 0) throw const WorkspaceFailure('invalid_request', '页码超出范围。');
       if (file.mediaType == 'text/plain') {
         return WorkspaceFilePreview(
           file: file,
@@ -135,6 +145,8 @@ class OwnerWorkspaceFiles {
         'service_unavailable' || 'library_changed' => '资料库已关闭或更换，请重新打开资料。',
         _ => '文件原文无法完整读取，请检查资料库后重试。',
       });
+    } on WorkspaceFailure {
+      rethrow;
     } on Object {
       throw const WorkspaceFailure('preview_unavailable', '文件内容无法预览，未修改原文件。');
     }
