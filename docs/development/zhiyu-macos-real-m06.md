@@ -39,9 +39,20 @@ v1→v2→v3、回执插入失败时原文/资料/版本回滚且原暂存可重
 真实空结果及跨操作歧义拒绝；错误的suite文件名已纠正。原错误日志和最终结果分开，
 不把中断或旧断言失败算通过。
 
-仍待本轮实际沙箱App变更流程、主人另存/外部打开、原生Open/Save面板及#76文件
+实际沙箱App变更流程已通过，仍待主人另存/外部打开、原生Open/Save面板及#76文件
 申请/审批/交付。当前87a92098完整包不含本段变更，正式安装/预览未替换。#75保持
 OPEN，不新增#73换包前置。只用合成资料，无个人库、Keychain、computer use或Windows CI。
+
+`check-owner-pdf-native.py build/macos-adaptation/m06-file-changes-native-1 --file-changes`
+以f3dd9de8构建并运行独立随机身份的真实沙箱Cocoa/Flutter Debug App，9项通过。
+使用生产OwnerWorkspaceSource导入原文并删源文件；真实PDF通道和前后翻页保持；
+替换PDF后渲染新字节，恢复保留版本生成v3并渲染准确旧字节，持久回执阻止重复恢复；
+库/service/source重开后同一旧命令仍返回v3，原生图像字节保持。
+文件选择器是注入的合成路径，Owner intake/SQLCipher/事务/预览通道/控件均为实际实现；
+没有真实OS面板，不称已验Release二进制或独立App进程重开。
+测试进程已退出、合成根由App删除，独立源码/App/dSYM/派生树清理，原预览kernel不变。
+[完整检查证据](evidence/zhiyu-round09/m06-file-changes.json)。没有个人库、Keychain、
+全局hooks、computer use或Windows CI。新源码尚未重新形成Release包，87a92098候选保持。
 
 ## 2026-11-01：Mac原生PDF分页预览
 
