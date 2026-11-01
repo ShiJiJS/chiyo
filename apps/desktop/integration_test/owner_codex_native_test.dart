@@ -13,6 +13,7 @@ import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/main.dart';
 import 'package:info_desktop/workspace/approvals_page.dart';
+import 'package:info_desktop/workspace/grant_history_page.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -28,6 +29,7 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   const owner = String.fromEnvironment('OWNER_NATIVE_WORKFLOW_RUN');
+  const fileScenario = bool.fromEnvironment('OWNER_NATIVE_FILE_CODEX');
   if (!Platform.isMacOS ||
       !const bool.fromEnvironment('OWNER_NATIVE_SYNTHETIC') ||
       !RegExp(r'^[a-f0-9]{32}$').hasMatch(owner)) {
@@ -50,7 +52,12 @@ void main() {
       '${root.path}/library',
       _Keys(),
     );
-    final service = core.InformationService(repository: repo);
+    final service = core.InformationService(
+      repository: repo,
+      informationDeliveryFiles: fileScenario
+          ? core.NativeInformationDeliveryFiles()
+          : null,
+    );
     final bootstrap = DesktopBootstrap(
       port: 47125,
       platform: NativeDesktopPlatform(),
@@ -147,6 +154,44 @@ void main() {
           address = detail.fieldIds['host']!,
           username = detail.fieldIds['user']!;
       checks.add('native-owner-ui-saves-synthetic-record');
+      String? fileItem, fileField;
+      if (fileScenario) {
+        // Only file selection is synthetic; intake, encryption and all following
+        // approvals/deliveries use the production service and workspace host.
+        final original = File('${root.path}/synthetic-native-ai.bin');
+        await original.writeAsBytes(
+          List.generate(1024, (i) => (i * 37 + 11) % 256),
+        );
+        final draft = await service.owner.beginInformationFileDraft();
+        try {
+          final stage = await service.owner.stageInformationFile(
+            draft,
+            original.path,
+            mediaType: 'application/octet-stream',
+          );
+          final saved = await service.owner.commitInformationDraft(
+            draft,
+            'Synthetic AI file intake',
+            core.InformationDraftInput(
+              name: 'Synthetic ordinary file',
+              description: 'Synthetic-only file acceptance',
+              fields: [
+                core.InformationDraftField.stagedFile(
+                  'Attachment',
+                  'Synthetic original file',
+                  stage.id,
+                ),
+              ],
+            ),
+          );
+          fileItem = saved.id;
+          fileField = saved.fields.single.id;
+        } finally {
+          await service.owner.releaseInformationFileDraft(draft);
+          await original.delete();
+        }
+        checks.add('native-owner-intakes-synthetic-file-original');
+      }
       Future<Map<String, Object?>> status() async {
         final history = await service.owner.history();
         return {
@@ -155,6 +200,21 @@ void main() {
           'textItem': item,
           'addressField': address,
           'usernameField': username,
+          if (fileScenario) 'fileItem': fileItem,
+          if (fileScenario) 'fileField': fileField,
+          if (fileScenario)
+            'deliveries': [
+              for (final d in service.owner.informationFileDeliveries)
+                {
+                  'id': d.id,
+                  'requestId': d.requestId,
+                  'operationId': d.operationId,
+                  'attachmentVersion': d.attachment.attachmentVersion,
+                  'state': d.state,
+                  'holdsCopy': d.holdsCopy,
+                  'cleanupError': d.cleanupError,
+                },
+            ],
           'requests': [
             for (final r in service.owner.requests)
               {
@@ -212,7 +272,53 @@ void main() {
           checks.add('native-runtime-closed');
           break;
         }
-        if (action != 'status') {
+        if (action == 'history' && fileScenario) {
+          final id = data['requestId'] as String;
+          final expected = data['state'] as String;
+          if (!['ready', 'released', 'ended'].contains(expected) ||
+              !service.owner.informationFileDeliveries.any(
+                (d) =>
+                    d.requestId == id &&
+                    d.field.itemId == fileItem &&
+                    d.field.fieldId == fileField,
+              )) {
+            throw StateError('Unexpected synthetic history target');
+          }
+          await tap(find.byKey(const ValueKey('workspace-nav-history')));
+          final page = find.byType(GrantHistoryPage);
+          await until(
+            () =>
+                page.evaluate().isNotEmpty &&
+                !t.widget<GrantHistoryPage>(page).controller.loading,
+          );
+          final row = find.byKey(ValueKey('grant-row-request:$id'));
+          await until(() => row.evaluate().isNotEmpty);
+          await tap(row);
+          final model = t.widget<GrantHistoryPage>(page).controller;
+          await until(
+            () => !model.reading && model.detail?.summary.requestId == id,
+          );
+          final history = model.detail!;
+          final scope = history.scopes.singleWhere(
+            (s) => s.kind == WorkspaceApprovalScopeKind.file,
+          );
+          expect(scope.record.id, fileItem);
+          expect(scope.fileVersion, 1);
+          final events = history.events
+              .where((e) => e.fileScopeId != null)
+              .toList();
+          expect(events, isNotEmpty);
+          expect(events.every((e) => e.fileVersion == 1), true);
+          if (expected == 'ready') {
+            expect(events.any((e) => e.result.contains('受管副本已准备')), true);
+          } else {
+            expect(events.every((e) => e.result.contains('登记副本路径已移除')), true);
+            if (expected == 'ended') {
+              expect(history.summary.state.isActive, false);
+            }
+          }
+          checks.add('native-file-history-$expected');
+        } else if (action != 'status') {
           if (!['approve', 'deny', 'revoke'].contains(action)) {
             throw StateError('Unexpected owner action');
           }
@@ -236,15 +342,27 @@ void main() {
           expect(
             model.detail!.scopes.every(
               (s) =>
-                  s.record.id == item &&
-                  [address, username].contains(s.fieldId),
+                  (s.record.id == item &&
+                      [address, username].contains(s.fieldId)) ||
+                  (fileScenario &&
+                      s.record.id == fileItem &&
+                      s.fieldId == fileField),
             ),
             isTrue,
           );
           if (action == 'approve') {
             final fields = (data['fields'] as List).cast<String>();
-            if (fields.length != 1 || fields.single != address) {
+            if (fields.length != 1 ||
+                fields.single != (fileScenario ? fileField : address)) {
               throw StateError('Unexpected QA approval range');
+            }
+            if (fileScenario) {
+              final file = model.detail!.scopes.singleWhere(
+                (s) => s.fieldId == fileField,
+              );
+              expect(file.kind, WorkspaceApprovalScopeKind.file);
+              expect(file.fileVersions.single.ref.version, 1);
+              expect(file.fileVersions.single.byteLength, 1024);
             }
             for (final scope in model.detail!.scopes) {
               if (model.draft!.selected.contains(scope.id) !=

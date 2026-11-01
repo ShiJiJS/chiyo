@@ -12,7 +12,7 @@ import json,os,queue,subprocess,threading,time,hashlib,tempfile,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume','delegation','owner-ui'],default='lifecycle');parser.add_argument('--delegation-mcp',action='store_true',help='Use an ephemeral process-only MCP bridge inherited by the one synthetic child');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
+parser.add_argument('--case',choices=['lifecycle','credential','expiry-restart','transport-resume','delegation','owner-ui','owner-file-ui'],default='lifecycle');parser.add_argument('--delegation-mcp',action='store_true',help='Use an ephemeral process-only MCP bridge inherited by the one synthetic child');parser.add_argument('--resume-ended',help='Public ID of an ended synthetic chat from this project; only test unarchive/resume refusal');parser.add_argument('output',type=Path);parser.add_argument('--project',required=True,type=Path);parser.add_argument('--host',required=True,type=Path)
 parser.add_argument('--package',type=Path,help='Verified new candidate CLI for owner-ui only; existing trusted hook definitions stay unchanged')
 args=parser.parse_args();OUT=args.output.resolve();OUT.relative_to(ROOT/'build/macos-adaptation');OUT.mkdir(exist_ok=False,parents=True)
 PROJECT=args.project.resolve();PROJECT.relative_to(ROOT/'build/macos-adaptation');assert (PROJECT/'preparation.json').is_file()
@@ -21,13 +21,13 @@ for entry in PREP['files']:assert hashlib.sha256((PROJECT/entry['path']).read_by
 CLI.resolve().relative_to(PROJECT.parent);assert CLI.is_file() and not CLI.is_symlink()
 PACKAGE_EVIDENCE={}
 if args.package:
- assert args.case=='owner-ui'
+ assert args.case in ['owner-ui','owner-file-ui']
  package=args.package.resolve();package.relative_to(ROOT/'build/macos-adaptation')
  manifest=json.loads((package/'manifest.json').read_text());CLI=package/'cli/info-codex'
  expected=next(f['sha256'] for f in manifest['files'] if f['path']=='cli/info-codex')
  assert not CLI.is_symlink() and hashlib.sha256(CLI.read_bytes()).hexdigest()==expected
  PACKAGE_EVIDENCE={'candidateSource':manifest['sourceCommit'],'infoCodexSha256':expected,'hookScope':'Original approved project/bundle unchanged; current package info-codex consumes actual host hook association.'}
-else:assert args.case!='owner-ui'
+else:assert args.case not in ['owner-ui','owner-file-ui']
 
 host=args.host.resolve();host.relative_to(ROOT/'build/macos-adaptation');CONTROL=json.loads((host/'controller.json').read_text());FIX=Path(CONTROL['root']);assert (FIX/'.qa-owner').read_text()==CONTROL['owner']
 EVENTS=[];CALLS=[];RESULTS={'sourceSha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'scope':__doc__,'package':PACKAGE_EVIDENCE};PROOFS={};DELEGATED={};Q=queue.Queue();COUNTER=0
@@ -108,7 +108,10 @@ def send(v):
  else:P.stdin.write(data.encode()+b'\n');P.stdin.flush()
 
 def cli(args,tid,origin='model'):
- if globals()['args'].case=='owner-ui':assert args.get('command') in ['catalog','capabilities','request','status','claim','read']
+ if globals()['args'].case in ['owner-ui','owner-file-ui']:
+  allowed=['catalog','capabilities','request','status','claim','read']
+  if globals()['args'].case=='owner-file-ui':allowed+=['file-fetch','file-status','file-release']
+  assert args.get('command') in allowed
  env=os.environ.copy();env['CODEX_THREAD_ID']=tid
  assert args.get('command') in ['catalog','capabilities','request','status','claim','read','file-fetch','file-status','file-release','credential-catalog','request-use','run-use','operation-status','execution-status','execution-output','cleanup-use','delegate']
  if args.get('command')=='delegate':
@@ -285,6 +288,80 @@ def owner_ui_case():
  RESULTS['afterEndSnapshot']=final;RESULTS['completeOwnerUiFlow']=True;save();print('OWNER_UI_REAL_CLIENT_COMPLETE',flush=True)
 
 
+def owner_file_ui_case():
+ RESULTS['scope']='Actual Codex model/SessionStart/SessionEnd + extracted package info-codex + native owner file approval/history controls. Synthetic ordinary file; native Debug QA entry, not installed Release/Keychain/system-panel acceptance.'
+ snapshot=owner('status');assert not snapshot['requests'] and not snapshot['deliveries']
+ root=new_thread();threads=[root];archived=set();RESULTS['ownerFileThreads']=threads;save()
+ def archive(tid):
+  request('thread/archive',{'threadId':tid});archived.add(tid)
+ def snapshot_ready(rid,clean=False):
+  end=time.monotonic()+12
+  while time.monotonic()<end:
+   value=owner('status');rows=[d for d in value['deliveries'] if d['requestId']==rid]
+   if rows and (not clean or all(not d['holdsCopy'] and d['state'] in ['released','expired','failed','unknown'] for d in rows)):return value
+   time.sleep(.1)
+  raise TimeoutError('Actual managed-copy cleanup did not settle')
+ def pending():
+  value=owner('status');rows=[r for r in value['requests'] if r['state']=='pending'];assert len(rows)==1
+  return rows[0]['id']
+ def fetches(tid,rid):return [c for c in CALLS if c['threadId']==tid and c['requestId']==rid and c['command']=='file-fetch' and c['response'].get('status')=='ok']
+ try:
+  turn(root,'Synthetic M07 file acceptance. Use your real latest SessionStart association, capabilities and public catalog. Request exactly Attachment of Synthetic ordinary file plus 登录用户 of Synthetic Mac server in ONE ordinary request. Purpose "M07 real file partial approval". Stop pending. No other requests, files, connections, agents or shell. Never output private association or values.')
+  rid=pending();RESULTS['ownerFileRequest']=rid
+  RESULTS['fileApprovedSnapshot']=owner('approve',requestId=rid,fields=[snapshot['fileField']])
+  approved=next(g for g in RESULTS['fileApprovedSnapshot']['grants'] if g['requestId']==rid)
+  chosen=next(r for r in RESULTS['fileApprovedSnapshot']['requests'] if r['id']==rid)
+  assert chosen['approvedFields']==[{'itemId':snapshot['fileItem'],'fieldId':snapshot['fileField']}]
+  turn(root,'The owner approved only the file in the SAME request. Claim it and respect that selection. Fetch Attachment with protocolVersion 2 operationId "m07-real-file-01". Pass its actual returned path and deliveryId to consume_synthetic_file exactly once; this reader returns count/digest only. Keep this copy held for now. Stop after consumption; no unselected field reads, new requests or reconnection. Report public status only.')
+  first=fetches(root,rid)[-1]['response']['delivery'];assert first['state']=='ready' and first['attachmentVersion']==1
+  assert RESULTS.get('consumers') and RESULTS['consumers'][-1]['deliveryId']==first['deliveryId']
+  RESULTS['fileReadyHistory']=owner('history',requestId=rid,state='ready')
+  turn(root,'Using the SAME association and request, query file-status with protocolVersion 2 and operationId "m07-real-file-01", then repeat the exact original file-fetch once with that SAME operationId. This is original-result recovery, not a new use: it must return the same delivery and path. Do not consume or release yet, create another operation or request, reconnect, or print the path.')
+  repeated=fetches(root,rid);assert len(repeated)==2 and repeated[0]['response']['delivery']==repeated[1]['response']['delivery']
+  statuses=[c for c in CALLS if c['threadId']==root and c['command']=='file-status' and c['operationId']=='m07-real-file-01']
+  assert statuses and statuses[-1]['response']['delivery']['deliveryId']==first['deliveryId'] and 'path' not in statuses[-1]['response']['delivery']
+  probe=cli({'association':PROOFS[root],'command':'read','requestId':rid,'itemId':snapshot['textItem'],'fieldId':snapshot['usernameField']},root,'negative-protocol-probe');assert probe['status']=='unauthorized'
+  inline=cli({'association':PROOFS[root],'command':'read','requestId':rid,'itemId':snapshot['fileItem'],'fieldId':snapshot['fileField']},root,'negative-protocol-probe');assert inline['status']=='file_delivery_required'
+  other=new_thread();threads.append(other);save()
+  turn(other,'Synthetic cross-chat refusal check. Use only your own latest SessionStart association, never a parent reference. Query status of public request '+rid+' once, then attempt exactly ONE protocolVersion 2 file-fetch for public item '+snapshot['fileItem']+' field '+snapshot['fileField']+' request '+rid+' operationId "m07-cross-chat-refused". Both should refuse. No new request, reconnect or file search; report statuses only.')
+  cross=[c for c in CALLS if c['threadId']==other and c['command'] in ['status','file-fetch']]
+  assert {c['command'] for c in cross}=={'status','file-fetch'} and all(c['response'].get('status')=='unauthorized' for c in cross)
+  turn(root,'The synthetic reader has closed. Use the same association and request context to file-release the exact deliveryId from "m07-real-file-01", protocolVersion 2. Then query file-status for that operation to confirm recorded release. No new request, fetch, reconnect or private path output.')
+  released=[c for c in CALLS if c['threadId']==root and c['command']=='file-release'];assert len(released)==1 and released[-1]['response']['delivery']['state']=='released'
+  assert not Path(first['path']).exists()
+  RESULTS['fileReleasedHistory']=owner('history',requestId=rid,state='released')
+  turn(root,'One new logical use under the SAME fixed grant: file-fetch Attachment from the same request with protocolVersion 2 operationId "m07-real-file-02". Keep that registered copy held; do not consume or release, make a new request or reconnect. Status only, never print path.')
+  second=fetches(root,rid)[-1]['response']['delivery'];assert second['deliveryId']!=first['deliveryId'] and second['state']=='ready'
+  current=next(g for g in owner('status')['grants'] if g['requestId']==rid);assert current['expiresAt']==approved['expiresAt']
+  RESULTS['fileDeadlineUnchanged']=True
+  RESULTS['fileRevokedSnapshot']=owner('revoke',requestId=rid)
+  snapshot_ready(rid,clean=True);assert not Path(second['path']).exists()
+  turn(root,'The owner revoked that request. Query status and attempt one protocolVersion 2 file-fetch of the same original field/request using operationId "m07-after-revoke-refused". Expect refusal. No new request or reconnect. Public status only.')
+  assert [c for c in CALLS if c['threadId']==root and c['command']=='file-fetch'][-1]['response']['status']=='unauthorized'
+  prompt='Synthetic M07 next request. Use the same current association and public catalog to request ONLY Attachment of Synthetic ordinary file once. Purpose "M07 real file DENY". Stop pending. No fetch, reconnect or values.'
+  turn(root,prompt);denied=pending();RESULTS['fileDeniedRequest']=denied
+  RESULTS['fileDeniedSnapshot']=owner('deny',requestId=denied)
+  turn(root,'The owner processed the latest file request. Query its status once; do not read, fetch, reconnect or create any request. Public status only.')
+  assert any(c['threadId']==root and c['requestId']==denied and c['command']=='status' and c['response'].get('status')=='denied' for c in CALLS)
+  turn(root,prompt.replace('DENY','SESSION-END'));ended=pending();RESULTS['fileEndedRequest']=ended
+  owner('approve',requestId=ended,fields=[snapshot['fileField']])
+  turn(root,'The owner approved this latest file request. Claim it and fetch Attachment once with protocolVersion 2 operationId "m07-session-end-copy". Keep the copy held; do not release or reconnect. Report statuses only.')
+  end_copy=fetches(root,ended)[-1]['response']['delivery'];assert Path(end_copy['path']).exists()
+  archive(root)
+  final=snapshot_ready(ended,clean=True);entry=next(r for r in final['requests'] if r['id']==ended)
+  assert entry['sessionEnded'] and entry['state']=='revoked' and not Path(end_copy['path']).exists()
+  RESULTS['fileEndedHistory']=owner('history',requestId=ended,state='ended')
+  assert cli({'association':PROOFS[root],'command':'file-fetch','protocolVersion':2,'requestId':ended,'itemId':snapshot['fileItem'],'fieldId':snapshot['fileField'],'operationId':'m07-after-end-refused'},root,'negative-protocol-probe')['status']=='unauthorized'
+  archive(other)
+  RESULTS['completeOwnerFileUiFlow']=True;save();print('OWNER_FILE_UI_REAL_CLIENT_COMPLETE',flush=True)
+ finally:
+  for tid in threads:
+   if tid in archived:continue
+   try:archive(tid)
+   except Exception as error:RESULTS.setdefault('fileThreadCleanupErrors',[]).append({'threadId':tid,'type':type(error).__name__})
+  save()
+
+
 def delegation_case():
  previous={r['id'] for r in owner('status')['requests']}
  tid=new_thread();RESULTS['delegationRoot']=tid;save()
@@ -449,6 +526,8 @@ try:
  models=request('model/list',{});RESULTS['model']=next(m['model'] for m in models['data'] if m.get('isDefault'));RESULTS['modelSelection']='CLI-advertised default, process only'
  if args.case=='owner-ui':
   owner_ui_case()
+ elif args.case=='owner-file-ui':
+  owner_file_ui_case()
  elif args.case=='delegation':
   delegation_case()
  elif args.case=='credential':
