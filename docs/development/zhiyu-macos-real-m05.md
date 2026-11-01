@@ -3,6 +3,42 @@
 对应 [#74](https://github.com/ShiJiJS/agent-info-manage/issues/74)，归属 #69 后续功能。
 本票不阻挡已准备的1443d358候选换包；本轮未替换App或请求系统授权。
 
+## 2026-11-01：完整 Release 候选与旧版混合资料往返
+
+源码 `f1bd29eaaede6b6f72ec40c9dcab1f8c7b60a42c`（产品实现同1f2fde44，补随包说明）
+已形成 `0.4.1+13-mac-dev.f1bd29eaaede` ARM64 Release 完整包：
+`build/macos-adaptation/m05-release-f1bd29ea/AgentInfoManage`。
+ZIP为同目录 `agent-info-manage-0.4.1+13-mac-dev.f1bd29eaaede-macos-arm64.zip`，
+131489572字节，SHA256 `de8d046c1f7efeca6393cbc6faf67eb075ec597889e00387ed5a97ddb145c9bd`。
+这是M05验证候选；未替换1443d358、固定旧安装或原预览，不直接作为已验日用版本。
+
+独立稀疏源码副本构建，20个打包阶段通过，7982项载荷记录。完成真实Swift/AOT编译、
+ARM64/依赖/最低macOS14要求、沙箱/ad-hoc签名、中文路径解压逐文件核对，实际随包
+SQLCipher4.19.0诊断及6项CLI/worker检查。二进制确认包含新增原生备份入口及Owner来源。
+Xcode日志有一次“exit code 0”SwiftCompile诊断及弃用警告，最终命令、产物和签名检查通过；
+原日志保留。SDK临时构建改动已还原。独立源码副本、重复App/dSYM/解压目录已清理，
+仅保留一份M05候选载荷、ZIP与小体积记录；原预览kernel摘要未变。
+
+`check-owner-legacy-export.py` 改为四个独立Flutter测试进程，通过生产
+OwnerWorkspaceBackups执行旧格式9恢复、新版编辑、格式12导出/恢复、恢复目标再重开。
+同包普通旧版导出的既有合成备份/恢复文件只读且前后不变，不读取原资料库或Keychain。
+直接核对认证原表、字段身份/正文及逐块附件字节，并比较凭据材料和历史关系。
+覆盖2条资料、5份凭据/7版本、3份附件/3073字节、4条授权/4条访问、11条凭据请求、
+27条执行和6条文件交付；编辑后4条修订。原操作回执重开仍可查询，旧有效能力为空。
+生产lib、macos、packages与候选源码一致；选择器是测试替代，不能称原生面板已验。
+
+首次第四进程把已主动生成本机恢复密钥的导出源库误当新恢复目标，比较器拒绝。
+已修正检查器：单独验证源库本机密钥保留；真正恢复目标仍要求不带入源库备份配置。
+四阶段重跑通过，desktop静态分析、Python AST与diff检查通过，合成库和材料已清理。
+本轮不修改业务实现或降低恢复标准；[结果与摘要](evidence/zhiyu-round09/m05-release-legacy.json)。
+
+**下一实现点**：外部位置的沙箱访问恢复。现有日志持久保存路径和文件身份，但没有
+持久保存备份文件/暂存目录的security-scoped bookmark；路径字符串不携带沙箱访问权。
+已结合本机Foundation头文件和既有ToolAccessStore核对这一差额，尚未用真实面板完成
+外部位置重开探针。需在#74补准确操作绑定的访问恢复（及不可恢复时的明确处理），
+不能把非沙箱独立测试进程通过当作普通App的外部访问已恢复。之后继续同候选系统
+文件面板和最终安装验收。#74保持OPEN，#73最新个人备份/钥匙串升级前置保持。
+
 ## 2026-11-01：正式 Owner 来源、页面组合与跨进程结果恢复
 
 `OwnerWorkspaceBackups` 已组合到 `OwnerWorkspaceHost` 和正常启动器。新版设置复用

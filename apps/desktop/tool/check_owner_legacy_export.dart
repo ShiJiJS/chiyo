@@ -6,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
+import 'package:info_desktop/backups.dart';
+import 'package:info_desktop/workspace/owner_workspace_backups.dart';
+import 'package:info_desktop/workspace/owner_workspace_backup_files.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import '../integration_test/support/macos_keychain_backup.dart';
 
@@ -69,6 +72,90 @@ Future<void> editLegacy(
   }
 }
 
+// The picker substitutes only native panel/allocation boundaries. Owner backup
+// operations, SQLCipher, publication, receipts and restoration remain real.
+class _Picker extends BackupFilePicker {
+  _Picker(this.root);
+  final Directory root;
+  String? next;
+  @override
+  Future<String?> recoveryKeyOutput() async => next;
+  @override
+  Future<String?> backupOutput() async => next;
+  @override
+  Future<String?> backupInput() async => next;
+  @override
+  Future<String?> recoveryKeyInput() async => next;
+  @override
+  Future<BackupStaging?> prepareStaging(String output) async => BackupStaging(
+    (await root.createTemp('backup-staging-')).path,
+    'synthetic',
+  );
+  @override
+  Future<void> releaseRecordedStaging(Map<String, Object?> value) async {
+    check(
+      !await Directory(value['path'] as String).exists(),
+      'Registered material remained',
+    );
+  }
+}
+
+class _BackupBridge {
+  _BackupBridge(
+    InformationService service,
+    EncryptedInformationRepository repo,
+    Directory root,
+  ) {
+    picker = _Picker(root);
+    files = OwnerWorkspaceBackupFiles(owner: service.owner, picker: picker);
+    source = OwnerWorkspaceBackups(
+      owner: service.owner,
+      backups: repo.backups,
+      files: files,
+      picker: picker,
+    );
+  }
+  late final _Picker picker;
+  late final OwnerWorkspaceBackupFiles files;
+  late final OwnerWorkspaceBackups source;
+  Future<WorkspaceBackupResource> pick(
+    WorkspaceBackupPick kind,
+    String path,
+  ) async {
+    picker.next = path;
+    return (await files.pick(kind))!;
+  }
+
+  Future<WorkspaceBackupReceipt> write(
+    String id,
+    WorkspaceBackupAction action, {
+    WorkspaceBackupResource? selection,
+    String? token,
+  }) async => source.change(
+    WorkspaceBackupChange(
+      operationId: id,
+      action: action,
+      expectedVersion: (await source.status()).version,
+      selection: selection,
+      previewToken: token,
+    ),
+  );
+  Future<WorkspaceBackupReceipt> restore(String archive, String key) async {
+    final preview = await source.inspect(
+      await pick(WorkspaceBackupPick.archiveInput, archive),
+      await pick(WorkspaceBackupPick.keyInput, key),
+    );
+    return write(
+      'owner-legacy-restore',
+      WorkspaceBackupAction.restore,
+      selection: preview.archive,
+      token: preview.token,
+    );
+  }
+
+  void dispose() => source.dispose();
+}
+
 void main() {
   test('ordinary package23 export survives new owner source and restart', () async {
     final env = Platform.environment;
@@ -79,7 +166,10 @@ void main() {
           'disposable-owner-legacy-v1',
       'Unowned fixture',
     );
-    check({'restore', 'edit', 'reopen'}.contains(phase), 'Invalid phase');
+    check(
+      {'restore', 'edit', 'reopen', 'verify-restored'}.contains(phase),
+      'Invalid phase',
+    );
     final path = '${root.path}/recipient';
     check(
       phase == 'restore' || await File('$path/library.db').exists(),
@@ -99,6 +189,7 @@ void main() {
       clock: () => DateTime.utc(2026, 10, 30, 12),
     );
     OwnerWorkspaceSource? source, referenceSource;
+    var backupBridge = _BackupBridge(service, repo, root);
     final report = <String, Object?>{
       'phase': phase,
       'pid': pid,
@@ -123,31 +214,63 @@ void main() {
       );
       if (phase == 'restore') {
         check(await repo.backups.recipientEmpty(), 'Nonempty target');
-        await service.owner.restoreLibrary(() => repo.backups.restore(preview));
+        final receipt = await backupBridge.restore(
+          env['OWNER_LEGACY_BACKUP']!,
+          env['OWNER_LEGACY_KEY']!,
+        );
+        check(
+          receipt.counts![WorkspaceBackupCategory.information] ==
+                  preview.informationCount &&
+              receipt.counts![WorkspaceBackupCategory.credentials] ==
+                  preview.credentialCount &&
+              receipt.counts![WorkspaceBackupCategory.files] ==
+                  preview.attachmentCount &&
+              receipt.counts![WorkspaceBackupCategory.fileBytes] ==
+                  preview.attachmentBytes,
+          'Owner receipt counts differ',
+        );
+        backupBridge.dispose();
+        backupBridge = _BackupBridge(service, repo, root);
+        report['productionOwnerRestoreReceipt'] = true;
       }
       await referenceService.owner.restoreLibrary(() async {
         await reference.backups.restoreFrom(env['OWNER_LEGACY_BACKUP']!, key);
       });
       source = OwnerWorkspaceSource(
         owner: service.owner,
+        backups: backupBridge.source,
         refreshInterval: Duration.zero,
       );
       referenceSource = OwnerWorkspaceSource(
         owner: referenceService.owner,
         refreshInterval: Duration.zero,
       );
-      if (phase == 'reopen') {
+      if (phase == 'reopen' || phase == 'verify-restored') {
         await editLegacy(referenceSource, referenceService);
       }
       // Checks all content, credentials, histories and attachment bytes against
       // an independent authenticated restore; ignores only restoredAt timestamps.
-      report['comparison'] = await compareMacBackupRecipients(
-        service,
-        repo,
-        referenceService,
-        reference,
-        preview,
-      );
+      if (phase == 'verify-restored') {
+        // The edited source deliberately created its own recovery key in the
+        // prior process. The final target comparison below still requires no
+        // imported backup configuration; do not apply that rule to the source.
+        check(
+          await repo.backups.recoveryKey() ==
+              await repo.backups.readRecoveryKeyFrom(
+                '${root.path}/roundtrip-key.txt',
+              ),
+          'Locally created recovery key changed on reopen',
+        );
+        report['localRecoveryKeyPreserved'] = true;
+      } else {
+        report['comparison'] = await compareMacBackupRecipients(
+          service,
+          repo,
+          referenceService,
+          reference,
+          preview,
+        );
+      }
       final raw = await AttachmentBackupContainer.openValidated(
         env['OWNER_LEGACY_BACKUP']!,
         key,
@@ -191,7 +314,9 @@ void main() {
                 'Workspace field projection differs',
               );
               check(
-                phase == 'reopen' || field.value == row['value'],
+                phase == 'reopen' ||
+                    phase == 'verify-restored' ||
+                    field.value == row['value'],
                 'Original field value differs',
               );
             }
@@ -217,24 +342,72 @@ void main() {
               edited.version,
           'Persistent edit receipt missing',
         );
-        final recovery = await repo.backups.enable();
-        await repo.backups.saveRecoveryKeyTo('${root.path}/roundtrip-key.txt');
-        await service.owner.exportLibrary(
-          () => repo.backups.exportTo('${root.path}/roundtrip.aimbackup'),
+        await backupBridge.write(
+          'owner-legacy-enable',
+          WorkspaceBackupAction.enableKey,
+        );
+        await backupBridge.write(
+          'owner-legacy-save-key',
+          WorkspaceBackupAction.saveKey,
+          selection: await backupBridge.pick(
+            WorkspaceBackupPick.keyOutput,
+            '${root.path}/roundtrip-key.txt',
+          ),
+        );
+        final output = await backupBridge.write(
+          'owner-legacy-export',
+          WorkspaceBackupAction.export,
+          selection: await backupBridge.pick(
+            WorkspaceBackupPick.archiveOutput,
+            '${root.path}/roundtrip.aimbackup',
+          ),
+        );
+        check(
+          output.counts![WorkspaceBackupCategory.files] == 3 &&
+              output.counts![WorkspaceBackupCategory.fileBytes] == 3073,
+          'Export lost attachment counts',
+        );
+        report['productionOwnerExportReceipt'] = true;
+      }
+      if (phase == 'reopen' || phase == 'verify-restored') {
+        final recovery = await repo.backups.readRecoveryKeyFrom(
+          '${root.path}/roundtrip-key.txt',
         );
         final target = await EncryptedInformationRepository.open(
           '${root.path}/roundtrip',
           _Keys(),
         );
         final targetService = InformationService(repository: target);
+        var targetBridge = _BackupBridge(targetService, target, root);
         try {
           final contents = await target.backups.inspect(
             '${root.path}/roundtrip.aimbackup',
             recovery,
           );
-          await targetService.owner.restoreLibrary(
-            () => target.backups.restore(contents),
+          if (phase == 'reopen') {
+            await targetBridge.restore(
+              '${root.path}/roundtrip.aimbackup',
+              '${root.path}/roundtrip-key.txt',
+            );
+            targetBridge.dispose();
+            targetBridge = _BackupBridge(targetService, target, root);
+          }
+          check(
+            (await targetBridge.source.receipt(
+                  'owner-legacy-restore',
+                ))?.counts?[WorkspaceBackupCategory.files] ==
+                3,
+            'Missing persisted Owner restoration receipt',
           );
+          check(
+            (await backupBridge.source.receipt(
+                  'owner-legacy-export',
+                ))?.counts?[WorkspaceBackupCategory.files] ==
+                3,
+            'Missing persisted Owner export receipt',
+          );
+          report['productionReceiptsSurviveReopen'] =
+              phase == 'verify-restored';
           report['newExportRoundtrip'] = await compareMacBackupRecipients(
             targetService,
             target,
@@ -243,12 +416,14 @@ void main() {
             contents,
           );
         } finally {
+          targetBridge.dispose();
           await targetService.close();
           await target.close();
         }
       }
       report['passed'] = true;
     } finally {
+      backupBridge.dispose();
       await source?.dispose();
       await referenceSource?.dispose();
       await service.close();
