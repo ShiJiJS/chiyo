@@ -46,7 +46,7 @@ def main():
         run('sparse', ['git', 'sparse-checkout', 'set', 'apps/desktop', 'packages', 'scripts', 'integrations', 'third_party'], source)
         run('checkout', ['git', 'checkout', '--detach', commit], source)
         with (source / '.git/info/exclude').open('a') as excluded:
-            excluded.write('\n/.tools/\n/.cache/\n/.downloads/\n')
+            excluded.write('\n/.tools\n/.cache/\n/.downloads\n')
         (source / '.tools').symlink_to(ROOT / '.tools', target_is_directory=True)
         (source / '.cache').mkdir()
         (source / '.cache/pub').symlink_to(ROOT / '.cache/pub', target_is_directory=True)
@@ -79,6 +79,12 @@ def main():
                    for line in processes.splitlines() if line.strip())
         report['sourceProcessStillRunning'] = live
         if source.exists() and not live:
+            failed = source / 'build/package'
+            if failed.exists() and not report['complete']:
+                if (failed / 'logs').is_dir():
+                    shutil.copytree(failed / 'logs', out / 'failed-package-logs')
+                if (failed / 'verification.json').is_file():
+                    shutil.copy2(failed / 'verification.json', out / 'failed-verification.json')
             shutil.rmtree(source)
         report['temporaryCheckoutRemoved'] = not source.exists()
         report['previewPreserved'] = digest(preview) == report['previewBefore']
