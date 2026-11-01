@@ -321,6 +321,16 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
       var committed = false;
       final receipt = await _db.transaction(() async {
         if (change.operationReceipt != null &&
+            (await _db
+                    .customSelect(
+                      'SELECT 1 FROM backup_operations WHERE operation_id=?',
+                      variables: [Variable(_fileOutputKey(change.operationId))],
+                    )
+                    .get())
+                .isNotEmpty) {
+          throw const AccessFailure('operation_conflict');
+        }
+        if (change.operationReceipt != null &&
             await informationRecordReceipt(change.operationId) != null) {
           throw const AccessFailure('operation_conflict');
         }

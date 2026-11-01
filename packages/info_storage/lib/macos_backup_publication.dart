@@ -150,7 +150,8 @@ class MacBackupPublicationFiles {
   /// False means the registered name is absent, never a different directory.
   static bool stagingExists(MacBackupStagingDirectory value) {
     final (parent, name) = _MacFiles.path(value.path);
-    final parentFd = _native.directory(parent);
+    final parentFd = _native.directory(parent, missing: true);
+    if (parentFd < 0) return false;
     var dir = -1;
     try {
       if (_native.identity(parentFd, directory: true) != value.parentIdentity) {
@@ -186,7 +187,8 @@ class MacBackupPublicationFiles {
       }
     }
     final (parent, name) = _MacFiles.path(value.path);
-    final parentFd = _native.directory(parent);
+    final parentFd = _native.directory(parent, missing: true);
+    if (parentFd < 0) return;
     var dir = -1;
     try {
       if (_native.identity(parentFd, directory: true) != value.parentIdentity) {
@@ -243,6 +245,15 @@ class MacBackupPublicationFiles {
         bytes.length > 256 ||
         bytes.any((b) => b < 0 || b > 255)) {
       throw const BackupPublicationFailure('invalid_recovery_key');
+    }
+    writePrivateFile(path, bytes);
+  }
+
+  /// Exclusive 0600 creation in a private directory, followed by file and
+  /// directory flush. Empty ordinary attachments are valid. No overwrite.
+  static void writePrivateFile(String path, List<int> bytes) {
+    if (bytes.length > 10 * 1024 * 1024 || bytes.any((b) => b < 0 || b > 255)) {
+      throw const BackupPublicationFailure('invalid_file_content');
     }
     final (parent, name) = _MacFiles.path(path);
     final dir = _native.directory(parent, private: true);
@@ -549,12 +560,13 @@ class _MacFiles {
     }
   }
 
-  int directory(String path, {bool private = false}) {
+  int directory(String path, {bool private = false, bool missing = false}) {
     try {
       if (Directory(path).resolveSymbolicLinksSync() != path) {
         throw const BackupPublicationFailure('identity_changed');
       }
       final fd = name(path, (p) => open(p, 0x100000 | 0x100 | 0x1000000, 0));
+      if (fd < 0 && missing && errno().value == 2) return -1;
       if (fd < 0) throw const BackupPublicationFailure('directory_unavailable');
       try {
         identity(fd, directory: true, private: private);
@@ -563,7 +575,8 @@ class _MacFiles {
         close(fd);
         rethrow;
       }
-    } on FileSystemException {
+    } on FileSystemException catch (e) {
+      if (missing && e.osError?.errorCode == 2) return -1;
       throw const BackupPublicationFailure('directory_unavailable');
     }
   }

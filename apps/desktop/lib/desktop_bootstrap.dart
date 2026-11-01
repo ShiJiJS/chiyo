@@ -16,10 +16,12 @@ class DesktopLibrary {
     required this.service,
     required this.close,
     this.backups,
+    this.fileOutputs,
   });
   final InformationService service;
   final Future<void> Function() close;
   final InformationBackups? backups;
+  final InformationFileOutputs? fileOutputs;
 }
 
 enum DesktopStartupState { idle, starting, ready, failed }
