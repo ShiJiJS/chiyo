@@ -12,13 +12,24 @@ final class InformationApprovalReceipt {
     required this.commandDigest,
     required this.revision,
     required this.recordedAt,
-  }) {
+    Map<String, Object?> metadata = const {},
+  }) : metadata = Map.unmodifiable(metadata) {
     if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(operationId) ||
         requestId.isEmpty ||
         requestId.length > 200 ||
         !RegExp(r'^[0-9a-f]{64}$').hasMatch(reviewToken) ||
         !RegExp(r'^[0-9a-f]{64}$').hasMatch(commandDigest) ||
-        revision < 1) {
+        revision < 1 ||
+        metadata.length > 20 ||
+        metadata.entries.any(
+          (e) =>
+              e.key.length > 100 ||
+              e.value != null &&
+                  e.value is! String &&
+                  e.value is! int &&
+                  e.value is! bool,
+        ) ||
+        utf8.encode(jsonEncode(metadata)).length > 16384) {
       throw const FormatException('Invalid approval receipt');
     }
   }
@@ -26,6 +37,7 @@ final class InformationApprovalReceipt {
   final InformationApprovalAction action;
   final int revision;
   final DateTime recordedAt;
+  final Map<String, Object?> metadata;
   Map<String, Object?> toJson() => {
     'operationId': operationId,
     'requestId': requestId,
@@ -34,9 +46,10 @@ final class InformationApprovalReceipt {
     'commandDigest': commandDigest,
     'revision': revision,
     'recordedAt': recordedAt.toUtc().toIso8601String(),
+    if (metadata.isNotEmpty) 'metadata': metadata,
   };
   factory InformationApprovalReceipt.fromJson(Map<String, dynamic> json) {
-    if (json.length != 7) {
+    if (json.length != 7 + (json.containsKey('metadata') ? 1 : 0)) {
       throw const FormatException('Invalid approval receipt');
     }
     return InformationApprovalReceipt(
@@ -47,6 +60,7 @@ final class InformationApprovalReceipt {
       commandDigest: json['commandDigest'] as String,
       revision: json['revision'] as int,
       recordedAt: DateTime.parse(json['recordedAt'] as String),
+      metadata: Map<String, Object?>.from(json['metadata'] as Map? ?? {}),
     );
   }
 }
@@ -181,6 +195,7 @@ abstract interface class InformationApprovalRepository {
     String operationId,
   );
   Future<int> informationApprovalRevision(String requestId);
+
   /// Atomically check current file bindings and complete original integrity
   /// for expectedFiles before publishing any receipt or history facts.
   Future<void> commitInformationApproval(

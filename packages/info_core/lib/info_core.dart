@@ -21,6 +21,8 @@ import 'information.dart';
 import 'information_files.dart';
 export 'information_files.dart';
 import 'templates.dart';
+import 'template_packages.dart';
+export 'template_packages.dart';
 import 'history.dart';
 export 'history.dart';
 import 'import_proposals.dart';
@@ -71,6 +73,8 @@ part 'credential_history_access.dart';
 part 'ssh_host_trust.dart';
 part 'proposal_access.dart';
 part 'proposal_operations.dart';
+part 'additional_approval_operations.dart';
+part 'template_package_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -272,6 +276,8 @@ class InformationService {
   final _reads = <Future<void>>{};
   final _informationDecisionWrites = <Future<void>>{};
   final _uncertainInformationDecisions = <String, _InformationDecision>{};
+  final _inactiveCredentialApprovals = <String>{};
+  final _uncertainCredentialDecisions = <String, void Function(bool)>{};
   Future<void> _auditWrites = Future.value();
   final _auditPending = <Future<void> Function()>[];
   bool _auditFailed = false;
@@ -833,6 +839,7 @@ class OwnerAccess {
   Future<T> _serialize<T>(Future<T> Function() action) {
     final scope = Zone.current[_ownerLibraryScopeZoneKey] as OwnerLibraryScope?;
     final proposal = pendingOwnerProposalOperation;
+    final approval = pendingAdditionalApproval;
     final generation = scope?._generation ?? _service._libraryGeneration;
     final result = _writes.then((_) async {
       if (generation != _service._libraryGeneration ||
@@ -840,6 +847,7 @@ class OwnerAccess {
         throw const AccessFailure('library_changed');
       }
       if (proposal != null) await proposal._before(this);
+      if (approval != null) await approval.before(this);
       return action();
     });
     _writes = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});

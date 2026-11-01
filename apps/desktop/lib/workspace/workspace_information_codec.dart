@@ -8,22 +8,29 @@ import 'workspace_files.dart';
 /// Owner-only translation. No sample source, database or agent transport lives
 /// here. Bodies remain in core fields; snapshots carry descriptors and order.
 class WorkspaceInformationCodec {
-  core.InformationRecordCommand createCommand(WorkspaceCreate draft) =>
-      _command(draft.typeId, {
-        'kind': 'create',
-        'typeId': draft.typeId,
-        'name': draft.name,
-        'description': draft.description,
-        'directoryId': draft.directoryId,
-        'tagIds': draft.tagIds.toList()..sort(),
-        'values': draft.values,
-        'relations': _commandRelations(draft.relations),
-        'fileSelections': draft.fileSelections,
-        'expectedTemplateVersion': draft.expectedTemplateVersion,
-        'expectedTemplateDigest': draft.expectedTemplateDigest,
-        'legacyTemplateId': draft.legacyTemplateId,
-        'expectedLegacyVersion': draft.expectedLegacyVersion,
-      });
+  core.InformationRecordCommand createCommand(WorkspaceCreate draft) {
+    final base = _command(draft.typeId, {
+      'kind': 'create',
+      'typeId': draft.typeId,
+      'name': draft.name,
+      'description': draft.description,
+      'directoryId': draft.directoryId,
+      'tagIds': draft.tagIds.toList()..sort(),
+      'values': draft.values,
+      'relations': _commandRelations(draft.relations),
+      'fileSelections': draft.fileSelections,
+      'expectedTemplateVersion': draft.expectedTemplateVersion,
+      'expectedTemplateDigest': draft.expectedTemplateDigest,
+      'legacyTemplateId': draft.legacyTemplateId,
+      'expectedLegacyVersion': draft.expectedLegacyVersion,
+    });
+    return core.InformationRecordCommand(
+      typeId: base.typeId,
+      digest: base.digest,
+      legacyTemplateId: draft.legacyTemplateId,
+      legacyTemplateVersion: draft.expectedLegacyVersion,
+    );
+  }
 
   core.InformationRecordCommand editCommand(WorkspaceEdit edit) =>
       _command(edit.record.type.id, {
@@ -272,10 +279,10 @@ class WorkspaceInformationCodec {
 
   core.InformationDraftInput create(
     WorkspaceCreate draft,
-    Map<String, Object?> definition,
-  ) {
-    if (draft.fileSelections.isNotEmpty ||
-        workspaceFileTypeIds.contains(draft.typeId)) {
+    Map<String, Object?> definition, {
+    Map<String, String> stagedFiles = const {},
+  }) {
+    if (workspaceFileTypeIds.contains(draft.typeId)) {
       throw const WorkspaceFailure('unsupported', '普通附件请使用文件导入入口。');
     }
     if (definition['id'] != draft.typeId) {
@@ -306,6 +313,7 @@ class WorkspaceInformationCodec {
         relations: draft.relations,
       ),
       command: createCommand(draft),
+      stagedFiles: stagedFiles,
     );
   }
 
@@ -344,11 +352,18 @@ class WorkspaceInformationCodec {
     );
   }
 
+  core.InformationDraftInput adopt(
+    WorkspaceDetail result,
+    core.InformationItem current,
+    core.InformationRecordCommand command,
+  ) => _encode(result, current: current, previous: result, command: command);
+
   core.InformationDraftInput _encode(
     WorkspaceDetail detail, {
     core.InformationItem? current,
     WorkspaceDetail? previous,
     required core.InformationRecordCommand command,
+    Map<String, String> stagedFiles = const {},
   }) {
     final errors = <String, String>{}, metadataErrors = <String, String>{};
     final record = detail.record;
@@ -374,6 +389,11 @@ class WorkspaceInformationCodec {
     final actual = {
       for (final f in current?.fields ?? <core.InformationField>[]) f.id: f,
     };
+    if (stagedFiles.keys.any(
+      (key) => !descriptors.any((d) => d['key'] == key && d['type'] == 'file'),
+    )) {
+      throw const WorkspaceFailure('validation', '附件选择不属于此表单字段。');
+    }
     final fields = <core.InformationDraftField>[], slots = <String>[];
     final entries = <String, Object?>{};
     final submittedIds = <String>{};
@@ -469,6 +489,17 @@ class WorkspaceInformationCodec {
         final old = actual[previous?.fieldIds[key]];
         final slot = _fieldSlot(key);
         if (type == 'file') {
+          if (current == null && stagedFiles.containsKey(key)) {
+            slots.add(slot);
+            fields.add(
+              core.InformationDraftField.stagedFile(
+                descriptor['label'] as String,
+                descriptor['description'] as String? ?? '',
+                stagedFiles[key],
+              ),
+            );
+            continue;
+          }
           if (old == null ||
               old.kind != core.FieldKind.file ||
               jsonEncode(value) != jsonEncode(_value(old))) {

@@ -28,7 +28,12 @@ void main() {
   late DateTime now;
   Future<void> open() async {
     repo = await EncryptedInformationRepository.open(root.path, keys);
-    service = core.InformationService(repository: repo, clock: () => now);
+    service = core.InformationService(
+      repository: repo,
+      clock: () => now,
+      credentialExecutableInspector: (path, receiver) async =>
+          core.ExecutableIdentity(path, 10, 100, 'sha256:fixture'),
+    );
     source = OwnerWorkspaceSource(
       owner: service.owner,
       refreshInterval: Duration.zero,
@@ -328,6 +333,229 @@ void main() {
             'library_changed',
           ),
         ),
+      );
+    },
+  );
+  Future<(String, core.CredentialUseRequest)> credentialRequest({
+    List<core.FieldRef> fields = const [],
+  }) async {
+    var c = await service.owner.createStringCredential(
+      name: '合成凭据',
+      publicPurpose: '',
+      secret: 'SYNTHETIC-ONLY',
+    );
+    c = await service.owner.updateCredentialMetadata(
+      c.id,
+      c.revision,
+      name: c.name,
+      publicPurpose: '',
+      privateNote: '',
+      suggestedBinding: 'GH_TOKEN',
+      discoverable: true,
+    );
+    final session = service.agent.openSession('合成凭据聊天');
+    final r = await service.agent.requestCredentialUse(
+      session,
+      core.CredentialUseInput.fromJson({
+        'protocolVersion': 2,
+        'command': 'request-use',
+        'purpose': '合成审批链路',
+        'credentials': [
+          {'alias': 'token', 'credentialId': c.id, 'version': c.version},
+        ],
+        'readFields': [for (final f in fields) f.toJson()],
+        'launch': {
+          'receiver': 'gh_token',
+          'executable': Platform.resolvedExecutable,
+          'argv': ['api', 'user', '--method', 'GET'],
+          'cwd': root.path,
+          'env': {
+            'GH_TOKEN': {'secret': 'token'},
+          },
+        },
+      }),
+    );
+    return (session, r);
+  }
+
+  test(
+    'real credential request partial approval, exact durable receipt and revoked grant',
+    () async {
+      final item = await service.owner.createInformation('合成资料', '', [
+        const core.FieldInput('地址', '', '合成正文'),
+      ]);
+      final (session, r) = await credentialRequest(
+        fields: [core.FieldRef(item.id, item.fields.single.id)],
+      );
+      final detail = await source.approvals.read(r.id);
+      expect(detail.request.kind, WorkspaceApprovalKind.credential);
+      expect(detail.credential!.session.id, isNot(session));
+      expect(detail.scopes.length, 2);
+      expect(
+        (await source.approvals.query(
+          const WorkspaceApprovalQuery(),
+        )).items.where((i) => i.id == r.id).length,
+        1,
+      );
+      final field = detail.scopes.singleWhere(
+        (s) => s.kind == WorkspaceApprovalScopeKind.field,
+      );
+      final c = WorkspaceApprovalChange(
+        operationId: workspaceOperationId(),
+        requestId: r.id,
+        reviewToken: detail.reviewToken,
+        action: WorkspaceApprovalAction.approve,
+        selected: [field.id],
+        fieldMinutes: 60,
+      );
+      final receipt = await source.approvals.change(c);
+      expect(receipt.revision, 1);
+      expect(
+        (await source.credentials.requests()).single.state,
+        WorkspaceCredentialRequestState.partiallyApproved,
+      );
+      expect(
+        service.owner.credentialUseRequests.single.credentialApproved,
+        false,
+      );
+      expect((await source.approvals.change(c)).revision, 1);
+      final history = await source.credentials.history(
+        WorkspaceRecordRef(WorkspaceRecordKind.credential, r.credentialId),
+      );
+      expect(history.single.operations.single.description, '主人审批');
+      final bearer = service.agent.claim(session, r.id).token;
+      expect(
+        await service.agent.read(
+          bearer,
+          core.FieldRef(item.id, item.fields.single.id),
+        ),
+        '合成正文',
+      );
+      final mixed = await source.approvals.read(r.id);
+      final revoke = WorkspaceApprovalChange(
+        operationId: workspaceOperationId(),
+        requestId: r.id,
+        reviewToken: mixed.reviewToken,
+        action: WorkspaceApprovalAction.revoke,
+      );
+      expect((await source.approvals.change(revoke)).revision, 2);
+      await expectLater(
+        service.agent.read(
+          bearer,
+          core.FieldRef(item.id, item.fields.single.id),
+        ),
+        throwsA(isA<core.AccessFailure>()),
+      );
+      expect(
+        service.owner.credentialFieldGrantState(
+          service.owner.credentialUseRequests.single,
+        ),
+        'revoked',
+      );
+
+      await close();
+      await open();
+      expect(
+        (await source.approvals.receipt(c.operationId))!.commandDigest,
+        c.digest,
+      );
+      expect((await source.approvals.change(c)).revision, 1);
+      expect(
+        (await source.credentials.requests()).single.state,
+        isNot(WorkspaceCredentialRequestState.approved),
+      );
+    },
+  );
+  test(
+    'credential approve and revoke are real and stale scope cannot be approved',
+    () async {
+      final (_, r) = await credentialRequest();
+      final detail = await source.approvals.read(r.id);
+      final approved = await source.approvals.change(
+        WorkspaceApprovalChange(
+          operationId: workspaceOperationId(),
+          requestId: r.id,
+          reviewToken: detail.reviewToken,
+          action: WorkspaceApprovalAction.approve,
+          selected: [detail.scopes.single.id],
+        ),
+      );
+      expect(approved.revision, 1);
+      expect(
+        service.owner.credentialGrantState(
+          service.owner.credentialUseRequests.single,
+        ),
+        'available',
+      );
+      final current = await source.approvals.read(r.id);
+      final revoke = WorkspaceApprovalChange(
+        operationId: workspaceOperationId(),
+        requestId: r.id,
+        reviewToken: current.reviewToken,
+        action: WorkspaceApprovalAction.revoke,
+      );
+      expect((await source.approvals.change(revoke)).revision, 2);
+      expect(
+        service.owner.credentialGrantState(
+          service.owner.credentialUseRequests.single,
+        ),
+        'revoked',
+      );
+      expect((await source.approvals.receipt(revoke.operationId))!.revision, 2);
+    },
+  );
+  test(
+    'organization approval binds selected real records and durable original receipt',
+    () async {
+      final a = await service.owner.createInformation('合成整理资料', '', [
+        const core.FieldInput('字段', '', '内容'),
+      ]);
+      final b = await service.owner.createInformation('未选资料', '', [
+        const core.FieldInput('字段', '', '内容'),
+      ]);
+      final session = service.agent.openSession('合成整理聊天');
+      final task = await service.agent.requestOrganization(session, '整理分类', [
+        a.id,
+        b.id,
+      ]);
+      final detail = await source.approvals.read(task.id);
+      expect(detail.request.kind, WorkspaceApprovalKind.organization);
+      final c = WorkspaceApprovalChange(
+        operationId: workspaceOperationId(),
+        requestId: task.id,
+        reviewToken: detail.reviewToken,
+        action: WorkspaceApprovalAction.approve,
+        selected: [a.id],
+        fieldMinutes: 15,
+      );
+      final receipt = await source.approvals.change(c);
+      expect(receipt.revision, 1);
+      final saved = service.owner.organizationTasks.single;
+      expect(saved.autoApply, true);
+      expect(saved.itemVersions.keys, [a.id]);
+      expect(
+        service.owner.organizationState(saved),
+        core.OrganizationTaskState.active,
+      );
+      final current = await source.approvals.read(task.id);
+      await source.approvals.change(
+        WorkspaceApprovalChange(
+          operationId: workspaceOperationId(),
+          requestId: task.id,
+          reviewToken: current.reviewToken,
+          action: WorkspaceApprovalAction.revoke,
+        ),
+      );
+      expect(
+        service.owner.organizationState(service.owner.organizationTasks.single),
+        core.OrganizationTaskState.cancelled,
+      );
+      await close();
+      await open();
+      expect((await source.approvals.change(c)).commandDigest, c.digest);
+      expect(
+        service.owner.organizationTasks.single.state,
+        core.OrganizationTaskState.cancelled,
       );
     },
   );

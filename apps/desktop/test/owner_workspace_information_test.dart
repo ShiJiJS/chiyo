@@ -381,7 +381,7 @@ void main() {
   );
 
   test(
-    'template adoption and file imports cannot silently become ordinary saves',
+    'foreign legacy definitions and expired file leases cannot silently become ordinary saves',
     () async {
       expect(
         await source.createRecord(
@@ -403,7 +403,7 @@ void main() {
             expectedLegacyVersion: 1,
           ),
         ),
-        rejected('unsupported'),
+        rejected('conflict'),
       );
       expect(
         await source.createRecord(
@@ -416,7 +416,7 @@ void main() {
             fileSelections: {'body': 'stage'},
           ),
         ),
-        rejected('unsupported'),
+        rejected('selection_expired'),
       );
       expect(repo.items, isEmpty);
     },

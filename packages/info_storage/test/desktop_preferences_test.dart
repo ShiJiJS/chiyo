@@ -4,6 +4,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:test/test.dart';
 import 'storage_test.dart' show TestKeyStore;
+import 'backup_setup.dart';
 
 void main() {
   late Directory root;
@@ -175,4 +176,39 @@ void main() {
     expect(service.owner.desktopPreferences.version, 1);
     expect(repo.requestHistory.single.id, 'old-1');
   });
+  test(
+    'empty recipient with local preference receipts can restore and invalidates them',
+    () async {
+      final sourceRepo = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        TestKeyStore(),
+        clock: () => now,
+      );
+      final sourceService = InformationService(
+        repository: sourceRepo,
+        clock: () => now,
+      );
+      await sourceService.owner.createInformation('合成恢复资料', '', [
+        const FieldInput('字段', '', '合成正文'),
+      ]);
+      final recovery = await enableTestBackups(sourceRepo.backups);
+      final backup = '${root.path}/synthetic.aimbackup';
+      await sourceRepo.backups.exportTo(backup);
+      await sourceService.close();
+      await sourceRepo.close();
+      await save();
+      await repo.backups.restoreFrom(backup, recovery);
+      expect(service.owner.information.single.name, '合成恢复资料');
+      await expectLater(
+        service.owner.desktopPreferencesReceipt('settings-1'),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'library_changed',
+          ),
+        ),
+      );
+    },
+  );
 }

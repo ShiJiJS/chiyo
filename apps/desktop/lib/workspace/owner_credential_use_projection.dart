@@ -8,18 +8,28 @@ class OwnerCredentialUseProjection {
   final core.OwnerAccess owner;
   final _observations = <String, (String, int)>{};
   WorkspaceCredentialRequestState state(core.CredentialUseRequest r) {
+    if (owner.credentialUseDecisionUnconfirmed(r)) {
+      return WorkspaceCredentialRequestState.unavailable;
+    }
     final status = owner.credentialUseState(r);
     if (status == 'pending') return WorkspaceCredentialRequestState.pending;
     if (status == 'denied') return WorkspaceCredentialRequestState.denied;
+    if (r.invalidatedCode == 'grant_revoked') {
+      return WorkspaceCredentialRequestState.revoked;
+    }
     return switch (owner.credentialGrantState(r)) {
-      'available' => WorkspaceCredentialRequestState.approved,
+      'available' || 'consumed' => WorkspaceCredentialRequestState.approved,
       'expired' => WorkspaceCredentialRequestState.expired,
       'version_invalidated' => WorkspaceCredentialRequestState.superseded,
       _ =>
         r.credentialApproved
             ? WorkspaceCredentialRequestState.revoked
             : r.approvedFields.isNotEmpty
-            ? WorkspaceCredentialRequestState.partiallyApproved
+            ? owner.credentialFieldGrantState(r) == 'available'
+                  ? WorkspaceCredentialRequestState.partiallyApproved
+                  : owner.credentialFieldGrantState(r) == 'expired'
+                  ? WorkspaceCredentialRequestState.expired
+                  : WorkspaceCredentialRequestState.sessionEnded
             : status == 'expired'
             ? WorkspaceCredentialRequestState.expired
             : WorkspaceCredentialRequestState.sessionEnded,
@@ -47,9 +57,6 @@ class OwnerCredentialUseProjection {
         binding: p.env.keys.join('、'),
       );
   WorkspaceCredentialUseRequest request(core.CredentialUseRequest r) {
-    if (r.isFocusedFill) {
-      throw const WorkspaceFailure('unsupported', '本机焦点填充需独立的系统接入。');
-    }
     final c = owner.credentials
         .where((c) => c.id == r.credentialId)
         .firstOrNull;
@@ -60,10 +67,21 @@ class OwnerCredentialUseProjection {
       credentialName: r.credentialName ?? c?.name ?? '原凭据已不可用',
       materialVersion: r.version,
       useGeneration: r.useGeneration,
-      delivery: r.plan.receiver == 'gh_token'
+      delivery: r.isFocusedFill
+          ? WorkspaceCredentialDelivery.focus
+          : r.plan.receiver == 'gh_token'
           ? WorkspaceCredentialDelivery.environment
           : WorkspaceCredentialDelivery.file,
-      receiver: receiver(r.plan),
+      receiver: r.isFocusedFill
+          ? WorkspaceCredentialReceiver(
+              id: 'focused_fill',
+              label: '本机焦点填充',
+              executable: r.focusedFill!.application.executable,
+              workingDirectory: '',
+              arguments: [r.focusedFill!.targetHint],
+              binding: '已指定应用与焦点目标',
+            )
+          : receiver(r.plan),
       session: WorkspaceCredentialSession(
         session ?? 'unlinked:${r.id}',
         session == null ? '${r.chatLabel}（历史会话身份不可用）' : r.chatLabel,

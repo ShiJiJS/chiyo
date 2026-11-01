@@ -1,9 +1,13 @@
+import 'owner_workspace_hosts.dart';
 import 'dart:async';
 import 'package:info_cli/macos_agent_bundle.dart';
 import 'owner_workspace_agents.dart';
 import 'owner_workspace_settings.dart';
 import 'owner_workspace_runtime.dart';
 import 'owner_workspace_proposals.dart';
+import 'owner_workspace_plugins.dart';
+import 'owner_workspace_legacy_templates.dart';
+import 'owner_plugin_picker.dart';
 import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
@@ -35,6 +39,7 @@ class OwnerWorkspaceHost extends StatefulWidget {
     this.backupPicker = const NativeBackupFilePicker(),
     this.filePicker = const NativeInformationFilePicker(),
     this.credentialFiles = const NativeCredentialFilePicker(),
+    this.pluginPicker = const NativeTemplatePackagePicker(),
   });
   final DesktopRuntime runtime;
   final InformationBackups? backups;
@@ -43,6 +48,7 @@ class OwnerWorkspaceHost extends StatefulWidget {
   final BackupFilePicker backupPicker;
   final InformationFilePicker filePicker;
   final CredentialFilePicker credentialFiles;
+  final InformationFilePicker pluginPicker;
   @override
   State<OwnerWorkspaceHost> createState() => _OwnerWorkspaceHostState();
 }
@@ -54,6 +60,8 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   StreamSubscription<WorkspaceRecordRef?>? _changes;
   OwnerWorkspaceBackups? _backups;
   OwnerWorkspaceBackupFiles? _backupFiles;
+  late OwnerWorkspacePlugins _plugins;
+  late OwnerWorkspaceHosts _hosts;
   @override
   void initState() {
     super.initState();
@@ -65,6 +73,16 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   void _runtimeChanged() => _source.notifyExternalChange();
 
   void _bind() {
+    _plugins = OwnerWorkspacePlugins(
+      owner: widget.runtime.service.owner,
+      picker: widget.pluginPicker,
+      changed: () => _source.notifyExternalChange(),
+    );
+    _hosts = OwnerWorkspaceHosts(
+      owner: widget.runtime.service.owner,
+      changed: () => _source.notifyExternalChange(),
+      picker: widget.filePicker,
+    );
     if (widget.backups != null) {
       _backupFiles = OwnerWorkspaceBackupFiles(
         owner: widget.runtime.service.owner,
@@ -80,6 +98,14 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     }
     _source = OwnerWorkspaceSource(
       owner: widget.runtime.service.owner,
+      plugins: _plugins,
+      hosts: _hosts,
+      legacyTemplates: OwnerWorkspaceLegacyTemplates(
+        widget.runtime.service.owner,
+        _plugins,
+      ),
+      definitionsReader: () => _plugins.templates,
+      templateState: _plugins.stateFor,
       fileOutputs: widget.fileOutputs,
       fileOpens: widget.fileOpens,
       outputPicker: widget.backupPicker,
@@ -115,10 +141,14 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         return;
       }
       final old = _source;
+      final oldPlugins = _plugins;
+      final oldHosts = _hosts;
       final oldBackups = _backups;
       unawaited(_changes?.cancel());
       setState(_bind);
       unawaited(old.dispose());
+      oldPlugins.dispose();
+      oldHosts.dispose();
       oldBackups?.dispose();
     });
   }
@@ -129,6 +159,8 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     widget.runtime.removeListener(_runtimeChanged);
     unawaited(_source.dispose());
     _backups?.dispose();
+    _plugins.dispose();
+    _hosts.dispose();
     _desktop.dispose();
     super.dispose();
   }
@@ -142,6 +174,8 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
       final source = _source;
       return WorkspaceInputs(
         backup: _backupFiles?.pick,
+        plugin: _plugins.pick,
+        hostFile: _hosts.pick,
         file: source.selections.pick,
         credential: (form) => showOwnerCredentialInput(
           context,

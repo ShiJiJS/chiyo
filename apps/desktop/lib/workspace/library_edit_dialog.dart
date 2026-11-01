@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
@@ -191,6 +192,7 @@ class _EditorState extends State<_Editor> {
     _fields.clear();
     _entries.clear();
     _readOnlyEntries.clear();
+    _releaseFiles();
     _fileSelections.clear();
     _tags.clear();
     _relations.clear();
@@ -253,8 +255,22 @@ class _EditorState extends State<_Editor> {
     }
   }
 
+  void _releaseFiles() {
+    final source = widget.controller.source;
+    if (source is WorkspaceFileSelectionReleaser) {
+      for (final file in _fileSelections.values) {
+        unawaited(
+          (source as WorkspaceFileSelectionReleaser)
+              .releaseFileSelection(file.selectionId)
+              .catchError((Object _) {}),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _releaseFiles();
     _mutation.dispose();
     _name.dispose();
     _description.dispose();
@@ -619,10 +635,37 @@ class _EditorState extends State<_Editor> {
                             try {
                               final selection = await widget.filePicker!();
                               if (mounted && selection != null) {
+                                final old = _fileSelections[field['key']];
+                                final source = widget.controller.source;
+                                if (old != null &&
+                                    source is WorkspaceFileSelectionReleaser) {
+                                  await (source
+                                          as WorkspaceFileSelectionReleaser)
+                                      .releaseFileSelection(old.selectionId);
+                                }
+                                if (!mounted) {
+                                  if (source
+                                      is WorkspaceFileSelectionReleaser) {
+                                    await (source
+                                            as WorkspaceFileSelectionReleaser)
+                                        .releaseFileSelection(
+                                          selection.selectionId,
+                                        );
+                                  }
+                                  return;
+                                }
                                 _fileSelections[field['key'] as String] =
                                     selection;
                                 _dirty = true;
                                 _mutation.edited();
+                              } else if (selection != null &&
+                                  widget.controller.source
+                                      is WorkspaceFileSelectionReleaser) {
+                                await (widget.controller.source
+                                        as WorkspaceFileSelectionReleaser)
+                                    .releaseFileSelection(
+                                      selection.selectionId,
+                                    );
                               }
                             } on WorkspaceFailure catch (e) {
                               if (mounted) setState(() => _notice = e.message);

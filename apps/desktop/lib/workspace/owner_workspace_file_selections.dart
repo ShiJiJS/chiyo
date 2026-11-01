@@ -21,7 +21,8 @@ class OwnerWorkspaceFileSelections {
   final InformationFilePicker picker;
   final core.OwnerLibraryScope _scope;
   final _random = Random.secure();
-  OwnerFileSelection? _current;
+  final _selected = <String, OwnerFileSelection>{};
+  core.InformationFileDraft? _draft;
   final _cleanup = <core.InformationFileDraft>[];
   bool _closed = false, _choosing = false;
   void _check() {
@@ -36,7 +37,7 @@ class OwnerWorkspaceFileSelections {
 
   OwnerFileSelection selection(String id) {
     _check();
-    final selected = _current;
+    final selected = _selected[id];
     if (selected == null || selected.resource.selectionId != id) {
       throw const WorkspaceFailure('selection_expired', '文件选择已失效，请重新选择。');
     }
@@ -52,16 +53,17 @@ class OwnerWorkspaceFileSelections {
       final path = await picker.choose();
       _check();
       if (path == null) return null;
-      draft = await owner.beginInformationFileDraft();
+      if (_selected.length >= 32) {
+        throw const WorkspaceFailure('capacity', '请先完成或取消已有文件表单。');
+      }
+      draft = _draft ?? await owner.beginInformationFileDraft();
+      _draft = draft;
       final stage = await owner.stageInformationFile(
         draft,
         path,
         mediaType: informationFileMediaType(path),
       );
       _check();
-      if (_current != null) {
-        await owner.releaseInformationFileDraft(_current!.draft);
-      }
       _check();
       final resource = WorkspaceFileCandidate(
         List.generate(
@@ -72,7 +74,11 @@ class OwnerWorkspaceFileSelections {
         stage.mediaType,
         stage.byteLength,
       );
-      _current = OwnerFileSelection(resource, draft, stage);
+      _selected[resource.selectionId] = OwnerFileSelection(
+        resource,
+        draft,
+        stage,
+      );
       draft = null;
       return resource;
     } catch (e) {
@@ -84,7 +90,8 @@ class OwnerWorkspaceFileSelections {
       );
     } finally {
       _choosing = false;
-      if (draft != null) {
+      if (draft != null && _selected.isEmpty) {
+        _draft = null;
         try {
           await owner.releaseInformationFileDraft(draft);
         } catch (_) {
@@ -95,35 +102,41 @@ class OwnerWorkspaceFileSelections {
   }
 
   Future<void> release(String id) async {
-    if (_current?.resource.selectionId != id) return;
-    final draft = _current!.draft;
-    _current = null;
+    final selected = _selected.remove(id);
+    if (selected == null) return;
     try {
-      await owner.releaseInformationFileDraft(draft);
+      await owner.releaseInformationStage(selected.draft, selected.stage);
+      if (_selected.isEmpty) {
+        _draft = null;
+        await owner.releaseInformationFileDraft(selected.draft);
+      }
     } catch (_) {
-      _cleanup.add(draft);
-      throw const WorkspaceFailure(
-        'cleanup_pending',
-        '文件未入库，临时资源仍待清理；关闭资料库时会继续清理。',
-      );
+      _cleanup.add(selected.draft);
+      throw const WorkspaceFailure('cleanup_pending', '临时附件待清理；资料库关闭时会继续清理。');
     }
   }
 
   Future<void> committed(String id) async {
-    if (_current?.resource.selectionId != id) return;
-    final draft = _current!.draft;
-    _current = null;
+    final selected = _selected.remove(id);
+    if (selected == null) return;
+    if (_selected.isNotEmpty) return;
+    _draft = null;
     try {
-      await owner.releaseInformationFileDraft(draft);
+      await owner.releaseInformationFileDraft(selected.draft);
     } catch (_) {
-      _cleanup.add(draft);
+      _cleanup.add(selected.draft);
     }
   }
 
   Future<void> dispose() async {
     _closed = true;
-    final drafts = [if (_current != null) _current!.draft, ..._cleanup];
-    _current = null;
+    final drafts = {
+      ?_draft,
+      for (final s in _selected.values) s.draft,
+      ..._cleanup,
+    };
+    _selected.clear();
+    _draft = null;
     _cleanup.clear();
     for (final draft in drafts) {
       try {

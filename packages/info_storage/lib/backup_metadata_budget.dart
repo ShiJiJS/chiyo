@@ -5,6 +5,7 @@ const _backupRowCeiling = 500000;
 const _backupNestedFactCeiling = 500000;
 
 int _maximumBackupRows(String table) => switch (table) {
+  'template_packages' => 100,
   'information_fields' ||
   'information_item_tags' ||
   'information_file_fields' => 200000,

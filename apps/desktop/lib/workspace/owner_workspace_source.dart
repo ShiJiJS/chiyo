@@ -1,3 +1,4 @@
+import 'owner_workspace_adoption.dart';
 import 'owner_workspace_file_opens.dart';
 import 'owner_file_open_dispatcher.dart';
 import 'package:info_storage/info_storage.dart';
@@ -40,6 +41,8 @@ class OwnerWorkspaceSource
     OwnerPdfPreviewRenderer pdfPreview = const NativeOwnerPdfPreview(),
     OwnerWorkspaceFileSelections? fileSelections,
     Map<String, Map<String, Object?>>? definitions,
+    Map<String, Map<String, Object?>> Function()? definitionsReader,
+    WorkspaceTemplateState Function(String, String?)? templateState,
     Duration refreshInterval = const Duration(seconds: 1),
     this.settings = const UnavailableWorkspaceSettings(),
     this.backups = const UnavailableWorkspaceBackup(),
@@ -60,11 +63,16 @@ class OwnerWorkspaceSource
     this.grantHistory =
         grantHistory ??
         OwnerWorkspaceGrantHistory(owner: owner, pdfPreview: pdfPreview);
+    selections = fileSelections ?? OwnerWorkspaceFileSelections(owner);
     _information = OwnerWorkspaceInformation(
+      fileSelections: selections,
       owner: owner,
       templates: definitions ?? builtinWorkspaceDefinitions,
+      readTemplates: definitionsReader,
+      templateState: templateState,
       onChanged: _changed,
     );
+    _adoption = OwnerWorkspaceAdoption(_information, plugins);
     _files = OwnerWorkspaceFiles(owner, _information, pdf: pdfPreview);
     _fileActions = fileOutputs == null
         ? null
@@ -86,7 +94,6 @@ class OwnerWorkspaceSource
             openDispatcher,
             outputs: fileOutputs,
           );
-    selections = fileSelections ?? OwnerWorkspaceFileSelections(owner);
     _fileChanges = OwnerWorkspaceFileChanges(
       owner,
       _information,
@@ -114,6 +121,7 @@ class OwnerWorkspaceSource
   final core.OwnerLibraryScope _scope;
   bool get isCurrentLibrary => !_disposed && _scope.isCurrent;
   late final OwnerWorkspaceInformation _information;
+  late final OwnerWorkspaceAdoption _adoption;
   late final OwnerWorkspaceFiles _files;
   late final OwnerWorkspaceFileActions? _fileActions;
   late final OwnerWorkspaceFileOpens? _fileOpens;
@@ -208,8 +216,32 @@ class OwnerWorkspaceSource
               [
                 for (final s in owner.sessions) [s.id, s.chatLabel, s.ended],
               ],
+              [
+                for (final r in owner.credentialUseRequests)
+                  [
+                    r.id,
+                    r.state,
+                    owner.credentialUseState(r),
+                    owner.credentialGrantState(r),
+                    r.attemptConsumed,
+                    r.executionId,
+                    r.invalidatedCode,
+                  ],
+              ],
+              [
+                for (final e in owner.credentialExecutions)
+                  [
+                    e.id,
+                    e.state,
+                    e.cleanupState,
+                    e.exitCode,
+                    e.finishedAt?.toIso8601String(),
+                  ],
+              ],
               owner.accessRecordObservation,
               owner.desktopPreferences.version,
+              owner.templatePackageVersion,
+              owner.sshKnownHosts?.id,
               [
                 for (final d in owner.informationFileDeliveries)
                   [
@@ -393,14 +425,15 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceAdoptionPreview> previewAdoption(
     WorkspaceAdoptionDraft draft,
-  ) => _unsupported();
+  ) => _read(() => _adoption.preview(draft));
   @override
-  Future<void> releaseAdoption(String planId) => _unsupported();
+  Future<void> releaseAdoption(String planId) =>
+      _read(() => _adoption.release(planId));
   @override
   Future<WorkspaceRecordReceipt> applyAdoption(
     String operationId,
     String planId,
-  ) => _unsupported();
+  ) => _read(() => _adoption.apply(operationId, planId));
   @override
   Future<WorkspaceFileHistory> loadFileHistory(
     WorkspaceRecordRef record,
@@ -516,6 +549,7 @@ class OwnerWorkspaceSource
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
+    _adoption.dispose();
     _fileActions?.dispose();
     _fileOpens?.dispose();
     _timer?.cancel();

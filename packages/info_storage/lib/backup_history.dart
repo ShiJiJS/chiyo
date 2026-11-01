@@ -169,8 +169,9 @@ void _validateBackupHistory(
         });
         if (!availableAttachments.contains(
           InformationAttachmentRef.fromJson(content),
-        ))
+        )) {
           _backupInvalid();
+        }
       } else {
         _backupText(field, 'value', 1000000);
       }
@@ -530,8 +531,9 @@ extension _CompleteBackups on InformationBackups {
       for (final row in tables['information_deliveries']!) {
         final record = _deliveryArchive(row);
         if ((record.finishedAt ?? record.createdAt).isBefore(auditCutoff) &&
-            !now.isBefore(record.expiresAt))
+            !now.isBefore(record.expiresAt)) {
           continue;
+        }
         final fact = restored
             ? record.changed({'restoredAt': now.toIso8601String()})
             : record;
@@ -649,6 +651,11 @@ extension _CompleteBackups on InformationBackups {
 
   void Function() _prepareInstall(BackupContents contents) {
     final tables = contents._tables;
+    final packages = [
+      for (final row
+          in tables['template_packages'] ?? const <Map<String, Object?>>[])
+        _templatePackageFromRow(row),
+    ];
     final fields = tables['information_fields']!;
     final links = tables['information_item_tags']!;
     final items = [
@@ -786,6 +793,9 @@ extension _CompleteBackups on InformationBackups {
       _repository._templates
         ..clear()
         ..addEntries(templates.map((v) => MapEntry(v.id, v)));
+      _repository._templatePackages
+        ..clear()
+        ..addEntries(packages.map((p) => MapEntry(p.id, p)));
       _repository._history
         ..clear()
         ..addEntries(history.map((v) => MapEntry(v.id, v)));
