@@ -9,6 +9,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:info_core/protocol_json.dart';
 import 'backup_publish.dart';
+import 'macos_backup_publication.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';
@@ -26,6 +27,7 @@ part 'classification_storage.dart';
 part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
 part 'backup_operations.dart';
+part 'backup_output_operations.dart';
 part 'information_purge_storage.dart';
 
 const _libraryFormat = 38;

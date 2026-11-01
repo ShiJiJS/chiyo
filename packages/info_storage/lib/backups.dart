@@ -61,6 +61,8 @@ final class BackupExportSummary {
 class InformationBackups {
   InformationBackups._(this._repository);
   final EncryptedInformationRepository _repository;
+  final _preparedBackupOutputs = <String>{};
+  final _activeBackupOutputs = <String>{};
   static const _keyPrefix = 'aim-recovery-v1:';
   static const _format = 'agent-info-manage-current-data';
   static const maxFileBytes = 128 * 1024 * 1024;

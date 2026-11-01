@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "baseCommit": "a2f8a398",
+  "scope": "SQLCipher prepared-output journal for recovery-key saves and authenticated encrypted exports; production workspace composition and restore-operation receipt still pending.",
+  "checks": {
+    "storage-all.log": {
+      "sha256": "1459e38d5785fdea6e2751ec11c51717fd9b99647e95b4260d7fb35047392a1e",
+      "passed": 261,
+      "skipped": 19,
+      "success": true
+    },
+    "output-final.log": {
+      "sha256": "d58b6f48b086e7cdf6fcabb282e688de13b5bee25054b1efdf3db1eee6a98c2e",
+      "passed": 13,
+      "skipped": 0,
+      "success": true
+    },
+    "desktop.log": {
+      "sha256": "6e4367e277fd15feb940fdf0e40e4563af8f8b0cdc57e20fdb749c8301f1d1d2",
+      "passed": 13,
+      "skipped": 0,
+      "success": true
+    },
+    "analysis-final.log": {
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+      "success": true
+    }
+  },
+  "sources": {
+    "packages/info_storage/lib/backup_output_operations.dart": "fd17ac6b26521cfa9fbc9eef60c079cfc0ff48cbe23af950a487b85bb8d6d87d",
+    "packages/info_storage/lib/macos_backup_publication.dart": "32b7251e210431ea4ccecc418af3f313e142b747fb775ad5b92737b1eae5212f",
+    "packages/info_storage/lib/info_storage.dart": "bf6a6063e8fb63e0a31c07824902aec12e6679cf9a2cfa3c30fbaf9c11424d72",
+    "packages/info_storage/lib/backups.dart": "e5385a1241c7c94678ad20b1d615dab1735015c32102b8bef9ba7aa8283df5ef",
+    "packages/info_storage/test/backup_output_operations_test.dart": "3d48cdfe2e6a9ac98cc7071f6eff5f5e59a0364449c73f0ea9e16e3acf8a3c84"
+  },
+  "limitations": [
+    "Only isolated synthetic SQLCipher libraries, memory test key stores and actual macOS temporary files.",
+    "Full storage suite preceded one additional publishing-barrier failure test; final output-journal suite includes that test.",
+    "Reopen tests close and reopen SQLCipher/Owner objects; not independent installed App processes.",
+    "Native publication has separate prior independent-process evidence; not combined into this SQLCipher journal test claim.",
+    "File production/staging lease registration, directory cleanup, restored invalidated cleanup bookkeeping, persistent UI recovery and Host composition still require adapter work.",
+    "No personal library, Keychain, CUA, native panels, installed Release or Windows CI validation."
+  ],
+  "candidateUnchanged": "1443d358"
+}
