@@ -515,6 +515,7 @@ class InformationBackups {
   Future<BackupExportSummary> exportTo(
     String path, {
     String? stagingParent,
+    Future<void> Function(String directory)? onStagingCreated,
   }) async {
     _checkOpen();
     sqlite.Database? db;
@@ -527,6 +528,15 @@ class InformationBackups {
       if (!await recoveryKeySaved()) {
         throw const StorageFailure('recovery_key_not_saved');
       }
+      // Registration must commit before the source snapshot transaction starts.
+      // Registering from the attachment writer inside that transaction would
+      // only create a savepoint and could leave crash-time files unregistered.
+      if (onStagingCreated != null) {
+        staging = await Directory(
+          stagingParent ?? File(path).parent.path,
+        ).createTemp('.agent-info-backup-');
+        await onStagingCreated(staging.path);
+      }
       final snapshot = await _repository._db.transaction(() async {
         final snapshot = await _snapshot();
         summary = BackupExportSummary._(snapshot);
@@ -538,6 +548,7 @@ class InformationBackups {
           createdAt: snapshot.createdAt,
           tables: snapshot._tables,
           stagingParent: stagingParent,
+          registeredStagingDirectory: staging?.path,
           formatVersion: snapshot.formatVersion,
           attachments: [
             for (final v in snapshot.attachments)
@@ -565,7 +576,7 @@ class InformationBackups {
           FileSystemEntityType.notFound) {
         throw const StorageFailure('output_exists');
       }
-      staging = await Directory(
+      staging ??= await Directory(
         stagingParent ?? output.parent.path,
       ).createTemp('.agent-info-backup-');
       final temporary = File('${staging.path}/backup.partial');

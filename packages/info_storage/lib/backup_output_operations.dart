@@ -135,6 +135,10 @@ extension BackupOutputOperations on InformationBackups {
       _decodeRestoreReceipt(payload);
       return 'restore';
     }
+    if (payload['action'] == 'staging') {
+      _decodeStaging(payload);
+      return 'staging';
+    }
     return _decodeOutput(payload).action.name;
   }
 
@@ -196,7 +200,9 @@ extension BackupOutputOperations on InformationBackups {
   Future<_BackupOutputRecord?> _outputRecord(String id) async {
     final value = await _backupOperationPayload(id);
     if (value == null) return null;
-    if (value['action'] == 'enableKey' || value['action'] == 'restore')
+    if (value['action'] == 'enableKey' ||
+        value['action'] == 'restore' ||
+        value['action'] == 'staging')
       throw const StorageFailure('operation_conflict');
     return _decodeOutput(value);
   }
@@ -283,6 +289,13 @@ extension BackupOutputOperations on InformationBackups {
       }
       if (await operationVersion() != expectedVersion)
         throw const StorageFailure('backup_version_conflict');
+      await _checkStagedPublication(
+        operationId,
+        commandDigest,
+        expectedVersion,
+        action,
+        publication,
+      );
       final key = await recoveryKey();
       if (key == null) throw const StorageFailure('backup_not_enabled');
       MacBackupPublicationFiles.verifyPrepared(publication);
@@ -487,13 +500,14 @@ extension BackupOutputOperations on InformationBackups {
           'SELECT operation_id FROM backup_operations WHERE invalidated=0',
         )
         .get();
-    var count = 0;
+    final pending = (await pendingOutputStaging()).toSet();
     for (final row in rows) {
       final id = row.read<String>('operation_id');
       final action = await backupOperationAction(id);
-      if (action == 'enableKey' || action == 'restore') continue;
-      if ((await _outputRecord(id))!.cleanupPending) count++;
+      if (action == 'enableKey' || action == 'restore' || action == 'staging')
+        continue;
+      if ((await _outputRecord(id))!.cleanupPending) pending.add(id);
     }
-    return count;
+    return pending.length;
   }
 }

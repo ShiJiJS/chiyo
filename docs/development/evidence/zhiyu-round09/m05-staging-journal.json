@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "baseCommit": "ac5596d2",
+  "scope": "Persistent private staging-directory ownership before material production; cleanup after interrupted production/restore and retryable native directory release. Production WorkspaceBackupSource/Host still pending.",
+  "checks": {
+    "storage-all.log": {
+      "sha256": "52d66dae43350846588fa606c0d607cba7e76362825eaafcb4b94f6a2d849e91",
+      "success": true,
+      "passed": 279,
+      "skipped": 19
+    },
+    "staging-complete.log": {
+      "sha256": "9a03689b0b53aca3aef6da410058db6d260c1fa3d6dd9b2125fcc04c7e3a7519",
+      "success": true,
+      "passed": 9,
+      "skipped": 0
+    },
+    "desktop.log": {
+      "sha256": "9dd206fe039273c0f053dddd5bc20b427ae1089b102fd07c555db7980ea855ff",
+      "success": true,
+      "passed": 13,
+      "skipped": 0
+    },
+    "analysis-final.log": {
+      "sha256": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+      "success": true
+    },
+    "native.log": {
+      "sha256": "5aeea078229020d82f9524a33249efa422d537fe8968edc12a0422d9ee2c072d",
+      "success": true,
+      "scope": "Standalone Foundation/Darwin registry checks: allocation, nonempty failure/retry, duplicate release, directory replacement, already-cleaned acknowledgement, unknown token."
+    },
+    "native-parse.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "success": true,
+      "scope": "Swift syntax only for MainFlutterWindow and BackupStagingRegistry; not full application typechecking/build."
+    },
+    "project.log": {
+      "sha256": "4ef114c43163a18fbd40c3461ebfce67c2fd1c989d35bc9bb8f829bc8800a147",
+      "success": true
+    }
+  },
+  "sources": {
+    "packages/info_storage/lib/backup_staging_operations.dart": "045ea5c34de013ca55674e048423993049974f80567c080ff7a99e9a99133a8c",
+    "packages/info_storage/lib/macos_backup_publication.dart": "5d62ed936d24c9ed146ee07a54352c6b40f12674975656da84fc3723f3422e49",
+    "packages/info_storage/lib/backup_output_operations.dart": "b0086d354e220fab7f75c11a1602650e25ad35b768e0d299b326aacc00c527f7",
+    "packages/info_storage/lib/backups.dart": "d95140815db50ef3258291fcbe20319f9534309282ccfdaa71d1ca5484f80327",
+    "packages/info_storage/lib/attachment_backup.dart": "713fac32dea8f2046231a79e1bc8035c8c11f7c025a300615da6f0902f37bd45",
+    "packages/info_storage/lib/info_storage.dart": "6556e00377bfed26e512529a0cd6c092bdfa8e263e307659e211308fa4ed3ad4",
+    "packages/info_storage/test/backup_staging_operations_test.dart": "3df3c64530fdccd7ab41f23fe4fb317a1097a6c88f0263041c3a765cf5dd0e06",
+    "apps/desktop/macos/Runner/BackupStagingRegistry.swift": "b73d486e409b5ba6ce11bd07f1536cdb4d542584c936c36108484d07cde9f3da",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": "e47ab156bd5921189be557c07fb24a0a04e10107fb804e0865789a758b42bf5b",
+    "apps/desktop/macos/Runner.xcodeproj/project.pbxproj": "cb741513ca9ef132336c61f845609c3d806d721d1f220489d8d92a3ad2aa025e",
+    "scripts/qa/macos-backup-staging-test.swift": "197f8ef0dd2b6fd2a41215dc3b028a21546f82bddd27d7d6f245d31e5bf2e613"
+  },
+  "limitations": [
+    "All encrypted test libraries use synthetic contents and memory key stores. Database reopen tests rebuild objects in one test process.",
+    "Independent SQLCipher connection checks demonstrate child registration is committed before legacy and attachment export writes; not independent production App process acceptance.",
+    "Full storage suite preceded the final optional native-release callback and its additional test; final staging suite has 9 tests and final static analysis passes. Desktop tests preceded that optional callback and use mocked panels.",
+    "Native test uses real Foundation replacement-directory allocation without system file panels or an App sandbox. Initial direct-parent access failed EPERM; returned private child avoids accessing the protected TemporaryItems parent. Final helper passed after that correction.",
+    "Initial standalone test terminated on an uncaught native allocation error; later test catches and reports failures. Test key material was never written during that failing allocation.",
+    "Initial SQLCipher failure-injection test raced background fixture startup; setup now awaits the Owner backup barrier before raw trigger installation. Final tests pass.",
+    "Live native allocation tokens remain process-local. Production adapter must compose native release/recovery, persistent pending UI intent and workspace rebinding; orphaned empty OS replacement containers are not claimed durably recovered by this storage ledger.",
+    "No personal library, Keychain, CUA, Windows CI, new App/dSYM or installed Release validation."
+  ],
+  "candidateUnchanged": "1443d358"
+}
