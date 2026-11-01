@@ -1,6 +1,6 @@
 // Test entry only. No production bootstrap, Keychain, hooks or OS input.
-import 'dart:convert';
 import 'owner_file_approvals_native.dart';
+import 'synthetic_native_pdf.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -69,42 +69,13 @@ class _OpenReceiver implements OwnerFileOpenDispatcher {
     calls++;
     lease = value;
     await core.NativeInformationDeliveryFiles().verify(value, length, hash);
-    expect(await File(value.filePath).readAsBytes(), _pdf());
+    expect(await File(value.filePath).readAsBytes(), syntheticNativePdf());
     return OwnerFileDispatchOutcome.opened;
   }
 
   @override
   Future<OwnerFileDispatchOutcome?> status(String id, String digest) async =>
       OwnerFileDispatchOutcome.opened;
-}
-
-List<int> _pdf({bool inverted = false}) {
-  final objects = [
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 5 0 R >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 6 0 R >>',
-  ];
-  for (final color in (inverted ? ['0 0 1', '1 0 0'] : ['1 0 0', '0 0 1'])) {
-    final stream = '$color rg 0 0 200 100 re f\n';
-    objects.add(
-      '<< /Length ${ascii.encode(stream).length} >>\nstream\n${stream}endstream',
-    );
-  }
-  var text = '%PDF-1.4\n';
-  final offsets = <int>[];
-  for (var i = 0; i < objects.length; i++) {
-    offsets.add(ascii.encode(text).length);
-    text += '${i + 1} 0 obj\n${objects[i]}\nendobj\n';
-  }
-  final xref = ascii.encode(text).length;
-  text += 'xref\n0 ${objects.length + 1}\n0000000000 65535 f \n';
-  for (final offset in offsets) {
-    text += '${offset.toString().padLeft(10, '0')} 00000 n \n';
-  }
-  text +=
-      'trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n$xref\n%%EOF\n';
-  return ascii.encode(text);
 }
 
 void main() {
@@ -168,7 +139,7 @@ void main() {
           ),
         );
         final input = File('${root!.path}/synthetic.pdf');
-        await input.writeAsBytes(_pdf());
+        await input.writeAsBytes(syntheticNativePdf());
         if (fileChanges) {
           picker.next = input.path;
           final selected = (await source!.selections.pick())!;
@@ -270,7 +241,7 @@ void main() {
       if (fileChanges) {
         await tester.runAsync(() async {
           final input = File('${root!.path}/replacement.pdf');
-          await input.writeAsBytes(_pdf(inverted: true));
+          await input.writeAsBytes(syntheticNativePdf(inverted: true));
           picker.next = input.path;
           final selected = (await source!.selections.pick())!;
           await input.delete();
@@ -352,7 +323,7 @@ void main() {
           expect(saved.cleanupPending, false);
           expect(
             await File('${root!.path}/synthetic-saved.pdf').readAsBytes(),
-            _pdf(),
+            syntheticNativePdf(),
           );
           expect(
             (await source!.fileOperationReceipt(
@@ -412,7 +383,7 @@ void main() {
           service!,
           source!,
           item,
-          _pdf(),
+          syntheticNativePdf(),
           checks,
         );
       }
@@ -469,7 +440,7 @@ void main() {
           );
           expect(
             await File('${root!.path}/synthetic-saved.pdf').readAsBytes(),
-            _pdf(),
+            syntheticNativePdf(),
           );
           checks.add(
             'reopened sandbox Save As reuses original receipt without another publication',
