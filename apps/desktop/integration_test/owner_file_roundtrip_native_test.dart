@@ -80,8 +80,16 @@ void main() {
       'pid': pid,
       'runtime': {'platform': 'macos'},
     };
+    Future<void> io(Future<void> Function() action) async {
+      final ok = await tester.runAsync(() async {
+        await action();
+        return true;
+      });
+      if (ok != true) throw StateError('Synthetic native operation failed');
+    }
+
     try {
-      await tester.runAsync(() async {
+      await io(() async {
         expect(
           root.absolute.path,
           contains(
@@ -130,7 +138,7 @@ void main() {
       });
       if (phase == 'live') {
         late core.InformationItem item;
-        await tester.runAsync(() async {
+        await io(() async {
           final input = File('${root.path}/synthetic.pdf');
           await input.writeAsBytes(syntheticNativePdf());
           picker.next = input.path;
@@ -177,7 +185,7 @@ void main() {
           syntheticNativePdf(inverted: true),
           checks,
         );
-        await tester.runAsync(() async {
+        await io(() async {
           state.addAll({
             'request': decision.requestId,
             'decision': decision.operationId,
@@ -238,6 +246,9 @@ void main() {
           state['pageSha256'] = sha256.convert(original.image!).toString();
           final recovery = await repo!.backups.enable();
           state['recovery'] = recovery;
+          await repo!.backups.saveRecoveryKeyTo(
+            '${root.path}/saved-recovery.txt',
+          );
           await service!.owner.exportLibrary(
             () => repo!.backups.exportTo('${root.path}/full.aimbackup'),
           );
@@ -252,7 +263,7 @@ void main() {
           );
         });
       } else {
-        await tester.runAsync(() async {
+        await io(() async {
           if (phase == 'restore') {
             expect(service!.owner.information, isEmpty);
             await service!.owner.restoreLibrary(
@@ -299,7 +310,12 @@ void main() {
           final hid = 'request:${state['request']}';
           final h = await source!.grantHistory.read(hid);
           expect(h.summary.state.isActive, false);
-          expect(h.scopes.single.fileVersion, 2);
+          expect(
+            h.scopes
+                .singleWhere((s) => s.kind == WorkspaceApprovalScopeKind.file)
+                .fileVersion,
+            2,
+          );
           final event = h.events.singleWhere((e) => e.fileScopeId != null);
           expect(event.fileScopeId, state['deliveryScope']);
           final rendered = await source!.grantHistory.filePreview(
@@ -383,10 +399,12 @@ void main() {
           }
         });
       }
+      final error = tester.takeException();
+      if (error != null) throw error;
       passed = true;
     } finally {
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.runAsync(() async {
+      await io(() async {
         await source?.dispose();
         await service?.close();
         await repo?.close();
