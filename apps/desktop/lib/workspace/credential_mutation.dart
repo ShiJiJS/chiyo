@@ -9,7 +9,7 @@ class CredentialMutation extends ChangeNotifier {
   final WorkspaceRecordRef? expectedRef;
   bool busy = false, _closed = false;
   WorkspaceFailure? failure;
-  String? _operation;
+  String? _operation, _expectedDigest;
   bool get uncertain => failure?.code == 'unknown_outcome';
   bool get canSubmit => !busy && !uncertain && failure?.code != 'conflict';
   void markUncertain(String message) {
@@ -22,6 +22,7 @@ class CredentialMutation extends ChangeNotifier {
   void edited() {
     if (busy || uncertain) return;
     _operation = null;
+    _expectedDigest = null;
     if (failure?.code != 'conflict') failure = null;
     notifyListeners();
   }
@@ -29,23 +30,41 @@ class CredentialMutation extends ChangeNotifier {
   void acceptCurrentVersion() {
     if (busy || uncertain) return;
     _operation = null;
+    _expectedDigest = null;
     failure = null;
     notifyListeners();
   }
 
   WorkspaceCredentialReceipt _check(WorkspaceCredentialReceipt receipt) {
     if (receipt.ref.kind != WorkspaceRecordKind.credential ||
+        receipt.recordVersion < 1 ||
+        receipt.materialVersion < 1 ||
+        (_expectedDigest != null && receipt.commandDigest != _expectedDigest) ||
         expectedRef != null && receipt.ref != expectedRef) {
       throw const WorkspaceFailure('unknown_outcome', '操作回执与当前凭据不符，请先核对。');
     }
     return receipt;
   }
 
+  Future<WorkspaceCredentialReceipt?>
+  submitCommand<T extends WorkspaceCredentialCommand>(
+    T Function(String operationId) build,
+    Future<WorkspaceCredentialReceipt> Function(T command) write,
+  ) => submit((id) {
+    final command = build(id);
+    if (command.operationId != id) {
+      throw const WorkspaceFailure('invalid_command', '凭据操作编号不匹配。');
+    }
+    _expectedDigest = command.commandDigest;
+    return write(command);
+  });
+
   Future<WorkspaceCredentialReceipt?> submit(
     Future<WorkspaceCredentialReceipt> Function(String operationId) write,
   ) async {
     if (!canSubmit || _closed) return null;
     busy = true;
+    _expectedDigest = null;
     failure = null;
     notifyListeners();
     try {
@@ -63,7 +82,10 @@ class CredentialMutation extends ChangeNotifier {
         failure = error is WorkspaceFailure
             ? error
             : const WorkspaceFailure('unknown_outcome', '操作结果暂时无法确认，请先核对。');
-        if (!uncertain) _operation = null;
+        if (!uncertain) {
+          _operation = null;
+          _expectedDigest = null;
+        }
         notifyListeners();
       }
       return null;
@@ -81,6 +103,7 @@ class CredentialMutation extends ChangeNotifier {
         busy = false;
         failure = null;
         _operation = null;
+        _expectedDigest = null;
         notifyListeners();
       }
       return checked;

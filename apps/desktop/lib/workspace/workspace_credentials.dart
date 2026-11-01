@@ -1,5 +1,15 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'workspace_records.dart';
 import 'workspace_history.dart';
+
+abstract interface class WorkspaceCredentialCommand {
+  String get operationId;
+  String get commandDigest;
+}
+
+String _credentialDigest(Object value) =>
+    sha256.convert(utf8.encode(jsonEncode(value))).toString();
 
 enum WorkspaceCredentialForm { string, file }
 
@@ -45,6 +55,7 @@ class WorkspaceCredentialDetail {
     required this.useGeneration,
     required this.enabled,
     required this.useSupported,
+    this.discoverable = false,
     this.useUnavailableReason,
     required this.form,
     required this.format,
@@ -56,7 +67,7 @@ class WorkspaceCredentialDetail {
   }) : linkedInformation = List.unmodifiable(linkedInformation);
   final WorkspaceRecordSummary record;
   final int recordVersion, materialVersion, useGeneration;
-  final bool enabled, useSupported;
+  final bool enabled, useSupported, discoverable;
   final String? useUnavailableReason;
   final WorkspaceCredentialForm form;
   final WorkspaceCredentialDelivery delivery;
@@ -77,7 +88,7 @@ class WorkspaceCredentialDetail {
       : null;
 }
 
-class WorkspaceCredentialWrite {
+class WorkspaceCredentialWrite implements WorkspaceCredentialCommand {
   WorkspaceCredentialWrite({
     required this.operationId,
     required this.name,
@@ -89,21 +100,44 @@ class WorkspaceCredentialWrite {
     this.expectedRecordVersion,
     this.expectedMaterialVersion,
     this.candidateId,
+    this.discoverable,
     Iterable<String> tagIds = const [],
     Iterable<WorkspaceRecordRef>? linkedInformation,
   }) : tagIds = List.unmodifiable(tagIds),
        linkedInformation = linkedInformation == null
            ? null
            : List.unmodifiable(linkedInformation);
-  final String operationId, name, purpose, privateNote, binding;
+  @override
+  final String operationId;
+  final String name, purpose, privateNote, binding;
   final String? directoryId, candidateId;
+  final bool? discoverable;
   final WorkspaceRecordRef? ref;
   final int? expectedRecordVersion, expectedMaterialVersion;
   final List<String> tagIds;
   final List<WorkspaceRecordRef>? linkedInformation;
+  @override
+  String get commandDigest => _credentialDigest({
+    'kind': 'credential-save',
+    'operationId': operationId,
+    'ref': ref?.key,
+    'record': expectedRecordVersion,
+    'material': expectedMaterialVersion,
+    'name': name,
+    'purpose': purpose,
+    'note': privateNote,
+    'binding': binding,
+    'candidate': candidateId,
+    'discoverable': discoverable,
+    'directory': directoryId,
+    'tags': List.of(tagIds)..sort(),
+    'links': linkedInformation == null
+        ? null
+        : (linkedInformation!.map((r) => r.key).toList()..sort()),
+  });
 }
 
-class WorkspaceCredentialToggle {
+class WorkspaceCredentialToggle implements WorkspaceCredentialCommand {
   const WorkspaceCredentialToggle({
     required this.operationId,
     required this.ref,
@@ -111,10 +145,20 @@ class WorkspaceCredentialToggle {
     required this.expectedMaterialVersion,
     required this.enabled,
   });
+  @override
   final String operationId;
   final WorkspaceRecordRef ref;
   final int expectedRecordVersion, expectedMaterialVersion;
   final bool enabled;
+  @override
+  String get commandDigest => _credentialDigest({
+    'kind': 'credential-toggle',
+    'operationId': operationId,
+    'ref': ref.key,
+    'record': expectedRecordVersion,
+    'material': expectedMaterialVersion,
+    'enabled': enabled,
+  });
 }
 
 class WorkspaceCredentialReceiver {
@@ -299,7 +343,7 @@ enum WorkspaceCredentialAction {
   purge,
 }
 
-class WorkspaceCredentialChange {
+class WorkspaceCredentialChange implements WorkspaceCredentialCommand {
   const WorkspaceCredentialChange({
     required this.operationId,
     required this.ref,
@@ -310,12 +354,25 @@ class WorkspaceCredentialChange {
     this.entryId,
     this.expectedCatalogVersion,
   });
+  @override
   final String operationId;
   final WorkspaceRecordRef ref;
   final int expectedRecordVersion, expectedMaterialVersion;
   final WorkspaceCredentialAction action;
   final int? materialVersion, expectedCatalogVersion;
   final String? entryId;
+  @override
+  String get commandDigest => _credentialDigest({
+    'kind': 'credential-lifecycle',
+    'operationId': operationId,
+    'ref': ref.key,
+    'record': expectedRecordVersion,
+    'material': expectedMaterialVersion,
+    'action': action.name,
+    'selected': materialVersion,
+    'entry': entryId,
+    'catalog': expectedCatalogVersion,
+  });
 }
 
 /// Contains only committed identities/versions, never credential contents.
@@ -326,11 +383,12 @@ class WorkspaceCredentialReceipt {
     this.materialVersion, {
     this.requestId,
     this.entryId,
+    this.commandDigest,
     Iterable<String> notices = const [],
   }) : notices = List.unmodifiable(notices);
   final WorkspaceRecordRef ref;
   final int recordVersion, materialVersion;
-  final String? requestId, entryId;
+  final String? requestId, entryId, commandDigest;
   final List<String> notices;
 }
 

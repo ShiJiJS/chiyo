@@ -150,7 +150,8 @@ class _CredentialEditorState extends State<_CredentialEditor> {
     widget.detail?.linkedInformation ?? [],
   );
   WorkspaceCredentialCandidate? _candidate;
-  bool _picking = false, _bindingEdited = false;
+  bool _picking = false, _bindingEdited = false, _visibilityDirty = false;
+  late bool _discoverable = widget.detail?.discoverable ?? false;
   bool _dirty = false, _discard = false, _linksDirty = false, _checking = false;
   String? _checkError;
   bool get _editable =>
@@ -244,23 +245,25 @@ class _CredentialEditorState extends State<_CredentialEditor> {
       setState(() => _checkError = '请选择凭据资料。');
       return;
     }
-    final receipt = await _mutation.submit(
-      (id) => widget.source.credentials.save(
-        WorkspaceCredentialWrite(
-          operationId: id,
-          ref: _baseline?.record.ref,
-          expectedRecordVersion: _baseline?.recordVersion,
-          expectedMaterialVersion: _baseline?.materialVersion,
-          candidateId: _candidate?.id,
-          name: _name.text,
-          purpose: _purpose.text,
-          privateNote: _note.text,
-          binding: _binding.text,
-          directoryId: _directory,
-          tagIds: _tags,
-          linkedInformation: _linksDirty || _baseline == null ? _links : null,
-        ),
+    final receipt = await _mutation.submitCommand(
+      (id) => WorkspaceCredentialWrite(
+        operationId: id,
+        ref: _baseline?.record.ref,
+        expectedRecordVersion: _baseline?.recordVersion,
+        expectedMaterialVersion: _baseline?.materialVersion,
+        candidateId: _candidate?.id,
+        discoverable: _visibilityDirty || _baseline == null
+            ? _discoverable
+            : null,
+        name: _name.text,
+        purpose: _purpose.text,
+        privateNote: _note.text,
+        binding: _binding.text,
+        directoryId: _directory,
+        tagIds: _tags,
+        linkedInformation: _linksDirty || _baseline == null ? _links : null,
       ),
+      widget.source.credentials.save,
     );
     if (mounted && receipt != null) _close(receipt.ref);
   }
@@ -386,8 +389,29 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                 errorText: failure?.fieldErrors['purpose'],
               ),
             ),
+            Row(
+              children: [
+                Checkbox(
+                  key: const ValueKey('credential-edit-discoverable'),
+                  value: _discoverable,
+                  onChanged: !_editable
+                      ? null
+                      : (value) => setState(() {
+                          _discoverable = value!;
+                          _visibilityDirty = true;
+                          _edit();
+                        }),
+                ),
+                Expanded(
+                  child: Text(
+                    '允许AI发现凭据名称和公开用途',
+                    style: libraryText(context, 13),
+                  ),
+                ),
+              ],
+            ),
             Text(
-              '名称、用途与标签可被接入的Agent发现；私有备注不进入公开目录。',
+              '允许发现不等于允许使用；秘密内容仍须单独申请和审批，私有备注不公开。',
               style: libraryText(context, 13, color: c.muted),
             ),
             const SizedBox(height: 18),
@@ -482,6 +506,9 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                     ? null
                     : () => setState(() {
                         _baseline = latest;
+                        if (!_visibilityDirty) {
+                          _discoverable = latest.discoverable;
+                        }
                         if (!_linksDirty) {
                           _links = List.of(latest.linkedInformation);
                         }

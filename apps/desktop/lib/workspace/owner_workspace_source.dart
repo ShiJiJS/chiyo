@@ -53,7 +53,8 @@ class OwnerWorkspaceSource
     this.hosts = const UnavailableWorkspaceHost(),
     this.legacyTemplates = const UnavailableWorkspaceLegacyTemplate(),
   }) : _scope = owner.captureLibraryScope() {
-    this.credentials = credentials ?? OwnerWorkspaceCredentials(owner);
+    this.credentials =
+        credentials ?? OwnerWorkspaceCredentials(owner, onChanged: _changed);
     this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     this.grantHistory =
@@ -286,8 +287,24 @@ class OwnerWorkspaceSource
     () => _information.queryRecords(query, keepSelection: keepSelection),
   );
   @override
-  Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) =>
-      _read(() => _information.readDetail(ref));
+  Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) => _read(() async {
+    if (ref.kind != WorkspaceRecordKind.credential) {
+      return _information.readDetail(ref);
+    }
+    final credential = await credentials.read(ref);
+    return WorkspaceDetail(
+      record: credential.record,
+      version: credential.recordVersion,
+      definition: const {
+        'fields': <Object?>[],
+        'sections': <Object?>[],
+        'relations': [
+          {'key': 'related', 'label': '关联资料', 'targetTemplates': <String>[]},
+        ],
+      },
+      relations: {'related': credential.linkedInformation},
+    );
+  });
   @override
   Future<WorkspaceResults> queryRelationCandidates(
     WorkspaceRelationQuery query,
@@ -479,6 +496,9 @@ class OwnerWorkspaceSource
     _fileActions?.dispose();
     _fileOpens?.dispose();
     _timer?.cancel();
+    if (credentials case final OwnerWorkspaceCredentials managed) {
+      managed.dispose();
+    }
     await selections.dispose();
     await _requests.cancel();
     await _changes.close();

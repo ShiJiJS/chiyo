@@ -1,28 +1,52 @@
+import 'dart:async';
+import 'package:info_storage/info_storage.dart';
+import 'owner_credential_staging.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
-/// Owner metadata projection only. Material bytes remain behind OwnerAccess;
-/// writes and AI use are unavailable until their persistent adapters are wired.
+/// Owner credential management. Secret staging is Host-owned; workspace DTOs
+/// contain metadata/opaque identities only. AI use remains a separate adapter.
 class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
-  OwnerWorkspaceCredentials(this.owner) : _scope = owner.captureLibraryScope();
+  OwnerWorkspaceCredentials(this.owner, {this.onChanged})
+    : _scope = owner.captureLibraryScope(),
+      staging = OwnerCredentialStaging(owner);
+  final OwnerCredentialStaging staging;
+  final void Function(WorkspaceRecordRef)? onChanged;
+  final _pending = <String, String>{};
+  bool _closed = false;
+  void _check() {
+    if (_closed) throw const WorkspaceFailure('unavailable', '凭据资料窗口已关闭。');
+    staging.check();
+  }
+
+  void dispose() {
+    _closed = true;
+    staging.dispose();
+    _pending.clear();
+  }
 
   final core.OwnerAccess owner;
   final core.OwnerLibraryScope _scope;
 
-  Future<T> _read<T>(T Function() action) async {
+  Future<T> _read<T>(FutureOr<T> Function() action) async {
     try {
       return await owner.inLibraryScope(_scope, () async {
+        _check();
         if (!owner.serviceAvailable) {
           throw const WorkspaceFailure('unavailable', '凭据资料服务尚未就绪。');
         }
-        return action();
+        final result = await action();
+        _check();
+        return result;
       });
     } on core.AccessFailure catch (error) {
       if (error.status == 'library_changed') {
+        staging.dispose();
+        _pending.clear();
         throw const WorkspaceFailure('library_changed', '资料库已替换，请重新打开凭据。');
       }
-      throw const WorkspaceFailure('unavailable', '凭据资料暂不可读取。');
+      throw _failure(error);
     }
   }
 
@@ -54,10 +78,11 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
       materialVersion: credential.version,
       useGeneration: credential.useGeneration,
       enabled: credential.enabled,
+      discoverable: credential.discoverable,
       useSupported: false,
       useUnavailableReason: availability == core.CredentialAvailability.expired
           ? '凭据已到期，不能批准新的使用。'
-          : '新版凭据使用审批尚未接入，当前仅查看和核对原资料。',
+          : '新版凭据使用审批尚未接入，可管理和更换凭据。',
       form: file
           ? WorkspaceCredentialForm.file
           : WorkspaceCredentialForm.string,
@@ -100,4 +125,206 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
         ),
     ]);
   });
+  WorkspaceFailure _failure(core.AccessFailure error) => switch (error.status) {
+    'library_changed' => const WorkspaceFailure(
+      'library_changed',
+      '资料库已替换，请重新打开凭据。',
+    ),
+    'credential_conflict' || 'operation_conflict' => const WorkspaceFailure(
+      'conflict',
+      '凭据或原操作已变化，请重新核对。',
+    ),
+    'credential_deleted' => const WorkspaceFailure('not_found', '凭据已回收或不存在。'),
+    'unsupported_capability' => const WorkspaceFailure(
+      'unsupported',
+      '当前资料库不支持凭据持久操作。',
+    ),
+    'invalid_credential_metadata' ||
+    'invalid_credential_content' ||
+    'invalid_credential_file' ||
+    'invalid_credential_links' ||
+    'invalid_credential_operation' => const WorkspaceFailure(
+      'validation',
+      '请核对凭据名称、用途、备注、引用及所选材料。',
+    ),
+    _ => const WorkspaceFailure('unavailable', '凭据资料服务暂不可用。'),
+  };
+  WorkspaceCredentialReceipt _receipt(core.CredentialRecordReceipt receipt) =>
+      WorkspaceCredentialReceipt(
+        WorkspaceRecordRef(
+          WorkspaceRecordKind.credential,
+          receipt.credentialId,
+        ),
+        receipt.revision,
+        receipt.materialVersion,
+        commandDigest: receipt.commandDigest,
+      );
+  Future<core.CredentialRecordReceipt?> _previous(
+    String id,
+    String digest,
+  ) async {
+    final pending = _pending[id];
+    if (pending != null && pending != digest) {
+      throw const WorkspaceFailure('conflict', '操作编号已绑定另一份凭据意图。');
+    }
+    try {
+      final result = await owner.credentialRecordReceipt(id);
+      _check();
+      if (result != null && result.commandDigest != digest) {
+        throw const WorkspaceFailure('conflict', '原操作与本次凭据意图不符。');
+      }
+      return result;
+    } on StorageFailure {
+      throw const WorkspaceFailure(
+        'unknown_outcome',
+        '原操作暂无法核对，请保留当前输入并查询原结果。',
+      );
+    }
+  }
+
+  Future<WorkspaceCredentialReceipt> _commit(
+    String id,
+    core.CredentialRecordInput input,
+  ) async {
+    _pending[id] = input.commandDigest;
+    try {
+      final result = await owner.saveCredentialRecord(id, input);
+      if (result.commandDigest != input.commandDigest) {
+        throw const WorkspaceFailure('unknown_outcome', '返回的凭据回执不匹配，请先核对原结果。');
+      }
+      staging.resolve(id, committed: true);
+      _pending.remove(id);
+      final receipt = _receipt(result);
+      if (!_closed) onChanged?.call(receipt.ref);
+      return receipt;
+    } on core.AccessFailure catch (error) {
+      if (error.status == 'library_changed') {
+        staging.dispose();
+        _pending.clear();
+      }
+      staging.resolve(id, committed: false);
+      _pending.remove(id);
+      throw _failure(error);
+    } on Object {
+      throw const WorkspaceFailure(
+        'unknown_outcome',
+        '凭据操作结果暂无法确认，请核对原操作，勿重复提交。',
+      );
+    }
+  }
+
+  @override
+  Future<void> releaseCandidate(String candidateId) async =>
+      staging.release(candidateId);
+
+  @override
+  Future<WorkspaceCredentialReceipt> save(
+    WorkspaceCredentialWrite write,
+  ) => _read(() async {
+    final prior = await _previous(write.operationId, write.commandDigest);
+    if (prior != null) {
+      staging.resolve(write.operationId, committed: true);
+      _pending.remove(write.operationId);
+      return _receipt(prior);
+    }
+    // These selections must never be silently omitted from an accepted save.
+    // Their persistent credential classification model is the next M08 segment.
+    if (write.directoryId != null || write.tagIds.isNotEmpty) {
+      throw const WorkspaceFailure('unsupported', '凭据目录和标签保存尚未接入，未提交本次更改。');
+    }
+    final creating = write.ref == null;
+    final old = creating ? null : _credential(write.ref!);
+    if ((!creating &&
+            (write.expectedRecordVersion == null ||
+                write.expectedMaterialVersion == null)) ||
+        (creating &&
+            (write.expectedRecordVersion != null ||
+                write.expectedMaterialVersion != null)) ||
+        (write.linkedInformation?.any(
+              (r) => r.kind != WorkspaceRecordKind.information,
+            ) ??
+            false)) {
+      throw const WorkspaceFailure('validation', '凭据版本或关联类型不匹配，请重新核对。');
+    }
+    if (creating && write.candidateId == null) {
+      throw const WorkspaceFailure('validation', '请先输入或选择凭据材料。');
+    }
+    OwnerCredentialStage? stage;
+    if (write.candidateId != null) {
+      stage = staging.claim(write.candidateId!, write.operationId);
+      if (old != null &&
+          (stage.metadata.form == WorkspaceCredentialForm.file) !=
+              (old.form == core.CredentialForm.file)) {
+        staging.resolve(write.operationId, committed: false);
+        throw const WorkspaceFailure('validation', '更换材料须保持原有字符串或文件形态。');
+      }
+    }
+    return _commit(
+      write.operationId,
+      core.CredentialRecordInput(
+        action: creating
+            ? core.CredentialRecordAction.create
+            : stage != null
+            ? core.CredentialRecordAction.replaceMaterial
+            : core.CredentialRecordAction.edit,
+        commandDigest: write.commandDigest,
+        credentialId: write.ref?.id,
+        expectedRevision: write.expectedRecordVersion,
+        expectedMaterialVersion: write.expectedMaterialVersion,
+        form: creating
+            ? stage!.metadata.form == WorkspaceCredentialForm.file
+                  ? core.CredentialForm.file
+                  : core.CredentialForm.string
+            : null,
+        discoverable: write.discoverable,
+        name: write.name,
+        publicPurpose: write.purpose,
+        privateNote: write.privateNote,
+        suggestedBinding: write.binding,
+        material: stage?.bytes,
+        fileName: stage?.metadata.filename,
+        linkedItemIds: write.linkedInformation?.map((r) => r.id),
+      ),
+    );
+  });
+
+  @override
+  Future<WorkspaceCredentialReceipt> setEnabled(
+    WorkspaceCredentialToggle change,
+  ) => _read(() async {
+    final prior = await _previous(change.operationId, change.commandDigest);
+    if (prior != null) return _receipt(prior);
+    _credential(change.ref);
+    return _commit(
+      change.operationId,
+      core.CredentialRecordInput(
+        action: core.CredentialRecordAction.setEnabled,
+        commandDigest: change.commandDigest,
+        credentialId: change.ref.id,
+        expectedRevision: change.expectedRecordVersion,
+        expectedMaterialVersion: change.expectedMaterialVersion,
+        enabled: change.enabled,
+      ),
+    );
+  });
+
+  @override
+  Future<WorkspaceCredentialReceipt?> receipt(String operationId) => _read(
+    () async {
+      try {
+        final result = await owner.credentialRecordReceipt(operationId);
+        _check();
+        if (result != null &&
+            _pending[operationId] != null &&
+            result.commandDigest != _pending[operationId]) {
+          throw const WorkspaceFailure('unknown_outcome', '原操作回执不匹配，请保留当前输入。');
+        }
+        staging.resolve(operationId, committed: result != null);
+        _pending.remove(operationId);
+        return result == null ? null : _receipt(result);
+      } on StorageFailure {
+        throw const WorkspaceFailure('unknown_outcome', '仍无法确认原操作结果，请稍后核对。');
+      }
+    },
+  );
 }
