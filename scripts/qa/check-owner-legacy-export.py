@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Read only the retained package23 synthetic export, never the live library.
 
-Three separate Flutter test processes restore, edit through the production
-workspace adapter, then reopen and export/restore again. No native input,
+Four separate Flutter test processes restore through the production backup
+source, edit, export/restore again, then reopen the restored target and receipts. No native input,
 Keychain access or installed Release upgrade is claimed.
 """
 import argparse
@@ -47,7 +47,7 @@ def main():
         with tempfile.TemporaryDirectory(prefix='owner-legacy-', dir=cache) as temp:
             fixture = Path(temp)
             (fixture / 'fixture-marker').write_text('disposable-owner-legacy-v1')
-            for phase in ('restore', 'edit', 'reopen'):
+            for phase in ('restore', 'edit', 'reopen', 'verify-restored'):
                 env = dict(os.environ, OWNER_LEGACY_ROOT=str(fixture), OWNER_LEGACY_PHASE=phase,
                            OWNER_LEGACY_BACKUP=str(BACKUP), OWNER_LEGACY_KEY=str(KEY))
                 logpath = output / (phase + '.log')
@@ -64,7 +64,7 @@ def main():
                 if result['phase'] != phase or result['passed'] is not True:
                     raise RuntimeError('Missing phase result')
                 facts['phases'].append(result)
-            if len({p['pid'] for p in facts['phases']}) != 3:
+            if len({p['pid'] for p in facts['phases']}) != 4:
                 raise RuntimeError('Processes were not independent')
             facts['passed'] = True
     finally:

@@ -1,0 +1,310 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "sourceCommit": "f1bd29eaaede6b6f72ec40c9dcab1f8c7b60a42c",
+  "release": "0.4.1+13-mac-dev.f1bd29eaaede",
+  "relativePayload": "build/macos-adaptation/m05-release-f1bd29ea/AgentInfoManage",
+  "archive": {
+    "name": "agent-info-manage-0.4.1+13-mac-dev.f1bd29eaaede-macos-arm64.zip",
+    "bytes": 131489572,
+    "sha256": "de8d046c1f7efeca6393cbc6faf67eb075ec597889e00387ed5a97ddb145c9bd"
+  },
+  "package": {
+    "complete": true,
+    "phases": [
+      {
+        "name": "release-build",
+        "exit": 0
+      },
+      {
+        "name": "compile-info",
+        "exit": 0
+      },
+      {
+        "name": "sign-info",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-codex",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-codex",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-codex-hook",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-codex-hook",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-runtime-worker",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-runtime-worker",
+        "exit": 0
+      },
+      {
+        "name": "compile-info-prepare-codex",
+        "exit": 0
+      },
+      {
+        "name": "sign-info-prepare-codex",
+        "exit": 0
+      },
+      {
+        "name": "diagnostic-build",
+        "exit": 0
+      },
+      {
+        "name": "sign-diagnostic-macos-storage-check",
+        "exit": 0
+      },
+      {
+        "name": "sign-diagnostic-libsqlcipher.dylib",
+        "exit": 0
+      },
+      {
+        "name": "app-signature",
+        "exit": 0
+      },
+      {
+        "name": "archive",
+        "exit": 0
+      },
+      {
+        "name": "extract",
+        "exit": 0
+      },
+      {
+        "name": "extracted-app-signature",
+        "exit": 0
+      },
+      {
+        "name": "extracted-storage",
+        "exit": 0
+      },
+      {
+        "name": "extracted-cli-and-worker",
+        "exit": 0
+      }
+    ],
+    "fileEntries": 7982,
+    "architecture": "macos-arm64",
+    "minimumSystemVersion": "14.0",
+    "signing": "local ad-hoc development; not notarized",
+    "sqlcipher": {
+      "desktopSha256": "b763342c5c02e17991465e7a78bb446af4a9e9cd1b777b1d3659964d1aafe0b4",
+      "desktopCipherVersion": "4.19.0 community"
+    },
+    "entitlements": {
+      "com.apple.security.app-sandbox": true,
+      "com.apple.security.files.bookmarks.app-scope": true,
+      "com.apple.security.files.user-selected.read-write": true,
+      "com.apple.security.network.client": true,
+      "com.apple.security.network.server": true
+    },
+    "cliWorkerChecksPassed": 6,
+    "sourceChecksRepeated": false
+  },
+  "compiledBackupCheck": {
+    "nativeBackupStagingRegistryPresent": true,
+    "nativeSelectOutputPresent": true,
+    "nativeReleaseRecordedPresent": true,
+    "dartOwnerWorkspaceBackupsPresent": true,
+    "sdkRestored": true
+  },
+  "buildCleanup": {
+    "complete": true,
+    "previewKernelBefore": "302791799a10fb288c7a5befed09206bf03e6d147ea19ac7b8875fb4211ce125",
+    "previewKernelAfter": "302791799a10fb288c7a5befed09206bf03e6d147ea19ac7b8875fb4211ce125",
+    "previewPreserved": true,
+    "intermediateCheckoutRemoved": true
+  },
+  "productionInputsMatchCompatibilityChecks": true,
+  "legacyOwnerSource": {
+    "scope": "Read only the retained package23 synthetic export, never the live library.\n\nFour separate Flutter test processes restore through the production backup\nsource, edit, export/restore again, then reopen the restored target and receipts. No native input,\nKeychain access or installed Release upgrade is claimed.\n",
+    "passed": true,
+    "phases": [
+      {
+        "phase": "restore",
+        "pid": 61932,
+        "passed": true,
+        "productionOwnerRestoreReceipt": true,
+        "comparison": {
+          "format": 9,
+          "information": 2,
+          "directories": 0,
+          "tags": 0,
+          "templates": 0,
+          "revisions": 3,
+          "recycle": 0,
+          "credentials": 5,
+          "credentialVersions": 7,
+          "grants": 4,
+          "accesses": 4,
+          "credentialRequests": 11,
+          "executions": 27,
+          "deliveries": 6,
+          "attachmentVersions": 3,
+          "attachmentBytes": 3073,
+          "exactPrivateContentsComparedInMemory": true,
+          "pastRelationshipsCompared": true,
+          "liveAuthorityAbsent": true,
+          "sourceBackupConfigurationAbsent": true
+        },
+        "actualRevisionCount": 3,
+        "originalRowsAndWorkspaceFieldsChecked": true
+      },
+      {
+        "phase": "edit",
+        "pid": 62093,
+        "passed": true,
+        "comparison": {
+          "format": 9,
+          "information": 2,
+          "directories": 0,
+          "tags": 0,
+          "templates": 0,
+          "revisions": 3,
+          "recycle": 0,
+          "credentials": 5,
+          "credentialVersions": 7,
+          "grants": 4,
+          "accesses": 4,
+          "credentialRequests": 11,
+          "executions": 27,
+          "deliveries": 6,
+          "attachmentVersions": 3,
+          "attachmentBytes": 3073,
+          "exactPrivateContentsComparedInMemory": true,
+          "pastRelationshipsCompared": true,
+          "liveAuthorityAbsent": true,
+          "sourceBackupConfigurationAbsent": true
+        },
+        "actualRevisionCount": 3,
+        "originalRowsAndWorkspaceFieldsChecked": true,
+        "legacyEditPreservesOtherFields": true
+      },
+      {
+        "phase": "reopen",
+        "pid": 62239,
+        "passed": true,
+        "comparison": {
+          "format": 9,
+          "information": 2,
+          "directories": 0,
+          "tags": 0,
+          "templates": 0,
+          "revisions": 3,
+          "recycle": 0,
+          "credentials": 5,
+          "credentialVersions": 7,
+          "grants": 4,
+          "accesses": 4,
+          "credentialRequests": 11,
+          "executions": 27,
+          "deliveries": 6,
+          "attachmentVersions": 3,
+          "attachmentBytes": 3073,
+          "exactPrivateContentsComparedInMemory": true,
+          "pastRelationshipsCompared": true,
+          "liveAuthorityAbsent": true,
+          "sourceBackupConfigurationAbsent": true
+        },
+        "actualRevisionCount": 4,
+        "originalRowsAndWorkspaceFieldsChecked": true,
+        "productionOwnerExportReceipt": true,
+        "productionReceiptsSurviveReopen": false,
+        "newExportRoundtrip": {
+          "format": 12,
+          "information": 2,
+          "directories": 0,
+          "tags": 0,
+          "templates": 0,
+          "revisions": 4,
+          "recycle": 0,
+          "credentials": 5,
+          "credentialVersions": 7,
+          "grants": 4,
+          "accesses": 4,
+          "credentialRequests": 11,
+          "executions": 27,
+          "deliveries": 6,
+          "attachmentVersions": 3,
+          "attachmentBytes": 3073,
+          "exactPrivateContentsComparedInMemory": true,
+          "pastRelationshipsCompared": true,
+          "liveAuthorityAbsent": true,
+          "sourceBackupConfigurationAbsent": true
+        }
+      },
+      {
+        "phase": "verify-restored",
+        "pid": 62468,
+        "passed": true,
+        "localRecoveryKeyPreserved": true,
+        "actualRevisionCount": 4,
+        "originalRowsAndWorkspaceFieldsChecked": true,
+        "productionReceiptsSurviveReopen": true,
+        "newExportRoundtrip": {
+          "format": 12,
+          "information": 2,
+          "directories": 0,
+          "tags": 0,
+          "templates": 0,
+          "revisions": 4,
+          "recycle": 0,
+          "credentials": 5,
+          "credentialVersions": 7,
+          "grants": 4,
+          "accesses": 4,
+          "credentialRequests": 11,
+          "executions": 27,
+          "deliveries": 6,
+          "attachmentVersions": 3,
+          "attachmentBytes": 3073,
+          "exactPrivateContentsComparedInMemory": true,
+          "pastRelationshipsCompared": true,
+          "liveAuthorityAbsent": true,
+          "sourceBackupConfigurationAbsent": true
+        }
+      }
+    ],
+    "sourceCommit": "f1bd29eaaede6b6f72ec40c9dcab1f8c7b60a42c",
+    "historicalPackageSource": "7b19d34b61cf07d5a77db05adb8f0c9cdbf85805",
+    "backupSha256": "a8771fa4f073bac737caeaa53cac04c360ecfe1931ff873a296905a84e5164dd",
+    "originalLibraryOpened": false,
+    "keychainAccessed": false,
+    "nativeReleaseAcceptance": false,
+    "inputsUnchanged": true,
+    "fixtureRemoved": true,
+    "checkerSources": {
+      "scripts/qa/check-owner-legacy-export.py": "079bd30896dfae8830b2640e143a922cd51c2a381df3efdd867dba499b0780db",
+      "apps/desktop/tool/check_owner_legacy_export.dart": "88864bf3b655b21feb804eb77f7467e0c9fbab77859bb3b1ac8df6281ede596c",
+      "apps/desktop/integration_test/support/macos_keychain_backup.dart": "d5f90678cfe1f55ad34ab8c36dd7262b83ae1e1853c4bdbee9fafe0bd6290968"
+    }
+  },
+  "analysis": "desktop no issues",
+  "pythonAst": "passed",
+  "correctedProbeFailure": "Fourth process wrongly required the edited export source to have no locally created recovery key; corrected source preservation check while final restored target still rejects imported backup configuration. No product storage change.",
+  "buildDiagnostics": "Xcode emitted an exit-code-0 SwiftCompile diagnostic and deprecation warnings; command returned 0, native functions/AOT source are present and final signatures/package checks passed. Raw log retained.",
+  "limits": [
+    "No installed App or Keychain upgrade",
+    "No native panels or sandbox external-path reopen acceptance",
+    "Backup path journal does not yet persist security-scoped bookmarks; external-resource recovery remains an implementation gap in #74",
+    "No computer use, personal library access or Windows CI"
+  ],
+  "evidenceSha256": {
+    "build/macos-adaptation/m05-release-f1bd29ea/package-verification.json": "980bb210659b4c54730ce4b76683be23653490a98ac1252b2b18691a7d075533",
+    "build/macos-adaptation/m05-release-f1bd29ea/package-logs/release-build.txt": "f1d85ea218aa3b9f679ad0f5cf02a8b4c593ca58cc40b858098f1835af9009b4",
+    "build/macos-adaptation/m05-release-f1bd29ea/package-logs/extracted-storage.txt": "bfe59e3f5c8148af626c8aa8416aa5c874f251127cecd3c3ec86f26dddfb1657",
+    "build/macos-adaptation/m05-release-f1bd29ea/package-logs/extracted-cli-and-worker.txt": "4a23733fda6aefea7389a004b9236c3672d148795b3ae735d06cfddc502a1e1d",
+    "build/macos-adaptation/m05-owner-legacy-2/result.json": "3f8422a62ef1354d6d928389c122c0473b0efdab5c2b2a885204814f67b24440",
+    "build/macos-adaptation/m05-owner-legacy-2/analysis.log": "c70da5958f5db1a3bde6edb314eaeef015d4d71f5a2b2588fd2e6161a5b092c8"
+  }
+}
