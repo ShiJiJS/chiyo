@@ -72,11 +72,19 @@ class WorkspaceBackupStatus {
     required Iterable<String> blockers,
     required this.cleanupCount,
     this.latestArchive,
+    this.pending,
   }) : blockers = List.unmodifiable(blockers);
   final int version, cleanupCount;
   final bool keyCreated, keySaved, recipientEmpty;
   final List<String> blockers;
   final WorkspaceBackupResource? latestArchive;
+  final WorkspaceBackupPending? pending;
+}
+
+class WorkspaceBackupPending {
+  const WorkspaceBackupPending(this.command, {this.restoreCounts});
+  final WorkspaceBackupChange command;
+  final WorkspaceBackupCounts? restoreCounts;
 }
 
 class WorkspaceBackupPreview {
@@ -107,19 +115,14 @@ class WorkspaceBackupChange {
   final int expectedVersion;
   final WorkspaceBackupResource? selection;
   final String? previewToken;
-  String get digest => sha256
-      .convert(
-        utf8.encode(
-          jsonEncode({
-            'operationId': operationId,
-            'action': action.name,
-            'expectedVersion': expectedVersion,
-            'selection': selection?.json,
-            'previewToken': previewToken,
-          }),
-        ),
-      )
-      .toString();
+  Map<String, Object?> get json => {
+    'operationId': operationId,
+    'action': action.name,
+    'expectedVersion': expectedVersion,
+    'selection': selection?.json,
+    'previewToken': previewToken,
+  };
+  String get digest => sha256.convert(utf8.encode(jsonEncode(json))).toString();
 }
 
 class WorkspaceBackupReceipt {

@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-01",
+  "issue": 74,
+  "branch": "codex/zhiyu-macos",
+  "baseCommit": "715e5c00",
+  "scope": "Production Owner backup source, Host composition, persisted pending intents and native staging recovery",
+  "checks": {
+    "storage": {
+      "passed": 285,
+      "skipped": 19,
+      "result": "passed"
+    },
+    "desktop": {
+      "passed": 35,
+      "realOwnerTestsIncluded": 10,
+      "result": "passed"
+    },
+    "analysis": {
+      "storage": "passed",
+      "desktop": "passed"
+    },
+    "independentFlutterProcesses": {
+      "phases": [
+        {
+          "phase": "seed",
+          "exitCode": 0
+        },
+        {
+          "phase": "verify",
+          "exitCode": 0
+        },
+        {
+          "phase": "reopen",
+          "exitCode": 0
+        }
+      ],
+      "temporaryRootRemoved": true
+    },
+    "swiftLifecycle": "passed",
+    "swiftDartSwiftBridge": {
+      "dartExitCode": 0,
+      "nativeAllocationRemoved": true
+    },
+    "mainFlutterWindowSyntax": "passed",
+    "xcodeProjectPlist": "passed"
+  },
+  "correctedFindings": [
+    "Retired unsuccessful cleanup cannot be retroactively successful",
+    "Persisted Owner intent must match its database row identity",
+    "Foundation canonical URL may retain /var alias; use realpath for Dart boundary",
+    "Recovery-key save also needs native output selection authority",
+    "Probe positional/named Set parameter and Swift throwing-autoclosure errors corrected before final pass"
+  ],
+  "limits": [
+    "Native panels and final sandbox App were not exercised",
+    "Independent Flutter test processes are not installed App process evidence",
+    "Existing 1443d358 candidate, fixed installation and preview unchanged",
+    "No personal library, Keychain, CUA, Windows CI or new App/dSYM"
+  ],
+  "cleanup": {
+    "independentProcessSyntheticRootsRemoved": true,
+    "bridgeSyntheticRootsRemoved": true,
+    "nativeExecutableRemoved": true
+  },
+  "sourceSha256": {
+    "apps/desktop/lib/backups.dart": "443e2f9e9295d46715508cdd6adc3eb93b03479efc25a625c09cd21b24d7fb2a",
+    "apps/desktop/lib/main.dart": "accedc971e5230ffabd8d8f7c65acd51d0982e129c334ff5d3f5a6b664307484",
+    "apps/desktop/lib/workspace/backup_controller.dart": "f9bf01210d0ff78b99468bb24a680abe90308ef66e0c58b53b63305b3bbb73d3",
+    "apps/desktop/lib/workspace/owner_workspace_host.dart": "48999140f8931787ea3eb938c58437fbde2445c35e2716b567fb8495b5efdcc8",
+    "apps/desktop/lib/workspace/workspace_app.dart": "a47ec5b884d7e66302e16ad1342dc1bf2368e77ed0bbb167004404e34c9b2ac7",
+    "apps/desktop/lib/workspace/workspace_backups.dart": "ef3322b27cb956991df874afc0e30742769dbb83018b19639263d17854cc4695",
+    "apps/desktop/lib/workspace/owner_workspace_backups.dart": "8137e1848ae30a590168bb52da54bc6c0f796a7a24477d7cf088b13302c45592",
+    "apps/desktop/macos/Runner/BackupStagingRegistry.swift": "53e848a574efafb4f334cd6c3463660730fa8a5aac0221cf36afc365d09cdde5",
+    "apps/desktop/macos/Runner/MainFlutterWindow.swift": "d954d91fe1a2a095a173739f380a3539a21aa96ded1229d17b7df6999bf9a954",
+    "apps/desktop/macos/backup_files/tests/StagingChecks.swift": "419f26f723997a3d616af1aa15b0f40b32532078a36a4ec4310771496731a2ef",
+    "apps/desktop/test/owner_workspace_backups_test.dart": "6c5e14ef9b8897244723f3c702d2715395ed70f431ceb549b3242b4b43539f79",
+    "apps/desktop/test/fixtures/owner_backup_restart.dart": "0e95870a4edf743b19b817c5e7f1941dacfab959bf8bb8695d61219be3753923",
+    "packages/info_storage/lib/info_storage.dart": "8bf79cd335c801f9301bef33429d262d3ecb10e143db898c78061a6e8c1a3cf3",
+    "packages/info_storage/lib/backup_output_operations.dart": "29d29cb1d428bb9770d7b905fcee42d4612d4c44457102322f97ca9228b24fa1",
+    "packages/info_storage/lib/backup_owner_operations.dart": "44230af31ddc5e032ffb75c87270de648a401c1f2dc572f06c3eba9509387b70",
+    "packages/info_storage/test/backup_owner_operations_test.dart": "66fa72ddfe070579babc98b003118d3619b887bdd500e06eb981883adf295948",
+    "packages/info_storage/test/fixtures/macos_staging_bridge.dart": "ede8c64bcee79f49cabef9e30e85c0366eceb961563beb51c2b7207d78b83e47"
+  },
+  "logSha256": {
+    "storage-tests.log": "a401e9dfd81a78d50e9abf50863f796a12ed9b3b59321939d982c63674a046bc",
+    "desktop-tests.log": "d3bbc6868387e68857724d9fd9faa9c51cf6db2e14334fb3286b35f9bd2a4d12",
+    "storage-analysis.log": "a489b1249880b489826d25a25a28b316c5059ae3c5e62feecfc2b7949aba9041",
+    "desktop-analysis.log": "f6aaddd223fddb2cd9ea1ba51c7ca37caab135296871d683571425cf678557ca",
+    "native-check.log": "bcf6ff56baff06c63bf9e358a36b73ae44329c4fef6693808a871ff4bfe16061",
+    "native-bridge.json": "cc780c3ec142ce2cf2e1a35224b5b5bc03e324beb670963a57d3870e7d477561",
+    "process-seed.log": "9745937fb72d04f3fa02239a0e9f8d47a0ff98d27c23086610a3705b7de70e95",
+    "process-verify.log": "a3e2a8ec52fcba44c3acea3d48a1eedbd2ce7e5dc6d4adb1f601ebcf566e9bed",
+    "process-reopen.log": "112fa607c66876792afd9eaf5429f992cf289761fd9dc24311e5716b755ea066",
+    "process-results.json": "20678c8d2721ed1ed20292714928129f936a2bd632424c0bfbff790eb2e186ba"
+  }
+}

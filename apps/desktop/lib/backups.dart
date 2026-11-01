@@ -18,6 +18,8 @@ abstract class BackupFilePicker {
   Future<String?> recoveryKeyInput() async => null;
   Future<BackupStaging?> prepareStaging(String output) async => null;
   Future<void> releaseStaging(BackupStaging staging) async {}
+  Future<void> releaseRecordedStaging(Map<String, Object?> directory) async =>
+      throw const StorageFailure('backup_staging_failed');
 }
 
 class BackupStaging {
@@ -55,6 +57,10 @@ class NativeBackupFilePicker extends BackupFilePicker {
   @override
   Future<void> releaseStaging(BackupStaging staging) =>
       _channel.invokeMethod<void>('releaseBackupStaging', staging.token);
+
+  @override
+  Future<void> releaseRecordedStaging(Map<String, Object?> directory) =>
+      _channel.invokeMethod<void>('releaseRegisteredBackupStaging', directory);
 }
 
 String _backupFailure(Object error) => switch (error) {

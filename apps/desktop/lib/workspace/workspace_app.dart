@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
+import '../desktop_controls.dart';
 import 'workspace_controller.dart';
 import 'workspace_source.dart';
 import 'workspace_inputs.dart';
@@ -400,6 +401,21 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   Widget _buildApp() => ZhiyuApp(
     controller: _controller,
     windowTitle: widget.windowTitle,
+    // A resumed unknown operation may arrive while the initial page is the
+    // library. Keep reconciliation reachable even while navigation is locked.
+    trailingBuilder: (_) => ListenableBuilder(
+      listenable: _backups,
+      builder: (context, _) => !_backups.uncertain
+          ? const SizedBox.shrink()
+          : Tooltip(
+              message: '上次备份操作结果未确认。只核对原操作，不重新导出或恢复。',
+              child: DesktopButton(
+                key: const ValueKey('backup-root-reconcile'),
+                onPressed: _backups.busy ? null : _backups.reconcile,
+                child: Text(_backups.busy ? '正在核对备份…' : '核对上次备份操作'),
+              ),
+            ),
+    ),
     pageBuilder:
         widget.pageBuilder ??
         (context, location) => location.page == WorkspacePage.library

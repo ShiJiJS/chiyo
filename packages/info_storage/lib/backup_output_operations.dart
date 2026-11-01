@@ -139,6 +139,14 @@ extension BackupOutputOperations on InformationBackups {
       _decodeStaging(payload);
       return 'staging';
     }
+    if (payload['action'] == 'ownerIntent') {
+      _decodeOwnerIntent(payload);
+      return 'ownerIntent';
+    }
+    if (payload['action'] == 'cleanup') {
+      _decodeCleanupReceipt(payload);
+      return 'cleanup';
+    }
     return _decodeOutput(payload).action.name;
   }
 
@@ -202,7 +210,9 @@ extension BackupOutputOperations on InformationBackups {
     if (value == null) return null;
     if (value['action'] == 'enableKey' ||
         value['action'] == 'restore' ||
-        value['action'] == 'staging')
+        value['action'] == 'staging' ||
+        value['action'] == 'ownerIntent' ||
+        value['action'] == 'cleanup')
       throw const StorageFailure('operation_conflict');
     return _decodeOutput(value);
   }
@@ -504,7 +514,11 @@ extension BackupOutputOperations on InformationBackups {
     for (final row in rows) {
       final id = row.read<String>('operation_id');
       final action = await backupOperationAction(id);
-      if (action == 'enableKey' || action == 'restore' || action == 'staging')
+      if (action == 'enableKey' ||
+          action == 'restore' ||
+          action == 'staging' ||
+          action == 'ownerIntent' ||
+          action == 'cleanup')
         continue;
       if ((await _outputRecord(id))!.cleanupPending) pending.add(id);
     }
