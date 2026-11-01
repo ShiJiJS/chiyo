@@ -220,6 +220,24 @@ void main() {
   );
 
   test(
+    'clock-only expiry refreshes the owner view without rewriting metadata',
+    () async {
+      final c = await create(expiresAt: now.add(const Duration(minutes: 1)));
+      source.refreshFromOwner();
+      await Future<void>.delayed(Duration.zero);
+      final next = source.changes.first.timeout(const Duration(seconds: 2));
+      now = now.add(const Duration(minutes: 1));
+      source.refreshFromOwner();
+      expect(await next, isNull);
+      expect(
+        (await source.credentials.read(ref(c))).unavailableReason,
+        contains('已到期'),
+      );
+      expect(service.owner.credential(c.id).toJson(), c.toJson());
+    },
+  );
+
+  test(
     'unwired writes and receipt queries fail without modifying vault or requesting use',
     () async {
       final c = await create();
