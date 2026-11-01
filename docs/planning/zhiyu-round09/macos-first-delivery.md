@@ -19,7 +19,6 @@
 | 3 | [#72 M03：审批、限定读取与失效](https://github.com/ShiJiJS/agent-info-manage/issues/72) | 部分批准、拒绝、撤销、固定期限、会话结束、授权历史与访问记录 | AI 只读批准字段，跨聊天及越界拒绝；撤销/到期/结束后拒读，重启/恢复不复活；记录可追溯 |
 | 4 | [#73 M04：完整流程与 App 交付](https://github.com/ShiJiJS/agent-info-manage/issues/73) | 同候选 App/CLI 联合检查、实际 AI 聊天、固定安装目录、升级保护、说明与清理 | 交付可打开的 Mac App、接入步骤和支持清单；安装升级与尚未完成的系统项明确记录 |
 | 后续 | [#74 M05：新版备份与恢复](https://github.com/ShiJiJS/agent-info-manage/issues/74) | 新版设置接恢复密钥、原生文件选择、真实加密导出、空库恢复及原操作核对 | 独立恢复成功且不复活授权；取消/错误/重复操作不覆盖原数据，恢复后旧界面操作失效 |
-
 | 后续 | [#75 M06：普通附件管理](https://github.com/ShiJiJS/agent-info-manage/issues/75) | 原文验证读取、真实版本/预览、导入/替换/恢复版本/另存 | 先接Owner读取，再接原生选择与持久操作；实际面板另验 |
 | 后续 | [#76 M07：AI文件申请与交付](https://github.com/ShiJiJS/agent-info-manage/issues/76) | 新版文件审批、准确版本、受管副本和交付历史 | AI申请，主人审批；复用现有协议，核对失效和清理 |
 
@@ -37,7 +36,7 @@ GitHub 已有依赖 **#70 → #71 → #72 → #73**，原五张票及新增#75/#
 
 4. **#75/#76：普通附件后续适配。** #75已接Owner有界校验读取、真实版本及文字/图片预览；PDF/导入/替换/恢复版本/另存仍待接，#76文件审批/交付尚未开始。仅用合成资料，未安装新版或增加演示入口。
 
-最新实施及证据：[M01](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m01.md)、[M02](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m02.md)、[M03](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m03.md)、[M04](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)、[M05](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m05.md)。这些记录保留具体来源与验证边界；未验事项不勾选、整票不提前关闭。
+最新实施及证据：[M01](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m01.md)、[M02](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m02.md)、[M03](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m03.md)、[M04](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m04.md)、[M05](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m05.md)、[M06](https://github.com/ShiJiJS/agent-info-manage/blob/codex/zhiyu-macos/docs/development/zhiyu-macos-real-m06.md)。这些记录保留具体来源与验证边界；未验事项不勾选、整票不提前关闭。
 
 ## 后置范围与原票归属
 
