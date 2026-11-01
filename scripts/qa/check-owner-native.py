@@ -21,7 +21,7 @@ TARGET = 'integration_test/owner_workspace_native_test.dart'
 IDENTITY = 'com.example.infoDesktop.zhiyuOwnerCheck'
 
 
-def drive_with_real_client(command, output, env, workflow_run, project, package):
+def drive_with_real_client(command, output, env, workflow_run, project, package, scenario="owner-ui"):
     """One owned native test App, with the existing approved synthetic project."""
     controller = output / 'controller.json'
     root = None
@@ -51,7 +51,7 @@ def drive_with_real_client(command, output, env, workflow_run, project, package)
             print('real Codex client: started', flush=True)
             with (output / 'real-client.log').open('w') as client_log:
                 result = subprocess.run([sys.executable, str(ROOT / 'scripts/qa/macos-codex-client.py'),
-                    str(output / 'real-client'), '--case', 'owner-ui', '--project', str(project),
+                    str(output / 'real-client'), '--case', scenario, '--project', str(project),
                     '--host', str(output), '--package', str(package)], cwd=ROOT, stdout=client_log,
                     stderr=subprocess.STDOUT, timeout=780)
             client_code = result.returncode
@@ -79,8 +79,11 @@ def main():
     parser.add_argument('--workflow', action='store_true', help='Full owner workflow in two launches of one native test App')
     parser.add_argument('--real-codex-project', type=Path, help='Existing approved synthetic project; no hook/trust changes')
     parser.add_argument('--package', type=Path, help='Candidate payload for real Codex CLI')
+    parser.add_argument('--file-codex', action='store_true', help='Real AI ordinary-file request/approval/history with the existing approved project')
     args = parser.parse_args()
     real_codex = args.real_codex_project is not None
+    if args.file_codex and not real_codex:
+        parser.error('--file-codex requires --real-codex-project and --package')
     if real_codex != (args.package is not None) or (real_codex and args.workflow):
         parser.error('Use --real-codex-project with --package, separately from --workflow')
     if real_codex:
@@ -134,6 +137,7 @@ def main():
         run([launcher, 'flutter', 'build', 'macos', '--debug', '--config-only',
              '--no-pub', '--target', target, '--dart-define=OWNER_NATIVE_SYNTHETIC=true',
              '--dart-define=OWNER_NATIVE_WORKFLOW_RUN=' + workflow_run,
+             '--dart-define=OWNER_NATIVE_FILE_CODEX=' + str(args.file_codex).lower(),
              '--dart-define=INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'], 'configure.log')
         run(['xcodebuild', '-workspace', 'macos/Runner.xcworkspace', '-scheme', 'Runner',
              '-configuration', 'Debug', '-derivedDataPath', str(OUTPUT / 'xcode'),
@@ -161,13 +165,14 @@ def main():
             if real_codex:
                 env['ZHIYU_PROFILE_DRIVER_TIMEOUT_SECONDS'] = '900'
                 drive_with_real_client(command, OUTPUT, env, workflow_run,
-                                       args.real_codex_project.resolve(), args.package.resolve())
+                                       args.real_codex_project.resolve(), args.package.resolve(),
+                                       'owner-file-ui' if args.file_codex else 'owner-ui')
             else:
                 run(command, 'drive-' + phase + '.log', 300)
             data = json.loads(driver_file.read_text())
             if not isinstance(data, dict):
                 raise RuntimeError('Driver returned no scenario evidence; an empty test run is not a pass')
-            expected = (9 if phase == 'live' else 3) if args.workflow else 6
+            expected = (9 if phase == 'live' else 3) if args.workflow else (10 if args.file_codex else 6)
             if data.get('runtime', {}).get('platform') != 'macos' or len(data.get('checks', [])) != expected:
                 raise RuntimeError('Missing native check evidence')
             if args.workflow:
@@ -187,6 +192,9 @@ def main():
                     raise RuntimeError('Missing real-client native UI or cleanup evidence')
                 report['nativeOwnerUi'] = data
                 report['realClient'] = json.loads((OUTPUT / 'real-client/real-client-result.json').read_text())['results']
+                completion = 'completeOwnerFileUiFlow' if args.file_codex else 'completeOwnerUiFlow'
+                if report['realClient'].get(completion) is not True or report['realClient'].get('failure'):
+                    raise RuntimeError('Real AI scenario incomplete; native cleanup is not acceptance')
             driver_file.write_text(json.dumps(data, indent=2))
             if hashlib.sha256(kernel.read_bytes()).hexdigest() != fixed_kernel:
                 raise RuntimeError('Native App changed during validation')
