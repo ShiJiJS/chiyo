@@ -15,7 +15,9 @@ void _validateUpdate(UpdateInput input) {
           input.templateId == null) ||
       (input.templateId != null && input.changes.isNotEmpty) ||
       (input.templateId == null &&
-          (input.values.isNotEmpty || input.compiledTemplate != null)) ||
+          (input.values.isNotEmpty ||
+              input.compiledTemplate != null ||
+              input.relations != null)) ||
       (input.name != null &&
           (input.name!.trim().isEmpty || input.name!.length > 200)) ||
       (input.description?.length ?? 0) > 2000 ||
@@ -231,6 +233,7 @@ extension OwnerUpdates on OwnerAccess {
         final reviewed = _compileTemplateUpdate(
           review?.input ?? proposal.input,
         );
+        _validateImportedRelations(reviewed.compiledTemplate!);
         final originalReview = review;
         if (originalReview != null) {
           review = UpdateReview(

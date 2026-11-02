@@ -139,6 +139,72 @@ class ProposalDiff extends StatelessWidget {
   );
 }
 
+class ProposalRelationChanges extends StatelessWidget {
+  const ProposalRelationChanges({
+    super.key,
+    required this.before,
+    required this.after,
+    required this.source,
+  });
+  final WorkspaceDetail before;
+  final WorkspaceProposalItemReview after;
+  final WorkspaceRelationSource source;
+  @override
+  Widget build(BuildContext context) {
+    final keys = {...before.relations.keys, ...after.relations.keys}.where((
+      key,
+    ) {
+      final old = (before.relations[key] ?? []).toSet(),
+          next = (after.relations[key] ?? []).toSet();
+      return old.length != next.length || !old.containsAll(next);
+    }).toList();
+    if (keys.isEmpty) return const SizedBox.shrink();
+    final refs = <WorkspaceRecordRef>{
+      for (final relationKey in keys) ...{
+        ...?before.relations[relationKey],
+        ...?after.relations[relationKey],
+      },
+    };
+    return FutureBuilder<List<WorkspaceRecordSummary>>(
+      future: source.readSummaries(refs),
+      builder: (context, result) {
+        String names(List<WorkspaceRecordRef>? values) =>
+            values == null || values.isEmpty
+            ? '未关联'
+            : values
+                  .map(
+                    (ref) =>
+                        result.data
+                            ?.where((r) => r.ref == ref)
+                            .firstOrNull
+                            ?.name ??
+                        (result.connectionState != ConnectionState.done
+                            ? '正在读取关联名称…'
+                            : result.hasError
+                            ? '关联名称暂时不可用'
+                            : '关联目标已不可用'),
+                  )
+                  .join('、');
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final key in keys)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: ProposalDiff(
+                  label:
+                      '关联：${(before.definition['relations'] as List? ?? []).cast<Map>().where((r) => r['key'] == key).firstOrNull?['label'] ?? key}',
+                  before: names(before.relations[key]),
+                  after: names(after.relations[key]),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class ProposalItemReading extends StatefulWidget {
   const ProposalItemReading({
     super.key,

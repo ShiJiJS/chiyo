@@ -59,6 +59,12 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
   Future<T> _run<T>(Future<T> Function() action) async {
     try {
       return await owner.inLibraryScope(_scope, action);
+    } on core.InformationTemplateInputFailure catch (e) {
+      throw WorkspaceFailure(
+        'validation',
+        '请按模板说明核对字段。',
+        fieldErrors: e.fieldErrors,
+      );
     } on core.AccessFailure catch (e) {
       throw WorkspaceFailure(
         switch (e.status) {
@@ -695,7 +701,8 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
       String relations(Map<String, List<WorkspaceRecordRef>> v) => jsonEncode({
         for (final e in v.entries) e.key: e.value.map((r) => r.key).toList(),
       });
-      if (relations(r.relations) != relations(original.relations)) {
+      if (original.definition['templateVersion'] == null &&
+          relations(r.relations) != relations(original.relations)) {
         throw const WorkspaceFailure(
           'validation',
           '此提案协议保留原关联；如需变更，请在资料入库后管理关联。',
@@ -807,6 +814,13 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                     templateId: input.templateId,
                     templateVersion: input.templateVersion,
                     templateDigest: input.templateDigest,
+                    relations: {
+                      for (final e in r.relations.entries)
+                        e.key: [
+                          for (final ref in e.value)
+                            core.InformationRelationRef(ref.kind.name, ref.id),
+                        ],
+                    },
                     values: input.templateId == null
                         ? const {}
                         : {
@@ -869,6 +883,13 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                     templateDigest: p.input.templateDigest,
                     values: _templateValues(item.proposed, r),
                     compiledTemplate: p.input.compiledTemplate,
+                    relations: {
+                      for (final e in r.relations.entries)
+                        e.key: [
+                          for (final ref in e.value)
+                            core.InformationRelationRef(ref.kind.name, ref.id),
+                        ],
+                    },
                   ),
                   directoryId: r.directoryId,
                   tagIds: r.tagIds,

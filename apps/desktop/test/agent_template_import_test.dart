@@ -295,6 +295,141 @@ void main() {
     },
   );
   test(
+    'typed relations persist, stay owner-reviewed and validate target types without granting reads',
+    () async {
+      Future<core.InformationItem> add(String templateId) async {
+        final submitted = await cli.execute(await example(templateId));
+        final receipt = await approve(
+          await proposals.read(submitted['proposalId'] as String),
+        );
+        return service.owner.information.singleWhere(
+          (i) => i.id == receipt.records.single.ref.id,
+        );
+      }
+
+      final server1 = await add('server'),
+          server2 = await add('server'),
+          document = await add('document');
+      final payload = await example('service');
+      final input = (payload['items'] as List).single as Map;
+      input['relations'] = {
+        'hostedOn': [
+          {'kind': 'information', 'id': server1.id},
+        ],
+        'docs': [
+          {'kind': 'information', 'id': document.id},
+        ],
+      };
+      final submitted = await cli.execute(payload);
+      expect(submitted['status'], 'pending');
+      final detail = await proposals.read(submitted['proposalId'] as String);
+      expect(
+        detail.items.single.proposed.relations['hostedOn']!.single.id,
+        server1.id,
+      );
+      final related = await proposals
+          .relations(
+            detail.summary.id,
+            detail.items.single.id,
+            detail.summary.version,
+          )
+          .readSummaries([
+            WorkspaceRecordRef(WorkspaceRecordKind.information, server1.id),
+          ]);
+      expect(related.single.name, server1.name);
+      final receipt = await approve(detail);
+      final serviceItem = service.owner.information.singleWhere(
+        (i) => i.id == receipt.records.single.ref.id,
+      );
+      expect(serviceItem.layout!.relations['hostedOn']!.single.id, server1.id);
+      final update = <String, dynamic>{
+        'command': 'update-submit',
+        'update': {
+          'itemId': serviceItem.id,
+          'baseVersion': serviceItem.version,
+          'templateId': input['templateId'],
+          'templateVersion': input['templateVersion'],
+          'templateDigest': input['templateDigest'],
+          'values': input['values'],
+          'relations': {
+            'hostedOn': [
+              {'kind': 'information', 'id': server2.id},
+            ],
+          },
+        },
+      };
+      final changed = await cli.execute(update);
+      expect(changed['status'], 'pending');
+      final preview = await proposals.read(changed['proposalId'] as String);
+      expect(
+        preview.items.single.before!.relations['hostedOn']!.single.id,
+        server1.id,
+      );
+      expect(
+        preview.items.single.proposed.relations['hostedOn']!.single.id,
+        server2.id,
+      );
+      expect(
+        service.owner.information
+            .singleWhere((i) => i.id == serviceItem.id)
+            .layout!
+            .relations['hostedOn']!
+            .single
+            .id,
+        server1.id,
+      );
+      await approve(preview);
+      await close();
+      await open();
+      final saved = service.owner.information.singleWhere(
+        (i) => i.id == serviceItem.id,
+      );
+      expect(saved.layout!.relations['hostedOn']!.single.id, server2.id);
+      expect(saved.layout!.relations.containsKey('docs'), false);
+      expect(
+        service
+            .owner
+            .informationRevisions
+            .single
+            .item
+            .layout!
+            .relations['hostedOn']!
+            .single
+            .id,
+        server1.id,
+      );
+      expect(
+        (await cli.execute({'command': 'read', 'itemId': saved.id}))['status'],
+        'unauthorized',
+      );
+      final invalid = await example('service');
+      ((invalid['items'] as List).single as Map)['relations'] = {
+        'hostedOn': [
+          {'kind': 'information', 'id': document.id},
+        ],
+      };
+      final pending = await cli.execute(invalid);
+      expect(pending['status'], 'pending');
+      await expectLater(
+        approve(await proposals.read(pending['proposalId'] as String)),
+        throwsA(
+          isA<WorkspaceFailure>().having(
+            (e) => e.code,
+            'code',
+            'proposal_reference_unavailable',
+          ),
+        ),
+      );
+      expect(service.owner.information.length, 4);
+      ((invalid['items'] as List).single as Map)['relations'] = {
+        'PRIVATE-RELATION': [],
+      };
+      final error = await cli.execute(invalid);
+      expect(error['status'], 'validation_failed');
+      expect(jsonEncode(error), isNot(contains('PRIVATE')));
+    },
+  );
+  test(
     'a plugin disabled after submission stays reviewable but cannot be admitted',
     () async {
       final submitted = await cli.execute(await example('server'));

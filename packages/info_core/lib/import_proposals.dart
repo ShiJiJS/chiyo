@@ -25,11 +25,16 @@ class ImportItemInput {
     this.templateDigest,
     Map<String, Object?> values = const {},
     this.layout,
+    Map<String, List<InformationRelationRef>> relations = const {},
     Iterable<String?> fieldKeys = const [],
   }) : fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds),
        values = _freezeImportValue(values) as Map<String, Object?>,
        fieldKeys = List.unmodifiable(fieldKeys),
+       relations = Map.unmodifiable({
+         for (final e in relations.entries)
+           e.key: List<InformationRelationRef>.unmodifiable(e.value),
+       }),
        suggestedTags = List.unmodifiable(suggestedTags);
   final String name, description;
   final List<FieldInput> fields;
@@ -41,6 +46,7 @@ class ImportItemInput {
   final Map<String, Object?> values;
   final InformationLayout? layout;
   final List<String?> fieldKeys;
+  final Map<String, List<InformationRelationRef>> relations;
 
   InformationLayout? bindLayout(List<InformationField> assigned) {
     if (layout == null) return null;
@@ -66,6 +72,10 @@ class ImportItemInput {
       'templateVersion': templateVersion,
       'templateDigest': templateDigest,
       'values': values,
+      'relations': {
+        for (final e in relations.entries)
+          e.key: e.value.map((r) => r.toJson()).toList(),
+      },
     } else
       'fields': [for (final f in fields) f.toJson()],
   };
@@ -84,6 +94,10 @@ class ImportItemInput {
       'templateVersion': templateVersion,
       'templateDigest': templateDigest,
       'values': values,
+      'relations': {
+        for (final e in relations.entries)
+          e.key: e.value.map((r) => r.toJson()).toList(),
+      },
       'layout': layout?.toJson(),
       'fieldKeys': fieldKeys,
     },
@@ -104,6 +118,7 @@ class ImportItemInput {
             'templateDigest',
             'values',
             'fields',
+            'relations',
           }.contains(key),
         ) ||
         json['templateId'] != null && json.containsKey('fields')) {
@@ -135,6 +150,7 @@ class ImportItemInput {
     templateVersion: json['templateVersion'] as String?,
     templateDigest: json['templateDigest'] as String?,
     values: Map<String, Object?>.from(json['values'] as Map? ?? {}),
+    relations: importRelationsFromJson(json['relations']),
     layout: private && json['layout'] != null
         ? InformationLayout.fromJson(
             Map<String, dynamic>.from(json['layout'] as Map),
@@ -144,6 +160,24 @@ class ImportItemInput {
         ? (json['fieldKeys'] as List? ?? []).cast<String?>()
         : const [],
   );
+}
+
+Map<String, List<InformationRelationRef>> importRelationsFromJson(
+  Object? json,
+) {
+  final map = json == null
+      ? const <String, dynamic>{}
+      : Map<String, dynamic>.from(json as Map);
+  if (map.length > 200) throw const FormatException('Too many relation groups');
+  return {
+    for (final e in map.entries)
+      e.key: [
+        for (final ref in e.value as List)
+          InformationRelationRef.fromJson(
+            Map<String, dynamic>.from(ref as Map),
+          ),
+      ],
+  };
 }
 
 Object? _freezeImportValue(Object? value, [int depth = 0]) {

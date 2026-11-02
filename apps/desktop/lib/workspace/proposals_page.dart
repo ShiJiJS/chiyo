@@ -653,6 +653,15 @@ class _ProposalsPageState extends State<ProposalsPage> {
                     after: proposalValue(metadata.after),
                   ),
                 ),
+            ProposalRelationChanges(
+              before: item.before!,
+              after: review,
+              source: m.source.relations(
+                d.summary.id,
+                item.id,
+                d.summary.version,
+              ),
+            ),
             for (final section in proposalChangeSections(item)) ...[
               Padding(
                 padding: const EdgeInsets.only(top: 22),
