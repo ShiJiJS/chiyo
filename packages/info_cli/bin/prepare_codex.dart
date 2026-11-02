@@ -1,16 +1,31 @@
 import 'dart:io';
 
 import 'package:info_cli/codex_bundle.dart';
+import 'package:info_cli/codex_registration.dart';
 import 'package:info_core/new_file_publish.dart';
 
 /// SDK-free preparation from the delivered CLI folder. No user configuration
 /// or state directory is touched: all output goes into a new chosen directory.
 Future<void> main(List<String> args) async {
+  if (args.length == 2 && args.first == '--register-existing') {
+    try {
+      await registerCodexRuntime(Directory(args[1]).absolute);
+      stdout.writeln(
+        'Registered public Codex runtime descriptor; configuration and hook trust were not changed.',
+      );
+    } on Object {
+      stderr.writeln(
+        'Registration failed; use a reviewed complete bundle and keep existing configuration.',
+      );
+      exitCode = 1;
+    }
+    return;
+  }
   if ((!Platform.isWindows && !Platform.isMacOS) ||
       !(args.length == 1 ||
           (args.length == 3 && args.first == '--source-bundle'))) {
     stderr.writeln(
-      'Usage: info-prepare-codex [--source-bundle <cli-folder>] <new-stable-bundle-directory>',
+      'Usage: info-prepare-codex [--source-bundle <cli-folder>] <new-stable-bundle-directory>\n       info-prepare-codex --register-existing <reviewed-bundle-directory>',
     );
     exitCode = 64;
     return;

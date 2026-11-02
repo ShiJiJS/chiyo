@@ -1,165 +1,79 @@
 ---
 name: agent-info-access
-description: Request approved information or ordinary file delivery, Windows/Mac credential command use or supported local password filling through Agent Info; submit designated source information for review and perform approved classification changes using this chat's private association.
+description: 使用信息授权软件查询公开目录和当前插件模板，按模板提交资料录入或修改申请，申请读取资料、领取普通附件、使用托管凭据及整理分类；主人负责审批和管理。
 ---
 
-Use the Agent Info association supplied by this chat's latest SessionStart hook.
-The association is a private capability reference. Never print its contents,
-search for other associations, infer a path from a chat ID, or copy it to an
-unrelated chat. Same-root children receive an explicitly delegated child-bound
-reference through the private procedure below. Do not read Codex transcripts or authentication files. If the reference is
-missing or unavailable, stop private access and ask the user to reconnect the
-integration. Only after that request, run the bundled `info-codex-hook --connect`
-to obtain a fresh context reference for the current CODEX_THREAD_ID. This is a
-new unapproved session, not a way to find an old grant. Do not retry it silently.
-Public chat IDs are not credentials.
+# 信息授权软件使用说明
 
-For user-requested app shutdown or an authorized test-version switch, use the
-reviewed Windows delivery's `cli/info.exe app status`, then `app quit`.
-Default discovery targets that delivery only; another installation requires its
-verified PID with `--pid`. `exited` confirms process exit; `shutdown_failed`
-keeps unsaved records open for repair, and `timeout` is unknown. Query before
-retrying; never force-kill. Quitting ends all chats' current grants. This native
-lifetime entry does not read information or approve anything.
+App 保存资料并接收审批；CLI 查询、提交申请和交付获准内容；本 Skill 说明使用方法。具体模板、字段格式、说明和例子由当前 App 的插件提供。安装 Skill、连接会话和提交申请均不代表获准；批准录入也不授予读取或使用许可。
 
-For Token, SSH private-key, AWS credential-file use or local password filling, read
-[Credential use](references/credential-use.md) before requesting or running it.
-Choose its command or focused-input branch. Both request fixed-term use and
-identify each operation separately; focused filling supplies no command or secret
-value. For a `kind:file` information field, read
-[Ordinary information files](references/information-files.md) before fetching or
-passing its copy to a document/browser tool. Ordinary text access below reads
-approved structured/text-note values; file access uses its separate fetch path.
+## 本机运行与当前会话
 
-1. Call `info-codex` with one JSON object on stdin, including `association` and
-   `command`. No command-line arguments. The executable is in the reviewed
-   integration bundle; do not locate it by reading private session files.
-   Send the JSON through the execution tool's stdin/input channel. Never embed
-   the private reference in a shell command or here-string: the parent shell's
-   arguments and command logs would then contain it. If the available tool
-   cannot provide stdin separately, stop and report that integration limitation.
-2. `catalog` returns only public metadata. Choose all fields needed for this
-   task and send one `request` with `purpose` and `fields` (objects containing
-   `itemId` and `fieldId`). Save the returned public `requestId` in chat context.
-   A request does not approve access. Continue independent work while pending.
-3. Query that same request using `status` or `wait` (`timeoutMs` from 0 to
-   300000). A wait timeout leaves the original request pending. Never resubmit
-   merely because a command exited, timed out, or the app was unavailable.
-4. When approved, `claim` returns final fields and expiry, without a token.
-   Respect the user's actual selection. For text fields use `read` with
-   `requestId`, `itemId`, and `fieldId`; for a file use the linked file workflow.
-   Each new text-read process privately claims the existing grant before
-   reading, so neither approval nor expiry is renewed by repeated use.
-5. Stop on `denied`, `expired`, `cancelled`, `revoked`, or `unauthorized`.
-   Explain the result and ask only if a new need justifies a new request. Do not
-   automatically retry approval. `service_unavailable` means resume querying
-   the same request after the service returns; after restart old associations
-   cannot recover grants. `association_unavailable` requires reconnecting.
+使用本机接入描述已核对的同版本 `info-codex`、`info-codex-hook` 与 worker。运行包末尾给出的程序路径或本机描述的 `cliPath` 是执行入口；程序和说明不匹配时报告需要更新接入材料。安装、更新、启用或信任 hooks 属于配置操作，本流程不自动改动。
 
-Example input shape (replace placeholders without printing the reference):
+1. 优先使用当前聊天 SessionStart 已提供的私密 `association`。它是能力引用，不能打印、写入命令行、普通日志、提交或无关聊天；不能按聊天 ID 搜索或恢复关联文件，也不读取 Codex 的登录文件或聊天记录。
+2. 用户已明确要求本次使用软件，且这是当前聊天首次连接时，可以执行同包 `info-codex-hook --connect`，取得一个新的**未授权会话**，再提交业务申请。该动作不批准任何资料。已结束或失效的会话、丢失的既有关联不能静默重连；需要用户明确要求重新连接。
+3. CLI 每次读取独立 stdin JSON，附本聊天的私密关联与 `command`。用执行工具的独立 stdin，或 Node／Python 的子进程管道传入；不要把整个 JSON 拼成 shell 命令、here-string 或 argv。工具不能安全传 stdin 时说明限制并停止私密访问。
+4. 子进程 `CODEX_THREAD_ID` 必须是当前聊天标识。Node REPL 不继承时，从当前工具的 `nodeRepl.requestMeta.threadId` 设置，保留本机正常环境；聊天标识只作误用检查，不能代替实际关联。
+5. 先查 `capabilities`。按服务实际提供的入口执行；服务不可用时保留已有请求标识，恢复后先查原状态。没有所需能力时说明需要更新或暂缓该项，不把别的格式当作已完成。
 
-```json
-{"association":"<private reference from this chat>","command":"read","requestId":"<request>","itemId":"<item>","fieldId":"<field>"}
-```
+## 按本次任务选择流程
 
-Approved fields keep fixed identities. New fields or information items require
-another request. Reading does not grant import, approval, or history access.
-Revocation stops future reads and cannot remove information already disclosed.
+- 用户给文件、资料或要求新增／修改：按下节整理并提交录入申请。
+- 申请阅读已保存的信息：走“申请资料”，文件字段再读 [普通附件交付](references/information-files.md)。
+- 使用 Token、私钥、凭据文件执行命令或本机填充：先读 [凭据使用](references/credential-use.md)。这是使用已保存凭据，不是将秘密录成普通资料。
+- 调整目录和标签：走“整理分类”。定位原始 infos 资料库则使用 infos Skill。
 
-For user-requested imports, include `agentName` (for example, `Codex`) and a
-short `purpose` explaining this batch. These are self-reported labels, not verified
-identity. Give items meaningful names; avoid test/session labels as item titles.
-Choose a sensible `suggestedDirectory` and optional `suggestedTags` for each item.
-The owner sees these defaults in read-only preview; confirmation reuses matching
-labels or creates the proposed labels atomically with the information. An owner
-can edit exceptions before confirming. Use private facts only in field values.
+## 整理、按模板录入和修改
 
-For user-requested imports, first explain that the importing agent has already
-seen the designated source data. Submit only that source, never scan unrelated
-personal files. Use `import-submit` with `items`: each has `name`, `description`,
-and `fields` containing `name`, `description`, `value`, and `kind` (`structured`
-or `textNote`). Names, descriptions, and field descriptions become public catalog
-metadata after confirmation: keep private facts in values. Optional
-`suggestedDirectory`, `suggestedTags`, and `suggestedTemplate` are review hints;
-directory/tag suggestions are applied only when the owner confirms the batch;
-templates remain hints and never reuse an existing field identity.
-Keep batches within 20 items, 200 total fields, 50 fields per item, and 240000
-UTF-8 bytes of item JSON. Each value is at most 64000 characters.
+用户指定的文件与资料是本次来源范围。自行判断名称、用途、分类、关联、条目数量和版本关系，不要求用户逐条指挥怎样建资料。已有资料的私有值若不在用户给定来源中，先取得正常读取授权；缺失事实保留未知，不猜填。
 
-Save the returned `proposalId` and query it with `import-status` using this same
-private association. Pending proposals are owner-only previews, absent from the
-public catalog. Querying returns status, never private proposal contents or
-credentials. Wait for desktop confirmation; do not retry submission merely
-because confirmation is slow. `rejected` means stop this import. Confirmed items
-still require a normal access request before reading: submission does not grant
-read access, overwrite existing information, approve requests, or export the
-library. New-item proposals cannot update existing items; reviewed updates use a
-separate workflow. Restart ends the old session association, even when an owner
-can still review its encrypted pending proposal.
+1. 调用 `plugin-list`、`template-list`，从启用的模板中选择，再用 `template-read` 读取完整 `definition`、`inputLimits`、`relationInput`、`updateInput` 和 `submissionExample`。每个模板的字段含义、必填项、格式、填写说明和虚构例子以本次查询为准。插件安装、更新、启停或移除后重新查询；不在 Skill 或 CLI 之外另存模板清单。
+2. 没有合适模板或模板缺填写说明／例子时，说明这份材料需要什么格式，暂缓这一项。其他资料按自身审批和引用情况处理。新增或安装插件由用户决定，不能为了录入自行造插件。
+3. 名称和公开用途应让主人能辨认、选择资料。名称用材料本身的用途或对象，描述写简短、具体的用途；分类浅且可复用，优先已有目录和标签。私有事实放模板值中。地址、端口等结构字段填简短值；长说明放模板声明的正文，按声明选择 plain／markdown 等格式。任务编号、操作指令、整理过程和秘密不进入公开名称或普通字段。
+4. 同一材料的前后修订作为历史版本；用途不同的材料分别建资料，例如两个投递方向。一个条目可以有相关附件，但不能把不同用途都塞成一条。原文件与版本只有在文件写入入口实际保存后才算已入库；没有对应能力时保留原文件并说明暂缓，不把全文复制成文字冒充原文件已保存。
+5. 新增使用 `import-submit`。按查询返回的 `submissionExample` 结构填写 `items`，保留所选 `templateId`、`templateVersion`、`templateDigest`，真实值放 `values`；附简短 `purpose` 与 `agentName`。可建议 `suggestedDirectory`、`suggestedTags`，它们只在主人批准并具备入库条件后应用。不要再用 `suggestedTemplate` 提示加平面文字来代替按模板保存。
+6. 需要关联已入库内容时用公开目录中的准确 ID；待录入内容用稳定的条目 `key` 和查询返回的关联格式。同批引用用 `itemKey`，跨提案再加同一会话中的 `proposalId`。查询 `import-status` 可取得服务生成的 key。相互引用的资料可以在同批提交，全部获批后由软件一起入库。
+7. 修改已有资料仍使用 `update-submit`，提供准确 `itemId` 与当前 `baseVersion`。按模板修改时同时提供模板三个标识和**完整 values**；先从获准来源取得现有值，明确保留或修改每个字段。省略字段会报错，不意味着清空。修改可关联待录入普通资料，须给目标 `proposalId` 与 `itemKey`。主人看前后变化再批准，等待期间原资料保持不变。
+8. 只改明确字段且保留原含义时，也可用原有 `changes` 协议：`correct` 提供 `fieldId`、`value`；`add` 提供新 `field`；`replace` 明确更换字段含义；`remove` 明确删除。字段含 `name`、`description`、`value`、`kind`。此格式不与模板 values 混用；新增或替换的字段不会继承旧授权。
+9. 保存返回的 `proposalId`，用 `import-status` 或 `update-status` 查**原提案**。等待审批时继续独立工作，不因等待、进程退出或超时重发。首次提交没有取得 proposalId 时报告收件结果尚未确认，先核对现有提案，不反复换内容提交。
 
-For user-requested organization, use this chat's existing private association:
+状态决定下一步：
 
-1. Use the public catalog to select the information IDs relevant to the user's
-   request. Send one `organize-request` with `purpose`, `itemIds` and `agentName`.
-   Keep its returned `taskId`. The desktop shows this request in Access approvals;
-   never ask the user to create a task, select a chat or copy a task prompt.
-2. Continue independent work while `pending`. Use `organize-wait` with the same
-   `taskId` (`timeoutMs`0–300000), or `organize-status`. A timeout leaves that
-   request pending: never automatically resubmit it. Approval permits metadata
-   access AND automatic category/tag changes only for the user's final selection.
-3. When `active`, call `organize-metadata`. Use only its final item IDs/versions,
-   titles, public descriptions and category/tag names. It contains no field values.
-   Prefer existing category/tag IDs and shallow reusable categories.
-4. Call `organize-submit` once with `taskId` and `changes`. Each change contains
-   `itemId`, supplied `baseVersion`, existing `directoryId` or new root
-   `directoryName`, and the complete desired `tagIds`/new `tagNames` lists.
-   No value/field/content edits or out-of-scope items. Limits:200items,100tags/item,
-   200-character names,240000UTF-8bytes of changes. `confirmed` means the whole
-   batch was applied; no second user confirmation is needed. If no changes are
-   needed, submit an empty `changes` list to finish without rewriting items. Report
-   the result.
-5. On an uncertain response, query the same status before retrying. Stop on
-   `confirmed`, `rejected`, `cancelled`, `expired`, `conflicted` or `unauthorized`;
-   never silently recreate an expired/conflicting request. If still `active` after
-   a storage failure, retry the same plan only within its original deadline.
+| 状态 | 行动与能报告的结果 |
+| --- | --- |
+| `pending` | 已提交，等待主人审批；尚未保存 |
+| `approved_awaiting_admission`／条目 `approved` | 主人已批准，仍在等待关联；不能报告已入库或开始读取 |
+| `needs_attention` | 核对引用或模板问题；保留这份申请，不自动拒绝依赖它的资料 |
+| `confirmed`／条目 `admitted` | 核对返回的正式资料 ID 和版本后报告入库；读取仍须另行申请 |
+| `rejected` | 停止该申请；不自动新建另一份绕过决定 |
+| `conflicted` | 原资料版本已变，先读取当前获准内容，再准备新的修改与审批 |
 
-Organization access lasts at most30minutes after approval and ends on completion, revocation,
-expiry, session end or restart. This does not grant values, content edits, approval
-powers or a larger normal content grant. Legacy `proposed` results still require
-owner review; do not treat a legacy metadata grant as automatic-write permission.
+修复待审批内容用 `import-revise`（`proposalId`、当前 `version`、保留 key 的 `items`）或 `update-revise`（`proposalId`、当前 `version`、修订的 `update`）。修订会清除相应旧批准，需要重新审批。`template_changed`、`template_unavailable` 或 `template_missing` 时先查询当前模板，再修订，不能悄悄降为通用资料或丢字段。
 
-For requested changes, use `update-submit` with `update` containing `itemId`,
-the current catalog `version` as `baseVersion`, and `changes`. Each operation is
-explicit: `correct` takes `fieldId` and `value` and preserves meaning; `add`
-takes a new `field`; `replace` takes `fieldId` and a new `field` for changed
-meaning; `remove` takes `fieldId`. A field contains `name`, `description`,
-`value`, and `kind`. Optional item `name` and `description` change public metadata.
-Query the returned `proposalId` with `update-status`. Only the owner can preview
-old values and differences or confirm changes. Obtain normal read authorization
-when you need existing values. `conflicted` leaves current information intact;
-explain the conflict before preparing a replacement. `rejected` stops the change.
-Confirmed corrections keep existing grants; added or replaced fields need new
-approval, and removed fields cease to be readable under old grants.
+凭据应走专用录入通道：尚未见过的人设账号密码应由主人在 App 内填写；已进入本次上下文的秘密按对应通道提交并说明暴露情况。运行包尚未提供凭据录入入口时暂缓，不放进普通资料。凭据文件保管和普通附件是不同流程。
 
-For a child of this root chat, use `delegate` with this parent's existing
-`association` and the intended `childChatId`. Its `privateAssociation` response is
-sensitive delivery: pass it directly in that child's private task/context, never
-in ordinary status, a user-visible report, or an unrelated chat. The child then
-uses that reference on stdin under its own CODEX_THREAD_ID. Delegation shares the
-same session and approved fields; it grants no extra fields and does not renew
-expiry. If the child ID becomes known only after spawning, send its delegated
-reference directly afterward. SubagentStart provides guidance only; a parent ID
-cannot retrieve a reference. A child missing its proof asks its parent to delegate.
+## 申请资料
 
-Startup, clear, and fork create new unapproved associations. Resume and compact
-retain only the reference already in context. Root SessionEnd permanently ends
-that session and its children; subsequent reads fail and pending requests are
-cancelled. Ordinary CLI exit, child completion, and switching chats do not end
-the root. An ended session requires an explicitly requested reconnect and new
-approval. Missing end callbacks rely on fixed expiry. Automatic end uses a
-separate end-only credential; invoking it cannot retrieve private information.
+1. `catalog` 只返回公开元数据。选择本次需要的准确字段，用一次 `request` 提供 `purpose` 和 `fields`（`itemId`、`fieldId`），保留 `requestId`。
+2. `status` 或 `wait` 查询同一申请；等待超时不重复申请。
+3. 获批后 `claim` 核对主人最终选择和到期时间。文字字段用 `read` 提供 `requestId`、`itemId`、`fieldId`；文件按附件参考交付。独立 CLI 进程会私下领取同一许可，不因此重新批准或延长期限。
+4. `denied`、`expired`、`cancelled`、`revoked`、`unauthorized` 时停止原访问。新的字段或条目需要新的申请；撤销不能追回已经披露的内容。
 
-Current integration is a development preview: use fictional data. Real Codex
-child propagation and end delivery still need Windows acceptance; macOS
-validation is deferred. Install hooks or change user configuration only after
-explicit user authorization.
+## 整理分类
+
+使用同一会话的 `organize-request` 提供用途、候选 `itemIds` 和 agentName，保留 `taskId`；主人在 App 审批，不要求主人手动建立任务。通过 `organize-wait` 或 `organize-status` 查询原任务。
+
+`active` 时调用 `organize-metadata`，只用最终获批 ID、版本、目录和标签，按用户目标整理。`organize-submit` 提供完整期望分类和标签；没有变化时提交空 changes 完成任务。此批准同时允许限定范围的元数据读取与分类改动，不再二次审批，也不授予私有值读取或正文修改。
+
+结果不确定先查原状态；已完成、拒绝、撤销、到期、冲突或未授权时停止原任务。存储失败且任务仍 active 时，仅在原有效期内重试同一方案。旧版 proposed 结果仍须主人确认，不能当成新版自动应用。
+
+## 子 Agent 与会话结束
+
+只有任务本来需要同根子 Agent 时才委托。父会话用 `delegate` 提供自己的关联和准确 `childChatId`，把返回的私密 `privateAssociation` 直接放入该子会话的私密任务上下文；子会话用自己的 CODEX_THREAD_ID。它只共享已批准范围和原到期，不扩大授权。子会话缺证明时向父会话请求委托，不按父聊天 ID 查找证明。
+
+startup、clear、fork 创建新的未授权关联；resume、compact 只保留已有引用。真实根 SessionEnd 结束它和子会话；普通 CLI 退出、子 Agent 完成、切换聊天不等于根会话结束。未送达结束通知时仍受固定到期与手动撤销约束。
+
+用户要求正常退出软件或已授权更换测试版时，同包 `info`／`info.exe app status` 查询，再 `app quit`。Mac 只控制同包实例，指定 PID 也不能选择另一目录；退出失败或超时先查原实例，不强杀。退出会结束当前授权。
+
+示例均为虚构；真实任务只处理本次用户指定资料。配置安装与信任状态应按实际客户端观察，不把受控测试当作所有客户端生命周期已验证。
