@@ -28,20 +28,26 @@ class OwnerWorkspaceAdditionalApprovals {
         WorkspaceApprovalState.unavailable,
       WorkspaceCredentialRequestState.sessionEnded =>
         WorkspaceApprovalState.sessionEnded,
-      _ => WorkspaceApprovalState.revoked,
+      WorkspaceCredentialRequestState.revoked => WorkspaceApprovalState.revoked,
+      WorkspaceCredentialRequestState.superseded ||
+      WorkspaceCredentialRequestState.disabled ||
+      WorkspaceCredentialRequestState.recycled =>
+        WorkspaceApprovalState.unavailable,
     };
   }
 
-  WorkspaceApprovalState _organizationState(core.OrganizationTask t) =>
-      switch (owner.organizationState(t)) {
-        core.OrganizationTaskState.pending => WorkspaceApprovalState.pending,
-        core.OrganizationTaskState.active => WorkspaceApprovalState.approved,
-        core.OrganizationTaskState.rejected => WorkspaceApprovalState.denied,
-        core.OrganizationTaskState.expired => WorkspaceApprovalState.expired,
-        core.OrganizationTaskState.cancelled =>
-          WorkspaceApprovalState.cancelled,
-        _ => WorkspaceApprovalState.completed,
-      };
+  WorkspaceApprovalState _organizationState(
+    core.OrganizationTask t,
+  ) => switch (owner.organizationState(t)) {
+    core.OrganizationTaskState.pending => WorkspaceApprovalState.pending,
+    core.OrganizationTaskState.active => WorkspaceApprovalState.approved,
+    core.OrganizationTaskState.rejected => WorkspaceApprovalState.denied,
+    core.OrganizationTaskState.expired => WorkspaceApprovalState.expired,
+    core.OrganizationTaskState.cancelled => WorkspaceApprovalState.cancelled,
+    core.OrganizationTaskState.proposed => WorkspaceApprovalState.proposed,
+    core.OrganizationTaskState.conflicted => WorkspaceApprovalState.conflicted,
+    core.OrganizationTaskState.confirmed => WorkspaceApprovalState.completed,
+  };
   WorkspaceApprovalSummary credentialSummary(core.CredentialUseRequest r) =>
       WorkspaceApprovalSummary(
         id: r.id,
@@ -90,6 +96,7 @@ class OwnerWorkspaceAdditionalApprovals {
         r.toJson(),
         owner.credentialUseState(r),
         owner.credentialGrantState(r),
+        owner.credentialFieldGrantState(r),
         for (final v in owner.informationRequests.where((v) => v.id == id))
           [v.state.name, v.sessionEnded, v.grantExpiresAt?.toIso8601String()],
         c?.revision,

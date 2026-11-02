@@ -12,6 +12,9 @@ enum WorkspaceGrantState {
   revoked('已撤销'),
   expired('已到期'),
   sessionEnded('会话已结束'),
+  cancelled('已取消'),
+  proposed('整理方案待确认'),
+  conflicted('整理资料已变化'),
   completed('整理已结束'),
   unavailable('范围已失效');
 
