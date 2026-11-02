@@ -427,6 +427,9 @@ class InformationBackups {
             _backupJson(r).containsKey('directoryId') ||
             _backupJson(r).containsKey('tagIds'),
       );
+      final credentialTemplates = tables['managed_credentials']!.any(
+        (r) => _backupJson(r).containsKey('template'),
+      );
       final templatePackages =
           (await _repository._db
                   .customSelect('SELECT id FROM template_packages LIMIT 1')
@@ -436,9 +439,12 @@ class InformationBackups {
           hasLayouts ||
           hasGrantVersions ||
           credentialClassification ||
-          templatePackages;
+          templatePackages ||
+          credentialTemplates;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = templatePackages
+        formatVersion = credentialTemplates
+            ? 16
+            : templatePackages
             ? 15
             : credentialClassification
             ? 14
@@ -450,7 +456,7 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (templatePackages
+            in (templatePackages || credentialTemplates
                     ? _v15Columns
                     : extendedColumns
                     ? _v12Columns
@@ -868,6 +874,11 @@ class InformationBackups {
         if (contents.formatVersion >= 15) {
           await _repository._requireTemplatePackageFormat();
         }
+        if (contents.formatVersion >= 16) {
+          await _repository._requireAdmissionFormat(
+            _credentialImportLibraryFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -939,6 +950,7 @@ class InformationBackups {
           13,
           14,
           15,
+          16,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -959,7 +971,7 @@ class InformationBackups {
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
       12 || 13 || 14 => _v12Columns,
-      15 => _v15Columns,
+      15 || 16 => _v15Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'information_layout.dart';
 
 enum CredentialForm { string, file }
 
@@ -26,6 +27,7 @@ class ManagedCredential {
     this.fileName,
     this.byteLength = 0,
     this.directoryId,
+    this.template,
     Iterable<String> tagIds = const [],
     Iterable<String> linkedItemIds = const [],
   }) : linkedItemIds = List.unmodifiable(linkedItemIds),
@@ -49,6 +51,7 @@ class ManagedCredential {
   final List<String> linkedItemIds;
   final String? directoryId;
   final List<String> tagIds;
+  final InformationLayout? template;
   CredentialAvailability availability(DateTime now) => deletedAt != null
       ? CredentialAvailability.deleted
       : !enabled
@@ -76,6 +79,7 @@ class ManagedCredential {
     'fileName': fileName,
     'byteLength': byteLength,
     'linkedItemIds': linkedItemIds,
+    if (template != null) 'template': template!.toJson(),
     if (directoryId != null || tagIds.isNotEmpty) ...{
       'directoryId': directoryId,
       'tagIds': tagIds,
@@ -114,6 +118,11 @@ class ManagedCredential {
       linkedItemIds: (j['linkedItemIds'] as List).cast<String>(),
       directoryId: j['directoryId'] as String?,
       tagIds: (j['tagIds'] as List? ?? const []).cast<String>(),
+      template: j['template'] == null
+          ? null
+          : InformationLayout.fromJson(
+              Map<String, dynamic>.from(j['template'] as Map),
+            ),
     );
   }
   ManagedCredential copy({
@@ -159,7 +168,38 @@ class ManagedCredential {
     linkedItemIds: linkedItemIds ?? this.linkedItemIds,
     directoryId: clearDirectory ? null : directoryId ?? this.directoryId,
     tagIds: tagIds ?? this.tagIds,
+    template: _templateAfterLinks(linkedItemIds),
   );
+
+  InformationLayout? _templateAfterLinks(Iterable<String>? links) {
+    final old = template;
+    if (old == null || links == null) return old;
+    final targets = links.toSet();
+    final groups = <String, List<InformationRelationRef>>{
+      for (final e in old.relations.entries)
+        e.key: [
+          for (final r in e.value)
+            if (r.kind != 'information' || targets.contains(r.id)) r,
+        ],
+    };
+    final retained = {
+      for (final r in groups.values.expand((v) => v))
+        if (r.kind == 'information') r.id,
+    };
+    final added = targets.difference(retained);
+    if (added.isNotEmpty) {
+      groups['ownerLinks'] = [
+        ...?groups['ownerLinks'],
+        for (final id in added) InformationRelationRef('information', id),
+      ];
+    }
+    return InformationLayout(
+      typeId: old.typeId,
+      snapshot: old.snapshot,
+      fieldIds: old.fieldIds,
+      relations: groups,
+    );
+  }
 }
 
 /// Desktop repository capability; never returned by AgentAccess or OwnerAccess.

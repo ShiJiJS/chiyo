@@ -9,6 +9,7 @@ import 'package:info_core/protocol_json.dart';
 import 'credential_output_filter.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
+part 'credential_import_client.dart';
 
 class AgentClient {
   AgentClient(
@@ -246,27 +247,31 @@ class AgentClient {
           'update': input['update'],
         });
       case 'import-submit':
-        if (_session == null) return {'status': 'unauthorized'};
-        return _call('/import/submit', {
-          'sessionSecret': _session,
-          'items': input['items'],
-          'agentName': input['agentName'] ?? sourceAgent,
-          if (input.containsKey('purpose')) 'purpose': input['purpose'],
-        });
+        return _executeImportCommand(input, revise: false);
       case 'import-status':
         if (_session == null) return {'status': 'unauthorized'};
+        if (input.containsKey('operationId')) {
+          if (input.containsKey('proposalId')) {
+            return {'status': 'invalid_request'};
+          }
+          final support = await _call('/capabilities', {});
+          if (support['status'] != 'ok') return support;
+          if (!(support['capabilities'] as List? ?? []).contains(
+            'information-import-operations.v1',
+          )) {
+            return {'status': 'unsupported_capability'};
+          }
+          return _call('/import/status', {
+            'sessionSecret': _session,
+            'operationId': input['operationId'],
+          });
+        }
         return _call('/import/status', {
           'sessionSecret': _session,
           'proposalId': input['proposalId'],
         });
       case 'import-revise':
-        if (_session == null) return {'status': 'unauthorized'};
-        return _call('/import/revise', {
-          'sessionSecret': _session,
-          'proposalId': input['proposalId'],
-          'version': input['version'],
-          'items': input['items'],
-        });
+        return _executeImportCommand(input, revise: true);
       case 'catalog':
         return _call('/catalog', {
           'protocolVersion': input['protocolVersion'] ?? 2,

@@ -152,6 +152,8 @@ class DeclarativeTemplatePackageDecoder {
         'relations',
         'instructions',
         'example',
+        'recordKind',
+        'credential',
       }, p);
       final key = t['id'] as String,
           name = _text(t, 'name', p, max: 160),
@@ -174,6 +176,28 @@ class DeclarativeTemplatePackageDecoder {
         }
         if (f['required'] is! bool) _fail('$path.required', '需要明确的布尔值。');
         fieldKinds[field] = kind;
+      }
+      final recordKind = t['recordKind'] ?? 'information';
+      if (!{'information', 'credential'}.contains(recordKind)) {
+        _fail('$p.recordKind', '只支持普通资料或宿主管理的凭据模板。');
+      }
+      if (recordKind == 'credential') {
+        if (fields.isNotEmpty) {
+          _fail('$p.fields', '凭据材料由宿主管理，不能声明为普通字段。');
+        }
+        final c = _map(t['credential'], '$p.credential');
+        _keys(c, {'form', 'secretKind', 'suggestedBinding'}, '$p.credential');
+        if (!{'string', 'file'}.contains(c['form']) ||
+            !{'accountPassword', 'token', 'file'}.contains(c['secretKind']) ||
+            (c['form'] == 'file') != (c['secretKind'] == 'file')) {
+          _fail('$p.credential', '需要明确的字符串密码、Token或完整凭据文件。');
+        }
+        final binding = _text(c, 'suggestedBinding', '$p.credential', max: 64);
+        if (!RegExp(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(binding)) {
+          _fail('$p.credential.suggestedBinding', '需要有效的环境变量名称。');
+        }
+      } else if (t.containsKey('credential')) {
+        _fail('$p.credential', '普通资料模板不能声明凭据材料。');
       }
       final relations = _list(t['relations'], '$p.relations', 40),
           relationKeys = <String>{};

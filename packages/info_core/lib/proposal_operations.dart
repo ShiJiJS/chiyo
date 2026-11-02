@@ -45,13 +45,20 @@ class OwnerProposalCommand {
 }
 
 class OwnerProposalTarget {
-  const OwnerProposalTarget(this.id, this.version, {this.recycleId});
+  const OwnerProposalTarget(
+    this.id,
+    this.version, {
+    this.recycleId,
+    this.kind = 'information',
+  });
   final String id;
   final int version;
   final String? recycleId;
+  final String kind;
   Map<String, Object?> toJson() => {
     'id': id,
     'version': version,
+    if (kind != 'information') 'kind': kind,
     if (recycleId != null) 'recycleId': recycleId,
   };
 }
@@ -85,6 +92,7 @@ class OwnerProposalReceipt {
             r['id'] as String,
             r['version'] as int,
             recycleId: r['recycleId'] as String?,
+            kind: r['kind'] as String? ?? 'information',
           ),
         ),
         awaitingKeys: (j['awaitingKeys'] as List? ?? []).cast<String>(),

@@ -42,18 +42,23 @@ extension OwnerImportAdmission on OwnerAccess {
     ImportPendingReference ref,
     Map<String, ImportProposal> proposals,
   ) {
-    if (ref.kind != 'information') {
-      return null; // Credential candidates join in #79.
-    }
     final p = proposals[ref.proposalId ?? from.id];
     if (p == null || p.sessionBinding != from.sessionBinding) return null;
+    if ((p.candidateKinds[ref.itemKey] ?? 'information') != ref.kind) {
+      return null;
+    }
     final receipt = p.receiptFor(ref.itemKey);
     final input = p.items.where((i) => i.key == ref.itemKey).firstOrNull;
     if (receipt == null && input == null) return null;
     return (proposal: p, input: input, receipt: receipt);
   }
 
-  bool _importTargetType(ImportItemInput input, String relation, String? type) {
+  bool _importTargetType(
+    ImportItemInput input,
+    String relation,
+    String? type, {
+    String kind = 'information',
+  }) {
     final definition = input.layout?.snapshot['definition'] as Map?;
     final descriptor = (definition?['relations'] as List? ?? [])
         .cast<Map>()
@@ -62,7 +67,9 @@ extension OwnerImportAdmission on OwnerAccess {
     if (descriptor == null) return false;
     final allowed = (descriptor['targetTemplates'] as List? ?? [])
         .cast<String>();
-    return allowed.isEmpty || allowed.contains(type ?? 'generic');
+    return allowed.isEmpty ||
+        allowed.contains(type ?? 'generic') ||
+        kind == 'credential' && allowed.contains('credential');
   }
 
   String? _importDirectProblem(
@@ -84,16 +91,25 @@ extension OwnerImportAdmission on OwnerAccess {
         }
         final target = _importTarget(node.proposal, ref, proposals);
         if (target == null) return '引用的待录入资料已不可用，请更改关联后重新审批。';
-        final saved = target.receipt == null
+        final saved = target.receipt == null || ref.kind != 'information'
             ? null
             : information.where((i) => i.id == target.receipt!.id).firstOrNull;
-        if (target.receipt != null && saved == null) {
+        final savedCredential =
+            target.receipt == null || ref.kind != 'credential'
+            ? null
+            : credentials.where((c) => c.id == target.receipt!.id).firstOrNull;
+        if (target.receipt != null &&
+            saved == null &&
+            savedCredential == null) {
           return '引用的资料已移除，请更改关联后重新审批。';
         }
         if (!_importTargetType(
           node.input,
           e.key,
-          saved?.layout?.typeId ?? target.input?.templateId,
+          saved?.layout?.typeId ??
+              savedCredential?.template?.typeId ??
+              target.input?.templateId,
+          kind: ref.kind,
         )) {
           return '引用的资料类型不符合模板，请更改关联后重新审批。';
         }
@@ -144,7 +160,13 @@ extension OwnerImportAdmission on OwnerAccess {
               );
             }
             if (!p.approvedKeys.contains(key)) {
-              return ImportCandidateStatus(key, 'pending');
+              return ImportCandidateStatus(
+                key,
+                'pending',
+                reason: node.input.credential?.ready == false
+                    ? '需要主人在提案中补填密码，填写后才能批准入库。'
+                    : '',
+              );
             }
             final names = [
               for (final ref in node.input.pendingRelations.values.expand(
@@ -199,6 +221,9 @@ extension OwnerImportAdmission on OwnerAccess {
     }
     reviewed = _compileTemplateImports(reviewed);
     _validateImport(reviewed);
+    if (reviewed.any((i) => i.credential != null && !i.credential!.ready)) {
+      throw const AccessFailure('credential_material_required');
+    }
     for (final input in reviewed) {
       _validateImportedRelations(input);
     }
@@ -225,6 +250,7 @@ extension OwnerImportAdmission on OwnerAccess {
     final eligible = {
       for (final e in nodes.entries)
         if (e.value.proposal.approvedKeys.contains(e.value.input.key) &&
+            (e.value.input.credential?.ready ?? true) &&
             _importDirectProblem(e.value, proposals) == null)
           e.key,
     };
@@ -251,6 +277,8 @@ extension OwnerImportAdmission on OwnerAccess {
     } while (changed);
     final identities = {for (final key in eligible) key: _service._secret()};
     final items = <InformationItem>[];
+    final credentialRecords = <ManagedCredential>[];
+    final credentialMaterials = <CredentialMaterial>[];
     final organization = _OrganizationPlan(this);
     final now = _service._clock();
     for (final key in eligible) {
@@ -294,6 +322,53 @@ extension OwnerImportAdmission on OwnerAccess {
         input.suggestedDirectory,
         input.suggestedTags,
       );
+      if (input.credential case final credential?) {
+        final id = identities[key]!;
+        final config = input.layout!.snapshot['definition'] as Map;
+        final material = credential.material!;
+        credentialRecords.add(
+          ManagedCredential(
+            id: id,
+            name: input.name.trim(),
+            publicPurpose: input.description,
+            privateNote: '',
+            form: credential.isFile
+                ? CredentialForm.file
+                : CredentialForm.string,
+            version: 1,
+            revision: 1,
+            suggestedBinding:
+                (config['credential'] as Map)['suggestedBinding'] as String,
+            createdAt: now,
+            modifiedAt: now,
+            discoverable: true,
+            fileName: credential.fileName,
+            byteLength: material.length,
+            directoryId: location.$1,
+            tagIds: location.$2,
+            linkedItemIds: {
+              for (final r in relations.values.expand((v) => v))
+                if (r.kind == 'information') r.id,
+            },
+            template: InformationLayout(
+              typeId: input.templateId!,
+              snapshot: input.layout!.snapshot,
+              fieldIds: const {},
+              relations: relations,
+            ),
+          ),
+        );
+        credentialMaterials.add(
+          CredentialMaterial(
+            credentialId: id,
+            version: 1,
+            bytes: material,
+            createdAt: now,
+            fileName: credential.fileName,
+          ),
+        );
+        continue;
+      }
       items.add(
         InformationItem(
           identities[key]!,
@@ -393,6 +468,8 @@ extension OwnerImportAdmission on OwnerAccess {
       awaitingKeys: awaiting,
       newDirectories: organization.newDirectories,
       newTags: organization.newTags,
+      credentialRecords: credentialRecords,
+      credentialMaterials: credentialMaterials,
     );
     for (final update in updateCommits) {
       if (update.item != null) {

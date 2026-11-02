@@ -61,6 +61,7 @@ class InformationTemplateDescription {
   final String? packageId;
   final bool enabled;
   final Map<String, Object?> definition;
+  String get recordKind => definition['recordKind'] as String? ?? 'information';
   bool get hasGuidance =>
       definition['instructions'] is String &&
       (definition['instructions'] as String).trim().isNotEmpty &&
@@ -73,6 +74,7 @@ class InformationTemplateDescription {
     'packageId': packageId,
     'enabled': enabled,
     'hasGuidance': hasGuidance,
+    'recordKind': recordKind,
   };
   Map<String, Object?> toJson() => {
     ...summary(),
@@ -84,6 +86,12 @@ class InformationTemplateDescription {
       'submissionUtf8Bytes': 240000,
       'textCharacters': 64000,
       'entryFieldCount': 3,
+      if (recordKind == 'credential') ...{
+        'credentialNameCharacters': 60,
+        'credentialStringUtf8Bytes': 65536,
+        'credentialFileBytes': 1048576,
+        'credentialTransportUtf8Bytes': 6000000,
+      },
     },
     'relationInput': {
       'shape': 'Map<declared relation key, List<target>>',
@@ -115,7 +123,7 @@ class InformationTemplateDescription {
       'revision':
           'update-revise supplies proposalId, current proposal version, and a revised update; a new owner approval is required.',
     },
-    if (hasGuidance)
+    if (hasGuidance && recordKind == 'information')
       'submissionExample': {
         'command': 'import-submit',
         'items': [
@@ -130,7 +138,60 @@ class InformationTemplateDescription {
           },
         ],
       },
+    if (hasGuidance && recordKind == 'credential') ..._credentialExamples(),
   };
+
+  Map<String, Object?> _credentialExamples() {
+    final config = definition['credential'] as Map;
+    final materials = <Map<String, Object?>>[
+      if (config['secretKind'] == 'accountPassword')
+        {'source': 'owner', 'contextExposed': false},
+      if (config['form'] == 'string')
+        {
+          'source': 'agentString',
+          'contextExposed': true,
+          'secret': 'FAKE-EXAMPLE-ONLY',
+        },
+      if (config['form'] == 'file')
+        {
+          'source': 'agentFile',
+          'contextExposed': false,
+          'filePath': '/path/to/user-provided-credential-file',
+        },
+    ];
+    Map<String, Object?> example(Map<String, Object?> material) => {
+      'command': 'import-submit',
+      'operationId': 'replace-with-unique-intake-id',
+      'items': [
+        {
+          'name': (definition['example'] as Map)['name'],
+          'description': (definition['example'] as Map)['summary'] ?? '',
+          'templateId': id,
+          'templateVersion': version,
+          'templateDigest': digest,
+          'values': <String, Object?>{},
+          'credential': material,
+          'relations': <String, Object?>{},
+        },
+      ],
+    };
+    return {
+      'submissionExample': example(materials.first),
+      'submissionExamples': [for (final m in materials) example(m)],
+      'credentialInput': {
+        'channel':
+            'dedicated credential material, never ordinary values or attachments',
+        'owner':
+            'An unseen account password is entered privately in the App; password-manager generated account passwords also use this path.',
+        'agentString':
+            'Already seen passwords or other tokens are entered by the Agent; explain that they may be exposed in the AI context. Never read a password just to select this branch.',
+        'agentFile':
+            'Pass the whole user-provided file path to the CLI without reading its bytes into the AI context. The CLI uploads it to the private proposal.',
+        'approval':
+            'Material must be complete and approved before admission. Status responses never return material; admission grants no use permission.',
+      },
+    };
+  }
 }
 
 Object? _immutableTemplateValue(Object? value) => switch (value) {
@@ -160,6 +221,9 @@ extension OwnerInformationTemplateCatalog on OwnerAccess {
 }
 
 extension AgentInformationTemplateCatalog on AgentAccess {
+  bool get credentialImportAvailable =>
+      informationTemplatesAvailable &&
+      _service._repository is CredentialRepository;
   bool get informationTemplatesAvailable =>
       !_service._closed && _service._informationTemplates != null;
 

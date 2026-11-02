@@ -95,6 +95,21 @@ class WorkspaceProposalResults {
 /// snapshot; a later installed template never reinterprets these values.
 enum WorkspaceProposalBeforeState { unread, available, unavailable }
 
+/// Credential metadata only. Material never crosses the workspace boundary.
+class WorkspaceProposalCredential {
+  const WorkspaceProposalCredential({
+    required this.source,
+    required this.contextExposed,
+    required this.ready,
+    this.fileName,
+    this.byteLength,
+  });
+  final String source;
+  final bool contextExposed, ready;
+  final String? fileName;
+  final int? byteLength;
+}
+
 class WorkspaceProposalItem {
   WorkspaceProposalItem({
     required this.id,
@@ -102,15 +117,24 @@ class WorkspaceProposalItem {
     this.before,
     this.beforeState = WorkspaceProposalBeforeState.unread,
     this.admissionNote = '',
+    this.credential,
     Iterable<WorkspaceProposalFieldChange> changes = const [],
   }) : changes = List.unmodifiable(changes) {
-    if (proposed.record.ref.kind != WorkspaceRecordKind.information ||
+    if (proposed.record.ref.kind == WorkspaceRecordKind.credential &&
+            (credential == null ||
+                proposed.values.isNotEmpty ||
+                proposed.fieldIds.isNotEmpty ||
+                proposed.fieldOverrides.isNotEmpty ||
+                proposed.retainedFields.isNotEmpty ||
+                before != null ||
+                this.changes.isNotEmpty) ||
         before?.record.ref.kind == WorkspaceRecordKind.credential) {
       throw ArgumentError('Credential bodies do not pass through proposals.');
     }
   }
   final String id;
   final String admissionNote;
+  final WorkspaceProposalCredential? credential;
   final WorkspaceDetail proposed;
   final WorkspaceDetail? before;
   final WorkspaceProposalBeforeState beforeState;
@@ -420,12 +444,16 @@ class WorkspaceProposalReceipt {
 class WorkspaceProposalExpectation {
   WorkspaceProposalExpectation(WorkspaceProposalDetail d)
     : kind = d.summary.kind,
+      candidateKinds = {
+        for (final i in d.items) i.id: i.proposed.record.ref.kind,
+      },
       originals = {
         for (final i in d.items)
           if (i.before != null) i.before!.record.ref: i.before!.version,
       };
   final WorkspaceProposalKind kind;
   final Map<WorkspaceRecordRef, int> originals;
+  final Map<String, WorkspaceRecordKind> candidateKinds;
   WorkspaceProposalReceipt check(
     WorkspaceProposalChange c,
     WorkspaceProposalReceipt r,
@@ -433,6 +461,26 @@ class WorkspaceProposalExpectation {
     final expected = c.action == WorkspaceProposalAction.reject
         ? 0
         : c.reviewed.length;
+    bool kindMismatch() {
+      if (kind != WorkspaceProposalKind.addition ||
+          c.action != WorkspaceProposalAction.confirm) {
+        return false;
+      }
+      for (final type in WorkspaceRecordKind.values) {
+        final expected = c.reviewed
+            .where(
+              (i) =>
+                  !r.awaitingItemIds.contains(i.itemId) &&
+                  candidateKinds[i.itemId] == type,
+            )
+            .length;
+        if (r.records.where((v) => v.ref.kind == type).length != expected) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     if (r.operationId != c.operationId ||
         r.proposalId != c.proposalId ||
         r.action != c.action ||
@@ -450,8 +498,12 @@ class WorkspaceProposalExpectation {
                 }.contains(kind) ||
                 c.action != WorkspaceProposalAction.confirm) ||
         r.records.map((x) => x.ref).toSet().length != r.records.length ||
+        kindMismatch() ||
         r.records.any(
-          (x) => x.ref.kind != WorkspaceRecordKind.information || x.version < 1,
+          (x) =>
+              x.version < 1 ||
+              kind != WorkspaceProposalKind.addition &&
+                  x.ref.kind != WorkspaceRecordKind.information,
         ) ||
         kind == WorkspaceProposalKind.deletion &&
             c.action == WorkspaceProposalAction.confirm &&

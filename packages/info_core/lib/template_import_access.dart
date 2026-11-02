@@ -164,6 +164,12 @@ extension OwnerTemplateImports on OwnerAccess {
       throw const AccessFailure('template_guidance_missing');
     }
     final definition = template.definition;
+    if (template.recordKind == 'credential') {
+      return _compileCredentialImport(input, template);
+    }
+    if (input.credential != null) {
+      throw const AccessFailure('invalid_credential_template');
+    }
     final descriptors = (definition['fields'] as List).cast<Map>();
     final keys = {for (final f in descriptors) f['key'] as String};
     final errors = <String, String>{};
@@ -348,9 +354,12 @@ extension OwnerTemplateImports on OwnerAccess {
           .cast<String>();
       for (final ref in e.value) {
         final targetType = ref.kind == 'credential'
-            ? credentials.any((c) => c.id == ref.id)
-                  ? 'credential'
-                  : null
+            ? credentials
+                      .where((c) => c.id == ref.id)
+                      .firstOrNull
+                      ?.template
+                      ?.typeId ??
+                  (credentials.any((c) => c.id == ref.id) ? 'credential' : null)
             : information
                   .where((i) => i.id == ref.id)
                   .firstOrNull
@@ -360,10 +369,73 @@ extension OwnerTemplateImports on OwnerAccess {
             ? targetType != null
             : information.any((i) => i.id == ref.id);
         if (!exists ||
-            allowed.isNotEmpty && !allowed.contains(targetType ?? 'generic')) {
+            allowed.isNotEmpty &&
+                !allowed.contains(targetType ?? 'generic') &&
+                !(ref.kind == 'credential' && allowed.contains('credential'))) {
           throw const AccessFailure('proposal_reference_unavailable');
         }
       }
     }
+  }
+
+  ImportItemInput _compileCredentialImport(
+    ImportItemInput input,
+    InformationTemplateDescription template,
+  ) {
+    if (_service._repository is! CredentialRepository) {
+      throw const AccessFailure('unsupported_capability');
+    }
+    final material = input.credential;
+    final config = template.definition['credential'] as Map?;
+    if (material == null ||
+        config == null ||
+        input.values.isNotEmpty ||
+        input.fields.isNotEmpty ||
+        material.isFile != (config['form'] == 'file') ||
+        config['secretKind'] == 'token' && material.source != 'agentString') {
+      throw const AccessFailure('invalid_credential_template');
+    }
+    _validateCredentialMetadata(
+      input.name,
+      input.description,
+      '',
+      config['suggestedBinding'] as String,
+    );
+    final keys = {
+      for (final rule in template.definition['relations'] as List? ?? [])
+        (rule as Map)['key'],
+    };
+    if ({
+      ...input.relations.keys,
+      ...input.pendingRelations.keys,
+    }.any((k) => !keys.contains(k))) {
+      throw const AccessFailure('invalid_reference');
+    }
+    return ImportItemInput(
+      input.name,
+      input.description,
+      const [],
+      key: input.key,
+      directoryId: input.directoryId,
+      tagIds: input.tagIds,
+      suggestedDirectory: input.suggestedDirectory,
+      suggestedTags: input.suggestedTags,
+      templateId: template.id,
+      templateVersion: template.version,
+      templateDigest: template.digest,
+      credential: material,
+      relations: input.relations,
+      pendingRelations: input.pendingRelations,
+      layout: InformationLayout(
+        typeId: template.id,
+        snapshot: {
+          'definition': template.definition,
+          'templateVersion': template.version,
+          'templateDigest': template.digest,
+        },
+        fieldIds: const {},
+        relations: input.relations,
+      ),
+    );
   }
 }

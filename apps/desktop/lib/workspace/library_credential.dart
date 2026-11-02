@@ -72,7 +72,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
       List<WorkspaceRecordSummary> links = [];
       WorkspaceFailure? linksFailure;
       try {
-        links = await widget.source.readSummaries(detail.linkedInformation);
+        links = await widget.source.readSummaries(detail.allLinks);
       } catch (error) {
         linksFailure = error is WorkspaceFailure
             ? error
@@ -453,7 +453,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                   style: libraryText(context, 13, color: c.warning),
                 ),
               if (_linksFailure == null)
-                for (final (index, ref) in detail.linkedInformation.indexed)
+                for (final (index, ref) in detail.allLinks.indexed)
                   if (_links.where((r) => r.ref == ref).firstOrNull
                       case final linked?)
                     LibraryRelationRow(
@@ -466,7 +466,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                       '关联资料已不可用。',
                       style: libraryText(context, 13, color: c.muted),
                     ),
-              if (_linksFailure == null && detail.linkedInformation.isEmpty)
+              if (_linksFailure == null && detail.allLinks.isEmpty)
                 Text(
                   '尚未关联资料。',
                   style: libraryText(context, 13, color: c.muted),

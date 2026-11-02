@@ -5,12 +5,15 @@ class WorkspaceInputs {
   const WorkspaceInputs({
     this.file,
     this.credential,
+    this.proposalPassword,
     this.plugin,
     this.hostFile,
     this.backup,
   });
   final WorkspaceFilePicker? file;
   final WorkspaceCredentialPicker? credential;
+  final Future<bool> Function(String proposalId, int version, String itemId)?
+  proposalPassword;
   final WorkspacePluginPicker? plugin;
   final WorkspaceHostFilePicker? hostFile;
   final WorkspaceBackupPicker? backup;

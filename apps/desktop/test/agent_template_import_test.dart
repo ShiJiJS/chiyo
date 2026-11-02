@@ -104,7 +104,9 @@ void main() {
           (await cli.execute({'command': 'template-list'}))['templates']
               as List;
       final ids = <String>[];
-      for (final template in templates.where((t) => t['id'] != 'file')) {
+      for (final template in templates.where(
+        (t) => t['id'] != 'file' && t['recordKind'] == 'information',
+      )) {
         final response = await cli.execute(
           await example(template['id'] as String),
         );

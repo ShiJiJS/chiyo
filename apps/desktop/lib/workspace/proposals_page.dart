@@ -30,6 +30,7 @@ class ProposalsPage extends StatefulWidget {
   const ProposalsPage({
     super.key,
     required this.controller,
+    this.onPasswordInput,
     required this.onRecord,
     this.onModalChanged,
     this.onRetry,
@@ -38,6 +39,8 @@ class ProposalsPage extends StatefulWidget {
     this.workspaceBackLabel = '返回上一页',
   });
   final ProposalsController controller;
+  final Future<bool> Function(String proposalId, int version, String itemId)?
+  onPasswordInput;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final ValueChanged<bool>? onModalChanged;
   final VoidCallback? onRetry;
@@ -162,6 +165,19 @@ class _ProposalsPageState extends State<ProposalsPage> {
           onSave: (value) => m.editItem(d.summary.id, d.summary.version, value),
         ),
       );
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
+  Future<void> _password(WorkspaceProposalItem item) async {
+    final d = m.detail, callback = widget.onPasswordInput;
+    if (!m.canEdit || d == null || callback == null) return;
+    widget.onModalChanged?.call(true);
+    try {
+      if (await callback(d.summary.id, d.summary.version, item.id)) {
+        await m.reloadAfterPasswordInput(d, item.id);
+      }
     } finally {
       widget.onModalChanged?.call(false);
     }
@@ -757,6 +773,16 @@ class _ProposalsPageState extends State<ProposalsPage> {
             ),
           ],
           if (d.summary.kind != WorkspaceProposalKind.deletion) ...[
+            if (item.credential?.source == 'owner') ...[
+              const SizedBox(height: 16),
+              DesktopButton(
+                key: ValueKey('proposal-password-${item.id}'),
+                onPressed: m.canEdit && widget.onPasswordInput != null
+                    ? () => _password(item)
+                    : null,
+                child: Text(item.credential!.ready ? '重新填写密码' : '填写密码'),
+              ),
+            ],
             const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerRight,
