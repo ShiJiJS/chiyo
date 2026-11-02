@@ -48,6 +48,7 @@ CLI 状态区分 `pending`、`approved_awaiting_admission`、`needs_attention`�
 - `apps/desktop/test/owner_admission_widget_test.dart`：真实加密库与主人审批页面显示待入库对象名称、“已批准待入库”和“需要处理”；实际点击新增与修改的批准按钮，等待阶段不发布资料、不覆盖原内容。
 - `apps/desktop/test/proposal_entry_editor_test.dart`：经历字段编辑读取拟修改内容，保存回原分组，保持字段身份。
 - 同时保留原有新增、修改及主人审批回执回归检查。
+- 正式个人 Skill 负责本机运行包定位；同版本运行包说明负责动态模板和申请流程，不在两处复制模板清单。`codex_registration_test.dart` 检查显式登记交付／准备目录、缺失文件拒绝、原描述保留及重定向文件拒绝；这不代替最终安装和独立新聊天验收。
 
 ## 仍须完成
 

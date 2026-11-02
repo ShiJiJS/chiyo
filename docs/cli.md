@@ -6,7 +6,13 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 新增通过 `import-submit` 的 `items` 提供 `name`、`description`、`templateId`、`templateVersion`、`templateDigest`、`values`，与主人审批共用原入口。按模板修改仍走 `update-submit`，在 `update` 中提供已有 `itemId`、`baseVersion`、相同三个模板标识和完整 `values`，不要与平面 `changes` 混用。类型和格式不再降为通用文字。
 
-模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。当前文件录入及待入库引用仍在 #79/#80 与 #78 后续开发，详见[实现进度](development/ai-template-ingestion.md)。
+模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。普通资料的待入库引用已接入，凭据和文件录入继续在 #79/#80 开发，详见[实现进度](development/ai-template-ingestion.md)。
+
+## 登记已准备好的 Codex 运行包
+
+正式个人 Skill 从系统默认的公开 `integration.json` 定位同版本运行包。安装者核对准备好的目录后，可显式运行同包 `info-prepare-codex --register-existing <运行包目录>`。支持交付包的 `template/` 或准备后的 `skills/agent-info-access/`，要求三个程序和完整说明齐全；登记只保存公开路径、大小和摘要，不建立会话、不编辑 Codex 配置，也不授予 hooks 信任。常规准备命令仍只向新目录输出，不自动登记。
+
+Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json`，Windows 位于 `%LOCALAPPDATA%/AgentInfo/Codex/integration.json`。更新运行包须重新核对和登记，不能把旧描述当作新版已就绪。当前登记与定位的故障检查在 Mac 上运行；未据此宣称 Windows 原生安装验收通过。
 
 新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
 
