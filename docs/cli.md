@@ -6,7 +6,13 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 新增通过 `import-submit` 的 `items` 提供 `name`、`description`、`templateId`、`templateVersion`、`templateDigest`、`values`，与主人审批共用原入口。按模板修改仍走 `update-submit`，在 `update` 中提供已有 `itemId`、`baseVersion`、相同三个模板标识和完整 `values`，不要与平面 `changes` 混用。类型和格式不再降为通用文字。
 
-模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。普通资料的待入库引用已接入，凭据和文件录入继续在 #79/#80 开发，详见[实现进度](development/ai-template-ingestion.md)。
+模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。普通资料与凭据的待入库引用已接入，文件新建提案已接入，已有资料的附件修改继续在 #80 开发，详见[实现进度](development/ai-template-ingestion.md)。
+
+## 普通文件新建录入（Mac 开发分支）
+
+先核对`information-file-upload.v1`，按`template-read`返回的`fileInput`及`submissionExample`填写。CLI的`attachments[].versions[].filePath`接收用户给定原文件路径，`values`中的声明文件字段填匹配的附件key，`templateField`标明声明字段；额外独立附件省略templateField。每组用从1开始数的`currentVersion`选择当前原文，并填写`label`与`sourceNote`说明来源。单份文件上限10MiB，原文不会进入Agent的响应或普通字段。
+
+新建文件提案须给稳定`operationId`，不确定时先用`import-status`按此编号核对；CLI另报上传编号时用`import-file-status`查询原文收件情况。提案待审批、已批准待引用与真正入库分别报告。主人可预览待审原文，批准时原文、资料、版本与回执一起保存。已有资料的文件修改尚未接完，不能将上传能力当作修改能力；详见[实现进度](development/ordinary-file-ingestion.md)。
 
 ## 登记已准备好的 Codex 运行包
 

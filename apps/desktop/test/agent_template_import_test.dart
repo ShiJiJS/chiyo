@@ -98,6 +98,117 @@ void main() {
     ),
   );
   test(
+    'built-in and newly installed file template examples submit their own originals and survive Owner approval and reopening',
+    () async {
+      final package = core.InstalledTemplatePackage(
+        id: 'local.materials',
+        enabled: true,
+        origin: 'synthetic',
+        bytes: utf8.encode(
+          jsonEncode({
+            'id': 'local.materials',
+            'name': '材料模板',
+            'version': '1.0.0',
+            'hostApi': 1,
+            'author': '测试',
+            'description': '普通原文资料。',
+            'templates': [
+              {
+                'id': 'proof',
+                'name': '证明材料',
+                'icon': 'file',
+                'instructions': '保留证明原文。相同证明的修订用版本，不同证明分别保存。',
+                'fields': [
+                  {
+                    'key': 'original',
+                    'label': '证明原文',
+                    'type': 'file',
+                    'required': true,
+                  },
+                ],
+                'sections': [
+                  {
+                    'kind': 'fields',
+                    'title': '证明',
+                    'keys': ['original'],
+                  },
+                ],
+                'relations': [],
+                'example': {
+                  'name': '培训证明',
+                  'summary': '用户提供的证明。',
+                  'values': {'original': 'proof'},
+                },
+              },
+            ],
+          }),
+        ),
+      );
+      await service.owner.changeTemplatePackage(
+        core.TemplatePackageCommand(
+          operationId: 'install-file-template',
+          action: core.TemplatePackageAction.install,
+          packageId: package.id,
+          expectedVersion: service.owner.templatePackageVersion,
+          expectedDigest: package.digest,
+          commandDigest: 'b' * 64,
+        ),
+        input: package,
+      );
+      final file = File('${root.path}/给定原文.txt');
+      await file.writeAsString('PRIVATE-FILE-SOURCE');
+      final ids = <String>[];
+      for (final templateId in ['file', 'local.materials/proof']) {
+        final input = await example(templateId);
+        input['operationId'] = 'example-${ids.length}';
+        final item = (input['items'] as List).single as Map;
+        final attachment = (item['attachments'] as List).single as Map;
+        expect(
+          (item['values'] as Map)[attachment['templateField']],
+          attachment['key'],
+        );
+        ((attachment['versions'] as List).single as Map)['filePath'] =
+            file.path;
+        final submitted = await cli.execute(input);
+        expect(submitted['status'], 'pending', reason: templateId);
+        final id = submitted['proposalId'] as String;
+        ids.add(id);
+        final d = await proposals.read(id);
+        expect(
+          d.items.single.attachments.single.versions.single.filename,
+          '给定原文.txt',
+        );
+        expect(jsonEncode(submitted), isNot(contains('PRIVATE-FILE-SOURCE')));
+        final r = await approve(d);
+        final saved = repo.items.singleWhere(
+          (i) => i.id == r.records.single.ref.id,
+        );
+        expect(saved.layout!.typeId, templateId);
+        expect(saved.fields.single.kind, core.FieldKind.file);
+        expect(
+          (await service.owner.readInformationAttachment(
+            saved.fields.single.attachment!,
+          )).bytes,
+          utf8.encode('PRIVATE-FILE-SOURCE'),
+        );
+      }
+      await close();
+      await open();
+      expect(repo.items.length, 2);
+      for (final item in repo.items) {
+        expect(
+          (await service.owner.readInformationAttachment(
+            item.fields.single.attachment!,
+          )).bytes,
+          utf8.encode('PRIVATE-FILE-SOURCE'),
+        );
+        final definition = WorkspaceInformationCodec().decode(item).definition;
+        expect((definition['fields'] as List).single['type'], 'file');
+      }
+      expect(repo.importProposals.every((p) => p.items.isEmpty), true);
+    },
+  );
+  test(
     'queried examples survive encrypted pending storage, actual review, admission and reopen as typed records',
     () async {
       final templates =

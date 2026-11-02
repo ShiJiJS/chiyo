@@ -7,7 +7,8 @@ extension _EncryptedInformationFileIntake on EncryptedInformationRepository {
       final row = await _db
           .customSelect(
             'SELECT count(*) AS files,coalesce(sum(byte_length),0) AS bytes '
-            'FROM information_file_stages',
+            'FROM (SELECT byte_length FROM information_file_stages UNION ALL '
+            'SELECT byte_length FROM information_import_files WHERE body IS NOT NULL)',
           )
           .getSingle();
       return InformationFileStagingUsage(

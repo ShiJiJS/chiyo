@@ -279,6 +279,7 @@ extension OwnerImportAdmission on OwnerAccess {
     final items = <InformationItem>[];
     final credentialRecords = <ManagedCredential>[];
     final credentialMaterials = <CredentialMaterial>[];
+    final filePromotions = <InformationImportFilePromotion>[];
     final organization = _OrganizationPlan(this);
     final now = _service._clock();
     for (final key in eligible) {
@@ -295,6 +296,12 @@ extension OwnerImportAdmission on OwnerAccess {
           ),
       ];
       final bound = input.bindLayout(fields);
+      final importedFiles = _prepareNewImportFiles(
+        input,
+        node.proposal.sessionBinding,
+      );
+      fields.addAll(importedFiles.fields);
+      filePromotions.addAll(importedFiles.promotions);
       final relations = {
         for (final group in {
           ...input.relations.keys,
@@ -381,7 +388,7 @@ extension OwnerImportAdmission on OwnerAccess {
               : InformationLayout(
                   typeId: bound.typeId,
                   snapshot: bound.snapshot,
-                  fieldIds: bound.fieldIds,
+                  fieldIds: {...bound.fieldIds, ...importedFiles.bindings},
                   relations: relations,
                 ),
           directoryId: location.$1,
@@ -470,6 +477,7 @@ extension OwnerImportAdmission on OwnerAccess {
       newTags: organization.newTags,
       credentialRecords: credentialRecords,
       credentialMaterials: credentialMaterials,
+      filePromotions: filePromotions,
     );
     for (final update in updateCommits) {
       if (update.item != null) {

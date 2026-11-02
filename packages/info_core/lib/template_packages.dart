@@ -65,6 +65,7 @@ class DeclarativeTemplatePackageDecoder {
     'date',
     'multiline',
     'entries',
+    'file',
   };
   static const icons = {
     'server',
@@ -172,7 +173,7 @@ class DeclarativeTemplatePackageDecoder {
         }
         if (fieldKinds.containsKey(field)) _fail('$path.key', '字段身份重复。');
         if (!fieldTypes.contains(kind)) {
-          _fail('$path.type', '不支持此字段类型；文件和凭据由宿主管理。');
+          _fail('$path.type', '不支持此字段类型；普通文件使用宿主管理的file字段，凭据使用独立凭据模板。');
         }
         if (f['required'] is! bool) _fail('$path.required', '需要明确的布尔值。');
         fieldKinds[field] = kind;
@@ -300,6 +301,16 @@ class DeclarativeTemplatePackageDecoder {
           }
           if (fieldKinds[entry.key] != 'entries' && entry.value is! String) {
             _fail('$p.example.values.${entry.key}', '标量样例需要字符串。');
+          }
+          if (fieldKinds[entry.key] == 'file' &&
+              entry.value != '' &&
+              !RegExp(
+                r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$',
+              ).hasMatch(entry.value as String)) {
+            _fail(
+              '$p.example.values.${entry.key}',
+              '文件样例填写附件key；实际路径由CLI的attachments提交。',
+            );
           }
           if (fieldKinds[entry.key] == 'entries') {
             for (final value in _list(

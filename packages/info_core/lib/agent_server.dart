@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'info_core.dart';
 import 'protocol_json.dart';
 
@@ -116,9 +117,10 @@ class AgentServer {
           request.headers.contentType?.mimeType != 'application/json') {
         throw const AccessFailure('unauthorized');
       }
-      final limit =
-          request.uri.path == '/import/submit' ||
-              request.uri.path == '/import/revise'
+      final limit = request.uri.path == '/import-file/submit'
+          ? 15 * 1024 * 1024
+          : request.uri.path == '/import/submit' ||
+                request.uri.path == '/import/revise'
           ? 6000000
           : request.uri.path == '/organization/submit' ||
                 request.uri.path == '/update/submit' ||
@@ -155,6 +157,7 @@ class AgentServer {
               request.uri.path == '/update/submit' ||
               request.uri.path == '/update/revise' ||
               request.uri.path.startsWith('/templates/') ||
+              request.uri.path.startsWith('/import-file/') ||
               request.uri.path == '/plugins/catalog'
           ? decodeProtocolObject(utf8.decode(bytes), maxBytes: limit)
           : jsonDecode(utf8.decode(bytes));
@@ -254,10 +257,47 @@ class AgentServer {
               'information-import-admission.v1',
             if (_agent.credentialImportAvailable) 'credential-import.v1',
             'information-import-operations.v1',
+            if (_agent.informationImportFilesAvailable)
+              'information-file-upload.v1',
           ],
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
         };
+      case '/import-file/submit':
+        if (body.keys.any(
+          (k) => !{
+            'sessionSecret',
+            'operationId',
+            'originalName',
+            'mediaType',
+            'bytes',
+          }.contains(k),
+        )) {
+          throw const AccessFailure('invalid_request');
+        }
+        final encoded = body['bytes'];
+        if (encoded is! String) throw const AccessFailure('invalid_request');
+        if (encoded.length > ((informationFileByteLimit + 2) ~/ 3) * 4) {
+          throw const AccessFailure('file_too_large');
+        }
+        final upload = await _agent.uploadImportFile(
+          _text(body, 'sessionSecret'),
+          operationId: _text(body, 'operationId'),
+          originalName: _text(body, 'originalName'),
+          mediaType: _text(body, 'mediaType'),
+          bytes: Uint8List.fromList(base64Decode(encoded)),
+        );
+        return {'status': 'ok', ...upload.metadata};
+      case '/import-file/status':
+        if (body.keys.any(
+          (k) => !{'sessionSecret', 'operationId'}.contains(k),
+        )) {
+          throw const AccessFailure('invalid_request');
+        }
+        return _agent.importFileStatus(
+          _text(body, 'sessionSecret'),
+          _text(body, 'operationId'),
+        );
       case '/plugins/catalog':
         if (body.isNotEmpty) throw const AccessFailure('invalid_request');
         return _agent.pluginCatalog();

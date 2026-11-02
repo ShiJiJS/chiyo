@@ -22,7 +22,8 @@ void _validateImport(List<ImportItemInput> items) {
 
   if (items.isEmpty ||
       items.length > 20 ||
-      items.fold<int>(0, (n, i) => n + i.fields.length) > 200 ||
+      items.fold<int>(0, (n, i) => n + i.fields.length + i.attachments.length) >
+          200 ||
       utf8
               .encode(jsonEncode(items.map((i) => i.submissionJson).toList()))
               .length >
@@ -42,7 +43,13 @@ void _validateImport(List<ImportItemInput> items) {
                     i.relations.isNotEmpty ||
                     i.pendingRelations.isNotEmpty) ||
             i.credential != null && i.templateId == null ||
-            i.fields.length > 50 ||
+            i.attachments.isNotEmpty &&
+                (i.templateId == null || i.credential != null) ||
+            i.attachments.any((a) => a.fieldId != null) ||
+            i.attachments.map((a) => a.key).toSet().length !=
+                i.attachments.length ||
+            i.attachments.fold<int>(0, (n, a) => n + a.versions.length) > 200 ||
+            i.fields.length + i.attachments.length > 50 ||
             i.suggestedDirectory.length > 200 ||
             i.suggestedTemplate.length > 200 ||
             i.suggestedTags.length > 100 ||
@@ -108,6 +115,10 @@ extension AgentImports on AgentAccess {
         )) {
       throw const AccessFailure('invalid_proposal');
     }
+    revised = await _service.owner._resolveImportFiles(
+      old.sessionBinding,
+      revised,
+    );
     revised = _service.owner._compileTemplateImports(revised);
     _validateImport(revised);
     final changes = {for (final i in revised) i.key: i};
@@ -163,6 +174,10 @@ extension AgentImports on AgentAccess {
         return previous.id;
       }
     }
+    items = await _service.owner._resolveImportFiles(
+      _service._sessionBindings[session]!,
+      items,
+    );
     items = _service.owner._compileTemplateImports(items);
     _validateImport(items);
     if (agentName.length > 200 || purpose.length > 2000) {

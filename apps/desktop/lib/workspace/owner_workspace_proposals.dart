@@ -637,14 +637,57 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
               admissionNote: states
                   .singleWhere((s) => s.key == input.key)
                   .reason,
-              proposed: _codec.decode(
-                item,
-                tagNames: {
-                  ..._tags,
-                  for (final e in _suggestedTags.entries)
-                    e.key: '建议新建：${e.value}',
-                },
-              ),
+              proposed: (() {
+                final decoded = _codec.decode(
+                  item,
+                  tagNames: {
+                    ..._tags,
+                    for (final e in _suggestedTags.entries)
+                      e.key: '建议新建：${e.value}',
+                  },
+                );
+                final fileKeys = {
+                  for (final a in input.attachments) ?a.templateField,
+                };
+                return WorkspaceDetail(
+                  record: decoded.record,
+                  version: decoded.version,
+                  templateState: decoded.templateState,
+                  definition: decoded.definition,
+                  values: {
+                    ...decoded.values,
+                    for (final key in fileKeys) key: input.values[key],
+                  },
+                  relations: decoded.relations,
+                  fieldIds: decoded.fieldIds,
+                  fieldOverrides: {
+                    for (final e in decoded.fieldOverrides.entries)
+                      if (!fileKeys.contains(e.key)) e.key: e.value,
+                  },
+                  retainedFields: decoded.retainedFields,
+                  retainedRelations: decoded.retainedRelations,
+                );
+              })(),
+              attachments: [
+                for (final a in input.attachments)
+                  WorkspaceProposalAttachment(
+                    key: a.key,
+                    name: a.name,
+                    description: a.description,
+                    templateField: a.templateField,
+                    currentVersion: a.currentVersion,
+                    versions: [
+                      for (final v in a.versions)
+                        WorkspaceProposalOriginal(
+                          filename: v.upload!.originalName,
+                          mediaType: v.upload!.mediaType,
+                          byteLength: v.upload!.byteLength,
+                          label: v.label,
+                          sourceNote: v.sourceNote,
+                        ),
+                    ],
+                  ),
+              ],
             ),
           );
         }
@@ -1018,6 +1061,7 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                     templateId: input.templateId,
                     key: input.key,
                     credential: input.credential,
+                    attachments: input.attachments,
                     templateVersion: input.templateVersion,
                     templateDigest: input.templateDigest,
                     relations: _reviewRelations(
@@ -1043,7 +1087,9 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                         : {
                             for (final field
                                 in detail.definition['fields'] as List)
-                              field['key'] as String: field['type'] == 'entries'
+                              field['key'] as String: field['type'] == 'file'
+                                  ? input.values[field['key']] ?? ''
+                                  : field['type'] == 'entries'
                                   ? [
                                       for (final row
                                           in r.values[field['key']] as List? ??

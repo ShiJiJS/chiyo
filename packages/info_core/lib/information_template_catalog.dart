@@ -86,6 +86,11 @@ class InformationTemplateDescription {
       'submissionUtf8Bytes': 240000,
       'textCharacters': 64000,
       'entryFieldCount': 3,
+      if (recordKind == 'information') ...{
+        'ordinaryFileBytes': informationFileByteLimit,
+        'attachmentsPerItem': 50,
+        'proposedVersionsPerAttachment': 20,
+      },
       if (recordKind == 'credential') ...{
         'credentialNameCharacters': 60,
         'credentialStringUtf8Bytes': 65536,
@@ -126,6 +131,8 @@ class InformationTemplateDescription {
     if (hasGuidance && recordKind == 'information')
       'submissionExample': {
         'command': 'import-submit',
+        if (_exampleAttachments.isNotEmpty)
+          'operationId': 'replace-with-unique-intake-id',
         'items': [
           {
             'name': (definition['example'] as Map)['name'],
@@ -134,12 +141,53 @@ class InformationTemplateDescription {
             'templateVersion': version,
             'templateDigest': digest,
             'values': (definition['example'] as Map)['values'],
+            if (_exampleAttachments.isNotEmpty)
+              'attachments': _exampleAttachments,
             'relations': <String, Object?>{},
           },
         ],
       },
+    if (recordKind == 'information')
+      'fileInput': {
+        'channel':
+            'attachments contain CLI filePath values; paths and file bytes are never ordinary text values.',
+        'binding':
+            'A declared file value is the matching attachment key, with templateField set to the declared field key. Omit templateField for an independent extra attachment.',
+        'versions':
+            'Group only revisions of the same material. Different purposes or directions are separate information items. Provide label and sourceNote explaining the source evidence; do not infer chronology just from submission order.',
+        'currentVersion':
+            'One-based index among proposed originals. Choose from source evidence, not the largest software version number. New attachments require an explicit choice.',
+        'retry':
+            'Use a stable operationId. If submission is uncertain query import-status by operationId before retrying; import-file-status queries a reported upload operationId. Never report pending or approved-waiting as saved.',
+        'credentials':
+            'Private keys and login-session files use credential templates, never ordinary attachments.',
+      },
     if (hasGuidance && recordKind == 'credential') ..._credentialExamples(),
   };
+
+  List<Map<String, Object?>> get _exampleAttachments {
+    if (!hasGuidance) return const [];
+    final values = (definition['example'] as Map)['values'] as Map;
+    return [
+      for (final raw in definition['fields'] as List? ?? [])
+        if ((raw as Map)['type'] == 'file' &&
+            values[raw['key']] is String &&
+            (values[raw['key']] as String).isNotEmpty)
+          {
+            'key': values[raw['key']],
+            'name': raw['label'],
+            'templateField': raw['key'],
+            'currentVersion': 1,
+            'versions': [
+              {
+                'filePath': '/path/to/user-provided-original',
+                'label': '源文件标明的版本',
+                'sourceNote': '填写从文件或用户说明中判断材料用途和版本的依据。',
+              },
+            ],
+          },
+    ];
+  }
 
   Map<String, Object?> _credentialExamples() {
     final config = definition['credential'] as Map;

@@ -20,6 +20,7 @@ part 'credential_record_storage.dart';
 part 'credential_runtime_storage.dart';
 part 'focused_fill_storage.dart';
 part 'information_files_storage.dart';
+part 'information_import_files_storage.dart';
 part 'attachment_backup.dart';
 part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
@@ -54,6 +55,7 @@ const _importAdmissionLibraryFormat = 43;
 const _updateAdmissionLibraryFormat = 44;
 const _credentialImportLibraryFormat = 45;
 const _longTermAttachmentLibraryFormat = 46;
+const _informationImportFileLibraryFormat = 47;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -137,6 +139,7 @@ class EncryptedInformationRepository
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
+        InformationImportFileRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
         InformationLifecycleRepository,
@@ -314,6 +317,27 @@ class EncryptedInformationRepository
   @override
   Future<InformationFileStagingUsage> informationFileStagingUsage() =>
       _fileStagingUsage();
+  @override
+  Future<InformationImportUpload?> importFileUpload(String id) =>
+      _importFileUpload(id);
+  @override
+  Future<InformationImportUpload?> importFileOperation(
+    String binding,
+    String operationId,
+  ) => _importFileOperation(binding, operationId);
+  @override
+  Future<void> stageImportFile(
+    InformationImportUpload upload,
+    Uint8List bytes,
+  ) => _stageImportFile(upload, bytes);
+  @override
+  Future<T> withImportFile<T>(
+    String id,
+    Future<T> Function(InformationImportUpload, Stream<Uint8List>) action,
+  ) => _withImportFile(id, action);
+  @override
+  Future<void> pruneImportFiles(DateTime cutoff, Set<String> retained) =>
+      _pruneImportFiles(cutoff, retained);
   @override
   Future<void> releaseInformationStage(String draftId, String stageId) =>
       _releaseInformationFileStage(draftId, stageId);
@@ -495,7 +519,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _longTermAttachmentLibraryFormat) {
+      if (headerVersion > _informationImportFileLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -511,7 +535,7 @@ class EncryptedInformationRepository
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
             (marker.single['version'] as int) >
-                _longTermAttachmentLibraryFormat ||
+                _informationImportFileLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -559,6 +583,7 @@ class EncryptedInformationRepository
   }
 
   Future<void> _load() async {
+    await _createImportFiles();
     // A stage belongs to an in-process owner form, never a resumed grant or
     // formal item. A new process has no valid form handle for orphan bytes.
     await _db.customStatement('DELETE FROM information_file_stages');
@@ -1297,6 +1322,10 @@ class EncryptedInformationRepository
     ImportProposal proposal, {
     bool operationReceipt = true,
   }) async {
+    if (proposal.items.any((i) => i.attachments.isNotEmpty)) {
+      await _requireAdmissionFormat(_informationImportFileLibraryFormat);
+      await _claimProposalUploads(proposal);
+    }
     if (proposal.candidateKinds.values.contains('credential') ||
         proposal.operationId != null) {
       await _requireAdmissionFormat(_credentialImportLibraryFormat);
@@ -1311,6 +1340,7 @@ class EncryptedInformationRepository
       'INSERT INTO import_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],
     );
+    await _reconcileImportFiles();
     if (operationReceipt && proposal.state != ImportProposalState.pending) {
       await _proposalCommit(
         proposal.id,
@@ -1350,6 +1380,7 @@ class EncryptedInformationRepository
     List<InformationUpdateAdmission> updates = const [],
     List<ManagedCredential> credentialRecords = const [],
     List<CredentialMaterial> credentialMaterials = const [],
+    List<InformationImportFilePromotion> filePromotions = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
@@ -1370,6 +1401,7 @@ class EncryptedInformationRepository
         for (final tag in newTags) {
           await _writeTag(tag);
         }
+        await _promoteImportFiles(filePromotions);
         for (final item in items) {
           await _writeItem(item);
         }
@@ -1390,6 +1422,7 @@ class EncryptedInformationRepository
           await _writeUpdate(update.proposal, operationReceipt: false);
           await _writeRecycle(update.recycled, update.facts);
         }
+        if (filePromotions.isNotEmpty) await _checkImportCapacity();
         await _checkAttachmentBackupBudget();
         await _proposalCommit(
           decisionProposalId,

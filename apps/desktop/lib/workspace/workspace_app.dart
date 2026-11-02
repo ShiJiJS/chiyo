@@ -468,6 +468,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 onPasswordInput: widget.inputsBuilder
                     ?.call(context)
                     .proposalPassword,
+                onFile: widget.inputsBuilder?.call(context).proposalFile,
                 onWorkspaceBack: _controller.canGoBack
                     ? _controller.goBack
                     : null,
