@@ -6,6 +6,7 @@ import 'library_document.dart';
 import 'library_entries.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'library_file_dialogs.dart';
 
 List<({String title, List<WorkspaceProposalFieldChange> changes})>
 proposalChangeSections(WorkspaceProposalItem item) {
@@ -214,6 +215,7 @@ class ProposalItemReading extends StatefulWidget {
     required this.relations,
     required this.onRecord,
     this.enabled = true,
+    this.onFile,
   });
   final WorkspaceProposalItem item;
   final WorkspaceProposalItemReview review;
@@ -221,6 +223,7 @@ class ProposalItemReading extends StatefulWidget {
   final WorkspaceRelationSource relations;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final bool enabled;
+  final Future<void> Function(String attachmentKey, int version)? onFile;
   @override
   State<ProposalItemReading> createState() => _ProposalItemReadingState();
 }
@@ -246,16 +249,50 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
     final key = f['key'] as String, value = widget.review.values[key];
     if (f['type'] == 'entries') return LibraryEntryTimeline(value);
     if (f['type'] == 'file') {
-      return Text(
-        '普通附件需通过信息库导入，提案不包含文件原文。',
-        style: libraryText(context, 13, color: UiPalette.of(context).muted),
-      );
+      final file = widget.item.attachments
+          .where((a) => a.templateField == key)
+          .firstOrNull;
+      return file == null
+          ? const Text('没有新的文件原文；已有原文保持不变。')
+          : _attachment(file);
     }
     return SelectableText(
       proposalValue(value),
       style: libraryText(context, 15, weight: FontWeight.w600, height: 1.9),
     );
   }
+
+  Widget _attachment(WorkspaceProposalAttachment a) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (a.description.isNotEmpty) Text(a.description),
+      for (final (index, v) in a.versions.indexed)
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              LibraryFileSummary(
+                label:
+                    '${v.label.isEmpty ? '提交的原文${index + 1}' : v.label}${a.currentVersion == index + 1 ? ' · 保存为当前版本' : ' · 保留为历史版本'}',
+                filename: v.filename,
+                mediaType: v.mediaType,
+                byteLength: v.byteLength,
+              ),
+              if (v.sourceNote.isNotEmpty)
+                SelectableText('来源依据：${v.sourceNote}'),
+              DesktopButton(
+                kind: DesktopButtonKind.quiet,
+                onPressed: widget.enabled && widget.onFile != null
+                    ? () => widget.onFile!(a.key, index + 1)
+                    : null,
+                child: const Text('查看这份原文'),
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
 
   Widget _fields(List<String> keys) {
     final fields = workspaceFields(
@@ -421,6 +458,13 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
           sections.add(proposalSection(context, title, _links(key)));
         }
       }
+    }
+    for (final a in widget.item.attachments.where(
+      (a) => a.templateField == null,
+    )) {
+      sections.add(
+        proposalSection(context, '独立附件 · ${a.name}', _attachment(a)),
+      );
     }
     final extras = workspaceFields(
       d,

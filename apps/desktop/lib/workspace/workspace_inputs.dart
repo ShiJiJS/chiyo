@@ -6,6 +6,7 @@ class WorkspaceInputs {
     this.file,
     this.credential,
     this.proposalPassword,
+    this.proposalFile,
     this.plugin,
     this.hostFile,
     this.backup,
@@ -14,6 +15,7 @@ class WorkspaceInputs {
   final WorkspaceCredentialPicker? credential;
   final Future<bool> Function(String proposalId, int version, String itemId)?
   proposalPassword;
+  final WorkspaceProposalFileOpener? proposalFile;
   final WorkspacePluginPicker? plugin;
   final WorkspaceHostFilePicker? hostFile;
   final WorkspaceBackupPicker? backup;

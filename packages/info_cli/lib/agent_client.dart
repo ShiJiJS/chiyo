@@ -10,6 +10,7 @@ import 'credential_output_filter.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';
+part 'information_import_client.dart';
 
 class AgentClient {
   AgentClient(
@@ -115,6 +116,9 @@ class AgentClient {
           );
         }
         return _call('/capabilities', {});
+      case 'import-file-status':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/import-file/status', {'sessionSecret': _session, 'operationId': input['operationId']});
       case 'plugin-list':
         if (input.length != 1) return {'status': 'invalid_request'};
         return _call('/plugins/catalog', {});

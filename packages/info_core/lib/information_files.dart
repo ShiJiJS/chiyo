@@ -44,8 +44,12 @@ final class InformationAttachmentVersion {
     required this.createdAt,
     this.retiredAt,
     this.purgedAt,
+    this.label = '',
+    this.sourceNote = '',
   }) {
-    if (!_validInformationFileMetadata(
+    if (label.length > 200 ||
+        sourceNote.length > 2000 ||
+        !_validInformationFileMetadata(
           originalName,
           mediaType,
           byteLength,
@@ -60,6 +64,7 @@ final class InformationAttachmentVersion {
   }
   final InformationAttachmentRef reference;
   final String originalName, mediaType, sha256;
+  final String label, sourceNote;
   final int byteLength;
   final DateTime createdAt;
   final DateTime? retiredAt, purgedAt;
@@ -76,6 +81,8 @@ final class InformationAttachmentVersion {
     createdAt: createdAt,
     retiredAt: retiredAt,
     purgedAt: purgedAt,
+    label: label,
+    sourceNote: sourceNote,
   );
   static bool _validDate(DateTime date) =>
       date.isUtc && date.year >= 1970 && date.year <= 9999;
@@ -89,11 +96,29 @@ final class InformationAttachmentVersion {
     'createdAt': createdAt.toIso8601String(),
     'retiredAt': retiredAt?.toIso8601String(),
     'purgedAt': purgedAt?.toIso8601String(),
+    if (label.isNotEmpty) 'label': label,
+    if (sourceNote.isNotEmpty) 'sourceNote': sourceNote,
   };
   factory InformationAttachmentVersion.fromPrivateJson(
     Map<String, dynamic> json,
   ) {
-    if (json.length != 9 ||
+    if (json.keys.any(
+          (k) => !{
+            'attachmentId',
+            'attachmentVersion',
+            'originalName',
+            'mediaType',
+            'byteLength',
+            'sha256',
+            'createdAt',
+            'retiredAt',
+            'purgedAt',
+            'label',
+            'sourceNote',
+          }.contains(k),
+        ) ||
+        json.length < 9 ||
+        json.length > 11 ||
         json['attachmentId'] is! String ||
         json['attachmentVersion'] is! int ||
         json['originalName'] is! String ||
@@ -129,6 +154,8 @@ final class InformationAttachmentVersion {
       createdAt: date(json['createdAt']),
       retiredAt: json['retiredAt'] == null ? null : date(json['retiredAt']),
       purgedAt: json['purgedAt'] == null ? null : date(json['purgedAt']),
+      label: json['label'] as String? ?? '',
+      sourceNote: json['sourceNote'] as String? ?? '',
     );
   }
 }

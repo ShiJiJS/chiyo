@@ -1,5 +1,6 @@
 import 'information.dart';
 import 'credential_import_input.dart';
+import 'information_import_files.dart';
 export 'credential_import_input.dart';
 
 enum ImportProposalState { pending, confirmed, rejected }
@@ -59,10 +60,12 @@ class ImportItemInput {
     Map<String, Object?> values = const {},
     this.layout,
     this.credential,
+    Iterable<ImportAttachmentInput> attachments = const [],
     Map<String, List<InformationRelationRef>> relations = const {},
     Map<String, List<ImportPendingReference>> pendingRelations = const {},
     Iterable<String?> fieldKeys = const [],
-  }) : fields = List.unmodifiable(fields),
+  }) : attachments = List.unmodifiable(attachments),
+       fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds),
        values = _freezeImportValue(values) as Map<String, Object?>,
        fieldKeys = List.unmodifiable(fieldKeys),
@@ -86,6 +89,7 @@ class ImportItemInput {
   final Map<String, Object?> values;
   final InformationLayout? layout;
   final CredentialImportInput? credential;
+  final List<ImportAttachmentInput> attachments;
   final List<String?> fieldKeys;
   final Map<String, List<InformationRelationRef>> relations;
   final Map<String, List<ImportPendingReference>> pendingRelations;
@@ -120,6 +124,8 @@ class ImportItemInput {
     'suggestedDirectory': suggestedDirectory,
     'suggestedTags': suggestedTags,
     'suggestedTemplate': suggestedTemplate,
+    if (attachments.isNotEmpty)
+      'attachments': [for (final f in attachments) f.submissionJson],
     if (templateId != null) ...{
       'templateId': templateId,
       'templateVersion': templateVersion,
@@ -140,6 +146,8 @@ class ImportItemInput {
     'suggestedDirectory': suggestedDirectory,
     'suggestedTags': suggestedTags,
     'suggestedTemplate': suggestedTemplate,
+    if (attachments.isNotEmpty)
+      'attachments': [for (final f in attachments) f.toPrivateJson()],
     'fields': [for (final f in fields) f.toJson()],
     if (templateId != null) ...{
       'templateId': templateId,
@@ -171,6 +179,7 @@ class ImportItemInput {
             'fields',
             'relations',
             'credential',
+            'attachments',
           }.contains(key),
         ) ||
         json['templateId'] != null && json.containsKey('fields')) {
@@ -222,6 +231,12 @@ class ImportItemInput {
     fieldKeys: private
         ? (json['fieldKeys'] as List? ?? []).cast<String?>()
         : const [],
+    attachments: (json['attachments'] as List? ?? []).map(
+      (v) => ImportAttachmentInput.fromJson(
+        Map<String, dynamic>.from(v as Map),
+        private: private,
+      ),
+    ),
   );
 }
 

@@ -14,6 +14,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
 import 'information_files.dart';
+import 'information_import_files.dart';
 import 'info_core.dart'
     show
         AccessFailure,
@@ -48,6 +49,7 @@ import 'info_core.dart'
         SshHostTrustRepository,
         SshHostTrustSnapshot;
 part 'memory_information_files.dart';
+part 'memory_information_import_files.dart';
 part 'memory_classification_operations.dart';
 part 'memory_information_purge.dart';
 
@@ -400,6 +402,7 @@ abstract interface class InformationRepository {
     List<InformationUpdateAdmission> updates = const [],
     List<ManagedCredential> credentialRecords = const [],
     List<CredentialMaterial> credentialMaterials = const [],
+    List<InformationImportFilePromotion> filePromotions = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
@@ -438,6 +441,7 @@ class MemoryInformationRepository
         CredentialRuntimeRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
+        InformationImportFileRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
         InformationLifecycleRepository,
@@ -449,6 +453,39 @@ class MemoryInformationRepository
   Future<void> commitInformationPurge(InformationPurgeChange change) async =>
       _commitPurge(change);
   final _purgedInformationCommits = <String>{};
+  final _importUploadData = <String, (InformationImportUpload, Uint8List?)>{};
+  final _claimedImportUploads = <String>{};
+  @override
+  Future<InformationImportUpload?> importFileUpload(String id) async =>
+      _importUploadData[id]?.$1;
+  @override
+  Future<InformationImportUpload?> importFileOperation(
+    String binding,
+    String operationId,
+  ) async => _importUploadData.values
+      .where(
+        (v) =>
+            v.$1.sessionBinding == binding && v.$1.operationId == operationId,
+      )
+      .firstOrNull
+      ?.$1;
+  @override
+  Future<void> stageImportFile(
+    InformationImportUpload upload,
+    Uint8List bytes,
+  ) => _stageImportOriginal(upload, bytes);
+  @override
+  Future<T> withImportFile<T>(
+    String id,
+    Future<T> Function(InformationImportUpload, Stream<Uint8List>) action,
+  ) => _withImportOriginal(id, action);
+  @override
+  Future<void> pruneImportFiles(DateTime cutoff, Set<String> retained) async {
+    _importUploadData.removeWhere(
+      (id, row) => !retained.contains(id) && row.$1.createdAt.isBefore(cutoff),
+    );
+  }
+
   final _approvalReceipts = <String, InformationApprovalReceipt>{};
   @override
   Future<InformationApprovalReceipt?> informationApprovalReceipt(
@@ -603,7 +640,7 @@ class MemoryInformationRepository
   );
   @override
   Future<InformationAttachmentUsage> informationAttachmentUsage() async {
-    final stages = await _fileStages.informationFileStagingUsage();
+    final stages = await informationFileStagingUsage();
     final available = _informationFiles.values
         .where((v) => v.$1.available)
         .toList();
@@ -653,20 +690,44 @@ class MemoryInformationRepository
     required String originalName,
     required String mediaType,
     required Uint8List bytes,
-  }) => _fileStages.stageInformationBytes(
-    draftId: draftId,
-    stageId: stageId,
-    originalName: originalName,
-    mediaType: mediaType,
-    bytes: bytes,
-    retainedBytes: _informationFiles.values.fold<int>(
-      0,
-      (sum, v) => sum + (v.$2?.length ?? 0),
-    ),
-  );
+  }) async {
+    final pending = _importUploadData.values.where((v) => v.$2 != null);
+    final own = await _fileStages.informationFileStagingUsage();
+    InformationFileStage? previous;
+    try {
+      previous = await informationStage(draftId, stageId);
+    } on AccessFailure {
+      /* New stage. */
+    }
+    if (previous == null &&
+        own.files + pending.length >= informationFileStageLimit) {
+      throw const AccessFailure('attachment_capacity_exceeded');
+    }
+    return _fileStages.stageInformationBytes(
+      draftId: draftId,
+      stageId: stageId,
+      originalName: originalName,
+      mediaType: mediaType,
+      bytes: bytes,
+      retainedBytes:
+          pending.fold(0, (n, v) => n + v.$1.byteLength) +
+          _informationFiles.values.fold<int>(
+            0,
+            (sum, v) => sum + (v.$2?.length ?? 0),
+          ),
+    );
+  }
+
   @override
-  Future<InformationFileStagingUsage> informationFileStagingUsage() =>
-      _fileStages.informationFileStagingUsage();
+  Future<InformationFileStagingUsage> informationFileStagingUsage() async {
+    final own = await _fileStages.informationFileStagingUsage();
+    final pending = _importUploadData.values.where((v) => v.$2 != null);
+    return InformationFileStagingUsage(
+      own.files + pending.length,
+      own.bytes + pending.fold(0, (n, v) => n + v.$1.byteLength),
+    );
+  }
+
   @override
   Future<void> releaseInformationStage(String draftId, String stageId) =>
       _fileStages.releaseInformationStage(draftId, stageId);
@@ -987,7 +1048,9 @@ class MemoryInformationRepository
       List.unmodifiable(_proposals.values);
   @override
   Future<void> saveImportProposal(ImportProposal proposal) async {
+    _claimImportOriginals(proposal);
     _proposals[proposal.id] = proposal;
+    _reconcileImportOriginals();
   }
 
   @override
@@ -1000,11 +1063,17 @@ class MemoryInformationRepository
     List<InformationUpdateAdmission> updates = const [],
     List<ManagedCredential> credentialRecords = const [],
     List<CredentialMaterial> credentialMaterials = const [],
+    List<InformationImportFilePromotion> filePromotions = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
+    final importedFiles = await _prepareImportedOriginals(
+      filePromotions,
+      proposals,
+    );
+    _informationFiles.addAll(importedFiles);
     _credentials.addAll(credentialRecords);
     _materials.addAll(credentialMaterials);
     for (final directory in newDirectories) {
@@ -1019,6 +1088,7 @@ class MemoryInformationRepository
     for (final proposal in proposals) {
       _proposals[proposal.id] = proposal;
     }
+    _reconcileImportOriginals();
     for (final update in updates) {
       final item = update.item;
       if (item != null) _items[item.id] = item;

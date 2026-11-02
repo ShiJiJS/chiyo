@@ -110,6 +110,43 @@ class WorkspaceProposalCredential {
   final int? byteLength;
 }
 
+typedef WorkspaceProposalFileOpener =
+    Future<void> Function(
+      String proposalId,
+      int proposalVersion,
+      String itemId,
+      String attachmentKey,
+      int version,
+    );
+
+/// Reviewed ordinary-file metadata. Original bytes stay in the Owner reader.
+class WorkspaceProposalAttachment {
+  WorkspaceProposalAttachment({
+    required this.key,
+    required this.name,
+    required this.description,
+    required this.currentVersion,
+    required Iterable<WorkspaceProposalOriginal> versions,
+    this.templateField,
+  }) : versions = List.unmodifiable(versions);
+  final String key, name, description;
+  final String? templateField;
+  final int? currentVersion;
+  final List<WorkspaceProposalOriginal> versions;
+}
+
+class WorkspaceProposalOriginal {
+  const WorkspaceProposalOriginal({
+    required this.filename,
+    required this.mediaType,
+    required this.byteLength,
+    required this.label,
+    required this.sourceNote,
+  });
+  final String filename, mediaType, label, sourceNote;
+  final int byteLength;
+}
+
 class WorkspaceProposalItem {
   WorkspaceProposalItem({
     required this.id,
@@ -118,8 +155,10 @@ class WorkspaceProposalItem {
     this.beforeState = WorkspaceProposalBeforeState.unread,
     this.admissionNote = '',
     this.credential,
+    Iterable<WorkspaceProposalAttachment> attachments = const [],
     Iterable<WorkspaceProposalFieldChange> changes = const [],
-  }) : changes = List.unmodifiable(changes) {
+  }) : changes = List.unmodifiable(changes),
+       attachments = List.unmodifiable(attachments) {
     if (proposed.record.ref.kind == WorkspaceRecordKind.credential &&
             (credential == null ||
                 proposed.values.isNotEmpty ||
@@ -128,6 +167,7 @@ class WorkspaceProposalItem {
                 proposed.retainedFields.isNotEmpty ||
                 before != null ||
                 this.changes.isNotEmpty) ||
+        credential != null && this.attachments.isNotEmpty ||
         before?.record.ref.kind == WorkspaceRecordKind.credential) {
       throw ArgumentError('Credential bodies do not pass through proposals.');
     }
@@ -135,6 +175,7 @@ class WorkspaceProposalItem {
   final String id;
   final String admissionNote;
   final WorkspaceProposalCredential? credential;
+  final List<WorkspaceProposalAttachment> attachments;
   final WorkspaceDetail proposed;
   final WorkspaceDetail? before;
   final WorkspaceProposalBeforeState beforeState;
@@ -147,6 +188,9 @@ class WorkspaceProposalItem {
     return WorkspaceProposalItem(
       id: id,
       proposed: proposed,
+      attachments: attachments,
+      credential: credential,
+      admissionNote: admissionNote,
       beforeState: state,
       before: WorkspaceDetail(
         record: old.record,

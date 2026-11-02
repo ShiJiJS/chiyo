@@ -16,9 +16,27 @@ extension _CredentialImportClient on AgentClient {
     final hasCredential = raw.any(
       (row) => (row as Map).containsKey('credential'),
     );
-    if (hasCredential || input.containsKey('operationId')) {
+    final hasFiles = raw.any((row) {
+      final attachments = (row as Map)['attachments'];
+      return attachments is List && attachments.isNotEmpty;
+    });
+    if (hasFiles &&
+        !revise &&
+        (input['operationId'] is! String ||
+            !RegExp(
+              r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+            ).hasMatch(input['operationId'] as String))) {
+      return {'status': 'invalid_operation_id'};
+    }
+    if (hasCredential || hasFiles || input.containsKey('operationId')) {
       final capabilities = await _call('/capabilities', {});
       if (capabilities['status'] != 'ok') return capabilities;
+      if (hasFiles &&
+          !(capabilities['capabilities'] as List? ?? []).contains(
+            'information-file-upload.v1',
+          )) {
+        return {'status': 'unsupported_capability'};
+      }
       if (input.containsKey('operationId') &&
           !(capabilities['capabilities'] as List? ?? []).contains(
             'information-import-operations.v1',
@@ -36,8 +54,17 @@ extension _CredentialImportClient on AgentClient {
     }
     final items = <Map<String, dynamic>>[];
     try {
-      for (final row in raw) {
+      for (final (index, row) in raw.indexed) {
         final item = Map<String, dynamic>.from(row as Map);
+        if (item['attachments'] != null) {
+          item['attachments'] = await _prepareImportAttachments(
+            item['attachments'],
+            rootOperation: revise
+                ? '${input['proposalId']}:${input['version']}'
+                : input['operationId'] as String? ?? '',
+            itemIndex: index,
+          );
+        }
         if (item['credential'] != null) {
           final credential = Map<String, dynamic>.from(
             item['credential'] as Map,
@@ -79,9 +106,15 @@ extension _CredentialImportClient on AgentClient {
         }
         items.add(item);
       }
+    } on _ImportFileClientFailure catch (error) {
+      return error.result;
     } on Object {
       // Errors never disclose file contents, source paths, bytes or secrets.
-      return {'status': 'invalid_credential_input'};
+      return {
+        'status': hasCredential
+            ? 'invalid_credential_input'
+            : 'invalid_request',
+      };
     }
     final body = <String, dynamic>{
       'sessionSecret': _session,

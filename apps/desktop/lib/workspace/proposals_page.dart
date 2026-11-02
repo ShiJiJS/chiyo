@@ -31,6 +31,7 @@ class ProposalsPage extends StatefulWidget {
     super.key,
     required this.controller,
     this.onPasswordInput,
+    this.onFile,
     required this.onRecord,
     this.onModalChanged,
     this.onRetry,
@@ -41,6 +42,7 @@ class ProposalsPage extends StatefulWidget {
   final ProposalsController controller;
   final Future<bool> Function(String proposalId, int version, String itemId)?
   onPasswordInput;
+  final WorkspaceProposalFileOpener? onFile;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final ValueChanged<bool>? onModalChanged;
   final VoidCallback? onRetry;
@@ -597,6 +599,22 @@ class _ProposalsPageState extends State<ProposalsPage> {
               ),
               onRecord: widget.onRecord,
               enabled: !m.frozen,
+              onFile: widget.onFile == null
+                  ? null
+                  : (key, version) async {
+                      widget.onModalChanged?.call(true);
+                      try {
+                        await widget.onFile!(
+                          d.summary.id,
+                          d.summary.version,
+                          item.id,
+                          key,
+                          version,
+                        );
+                      } finally {
+                        widget.onModalChanged?.call(false);
+                      }
+                    },
             )
           else if (d.summary.wholeDeletion) ...[
             Text(

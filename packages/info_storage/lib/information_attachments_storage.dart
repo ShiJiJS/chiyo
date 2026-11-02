@@ -44,6 +44,9 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     final versions = await _allAttachmentVersions();
     if (versions.isEmpty) return;
     await _requireAdmissionFormat(_longTermAttachmentLibraryFormat);
+    if (versions.any((v) => v.label.isNotEmpty || v.sourceNote.isNotEmpty)) {
+      await _requireAdmissionFormat(_informationImportFileLibraryFormat);
+    }
     final current = {
       for (final row
           in await _db

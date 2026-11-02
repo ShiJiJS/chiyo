@@ -431,6 +431,9 @@ class InformationBackups {
         (r) => _backupJson(r).containsKey('template'),
       );
       final longTermAttachments = versions.isNotEmpty;
+      final describedFileVersions = versions.any(
+        (v) => v.label.isNotEmpty || v.sourceNote.isNotEmpty,
+      );
       final templatePackages =
           (await _repository._db
                   .customSelect('SELECT id FROM template_packages LIMIT 1')
@@ -444,7 +447,9 @@ class InformationBackups {
           credentialTemplates ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = longTermAttachments
+        formatVersion = describedFileVersions
+            ? 18
+            : longTermAttachments
             ? 17
             : credentialTemplates
             ? 16
@@ -888,6 +893,11 @@ class InformationBackups {
             _longTermAttachmentLibraryFormat,
           );
         }
+        if (contents.formatVersion >= 18) {
+          await _repository._requireAdmissionFormat(
+            _informationImportFileLibraryFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -961,6 +971,7 @@ class InformationBackups {
           15,
           16,
           17,
+          18,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -981,7 +992,7 @@ class InformationBackups {
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
       12 || 13 || 14 => _v12Columns,
-      15 || 16 || 17 => _v15Columns,
+      15 || 16 || 17 || 18 => _v15Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

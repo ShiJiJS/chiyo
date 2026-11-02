@@ -212,7 +212,16 @@ extension OwnerTemplateImports on OwnerAccess {
           kind = field['type'] as String;
       final value = input.values[key];
       if (kind == 'file') {
-        throw const AccessFailure('unsupported_file_write');
+        final files = input.attachments
+            .where((a) => a.templateField == key)
+            .toList();
+        if (files.length > 1 ||
+            files.isEmpty && field['required'] == true ||
+            files.isNotEmpty && value != files.single.key ||
+            files.isEmpty && value != null && value != '') {
+          errors[key] = '请提供这份文件的attachments条目，并在模板值中填写它的key。';
+        }
+        continue;
       }
       if (kind == 'entries') {
         if (value != null && value is! List ||
@@ -304,7 +313,21 @@ extension OwnerTemplateImports on OwnerAccess {
         errors[format] = '请选择plain或markdown正文格式。';
       }
     }
-    if (fields.isEmpty && errors.isEmpty) {
+    final declaredFiles = {
+      for (final f in descriptors.where((f) => f['type'] == 'file')) f['key'],
+    };
+    if (input.attachments.any(
+      (a) =>
+          a.templateField != null && !declaredFiles.contains(a.templateField),
+    )) {
+      errors['_files'] = '文件绑定必须指向模板声明的文件字段；独立补充附件省略templateField。';
+    }
+    if (input.attachments.any(
+      (a) => a.versions.any((v) => v.upload == null || v.upload!.consumed),
+    )) {
+      errors['_files'] = '原文件尚未接收，请通过CLI提交后重新审批。';
+    }
+    if (fields.isEmpty && input.attachments.isEmpty && errors.isEmpty) {
       errors['_form'] = '模板至少需要一个可保存的字段。';
     }
     if (errors.isNotEmpty) throw InformationTemplateInputFailure(errors);
@@ -340,6 +363,7 @@ extension OwnerTemplateImports on OwnerAccess {
       pendingRelations: input.pendingRelations,
       layout: layout,
       fieldKeys: slots,
+      attachments: input.attachments,
     );
   }
 
@@ -388,6 +412,7 @@ extension OwnerTemplateImports on OwnerAccess {
     final material = input.credential;
     final config = template.definition['credential'] as Map?;
     if (material == null ||
+        input.attachments.isNotEmpty ||
         config == null ||
         input.values.isNotEmpty ||
         input.fields.isNotEmpty ||

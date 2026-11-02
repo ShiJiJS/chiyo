@@ -52,7 +52,7 @@ Map<String, Object?> _guidance(String type) {
       ],
       'experience': [],
     },
-    'file': {'file': '由用户提供的普通文件；通过文件录入入口提交原文件。'},
+    'file': {'file': 'primary'},
   };
   return {
     'instructions': switch (type) {

@@ -94,7 +94,8 @@
                     "number",
                     "date",
                     "multiline",
-                    "entries"
+                    "entries",
+                    "file"
                   ]
                 },
                 "required": {
