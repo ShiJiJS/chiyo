@@ -153,6 +153,16 @@ class _ProposalReadDialogState extends State<ProposalReadDialog> {
                 enabled: false,
               ),
           ],
+          if (widget.review != null)
+            ProposalRelationChanges(
+              before: current,
+              after: widget.review!,
+              source: widget.source.relations(
+                widget.proposalId,
+                widget.item!.id,
+                widget.proposalVersion,
+              ),
+            ),
           for (final section in proposalChangeSections(widget.item!)) ...[
             Padding(
               padding: const EdgeInsets.only(top: 18),

@@ -19,6 +19,7 @@ extension OwnerTemplateImports on OwnerAccess {
         templateVersion: input.templateVersion,
         templateDigest: input.templateDigest,
         values: input.values,
+        relations: input.relations ?? const {},
         layout: input.compiledTemplate?.layout,
       ),
       _service.agent._currentInformationTemplates(),
@@ -34,6 +35,7 @@ extension OwnerTemplateImports on OwnerAccess {
       templateVersion: input.templateVersion,
       templateDigest: input.templateDigest,
       values: input.values,
+      relations: input.relations,
       compiledTemplate: compiled,
     );
   }
@@ -82,7 +84,9 @@ extension OwnerTemplateImports on OwnerAccess {
         typeId: compiled.layout!.typeId,
         snapshot: compiled.layout!.snapshot,
         fieldIds: compiled.bindLayout(fields)!.fieldIds,
-        relations: previous.layout!.relations,
+        relations: input.relations == null
+            ? previous.layout!.relations
+            : compiled.relations,
       ),
       createdAt: previous.createdAt,
       modifiedAt: _service._clock(),
@@ -116,6 +120,13 @@ extension OwnerTemplateImports on OwnerAccess {
     final descriptors = (definition['fields'] as List).cast<Map>();
     final keys = {for (final f in descriptors) f['key'] as String};
     final errors = <String, String>{};
+    final relationKeys = {
+      for (final r in definition['relations'] as List? ?? [])
+        (r as Map)['key'] as String,
+    };
+    if (input.relations.keys.any((key) => !relationKeys.contains(key))) {
+      errors['_relations'] = '包含模板未定义的关联。';
+    }
     for (final key in input.values.keys) {
       if (!keys.contains(key)) errors['_form'] = '包含模板未定义的字段。';
     }
@@ -253,6 +264,7 @@ extension OwnerTemplateImports on OwnerAccess {
         'entries': entries,
       },
       fieldIds: const {},
+      relations: input.relations,
     );
     return ImportItemInput(
       input.name,
@@ -267,8 +279,39 @@ extension OwnerTemplateImports on OwnerAccess {
       templateVersion: template.version,
       templateDigest: template.digest,
       values: input.values,
+      relations: input.relations,
       layout: layout,
       fieldKeys: slots,
     );
+  }
+
+  void _validateImportedRelations(ImportItemInput input) {
+    if (input.relations.isEmpty) return;
+    final definition = input.layout!.snapshot['definition'] as Map;
+    for (final e in input.relations.entries) {
+      final descriptor = (definition['relations'] as List)
+          .cast<Map>()
+          .singleWhere((r) => r['key'] == e.key);
+      final allowed = (descriptor['targetTemplates'] as List? ?? [])
+          .cast<String>();
+      for (final ref in e.value) {
+        final targetType = ref.kind == 'credential'
+            ? credentials.any((c) => c.id == ref.id)
+                  ? 'credential'
+                  : null
+            : information
+                  .where((i) => i.id == ref.id)
+                  .firstOrNull
+                  ?.layout
+                  ?.typeId;
+        final exists = ref.kind == 'credential'
+            ? targetType != null
+            : information.any((i) => i.id == ref.id);
+        if (!exists ||
+            allowed.isNotEmpty && !allowed.contains(targetType ?? 'generic')) {
+          throw const AccessFailure('proposal_reference_unavailable');
+        }
+      }
+    }
   }
 }

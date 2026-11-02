@@ -37,6 +37,8 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
   late Set<String> _tags;
   String? _directory, _error;
   bool get _new => widget.item.before == null;
+  bool get _templateRelations =>
+      widget.item.proposed.definition['templateVersion'] != null;
   List<Map<String, Object?>> get _fields => _new
       ? workspaceFields(widget.item.proposed)
       : [
@@ -254,13 +256,15 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
             ),
           ] else
             Text(
-              '可核对名称、用途说明及提案列出的字段；分类和关联保持当前内容。',
+              _templateRelations
+                  ? '可核对名称、用途说明、提案字段及关联；分类保持当前内容。'
+                  : '可核对名称、用途说明及提案列出的字段；分类和关联保持当前内容。',
               style: libraryText(context, 13, color: c.muted, height: 1.8),
             ),
           if (_fieldErrors['classification'] case final error?)
             Text(error, style: libraryText(context, 13, color: c.danger)),
           for (final f in _fields) _field(f),
-          if (_new)
+          if (_new || _templateRelations)
             for (final raw
                 in widget.item.proposed.definition['relations'] as List? ?? [])
               Padding(

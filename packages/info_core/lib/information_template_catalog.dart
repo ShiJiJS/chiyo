@@ -77,6 +77,25 @@ class InformationTemplateDescription {
   Map<String, Object?> toJson() => {
     ...summary(),
     'definition': definition,
+    'inputLimits': {
+      'itemsPerProposal': 20,
+      'fieldsPerItem': 50,
+      'fieldsPerProposal': 200,
+      'submissionUtf8Bytes': 240000,
+      'textCharacters': 64000,
+      'entryFieldCount': 3,
+    },
+    'relationInput': {
+      'shape': 'Map<declared relation key, List<target>>',
+      'target': {
+        'kind': 'information or credential',
+        'id': 'existing catalog target id',
+      },
+      'approval':
+          'References are saved only after owner approval; this grants no access to their content.',
+      'update':
+          'Omit relations to retain existing links; pass a complete map to replace links.',
+    },
     if (hasGuidance)
       'submissionExample': {
         'command': 'import-submit',
@@ -88,6 +107,7 @@ class InformationTemplateDescription {
             'templateVersion': version,
             'templateDigest': digest,
             'values': (definition['example'] as Map)['values'],
+            'relations': <String, Object?>{},
           },
         ],
       },

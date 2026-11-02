@@ -67,15 +67,20 @@ class UpdateInput {
     this.templateVersion,
     this.templateDigest,
     Map<String, Object?> values = const {},
+    Map<String, List<InformationRelationRef>>? relations,
     this.compiledTemplate,
   }) : changes = List.unmodifiable(changes),
-       values = ImportItemInput('', '', const [], values: values).values;
+       values = ImportItemInput('', '', const [], values: values).values,
+       relations = relations == null
+           ? null
+           : ImportItemInput('', '', const [], relations: relations).relations;
   final String itemId;
   final int baseVersion;
   final List<FieldChange> changes;
   final String? name, description;
   final String? templateId, templateVersion, templateDigest;
   final Map<String, Object?> values;
+  final Map<String, List<InformationRelationRef>>? relations;
 
   /// Validated private snapshot, never accepted from Agent JSON.
   final ImportItemInput? compiledTemplate;
@@ -90,6 +95,11 @@ class UpdateInput {
       'templateVersion': templateVersion,
       'templateDigest': templateDigest,
       'values': values,
+      if (relations != null)
+        'relations': {
+          for (final e in relations!.entries)
+            e.key: e.value.map((r) => r.toJson()).toList(),
+        },
     },
   };
   Map<String, Object?> toJson() => {
@@ -109,6 +119,7 @@ class UpdateInput {
         'templateVersion',
         'templateDigest',
         'values',
+        'relations',
       }.contains(key),
     )) {
       throw const FormatException('Agent cannot supply compiled template');
@@ -132,6 +143,9 @@ class UpdateInput {
     templateVersion: json['templateVersion'] as String?,
     templateDigest: json['templateDigest'] as String?,
     values: Map<String, Object?>.from(json['values'] as Map? ?? {}),
+    relations: json.containsKey('relations')
+        ? importRelationsFromJson(json['relations'])
+        : null,
     compiledTemplate: private && json['compiledTemplate'] != null
         ? ImportItemInput.fromPrivateJson(
             Map<String, dynamic>.from(json['compiledTemplate'] as Map),

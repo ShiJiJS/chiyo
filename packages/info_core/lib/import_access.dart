@@ -14,7 +14,10 @@ void _validateImport(List<ImportItemInput> items) {
             i.name.length > 200 ||
             i.description.length > 2000 ||
             i.fields.isEmpty && i.templateId == null ||
-            i.templateId == null && (i.values.isNotEmpty || i.layout != null) ||
+            i.templateId == null &&
+                (i.values.isNotEmpty ||
+                    i.layout != null ||
+                    i.relations.isNotEmpty) ||
             i.fields.length > 50 ||
             i.suggestedDirectory.length > 200 ||
             i.suggestedTemplate.length > 200 ||
@@ -122,6 +125,9 @@ extension OwnerImports on OwnerAccess {
     _validateImport(reviewed);
     reviewed = _compileTemplateImports(reviewed);
     _validateImport(reviewed);
+    for (final input in reviewed) {
+      _validateImportedRelations(input);
+    }
     final confirmedAt = _service._clock();
     final organization = _OrganizationPlan(this);
     final locations = [
