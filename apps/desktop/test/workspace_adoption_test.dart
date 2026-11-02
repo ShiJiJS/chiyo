@@ -63,6 +63,54 @@ void main() {
   Matcher failure(String code) =>
       isA<WorkspaceFailure>().having((e) => e.code, 'code', code);
   test(
+    'same-template suggestions copy values but preserve identities only after explicit meaning confirmation',
+    () async {
+      final s = SampleWorkspaceSource();
+      addTearDown(s.dispose);
+      await installDomain(s);
+      final original = await generic(s);
+      final first = await s.previewAdoption(domain(original));
+      final applied = await s.applyAdoption('initial-adoption', first.planId);
+      final current = await s.readDetail(applied.ref);
+      final target = (await s.plugins.load()).packages
+          .expand((p) => p.templates)
+          .singleWhere((t) => t.type.id == current.record.type.id);
+      final suggested = workspaceSuggestedAdoptionMappings(current, target);
+      expect(suggested['domain']!.sourceKey, 'domain');
+      expect(suggested['domain']!.sameMeaning, isFalse);
+      final copy = await s.previewAdoption(
+        WorkspaceAdoptionDraft(
+          ref: current.record.ref,
+          typeId: target.type.id,
+          fields: suggested,
+        ),
+      );
+      expect(copy.result.values['domain'], current.values['domain']);
+      expect(copy.result.fieldIds['domain'], isNot(current.fieldIds['domain']));
+      final confirmed = await s.previewAdoption(
+        WorkspaceAdoptionDraft(
+          ref: current.record.ref,
+          typeId: target.type.id,
+          fields: {
+            ...suggested,
+            'domain': const WorkspaceFieldMapping(
+              sourceKey: 'domain',
+              sameMeaning: true,
+            ),
+          },
+        ),
+      );
+      expect(confirmed.result.fieldIds['domain'], current.fieldIds['domain']);
+      expect(workspaceSuggestedAdoptionMappings(original, target), isEmpty);
+      final foreign = WorkspacePluginTemplate(
+        id: target.id,
+        type: target.type,
+        definition: {...target.definition, 'packageId': 'another.package'},
+      );
+      expect(workspaceSuggestedAdoptionMappings(current, foreign), isEmpty);
+    },
+  );
+  test(
     'adoption preview preserves source and exact target snapshot, distinguishes same-meaning identity from same-named retained content',
     () async {
       final s = SampleWorkspaceSource();

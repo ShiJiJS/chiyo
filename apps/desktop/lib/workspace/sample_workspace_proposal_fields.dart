@@ -186,9 +186,7 @@ extension _SampleProposalFields on _SampleProposals {
         .where((c) => c.intent != WorkspaceProposalFieldIntent.remove)
         .map((c) => c.reviewKey)
         .toSet();
-    if (review.name != baseline.name ||
-        review.description != baseline.description ||
-        review.directoryId != baseline.directoryId ||
+    if (review.directoryId != baseline.directoryId ||
         !_same(review.tagIds, baseline.tagIds) ||
         !_same(
           _relationKeys(review.relations),
@@ -410,7 +408,11 @@ extension _SampleProposalFields on _SampleProposals {
       removedValues[e.key] = e.value.values.toList();
     }
     final result = WorkspaceDetail(
-      record: current.record.copyWith(updatedAt: s._now()),
+      record: current.record.copyWith(
+        name: review.name.trim(),
+        description: review.description,
+        updatedAt: s._now(),
+      ),
       version: current.version + 1,
       definition: current.definition,
       fieldIds: ids,

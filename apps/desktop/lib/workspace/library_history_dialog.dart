@@ -20,6 +20,7 @@ Future<bool?> showLibraryHistory(
 Map<String, String> librarySnapshot(
   WorkspaceArchive archive, {
   bool includeEntries = true,
+  bool includeTargetIds = false,
 }) {
   final detail = archive.detail, record = detail.record;
   String value(Object? v) => v == null || v == ''
@@ -31,6 +32,22 @@ Map<String, String> librarySnapshot(
     for (final f in workspaceFields(detail))
       f['key'] as String: f['label'] as String? ?? f['key'] as String,
   };
+  final relationLabels = <String, String>{
+    for (final r
+        in workspaceEditingDefinition(detail)['relations'] as List? ?? [])
+      r['key'] as String: r['label'] as String? ?? r['key'] as String,
+    'credentials': '凭据',
+  };
+  String relationLabel(String key) {
+    final label = relationLabels[key] ?? key;
+    return detail.relations.keys
+                .where((k) => (relationLabels[k] ?? k) == label)
+                .length >
+            1
+        ? '$label（$key）'
+        : label;
+  }
+
   return {
     '名称': record.name,
     '用途': value(record.description),
@@ -53,10 +70,14 @@ Map<String, String> librarySnapshot(
           e.value,
         ),
     for (final e in detail.relations.entries)
-      '关联：${e.key}': e.value.isEmpty
+      '关联：${relationLabel(e.key)}': e.value.isEmpty
           ? '无关联'
           : e.value
-                .map((r) => '${archive.targets[r]?.name ?? '不可用目标'}（${r.key}）')
+                .map(
+                  (r) => archive.targets[r] == null
+                      ? '不可用目标（${r.key}）'
+                      : '${archive.targets[r]!.name}${includeTargetIds ? '（${r.key}）' : ''}',
+                )
                 .join('\n'),
     '资料结构': const JsonEncoder.withIndent('  ').convert(detail.definition),
   };
@@ -280,7 +301,12 @@ class _HistoryDialogState extends State<_HistoryDialog> {
 
   Widget _comparison(WorkspaceRevisionPreview preview) {
     final before = librarySnapshot(_currentArchive!),
-        old = librarySnapshot(preview.archive);
+        old = librarySnapshot(preview.archive),
+        beforeIdentity = librarySnapshot(
+          _currentArchive!,
+          includeTargetIds: true,
+        ),
+        oldIdentity = librarySnapshot(preview.archive, includeTargetIds: true);
     final c = UiPalette.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -308,7 +334,10 @@ class _HistoryDialogState extends State<_HistoryDialog> {
             ),
           ),
         const SizedBox(height: 20),
-        for (final key in {...before.keys, ...old.keys})
+        for (final key in {
+          ...before.keys,
+          ...old.keys,
+        }.where((k) => k != '资料结构'))
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15),
             decoration: BoxDecoration(
@@ -323,7 +352,11 @@ class _HistoryDialogState extends State<_HistoryDialog> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '当前${before[key] == old[key] ? ' · 未变化' : ''}',
+                  '当前${beforeIdentity[key] == oldIdentity[key]
+                      ? ' · 未变化'
+                      : key.startsWith('关联：')
+                      ? ' · 关联对象有变化'
+                      : ''}',
                   style: libraryText(context, 12, color: c.muted),
                 ),
                 SelectableText(
@@ -342,6 +375,34 @@ class _HistoryDialogState extends State<_HistoryDialog> {
               ],
             ),
           ),
+        ExpansionTile(
+          key: const ValueKey('history-structure-details'),
+          tilePadding: EdgeInsets.zero,
+          title: Text(
+            before['资料结构'] == old['资料结构']
+                ? '资料结构与关联标识（结构未变化）'
+                : '资料结构与关联标识（结构有变化，展开核对）',
+            style: libraryText(context, 14, weight: FontWeight.w600),
+          ),
+          children: [
+            if (before['资料结构'] != old['资料结构']) ...[
+              const Text('当前资料结构'),
+              SelectableText(before['资料结构']!),
+              const SizedBox(height: 10),
+              Text('历史 v${preview.archive.detail.version} 的资料结构'),
+            ],
+            SelectableText(old['资料结构']!),
+            for (final key in {
+              ...beforeIdentity.keys,
+              ...oldIdentity.keys,
+            }.where((k) => k.startsWith('关联：'))) ...[
+              const SizedBox(height: 12),
+              Text('$key · 对象标识'),
+              Text('当前：${beforeIdentity[key] ?? '无此关联'}'),
+              Text('历史：${oldIdentity[key] ?? '无此关联'}'),
+            ],
+          ],
+        ),
       ],
     );
   }

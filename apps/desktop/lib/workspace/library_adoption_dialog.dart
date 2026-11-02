@@ -38,8 +38,10 @@ class _AdoptionDialogState extends State<_AdoptionDialog> {
   bool get _locked => _loading || _mutation.frozen;
   WorkspacePluginTemplate? get _template =>
       _templates.where((t) => t.type.id == _target).firstOrNull;
-  Map<String, WorkspaceFieldMapping> get _fields =>
-      _mappings.putIfAbsent(_target!, () => {});
+  Map<String, WorkspaceFieldMapping> get _fields => _mappings.putIfAbsent(
+    _target!,
+    () => workspaceSuggestedAdoptionMappings(_current!, _template!),
+  );
   List<Map<String, Object?>> get _sourceFields => [
     ...workspaceFields(_current!),
     for (final key in _current!.values.keys)
@@ -215,7 +217,7 @@ class _AdoptionDialogState extends State<_AdoptionDialog> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Text(
-        '为目标字段选择来源，或填写新值。未选中的原内容会保留。',
+        '为目标字段选择来源，或填写新值。同一模板的同键字段会预选来源，仍需确认含义相同才保留原身份。未选中的原内容会保留。',
         style: libraryText(context, 13, color: UiPalette.of(context).muted),
       ),
       const SizedBox(height: 18),

@@ -176,6 +176,49 @@ void main() {
     }
   }
 
+  for (final batch in [false, true]) {
+    testWidgets(
+      'metadata diff and edits match persisted proposal (batch=$batch)',
+      (t) async {
+        final s = await start(t), m = model(t);
+        await pickProposal(t, 'update');
+        final before = await s.proposals.currentTarget('update');
+        await tap(t, find.byKey(const ValueKey('proposal-edit-server-port')));
+        await t.enterText(
+          find.byKey(const ValueKey('proposal-edit-name')),
+          '核对后的服务器',
+        );
+        await t.enterText(
+          find.byKey(const ValueKey('proposal-edit-description')),
+          '核对后的用途说明',
+        );
+        await tap(t, find.byKey(const ValueKey('proposal-edit-keep')));
+        await closed(t);
+        expect(find.text('资料名称'), findsWidgets);
+        expect(find.text('用途说明'), findsWidgets);
+        expect(find.text('核对后的服务器'), findsOneWidget);
+        expect(find.text('核对后的用途说明'), findsOneWidget);
+        if (batch) {
+          await tap(
+            t,
+            find.byKey(const ValueKey('proposal-batch-add-confirm')),
+          );
+          await openBatch(t);
+          await tap(t, find.byKey(const ValueKey('proposal-batch-run')));
+          expect(m.batch.entries.single.status, ProposalBatchStatus.completed);
+          await tap(t, find.byKey(const ValueKey('proposal-batch-close')));
+        } else {
+          await tap(t, find.byKey(const ValueKey('proposal-confirm')));
+        }
+        final saved = await s.readDetail(before.record.ref);
+        expect(saved.record.name, '核对后的服务器');
+        expect(saved.record.description, '核对后的用途说明');
+        expect(saved.record.directoryId, before.record.directoryId);
+        expect(saved.relations, before.relations);
+        expect(saved.fieldIds, before.fieldIds);
+      },
+    );
+  }
   testWidgets(
     'actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal',
     (t) async {

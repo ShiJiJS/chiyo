@@ -360,8 +360,17 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             ? WorkspaceSettingsSection.runtime
             : id == 'backups'
             ? WorkspaceSettingsSection.backups
+            : id == 'labels' || id == 'directories'
+            ? WorkspaceSettingsSection.classifications
             : WorkspaceSettingsSection.plugins,
       );
+      if (id == 'labels' || id == 'directories') {
+        _classifications.select(
+          id == 'labels'
+              ? WorkspaceClassificationKind.tag
+              : WorkspaceClassificationKind.directory,
+        );
+      }
       const prefix = 'plugin:builtin.server/host:';
       if (id.startsWith(prefix)) {
         _plugins.showHostSettings(

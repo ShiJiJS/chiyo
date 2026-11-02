@@ -12,6 +12,7 @@ Future<WorkspaceRecordRef?> showLibraryCredentialEditor(
   WorkspaceSource source,
   WorkspaceCatalog catalog, {
   WorkspaceRecordRef? ref,
+  String? initialDirectoryId,
   bool replace = false,
   WorkspaceCredentialPicker? picker,
 }) => showDesktopDialog<WorkspaceRecordRef>(
@@ -20,6 +21,7 @@ Future<WorkspaceRecordRef?> showLibraryCredentialEditor(
     source: source,
     catalog: catalog,
     ref: ref,
+    initialDirectoryId: initialDirectoryId,
     replace: replace,
     picker: picker,
   ),
@@ -30,12 +32,14 @@ class _CredentialFormLoader extends StatefulWidget {
     required this.source,
     required this.catalog,
     this.ref,
+    this.initialDirectoryId,
     required this.replace,
     this.picker,
   });
   final WorkspaceSource source;
   final WorkspaceCatalog catalog;
   final WorkspaceRecordRef? ref;
+  final String? initialDirectoryId;
   final bool replace;
   final WorkspaceCredentialPicker? picker;
   @override
@@ -83,6 +87,7 @@ class _CredentialFormLoaderState extends State<_CredentialFormLoader> {
           source: widget.source,
           catalog: widget.catalog,
           detail: _detail,
+          initialDirectoryId: widget.initialDirectoryId,
           picker: widget.picker,
           replace: widget.replace,
         )
@@ -111,12 +116,14 @@ class _CredentialEditor extends StatefulWidget {
     required this.source,
     required this.catalog,
     required this.detail,
+    required this.initialDirectoryId,
     required this.picker,
     required this.replace,
   });
   final WorkspaceSource source;
   final WorkspaceCatalog catalog;
   final WorkspaceCredentialDetail? detail;
+  final String? initialDirectoryId;
   final WorkspaceCredentialPicker? picker;
   final bool replace;
   @override
@@ -144,7 +151,9 @@ class _CredentialEditorState extends State<_CredentialEditor> {
   late WorkspaceCredentialDetail? _baseline = widget.detail;
   WorkspaceCredentialDetail? _latest;
   Map<WorkspaceRecordRef, String> _latestNames = {};
-  late String? _directory = widget.detail?.record.directoryId;
+  late String? _directory = widget.detail == null
+      ? widget.initialDirectoryId
+      : widget.detail!.record.directoryId;
   late final _tags = {...?widget.detail?.record.tags.map((t) => t.id)};
   late List<WorkspaceRecordRef> _links = List.of(
     widget.detail?.linkedInformation ?? [],

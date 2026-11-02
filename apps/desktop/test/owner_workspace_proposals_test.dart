@@ -122,6 +122,51 @@ void main() {
     },
   );
   test(
+    'agent metadata changes remain reviewable and owner edits persist with the field correction',
+    () async {
+      final session = service.agent.openSession('合成聊天');
+      final item = await service.owner.createInformation('旧名称', '旧用途', [
+        const core.FieldInput('步骤', '', '旧步骤'),
+      ]);
+      final id = await service.agent.submitUpdate(
+        session,
+        core.UpdateInput(
+          item.id,
+          item.version,
+          [core.FieldChange.correct(item.fields.single.id, '新步骤')],
+          name: 'AI 名称',
+          description: 'AI 用途',
+        ),
+      );
+      final d = await source.read(id), change = d.items.single;
+      expect(change.before!.record.description, '旧用途');
+      expect(change.proposed.record.name, 'AI 名称');
+      expect(change.proposed.record.description, 'AI 用途');
+      final proposed = WorkspaceProposalItemReview.fromItem(change);
+      await source.change(
+        decision(
+          d,
+          reviewed: [
+            WorkspaceProposalItemReview(
+              itemId: proposed.itemId,
+              name: '主人核对名称',
+              description: '主人核对用途',
+              values: proposed.values,
+              directoryId: proposed.directoryId,
+              tagIds: proposed.tagIds,
+              relations: proposed.relations,
+            ),
+          ],
+        ),
+      );
+      final saved = service.owner.information.single;
+      expect(saved.name, '主人核对名称');
+      expect(saved.description, '主人核对用途');
+      expect(saved.fields.single.value, '新步骤');
+      expect(saved.fields.single.id, item.fields.single.id);
+    },
+  );
+  test(
     'mixed add/replace changes keep correct reviewed values and stable preview identities',
     () async {
       final session = service.agent.openSession('合成聊天');
