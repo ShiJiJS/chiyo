@@ -5,6 +5,7 @@ enum ProposalBatchStatus {
   notStarted('未开始'),
   processing('处理中'),
   completed('已提交'),
+  awaiting('已批准待入库'),
   rejected('已拒绝'),
   conflict('版本冲突'),
   failed('确定未提交'),
@@ -35,6 +36,7 @@ class ProposalBatchEntry {
   WorkspaceProposalReceipt? receipt;
   bool get terminal =>
       status == ProposalBatchStatus.completed ||
+      status == ProposalBatchStatus.awaiting ||
       status == ProposalBatchStatus.rejected ||
       status == ProposalBatchStatus.obsolete;
 }
@@ -222,7 +224,9 @@ class ProposalBatch extends ChangeNotifier {
     e.command = null;
     e.failure = null;
     e.status = e.action == WorkspaceProposalAction.confirm
-        ? ProposalBatchStatus.completed
+        ? receipt.awaitingItemIds.isEmpty
+              ? ProposalBatchStatus.completed
+              : ProposalBatchStatus.awaiting
         : ProposalBatchStatus.rejected;
     onHandled(e.summary.id);
   }

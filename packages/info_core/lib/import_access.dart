@@ -1,6 +1,25 @@
 part of 'info_core.dart';
 
 void _validateImport(List<ImportItemInput> items) {
+  bool invalidRelations(ImportItemInput input) {
+    for (final group in {
+      ...input.relations.keys,
+      ...input.pendingRelations.keys,
+    }) {
+      final targets = [
+        for (final ref in input.relations[group] ?? <InformationRelationRef>[])
+          jsonEncode(ref.toJson()),
+        for (final ref
+            in input.pendingRelations[group] ?? <ImportPendingReference>[])
+          jsonEncode(ref.toJson()),
+      ];
+      if (targets.length > 200 || targets.toSet().length != targets.length) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   if (items.isEmpty ||
       items.length > 20 ||
       items.fold<int>(0, (n, i) => n + i.fields.length) > 200 ||
@@ -13,11 +32,15 @@ void _validateImport(List<ImportItemInput> items) {
             i.name.trim().isEmpty ||
             i.name.length > 200 ||
             i.description.length > 2000 ||
+            invalidRelations(i) ||
+            i.key.isNotEmpty &&
+                !RegExp(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$').hasMatch(i.key) ||
             i.fields.isEmpty && i.templateId == null ||
             i.templateId == null &&
                 (i.values.isNotEmpty ||
                     i.layout != null ||
-                    i.relations.isNotEmpty) ||
+                    i.relations.isNotEmpty ||
+                    i.pendingRelations.isNotEmpty) ||
             i.fields.length > 50 ||
             i.suggestedDirectory.length > 200 ||
             i.suggestedTemplate.length > 200 ||
@@ -39,6 +62,42 @@ void _validateImport(List<ImportItemInput> items) {
 }
 
 extension AgentImports on AgentAccess {
+  Future<void> reviseImport(
+    String session,
+    String id,
+    int version,
+    List<ImportItemInput> revised,
+  ) => _service.owner._serialize(() async {
+    _service._requireSession(session);
+    final old = _service._repository.importProposals
+        .where(
+          (p) =>
+              p.id == id &&
+              p.sessionBinding == _service._sessionBindings[session],
+        )
+        .firstOrNull;
+    if (old == null) throw const AccessFailure('unauthorized');
+    if (old.state != ImportProposalState.pending || old.version != version) {
+      throw const AccessFailure('proposal_changed');
+    }
+    _validateImport(revised);
+    if (revised.map((i) => i.key).toSet().length != revised.length ||
+        revised.any(
+          (i) => i.key.isEmpty || !old.items.any((o) => o.key == i.key),
+        )) {
+      throw const AccessFailure('invalid_proposal');
+    }
+    revised = _service.owner._compileTemplateImports(revised);
+    _validateImport(revised);
+    final changes = {for (final i in revised) i.key: i};
+    final next = old.revise(
+      items: [for (final i in old.items) changes[i.key] ?? i],
+      approvedKeys: old.approvedKeys.where((k) => !changes.containsKey(k)),
+    );
+    _service.owner._validatePendingImportTargets(next, revised);
+    await _service._repository.saveImportProposal(next);
+  });
+
   Future<String> submitImport(
     String session,
     List<ImportItemInput> items, {
@@ -72,6 +131,11 @@ extension AgentImports on AgentAccess {
       agentName: agentName.trim(),
       purpose: purpose.trim(),
     );
+    if (proposal.items.map((i) => i.key).toSet().length !=
+        proposal.items.length) {
+      throw const AccessFailure('invalid_proposal');
+    }
+    _service.owner._validatePendingImportTargets(proposal, proposal.items);
     await _service._repository.saveImportProposal(proposal);
     return proposal.id;
   });
@@ -86,10 +150,29 @@ extension AgentImports on AgentAccess {
       throw const AccessFailure('unauthorized');
     }
     final proposal = matches.single;
+    final states = _service.owner.importAdmission(id);
     return {
-      'status': proposal.state.name,
+      'status':
+          proposal.state == ImportProposalState.pending &&
+              states.any((s) => s.state == 'needs_attention')
+          ? 'needs_attention'
+          : proposal.awaitingAdmission
+          ? 'approved_awaiting_admission'
+          : proposal.state.name,
       'proposalId': proposal.id,
       'createdAt': proposal.createdAt.toUtc().toIso8601String(),
+      'version': proposal.version,
+      'items': [
+        for (final state in states)
+          {
+            'key': state.key,
+            'state': state.state,
+            if (proposal.receiptFor(state.key) case final receipt?) ...{
+              'itemId': receipt.id,
+              'version': receipt.version,
+            },
+          },
+      ],
       if (proposal.state == ImportProposalState.confirmed)
         'itemIds': proposal.createdItemIds,
     };
@@ -123,88 +206,27 @@ extension OwnerImports on OwnerAccess {
     }
     final previous = _pendingImport(id, version);
     _validateImport(reviewed);
-    reviewed = _compileTemplateImports(reviewed);
-    _validateImport(reviewed);
-    for (final input in reviewed) {
-      _validateImportedRelations(input);
-    }
-    final confirmedAt = _service._clock();
-    final organization = _OrganizationPlan(this);
-    final locations = [
-      for (final input in reviewed)
-        organization.resolve(
-          input.directoryId,
-          input.tagIds,
-          input.suggestedDirectory,
-          input.suggestedTags,
-        ),
-    ];
-    final items = [
-      for (final (index, input) in reviewed.indexed)
-        (() {
-          final fields = [
-            for (final f in input.fields)
-              InformationField(
-                _service._secret(),
-                f.name.trim(),
-                f.description,
-                f.value,
-                1,
-                kind: f.kind,
-              ),
-          ];
-          return InformationItem(
-            _service._secret(),
-            input.name.trim(),
-            input.description,
-            1,
-            fields,
-            layout: input.bindLayout(fields),
-            directoryId: locations[index].$1,
-            tagIds: locations[index].$2,
-            createdAt: confirmedAt,
-            modifiedAt: confirmedAt,
-          );
-        })(),
-    ];
-    final confirmed = ImportProposal(
-      id: previous.id,
-      sessionBinding: previous.sessionBinding,
-      chatLabel: previous.chatLabel,
-      createdAt: previous.createdAt,
-      items: reviewed,
-      state: ImportProposalState.confirmed,
-      version: previous.version + 1,
-      createdItemIds: items.map((i) => i.id),
-      createdItemVersions: items.map((i) => i.version),
-      agentName: previous.agentName,
-      purpose: previous.purpose,
-      fieldCount: items.fold<int>(0, (n, i) => n + i.fields.length),
-    );
-    await _service._repository.confirmImportProposal(
-      confirmed,
-      items,
-      newDirectories: organization.newDirectories,
-      newTags: organization.newTags,
-    );
-    return confirmed.receipts;
+    return _approveImportCandidates(previous, reviewed);
   });
 
   Future<void> rejectImport(String id, int version) => _serialize(() async {
     final previous = _pendingImport(id, version);
-    await _service._repository.saveImportProposal(
-      ImportProposal(
-        id: previous.id,
-        sessionBinding: previous.sessionBinding,
-        chatLabel: previous.chatLabel,
-        createdAt: previous.createdAt,
-        items: previous.items,
-        state: ImportProposalState.rejected,
-        version: previous.version + 1,
-        agentName: previous.agentName,
-        purpose: previous.purpose,
-        fieldCount: previous.fieldCount,
-      ),
+    final rejected = previous.revise(
+      items: const [],
+      approvedKeys: const [],
+      rejectedKeys: {
+        ...previous.rejectedKeys,
+        ...previous.items.map((i) => i.key),
+      },
+      state: previous.createdItemIds.isEmpty
+          ? ImportProposalState.rejected
+          : ImportProposalState.confirmed,
+    );
+    await _service._repository.commitImportAdmission(
+      [rejected],
+      const [],
+      decisionProposalId: id,
+      confirm: false,
     );
   });
 }

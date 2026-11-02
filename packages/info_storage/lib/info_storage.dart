@@ -50,6 +50,7 @@ const _credentialClassificationLibraryFormat = 40;
 const _templatePackageLibraryFormat = 41;
 // Typed pending proposals must never be flattened by an older reader.
 const _templateImportLibraryFormat = 42;
+const _importAdmissionLibraryFormat = 43;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -491,7 +492,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _templateImportLibraryFormat) {
+      if (headerVersion > _importAdmissionLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -506,7 +507,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _templateImportLibraryFormat ||
+            (marker.single['version'] as int) > _importAdmissionLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1285,7 +1286,19 @@ class EncryptedInformationRepository
     );
   }
 
-  Future<void> _writeProposal(ImportProposal proposal) async {
+  Future<void> _writeProposal(
+    ImportProposal proposal, {
+    bool operationReceipt = true,
+  }) async {
+    if (proposal.admissionVersion > 0) {
+      await _db.customStatement(
+        'UPDATE library_format SET version=? WHERE singleton=1 AND version<?',
+        [_importAdmissionLibraryFormat, _importAdmissionLibraryFormat],
+      );
+      await _db.customStatement(
+        'PRAGMA user_version = $_importAdmissionLibraryFormat',
+      );
+    }
     if (proposal.items.any((i) => i.templateId != null)) {
       await _requireTemplateImportFormat();
     }
@@ -1293,7 +1306,7 @@ class EncryptedInformationRepository
       'INSERT INTO import_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],
     );
-    if (proposal.state != ImportProposalState.pending) {
+    if (operationReceipt && proposal.state != ImportProposalState.pending) {
       await _proposalCommit(
         proposal.id,
         ProposalKind.addition,
@@ -1321,13 +1334,18 @@ class EncryptedInformationRepository
   }
 
   @override
-  Future<void> confirmImportProposal(
-    ImportProposal proposal,
+  Future<void> commitImportAdmission(
+    List<ImportProposal> proposals,
     List<InformationItem> items, {
+    required String decisionProposalId,
+    required bool confirm,
+    List<ImportReceipt> decisionRecords = const [],
+    List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
+    final deciding = proposals.singleWhere((p) => p.id == decisionProposalId);
     try {
       await _db.transaction(() async {
         for (final directory in newDirectories) {
@@ -1339,8 +1357,18 @@ class EncryptedInformationRepository
         for (final item in items) {
           await _writeItem(item);
         }
-        await _writeProposal(proposal);
+        for (final proposal in proposals) {
+          await _writeProposal(proposal, operationReceipt: false);
+        }
         await _checkAttachmentBackupBudget();
+        await _proposalCommit(
+          deciding.id,
+          ProposalKind.addition,
+          confirm,
+          deciding.version,
+          decisionRecords.map((r) => OwnerProposalTarget(r.id, r.version)),
+          awaitingKeys: awaitingKeys,
+        );
         pendingOwnerProposalOperation?.validate();
       });
       for (final directory in newDirectories) {
@@ -1352,7 +1380,9 @@ class EncryptedInformationRepository
       for (final item in items) {
         _items[item.id] = item;
       }
-      _proposals[proposal.id] = proposal;
+      for (final proposal in proposals) {
+        _proposals[proposal.id] = proposal;
+      }
     } catch (_) {
       throw const StorageFailure('save_failed');
     }

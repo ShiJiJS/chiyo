@@ -2,6 +2,35 @@ import 'information.dart';
 
 enum ImportProposalState { pending, confirmed, rejected }
 
+/// A reference to a candidate, not a grant or a pre-created library record.
+class ImportPendingReference {
+  ImportPendingReference(this.kind, this.itemKey, {this.proposalId}) {
+    if (!{'information', 'credential'}.contains(kind) ||
+        !RegExp(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$').hasMatch(itemKey) ||
+        proposalId != null &&
+            (proposalId!.isEmpty || proposalId!.length > 200)) {
+      throw const FormatException('Invalid pending reference');
+    }
+  }
+  final String kind, itemKey;
+  final String? proposalId;
+  Map<String, Object?> toJson() => {
+    'kind': kind,
+    'itemKey': itemKey,
+    if (proposalId != null) 'proposalId': proposalId,
+  };
+  factory ImportPendingReference.fromJson(Map<String, dynamic> json) {
+    if (json.keys.any((k) => !{'kind', 'itemKey', 'proposalId'}.contains(k))) {
+      throw const FormatException('Invalid pending reference');
+    }
+    return ImportPendingReference(
+      json['kind'] as String,
+      json['itemKey'] as String,
+      proposalId: json['proposalId'] as String?,
+    );
+  }
+}
+
 /// Confirmation facts remain available even after the resulting item is deleted.
 class ImportReceipt {
   const ImportReceipt(this.id, this.version);
@@ -16,6 +45,7 @@ class ImportItemInput {
     this.description,
     Iterable<FieldInput> fields, {
     this.directoryId,
+    this.key = '',
     Iterable<String> tagIds = const [],
     this.suggestedDirectory = '',
     Iterable<String> suggestedTags = const [],
@@ -26,6 +56,7 @@ class ImportItemInput {
     Map<String, Object?> values = const {},
     this.layout,
     Map<String, List<InformationRelationRef>> relations = const {},
+    Map<String, List<ImportPendingReference>> pendingRelations = const {},
     Iterable<String?> fieldKeys = const [],
   }) : fields = List.unmodifiable(fields),
        tagIds = List.unmodifiable(tagIds),
@@ -35,8 +66,13 @@ class ImportItemInput {
          for (final e in relations.entries)
            e.key: List<InformationRelationRef>.unmodifiable(e.value),
        }),
+       pendingRelations = Map.unmodifiable({
+         for (final e in pendingRelations.entries)
+           e.key: List<ImportPendingReference>.unmodifiable(e.value),
+       }),
        suggestedTags = List.unmodifiable(suggestedTags);
   final String name, description;
+  final String key;
   final List<FieldInput> fields;
   final String? directoryId;
   final List<String> tagIds;
@@ -47,6 +83,17 @@ class ImportItemInput {
   final InformationLayout? layout;
   final List<String?> fieldKeys;
   final Map<String, List<InformationRelationRef>> relations;
+  final Map<String, List<ImportPendingReference>> pendingRelations;
+  ImportItemInput withKey(String key) =>
+      ImportItemInput.fromPrivateJson({...toJson(), 'key': key});
+  Map<String, Object?> get relationJson => {
+    for (final k in {...relations.keys, ...pendingRelations.keys})
+      k: [
+        for (final r in relations[k] ?? <InformationRelationRef>[]) r.toJson(),
+        for (final r in pendingRelations[k] ?? <ImportPendingReference>[])
+          r.toJson(),
+      ],
+  };
 
   InformationLayout? bindLayout(List<InformationField> assigned) {
     if (layout == null) return null;
@@ -61,6 +108,7 @@ class ImportItemInput {
 
   Map<String, Object?> get submissionJson => {
     'name': name,
+    if (key.isNotEmpty) 'key': key,
     'description': description,
     'directoryId': directoryId,
     'tagIds': tagIds,
@@ -72,16 +120,14 @@ class ImportItemInput {
       'templateVersion': templateVersion,
       'templateDigest': templateDigest,
       'values': values,
-      'relations': {
-        for (final e in relations.entries)
-          e.key: e.value.map((r) => r.toJson()).toList(),
-      },
+      'relations': relationJson,
     } else
       'fields': [for (final f in fields) f.toJson()],
   };
 
   Map<String, Object?> toJson() => {
     'name': name,
+    if (key.isNotEmpty) 'key': key,
     'description': description,
     'directoryId': directoryId,
     'tagIds': tagIds,
@@ -94,10 +140,7 @@ class ImportItemInput {
       'templateVersion': templateVersion,
       'templateDigest': templateDigest,
       'values': values,
-      'relations': {
-        for (final e in relations.entries)
-          e.key: e.value.map((r) => r.toJson()).toList(),
-      },
+      'relations': relationJson,
       'layout': layout?.toJson(),
       'fieldKeys': fieldKeys,
     },
@@ -107,6 +150,7 @@ class ImportItemInput {
     if (json.keys.any(
           (key) => !const {
             'name',
+            'key',
             'description',
             'directoryId',
             'tagIds',
@@ -142,6 +186,7 @@ class ImportItemInput {
       (dynamic f) => FieldInput.fromJson(f as Map<String, dynamic>),
     ),
     directoryId: json['directoryId'] as String?,
+    key: json['key'] as String? ?? '',
     tagIds: (json['tagIds'] as List? ?? []).cast<String>(),
     suggestedDirectory: json['suggestedDirectory'] as String? ?? '',
     suggestedTags: (json['suggestedTags'] as List? ?? []).cast<String>(),
@@ -151,6 +196,7 @@ class ImportItemInput {
     templateDigest: json['templateDigest'] as String?,
     values: Map<String, Object?>.from(json['values'] as Map? ?? {}),
     relations: importRelationsFromJson(json['relations']),
+    pendingRelations: importPendingRelationsFromJson(json['relations']),
     layout: private && json['layout'] != null
         ? InformationLayout.fromJson(
             Map<String, dynamic>.from(json['layout'] as Map),
@@ -173,10 +219,27 @@ Map<String, List<InformationRelationRef>> importRelationsFromJson(
     for (final e in map.entries)
       e.key: [
         for (final ref in e.value as List)
-          InformationRelationRef.fromJson(
-            Map<String, dynamic>.from(ref as Map),
-          ),
+          if (!(ref as Map).containsKey('itemKey'))
+            InformationRelationRef.fromJson(Map<String, dynamic>.from(ref)),
       ],
+  };
+}
+
+Map<String, List<ImportPendingReference>> importPendingRelationsFromJson(
+  Object? json,
+) {
+  final map = json == null
+      ? const <String, dynamic>{}
+      : Map<String, dynamic>.from(json as Map);
+  if (map.length > 200) throw const FormatException('Too many relation groups');
+  return {
+    for (final e in map.entries)
+      if ((e.value as List).any((r) => (r as Map).containsKey('itemKey')))
+        e.key: [
+          for (final ref in e.value as List)
+            if ((ref as Map).containsKey('itemKey'))
+              ImportPendingReference.fromJson(Map<String, dynamic>.from(ref)),
+        ],
   };
 }
 
@@ -217,9 +280,35 @@ class ImportProposal {
     this.purpose = '',
     int? fieldCount,
     Iterable<String>? itemNames,
+    Iterable<String> approvedKeys = const [],
+    Iterable<String> createdItemKeys = const [],
+    Iterable<String> rejectedKeys = const [],
+    Map<String, String>? candidateNames,
+    this.admissionVersion = 1,
   }) : items = state == ImportProposalState.pending
-           ? List.unmodifiable(items)
+           ? List.unmodifiable(
+               items.indexed.map(
+                 (e) => e.$2.key.isEmpty ? e.$2.withKey('item-${e.$1}') : e.$2,
+               ),
+             )
            : const [],
+       approvedKeys = Set.unmodifiable(approvedKeys),
+       rejectedKeys = Set.unmodifiable(rejectedKeys),
+       createdItemKeys = List.unmodifiable(
+         createdItemKeys.isEmpty
+             ? createdItemIds.indexed.map((e) => 'item-${e.$1}')
+             : createdItemKeys,
+       ),
+       candidateNames = Map.unmodifiable(
+         candidateNames ??
+             {
+               for (final (index, item) in items.indexed)
+                 (item.key.isEmpty ? 'item-$index' : item.key): item.name,
+               if (items.isEmpty)
+                 for (final (index, name) in (itemNames ?? <String>[]).indexed)
+                   'item-$index': name,
+             },
+       ),
        itemNames = List.unmodifiable(itemNames ?? items.map((i) => i.name)),
        itemCount = itemCount ?? items.length,
        fieldCount =
@@ -240,6 +329,53 @@ class ImportProposal {
   final List<int> createdItemVersions;
   final int itemCount;
   final int fieldCount;
+  final int admissionVersion;
+  final Set<String> approvedKeys, rejectedKeys;
+  final List<String> createdItemKeys;
+  final Map<String, String> candidateNames;
+  bool get awaitingAdmission =>
+      state == ImportProposalState.pending &&
+      items.isNotEmpty &&
+      items.every((i) => approvedKeys.contains(i.key));
+  ImportReceipt? receiptFor(String key) {
+    final index = createdItemKeys.indexOf(key);
+    return index < 0
+        ? null
+        : ImportReceipt(createdItemIds[index], createdItemVersions[index]);
+  }
+
+  ImportProposal revise({
+    Iterable<ImportItemInput>? items,
+    Iterable<String>? approvedKeys,
+    Iterable<String>? rejectedKeys,
+    Iterable<String>? createdItemKeys,
+    Iterable<String>? createdItemIds,
+    Iterable<int>? createdItemVersions,
+    ImportProposalState? state,
+    int? version,
+  }) => ImportProposal(
+    id: id,
+    sessionBinding: sessionBinding,
+    chatLabel: chatLabel,
+    createdAt: createdAt,
+    items: items ?? this.items,
+    state: state ?? this.state,
+    version: version ?? this.version + 1,
+    approvedKeys: approvedKeys ?? this.approvedKeys,
+    rejectedKeys: rejectedKeys ?? this.rejectedKeys,
+    createdItemKeys: createdItemKeys ?? this.createdItemKeys,
+    createdItemIds: createdItemIds ?? this.createdItemIds,
+    createdItemVersions: createdItemVersions ?? this.createdItemVersions,
+    candidateNames: {
+      ...candidateNames,
+      for (final i in items ?? this.items) i.key: i.name,
+    },
+    itemNames: itemNames,
+    itemCount: itemCount,
+    fieldCount: fieldCount,
+    agentName: agentName,
+    purpose: purpose,
+  );
 
   /// Public titles only. Terminal proposals never retain private field snapshots.
   final List<String> itemNames;
@@ -262,6 +398,11 @@ class ImportProposal {
     'purpose': purpose,
     'fieldCount': fieldCount,
     'itemNames': itemNames,
+    'admissionVersion': admissionVersion,
+    'approvedKeys': approvedKeys.toList(),
+    'rejectedKeys': rejectedKeys.toList(),
+    'createdItemKeys': createdItemKeys,
+    'candidateNames': candidateNames,
   };
   factory ImportProposal.fromJson(Map<String, dynamic> json) => ImportProposal(
     id: json['id'] as String,
@@ -281,5 +422,12 @@ class ImportProposal {
     purpose: json['purpose'] as String? ?? '',
     fieldCount: json['fieldCount'] as int?,
     itemNames: (json['itemNames'] as List?)?.cast<String>(),
+    admissionVersion: json['admissionVersion'] as int? ?? 0,
+    approvedKeys: (json['approvedKeys'] as List? ?? []).cast<String>(),
+    rejectedKeys: (json['rejectedKeys'] as List? ?? []).cast<String>(),
+    createdItemKeys: (json['createdItemKeys'] as List? ?? []).cast<String>(),
+    candidateNames: json['candidateNames'] == null
+        ? null
+        : Map<String, String>.from(json['candidateNames'] as Map),
   );
 }

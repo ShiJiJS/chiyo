@@ -997,7 +997,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         children: [
                           if (d.items.length > 1 && d.organization == null)
                             Text(
-                              '本次确认 ${m.draft?.selected.length ?? 0} / ${d.items.length} 份资料；未选中的内容不会入库。',
+                              '本次批准 ${m.draft?.selected.length ?? 0} / ${d.items.length} 份资料；未选中的继续待审批，有待审批关联的获准后一起入库。',
                               style: libraryText(
                                 context,
                                 13,
@@ -1065,7 +1065,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                     : null,
                                 child: Text(
                                   s.kind == WorkspaceProposalKind.addition
-                                      ? '确认入库'
+                                      ? '批准录入'
                                       : d.organization?.legacyReview == true
                                       ? '确认旧版整批分类'
                                       : s.kind == WorkspaceProposalKind.deletion

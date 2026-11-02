@@ -25,11 +25,19 @@ extension _ProposalOperationStorage on EncryptedInformationRepository {
     ProposalKind kind,
     bool confirm,
     int version,
-    Iterable<OwnerProposalTarget> records,
-  ) async {
+    Iterable<OwnerProposalTarget> records, {
+    Iterable<String> awaitingKeys = const [],
+  }) async {
     final operation = pendingOwnerProposalOperation;
     if (operation == null) return;
-    final receipt = operation.complete(id, kind, confirm, version, records);
+    final receipt = operation.complete(
+      id,
+      kind,
+      confirm,
+      version,
+      records,
+      awaitingKeys: awaitingKeys,
+    );
     await _db.customStatement(
       'INSERT INTO owner_proposal_operations(operation_id,payload) VALUES(?,?)',
       [receipt.command.operationId, jsonEncode(receipt.toJson())],

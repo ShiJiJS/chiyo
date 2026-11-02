@@ -100,6 +100,47 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
       WorkspaceRecordRef(WorkspaceRecordKind.information, id);
   core.InformationItem? _current(String id) =>
       owner.information.where((i) => i.id == id).firstOrNull;
+  String _pendingId(String proposalId, String key) =>
+      'pending:$proposalId:$key';
+  ({core.ImportProposal proposal, String key})? _pendingTarget(String id) {
+    for (final p in owner.importProposals) {
+      for (final key in p.candidateNames.keys) {
+        if (_pendingId(p.id, key) == id) return (proposal: p, key: key);
+      }
+    }
+    return null;
+  }
+
+  ({
+    Map<String, List<core.InformationRelationRef>> existing,
+    Map<String, List<core.ImportPendingReference>> pending,
+  })
+  _reviewRelations(WorkspaceProposalItemReview review, String proposalId) {
+    final existing = <String, List<core.InformationRelationRef>>{},
+        pending = <String, List<core.ImportPendingReference>>{};
+    for (final e in review.relations.entries) {
+      for (final ref in e.value) {
+        final target = _pendingTarget(ref.id);
+        if (target == null) {
+          (existing[e.key] ??= []).add(
+            core.InformationRelationRef(ref.kind.name, ref.id),
+          );
+        } else {
+          (pending[e.key] ??= []).add(
+            core.ImportPendingReference(
+              ref.kind.name,
+              target.key,
+              proposalId: target.proposal.id == proposalId
+                  ? null
+                  : target.proposal.id,
+            ),
+          );
+        }
+      }
+    }
+    return (existing: existing, pending: pending);
+  }
+
   core.InformationItem? _retained(String id, int version) {
     final current = _current(id);
     if (current?.version == version) return current;
@@ -443,8 +484,14 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
     if (entry.kind == core.ProposalKind.addition) {
       final p = owner.importProposals.singleWhere((p) => p.id == id);
       if (p.state == core.ImportProposalState.pending) {
-        for (final (index, input) in p.items.indexed) {
-          final candidate = 'proposal:$id:$index';
+        final states = owner.importAdmission(id);
+        final problems = states
+            .where((s) => s.reason.isNotEmpty)
+            .map((s) => s.reason)
+            .toSet();
+        if (problems.isNotEmpty) notice = problems.join('\n');
+        for (final input in p.items) {
+          final candidate = 'proposal:$id:${input.key}';
           final previewFields = [
             for (final (n, f) in input.fields.indexed)
               core.InformationField(
@@ -456,19 +503,44 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                 kind: f.kind,
               ),
           ];
+          final bound = input.bindLayout(previewFields);
+          final previewLayout = bound == null
+              ? null
+              : core.InformationLayout(
+                  typeId: bound.typeId,
+                  snapshot: bound.snapshot,
+                  fieldIds: bound.fieldIds,
+                  relations: {
+                    for (final group in {
+                      ...input.relations.keys,
+                      ...input.pendingRelations.keys,
+                    })
+                      group: [
+                        ...input.relations[group] ?? [],
+                        for (final ref in input.pendingRelations[group] ?? [])
+                          core.InformationRelationRef(
+                            ref.kind,
+                            _pendingId(ref.proposalId ?? id, ref.itemKey),
+                          ),
+                      ],
+                  },
+                );
           final item = core.InformationItem(
             candidate,
             input.name,
             input.description,
             1,
             previewFields,
-            layout: input.bindLayout(previewFields),
+            layout: previewLayout,
             directoryId: _importDirectory(input),
             tagIds: _importTags(input),
           );
           items.add(
             WorkspaceProposalItem(
               id: candidate,
+              admissionNote: states
+                  .singleWhere((s) => s.key == input.key)
+                  .reason,
               proposed: _codec.decode(
                 item,
                 tagNames: {
@@ -480,12 +552,19 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
             ),
           );
         }
-      } else if (p.state == core.ImportProposalState.confirmed) {
+      }
+      if (p.createdItemIds.isNotEmpty) {
+        if (p.rejectedKeys.isNotEmpty) {
+          notice =
+              '已入库${p.createdItemIds.length}项；其余${p.rejectedKeys.length}项已拒绝。';
+        }
         for (final (index, r) in p.receipts.indexed) {
           targets.add(
             WorkspaceProposalTarget(
               record: _ref(r.id),
-              name: index < p.itemNames.length ? p.itemNames[index] : '已保存资料',
+              name: index < p.createdItemKeys.length
+                  ? p.candidateNames[p.createdItemKeys[index]] ?? '已保存资料'
+                  : '已保存资料',
               version: r.version,
               exists: _current(r.id) != null,
               snapshotAvailable: _retained(r.id, r.version) != null,
@@ -637,6 +716,9 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
             version: r.version,
             entryId: r.recycleId,
           ),
+        ),
+        awaitingItemIds: r.awaitingKeys.map(
+          (key) => 'proposal:${r.command.proposalId}:$key',
         ),
       );
   @override
@@ -812,15 +894,11 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                               ),
                           ],
                     templateId: input.templateId,
+                    key: input.key,
                     templateVersion: input.templateVersion,
                     templateDigest: input.templateDigest,
-                    relations: {
-                      for (final e in r.relations.entries)
-                        e.key: [
-                          for (final ref in e.value)
-                            core.InformationRelationRef(ref.kind.name, ref.id),
-                        ],
-                    },
+                    relations: _reviewRelations(r, p.id).existing,
+                    pendingRelations: _reviewRelations(r, p.id).pending,
                     values: input.templateId == null
                         ? const {}
                         : {
@@ -1082,5 +1160,33 @@ class _ProposalRelations implements WorkspaceRelationSource {
   @override
   Future<List<WorkspaceRecordSummary>> readSummaries(
     Iterable<WorkspaceRecordRef> refs,
-  ) => _run(() => source.library().readSummaries(refs));
+  ) => _run(() async {
+    final requested = refs.toSet();
+    final pending = {
+      for (final ref in requested) ref: ?source._pendingTarget(ref.id),
+    };
+    return [
+      ...await source.library().readSummaries(
+        requested.where((r) => !pending.containsKey(r)),
+      ),
+      for (final e in pending.entries)
+        (() {
+          final p = e.value.proposal, key = e.value.key;
+          final input = p.items.where((i) => i.key == key).firstOrNull;
+          final type = input?.layout?.snapshot['type'] as Map?;
+          return WorkspaceRecordSummary(
+            ref: e.key,
+            name:
+                '${p.candidateNames[key] ?? '关联资料'}${p.rejectedKeys.contains(key) ? '（已拒绝）' : '（待入库）'}',
+            description: '',
+            type: WorkspaceType(
+              input?.templateId ?? 'generic',
+              type?['name'] as String? ?? '待录入资料',
+              type?['icon'] as String? ?? 'file',
+            ),
+            updatedAt: p.createdAt,
+          );
+        })(),
+    ];
+  });
 }

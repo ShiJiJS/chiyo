@@ -2,7 +2,15 @@ part of 'info_core.dart';
 
 enum ProposalKind { addition, modification, deletion, organization }
 
-enum ProposalStatus { pending, conflicted, completed, rejected, ended }
+enum ProposalStatus {
+  pending,
+  awaiting,
+  needsAttention,
+  conflicted,
+  completed,
+  rejected,
+  ended,
+}
 
 enum ProposalFilter { pending, handled, all }
 
@@ -41,6 +49,8 @@ class ProposalEntry {
       statusText ??
       switch (status) {
         ProposalStatus.pending => '待确认',
+        ProposalStatus.awaiting => '已批准待入库',
+        ProposalStatus.needsAttention => '需要处理',
         ProposalStatus.conflicted => '版本冲突',
         ProposalStatus.completed => switch (kind) {
           ProposalKind.addition => '已入库',
@@ -114,7 +124,12 @@ extension OwnerProposals on OwnerAccess {
           id: p.id,
           kind: ProposalKind.addition,
           status: switch (p.state) {
-            ImportProposalState.pending => ProposalStatus.pending,
+            ImportProposalState.pending =>
+              importAdmission(p.id).any((s) => s.state == 'needs_attention')
+                  ? ProposalStatus.needsAttention
+                  : p.awaitingAdmission
+                  ? ProposalStatus.awaiting
+                  : ProposalStatus.pending,
             ImportProposalState.confirmed => ProposalStatus.completed,
             ImportProposalState.rejected => ProposalStatus.rejected,
           },
@@ -122,7 +137,11 @@ extension OwnerProposals on OwnerAccess {
           chatLabel: p.chatLabel,
           agentName: p.agentName,
           purpose: p.purpose,
-          count: p.itemCount,
+          count: p.state == ImportProposalState.pending
+              ? p.items.length
+              : p.createdItemIds.isEmpty
+              ? p.itemCount
+              : p.createdItemIds.length,
           version: p.version,
           pending: p.state == ImportProposalState.pending,
           itemIds: p.createdItemIds,

@@ -66,10 +66,10 @@ void main() {
             .map((v) => v.toRadixString(16).padLeft(2, '0'))
             .join();
         db.execute('PRAGMA key = "x\'$hex\'"');
-        expect(db.select('PRAGMA user_version').single.values.single, 42);
+      expect(db.select('PRAGMA user_version').single.values.single, 43);
         expect(
           db.select('SELECT version FROM library_format').single['version'],
-          42,
+        43,
         );
       } finally {
         db.close();

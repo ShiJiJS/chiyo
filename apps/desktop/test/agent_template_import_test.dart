@@ -409,7 +409,7 @@ void main() {
         ],
       };
       final pending = await cli.execute(invalid);
-      expect(pending['status'], 'pending');
+      expect(pending['status'], 'needs_attention');
       await expectLater(
         approve(await proposals.read(pending['proposalId'] as String)),
         throwsA(
@@ -427,6 +427,162 @@ void main() {
       final error = await cli.execute(invalid);
       expect(error['status'], 'validation_failed');
       expect(jsonEncode(error), isNot(contains('PRIVATE')));
+    },
+  );
+  test(
+    'CLI pending references survive review, partial admission and encrypted reopen without a false saved receipt',
+    () async {
+      final payload = await example('document');
+      final base = Map<String, dynamic>.from(
+        (payload['items'] as List).single as Map,
+      );
+      payload['items'] = [
+        {
+          ...base,
+          'key': 'a',
+          'name': '说明甲',
+          'relations': {
+            'related': [
+              {'kind': 'information', 'itemKey': 'b'},
+            ],
+          },
+        },
+        {
+          ...base,
+          'key': 'b',
+          'name': '说明乙',
+          'relations': {
+            'related': [
+              {'kind': 'information', 'itemKey': 'a'},
+            ],
+          },
+        },
+        {...base, 'key': 'independent', 'name': '独立说明'},
+      ];
+      final submitted = await cli.execute(payload);
+      expect(submitted['status'], 'pending');
+      final id = submitted['proposalId'] as String;
+      final initial = await proposals.read(id);
+      final first = await approve(
+        initial,
+        reviewed: [
+          for (final i in initial.items.where(
+            (i) => i.proposed.record.name != '说明乙',
+          ))
+            WorkspaceProposalItemReview.fromItem(i),
+        ],
+      );
+      expect(first.records.length, 1);
+      expect(first.awaitingItemIds, ['proposal:$id:a']);
+      expect(service.owner.information.single.name, '独立说明');
+      final remaining = await proposals.read(id);
+      expect(remaining.items.map((i) => i.proposed.record.name), [
+        '说明甲',
+        '说明乙',
+      ]);
+      expect(remaining.items.first.admissionNote, contains('已批准'));
+      final linked = await proposals
+          .relations(id, remaining.items.first.id, remaining.summary.version)
+          .readSummaries(
+            remaining.items.first.proposed.relations.values.expand((r) => r),
+          );
+      expect(linked.single.name, '说明乙（待入库）');
+      final state = await cli.execute({
+        'command': 'import-status',
+        'proposalId': id,
+      });
+      expect(
+        (state['items'] as List).singleWhere((i) => i['key'] == 'a')['state'],
+        'approved',
+      );
+      expect(jsonEncode(state), isNot(contains('维护说明')));
+      await close();
+      await open();
+      final reopened = await proposals.read(id);
+      expect(reopened.items.first.admissionNote, contains('已批准'));
+      expect(
+        (await proposals.receipt(first.operationId))!.awaitingItemIds,
+        first.awaitingItemIds,
+      );
+      final finalReceipt = await approve(
+        reopened,
+        reviewed: [WorkspaceProposalItemReview.fromItem(reopened.items.last)],
+      );
+      expect(finalReceipt.awaitingItemIds, isEmpty);
+      expect(finalReceipt.records.length, 1);
+      expect(service.owner.information.length, 3);
+      final a = service.owner.information.singleWhere((i) => i.name == '说明甲'),
+          b = service.owner.information.singleWhere((i) => i.name == '说明乙');
+      expect(a.layout!.relations['related']!.single.id, b.id);
+      expect(b.layout!.relations['related']!.single.id, a.id);
+      final finalDetail = await proposals.read(id);
+      expect(finalDetail.summary.status, WorkspaceProposalStatus.completed);
+      expect(finalDetail.items, isEmpty);
+      expect(finalDetail.targets.map((t) => t.name).toSet(), {
+        '说明甲',
+        '说明乙',
+        '独立说明',
+      });
+    },
+  );
+  test(
+    'CLI revision after a rejected dependency resets approval and the owner can admit the repaired proposal',
+    () async {
+      final targetPayload = await example('document');
+      ((targetPayload['items'] as List).single as Map)['key'] = 'target';
+      final target = await cli.execute(targetPayload);
+      final payload = await example('document');
+      final row = (payload['items'] as List).single as Map;
+      row['key'] = 'dependent';
+      row['relations'] = {
+        'related': [
+          {
+            'kind': 'information',
+            'itemKey': 'target',
+            'proposalId': target['proposalId'],
+          },
+        ],
+      };
+      final response = await cli.execute(payload);
+      final id = response['proposalId'] as String;
+      final waiting = await approve(await proposals.read(id));
+      expect(waiting.records, isEmpty);
+      expect(waiting.awaitingItemIds.length, 1);
+      expect(
+        (await proposals.read(id)).summary.status,
+        WorkspaceProposalStatus.awaiting,
+      );
+      final targetDetail = await proposals.read(target['proposalId'] as String);
+      await proposals.change(
+        WorkspaceProposalChange(
+          operationId: workspaceOperationId(),
+          proposalId: targetDetail.summary.id,
+          version: targetDetail.summary.version,
+          reviewToken: targetDetail.reviewToken,
+          action: WorkspaceProposalAction.reject,
+          reviewed: const [],
+        ),
+      );
+      final blocked = await proposals.read(id);
+      expect(blocked.summary.status, WorkspaceProposalStatus.needsAttention);
+      expect(blocked.notice, contains('已被拒绝'));
+      row['relations'] = <String, Object?>{};
+      final amended = await cli.execute({
+        'command': 'import-revise',
+        'proposalId': id,
+        'version': blocked.summary.version,
+        'items': [row],
+      });
+      expect(amended['status'], 'pending');
+      expect(
+        service.owner.importProposals
+            .singleWhere((p) => p.id == id)
+            .approvedKeys,
+        isEmpty,
+      );
+      expect(service.owner.information, isEmpty);
+      await approve(await proposals.read(id));
+      expect(service.owner.information.length, 1);
     },
   );
   test(

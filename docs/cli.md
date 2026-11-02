@@ -8,6 +8,8 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。当前文件录入及待入库引用仍在 #79/#80 与 #78 后续开发，详见[实现进度](development/ai-template-ingestion.md)。
 
+新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。已有资料修改的待审批引用及待审批凭据仍在后续接入。
+
 ## 分类名称与整理兼容（0.4.1+13）
 
 新建分类时，`directoryName`／`suggestedDirectory` 是单级根目录名称，不是路径；

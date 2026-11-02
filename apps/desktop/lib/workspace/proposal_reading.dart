@@ -322,6 +322,7 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
                   alignment: Alignment.centerLeft,
                   onPressed:
                       widget.enabled &&
+                          !ref.id.startsWith('pending:') &&
                           state.connectionState == ConnectionState.done &&
                           !state.hasError &&
                           record != null
@@ -350,6 +351,14 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
         shown = <String>{},
         links = <String>{};
     final sections = <Widget>[];
+    if (widget.item.admissionNote.isNotEmpty) {
+      sections.add(
+        Text(
+          widget.item.admissionNote,
+          style: libraryText(context, 14, color: c.warning, height: 1.8),
+        ),
+      );
+    }
     for (final raw in d.definition['sections'] as List? ?? []) {
       if (raw is! Map) continue;
       final title = raw['title'] as String? ?? '内容';

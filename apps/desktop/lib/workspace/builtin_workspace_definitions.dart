@@ -73,14 +73,42 @@ Map<String, Object?> _guidance(String type) {
         'file' => '后端岗位简历',
         _ => '项目说明',
       },
-      'summary': '便于按本项用途选择和使用资料。',
+      'summary': switch (type) {
+        'server' => '运行内部应用，可按需申请连接信息和维护资料。',
+        'service' => '保存个人笔记，提供网页与API入口。',
+        'profile' => '联系资料、求职方向与教育工作经历。',
+        'document' => '服务更新前的备份与状态检查步骤。',
+        'file' => '用于后端开发岗位投递的简历原文。',
+        _ => '项目的用途及基本说明。',
+      },
       'values': exampleValues[type]!,
     },
   };
 }
 
 Map<String, Object?> _field(String key, String label, [String type = 'text']) =>
-    {'key': key, 'label': label, 'type': type};
+    {
+      'key': key,
+      'label': label,
+      'type': type,
+      'description': switch (key) {
+        'host' => '主机名或IP地址，只填地址，不放整条连接命令。',
+        'port' => 'SSH端口，填写十进制数字。',
+        'user' => '登录用户名，不包含密码或密钥。',
+        'url' => '服务访问入口，不包含Token等秘密参数。',
+        'purpose' => '用简短事实说明用途，不复制整段源文档。',
+        'auth' => '说明认证方式；秘密另走凭据录入申请。',
+        'bodyFormat' => '正文格式：plain为原文字，markdown为Markdown排版。',
+        'body' => '资料正文，按声明格式填写；密码和密钥不能放进普通正文。',
+        'name' => '源资料中的姓名，未知时留空，不编造。',
+        'email' => '源资料中的联系邮箱。',
+        'direction' => '本份材料面向的求职方向。',
+        'city' => '源资料中明确说明的城市。',
+        'education' || 'experience' => '每项含title、period、detail；分别填写经历名称、时间与说明。',
+        'file' => '提交普通文件原文；私钥、登录会话等应使用凭据入口。',
+        _ => label,
+      },
+    };
 Map<String, Object?> _relation(
   String key,
   String label, [

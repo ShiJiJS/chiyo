@@ -107,8 +107,13 @@ void main() {
       expect(service.owner.information.single.fields.single.value, '主人核对正文');
       expect(service.owner.directories.single.name, '合成新目录');
       expect(service.owner.tags.single.name, '合成新标签');
-      expect(service.owner.importProposals.single.items, isEmpty);
-      expect((await source.read(id)).items, isEmpty);
+      expect(service.owner.importProposals.single.items.single.name, '未选项');
+      expect(
+        service.owner.importProposals.single.items.single.fields.single.value,
+        '不应保存',
+      );
+      expect((await source.read(id)).items.length, 1);
+      expect((await source.read(id)).targets.length, 1);
       final archive = await source.snapshot(id, receipt.records.single.ref);
       expect(archive.detail.record.name, '主人核对名称');
       await close();

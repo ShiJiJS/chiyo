@@ -91,6 +91,14 @@ class InformationTemplateDescription {
         'kind': 'information or credential',
         'id': 'existing catalog target id',
       },
+      'pendingTarget': {
+        'kind': 'information',
+        'itemKey': 'stable candidate key',
+        'proposalId':
+            'omit for same proposal, otherwise own related proposal id',
+      },
+      'pendingApproval':
+          'Approved candidates wait for their references; all approved members of a cycle save together. Rejected references require repair and new approval.',
       'approval':
           'References are saved only after owner approval; this grants no access to their content.',
       'update':
