@@ -505,6 +505,25 @@ class ProposalsController extends ChangeNotifier {
     _notify();
   }
 
+  /// Start a fresh review only after the Owner discards the old local draft.
+  Future<void> restartReview(String proposalId) async {
+    if (!_readable ||
+        selection != proposalId ||
+        !detail!.summary.pending ||
+        !needsNewReview) {
+      return;
+    }
+    await load();
+    if (!_readable || selection != proposalId || !detail!.summary.pending) {
+      return;
+    }
+    _drafts[proposalId] = ProposalDraft(detail!);
+    detailScroll = 0;
+    writeFailure = null;
+    notice = '已重新读取当前提案。旧审阅的编辑和勾选已放弃，请核对这份内容后再批准。';
+    _notify();
+  }
+
   WorkspaceProposalReceipt _check(WorkspaceProposalReceipt r) =>
       WorkspaceProposalExpectation(detail!).check(_command!, r);
 

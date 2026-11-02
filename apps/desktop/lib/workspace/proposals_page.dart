@@ -185,6 +185,38 @@ class _ProposalsPageState extends State<ProposalsPage> {
     }
   }
 
+  Future<void> _restartReview() async {
+    final id = m.detail?.summary.id;
+    if (id == null || m.frozen || !m.needsNewReview) return;
+    widget.onModalChanged?.call(true);
+    try {
+      final accepted = await showDesktopDialog<bool>(
+        context,
+        builder: (context) => DesktopDialog(
+          title: const Text('重新审阅当前提案'),
+          content: const Text('这会放弃本页旧审阅的未保存编辑和勾选，重新读取当前提案。已有资料不会改变，也不会自动批准。'),
+          actions: [
+            DesktopButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('保留旧审阅'),
+            ),
+            DesktopButton(
+              key: const ValueKey('proposal-restart-review-confirm'),
+              kind: DesktopButtonKind.primary,
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('重新审阅'),
+            ),
+          ],
+        ),
+      );
+      if (accepted != true || !mounted) return;
+      await m.restartReview(id);
+      if (mounted && _detail.hasClients) _detail.jumpTo(0);
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
   Future<void> _read({
     WorkspaceProposalTarget? target,
     WorkspaceProposalItem? item,
@@ -954,14 +986,27 @@ class _ProposalsPageState extends State<ProposalsPage> {
                   if (m.needsNewReview)
                     Padding(
                       padding: const EdgeInsets.only(top: 18),
-                      child: Text(
-                        '提案内容或结构已变化，下方按原结构保留旧审阅，不能自动套用。请按当前资料重新生成提案。',
-                        style: libraryText(
-                          context,
-                          14,
-                          color: c.warning,
-                          height: 1.9,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '提案内容或结构已变化，下方保留旧审阅。请重新审阅当前提案后再决定。',
+                            style: libraryText(
+                              context,
+                              14,
+                              color: c.warning,
+                              height: 1.9,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          DesktopButton(
+                            key: const ValueKey('proposal-restart-review'),
+                            onPressed: m.frozen || m.loading || m.reading
+                                ? null
+                                : _restartReview,
+                            child: const Text('重新审阅当前提案'),
+                          ),
+                        ],
                       ),
                     ),
                   if (d.notice != null)

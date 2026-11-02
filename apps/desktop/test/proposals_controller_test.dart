@@ -320,6 +320,23 @@ void main() {
       expect(m.canConfirm, false);
       expect(m.draft!.items[old.id]!.name, '旧审阅的名称');
       expect(port.commands, isEmpty);
+      final retained = m.draft;
+      await m.restartReview('update');
+      expect(m.draft, same(retained));
+      final changed = port.readOverride;
+      port.readOverride = (_) async =>
+          throw const WorkspaceFailure('offline', '新提案暂时无法读取');
+      await m.restartReview('import');
+      expect(m.draft, same(retained));
+      expect(m.draft!.items[old.id]!.name, '旧审阅的名称');
+      port.readOverride = changed;
+      await m.load();
+      await m.restartReview('import');
+      expect(m.needsNewReview, false);
+      expect(m.canConfirm, true);
+      expect(m.draft!.items[old.id]!.name, '另一份新含义资料');
+      expect(m.draft!.dirty, false);
+      expect(port.commands, isEmpty);
     },
   );
   test(
