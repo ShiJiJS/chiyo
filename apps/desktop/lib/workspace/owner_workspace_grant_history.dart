@@ -93,6 +93,7 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
       core.AccessRequestState.denied => WorkspaceGrantState.denied,
       core.AccessRequestState.expired => WorkspaceGrantState.expired,
       core.AccessRequestState.revoked => WorkspaceGrantState.revoked,
+      core.AccessRequestState.cancelled => WorkspaceGrantState.cancelled,
       _ =>
         e.request!.sessionEnded || e.request!.applicationClosed
             ? WorkspaceGrantState.sessionEnded

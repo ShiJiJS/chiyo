@@ -14,32 +14,47 @@ class OwnerCredentialUseProjection {
     final status = owner.credentialUseState(r);
     if (status == 'pending') return WorkspaceCredentialRequestState.pending;
     if (status == 'denied') return WorkspaceCredentialRequestState.denied;
+    if (r.restoredAt != null) {
+      return WorkspaceCredentialRequestState.unavailable;
+    }
+    final grant = owner.credentialGrantState(r);
+    final fields = owner.credentialFieldGrantState(r);
     // The ordinary half has its own deadline. Keep its remaining permission
     // visible/revocable when the credential half expires or is invalidated.
-    if (owner.credentialFieldGrantState(r) == 'available' &&
-        !{'available', 'consumed'}.contains(owner.credentialGrantState(r))) {
+    if (fields == 'available' && grant != 'available') {
       return WorkspaceCredentialRequestState.partiallyApproved;
     }
     if (r.invalidatedCode == 'grant_revoked') {
       return WorkspaceCredentialRequestState.revoked;
     }
-    return switch (owner.credentialGrantState(r)) {
-      'available' || 'consumed' => WorkspaceCredentialRequestState.approved,
-      'expired' => WorkspaceCredentialRequestState.expired,
-      'version_invalidated' => WorkspaceCredentialRequestState.superseded,
-      _ =>
-        r.credentialApproved
-            ? WorkspaceCredentialRequestState.revoked
-            : r.approvedFields.isNotEmpty
-            ? owner.credentialFieldGrantState(r) == 'available'
-                  ? WorkspaceCredentialRequestState.partiallyApproved
-                  : owner.credentialFieldGrantState(r) == 'expired'
-                  ? WorkspaceCredentialRequestState.expired
-                  : WorkspaceCredentialRequestState.sessionEnded
-            : status == 'expired'
-            ? WorkspaceCredentialRequestState.expired
-            : WorkspaceCredentialRequestState.sessionEnded,
-    };
+    if (grant == 'available') return WorkspaceCredentialRequestState.approved;
+    if (grant == 'expired' || fields == 'expired' || status == 'expired') {
+      return WorkspaceCredentialRequestState.expired;
+    }
+    final session = owner.credentialRequestSessionId(r.id);
+    if (session == null ||
+        !owner.sessions.any((s) => s.id == session && !s.ended)) {
+      return WorkspaceCredentialRequestState.sessionEnded;
+    }
+    if (r.credentialApproved) {
+      if (owner.recycledCredentials.any((c) => c.id == r.credentialId)) {
+        return WorkspaceCredentialRequestState.recycled;
+      }
+      final credential = owner.credentials
+          .where((c) => c.id == r.credentialId)
+          .firstOrNull;
+      if (credential == null) {
+        return WorkspaceCredentialRequestState.unavailable;
+      }
+      if (!credential.enabled) return WorkspaceCredentialRequestState.disabled;
+      if (credential.version != r.version ||
+          credential.useGeneration != r.useGeneration) {
+        return WorkspaceCredentialRequestState.superseded;
+      }
+    }
+    // A consumed legacy operation or unavailable material is not a live grant
+    // or an explicit owner revocation. Retain the decision as history only.
+    return WorkspaceCredentialRequestState.unavailable;
   }
 
   WorkspaceCredentialReceiver receiver(core.CredentialLaunchPlan p) =>

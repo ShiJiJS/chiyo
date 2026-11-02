@@ -111,6 +111,9 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
       core.OrganizationTaskState.confirmed => WorkspaceGrantState.completed,
       core.OrganizationTaskState.rejected => WorkspaceGrantState.denied,
       core.OrganizationTaskState.expired => WorkspaceGrantState.expired,
+      core.OrganizationTaskState.cancelled => WorkspaceGrantState.cancelled,
+      core.OrganizationTaskState.proposed => WorkspaceGrantState.proposed,
+      core.OrganizationTaskState.conflicted => WorkspaceGrantState.conflicted,
       _ => WorkspaceGrantState.unavailable,
     };
   }

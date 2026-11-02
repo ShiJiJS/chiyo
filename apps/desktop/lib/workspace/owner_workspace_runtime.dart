@@ -43,10 +43,12 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
     _check();
     final available = !runtime.stopped && owner.serviceAvailable;
     final requests = available
-        ? owner.credentialUseRequests.where((r) => !r.isFocusedFill).toList()
+        ? owner.credentialUseRequests
+              .where((r) => !r.isFocusedFill && r.restoredAt == null)
+              .toList()
         : <core.CredentialUseRequest>[];
     final executions = available
-        ? owner.credentialExecutions
+        ? owner.credentialExecutions.where((e) => e.restoredAt == null).toList()
         : <core.CredentialExecution>[];
     final materials = available
         ? <WorkspaceApprovalExecution>[
@@ -161,6 +163,7 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
             : owner.credentialExecutions
                   .where(
                     (e) =>
+                        e.restoredAt == null &&
                         {'preparing', 'running', 'unknown'}.contains(e.state),
                   )
                   .length,

@@ -756,6 +756,8 @@ class _SampleApprovals implements WorkspaceApprovalSource {
         WorkspaceCredentialRequestState.superseded,
       WorkspaceApprovalState.completed =>
         WorkspaceCredentialRequestState.superseded,
+      WorkspaceApprovalState.proposed || WorkspaceApprovalState.conflicted =>
+        WorkspaceCredentialRequestState.unavailable,
     };
   }
 
