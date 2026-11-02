@@ -477,7 +477,10 @@ extension OwnerImportAdmission on OwnerAccess {
       newTags: organization.newTags,
       credentialRecords: credentialRecords,
       credentialMaterials: credentialMaterials,
-      filePromotions: filePromotions,
+      filePromotions: [
+        ...filePromotions,
+        ...updateCommits.expand((u) => u.filePromotions),
+      ],
     );
     for (final update in updateCommits) {
       if (update.item != null) {

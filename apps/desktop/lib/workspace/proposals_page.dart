@@ -687,6 +687,33 @@ class _ProposalsPageState extends State<ProposalsPage> {
                     after: proposalValue(metadata.after),
                   ),
                 ),
+            for (final a in item.attachments)
+              proposalSection(
+                context,
+                a.existingName.isEmpty
+                    ? '新增独立附件 · ${a.name}'
+                    : '补充文件版本 · ${a.name}',
+                ProposalAttachmentReading(
+                  attachment: a,
+                  enabled: !m.frozen,
+                  onFile: widget.onFile == null
+                      ? null
+                      : (key, version) async {
+                          widget.onModalChanged?.call(true);
+                          try {
+                            await widget.onFile!(
+                              d.summary.id,
+                              d.summary.version,
+                              item.id,
+                              key,
+                              version,
+                            );
+                          } finally {
+                            widget.onModalChanged?.call(false);
+                          }
+                        },
+                ),
+              ),
             ProposalRelationChanges(
               before: item.before!,
               after: review,

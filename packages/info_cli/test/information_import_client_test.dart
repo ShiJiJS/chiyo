@@ -125,6 +125,61 @@ void main() {
         }))['consumed'],
         true,
       );
+      final saved = repo.items.single;
+      final fileTemplate =
+          (await cli.execute({
+                'command': 'template-read',
+                'templateId': 'file',
+              }))['template']
+              as Map;
+      final updateInput = Map<String, dynamic>.from(
+        (fileTemplate['fileUpdateExamples'] as List)[1] as Map,
+      );
+      updateInput['operationId'] = 'revision-once';
+      final change = updateInput['update'] as Map;
+      change['itemId'] = saved.id;
+      change['baseVersion'] = saved.version;
+      final attachment = (change['attachments'] as List).single as Map;
+      attachment['fieldId'] = saved.fields.single.id;
+      ((attachment['versions'] as List).single as Map)['filePath'] =
+          revision.path;
+      final modified = await cli.execute(updateInput);
+      expect(modified['status'], 'pending');
+      expect(jsonEncode(modified), isNot(contains(root.path)));
+      expect(repo.items.single.version, saved.version);
+      expect(
+        (await cli.execute(updateInput))['proposalId'],
+        modified['proposalId'],
+      );
+      final update = repo.updateProposals.single;
+      expect(
+        update.input.attachments.single.versions.single.upload!.mediaType,
+        'text/plain',
+      );
+      expect(
+        (await cli.execute({
+          'command': 'update-status',
+          'operationId': 'revision-once',
+        }))['proposalId'],
+        update.id,
+      );
+      await service.owner.confirmUpdate(update.id, update.version);
+      expect(repo.items.single.fields.single.attachment!.attachmentVersion, 3);
+      expect(
+        (await service.owner.readInformationAttachment(
+          repo.items.single.fields.single.attachment!,
+        )).bytes,
+        utf8.encode('PRIVATE-REVISED'),
+      );
+      expect((await cli.execute(updateInput))['proposalId'], update.id);
+      expect(
+        (await cli.execute({
+          'command': 'update-status',
+          'operationId': 'revision-once',
+        }))['status'],
+        'confirmed',
+      );
+      expect(repo.items.single.version, 2);
     },
   );
 

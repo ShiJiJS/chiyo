@@ -93,6 +93,10 @@ extension _EncryptedImportFiles on EncryptedInformationRepository {
       });
     } on AccessFailure {
       rethrow;
+    } on sqlite.SqliteException catch (e) {
+      if (e.resultCode == sqlite.SqlError.SQLITE_FULL)
+        throw const AccessFailure('attachment_capacity_exceeded');
+      throw const StorageFailure('file_upload_failed');
     } on Object {
       throw const StorageFailure('file_upload_failed');
     }
@@ -146,24 +150,30 @@ extension _EncryptedImportFiles on EncryptedInformationRepository {
     });
   }
 
-  Future<void> _claimProposalUploads(ImportProposal proposal) async {
-    for (final item in proposal.items) {
-      for (final a in item.attachments) {
-        for (final version in a.versions) {
-          final stored = await _importFileUpload(version.uploadId);
-          if (stored == null ||
-              stored.consumed ||
-              stored.sessionBinding != proposal.sessionBinding ||
-              version.upload == null ||
-              jsonEncode(stored.toPrivateJson()) !=
-                  jsonEncode(version.upload!.toPrivateJson())) {
-            throw const AccessFailure('upload_unavailable');
-          }
-          await _db.customStatement(
-            'UPDATE information_import_files SET claimed=1 WHERE id=?',
-            [stored.id],
-          );
+  Future<void> _claimProposalUploads(ImportProposal proposal) =>
+      _claimFileChanges(
+        proposal.sessionBinding,
+        proposal.items.expand((i) => i.attachments),
+      );
+  Future<void> _claimFileChanges(
+    String binding,
+    Iterable<ImportAttachmentInput> attachments,
+  ) async {
+    for (final a in attachments) {
+      for (final version in a.versions) {
+        final stored = await _importFileUpload(version.uploadId);
+        if (stored == null ||
+            stored.consumed ||
+            stored.sessionBinding != binding ||
+            version.upload == null ||
+            jsonEncode(stored.toPrivateJson()) !=
+                jsonEncode(version.upload!.toPrivateJson())) {
+          throw const AccessFailure('upload_unavailable');
         }
+        await _db.customStatement(
+          'UPDATE information_import_files SET claimed=1 WHERE id=?',
+          [stored.id],
+        );
       }
     }
   }
@@ -180,6 +190,19 @@ extension _EncryptedImportFiles on EncryptedInformationRepository {
       for (final item in proposal.items)
         for (final a in item.attachments)
           for (final v in a.versions) retained.add(v.uploadId);
+    }
+    for (final row
+        in await _db
+            .customSelect('SELECT payload FROM update_proposals')
+            .get()) {
+      final proposal = UpdateProposal.fromJson(
+        jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
+      );
+      for (final a in proposal.input.attachments) {
+        for (final v in a.versions) {
+          retained.add(v.uploadId);
+        }
+      }
     }
     for (final row
         in await _db

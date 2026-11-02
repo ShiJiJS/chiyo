@@ -7,6 +7,7 @@ extension _MemoryImportOriginals on MemoryInformationRepository {
   _prepareImportedOriginals(
     List<InformationImportFilePromotion> promotions,
     List<ImportProposal> proposals,
+    List<InformationUpdateAdmission> updates,
   ) async {
     final result =
         <
@@ -40,11 +41,18 @@ extension _MemoryImportOriginals on MemoryInformationRepository {
     );
     final added = result.values.fold(0, (n, v) => n + (v.$2?.length ?? 0));
     final future = {..._proposals, for (final p in proposals) p.id: p};
+    final futureUpdates = {
+      ..._updates,
+      for (final u in updates) u.proposal.id: u.proposal,
+    };
     final used = {
       for (final p in future.values)
         for (final item in p.items)
           for (final a in item.attachments)
             for (final v in a.versions) v.uploadId,
+      for (final p in futureUpdates.values)
+        for (final a in p.input.attachments)
+          for (final v in a.versions) v.uploadId,
     };
     final sources = _importUploadData.entries
         .where(
@@ -62,22 +70,30 @@ extension _MemoryImportOriginals on MemoryInformationRepository {
   }
 
   void _claimImportOriginals(ImportProposal proposal) {
+    _claimFileChanges(
+      proposal.sessionBinding,
+      proposal.items.expand((i) => i.attachments),
+    );
+  }
+
+  void _claimFileChanges(
+    String binding,
+    Iterable<ImportAttachmentInput> attachments,
+  ) {
     final ids = <String>[];
-    for (final item in proposal.items) {
-      for (final a in item.attachments) {
-        for (final v in a.versions) {
-          final row = _importUploadData[v.uploadId];
-          if (row == null ||
-              row.$2 == null ||
-              row.$1.consumed ||
-              row.$1.sessionBinding != proposal.sessionBinding ||
-              v.upload == null ||
-              jsonEncode(row.$1.toPrivateJson()) !=
-                  jsonEncode(v.upload!.toPrivateJson())) {
-            throw const AccessFailure('upload_unavailable');
-          }
-          ids.add(v.uploadId);
+    for (final a in attachments) {
+      for (final v in a.versions) {
+        final row = _importUploadData[v.uploadId];
+        if (row == null ||
+            row.$2 == null ||
+            row.$1.consumed ||
+            row.$1.sessionBinding != binding ||
+            v.upload == null ||
+            jsonEncode(row.$1.toPrivateJson()) !=
+                jsonEncode(v.upload!.toPrivateJson())) {
+          throw const AccessFailure('upload_unavailable');
         }
+        ids.add(v.uploadId);
       }
     }
     _claimedImportUploads.addAll(ids);
@@ -89,6 +105,9 @@ extension _MemoryImportOriginals on MemoryInformationRepository {
         for (final item in p.items)
           for (final a in item.attachments)
             for (final v in a.versions) v.uploadId,
+      for (final p in _updates.values)
+        for (final a in p.input.attachments)
+          for (final v in a.versions) v.uploadId,
     };
     for (final id in _claimedImportUploads.difference(retained)) {
       final row = _importUploadData[id];

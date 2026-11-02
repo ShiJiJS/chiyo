@@ -10,6 +10,7 @@ void _validateUpdate(UpdateInput input) {
       input.baseVersion < 1 ||
       input.changes.length > 200 ||
       (input.changes.isEmpty &&
+          input.attachments.isEmpty &&
           input.name == null &&
           input.description == null &&
           input.templateId == null) ||
@@ -33,7 +34,17 @@ void _validateUpdate(UpdateInput input) {
                     c.field!.name.length > 200 ||
                     c.field!.description.length > 2000 ||
                     c.field!.value.length > 64000)),
-      )) {
+      ) ||
+      input.attachments.length > 50 ||
+      input.attachments.map((a) => a.key).toSet().length !=
+          input.attachments.length ||
+      input.attachments
+              .where((a) => a.fieldId != null)
+              .map((a) => a.fieldId)
+              .toSet()
+              .length !=
+          input.attachments.where((a) => a.fieldId != null).length ||
+      input.attachments.fold(0, (int n, a) => n + a.versions.length) > 200) {
     throw const AccessFailure('invalid_proposal');
   }
 }
@@ -62,6 +73,10 @@ extension AgentUpdates on AgentAccess {
       throw const AccessFailure('invalid_proposal');
     }
     _validateUpdate(input);
+    input = await _service.owner._resolveUpdateFiles(
+      previous.sessionBinding,
+      input,
+    );
     input = _service.owner._compileTemplateUpdate(input);
     final next = UpdateProposal(
       id: previous.id,
@@ -70,6 +85,8 @@ extension AgentUpdates on AgentAccess {
       createdAt: previous.createdAt,
       input: input,
       version: previous.version + 1,
+      operationId: previous.operationId,
+      submissionDigest: previous.submissionDigest,
     );
     _service.owner._validatePendingUpdateTargets(next);
     await _service._repository.saveUpdateProposal(next);
@@ -77,12 +94,37 @@ extension AgentUpdates on AgentAccess {
 
   Future<String> submitUpdate(
     String session,
-    UpdateInput input,
-  ) => _service.owner._serialize(() async {
+    UpdateInput input, {
+    String? operationId,
+  }) => _service.owner._serialize(() async {
     _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     if (binding == null) throw const AccessFailure('unauthorized');
     _validateUpdate(input);
+    if (operationId != null &&
+        !RegExp(
+          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+        ).hasMatch(operationId!)) {
+      throw const AccessFailure('invalid_operation_id');
+    }
+    final digest = sha256
+        .convert(utf8.encode(jsonEncode(input.submissionJson)))
+        .toString();
+    operationId ??= input.attachments.isNotEmpty ? 'file-update-$digest' : null;
+    if (operationId != null) {
+      final previous = _service._repository.updateProposals
+          .where(
+            (p) => p.sessionBinding == binding && p.operationId == operationId,
+          )
+          .firstOrNull;
+      if (previous != null) {
+        if (previous.submissionDigest != digest) {
+          throw const AccessFailure('operation_conflict');
+        }
+        return previous.id;
+      }
+    }
+    input = await _service.owner._resolveUpdateFiles(binding, input);
     input = _service.owner._compileTemplateUpdate(input);
     if (_service._repository.updateProposals
             .where(
@@ -102,11 +144,31 @@ extension AgentUpdates on AgentAccess {
       chatLabel: _service._sessions[session]!,
       createdAt: _service._clock(),
       input: input,
+      operationId: operationId,
+      submissionDigest: operationId == null ? null : digest,
     );
     _service.owner._validatePendingUpdateTargets(proposal);
     await _service._repository.saveUpdateProposal(proposal);
     return proposal.id;
   });
+  Map<String, Object?> updateStatusByOperation(
+    String session,
+    String operationId,
+  ) {
+    _service._requireSession(session);
+    if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(operationId)) {
+      throw const AccessFailure('invalid_operation_id');
+    }
+    final p = _service._repository.updateProposals
+        .where(
+          (p) =>
+              p.sessionBinding == _service._sessionBindings[session] &&
+              p.operationId == operationId,
+        )
+        .firstOrNull;
+    return p == null ? {'status': 'not_found'} : updateStatus(session, p.id);
+  }
+
   Map<String, Object?> updateStatus(String session, String id) {
     _service._requireSession(session);
     final binding = _service._sessionBindings[session];
@@ -173,6 +235,14 @@ extension OwnerUpdates on OwnerAccess {
         review.input.templateId != proposal.input.templateId ||
         review.input.templateVersion != proposal.input.templateVersion ||
         review.input.templateDigest != proposal.input.templateDigest ||
+        jsonEncode(
+              review.input.attachments.map((a) => a.toPrivateJson()).toList(),
+            ) !=
+            jsonEncode(
+              proposal.input.attachments.map((a) => a.toPrivateJson()).toList(),
+            ) ||
+        jsonEncode(review.input.filePlan?.toPrivateJson()) !=
+            jsonEncode(proposal.input.filePlan?.toPrivateJson()) ||
         review.tagIds.length > 100 ||
         review.tagIds.any((id) => !tags.any((tag) => tag.id == id)) ||
         review.fieldDescriptions.length > 200 ||
@@ -216,7 +286,9 @@ extension OwnerUpdates on OwnerAccess {
 
   InformationItem _applyUpdate(InformationItem previous, UpdateInput input) {
     _validateUpdate(input);
-    if (input.templateId != null) return _applyTemplateUpdate(previous, input);
+    if (input.templateId != null) {
+      return _applyUpdateFiles(_applyTemplateUpdate(previous, input), input);
+    }
     final fields = previous.fields.toList();
     final replacedIds = <String, String>{};
     for (final change in input.changes) {
@@ -251,17 +323,20 @@ extension OwnerUpdates on OwnerAccess {
     if (fields.length > 200) {
       throw const AccessFailure('invalid_proposal');
     }
-    return InformationItem(
-      previous.id,
-      input.name?.trim() ?? previous.name,
-      input.description ?? previous.description,
-      previous.version + 1,
-      fields,
-      directoryId: previous.directoryId,
-      tagIds: previous.tagIds,
-      layout: previous.layout?.remapFields(replacedIds),
-      createdAt: previous.createdAt,
-      modifiedAt: _service._clock(),
+    return _applyUpdateFiles(
+      InformationItem(
+        previous.id,
+        input.name?.trim() ?? previous.name,
+        input.description ?? previous.description,
+        previous.version + 1,
+        fields,
+        directoryId: previous.directoryId,
+        tagIds: previous.tagIds,
+        layout: previous.layout?.remapFields(replacedIds),
+        createdAt: previous.createdAt,
+        modifiedAt: _service._clock(),
+      ),
+      input,
     );
   }
 

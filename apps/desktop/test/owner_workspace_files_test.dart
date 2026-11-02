@@ -159,20 +159,20 @@ void main() {
     },
   );
   test(
-    'retention expiry keeps metadata but cannot return cleaned historical bytes',
+    'owned attachment history remains readable beyond the former retention window',
     () async {
       final old = await save(utf8.encode('retired'));
       final current = await save(utf8.encode('current'), old: old);
       final key = await fieldKey(current);
       now = now.add(const Duration(days: 31));
-      await expectLater(
-        source.readFilePreview(ref(current), key, version: 1),
-        fails('attachment_missing'),
+      expect(
+        (await source.readFilePreview(ref(current), key, version: 1)).text,
+        'retired',
       );
       final history = await source.loadFileHistory(ref(current), key);
       expect(
         history.versions.singleWhere((v) => v.ref.version == 1).available,
-        isFalse,
+        isTrue,
       );
       expect(history.current.available, isTrue);
       expect((await source.readFilePreview(ref(current), key)).text, 'current');

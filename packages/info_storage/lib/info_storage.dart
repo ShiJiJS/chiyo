@@ -56,6 +56,7 @@ const _updateAdmissionLibraryFormat = 44;
 const _credentialImportLibraryFormat = 45;
 const _longTermAttachmentLibraryFormat = 46;
 const _informationImportFileLibraryFormat = 47;
+const _informationFileUpdateLibraryFormat = 48;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -519,7 +520,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _informationImportFileLibraryFormat) {
+      if (headerVersion > _informationFileUpdateLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -535,7 +536,7 @@ class EncryptedInformationRepository
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
             (marker.single['version'] as int) >
-                _informationImportFileLibraryFormat ||
+                _informationFileUpdateLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1463,6 +1464,20 @@ class EncryptedInformationRepository
         _recycleFacts.addAll(update.facts);
         _updates[update.proposal.id] = update.proposal;
       }
+    } on AccessFailure catch (e) {
+      if (filePromotions.isNotEmpty &&
+          {
+            'attachment_capacity_exceeded',
+            'attachment_integrity_failed',
+            'upload_unavailable',
+          }.contains(e.status))
+        rethrow;
+      throw const StorageFailure('save_failed');
+    } on sqlite.SqliteException catch (e) {
+      if (filePromotions.isNotEmpty &&
+          e.resultCode == sqlite.SqlError.SQLITE_FULL)
+        throw const AccessFailure('attachment_capacity_exceeded');
+      throw const StorageFailure('save_failed');
     } catch (_) {
       throw const StorageFailure('save_failed');
     }
@@ -1553,6 +1568,13 @@ class EncryptedInformationRepository
     UpdateProposal proposal, {
     bool operationReceipt = true,
   }) async {
+    if (proposal.operationId != null || proposal.input.attachments.isNotEmpty) {
+      await _requireAdmissionFormat(_informationFileUpdateLibraryFormat);
+    }
+    await _claimFileChanges(
+      proposal.sessionBinding,
+      proposal.input.attachments,
+    );
     if (proposal.approved || proposal.input.pendingRelations.isNotEmpty) {
       await _requireAdmissionFormat(_updateAdmissionLibraryFormat);
     }
@@ -1563,6 +1585,7 @@ class EncryptedInformationRepository
       'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],
     );
+    await _reconcileImportFiles();
     if (operationReceipt &&
         {
           UpdateProposalState.confirmed,

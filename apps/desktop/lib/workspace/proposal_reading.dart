@@ -262,37 +262,12 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
     );
   }
 
-  Widget _attachment(WorkspaceProposalAttachment a) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      if (a.description.isNotEmpty) Text(a.description),
-      for (final (index, v) in a.versions.indexed)
-        Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              LibraryFileSummary(
-                label:
-                    '${v.label.isEmpty ? '提交的原文${index + 1}' : v.label}${a.currentVersion == index + 1 ? ' · 保存为当前版本' : ' · 保留为历史版本'}',
-                filename: v.filename,
-                mediaType: v.mediaType,
-                byteLength: v.byteLength,
-              ),
-              if (v.sourceNote.isNotEmpty)
-                SelectableText('来源依据：${v.sourceNote}'),
-              DesktopButton(
-                kind: DesktopButtonKind.quiet,
-                onPressed: widget.enabled && widget.onFile != null
-                    ? () => widget.onFile!(a.key, index + 1)
-                    : null,
-                child: const Text('查看这份原文'),
-              ),
-            ],
-          ),
-        ),
-    ],
-  );
+  Widget _attachment(WorkspaceProposalAttachment a) =>
+      ProposalAttachmentReading(
+        attachment: a,
+        onFile: widget.onFile,
+        enabled: widget.enabled,
+      );
 
   Widget _fields(List<String> keys) {
     final fields = workspaceFields(
@@ -549,6 +524,71 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
                             ?.name ??
                         '已移除标签',
                   ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// New-file and modification approvals share the same human-readable originals.
+class ProposalAttachmentReading extends StatelessWidget {
+  const ProposalAttachmentReading({
+    super.key,
+    required this.attachment,
+    this.onFile,
+    this.enabled = true,
+  });
+  final WorkspaceProposalAttachment attachment;
+  final Future<void> Function(String attachmentKey, int version)? onFile;
+  final bool enabled;
+  @override
+  Widget build(BuildContext context) {
+    final a = attachment;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (a.existingName.isNotEmpty) Text('补充到已有附件：${a.existingName}'),
+        if (a.previous case final previous?) ...[
+          LibraryFileSummary(
+            label: '原当前文件',
+            filename: previous.filename,
+            mediaType: previous.mediaType,
+            byteLength: previous.byteLength,
+          ),
+          DesktopButton(
+            kind: DesktopButtonKind.quiet,
+            onPressed: enabled && onFile != null
+                ? () => onFile!(a.key, 0)
+                : null,
+            child: const Text('查看原当前文件'),
+          ),
+        ],
+        if (a.currentVersion == null) const Text('以下原文只补入历史，当前文件保持不变。'),
+        if (a.description.isNotEmpty) Text(a.description),
+        for (final (index, v) in a.versions.indexed)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LibraryFileSummary(
+                  label:
+                      '${v.label.isEmpty ? '提交的原文${index + 1}' : v.label}${a.currentVersion == index + 1 ? ' · 保存为当前版本' : ' · 保留为历史版本'}',
+                  filename: v.filename,
+                  mediaType: v.mediaType,
+                  byteLength: v.byteLength,
+                ),
+                if (v.sourceNote.isNotEmpty)
+                  SelectableText('来源依据：${v.sourceNote}'),
+                DesktopButton(
+                  kind: DesktopButtonKind.quiet,
+                  onPressed: enabled && onFile != null
+                      ? () => onFile!(a.key, index + 1)
+                      : null,
+                  child: const Text('查看这份原文'),
+                ),
               ],
             ),
           ),

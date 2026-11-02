@@ -34,7 +34,7 @@ App 保存资料并接收审批；CLI 查询、提交申请和交付获准内容
 4. 同一材料的前后修订作为历史版本；用途不同的材料分别建资料，例如两个投递方向。一个条目可以有相关附件，但不能把不同用途都塞成一条。需要保存原文件时，继续按[普通文件录入](references/information-file-intake.md)提交；原文件与版本只有在文件写入入口实际保存后才算已入库。
 5. 新增使用 `import-submit`。按查询返回的 `submissionExample` 结构填写 `items`，保留所选 `templateId`、`templateVersion`、`templateDigest`，真实值放 `values`；附简短 `purpose` 与 `agentName`。可建议 `suggestedDirectory`、`suggestedTags`，它们只在主人批准并具备入库条件后应用。不要再用 `suggestedTemplate` 提示加平面文字来代替按模板保存。
 6. 需要关联已入库内容时用公开目录中的准确 ID；待录入内容用稳定的条目 `key` 和查询返回的关联格式。同批引用用 `itemKey`，跨提案再加同一会话中的 `proposalId`。查询 `import-status` 可取得服务生成的 key。相互引用的资料可以在同批提交，全部获批后由软件一起入库。
-7. 修改已有资料仍使用 `update-submit`，提供准确 `itemId` 与当前 `baseVersion`。按模板修改时同时提供模板三个标识和**完整 values**；先从获准来源取得现有值，明确保留或修改每个字段。省略字段会报错，不意味着清空。修改可关联待录入普通资料，须给目标 `proposalId` 与 `itemKey`。主人看前后变化再批准，等待期间原资料保持不变。
+7. 修改已有资料仍使用 `update-submit`，提供准确 `itemId` 与当前 `baseVersion`。按模板修改时同时提供模板三个标识和**完整 values**；先从获准来源取得现有文字值，明确保留或修改每个字段，已有文件按查询返回的 `retainFileValue` 明确保留。省略字段会报错，不意味着清空。只补文件的修改按文件录入说明，不要求重填无关正文。修改可关联待录入普通资料，须给目标 `proposalId` 与 `itemKey`。主人看前后变化再批准，等待期间原资料保持不变。
 8. 只改明确字段且保留原含义时，也可用原有 `changes` 协议：`correct` 提供 `fieldId`、`value`；`add` 提供新 `field`；`replace` 明确更换字段含义；`remove` 明确删除。字段含 `name`、`description`、`value`、`kind`。此格式不与模板 values 混用；新增或替换的字段不会继承旧授权。
 9. 保存返回的 `proposalId`，用 `import-status` 或 `update-status` 查**原提案**。等待审批时继续独立工作，不因等待、进程退出或超时重发。首次提交没有取得 proposalId 时报告收件结果尚未确认，先核对现有提案，不反复换内容提交。
 

@@ -118,7 +118,10 @@ class AgentClient {
         return _call('/capabilities', {});
       case 'import-file-status':
         if (_session == null) return {'status': 'unauthorized'};
-        return _call('/import-file/status', {'sessionSecret': _session, 'operationId': input['operationId']});
+        return _call('/import-file/status', {
+          'sessionSecret': _session,
+          'operationId': input['operationId'],
+        });
       case 'plugin-list':
         if (input.length != 1) return {'status': 'invalid_request'};
         return _call('/plugins/catalog', {});
@@ -231,25 +234,31 @@ class AgentClient {
           'proposalId': input['proposalId'],
         });
       case 'update-submit':
-        if (_session == null) return {'status': 'unauthorized'};
-        return _call('/update/submit', {
-          'sessionSecret': _session,
-          'update': input['update'],
-        });
+        return _executeUpdateCommand(input, revise: false);
       case 'update-status':
         if (_session == null) return {'status': 'unauthorized'};
+        if (input.containsKey('operationId')) {
+          if (input.containsKey('proposalId')) {
+            return {'status': 'invalid_request'};
+          }
+          final support = await _call('/capabilities', {});
+          if (support['status'] != 'ok') return support;
+          if (!(support['capabilities'] as List? ?? []).contains(
+            'information-update-operations.v1',
+          )) {
+            return {'status': 'unsupported_capability'};
+          }
+          return _call('/update/status', {
+            'sessionSecret': _session,
+            'operationId': input['operationId'],
+          });
+        }
         return _call('/update/status', {
           'sessionSecret': _session,
           'proposalId': input['proposalId'],
         });
       case 'update-revise':
-        if (_session == null) return {'status': 'unauthorized'};
-        return _call('/update/revise', {
-          'sessionSecret': _session,
-          'proposalId': input['proposalId'],
-          'version': input['version'],
-          'update': input['update'],
-        });
+        return _executeUpdateCommand(input, revise: true);
       case 'import-submit':
         return _executeImportCommand(input, revise: false);
       case 'import-status':

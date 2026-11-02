@@ -74,19 +74,53 @@ class _OriginalState extends State<_Original> {
         final p = widget.owner.importProposals
             .where((p) => p.id == widget.proposalId)
             .firstOrNull;
-        final item = p?.items
-            .where((i) => 'proposal:${p.id}:${i.key}' == widget.itemId)
-            .firstOrNull;
-        if (p == null || item == null) {
-          throw const core.AccessFailure('proposal_changed');
+        late core.OwnerImportOriginal content;
+        if (p != null) {
+          final item = p.items
+              .where((i) => 'proposal:${p.id}:${i.key}' == widget.itemId)
+              .firstOrNull;
+          if (item == null) throw const core.AccessFailure('proposal_changed');
+          content = await widget.owner.readImportOriginal(
+            p.id,
+            item.key,
+            widget.attachmentKey,
+            widget.version,
+            proposalVersion: widget.proposalVersion,
+          );
+        } else {
+          final update = widget.owner.updateProposals
+              .where((p) => p.id == widget.proposalId)
+              .firstOrNull;
+          if (update == null ||
+              update.version != widget.proposalVersion ||
+              update.state != core.UpdateProposalState.pending ||
+              update.input.itemId != widget.itemId) {
+            throw const core.AccessFailure('proposal_changed');
+          }
+          final attachment = update.input.attachments
+              .where((a) => a.key == widget.attachmentKey)
+              .firstOrNull;
+          if (attachment == null) {
+            throw const core.AccessFailure('proposal_changed');
+          }
+          if (widget.version == 0) {
+            final previous =
+                update.input.filePlan?.previousVersions[attachment.fieldId];
+            if (previous == null) {
+              throw const core.AccessFailure('proposal_changed');
+            }
+            return OwnerWorkspaceAttachmentPreview(
+              widget.owner,
+              pdf: widget.pdf,
+            ).read(previous.reference, page: page);
+          }
+          content = await widget.owner.readUpdateOriginal(
+            update.id,
+            widget.proposalVersion,
+            widget.attachmentKey,
+            widget.version,
+          );
         }
-        final content = await widget.owner.readImportOriginal(
-          p.id,
-          item.key,
-          widget.attachmentKey,
-          widget.version,
-          proposalVersion: widget.proposalVersion,
-        );
         final upload = content.upload;
         return OwnerWorkspaceAttachmentPreview(
           widget.owner,
@@ -131,7 +165,13 @@ class _OriginalState extends State<_Original> {
         else if (_preview == null)
           const LinearProgressIndicator()
         else
-          LibraryFilePreviewView(preview: _preview!, onPage: _load),
+          LibraryFilePreviewView(
+            preview: _preview!,
+            onPage: _load,
+            unsupportedMessage: widget.version == 0
+                ? '此文件格式暂不支持预览，可在资料库另存或用本机程序打开。'
+                : '此格式暂不支持在App内预览；这份新原文尚未入库。',
+          ),
       ],
     ),
     actions: [

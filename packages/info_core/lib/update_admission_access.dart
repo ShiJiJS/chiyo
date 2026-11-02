@@ -95,6 +95,8 @@ extension OwnerUpdateAdmission on OwnerAccess {
       values: input.values,
       relations: relations,
       compiledTemplate: input.compiledTemplate,
+      attachments: input.attachments,
+      filePlan: input.filePlan,
     ),
   );
 
@@ -176,6 +178,7 @@ extension OwnerUpdateAdmission on OwnerAccess {
                     : p.version + 1,
               ),
               item: after,
+              filePromotions: p.input.filePlan?.promotions ?? const [],
               previous: InformationRevision(preview.before, _service._clock()),
               recycled: recycled == null ? const [] : [recycled],
               facts: recycled == null

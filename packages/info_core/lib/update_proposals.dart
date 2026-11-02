@@ -1,5 +1,51 @@
 import 'information.dart';
 import 'import_proposals.dart';
+import 'information_import_files.dart';
+import 'information_files.dart';
+
+/// Trusted frozen identities for the Owner's exact pending file preview.
+class InformationFileUpdatePlan {
+  InformationFileUpdatePlan({
+    required Iterable<InformationField> fields,
+    required Iterable<InformationImportFilePromotion> promotions,
+    Map<String, String> bindings = const {},
+    Map<String, InformationAttachmentVersion> previousVersions = const {},
+  }) : fields = List.unmodifiable(fields),
+       promotions = List.unmodifiable(promotions),
+       bindings = Map.unmodifiable(bindings),
+       previousVersions = Map.unmodifiable(previousVersions);
+  final List<InformationField> fields;
+  final List<InformationImportFilePromotion> promotions;
+  final Map<String, String> bindings;
+  final Map<String, InformationAttachmentVersion> previousVersions;
+  Map<String, Object?> toPrivateJson() => {
+    'fields': fields.map((f) => f.toJson()).toList(),
+    'promotions': promotions.map((p) => p.toPrivateJson()).toList(),
+    'bindings': bindings,
+    'previousVersions': {
+      for (final e in previousVersions.entries) e.key: e.value.toPrivateJson(),
+    },
+  };
+  factory InformationFileUpdatePlan.fromPrivateJson(
+    Map<String, dynamic> json,
+  ) => InformationFileUpdatePlan(
+    fields: (json['fields'] as List).map(
+      (f) => InformationField.fromJson(Map<String, dynamic>.from(f as Map)),
+    ),
+    promotions: (json['promotions'] as List).map(
+      (p) => InformationImportFilePromotion.fromPrivateJson(
+        Map<String, dynamic>.from(p as Map),
+      ),
+    ),
+    bindings: Map<String, String>.from(json['bindings'] as Map),
+    previousVersions: {
+      for (final e in (json['previousVersions'] as Map? ?? {}).entries)
+        e.key as String: InformationAttachmentVersion.fromPrivateJson(
+          Map<String, dynamic>.from(e.value as Map),
+        ),
+    },
+  );
+}
 
 enum UpdateProposalState { pending, confirmed, rejected, conflicted }
 
@@ -70,7 +116,10 @@ class UpdateInput {
     Map<String, List<InformationRelationRef>>? relations,
     Map<String, List<ImportPendingReference>> pendingRelations = const {},
     this.compiledTemplate,
+    Iterable<ImportAttachmentInput> attachments = const [],
+    this.filePlan,
   }) : changes = List.unmodifiable(changes),
+       attachments = List.unmodifiable(attachments),
        values = ImportItemInput('', '', const [], values: values).values,
        pendingRelations = ImportItemInput(
          '',
@@ -97,12 +146,16 @@ class UpdateInput {
 
   /// Validated private snapshot, never accepted from Agent JSON.
   final ImportItemInput? compiledTemplate;
+  final List<ImportAttachmentInput> attachments;
+  final InformationFileUpdatePlan? filePlan;
   Map<String, Object?> get submissionJson => {
     'itemId': itemId,
     'baseVersion': baseVersion,
     'changes': changes.map((c) => c.toJson()).toList(),
     if (name != null) 'name': name,
     if (description != null) 'description': description,
+    if (attachments.isNotEmpty)
+      'attachments': attachments.map((a) => a.submissionJson).toList(),
     if (templateId != null) ...{
       'templateId': templateId,
       'templateVersion': templateVersion,
@@ -120,6 +173,9 @@ class UpdateInput {
   };
   Map<String, Object?> toJson() => {
     ...submissionJson,
+    if (attachments.isNotEmpty)
+      'attachments': attachments.map((a) => a.toPrivateJson()).toList(),
+    if (filePlan != null) 'filePlan': filePlan!.toPrivateJson(),
     if (compiledTemplate != null)
       'compiledTemplate': compiledTemplate!.toJson(),
   };
@@ -136,6 +192,7 @@ class UpdateInput {
         'templateDigest',
         'values',
         'relations',
+        'attachments',
       }.contains(key),
     )) {
       throw const FormatException('Agent cannot supply compiled template');
@@ -163,6 +220,17 @@ class UpdateInput {
         ? importRelationsFromJson(json['relations'])
         : null,
     pendingRelations: importPendingRelationsFromJson(json['relations']),
+    attachments: (json['attachments'] as List? ?? []).map(
+      (a) => ImportAttachmentInput.fromJson(
+        Map<String, dynamic>.from(a as Map),
+        private: private,
+      ),
+    ),
+    filePlan: private && json['filePlan'] != null
+        ? InformationFileUpdatePlan.fromPrivateJson(
+            Map<String, dynamic>.from(json['filePlan'] as Map),
+          )
+        : null,
     compiledTemplate: private && json['compiledTemplate'] != null
         ? ImportItemInput.fromPrivateJson(
             Map<String, dynamic>.from(json['compiledTemplate'] as Map),
@@ -183,6 +251,8 @@ class UpdateProposal {
     this.version = 1,
     this.result,
     this.approvedReview,
+    this.operationId,
+    this.submissionDigest,
   });
   final String id, sessionBinding, chatLabel;
   final DateTime createdAt;
@@ -191,6 +261,7 @@ class UpdateProposal {
   final int version;
   final UpdateReceipt? result;
   final UpdateReview? approvedReview;
+  final String? operationId, submissionDigest;
   bool get approved => approvedReview != null;
   UpdateProposal approve(UpdateReview review) => UpdateProposal(
     id: id,
@@ -201,6 +272,8 @@ class UpdateProposal {
     state: state,
     version: version + 1,
     approvedReview: review,
+    operationId: operationId,
+    submissionDigest: submissionDigest,
   );
   UpdateProposal finish(
     UpdateProposalState state, {
@@ -215,6 +288,8 @@ class UpdateProposal {
     state: state,
     version: resultingVersion ?? version + 1,
     result: result,
+    operationId: operationId,
+    submissionDigest: submissionDigest,
   );
   Map<String, Object?> toJson() => {
     'id': id,
@@ -224,6 +299,10 @@ class UpdateProposal {
     'input': input.toJson(),
     'state': state.name,
     'version': version,
+    if (operationId != null) ...{
+      'operationId': operationId,
+      'submissionDigest': submissionDigest,
+    },
     if (approvedReview case final review?)
       'approval': {
         'directoryId': review.directoryId,
@@ -241,6 +320,8 @@ class UpdateProposal {
     input: UpdateInput.fromPrivateJson(json['input'] as Map<String, dynamic>),
     state: UpdateProposalState.values.byName(json['state'] as String),
     version: json['version'] as int,
+    operationId: json['operationId'] as String?,
+    submissionDigest: json['submissionDigest'] as String?,
     approvedReview: json['approval'] == null
         ? null
         : UpdateReview(

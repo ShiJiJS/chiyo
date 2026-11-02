@@ -7,13 +7,19 @@ InformationImportFileRepository _importFiles(
   _ => throw const AccessFailure('unsupported_capability'),
 };
 
-Set<String> _pendingImportUploads(Iterable<ImportProposal> proposals) => {
+Set<String> _pendingImportUploads(
+  Iterable<ImportProposal> proposals, [
+  Iterable<UpdateProposal> updates = const [],
+]) => {
   for (final p in proposals.where(
     (p) => p.state == ImportProposalState.pending,
   ))
     for (final i in p.items)
       for (final a in i.attachments)
         for (final v in a.versions) v.uploadId,
+  for (final p in updates.where((p) => p.state == UpdateProposalState.pending))
+    for (final a in p.input.attachments)
+      for (final v in a.versions) v.uploadId,
 };
 
 extension AgentInformationImportFiles on AgentAccess {
@@ -68,7 +74,10 @@ extension AgentInformationImportFiles on AgentAccess {
       }
       await repository.pruneImportFiles(
         _service._clock().toUtc().subtract(const Duration(minutes: 30)),
-        _pendingImportUploads(_service._repository.importProposals),
+        _pendingImportUploads(
+          _service._repository.importProposals,
+          _service._repository.updateProposals,
+        ),
       );
       _service._requireSession(session);
       await repository.stageImportFile(upload, copy);
@@ -91,6 +100,150 @@ extension AgentInformationImportFiles on AgentAccess {
 }
 
 extension OwnerImportFiles on OwnerAccess {
+  Future<UpdateInput> _resolveUpdateFiles(
+    String binding,
+    UpdateInput input,
+  ) async {
+    if (input.attachments.isEmpty) return input;
+    final previous = information.where((i) => i.id == input.itemId).firstOrNull;
+    if (previous == null || previous.version != input.baseVersion) {
+      throw const AccessFailure('proposal_conflict');
+    }
+    final resolved = (await _resolveImportFiles(binding, [
+      ImportItemInput('', '', const [], attachments: input.attachments),
+    ])).single.attachments;
+    final previousVersions = <String, InformationAttachmentVersion>{};
+    final usedSeries = <String>{};
+    final fields = <InformationField>[],
+        promotions = <InformationImportFilePromotion>[],
+        bindings = <String, String>{};
+    final now = _service._clock().toUtc();
+    for (final a in resolved) {
+      final old = previous.fields.where((f) => f.id == a.fieldId).firstOrNull;
+      if (a.fieldId != null && (old == null || old.kind != FieldKind.file) ||
+          input.changes.any(
+            (c) => c.fieldId != null && c.fieldId == a.fieldId,
+          )) {
+        throw const AccessFailure('proposal_conflict');
+      }
+      if (a.templateField case final key?) {
+        final definition = previous.layout?.snapshot['definition'] as Map?;
+        final declared = (definition?['fields'] as List? ?? [])
+            .where((f) => (f as Map)['key'] == key)
+            .firstOrNull;
+        final current = previous.layout?.fieldIds[jsonEncode(['field', key])];
+        if (declared == null ||
+            (declared as Map)['type'] != 'file' ||
+            current != null && current != a.fieldId) {
+          throw const AccessFailure('proposal_conflict');
+        }
+      }
+      final attachmentId = old?.attachment?.attachmentId ?? _service._secret();
+      if (!usedSeries.add(attachmentId)) {
+        throw const AccessFailure('invalid_proposal');
+      }
+      final history = old == null
+          ? <InformationAttachmentVersion>[]
+          : await _attachments.informationAttachmentVersions(attachmentId);
+      final latest = history.fold(
+        0,
+        (n, v) => max(n, v.reference.attachmentVersion),
+      );
+      if (old != null) {
+        final current = history
+            .where((v) => v.reference == old.attachment)
+            .firstOrNull;
+        if (current == null || !current.available) {
+          throw const AccessFailure('attachment_missing');
+        }
+        previousVersions[old.id] = current;
+      }
+      for (final (index, v) in a.versions.indexed) {
+        final upload = v.upload!;
+        promotions.add(
+          InformationImportFilePromotion(
+            upload,
+            InformationAttachmentVersion(
+              reference: InformationAttachmentRef(
+                attachmentId,
+                latest + index + 1,
+              ),
+              originalName: upload.originalName,
+              mediaType: upload.mediaType,
+              byteLength: upload.byteLength,
+              sha256: upload.sha256,
+              createdAt: now,
+              retiredAt: a.currentVersion == index + 1 ? null : now,
+              label: v.label,
+              sourceNote: v.sourceNote,
+            ),
+          ),
+        );
+      }
+      final field = InformationField.file(
+        old?.id ?? _service._secret(),
+        a.name,
+        a.description,
+        a.currentVersion == null
+            ? old!.attachment!
+            : InformationAttachmentRef(
+                attachmentId,
+                latest + a.currentVersion!,
+              ),
+        (old?.version ?? 0) + 1,
+      );
+      fields.add(field);
+      if (a.templateField != null) {
+        bindings[jsonEncode(['field', a.templateField])] = field.id;
+      }
+    }
+    return UpdateInput.fromPrivateJson({
+      ...input.toJson(),
+      'attachments': resolved.map((a) => a.toPrivateJson()).toList(),
+      'filePlan': InformationFileUpdatePlan(
+        fields: fields,
+        promotions: promotions,
+        bindings: bindings,
+        previousVersions: previousVersions,
+      ).toPrivateJson(),
+    });
+  }
+
+  InformationItem _applyUpdateFiles(
+    InformationItem updated,
+    UpdateInput input,
+  ) {
+    if (input.attachments.isEmpty) return updated;
+    final plan = input.filePlan;
+    if (plan == null) throw const AccessFailure('invalid_proposal');
+    final replacements = {for (final f in plan.fields) f.id: f};
+    final fields = [
+      for (final f in updated.fields) replacements.remove(f.id) ?? f,
+      ...replacements.values,
+    ];
+    if (fields.length > 200) throw const AccessFailure('invalid_proposal');
+    final layout = updated.layout;
+    return InformationItem(
+      updated.id,
+      updated.name,
+      updated.description,
+      updated.version,
+      fields,
+      directoryId: updated.directoryId,
+      tagIds: updated.tagIds,
+      createdAt: updated.createdAt,
+      modifiedAt: updated.modifiedAt,
+      layout: layout == null
+          ? null
+          : InformationLayout(
+              typeId: layout.typeId,
+              snapshot: layout.snapshot,
+              fieldIds: {...layout.fieldIds, ...plan.bindings},
+              relations: layout.relations,
+            ),
+    );
+  }
+
   Future<OwnerImportOriginal> readImportOriginal(
     String proposalId,
     String itemKey,
@@ -117,41 +270,77 @@ extension OwnerImportFiles on OwnerAccess {
       throw const AccessFailure('proposal_changed');
     }
     final expected = attachment.versions[version - 1].upload;
-    final scope = captureLibraryScope();
-    return _importFiles(_service._repository).withImportFile(
-      attachment.versions[version - 1].uploadId,
-      (upload, chunks) async {
-        if (expected == null ||
-            upload.sessionBinding != p!.sessionBinding ||
-            jsonEncode(upload.toPrivateJson()) !=
-                jsonEncode(expected.toPrivateJson())) {
-          throw const AccessFailure('upload_unavailable');
-        }
-        final builder = BytesBuilder(copy: true);
-        final digest = _InformationFileDigest();
-        // One bounded original is available only to the trusted owner preview.
-        final receiver = sha256.startChunkedConversion(digest);
-        try {
-          await for (final chunk in chunks) {
-            if (chunk.length > 1024 * 1024 ||
-                builder.length + chunk.length > upload.byteLength) {
-              throw const AccessFailure('attachment_integrity_failed');
-            }
-            builder.add(chunk);
-            receiver.add(chunk);
-          }
-        } finally {
-          receiver.close();
-        }
-        if (!scope.isCurrent ||
-            builder.length != upload.byteLength ||
-            digest.value.toString() != upload.sha256) {
-          throw const AccessFailure('attachment_integrity_failed');
-        }
-        return OwnerImportOriginal._(upload, builder.takeBytes());
-      },
-    );
+    if (expected == null) throw const AccessFailure('upload_unavailable');
+    return _readProposedOriginal(expected, p!.sessionBinding);
   });
+
+  Future<OwnerImportOriginal> readUpdateOriginal(
+    String proposalId,
+    int proposalVersion,
+    String attachmentKey,
+    int version,
+  ) => _serialize(() async {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    final p = updateProposals
+        .where(
+          (p) => p.id == proposalId && p.state == UpdateProposalState.pending,
+        )
+        .firstOrNull;
+    if (p == null || p.version != proposalVersion) {
+      throw const AccessFailure('proposal_changed');
+    }
+    final attachment = p.input.attachments
+        .where((a) => a.key == attachmentKey)
+        .firstOrNull;
+    if (attachment == null ||
+        version < 1 ||
+        version > attachment.versions.length) {
+      throw const AccessFailure('proposal_changed');
+    }
+    final expected = attachment.versions[version - 1].upload;
+    if (expected == null) throw const AccessFailure('upload_unavailable');
+    return _readProposedOriginal(expected, p.sessionBinding);
+  });
+
+  Future<OwnerImportOriginal> _readProposedOriginal(
+    InformationImportUpload expected,
+    String binding,
+  ) {
+    final scope = captureLibraryScope();
+    return _importFiles(_service._repository).withImportFile(expected.id, (
+      upload,
+      chunks,
+    ) async {
+      if (upload.sessionBinding != binding ||
+          jsonEncode(upload.toPrivateJson()) !=
+              jsonEncode(expected.toPrivateJson())) {
+        throw const AccessFailure('upload_unavailable');
+      }
+      final builder = BytesBuilder(copy: true);
+      final digest = _InformationFileDigest();
+      // One bounded original is available only to the trusted owner preview.
+      final receiver = sha256.startChunkedConversion(digest);
+      try {
+        await for (final chunk in chunks) {
+          if (chunk.length > 1024 * 1024 ||
+              builder.length + chunk.length > upload.byteLength) {
+            throw const AccessFailure('attachment_integrity_failed');
+          }
+          builder.add(chunk);
+          receiver.add(chunk);
+        }
+      } finally {
+        receiver.close();
+      }
+      if (!scope.isCurrent ||
+          builder.length != upload.byteLength ||
+          digest.value.toString() != upload.sha256) {
+        throw const AccessFailure('attachment_integrity_failed');
+      }
+      return OwnerImportOriginal._(upload, builder.takeBytes());
+    });
+  }
+
   ({
     List<InformationField> fields,
     Map<String, String> bindings,
