@@ -1,5 +1,13 @@
 # 通用 CLI 申请与等待
 
+## 查询当前插件和资料模板（Mac 开发分支）
+
+App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}`；后者支持 `packageId`、`offset`、`limit`。选择启用的模板后发送 `{"command":"template-read","templateId":"查询所得ID"}`，按返回的 `definition` 和 `submissionExample` 填写，不能把固定模板列表抄进 Skill。插件安装、更新、启停和移除在下一次查询中生效。没有适合的模板就建议用户补充并暂缓，不自行生成安装插件。
+
+新增通过 `import-submit` 的 `items` 提供 `name`、`description`、`templateId`、`templateVersion`、`templateDigest`、`values`，与主人审批共用原入口。按模板修改仍走 `update-submit`，在 `update` 中提供已有 `itemId`、`baseVersion`、相同三个模板标识和完整 `values`，不要与平面 `changes` 混用。类型和格式不再降为通用文字。
+
+模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。当前文件录入及待入库引用仍在 #79/#80 与 #78 后续开发，详见[实现进度](development/ai-template-ingestion.md)。
+
 ## 分类名称与整理兼容（0.4.1+13）
 
 新建分类时，`directoryName`／`suggestedDirectory` 是单级根目录名称，不是路径；

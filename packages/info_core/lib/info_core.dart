@@ -75,6 +75,8 @@ part 'proposal_access.dart';
 part 'proposal_operations.dart';
 part 'additional_approval_operations.dart';
 part 'template_package_access.dart';
+part 'information_template_catalog.dart';
+part 'template_import_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -270,6 +272,7 @@ class InformationService {
   final _expiredOrganizations = <String>{};
   final _submitted = StreamController<String>.broadcast();
   bool _closed = false;
+  InformationTemplateCatalog Function()? _informationTemplates;
   bool _backupBusy = false;
   Completer<void>? _backupBarrier;
   int _libraryGeneration = 0;

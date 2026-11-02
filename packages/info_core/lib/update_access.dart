@@ -11,13 +11,17 @@ void _validateUpdate(UpdateInput input) {
       input.changes.length > 200 ||
       (input.changes.isEmpty &&
           input.name == null &&
-          input.description == null) ||
+          input.description == null &&
+          input.templateId == null) ||
+      (input.templateId != null && input.changes.isNotEmpty) ||
+      (input.templateId == null &&
+          (input.values.isNotEmpty || input.compiledTemplate != null)) ||
       (input.name != null &&
           (input.name!.trim().isEmpty || input.name!.length > 200)) ||
       (input.description?.length ?? 0) > 2000 ||
       touched.toSet().length != touched.length ||
       touched.any((id) => id.isEmpty || id.length > 200) ||
-      utf8.encode(jsonEncode(input.toJson())).length > 240000 ||
+      utf8.encode(jsonEncode(input.submissionJson)).length > 240000 ||
       input.changes.any(
         (c) =>
             (c.value?.length ?? 0) > 64000 ||
@@ -40,6 +44,7 @@ extension AgentUpdates on AgentAccess {
     final binding = _service._sessionBindings[session];
     if (binding == null) throw const AccessFailure('unauthorized');
     _validateUpdate(input);
+    input = _service.owner._compileTemplateUpdate(input);
     if (_service._repository.updateProposals
             .where(
               (p) =>
@@ -112,6 +117,9 @@ extension OwnerUpdates on OwnerAccess {
     }
     if (review.input.itemId != proposal.input.itemId ||
         review.input.baseVersion != proposal.input.baseVersion ||
+        review.input.templateId != proposal.input.templateId ||
+        review.input.templateVersion != proposal.input.templateVersion ||
+        review.input.templateDigest != proposal.input.templateDigest ||
         review.tagIds.length > 100 ||
         review.tagIds.any((id) => !tags.any((tag) => tag.id == id)) ||
         review.fieldDescriptions.length > 200 ||
@@ -155,6 +163,7 @@ extension OwnerUpdates on OwnerAccess {
 
   InformationItem _applyUpdate(InformationItem previous, UpdateInput input) {
     _validateUpdate(input);
+    if (input.templateId != null) return _applyTemplateUpdate(previous, input);
     final fields = previous.fields.toList();
     final replacedIds = <String, String>{};
     for (final change in input.changes) {
@@ -218,6 +227,20 @@ extension OwnerUpdates on OwnerAccess {
     }
     UpdatePreview preview;
     try {
+      if (proposal.input.templateId != null) {
+        final reviewed = _compileTemplateUpdate(
+          review?.input ?? proposal.input,
+        );
+        final originalReview = review;
+        if (originalReview != null) {
+          review = UpdateReview(
+            reviewed,
+            directoryId: originalReview.directoryId,
+            tagIds: originalReview.tagIds,
+            fieldDescriptions: originalReview.fieldDescriptions,
+          );
+        }
+      }
       preview = previewUpdate(id, review: review);
     } on AccessFailure catch (error) {
       if (error.status == 'proposal_conflict') {

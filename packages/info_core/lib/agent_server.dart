@@ -146,7 +146,11 @@ class AgentServer {
               informationFile ||
               request.uri.path == '/catalog' ||
               request.uri.path == '/request' ||
-              request.uri.path == '/request/status'
+              request.uri.path == '/request/status' ||
+              request.uri.path == '/import/submit' ||
+              request.uri.path == '/update/submit' ||
+              request.uri.path.startsWith('/templates/') ||
+              request.uri.path == '/plugins/catalog'
           ? decodeProtocolObject(utf8.decode(bytes))
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
@@ -166,6 +170,8 @@ class AgentServer {
           : request.uri.path == '/credentials/catalog' || runtime
           ? _credentialFailure('invalid_json')
           : {'status': 'invalid_request'};
+    } on InformationTemplateInputFailure catch (error) {
+      result = {'status': error.status, 'fieldErrors': error.fieldErrors};
     } on AccessFailure catch (error) {
       result = {'status': error.status};
     } on Object {
@@ -237,10 +243,34 @@ class AgentServer {
               'credential-focused-target.v1',
             if (_informationFilesEnabled) 'information-attachments.v1',
             if (tools != null) 'credential-tools.v1',
+            if (_agent.informationTemplatesAvailable)
+              'information-template-discovery.v1',
           ],
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
         };
+      case '/plugins/catalog':
+        if (body.isNotEmpty) throw const AccessFailure('invalid_request');
+        return _agent.pluginCatalog();
+      case '/templates/catalog':
+        if (body.keys.any(
+              (k) => !{'packageId', 'offset', 'limit'}.contains(k),
+            ) ||
+            body['packageId'] != null && body['packageId'] is! String ||
+            body.containsKey('offset') && body['offset'] is! int ||
+            body.containsKey('limit') && body['limit'] is! int) {
+          throw const AccessFailure('invalid_request');
+        }
+        return _agent.informationTemplateCatalog(
+          packageId: body['packageId'] as String?,
+          offset: body['offset'] as int? ?? 0,
+          limit: body['limit'] as int? ?? 50,
+        );
+      case '/templates/read':
+        if (body.length != 1 || body['templateId'] is! String) {
+          throw const AccessFailure('invalid_request');
+        }
+        return _agent.readInformationTemplate(body['templateId'] as String);
       case '/information-file/fetch':
       case '/information-file/status':
       case '/information-file/release':

@@ -161,10 +161,13 @@ class DeclarativeTemplatePackageDecoder {
           fieldKinds = <String, String>{};
       for (final (n, rawField) in fields.indexed) {
         final path = '$p.fields[$n]', f = _map(rawField, path);
-        _keys(f, {'key', 'label', 'type', 'required'}, path);
+        _keys(f, {'key', 'label', 'type', 'required', 'description'}, path);
         final field = _identifier(f, 'key', path),
             kind = _text(f, 'type', path, max: 32);
         _text(f, 'label', path, max: 160);
+        if (f.containsKey('description')) {
+          _text(f, 'description', path, max: 2000, empty: true);
+        }
         if (fieldKinds.containsKey(field)) _fail('$path.key', '字段身份重复。');
         if (!fieldTypes.contains(kind)) {
           _fail('$path.type', '不支持此字段类型；文件和凭据由宿主管理。');
@@ -226,7 +229,18 @@ class DeclarativeTemplatePackageDecoder {
             _fail('$path.keys', '字段引用不存在或重复。');
           }
         } else if ({'text', 'timeline', 'relations'}.contains(kind)) {
-          _keys(s, {'kind', 'title', 'key'}, path);
+          _keys(s, {
+            'kind',
+            'title',
+            'key',
+            if (kind == 'text') 'formatKey',
+          }, path);
+          if (s.containsKey('formatKey')) {
+            final formatKey = _identifier(s, 'formatKey', path);
+            if (fieldKinds[formatKey] != 'text') {
+              _fail('$path.formatKey', '正文格式需引用一个文本字段。');
+            }
+          }
           final field = _identifier(s, 'key', path);
           if (kind == 'relations'
               ? !relationKeys.contains(field)

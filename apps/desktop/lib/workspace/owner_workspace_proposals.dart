@@ -248,6 +248,48 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
     WorkspaceDetail before,
     WorkspaceDetail proposed,
   ) {
+    if (p.input.templateId != null) {
+      return [
+        for (final old in preview.before.fields)
+          if (!after.fields.any((f) => f.id == old.id))
+            (() {
+              final slot = _slot(before, old.id);
+              return WorkspaceProposalFieldChange(
+                intent: WorkspaceProposalFieldIntent.remove,
+                key: slot.key,
+                entryId: slot.entry,
+                leaf: slot.leaf,
+                fieldId: old.id,
+                label: old.name,
+                before: old.value,
+                beforeAvailable: true,
+              );
+            })(),
+        for (final next in after.fields)
+          if (!preview.before.fields.any(
+            (f) => f.id == next.id && f.value == next.value,
+          ))
+            (() {
+              final old = preview.before.fields
+                  .where((f) => f.id == next.id)
+                  .firstOrNull;
+              final slot = _slot(proposed, next.id);
+              return WorkspaceProposalFieldChange(
+                intent: old == null
+                    ? WorkspaceProposalFieldIntent.add
+                    : WorkspaceProposalFieldIntent.correct,
+                key: slot.key,
+                entryId: slot.entry,
+                leaf: slot.leaf,
+                fieldId: old?.id,
+                label: next.name,
+                before: old?.value,
+                after: next.value,
+                beforeAvailable: old != null,
+              );
+            })(),
+      ];
+    }
     final slots = preview.before.fields.map((f) => f.id).toList();
     final changedSlots = <int, String>{};
     for (final (index, c) in p.input.changes.indexed) {
@@ -397,22 +439,24 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
       if (p.state == core.ImportProposalState.pending) {
         for (final (index, input) in p.items.indexed) {
           final candidate = 'proposal:$id:$index';
+          final previewFields = [
+            for (final (n, f) in input.fields.indexed)
+              core.InformationField(
+                '$candidate:$n',
+                f.name,
+                f.description,
+                f.value,
+                1,
+                kind: f.kind,
+              ),
+          ];
           final item = core.InformationItem(
             candidate,
             input.name,
             input.description,
             1,
-            [
-              for (final (n, f) in input.fields.indexed)
-                core.InformationField(
-                  '$candidate:$n',
-                  f.name,
-                  f.description,
-                  f.value,
-                  1,
-                  kind: f.kind,
-                ),
-            ],
+            previewFields,
+            layout: input.bindLayout(previewFields),
             directoryId: _importDirectory(input),
             tagIds: _importTags(input),
           );
@@ -684,184 +728,250 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
     return raw;
   }
 
+  Map<String, Object?> _templateValues(
+    WorkspaceDetail detail,
+    WorkspaceProposalItemReview review,
+  ) => {
+    for (final field in detail.definition['fields'] as List)
+      field['key'] as String: field['type'] == 'entries'
+          ? [
+              for (final row in review.values[field['key']] as List? ?? [])
+                {
+                  for (final part in ['title', 'period', 'detail'])
+                    part: (row as Map)[part] ?? '',
+                },
+            ]
+          : review.values[field['key']] ?? '',
+  };
+
   @override
-  Future<WorkspaceProposalReceipt> change(WorkspaceProposalChange c) =>
-      _run(() async {
-        final previous = await owner.ownerProposalReceipt(c.operationId);
-        if (previous != null) {
-          if (previous.command.commandDigest != c.digest) {
-            throw const WorkspaceFailure('operation_conflict', '原操作不能用于另一份决定。');
-          }
-          return _receipt(previous);
-        }
-        final d = _detail(c.proposalId);
-        _validateReview(c, d);
-        final command = core.OwnerProposalCommand(
-          operationId: c.operationId,
-          proposalId: c.proposalId,
-          kind: core.ProposalKind.values.byName(d.summary.kind.name),
-          confirm: c.action == WorkspaceProposalAction.confirm,
-          version: c.version,
-          reviewToken: c.reviewToken,
-          commandDigest: c.digest,
-        );
-        final result = await owner.performProposalDecision(
-          command,
-          validate: () => _validateReview(c, _detail(c.proposalId)),
-          decide: () async {
-            switch (d.summary.kind) {
-              case WorkspaceProposalKind.addition:
-                if (c.action == WorkspaceProposalAction.reject) {
-                  await owner.rejectImport(c.proposalId, c.version);
-                  break;
-                }
-                final p = owner.importProposals.singleWhere(
-                  (p) => p.id == c.proposalId,
-                );
-                await owner.confirmImport(c.proposalId, c.version, [
-                  for (final r in c.reviewed)
-                    (() {
-                      final index = d.items.indexWhere((i) => i.id == r.itemId),
-                          input = p.items[index],
-                          detail = d.items[index].proposed;
-                      return core.ImportItemInput(
-                        r.name,
-                        r.description,
-                        [
-                          for (final (n, f) in input.fields.indexed)
-                            core.FieldInput(
-                              f.name,
-                              f.description,
-                              r.values[detail.fieldIds.entries
-                                      .singleWhere(
-                                        (e) => e.value == '${r.itemId}:$n',
-                                      )
-                                      .key]
-                                  as String,
-                              kind: f.kind,
-                            ),
-                        ],
-                        directoryId:
-                            _suggestedDirectories.containsKey(r.directoryId)
-                            ? null
-                            : r.directoryId,
-                        suggestedDirectory:
-                            _suggestedDirectories[r.directoryId] ?? '',
-                        tagIds: r.tagIds.where(
-                          (id) => !_suggestedTags.containsKey(id),
-                        ),
-                        suggestedTags: r.tagIds
-                            .where(_suggestedTags.containsKey)
-                            .map((id) => _suggestedTags[id]!),
-                      );
-                    })(),
-                ]);
-              case WorkspaceProposalKind.modification:
-                if (c.action == WorkspaceProposalAction.reject) {
-                  await owner.rejectUpdate(c.proposalId, c.version);
-                  break;
-                }
-                final p = owner.updateProposals.singleWhere(
-                      (p) => p.id == c.proposalId,
-                    ),
-                    r = c.reviewed.single,
-                    item = d.items.single;
-                final changes = <core.FieldChange>[];
-                for (final (index, original) in p.input.changes.indexed) {
-                  final change = item.changes[index];
-                  changes.add(switch (original.kind) {
-                    core.FieldChangeKind.correct => core.FieldChange.correct(
-                      original.fieldId!,
-                      _value(r, change),
-                    ),
-                    core.FieldChangeKind.remove => core.FieldChange.remove(
-                      original.fieldId!,
-                    ),
-                    core.FieldChangeKind.add => core.FieldChange.add(
-                      core.FieldInput(
-                        original.field!.name,
-                        original.field!.description,
-                        _value(r, change),
-                        kind: original.field!.kind,
-                      ),
-                    ),
-                    core.FieldChangeKind.replace => core.FieldChange.replace(
-                      original.fieldId!,
-                      core.FieldInput(
-                        original.field!.name,
-                        original.field!.description,
-                        _value(r, change),
-                        kind: original.field!.kind,
-                      ),
-                    ),
-                  });
-                }
-                final touched = p.input.changes
-                    .map((change) => change.fieldId)
-                    .whereType<String>()
-                    .toSet();
-                final current = owner.information.singleWhere(
-                  (i) => i.id == p.input.itemId,
-                );
-                for (final field in current.fields.where(
-                  (f) => !touched.contains(f.id),
-                )) {
-                  final slot = _slot(item.proposed, field.id);
-                  final probe = WorkspaceProposalFieldChange(
-                    intent: WorkspaceProposalFieldIntent.correct,
-                    key: slot.key,
-                    entryId: slot.entry,
-                    leaf: slot.leaf,
-                    label: field.name,
-                  );
-                  if (field.kind == core.FieldKind.file) {
-                    if (jsonEncode(r.values[slot.key]) !=
-                        jsonEncode(item.proposed.values[slot.key])) {
-                      throw const WorkspaceFailure(
-                        'validation',
-                        '普通附件通过资料文件管理替换，不能在文字提案中更换。',
-                      );
-                    }
-                  } else {
-                    final value = _value(r, probe);
-                    if (value != field.value) {
-                      changes.add(core.FieldChange.correct(field.id, value));
-                    }
-                  }
-                }
-                await owner.confirmUpdate(
-                  c.proposalId,
-                  c.version,
-                  review: core.UpdateReview(
-                    core.UpdateInput(
-                      p.input.itemId,
-                      p.input.baseVersion,
-                      changes,
-                      name: r.name,
-                      description: r.description,
-                    ),
-                    directoryId: r.directoryId,
-                    tagIds: r.tagIds,
-                  ),
-                );
-              case WorkspaceProposalKind.deletion:
-                if (c.action == WorkspaceProposalAction.reject) {
-                  await owner.rejectDelete(c.proposalId, c.version);
-                } else {
-                  await owner.confirmDelete(c.proposalId, c.version);
-                }
-              case WorkspaceProposalKind.organization:
-                if (c.action == WorkspaceProposalAction.reject) {
-                  await owner.rejectOrganization(c.proposalId);
-                } else {
-                  await owner.confirmOrganization(c.proposalId);
-                }
+  Future<WorkspaceProposalReceipt> change(
+    WorkspaceProposalChange c,
+  ) => _run(() async {
+    final previous = await owner.ownerProposalReceipt(c.operationId);
+    if (previous != null) {
+      if (previous.command.commandDigest != c.digest) {
+        throw const WorkspaceFailure('operation_conflict', '原操作不能用于另一份决定。');
+      }
+      return _receipt(previous);
+    }
+    final d = _detail(c.proposalId);
+    _validateReview(c, d);
+    final command = core.OwnerProposalCommand(
+      operationId: c.operationId,
+      proposalId: c.proposalId,
+      kind: core.ProposalKind.values.byName(d.summary.kind.name),
+      confirm: c.action == WorkspaceProposalAction.confirm,
+      version: c.version,
+      reviewToken: c.reviewToken,
+      commandDigest: c.digest,
+    );
+    final result = await owner.performProposalDecision(
+      command,
+      validate: () => _validateReview(c, _detail(c.proposalId)),
+      decide: () async {
+        switch (d.summary.kind) {
+          case WorkspaceProposalKind.addition:
+            if (c.action == WorkspaceProposalAction.reject) {
+              await owner.rejectImport(c.proposalId, c.version);
+              break;
             }
-          },
-        );
-        changed();
-        return _receipt(result);
-      });
+            final p = owner.importProposals.singleWhere(
+              (p) => p.id == c.proposalId,
+            );
+            await owner.confirmImport(c.proposalId, c.version, [
+              for (final r in c.reviewed)
+                (() {
+                  final index = d.items.indexWhere((i) => i.id == r.itemId),
+                      input = p.items[index],
+                      detail = d.items[index].proposed;
+                  return core.ImportItemInput(
+                    r.name,
+                    r.description,
+                    input.templateId != null
+                        ? const []
+                        : [
+                            for (final (n, f) in input.fields.indexed)
+                              core.FieldInput(
+                                f.name,
+                                f.description,
+                                r.values[detail.fieldIds.entries
+                                        .singleWhere(
+                                          (e) => e.value == '${r.itemId}:$n',
+                                        )
+                                        .key]
+                                    as String,
+                                kind: f.kind,
+                              ),
+                          ],
+                    templateId: input.templateId,
+                    templateVersion: input.templateVersion,
+                    templateDigest: input.templateDigest,
+                    values: input.templateId == null
+                        ? const {}
+                        : {
+                            for (final field
+                                in detail.definition['fields'] as List)
+                              field['key'] as String: field['type'] == 'entries'
+                                  ? [
+                                      for (final row
+                                          in r.values[field['key']] as List? ??
+                                              [])
+                                        {
+                                          for (final part in [
+                                            'title',
+                                            'period',
+                                            'detail',
+                                          ])
+                                            part: (row as Map)[part] ?? '',
+                                        },
+                                    ]
+                                  : r.values[field['key']] ?? '',
+                          },
+                    directoryId:
+                        _suggestedDirectories.containsKey(r.directoryId)
+                        ? null
+                        : r.directoryId,
+                    suggestedDirectory:
+                        _suggestedDirectories[r.directoryId] ?? '',
+                    tagIds: r.tagIds.where(
+                      (id) => !_suggestedTags.containsKey(id),
+                    ),
+                    suggestedTags: r.tagIds
+                        .where(_suggestedTags.containsKey)
+                        .map((id) => _suggestedTags[id]!),
+                  );
+                })(),
+            ]);
+          case WorkspaceProposalKind.modification:
+            if (c.action == WorkspaceProposalAction.reject) {
+              await owner.rejectUpdate(c.proposalId, c.version);
+              break;
+            }
+            final p = owner.updateProposals.singleWhere(
+                  (p) => p.id == c.proposalId,
+                ),
+                r = c.reviewed.single,
+                item = d.items.single;
+            if (p.input.templateId != null) {
+              await owner.confirmUpdate(
+                c.proposalId,
+                c.version,
+                review: core.UpdateReview(
+                  core.UpdateInput(
+                    p.input.itemId,
+                    p.input.baseVersion,
+                    const [],
+                    name: r.name,
+                    description: r.description,
+                    templateId: p.input.templateId,
+                    templateVersion: p.input.templateVersion,
+                    templateDigest: p.input.templateDigest,
+                    values: _templateValues(item.proposed, r),
+                    compiledTemplate: p.input.compiledTemplate,
+                  ),
+                  directoryId: r.directoryId,
+                  tagIds: r.tagIds,
+                ),
+              );
+              break;
+            }
+            final changes = <core.FieldChange>[];
+            for (final (index, original) in p.input.changes.indexed) {
+              final change = item.changes[index];
+              changes.add(switch (original.kind) {
+                core.FieldChangeKind.correct => core.FieldChange.correct(
+                  original.fieldId!,
+                  _value(r, change),
+                ),
+                core.FieldChangeKind.remove => core.FieldChange.remove(
+                  original.fieldId!,
+                ),
+                core.FieldChangeKind.add => core.FieldChange.add(
+                  core.FieldInput(
+                    original.field!.name,
+                    original.field!.description,
+                    _value(r, change),
+                    kind: original.field!.kind,
+                  ),
+                ),
+                core.FieldChangeKind.replace => core.FieldChange.replace(
+                  original.fieldId!,
+                  core.FieldInput(
+                    original.field!.name,
+                    original.field!.description,
+                    _value(r, change),
+                    kind: original.field!.kind,
+                  ),
+                ),
+              });
+            }
+            final touched = p.input.changes
+                .map((change) => change.fieldId)
+                .whereType<String>()
+                .toSet();
+            final current = owner.information.singleWhere(
+              (i) => i.id == p.input.itemId,
+            );
+            for (final field in current.fields.where(
+              (f) => !touched.contains(f.id),
+            )) {
+              final slot = _slot(item.proposed, field.id);
+              final probe = WorkspaceProposalFieldChange(
+                intent: WorkspaceProposalFieldIntent.correct,
+                key: slot.key,
+                entryId: slot.entry,
+                leaf: slot.leaf,
+                label: field.name,
+              );
+              if (field.kind == core.FieldKind.file) {
+                if (jsonEncode(r.values[slot.key]) !=
+                    jsonEncode(item.proposed.values[slot.key])) {
+                  throw const WorkspaceFailure(
+                    'validation',
+                    '普通附件通过资料文件管理替换，不能在文字提案中更换。',
+                  );
+                }
+              } else {
+                final value = _value(r, probe);
+                if (value != field.value) {
+                  changes.add(core.FieldChange.correct(field.id, value));
+                }
+              }
+            }
+            await owner.confirmUpdate(
+              c.proposalId,
+              c.version,
+              review: core.UpdateReview(
+                core.UpdateInput(
+                  p.input.itemId,
+                  p.input.baseVersion,
+                  changes,
+                  name: r.name,
+                  description: r.description,
+                ),
+                directoryId: r.directoryId,
+                tagIds: r.tagIds,
+              ),
+            );
+          case WorkspaceProposalKind.deletion:
+            if (c.action == WorkspaceProposalAction.reject) {
+              await owner.rejectDelete(c.proposalId, c.version);
+            } else {
+              await owner.confirmDelete(c.proposalId, c.version);
+            }
+          case WorkspaceProposalKind.organization:
+            if (c.action == WorkspaceProposalAction.reject) {
+              await owner.rejectOrganization(c.proposalId);
+            } else {
+              await owner.confirmOrganization(c.proposalId);
+            }
+        }
+      },
+    );
+    changed();
+    return _receipt(result);
+  });
   @override
   Future<WorkspaceCatalog> catalog() => _run(() async {
     final original = await library().loadCatalog();

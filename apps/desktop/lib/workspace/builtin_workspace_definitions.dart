@@ -9,12 +9,75 @@ final Map<String, Map<String, Object?>> builtinWorkspaceDefinitions =
       for (final definition in _definitions)
         definition['id'] as String: workspaceImmutableMap({
           ...definition,
+          ..._guidance(definition['id'] as String),
           'templateVersion': '1',
           'packageDigest': sha256
-              .convert(utf8.encode(jsonEncode(definition)))
+              .convert(
+                utf8.encode(
+                  jsonEncode({
+                    ...definition,
+                    ..._guidance(definition['id'] as String),
+                  }),
+                ),
+              )
               .toString(),
         }),
     });
+
+Map<String, Object?> _guidance(String type) {
+  final exampleValues = <String, Map<String, Object?>>{
+    'generic': {'body': '资料内容；只填写用户提供的事实。'},
+    'document': {
+      'bodyFormat': 'markdown',
+      'body': '## 维护说明\n\n每次更新前检查备份。\n\n- 确认服务状态\n- 记录修改内容',
+    },
+    'server': {
+      'host': '192.0.2.10',
+      'port': '22',
+      'user': 'operator',
+      'purpose': '运行内部应用及保存业务数据。',
+    },
+    'service': {
+      'url': 'https://notes.example.invalid',
+      'purpose': '个人笔记与资料查找。',
+      'auth': 'API 凭据另存为托管凭据，不能写进普通字段。',
+    },
+    'profile': {
+      'name': '示例姓名',
+      'email': 'person@example.invalid',
+      'direction': '后端开发',
+      'city': '示例城市',
+      'education': [
+        {'title': '示例大学 · 计算机专业', 'period': '2020–2024', 'detail': '本科教育经历。'},
+      ],
+      'experience': [],
+    },
+    'file': {'file': '由用户提供的普通文件；通过文件录入入口提交原文件。'},
+  };
+  return {
+    'instructions': switch (type) {
+      'server' => '用于一台服务器。地址、SSH端口、登录用户分别填写简短值；密码和私钥另存为凭据并关联。不同服务器分别建资料。',
+      'service' => '用于一个应用或服务。分别填写访问入口、用途和认证说明；关联实际部署主机及凭据，不能把秘密写入普通字段。',
+      'profile' => '只填写源资料中明确给出的个人事实。教育和工作经历按title、period、detail逐段填写，未知内容不编造。',
+      'document' =>
+        '用于长说明。bodyFormat明确选择plain或markdown，body存相应正文；名称和公开用途简短，不含私人值。',
+      'file' => '普通文件保留原文。不同用途的材料各建一条，同一材料的前后修订用版本。私钥、登录会话等走凭据入口。',
+      _ => '仅在通用资料确实符合内容用途时使用。body填写清晰正文，不堆源文档或过程编号；缺少合适模板时建议并暂缓，不自行创建插件。',
+    },
+    'example': {
+      'name': switch (type) {
+        'server' => '业务服务器',
+        'service' => '笔记服务',
+        'profile' => '个人基本档案',
+        'document' => '服务维护说明',
+        'file' => '后端岗位简历',
+        _ => '项目说明',
+      },
+      'summary': '便于按本项用途选择和使用资料。',
+      'values': exampleValues[type]!,
+    },
+  };
+}
 
 Map<String, Object?> _field(String key, String label, [String type = 'text']) =>
     {'key': key, 'label': label, 'type': type};

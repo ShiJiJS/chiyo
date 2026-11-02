@@ -112,6 +112,24 @@ class AgentClient {
           );
         }
         return _call('/capabilities', {});
+      case 'plugin-list':
+        if (input.length != 1) return {'status': 'invalid_request'};
+        return _call('/plugins/catalog', {});
+      case 'template-list':
+        if (input.keys.any(
+          (k) => !{'command', 'packageId', 'offset', 'limit'}.contains(k),
+        )) {
+          return {'status': 'invalid_request'};
+        }
+        return _call('/templates/catalog', {
+          for (final key in ['packageId', 'offset', 'limit'])
+            if (input.containsKey(key)) key: input[key],
+        });
+      case 'template-read':
+        if (input.length != 2 || input['templateId'] is! String) {
+          return {'status': 'invalid_request'};
+        }
+        return _call('/templates/read', {'templateId': input['templateId']});
       case 'credential-catalog':
         if (input.keys.any(
           (k) => !{'command', 'cursor', 'limit'}.contains(k),

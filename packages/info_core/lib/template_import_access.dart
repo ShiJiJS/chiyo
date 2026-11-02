@@ -1,0 +1,274 @@
+part of 'info_core.dart';
+
+class InformationTemplateInputFailure extends AccessFailure {
+  InformationTemplateInputFailure(Map<String, String> errors)
+    : fieldErrors = Map.unmodifiable(errors),
+      super('validation_failed');
+  final Map<String, String> fieldErrors;
+}
+
+extension OwnerTemplateImports on OwnerAccess {
+  UpdateInput _compileTemplateUpdate(UpdateInput input) {
+    if (input.templateId == null) return input;
+    final compiled = _compileTemplateImport(
+      ImportItemInput(
+        input.name ?? '模板修改',
+        input.description ?? '',
+        const [],
+        templateId: input.templateId,
+        templateVersion: input.templateVersion,
+        templateDigest: input.templateDigest,
+        values: input.values,
+        layout: input.compiledTemplate?.layout,
+      ),
+      _service.agent._currentInformationTemplates(),
+    );
+    _validateImport([compiled]);
+    return UpdateInput(
+      input.itemId,
+      input.baseVersion,
+      const [],
+      name: input.name,
+      description: input.description,
+      templateId: input.templateId,
+      templateVersion: input.templateVersion,
+      templateDigest: input.templateDigest,
+      values: input.values,
+      compiledTemplate: compiled,
+    );
+  }
+
+  InformationItem _applyTemplateUpdate(
+    InformationItem previous,
+    UpdateInput raw,
+  ) {
+    // Preview the retained reviewed snapshot even when a plugin changes. The
+    // final decision revalidates availability and values before committing.
+    final input = raw.compiledTemplate == null
+        ? _compileTemplateUpdate(raw)
+        : raw;
+    if (previous.layout?.typeId != input.templateId) {
+      throw const AccessFailure('proposal_conflict');
+    }
+    final compiled = input.compiledTemplate!;
+    final fields = <InformationField>[];
+    for (final (n, value) in compiled.fields.indexed) {
+      final oldId = previous.layout!.fieldIds[compiled.fieldKeys[n]];
+      final old = previous.fields.where((f) => f.id == oldId).firstOrNull;
+      fields.add(
+        old == null
+            ? InformationField(
+                _service._secret(),
+                value.name,
+                value.description,
+                value.value,
+                1,
+                kind: value.kind,
+              )
+            : old.value == value.value
+            ? old
+            : old.correctValue(value.value),
+      );
+    }
+    return InformationItem(
+      previous.id,
+      input.name?.trim() ?? previous.name,
+      input.description ?? previous.description,
+      previous.version + 1,
+      fields,
+      directoryId: previous.directoryId,
+      tagIds: previous.tagIds,
+      layout: InformationLayout(
+        typeId: compiled.layout!.typeId,
+        snapshot: compiled.layout!.snapshot,
+        fieldIds: compiled.bindLayout(fields)!.fieldIds,
+        relations: previous.layout!.relations,
+      ),
+      createdAt: previous.createdAt,
+      modifiedAt: _service._clock(),
+    );
+  }
+
+  List<ImportItemInput> _compileTemplateImports(List<ImportItemInput> inputs) {
+    if (!inputs.any((i) => i.templateId != null)) return inputs;
+    final catalog = _service.agent._currentInformationTemplates();
+    return [for (final input in inputs) _compileTemplateImport(input, catalog)];
+  }
+
+  ImportItemInput _compileTemplateImport(
+    ImportItemInput input,
+    InformationTemplateCatalog catalog,
+  ) {
+    if (input.templateId == null) return input;
+    final template = catalog.templates
+        .where((t) => t.id == input.templateId)
+        .firstOrNull;
+    if (template == null) throw const AccessFailure('template_missing');
+    if (!template.enabled) throw const AccessFailure('template_unavailable');
+    if (template.version != input.templateVersion ||
+        template.digest != input.templateDigest) {
+      throw const AccessFailure('template_changed');
+    }
+    if (!template.hasGuidance) {
+      throw const AccessFailure('template_guidance_missing');
+    }
+    final definition = template.definition;
+    final descriptors = (definition['fields'] as List).cast<Map>();
+    final keys = {for (final f in descriptors) f['key'] as String};
+    final errors = <String, String>{};
+    for (final key in input.values.keys) {
+      if (!keys.contains(key)) errors['_form'] = '包含模板未定义的字段。';
+    }
+    final fields = <FieldInput>[], slots = <String>[];
+    final entries = <String, Object?>{};
+    void add(
+      String slot,
+      String name,
+      String description,
+      String text, {
+      bool multiline = false,
+    }) {
+      fields.add(
+        FieldInput(
+          name,
+          description,
+          text,
+          kind: multiline ? FieldKind.textNote : FieldKind.structured,
+        ),
+      );
+      slots.add(slot);
+    }
+
+    for (final field in descriptors) {
+      final key = field['key'] as String,
+          label = field['label'] as String,
+          kind = field['type'] as String;
+      final value = input.values[key];
+      if (kind == 'file') {
+        throw const AccessFailure('unsupported_file_write');
+      }
+      if (kind == 'entries') {
+        if (value != null && value is! List ||
+            value is List && value.length > 100 ||
+            field['required'] == true &&
+                (value == null || (value as List).isEmpty)) {
+          errors[key] = '请提供有效的经历列表，每组最多100项。';
+          continue;
+        }
+        final rows = <Map<String, Object?>>[];
+        for (final (n, row) in (value as List? ?? []).indexed) {
+          if (row is! Map ||
+              row.keys.any((k) => !{'title', 'period', 'detail'}.contains(k))) {
+            errors['$key:$n'] = '经历仅包含title、period、detail文本。';
+            continue;
+          }
+          final previousRows =
+              (input.layout?.snapshot['entries'] as Map?)?[key] as List?;
+          final previousId = previousRows != null && n < previousRows.length
+              ? (previousRows[n] as Map)['entryId'] as String?
+              : null;
+          final entryId =
+              previousId ?? 'entry-${_service._secret().replaceAll('=', '')}';
+          rows.add({'entryId': entryId});
+          for (final part in ['title', 'period', 'detail']) {
+            final text = row[part] ?? '';
+            final max = part == 'detail' ? 2000 : 160;
+            if (text is! String ||
+                text.length > max ||
+                part == 'title' && text.trim().isEmpty) {
+              errors['$key:$n:$part'] = '请填写有效的经历文本。';
+              continue;
+            }
+            add(
+              jsonEncode(['entry', key, entryId, part]),
+              switch (part) {
+                'title' => '经历名称',
+                'period' => '经历时间',
+                _ => '经历说明',
+              },
+              '',
+              text,
+              multiline: part == 'detail',
+            );
+          }
+        }
+        entries[key] = rows;
+        continue;
+      }
+      if (!{'text', 'url', 'number', 'date', 'multiline'}.contains(kind)) {
+        errors[key] = '当前宿主不支持此字段格式。';
+        continue;
+      }
+      if (value != null && value is! String) {
+        errors[key] = '此字段需要文本值。';
+        continue;
+      }
+      final text = value as String? ?? '';
+      if (text.length > 64000 ||
+          field['required'] == true && text.trim().isEmpty) {
+        errors[key] = '请填写有效文本，不能超过64000字符。';
+      }
+      if (text.isNotEmpty &&
+          kind == 'number' &&
+          (!RegExp(r'^-?(?:0|[1-9]\d*)(?:\.\d+)?$').hasMatch(text.trim()) ||
+              num.tryParse(text)?.isFinite != true)) {
+        errors[key] = '请输入有限的十进制数字。';
+      }
+      if (text.isNotEmpty && kind == 'date') {
+        final date = DateTime.tryParse(text);
+        if (date == null ||
+            !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(text) ||
+            date.toIso8601String().substring(0, 10) != text) {
+          errors[key] = '请输入有效日期（YYYY-MM-DD）。';
+        }
+      }
+      add(
+        jsonEncode(['field', key]),
+        label,
+        field['description'] as String? ?? '',
+        text,
+        multiline: kind == 'multiline',
+      );
+    }
+    for (final section in definition['sections'] as List? ?? []) {
+      final format = (section as Map)['formatKey'];
+      if (format is String &&
+          !{'plain', 'markdown'}.contains(input.values[format])) {
+        errors[format] = '请选择plain或markdown正文格式。';
+      }
+    }
+    if (fields.isEmpty && errors.isEmpty) {
+      errors['_form'] = '模板至少需要一个可保存的字段。';
+    }
+    if (errors.isNotEmpty) throw InformationTemplateInputFailure(errors);
+    final layout = InformationLayout(
+      typeId: template.id,
+      snapshot: {
+        'codec': 'workspace-information-v1',
+        'type': {'name': template.name, 'icon': definition['icon'] ?? 'file'},
+        'definition': definition,
+        'fieldOverrides': <String, Object?>{},
+        'retainedFields': <Object?>[],
+        'retainedRelations': <Object?>[],
+        'entries': entries,
+      },
+      fieldIds: const {},
+    );
+    return ImportItemInput(
+      input.name,
+      input.description,
+      fields,
+      directoryId: input.directoryId,
+      tagIds: input.tagIds,
+      suggestedDirectory: input.suggestedDirectory,
+      suggestedTags: input.suggestedTags,
+      suggestedTemplate: input.suggestedTemplate,
+      templateId: template.id,
+      templateVersion: template.version,
+      templateDigest: template.digest,
+      values: input.values,
+      layout: layout,
+      fieldKeys: slots,
+    );
+  }
+}

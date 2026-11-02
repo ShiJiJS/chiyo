@@ -133,6 +133,7 @@ extension OwnerProposals on OwnerAccess {
           kind: ProposalKind.modification,
           changeCount:
               p.input.changes.length +
+              p.input.values.length +
               (p.input.name == null ? 0 : 1) +
               (p.input.description == null ? 0 : 1),
           status: switch (p.state) {

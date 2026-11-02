@@ -48,6 +48,8 @@ const _portableFocusedFillLibraryFormat = 39;
 // reader. Older binaries must reject instead of silently discarding metadata.
 const _credentialClassificationLibraryFormat = 40;
 const _templatePackageLibraryFormat = 41;
+// Typed pending proposals must never be flattened by an older reader.
+const _templateImportLibraryFormat = 42;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -489,7 +491,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _templatePackageLibraryFormat) {
+      if (headerVersion > _templateImportLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -504,7 +506,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _templatePackageLibraryFormat ||
+            (marker.single['version'] as int) > _templateImportLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1270,7 +1272,23 @@ class EncryptedInformationRepository
     return List.unmodifiable(_proposals.values);
   }
 
+  Future<void> _requireTemplateImportFormat() async {
+    await _db.customStatement(
+      'UPDATE library_format SET version=? WHERE singleton=1 AND version<?',
+      [_templateImportLibraryFormat, _templateImportLibraryFormat],
+    );
+    final marker = await _db
+        .customSelect('SELECT version FROM library_format WHERE singleton=1')
+        .getSingle();
+    await _db.customStatement(
+      'PRAGMA user_version = ${marker.read<int>('version')}',
+    );
+  }
+
   Future<void> _writeProposal(ImportProposal proposal) async {
+    if (proposal.items.any((i) => i.templateId != null)) {
+      await _requireTemplateImportFormat();
+    }
     await _db.customStatement(
       'INSERT INTO import_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],
@@ -1422,6 +1440,9 @@ class EncryptedInformationRepository
   }
 
   Future<void> _writeUpdate(UpdateProposal proposal) async {
+    if (proposal.input.templateId != null) {
+      await _requireTemplateImportFormat();
+    }
     await _db.customStatement(
       'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],
