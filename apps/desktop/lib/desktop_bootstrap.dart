@@ -9,6 +9,7 @@ import 'package:info_core/macos_desktop_control.dart';
 import 'package:info_storage/info_storage.dart';
 import 'desktop_runtime.dart';
 import 'bundled_focused_fill.dart';
+import 'workspace/owner_agent_templates.dart';
 
 /// The opened library remains owned here until authorization facts are saved.
 class DesktopLibrary {
@@ -139,6 +140,10 @@ class DesktopBootstrap extends ChangeNotifier {
       )) {
         await library!.service.owner.reconcileInformationFileDeliveries();
       }
+      final templateOwner = library!.service.owner;
+      templateOwner.configureInformationTemplates(
+        () => currentAgentTemplates(templateOwner),
+      );
       _server = await AgentServer.start(
         library!.service.agent,
         port: port,

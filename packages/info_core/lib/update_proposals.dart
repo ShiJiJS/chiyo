@@ -1,4 +1,5 @@
 import 'information.dart';
+import 'import_proposals.dart';
 
 enum UpdateProposalState { pending, confirmed, rejected, conflicted }
 
@@ -62,26 +63,80 @@ class UpdateInput {
     Iterable<FieldChange> changes, {
     this.name,
     this.description,
-  }) : changes = List.unmodifiable(changes);
+    this.templateId,
+    this.templateVersion,
+    this.templateDigest,
+    Map<String, Object?> values = const {},
+    this.compiledTemplate,
+  }) : changes = List.unmodifiable(changes),
+       values = ImportItemInput('', '', const [], values: values).values;
   final String itemId;
   final int baseVersion;
   final List<FieldChange> changes;
   final String? name, description;
-  Map<String, Object?> toJson() => {
+  final String? templateId, templateVersion, templateDigest;
+  final Map<String, Object?> values;
+
+  /// Validated private snapshot, never accepted from Agent JSON.
+  final ImportItemInput? compiledTemplate;
+  Map<String, Object?> get submissionJson => {
     'itemId': itemId,
     'baseVersion': baseVersion,
     'changes': changes.map((c) => c.toJson()).toList(),
     if (name != null) 'name': name,
     if (description != null) 'description': description,
+    if (templateId != null) ...{
+      'templateId': templateId,
+      'templateVersion': templateVersion,
+      'templateDigest': templateDigest,
+      'values': values,
+    },
   };
-  factory UpdateInput.fromJson(Map<String, dynamic> json) => UpdateInput(
+  Map<String, Object?> toJson() => {
+    ...submissionJson,
+    if (compiledTemplate != null)
+      'compiledTemplate': compiledTemplate!.toJson(),
+  };
+  factory UpdateInput.fromJson(Map<String, dynamic> json) {
+    if (json.keys.any(
+      (key) => !const {
+        'itemId',
+        'baseVersion',
+        'changes',
+        'name',
+        'description',
+        'templateId',
+        'templateVersion',
+        'templateDigest',
+        'values',
+      }.contains(key),
+    )) {
+      throw const FormatException('Agent cannot supply compiled template');
+    }
+    return UpdateInput._read(json, private: false);
+  }
+  factory UpdateInput.fromPrivateJson(Map<String, dynamic> json) =>
+      UpdateInput._read(json, private: true);
+  factory UpdateInput._read(
+    Map<String, dynamic> json, {
+    required bool private,
+  }) => UpdateInput(
     json['itemId'] as String,
     json['baseVersion'] as int,
-    (json['changes'] as List).map(
+    (json['changes'] as List? ?? []).map(
       (dynamic c) => FieldChange.fromJson(c as Map<String, dynamic>),
     ),
     name: json['name'] as String?,
     description: json['description'] as String?,
+    templateId: json['templateId'] as String?,
+    templateVersion: json['templateVersion'] as String?,
+    templateDigest: json['templateDigest'] as String?,
+    values: Map<String, Object?>.from(json['values'] as Map? ?? {}),
+    compiledTemplate: private && json['compiledTemplate'] != null
+        ? ImportItemInput.fromPrivateJson(
+            Map<String, dynamic>.from(json['compiledTemplate'] as Map),
+          )
+        : null,
   );
 }
 
@@ -130,7 +185,7 @@ class UpdateProposal {
     sessionBinding: json['sessionBinding'] as String,
     chatLabel: json['chatLabel'] as String,
     createdAt: DateTime.parse(json['createdAt'] as String),
-    input: UpdateInput.fromJson(json['input'] as Map<String, dynamic>),
+    input: UpdateInput.fromPrivateJson(json['input'] as Map<String, dynamic>),
     state: UpdateProposalState.values.byName(json['state'] as String),
     version: json['version'] as int,
     result: json['result'] == null

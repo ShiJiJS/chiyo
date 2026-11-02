@@ -4,14 +4,17 @@ void _validateImport(List<ImportItemInput> items) {
   if (items.isEmpty ||
       items.length > 20 ||
       items.fold<int>(0, (n, i) => n + i.fields.length) > 200 ||
-      utf8.encode(jsonEncode(items.map((i) => i.toJson()).toList())).length >
+      utf8
+              .encode(jsonEncode(items.map((i) => i.submissionJson).toList()))
+              .length >
           240000 ||
       items.any(
         (i) =>
             i.name.trim().isEmpty ||
             i.name.length > 200 ||
             i.description.length > 2000 ||
-            i.fields.isEmpty ||
+            i.fields.isEmpty && i.templateId == null ||
+            i.templateId == null && (i.values.isNotEmpty || i.layout != null) ||
             i.fields.length > 50 ||
             i.suggestedDirectory.length > 200 ||
             i.suggestedTemplate.length > 200 ||
@@ -40,6 +43,8 @@ extension AgentImports on AgentAccess {
     String purpose = '',
   }) => _service.owner._serialize(() async {
     _service._requireSession(session);
+    _validateImport(items);
+    items = _service.owner._compileTemplateImports(items);
     _validateImport(items);
     if (agentName.length > 200 || purpose.length > 2000) {
       throw const AccessFailure('invalid_proposal');
@@ -115,6 +120,8 @@ extension OwnerImports on OwnerAccess {
     }
     final previous = _pendingImport(id, version);
     _validateImport(reviewed);
+    reviewed = _compileTemplateImports(reviewed);
+    _validateImport(reviewed);
     final confirmedAt = _service._clock();
     final organization = _OrganizationPlan(this);
     final locations = [
@@ -128,12 +135,8 @@ extension OwnerImports on OwnerAccess {
     ];
     final items = [
       for (final (index, input) in reviewed.indexed)
-        InformationItem(
-          _service._secret(),
-          input.name.trim(),
-          input.description,
-          1,
-          [
+        (() {
+          final fields = [
             for (final f in input.fields)
               InformationField(
                 _service._secret(),
@@ -143,12 +146,20 @@ extension OwnerImports on OwnerAccess {
                 1,
                 kind: f.kind,
               ),
-          ],
-          directoryId: locations[index].$1,
-          tagIds: locations[index].$2,
-          createdAt: confirmedAt,
-          modifiedAt: confirmedAt,
-        ),
+          ];
+          return InformationItem(
+            _service._secret(),
+            input.name.trim(),
+            input.description,
+            1,
+            fields,
+            layout: input.bindLayout(fields),
+            directoryId: locations[index].$1,
+            tagIds: locations[index].$2,
+            createdAt: confirmedAt,
+            modifiedAt: confirmedAt,
+          );
+        })(),
     ];
     final confirmed = ImportProposal(
       id: previous.id,
