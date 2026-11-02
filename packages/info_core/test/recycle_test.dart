@@ -46,7 +46,7 @@ void main() {
             .then<Object>((e) => e, onError: (Object e) => e),
         service.owner
             .confirmUpdate(update, 1)
-            .then<Object>((e) => e, onError: (Object e) => e),
+            .then<Object>((e) => e!, onError: (Object e) => e),
       ]);
       expect(results.whereType<RecycleEntry>(), hasLength(1));
       expect(

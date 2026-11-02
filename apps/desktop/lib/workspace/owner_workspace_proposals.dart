@@ -102,6 +102,30 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
       owner.information.where((i) => i.id == id).firstOrNull;
   String _pendingId(String proposalId, String key) =>
       'pending:$proposalId:$key';
+  core.InformationLayout? _pendingLayout(
+    core.InformationLayout? layout,
+    Map<String, List<core.ImportPendingReference>> pending,
+    String proposalId,
+  ) {
+    if (layout == null || pending.isEmpty) return layout;
+    return core.InformationLayout(
+      typeId: layout.typeId,
+      snapshot: layout.snapshot,
+      fieldIds: layout.fieldIds,
+      relations: {
+        for (final key in {...layout.relations.keys, ...pending.keys})
+          key: [
+            ...layout.relations[key] ?? [],
+            for (final ref in pending[key] ?? [])
+              core.InformationRelationRef(
+                ref.kind,
+                _pendingId(ref.proposalId ?? proposalId, ref.itemKey),
+              ),
+          ],
+      },
+    );
+  }
+
   ({core.ImportProposal proposal, String key})? _pendingTarget(String id) {
     for (final p in owner.importProposals) {
       for (final key in p.candidateNames.keys) {
@@ -115,10 +139,15 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
     Map<String, List<core.InformationRelationRef>> existing,
     Map<String, List<core.ImportPendingReference>> pending,
   })
-  _reviewRelations(WorkspaceProposalItemReview review, String proposalId) {
+  _reviewRelations(
+    WorkspaceProposalItemReview review,
+    String proposalId, {
+    Set<String>? declaredKeys,
+  }) {
     final existing = <String, List<core.InformationRelationRef>>{},
         pending = <String, List<core.ImportPendingReference>>{};
     for (final e in review.relations.entries) {
+      if (declaredKeys != null && !declaredKeys.contains(e.key)) continue;
       for (final ref in e.value) {
         final target = _pendingTarget(ref.id);
         if (target == null) {
@@ -578,12 +607,27 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
       if (p.state == core.UpdateProposalState.pending &&
           entry.status != core.ProposalStatus.conflicted) {
         final preview = owner.previewUpdate(id);
-        final after = _stablePreview(p, preview);
+        final stable = _stablePreview(p, preview);
+        final after = core.InformationItem(
+          stable.id,
+          stable.name,
+          stable.description,
+          stable.version,
+          stable.fields,
+          directoryId: stable.directoryId,
+          tagIds: stable.tagIds,
+          createdAt: stable.createdAt,
+          modifiedAt: stable.modifiedAt,
+          layout: _pendingLayout(stable.layout, p.input.pendingRelations, p.id),
+        );
+        final admission = owner.updateAdmission(id);
+        if (admission.reason.isNotEmpty) notice = admission.reason;
         final before = _codec.decode(preview.before, tagNames: _tags),
             proposed = _codec.decode(after, tagNames: _tags);
         items.add(
           WorkspaceProposalItem(
             id: p.input.itemId,
+            admissionNote: admission.reason,
             proposed: proposed,
             before: before,
             beforeState: WorkspaceProposalBeforeState.available,
@@ -718,7 +762,9 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
           ),
         ),
         awaitingItemIds: r.awaitingKeys.map(
-          (key) => 'proposal:${r.command.proposalId}:$key',
+          (key) => r.command.kind == core.ProposalKind.modification
+              ? key
+              : 'proposal:${r.command.proposalId}:$key',
         ),
       );
   @override
@@ -897,8 +943,24 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                     key: input.key,
                     templateVersion: input.templateVersion,
                     templateDigest: input.templateDigest,
-                    relations: _reviewRelations(r, p.id).existing,
-                    pendingRelations: _reviewRelations(r, p.id).pending,
+                    relations: _reviewRelations(
+                      r,
+                      p.id,
+                      declaredKeys: {
+                        for (final rule
+                            in detail.definition['relations'] as List? ?? [])
+                          (rule as Map)['key'] as String,
+                      },
+                    ).existing,
+                    pendingRelations: _reviewRelations(
+                      r,
+                      p.id,
+                      declaredKeys: {
+                        for (final rule
+                            in detail.definition['relations'] as List? ?? [])
+                          (rule as Map)['key'] as String,
+                      },
+                    ).pending,
                     values: input.templateId == null
                         ? const {}
                         : {
@@ -961,13 +1023,26 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                     templateDigest: p.input.templateDigest,
                     values: _templateValues(item.proposed, r),
                     compiledTemplate: p.input.compiledTemplate,
-                    relations: {
-                      for (final e in r.relations.entries)
-                        e.key: [
-                          for (final ref in e.value)
-                            core.InformationRelationRef(ref.kind.name, ref.id),
-                        ],
-                    },
+                    relations: _reviewRelations(
+                      r,
+                      p.id,
+                      declaredKeys: {
+                        for (final rule
+                            in item.proposed.definition['relations'] as List? ??
+                                [])
+                          (rule as Map)['key'] as String,
+                      },
+                    ).existing,
+                    pendingRelations: _reviewRelations(
+                      r,
+                      p.id,
+                      declaredKeys: {
+                        for (final rule
+                            in item.proposed.definition['relations'] as List? ??
+                                [])
+                          (rule as Map)['key'] as String,
+                      },
+                    ).pending,
                   ),
                   directoryId: r.directoryId,
                   tagIds: r.tagIds,

@@ -444,7 +444,10 @@ class WorkspaceProposalExpectation {
         r.awaitingItemIds.toSet().length != r.awaitingItemIds.length ||
         r.awaitingItemIds.any((id) => !c.reviewed.any((i) => i.itemId == id)) ||
         r.awaitingItemIds.isNotEmpty &&
-            (kind != WorkspaceProposalKind.addition ||
+            (!{
+                  WorkspaceProposalKind.addition,
+                  WorkspaceProposalKind.modification,
+                }.contains(kind) ||
                 c.action != WorkspaceProposalAction.confirm) ||
         r.records.map((x) => x.ref).toSet().length != r.records.length ||
         r.records.any(

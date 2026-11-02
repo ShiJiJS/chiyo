@@ -17,7 +17,8 @@ void _validateUpdate(UpdateInput input) {
       (input.templateId == null &&
           (input.values.isNotEmpty ||
               input.compiledTemplate != null ||
-              input.relations != null)) ||
+              input.relations != null ||
+              input.pendingRelations.isNotEmpty)) ||
       (input.name != null &&
           (input.name!.trim().isEmpty || input.name!.length > 200)) ||
       (input.description?.length ?? 0) > 2000 ||
@@ -38,6 +39,42 @@ void _validateUpdate(UpdateInput input) {
 }
 
 extension AgentUpdates on AgentAccess {
+  Future<void> reviseUpdate(
+    String session,
+    String id,
+    int version,
+    UpdateInput input,
+  ) => _service.owner._serialize(() async {
+    _service._requireSession(session);
+    final previous = _service._repository.updateProposals
+        .where(
+          (p) =>
+              p.id == id &&
+              p.sessionBinding == _service._sessionBindings[session],
+        )
+        .firstOrNull;
+    if (previous == null) throw const AccessFailure('unauthorized');
+    if (previous.state != UpdateProposalState.pending ||
+        previous.version != version) {
+      throw const AccessFailure('proposal_changed');
+    }
+    if (input.itemId != previous.input.itemId) {
+      throw const AccessFailure('invalid_proposal');
+    }
+    _validateUpdate(input);
+    input = _service.owner._compileTemplateUpdate(input);
+    final next = UpdateProposal(
+      id: previous.id,
+      sessionBinding: previous.sessionBinding,
+      chatLabel: previous.chatLabel,
+      createdAt: previous.createdAt,
+      input: input,
+      version: previous.version + 1,
+    );
+    _service.owner._validatePendingUpdateTargets(next);
+    await _service._repository.saveUpdateProposal(next);
+  });
+
   Future<String> submitUpdate(
     String session,
     UpdateInput input,
@@ -66,6 +103,7 @@ extension AgentUpdates on AgentAccess {
       createdAt: _service._clock(),
       input: input,
     );
+    _service.owner._validatePendingUpdateTargets(proposal);
     await _service._repository.saveUpdateProposal(proposal);
     return proposal.id;
   });
@@ -78,7 +116,19 @@ extension AgentUpdates on AgentAccess {
     if (binding == null || found.isEmpty) {
       throw const AccessFailure('unauthorized');
     }
-    return {'status': found.single.state.name, 'proposalId': id};
+    final p = found.single;
+    final admission = p.approved ? _service.owner.updateAdmission(id) : null;
+    return {
+      'status': admission?.state == 'needs_attention'
+          ? 'needs_attention'
+          : p.approved
+          ? 'approved_awaiting_admission'
+          : p.state.name,
+      'proposalId': id,
+      'version': p.version,
+      if (p.result case final result?)
+        'result': {'itemId': result.itemId, 'version': result.version},
+    };
   }
 }
 
@@ -103,6 +153,7 @@ extension OwnerUpdates on OwnerAccess {
 
   UpdatePreview previewUpdate(String id, {UpdateReview? review}) {
     final proposal = _update(id);
+    review ??= proposal.approvedReview;
     if (proposal.state != UpdateProposalState.pending) {
       throw const AccessFailure('proposal_changed');
     }
@@ -214,7 +265,7 @@ extension OwnerUpdates on OwnerAccess {
     );
   }
 
-  Future<UpdateReceipt> confirmUpdate(
+  Future<UpdateReceipt?> confirmUpdate(
     String id,
     int proposalVersion, {
     UpdateReview? review,
@@ -246,31 +297,28 @@ extension OwnerUpdates on OwnerAccess {
       }
       preview = previewUpdate(id, review: review);
     } on AccessFailure catch (error) {
-      if (error.status == 'proposal_conflict') {
+      if (error.status == 'proposal_conflict' && !proposal.approved) {
         await _service._repository.saveUpdateProposal(
           proposal.finish(UpdateProposalState.conflicted),
         );
       }
       rethrow;
     }
-    final item = preview.after;
-    final receipt = UpdateReceipt(item.id, item.version);
-    final removed = preview.before.fields.any(
-      (f) => !item.fields.any((n) => n.id == f.id),
+    final root = proposal.approve(
+      UpdateReview(
+        review?.input ?? proposal.input,
+        directoryId: preview.after.directoryId,
+        tagIds: preview.after.tagIds,
+        fieldDescriptions: review?.fieldDescriptions ?? const {},
+      ),
     );
-    final recycled = removed ? _recycle(preview.before, item) : null;
-    await _service._repository.confirmUpdateProposal(
-      proposal.finish(UpdateProposalState.confirmed, result: receipt),
-      item,
-      InformationRevision(preview.before, _service._clock()),
-      recycled: recycled == null ? const [] : [recycled],
-      facts: recycled == null
-          ? const []
-          : [_fact(recycled, RecycleFactKind.deleted, item.version)],
-    );
-    _invalidateRemoved(preview.before, item);
-    return receipt;
+    _validatePendingUpdateTargets(root);
+    final records = await _settleApprovedAdmissions(rootUpdate: root);
+    return records.isEmpty
+        ? null
+        : UpdateReceipt(records.single.id, records.single.version);
   });
+
   Future<void> rejectUpdate(String id, int proposalVersion) =>
       _serialize(() async {
         final proposal = _update(id);

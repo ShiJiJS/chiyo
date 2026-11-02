@@ -20,10 +20,18 @@ extension OwnerTemplateImports on OwnerAccess {
         templateDigest: input.templateDigest,
         values: input.values,
         relations: input.relations ?? const {},
+        pendingRelations: input.pendingRelations,
         layout: input.compiledTemplate?.layout,
       ),
       _service.agent._currentInformationTemplates(),
     );
+    final missing = <String, String>{
+      for (final field
+          in (compiled.layout!.snapshot['definition'] as Map)['fields'] as List)
+        if (!input.values.containsKey((field as Map)['key']))
+          field['key'] as String: '按模板修改需提供完整字段；不要用省略字段来清空原内容。',
+    };
+    if (missing.isNotEmpty) throw InformationTemplateInputFailure(missing);
     _validateImport([compiled]);
     return UpdateInput(
       input.itemId,
@@ -36,6 +44,7 @@ extension OwnerTemplateImports on OwnerAccess {
       templateDigest: input.templateDigest,
       values: input.values,
       relations: input.relations,
+      pendingRelations: input.pendingRelations,
       compiledTemplate: compiled,
     );
   }
@@ -53,6 +62,24 @@ extension OwnerTemplateImports on OwnerAccess {
       throw const AccessFailure('proposal_conflict');
     }
     final compiled = input.compiledTemplate!;
+    final templateKeys = {
+      for (final field
+          in (compiled.layout!.snapshot['definition'] as Map)['fields'] as List)
+        (field as Map)['key'] as String,
+    };
+    final managed = <String>{};
+    for (final e in previous.layout!.fieldIds.entries) {
+      try {
+        final slot = jsonDecode(e.key);
+        if (slot is List &&
+            slot.length >= 2 &&
+            templateKeys.contains(slot[1])) {
+          managed.add(e.value);
+        }
+      } on FormatException {
+        /* Unrecognized bindings remain independently retained fields. */
+      }
+    }
     final fields = <InformationField>[];
     for (final (n, value) in compiled.fields.indexed) {
       final oldId = previous.layout!.fieldIds[compiled.fieldKeys[n]];
@@ -72,6 +99,16 @@ extension OwnerTemplateImports on OwnerAccess {
             : old.correctValue(value.value),
       );
     }
+    final bound = compiled.bindLayout(fields)!;
+    fields.addAll(previous.fields.where((f) => !managed.contains(f.id)));
+    if (fields.length > 200) throw const AccessFailure('invalid_proposal');
+    final relationKeys = {
+      for (final rule
+          in (compiled.layout!.snapshot['definition'] as Map)['relations']
+                  as List? ??
+              [])
+        (rule as Map)['key'] as String,
+    };
     return InformationItem(
       previous.id,
       input.name?.trim() ?? previous.name,
@@ -82,11 +119,21 @@ extension OwnerTemplateImports on OwnerAccess {
       tagIds: previous.tagIds,
       layout: InformationLayout(
         typeId: compiled.layout!.typeId,
-        snapshot: compiled.layout!.snapshot,
-        fieldIds: compiled.bindLayout(fields)!.fieldIds,
+        snapshot: {
+          ...compiled.layout!.snapshot,
+          'retainedFields':
+              previous.layout!.snapshot['retainedFields'] ?? <Object?>[],
+          'retainedRelations':
+              previous.layout!.snapshot['retainedRelations'] ?? <Object?>[],
+        },
+        fieldIds: {...previous.layout!.fieldIds, ...bound.fieldIds},
         relations: input.relations == null
             ? previous.layout!.relations
-            : compiled.relations,
+            : {
+                for (final e in previous.layout!.relations.entries)
+                  if (!relationKeys.contains(e.key)) e.key: e.value,
+                ...compiled.relations,
+              },
       ),
       createdAt: previous.createdAt,
       modifiedAt: _service._clock(),

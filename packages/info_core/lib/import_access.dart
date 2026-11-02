@@ -222,7 +222,7 @@ extension OwnerImports on OwnerAccess {
           ? ImportProposalState.rejected
           : ImportProposalState.confirmed,
     );
-    await _service._repository.commitImportAdmission(
+    await _service._repository.commitInformationAdmission(
       [rejected],
       const [],
       decisionProposalId: id,

@@ -93,6 +93,7 @@ class AgentClient {
                 command == 'import-submit' ||
                 command == 'import-revise' ||
                 command == 'update-submit' ||
+                command == 'update-revise' ||
                 command == 'organize-submit'
             ? 262144
             : 16384)) {
@@ -235,6 +236,14 @@ class AgentClient {
         return _call('/update/status', {
           'sessionSecret': _session,
           'proposalId': input['proposalId'],
+        });
+      case 'update-revise':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/update/revise', {
+          'sessionSecret': _session,
+          'proposalId': input['proposalId'],
+          'version': input['version'],
+          'update': input['update'],
         });
       case 'import-submit':
         if (_session == null) return {'status': 'unauthorized'};

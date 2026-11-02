@@ -78,6 +78,7 @@ part 'template_package_access.dart';
 part 'information_template_catalog.dart';
 part 'template_import_access.dart';
 part 'import_admission_access.dart';
+part 'update_admission_access.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);

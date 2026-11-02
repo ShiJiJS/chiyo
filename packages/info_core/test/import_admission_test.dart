@@ -222,6 +222,185 @@ void main() {
     },
   );
   test(
+    'a reviewed modification waits without touching original content and commits with its new referenced material',
+    () async {
+      final initial = await service.agent.submitImport(session, [
+        input('existing'),
+      ]);
+      final created = await service.owner.confirmImport(
+        initial,
+        1,
+        proposal(initial).items,
+      );
+      final old = service.owner.information.single;
+      final target = await service.agent.submitImport(session, [
+        input('target'),
+      ]);
+      final update = await service.agent.submitUpdate(
+        session,
+        UpdateInput(
+          created.single.id,
+          1,
+          [],
+          templateId: 'note',
+          templateVersion: '1',
+          templateDigest: digest,
+          values: {'body': 'NEW-REVIEWED'},
+          pendingRelations: {
+            'related': [
+              ImportPendingReference(
+                'information',
+                'target',
+                proposalId: target,
+              ),
+            ],
+          },
+        ),
+      );
+      expect(await service.owner.confirmUpdate(update, 1), isNull);
+      expect(
+        service.owner.information.single.fields.single.value,
+        'PRIVATE-existing',
+      );
+      expect(service.owner.informationRevisions, isEmpty);
+      expect(service.owner.updateAdmission(update).state, 'approved');
+      expect(
+        service.agent.updateStatus(session, update)['status'],
+        'approved_awaiting_admission',
+      );
+      await service.owner.confirmImport(target, 1, proposal(target).items);
+      final current = service.owner.information.singleWhere(
+            (i) => i.id == old.id,
+          ),
+          linked = service.owner.information.singleWhere(
+            (i) => i.name == 'target',
+          );
+      expect(current.version, 2);
+      expect(current.fields.single.id, old.fields.single.id);
+      expect(current.fields.single.value, 'NEW-REVIEWED');
+      expect(current.layout!.relations['related']!.single.id, linked.id);
+      expect(
+        service.owner.informationRevisions.single.item.fields.single.value,
+        'PRIVATE-existing',
+      );
+      expect(
+        service.owner.updateProposals.single.state,
+        UpdateProposalState.confirmed,
+      );
+      expect(service.owner.updateProposals.single.version, 3);
+      expect(service.owner.updateProposals.single.input.values, isEmpty);
+    },
+  );
+  test(
+    'template updates require complete values and retain independent owner-added fields',
+    () async {
+      final seed = await service.agent.submitImport(session, [
+        input('existing'),
+      ]);
+      await service.owner.confirmImport(seed, 1, proposal(seed).items);
+      final original = service.owner.information.single;
+      final extra = await service.agent.submitUpdate(
+        session,
+        UpdateInput(original.id, 1, [
+          const FieldChange.add(FieldInput('主人补充字段', '', 'OWNER-EXTRA')),
+        ]),
+      );
+      await service.owner.confirmUpdate(extra, 1);
+      final current = service.owner.information.single;
+      final bodyOnly = await service.agent.submitUpdate(
+        session,
+        UpdateInput(
+          original.id,
+          current.version,
+          [],
+          templateId: 'note',
+          templateVersion: '1',
+          templateDigest: digest,
+          values: {'body': 'UPDATED-BODY'},
+        ),
+      );
+      await service.owner.confirmUpdate(bodyOnly, 1);
+      expect(
+        service.owner.information.single.fields
+            .singleWhere((f) => f.name == '主人补充字段')
+            .value,
+        'OWNER-EXTRA',
+      );
+      expect(
+        service.owner.information.single.fields
+            .singleWhere((f) => f.name == '正文')
+            .value,
+        'UPDATED-BODY',
+      );
+      await expectLater(
+        service.agent.submitUpdate(
+          session,
+          UpdateInput(
+            original.id,
+            3,
+            [],
+            templateId: 'note',
+            templateVersion: '1',
+            templateDigest: digest,
+            values: const {},
+          ),
+        ),
+        throwsA(
+          isA<InformationTemplateInputFailure>().having(
+            (e) => e.fieldErrors.keys,
+            'keys',
+            contains('body'),
+          ),
+        ),
+      );
+    },
+  );
+  test('a deferred modification never overwrites later owner edits', () async {
+    final initial = await service.agent.submitImport(session, [
+      input('existing'),
+    ]);
+    await service.owner.confirmImport(initial, 1, proposal(initial).items);
+    final old = service.owner.information.single;
+    final target = await service.agent.submitImport(session, [input('target')]);
+    final update = await service.agent.submitUpdate(
+      session,
+      UpdateInput(
+        old.id,
+        1,
+        [],
+        templateId: 'note',
+        templateVersion: '1',
+        templateDigest: digest,
+        values: {'body': 'AI-REVIEWED'},
+        pendingRelations: {
+          'related': [
+            ImportPendingReference('information', 'target', proposalId: target),
+          ],
+        },
+      ),
+    );
+    await service.owner.confirmUpdate(update, 1);
+    await service.owner.correctValue(
+      FieldRef(old.id, old.fields.single.id),
+      'OWNER-EDIT',
+    );
+    await service.owner.confirmImport(target, 1, proposal(target).items);
+    expect(
+      service.owner.information
+          .singleWhere((i) => i.id == old.id)
+          .fields
+          .single
+          .value,
+      'OWNER-EDIT',
+    );
+    expect(service.owner.updateProposals.single.approved, true);
+    expect(service.owner.updateAdmission(update).state, 'needs_attention');
+    expect(
+      service.owner.updateProposals.single.input.values['body'],
+      'AI-REVIEWED',
+    );
+  });
+  test(
     'another chat cannot address, observe or revise private pending candidates',
     () async {
       final target = await service.agent.submitImport(session, [

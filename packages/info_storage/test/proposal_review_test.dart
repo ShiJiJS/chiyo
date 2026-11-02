@@ -89,7 +89,7 @@ void main() {
       'before.example',
     );
     expect(service.owner.updateProposals.single.input.changes, isEmpty);
-    expect((await service.owner.confirmUpdate(id, 1)).version, receipt.version);
+    expect((await service.owner.confirmUpdate(id, 1))!.version, receipt!.version);
     expect(service.owner.informationRevisions, hasLength(1));
   });
 }

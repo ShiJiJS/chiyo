@@ -51,6 +51,8 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
                 ...?change.definition,
                 'key': change.reviewKey,
                 'proposalRootKey': change.key,
+                'proposalEntryId': change.entryId,
+                'proposalLeaf': change.leaf,
                 'label': change.label,
                 if (change.entryId != null)
                   'type':
@@ -70,6 +72,14 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
     _relations = {for (final e in r.relations.entries) e.key: List.of(e.value)};
     for (final f in _fields) {
       final key = f['key'] as String;
+      Object? value = r.values[key];
+      if (f['proposalEntryId'] != null &&
+          r.values[f['proposalRootKey']] is List) {
+        value = WorkspaceRepeatedEntry.read(r.values[f['proposalRootKey']])
+            .where((e) => e.id == f['proposalEntryId'])
+            .firstOrNull
+            ?.toJson()[f['proposalLeaf']];
+      }
       if (f['type'] == 'entries') {
         try {
           _entries[key] = WorkspaceRepeatedEntry.read(r.values[key]);
@@ -78,10 +88,8 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
         }
       } else if (f['type'] != 'file' &&
           f['type'] != 'unknown' &&
-          (r.values[key] == null || r.values[key] is String)) {
-        _text[key] = TextEditingController(
-          text: r.values[key] as String? ?? '',
-        );
+          (value == null || value is String)) {
+        _text[key] = TextEditingController(text: value as String? ?? '');
       }
     }
   }
@@ -101,18 +109,35 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
       setState(() => _error = '请填写资料名称。');
       return;
     }
+    final values = Map<String, Object?>.from(widget.review.values);
+    for (final f in _fields) {
+      final key = f['key'] as String;
+      if (!_text.containsKey(key)) continue;
+      final root = f['proposalRootKey'];
+      if (f['proposalEntryId'] != null && values[root] is List) {
+        values[root as String] = [
+          for (final row in values[root] as List)
+            (row as Map)['entryId'] == f['proposalEntryId']
+                ? <String, Object?>{
+                    ...Map<String, Object?>.from(row),
+                    f['proposalLeaf'] as String: _text[key]!.text,
+                  }
+                : row,
+        ];
+      } else {
+        values[key] = _text[key]!.text;
+      }
+    }
+    for (final e in _entries.entries) {
+      values[e.key] = e.value.map((v) => v.toJson()).toList();
+    }
     final review = WorkspaceProposalItemReview(
       itemId: widget.review.itemId,
       name: _name.text,
       description: _description.text,
       directoryId: _directory,
       tagIds: _tags,
-      values: {
-        ...widget.review.values,
-        for (final e in _text.entries) e.key: e.value.text,
-        for (final e in _entries.entries)
-          e.key: e.value.map((v) => v.toJson()).toList(),
-      },
+      values: values,
       relations: _relations,
     );
     if (!widget.onSave(review)) {

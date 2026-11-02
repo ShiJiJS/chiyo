@@ -51,6 +51,7 @@ const _templatePackageLibraryFormat = 41;
 // Typed pending proposals must never be flattened by an older reader.
 const _templateImportLibraryFormat = 42;
 const _importAdmissionLibraryFormat = 43;
+const _updateAdmissionLibraryFormat = 44;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -492,7 +493,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _importAdmissionLibraryFormat) {
+      if (headerVersion > _updateAdmissionLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -507,7 +508,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _importAdmissionLibraryFormat ||
+            (marker.single['version'] as int) > _updateAdmissionLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1273,10 +1274,10 @@ class EncryptedInformationRepository
     return List.unmodifiable(_proposals.values);
   }
 
-  Future<void> _requireTemplateImportFormat() async {
+  Future<void> _requireAdmissionFormat(int format) async {
     await _db.customStatement(
       'UPDATE library_format SET version=? WHERE singleton=1 AND version<?',
-      [_templateImportLibraryFormat, _templateImportLibraryFormat],
+      [format, format],
     );
     final marker = await _db
         .customSelect('SELECT version FROM library_format WHERE singleton=1')
@@ -1286,18 +1287,15 @@ class EncryptedInformationRepository
     );
   }
 
+  Future<void> _requireTemplateImportFormat() =>
+      _requireAdmissionFormat(_templateImportLibraryFormat);
+
   Future<void> _writeProposal(
     ImportProposal proposal, {
     bool operationReceipt = true,
   }) async {
     if (proposal.admissionVersion > 0) {
-      await _db.customStatement(
-        'UPDATE library_format SET version=? WHERE singleton=1 AND version<?',
-        [_importAdmissionLibraryFormat, _importAdmissionLibraryFormat],
-      );
-      await _db.customStatement(
-        'PRAGMA user_version = $_importAdmissionLibraryFormat',
-      );
+      await _requireAdmissionFormat(_importAdmissionLibraryFormat);
     }
     if (proposal.items.any((i) => i.templateId != null)) {
       await _requireTemplateImportFormat();
@@ -1334,18 +1332,25 @@ class EncryptedInformationRepository
   }
 
   @override
-  Future<void> commitImportAdmission(
+  Future<void> commitInformationAdmission(
     List<ImportProposal> proposals,
     List<InformationItem> items, {
     required String decisionProposalId,
     required bool confirm,
+    ProposalKind decisionKind = ProposalKind.addition,
+    List<InformationUpdateAdmission> updates = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
     if (_closed) throw const StorageFailure('library_closed');
-    final deciding = proposals.singleWhere((p) => p.id == decisionProposalId);
+    final decidingVersion = decisionKind == ProposalKind.addition
+        ? proposals.singleWhere((p) => p.id == decisionProposalId).version
+        : updates
+              .singleWhere((u) => u.proposal.id == decisionProposalId)
+              .proposal
+              .version;
     try {
       await _db.transaction(() async {
         for (final directory in newDirectories) {
@@ -1360,12 +1365,19 @@ class EncryptedInformationRepository
         for (final proposal in proposals) {
           await _writeProposal(proposal, operationReceipt: false);
         }
+        for (final update in updates) {
+          if (update.item case final item?) await _writeItem(item);
+          if (update.previous case final previous?)
+            await _writeRevision(previous);
+          await _writeUpdate(update.proposal, operationReceipt: false);
+          await _writeRecycle(update.recycled, update.facts);
+        }
         await _checkAttachmentBackupBudget();
         await _proposalCommit(
-          deciding.id,
-          ProposalKind.addition,
+          decisionProposalId,
+          decisionKind,
           confirm,
-          deciding.version,
+          decidingVersion,
           decisionRecords.map((r) => OwnerProposalTarget(r.id, r.version)),
           awaitingKeys: awaitingKeys,
         );
@@ -1382,6 +1394,15 @@ class EncryptedInformationRepository
       }
       for (final proposal in proposals) {
         _proposals[proposal.id] = proposal;
+      }
+      for (final update in updates) {
+        if (update.item case final item?) _items[item.id] = item;
+        if (update.previous case final previous?) _revisions.add(previous);
+        for (final entry in update.recycled) {
+          _recycle[entry.id] = entry;
+        }
+        _recycleFacts.addAll(update.facts);
+        _updates[update.proposal.id] = update.proposal;
       }
     } catch (_) {
       throw const StorageFailure('save_failed');
@@ -1469,7 +1490,13 @@ class EncryptedInformationRepository
     }
   }
 
-  Future<void> _writeUpdate(UpdateProposal proposal) async {
+  Future<void> _writeUpdate(
+    UpdateProposal proposal, {
+    bool operationReceipt = true,
+  }) async {
+    if (proposal.approved || proposal.input.pendingRelations.isNotEmpty) {
+      await _requireAdmissionFormat(_updateAdmissionLibraryFormat);
+    }
     if (proposal.input.templateId != null) {
       await _requireTemplateImportFormat();
     }
@@ -1477,10 +1504,11 @@ class EncryptedInformationRepository
       'INSERT INTO update_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],
     );
-    if ({
-      UpdateProposalState.confirmed,
-      UpdateProposalState.rejected,
-    }.contains(proposal.state)) {
+    if (operationReceipt &&
+        {
+          UpdateProposalState.confirmed,
+          UpdateProposalState.rejected,
+        }.contains(proposal.state)) {
       await _proposalCommit(
         proposal.id,
         ProposalKind.modification,
@@ -1545,36 +1573,6 @@ class EncryptedInformationRepository
       });
       _items[item.id] = item;
       _revisions.add(previous);
-    } catch (_) {
-      throw const StorageFailure('save_failed');
-    }
-  }
-
-  @override
-  Future<void> confirmUpdateProposal(
-    UpdateProposal proposal,
-    InformationItem item,
-    InformationRevision previous, {
-    List<RecycleEntry> recycled = const [],
-    List<RecycleFact> facts = const [],
-  }) async {
-    if (_closed) throw const StorageFailure('library_closed');
-    try {
-      await _db.transaction(() async {
-        await _writeItem(item);
-        await _writeRevision(previous);
-        await _writeUpdate(proposal);
-        await _writeRecycle(recycled, facts);
-        await _checkAttachmentBackupBudget();
-        pendingOwnerProposalOperation?.validate();
-      });
-      _items[item.id] = item;
-      _revisions.add(previous);
-      _updates[proposal.id] = proposal;
-      for (final entry in recycled) {
-        _recycle[entry.id] = entry;
-      }
-      _recycleFacts.addAll(facts);
     } catch (_) {
       throw const StorageFailure('save_failed');
     }

@@ -103,6 +103,17 @@ class InformationTemplateDescription {
           'References are saved only after owner approval; this grants no access to their content.',
       'update':
           'Omit relations to retain existing links; pass a complete map to replace links.',
+      'updatePendingTarget':
+          'An update may reference a pending information candidate only with its explicit proposalId and itemKey. The old record stays unchanged until admission.',
+    },
+    'updateInput': {
+      'command': 'update-submit',
+      'identity': ['itemId', 'baseVersion'],
+      'templateIdentity': ['templateId', 'templateVersion', 'templateDigest'],
+      'values':
+          'Provide every declared field from authorized source values; omission never means clear. Independent owner-added fields remain unchanged.',
+      'revision':
+          'update-revise supplies proposalId, current proposal version, and a revised update; a new owner approval is required.',
     },
     if (hasGuidance)
       'submissionExample': {
