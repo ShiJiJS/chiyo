@@ -521,6 +521,73 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
         if (problems.isNotEmpty) notice = problems.join('\n');
         for (final input in p.items) {
           final candidate = 'proposal:$id:${input.key}';
+          if (input.credential case final material?) {
+            final definition = input.layout!.snapshot['definition'] as Map;
+            items.add(
+              WorkspaceProposalItem(
+                id: candidate,
+                admissionNote: states
+                    .singleWhere((s) => s.key == input.key)
+                    .reason,
+                credential: WorkspaceProposalCredential(
+                  source: material.source,
+                  contextExposed: material.contextExposed,
+                  ready: material.ready,
+                  fileName: material.fileName,
+                  byteLength: material.material?.length,
+                ),
+                proposed: WorkspaceDetail(
+                  record: WorkspaceRecordSummary(
+                    ref: WorkspaceRecordRef(
+                      WorkspaceRecordKind.credential,
+                      candidate,
+                    ),
+                    name: input.name,
+                    description: input.description,
+                    type: WorkspaceType(
+                      input.templateId!,
+                      definition['name'] as String? ?? '托管凭据',
+                      'key',
+                    ),
+                    updatedAt: p.createdAt,
+                    directoryId: _importDirectory(input),
+                    tags: [
+                      for (final t in _importTags(input))
+                        WorkspaceTag(
+                          t,
+                          _tags[t] ?? _suggestedTags[t] ?? '建议标签',
+                        ),
+                    ],
+                  ),
+                  version: p.version,
+                  definition: {
+                    ...Map<String, Object?>.from(definition),
+                    'templateVersion': input.templateVersion,
+                    'packageDigest': input.templateDigest,
+                  },
+                  relations: {
+                    for (final group in {
+                      ...input.relations.keys,
+                      ...input.pendingRelations.keys,
+                    })
+                      group: [
+                        for (final ref in input.relations[group] ?? [])
+                          WorkspaceRecordRef(
+                            WorkspaceRecordKind.values.byName(ref.kind),
+                            ref.id,
+                          ),
+                        for (final ref in input.pendingRelations[group] ?? [])
+                          WorkspaceRecordRef(
+                            WorkspaceRecordKind.values.byName(ref.kind),
+                            _pendingId(ref.proposalId ?? id, ref.itemKey),
+                          ),
+                      ],
+                  },
+                ),
+              ),
+            );
+            continue;
+          }
           final previewFields = [
             for (final (n, f) in input.fields.indexed)
               core.InformationField(
@@ -590,13 +657,19 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
         for (final (index, r) in p.receipts.indexed) {
           targets.add(
             WorkspaceProposalTarget(
-              record: _ref(r.id),
+              record: WorkspaceRecordRef(
+                WorkspaceRecordKind.values.byName(r.kind),
+                r.id,
+              ),
               name: index < p.createdItemKeys.length
                   ? p.candidateNames[p.createdItemKeys[index]] ?? '已保存资料'
                   : '已保存资料',
               version: r.version,
-              exists: _current(r.id) != null,
-              snapshotAvailable: _retained(r.id, r.version) != null,
+              exists: r.kind == 'credential'
+                  ? owner.credentials.any((c) => c.id == r.id)
+                  : _current(r.id) != null,
+              snapshotAvailable:
+                  r.kind == 'information' && _retained(r.id, r.version) != null,
             ),
           );
         }
@@ -756,7 +829,10 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
         commandDigest: r.command.commandDigest,
         records: r.records.map(
           (r) => WorkspaceRecordReceipt(
-            ref: _ref(r.id),
+            ref: WorkspaceRecordRef(
+              WorkspaceRecordKind.values.byName(r.kind),
+              r.id,
+            ),
             version: r.version,
             entryId: r.recycleId,
           ),
@@ -941,6 +1017,7 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                           ],
                     templateId: input.templateId,
                     key: input.key,
+                    credential: input.credential,
                     templateVersion: input.templateVersion,
                     templateDigest: input.templateDigest,
                     relations: _reviewRelations(

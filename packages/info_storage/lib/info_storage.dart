@@ -52,6 +52,7 @@ const _templatePackageLibraryFormat = 41;
 const _templateImportLibraryFormat = 42;
 const _importAdmissionLibraryFormat = 43;
 const _updateAdmissionLibraryFormat = 44;
+const _credentialImportLibraryFormat = 45;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -493,7 +494,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _updateAdmissionLibraryFormat) {
+      if (headerVersion > _credentialImportLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -508,7 +509,8 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _updateAdmissionLibraryFormat ||
+            (marker.single['version'] as int) >
+                _credentialImportLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1294,6 +1296,10 @@ class EncryptedInformationRepository
     ImportProposal proposal, {
     bool operationReceipt = true,
   }) async {
+    if (proposal.candidateKinds.values.contains('credential') ||
+        proposal.operationId != null) {
+      await _requireAdmissionFormat(_credentialImportLibraryFormat);
+    }
     if (proposal.admissionVersion > 0) {
       await _requireAdmissionFormat(_importAdmissionLibraryFormat);
     }
@@ -1310,7 +1316,9 @@ class EncryptedInformationRepository
         ProposalKind.addition,
         proposal.state == ImportProposalState.confirmed,
         proposal.version,
-        proposal.receipts.map((r) => OwnerProposalTarget(r.id, r.version)),
+        proposal.receipts.map(
+          (r) => OwnerProposalTarget(r.id, r.version, kind: r.kind),
+        ),
       );
     }
   }
@@ -1339,6 +1347,8 @@ class EncryptedInformationRepository
     required bool confirm,
     ProposalKind decisionKind = ProposalKind.addition,
     List<InformationUpdateAdmission> updates = const [],
+    List<ManagedCredential> credentialRecords = const [],
+    List<CredentialMaterial> credentialMaterials = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
@@ -1362,6 +1372,13 @@ class EncryptedInformationRepository
         for (final item in items) {
           await _writeItem(item);
         }
+        if (credentialRecords.isNotEmpty) {
+          await _requireAdmissionFormat(_credentialImportLibraryFormat);
+          await _writeCredentialSnapshot(
+            [..._credentials, ...credentialRecords],
+            [..._credentialMaterials, ...credentialMaterials],
+          );
+        }
         for (final proposal in proposals) {
           await _writeProposal(proposal, operationReceipt: false);
         }
@@ -1378,7 +1395,9 @@ class EncryptedInformationRepository
           decisionKind,
           confirm,
           decidingVersion,
-          decisionRecords.map((r) => OwnerProposalTarget(r.id, r.version)),
+          decisionRecords.map(
+            (r) => OwnerProposalTarget(r.id, r.version, kind: r.kind),
+          ),
           awaitingKeys: awaitingKeys,
         );
         pendingOwnerProposalOperation?.validate();
@@ -1391,6 +1410,12 @@ class EncryptedInformationRepository
       }
       for (final item in items) {
         _items[item.id] = item;
+      }
+      if (credentialRecords.isNotEmpty) {
+        _publishCredentialSnapshot(
+          [..._credentials, ...credentialRecords],
+          [..._credentialMaterials, ...credentialMaterials],
+        );
       }
       for (final proposal in proposals) {
         _proposals[proposal.id] = proposal;

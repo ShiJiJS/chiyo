@@ -33,6 +33,7 @@ void _validateBackupCredentials(
       },
       {
         if (formatVersion >= 14) ...{'directoryId', 'tagIds'},
+        if (formatVersion >= 16) 'template',
       },
     );
     if (j.containsKey('directoryId') != j.containsKey('tagIds'))
@@ -65,6 +66,16 @@ void _validateBackupCredentials(
         _backupInvalid();
     }
     final id = _backupId(j, 'id');
+    if (j['template'] != null) {
+      final template = InformationLayout.fromJson(
+        Map<String, dynamic>.from(j['template'] as Map),
+      );
+      if (template.fieldIds.isNotEmpty ||
+          (template.snapshot['definition'] as Map?)?['recordKind'] !=
+              'credential') {
+        _backupInvalid();
+      }
+    }
     if (row['id'] != id || credentials.containsKey(id)) _backupInvalid();
     _backupText(j, 'name', 60, required: true);
     _backupText(j, 'publicPurpose', 2000);

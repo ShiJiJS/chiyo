@@ -1,6 +1,7 @@
 import 'package:info_core/info_core.dart' as core;
 import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_plugins.dart';
+import 'builtin_credential_templates.dart';
 
 /// Read the same installed-package projection as the owner UI. No origin path,
 /// affected-record count, selection, private body or pending proposal is sent.
@@ -23,6 +24,7 @@ core.InformationTemplateCatalog currentAgentTemplates(core.OwnerAccess owner) {
           ),
       ],
       templates: [
+        ...builtinCredentialTemplates(),
         for (final e in builtinWorkspaceDefinitions.entries)
           if (!const {'server', 'service', 'profile'}.contains(e.key))
             core.InformationTemplateDescription(

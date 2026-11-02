@@ -398,6 +398,8 @@ abstract interface class InformationRepository {
     required bool confirm,
     ProposalKind decisionKind = ProposalKind.addition,
     List<InformationUpdateAdmission> updates = const [],
+    List<ManagedCredential> credentialRecords = const [],
+    List<CredentialMaterial> credentialMaterials = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
@@ -996,11 +998,15 @@ class MemoryInformationRepository
     required bool confirm,
     ProposalKind decisionKind = ProposalKind.addition,
     List<InformationUpdateAdmission> updates = const [],
+    List<ManagedCredential> credentialRecords = const [],
+    List<CredentialMaterial> credentialMaterials = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
+    _credentials.addAll(credentialRecords);
+    _materials.addAll(credentialMaterials);
     for (final directory in newDirectories) {
       _directories[directory.id] = directory;
     }

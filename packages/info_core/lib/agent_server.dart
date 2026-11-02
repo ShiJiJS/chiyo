@@ -118,12 +118,13 @@ class AgentServer {
       }
       final limit =
           request.uri.path == '/import/submit' ||
-              request.uri.path == '/import/revise' ||
-              request.uri.path == '/organization/submit' ||
-              request.uri.path == '/update/submit' ||
-              request.uri.path == '/update/revise' ||
-              request.uri.path == '/credentials/catalog' ||
-              runtime
+              request.uri.path == '/import/revise'
+          ? 6000000
+          : request.uri.path == '/organization/submit' ||
+                request.uri.path == '/update/submit' ||
+                request.uri.path == '/update/revise' ||
+                request.uri.path == '/credentials/catalog' ||
+                runtime
           ? 262144
           : 16384;
       if (request.contentLength > limit) {
@@ -155,7 +156,7 @@ class AgentServer {
               request.uri.path == '/update/revise' ||
               request.uri.path.startsWith('/templates/') ||
               request.uri.path == '/plugins/catalog'
-          ? decodeProtocolObject(utf8.decode(bytes))
+          ? decodeProtocolObject(utf8.decode(bytes), maxBytes: limit)
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
@@ -251,6 +252,8 @@ class AgentServer {
               'information-template-discovery.v1',
             if (_agent.informationTemplatesAvailable)
               'information-import-admission.v1',
+            if (_agent.credentialImportAvailable) 'credential-import.v1',
+            'information-import-operations.v1',
           ],
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
@@ -569,6 +572,15 @@ class AgentServer {
         ]);
         return _agent.importStatus(session, id);
       case '/import/status':
+        if (body.containsKey('operationId')) {
+          if (body.containsKey('proposalId')) {
+            throw const AccessFailure('invalid_request');
+          }
+          return _agent.importStatusByOperation(
+            _text(body, 'sessionSecret'),
+            _text(body, 'operationId'),
+          );
+        }
         return _agent.importStatus(
           _text(body, 'sessionSecret'),
           _text(body, 'proposalId'),
@@ -799,6 +811,7 @@ class AgentServer {
       items,
       agentName: body['agentName'] is String ? body['agentName'] as String : '',
       purpose: body['purpose'] is String ? body['purpose'] as String : '',
+      operationId: body['operationId'] as String?,
     );
     return _agent.importStatus(session, id);
   }

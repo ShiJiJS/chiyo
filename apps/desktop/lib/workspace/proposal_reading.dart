@@ -351,6 +351,34 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
         shown = <String>{},
         links = <String>{};
     final sections = <Widget>[];
+    if (widget.item.credential case final credential?) {
+      sections.add(
+        Text(
+          credential.source == 'owner'
+              ? credential.ready
+                    ? '主人已填写密码，秘密不返回 AI。'
+                    : '需要主人私下填写账号密码，填写后才能批准。'
+              : credential.source == 'agentFile'
+              ? 'AI 已提交凭据文件：${credential.fileName} · ${credential.byteLength}字节。无需重新选择文件。'
+              : 'AI 已填写凭据字符串，审批页不显示秘密原文。',
+          style: libraryText(context, 14, height: 1.8),
+        ),
+      );
+      if (credential.contextExposed) {
+        sections.add(
+          Text(
+            'AI 已接触过这份秘密，内容可能已经进入会话上下文。',
+            style: libraryText(context, 14, color: c.warning, height: 1.8),
+          ),
+        );
+      }
+      sections.add(
+        Text(
+          '批准只保存凭据，不允许 AI 使用；使用仍须另行申请。',
+          style: libraryText(context, 13, color: c.muted, height: 1.8),
+        ),
+      );
+    }
     if (widget.item.admissionNote.isNotEmpty) {
       sections.add(
         Text(

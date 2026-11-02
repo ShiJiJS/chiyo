@@ -301,6 +301,9 @@ extension OwnerTemplatePackages on OwnerAccess {
   void _validateNewTemplate(InformationLayout? layout) {
     if (layout == null) return;
     final raw = layout.snapshot['definition'];
+    if (raw is Map && raw['recordKind'] == 'credential') {
+      throw const AccessFailure('invalid_credential_template');
+    }
     if (raw is Map && raw['packageId'] != null && raw['packageId'] is! String) {
       throw const AccessFailure('invalid_information');
     }

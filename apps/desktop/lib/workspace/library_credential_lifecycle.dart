@@ -431,7 +431,7 @@ class _RecycleState extends State<_Recycle> {
       if (r != null && r.catalogVersion != c.version) {
         throw const WorkspaceFailure('conflict', '分类已变化，请重新读取恢复范围。');
       }
-      final targets = await widget.source.readSummaries(d.linkedInformation);
+      final targets = await widget.source.readSummaries(d.allLinks);
       if (!mounted) return;
       mutation.acceptCurrentVersion();
       setState(() {
@@ -582,7 +582,7 @@ class _RecycleState extends State<_Recycle> {
                           '保留标签：${r.restored.record.tags.map((t) => t.name).join('、')}',
                         ),
                         Text(
-                          '保留关联：${r.restored.linkedInformation.map((ref) => names[ref] ?? '不可用资料').join('、')}',
+                          '保留关联：${r.restored.allLinks.map((ref) => names[ref] ?? '不可用资料').join('、')}',
                         ),
                         for (final notice in r.notices)
                           Text(

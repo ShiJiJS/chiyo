@@ -99,6 +99,10 @@
                 },
                 "required": {
                   "type": "boolean"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 2000
                 }
               },
               "required": [
@@ -170,12 +174,36 @@
                       "maxLength": 64,
                       "pattern": "^[a-z][a-zA-Z0-9_-]*$",
                       "x-reference": "matching field or relation; timeline requires entries"
+                    },
+                    "formatKey": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^[a-z][a-zA-Z0-9_-]*$",
+                      "x-reference": "a text field containing plain or markdown; only text sections support formatKey"
                     }
                   },
                   "required": [
                     "kind",
                     "title",
                     "key"
+                  ],
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "text"
+                          }
+                        }
+                      },
+                      "else": {
+                        "not": {
+                          "required": [
+                            "formatKey"
+                          ]
+                        }
+                      }
+                    }
                   ]
                 }
               ]
@@ -290,6 +318,66 @@
               "summary",
               "values"
             ]
+          },
+          "recordKind": {
+            "enum": [
+              "information",
+              "credential"
+            ]
+          },
+          "credential": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "form": {
+                "enum": [
+                  "string",
+                  "file"
+                ]
+              },
+              "secretKind": {
+                "enum": [
+                  "accountPassword",
+                  "token",
+                  "file"
+                ]
+              },
+              "suggestedBinding": {
+                "type": "string",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$"
+              }
+            },
+            "required": [
+              "form",
+              "secretKind",
+              "suggestedBinding"
+            ],
+            "oneOf": [
+              {
+                "properties": {
+                  "form": {
+                    "const": "string"
+                  },
+                  "secretKind": {
+                    "enum": [
+                      "accountPassword",
+                      "token"
+                    ]
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "form": {
+                    "const": "file"
+                  },
+                  "secretKind": {
+                    "const": "file"
+                  }
+                }
+              }
+            ]
           }
         },
         "required": [
@@ -300,6 +388,44 @@
           "sections",
           "relations",
           "instructions"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "recordKind": {
+                  "const": "credential"
+                }
+              },
+              "required": [
+                "recordKind"
+              ]
+            },
+            "then": {
+              "required": [
+                "credential"
+              ],
+              "properties": {
+                "fields": {
+                  "maxItems": 0
+                },
+                "example": {
+                  "properties": {
+                    "values": {
+                      "maxProperties": 0
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "credential"
+                ]
+              }
+            }
+          }
         ]
       },
       "maxItems": 10,

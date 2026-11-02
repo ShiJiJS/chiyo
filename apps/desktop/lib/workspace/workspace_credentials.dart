@@ -64,7 +64,9 @@ class WorkspaceCredentialDetail {
     required this.privateNote,
     this.filename,
     Iterable<WorkspaceRecordRef> linkedInformation = const [],
-  }) : linkedInformation = List.unmodifiable(linkedInformation);
+    Iterable<WorkspaceRecordRef> linkedCredentials = const [],
+  }) : linkedInformation = List.unmodifiable(linkedInformation),
+       linkedCredentials = List.unmodifiable(linkedCredentials);
   final WorkspaceRecordSummary record;
   final int recordVersion, materialVersion, useGeneration;
   final bool enabled, useSupported, discoverable;
@@ -74,6 +76,11 @@ class WorkspaceCredentialDetail {
   final String format, binding, privateNote;
   final String? filename;
   final List<WorkspaceRecordRef> linkedInformation;
+  final List<WorkspaceRecordRef> linkedCredentials;
+  List<WorkspaceRecordRef> get allLinks => [
+    ...linkedInformation,
+    ...linkedCredentials,
+  ];
   String get mask => '••••••••';
   bool get canRequestUse =>
       enabled &&

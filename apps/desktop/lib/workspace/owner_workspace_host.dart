@@ -20,6 +20,7 @@ import '../backups.dart';
 import '../information_files.dart';
 import '../credential_files.dart';
 import 'owner_credential_input.dart';
+import 'owner_proposal_password_input.dart';
 import 'owner_workspace_credentials.dart';
 import 'owner_workspace_file_selections.dart';
 import 'owner_workspace_backup_files.dart';
@@ -173,6 +174,13 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     inputsBuilder: (context) {
       final source = _source;
       return WorkspaceInputs(
+        proposalPassword: (id, version, item) => showOwnerProposalPasswordInput(
+          context,
+          widget.runtime.service.owner,
+          id,
+          version,
+          item,
+        ),
         backup: _backupFiles?.pick,
         plugin: _plugins.pick,
         hostFile: _hosts.pick,

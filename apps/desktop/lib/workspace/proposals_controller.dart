@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 import 'proposal_batch.dart';
@@ -211,6 +212,9 @@ class ProposalsController extends ChangeNotifier {
       draft != null &&
       !needsReview &&
       draft!.selected.isNotEmpty &&
+      detail!.items
+          .where((i) => draft!.selected.contains(i.id))
+          .every((i) => i.credential?.ready ?? true) &&
       writeFailure?.code != 'conflict';
   bool get canReject => _readable && detail!.summary.pending;
   bool get canEdit =>
@@ -356,6 +360,50 @@ class ProposalsController extends ChangeNotifier {
     notice = null;
     writeFailure = null;
     await load();
+  }
+
+  /// Only after this Host's password editor reports a committed fill. Preserve
+  /// local metadata edits only when the complete public proposal is unchanged.
+  Future<void> reloadAfterPasswordInput(
+    WorkspaceProposalDetail previous,
+    String itemId,
+  ) async {
+    final old = draft;
+    await select(previous.summary.id);
+    final current = detail;
+    if (old == null ||
+        current == null ||
+        selection != previous.summary.id ||
+        current.summary.version != previous.summary.version + 1 ||
+        old.version != previous.summary.version ||
+        current.items.length != previous.items.length) {
+      return;
+    }
+    for (final before in previous.items) {
+      final after = current.items.where((i) => i.id == before.id).firstOrNull;
+      if (after == null ||
+          jsonEncode(WorkspaceProposalItemReview.fromItem(before).toJson()) !=
+              jsonEncode(
+                WorkspaceProposalItemReview.fromItem(after).toJson(),
+              )) {
+        return;
+      }
+      if (before.id == itemId &&
+          (before.credential?.source != 'owner' ||
+              after.credential?.source != 'owner' ||
+              after.credential?.ready != true)) {
+        return;
+      }
+    }
+    final next = ProposalDraft(current);
+    next.items.addAll(old.items);
+    next.selected
+      ..clear()
+      ..addAll(old.selected);
+    next.dirty = old.dirty;
+    _drafts[current.summary.id] = next;
+    writeFailure = null;
+    _notify();
   }
 
   Future<void> _changeQuery(VoidCallback change) async {

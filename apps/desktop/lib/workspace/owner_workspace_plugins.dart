@@ -141,16 +141,23 @@ class OwnerWorkspacePlugins implements WorkspacePluginSource {
     return [
       for (final p in result)
         p.project(
-          affectedRecords: owner.information
-              .where(
-                (i) =>
-                    p.templates.any((t) => t.type.id == i.layout?.typeId) ||
-                    (i.layout?.snapshot['definition'] is Map &&
-                        (i.layout!.snapshot['definition']
-                                as Map)['packageId'] ==
-                            p.id),
-              )
-              .length,
+          affectedRecords:
+              owner.information
+                  .where(
+                    (i) =>
+                        p.templates.any((t) => t.type.id == i.layout?.typeId) ||
+                        (i.layout?.snapshot['definition'] is Map &&
+                            (i.layout!.snapshot['definition']
+                                    as Map)['packageId'] ==
+                                p.id),
+                  )
+                  .length +
+              owner.credentials
+                  .where(
+                    (c) =>
+                        p.templates.any((t) => t.type.id == c.template?.typeId),
+                  )
+                  .length,
         ),
     ];
   }
@@ -163,7 +170,11 @@ class OwnerWorkspacePlugins implements WorkspacePluginSource {
           e.key: e.value,
       for (final p in current.where((p) => p.enabled))
         for (final t in p.templates)
-          t.type.id: workspaceImmutableMap({...t.definition, 'id': t.type.id}),
+          if (t.definition['recordKind'] != 'credential')
+            t.type.id: workspaceImmutableMap({
+              ...t.definition,
+              'id': t.type.id,
+            }),
     };
   }
 

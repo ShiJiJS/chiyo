@@ -26,7 +26,7 @@ void _validateImport(List<ImportItemInput> items) {
       utf8
               .encode(jsonEncode(items.map((i) => i.submissionJson).toList()))
               .length >
-          240000 ||
+          (items.any((i) => i.credential != null) ? 6000000 : 240000) ||
       items.any(
         (i) =>
             i.name.trim().isEmpty ||
@@ -41,6 +41,7 @@ void _validateImport(List<ImportItemInput> items) {
                     i.layout != null ||
                     i.relations.isNotEmpty ||
                     i.pendingRelations.isNotEmpty) ||
+            i.credential != null && i.templateId == null ||
             i.fields.length > 50 ||
             i.suggestedDirectory.length > 200 ||
             i.suggestedTemplate.length > 200 ||
@@ -62,6 +63,26 @@ void _validateImport(List<ImportItemInput> items) {
 }
 
 extension AgentImports on AgentAccess {
+  Map<String, Object?> importStatusByOperation(
+    String session,
+    String operationId,
+  ) {
+    _service._requireSession(session);
+    if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(operationId)) {
+      throw const AccessFailure('invalid_operation_id');
+    }
+    final proposal = _service._repository.importProposals
+        .where(
+          (p) =>
+              p.sessionBinding == _service._sessionBindings[session] &&
+              p.operationId == operationId,
+        )
+        .firstOrNull;
+    return proposal == null
+        ? {'status': 'not_found', 'operationId': operationId}
+        : importStatus(session, proposal.id);
+  }
+
   Future<void> reviseImport(
     String session,
     String id,
@@ -103,9 +124,45 @@ extension AgentImports on AgentAccess {
     List<ImportItemInput> items, {
     String agentName = '',
     String purpose = '',
+    String? operationId,
   }) => _service.owner._serialize(() async {
     _service._requireSession(session);
     _validateImport(items);
+    if (operationId != null &&
+        !RegExp(
+          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+        ).hasMatch(operationId!)) {
+      throw const AccessFailure('invalid_operation_id');
+    }
+    final digest = sha256
+        .convert(
+          utf8.encode(
+            jsonEncode({
+              'items': [for (final i in items) i.submissionJson],
+              'purpose': purpose,
+              'agentName': agentName,
+            }),
+          ),
+        )
+        .toString();
+    operationId ??= items.any((i) => i.credential != null)
+        ? 'credential-$digest'
+        : null;
+    if (operationId != null) {
+      final previous = _service._repository.importProposals
+          .where(
+            (p) =>
+                p.sessionBinding == _service._sessionBindings[session] &&
+                p.operationId == operationId,
+          )
+          .firstOrNull;
+      if (previous != null) {
+        if (previous.submissionDigest != digest) {
+          throw const AccessFailure('operation_conflict');
+        }
+        return previous.id;
+      }
+    }
     items = _service.owner._compileTemplateImports(items);
     _validateImport(items);
     if (agentName.length > 200 || purpose.length > 2000) {
@@ -130,6 +187,8 @@ extension AgentImports on AgentAccess {
       items: items,
       agentName: agentName.trim(),
       purpose: purpose.trim(),
+      operationId: operationId,
+      submissionDigest: operationId == null ? null : digest,
     );
     if (proposal.items.map((i) => i.key).toSet().length !=
         proposal.items.length) {
@@ -167,6 +226,8 @@ extension AgentImports on AgentAccess {
           {
             'key': state.key,
             'state': state.state,
+            if (proposal.candidateKinds[state.key] == 'credential')
+              'kind': 'credential',
             if (proposal.receiptFor(state.key) case final receipt?) ...{
               'itemId': receipt.id,
               'version': receipt.version,
@@ -182,6 +243,44 @@ extension AgentImports on AgentAccess {
 extension OwnerImports on OwnerAccess {
   List<ImportProposal> get importProposals =>
       _service._repository.importProposals;
+
+  /// A trusted secure editor only. There is no Agent operation to supply or
+  /// read this owner-entered value, and status contains metadata only.
+  Future<void> fillImportCredential(
+    String id,
+    int version,
+    String key,
+    String secret,
+  ) => _serialize(() async {
+    final proposal = importProposals.where((p) => p.id == id).firstOrNull;
+    if (proposal == null ||
+        proposal.state != ImportProposalState.pending ||
+        proposal.version != version) {
+      throw const AccessFailure('proposal_changed');
+    }
+    final input = proposal.items.where((i) => i.key == key).firstOrNull;
+    if (input?.credential?.source != 'owner') {
+      throw const AccessFailure('invalid_credential_input');
+    }
+    CredentialImportInput credential;
+    try {
+      credential = input!.credential!.withOwnerSecret(secret);
+    } on FormatException {
+      throw const AccessFailure('invalid_credential_content');
+    }
+    final revised = ImportItemInput.fromPrivateJson({
+      ...input.toJson(),
+      'credential': credential.toPrivateJson(),
+    });
+    await _service._repository.saveImportProposal(
+      proposal.revise(
+        items: [
+          for (final old in proposal.items) old.key == key ? revised : old,
+        ],
+        approvedKeys: proposal.approvedKeys.where((k) => k != key),
+      ),
+    );
+  });
 
   ImportProposal _pendingImport(String id, int version) {
     if (_service._closed) throw const AccessFailure('service_unavailable');

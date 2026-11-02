@@ -465,6 +465,9 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             : location.page == WorkspacePage.proposals
             ? ProposalsPage(
                 controller: _proposals,
+                onPasswordInput: widget.inputsBuilder
+                    ?.call(context)
+                    .proposalPassword,
                 onWorkspaceBack: _controller.canGoBack
                     ? _controller.goBack
                     : null,
