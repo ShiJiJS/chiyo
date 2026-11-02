@@ -96,7 +96,7 @@ class OwnerWorkspaceAdditionalApprovals {
         r.toJson(),
         owner.credentialUseState(r),
         owner.credentialGrantState(r),
-        owner.credentialFieldGrantState(r),
+        owner.credentialFieldGrantState(r, forReview: true),
         for (final v in owner.informationRequests.where((v) => v.id == id))
           [v.state.name, v.sessionEnded, v.grantExpiresAt?.toIso8601String()],
         c?.revision,
