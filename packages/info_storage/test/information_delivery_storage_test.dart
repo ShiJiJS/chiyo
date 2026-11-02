@@ -475,15 +475,15 @@ void main() {
     },
   );
   test(
-    'format9 archives facts and original bytes without leases or associations and restores no execution capability',
+    'format17 archives delivery facts and owned originals without leases or restored execution capability',
     () async {
       await approve();
       if (Platform.environment.containsKey('ISSUE37_OLD_STORAGE_PROBES')) {
         final key = await enableTestBackups(repo.backups);
         final path = '${root.path}/before-delivery8.aimbackup';
         await repo.backups.exportTo(path);
-        expect((await repo.backups.inspect(path, key)).formatVersion, 8);
-        await checkOldReaders(path, key, 8);
+        expect((await repo.backups.inspect(path, key)).formatVersion, 17);
+        await checkOldReaders(path, key, 17);
       }
       final delivered = result(
         await service.agent.fetchInformationFile(session, input('one')),
@@ -492,10 +492,10 @@ void main() {
       final key = await enableTestBackups(repo.backups),
           path = '${root.path}/archive.aimbackup';
       await service.owner.exportLibrary(() => repo.backups.exportTo(path));
-      await checkOldReaders(path, key, 9);
+      await checkOldReaders(path, key, 17);
       final reader = await AttachmentBackupContainer.openValidated(path, key);
       try {
-        expect(reader.formatVersion, 9);
+        expect(reader.formatVersion, 17);
         final fact =
             jsonDecode(
                   reader.tables['information_deliveries']!.single['payload']
@@ -529,7 +529,7 @@ void main() {
         await target.close();
       });
       final preview = await target.backups.inspect(path, key);
-      expect(preview.formatVersion, 9);
+      expect(preview.formatVersion, 17);
       expect(preview.fileDeliveryCount, 1);
       await restoredService.owner.restoreLibrary(
         () => target.backups.restore(preview),
@@ -990,7 +990,7 @@ void main() {
         final after = '${root.path}/after.aimbackup';
         await repo.backups.exportTo(after);
         final checked = await repo.backups.inspect(after, recovery);
-        expect(checked.formatVersion, 9);
+        expect(checked.formatVersion, 17);
         expect(checked.fileDeliveryCount, 1);
         expect(checked.attachmentBytes, data.length);
       } finally {
@@ -1034,7 +1034,7 @@ void main() {
       await service.close();
       await repo.close();
       db = inspect();
-      expect(db.select('PRAGMA user_version').single.values.single, 38);
+      expect(db.select('PRAGMA user_version').single.values.single, 46);
       db.execute('UPDATE library_format SET version=20');
       db.execute('PRAGMA user_version=10');
       db.close();

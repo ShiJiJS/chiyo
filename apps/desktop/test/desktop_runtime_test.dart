@@ -192,7 +192,7 @@ void main() {
   });
 
   test(
-    'startup removes expired attachment originals while preserving the current file',
+    'startup retains owned attachment history beyond the former expiry window',
     () async {
       var now = DateTime.utc(2026, 10, 1);
       final root = await Directory.systemTemp.createTemp('runtime-attachment-');
@@ -246,19 +246,13 @@ void main() {
       );
       await runtime.start();
       expect(runtime.attachmentCleanupFailed, isFalse);
-      await expectLater(
-        repo.readInformationAttachmentChunk(
+      expect(
+        await repo.readInformationAttachmentChunk(
           old.fields.single.attachment!,
           0,
           2,
         ),
-        throwsA(
-          isA<AccessFailure>().having(
-            (e) => e.status,
-            'status',
-            'attachment_missing',
-          ),
-        ),
+        [1, 2],
       );
       expect(
         await repo.readInformationAttachmentChunk(

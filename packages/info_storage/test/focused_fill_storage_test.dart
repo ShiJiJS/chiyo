@@ -519,7 +519,7 @@ void main() {
   );
 
   test(
-    'Mac format11 retains Windows fills and ordinary attachment bytes',
+    'format17 retains Mac and Windows fill facts with owned ordinary originals',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);
@@ -559,7 +559,7 @@ void main() {
       );
       addTearDown(target.close);
       final contents = await target.backups.restoreFrom(path, recovery);
-      expect(contents.formatVersion, 11);
+      expect(contents.formatVersion, 17);
       expect(contents.focusedFillCount, 2);
       expect(contents.attachmentCount, 1);
       expect(
@@ -770,7 +770,7 @@ void main() {
     timeout: const Timeout(Duration(minutes: 4)),
   );
   test(
-    'format9 preserves command, fill and credential archives alongside ordinary originals without file delivery authority',
+    'format17 preserves command, fill and credential archives alongside ordinary originals without file delivery authority',
     () async {
       final f = await _Fixture.create();
       addTearDown(f.close);
@@ -831,7 +831,7 @@ void main() {
       );
       addTearDown(target.close);
       final restored = await target.backups.restoreFrom(path, key);
-      expect(restored.formatVersion, 9);
+      expect(restored.formatVersion, 17);
       expect(restored.fileDeliveryCount, 1);
       expect(restored.focusedFillCount, 2);
       expect(restored.credentialExecutionCount, 1);

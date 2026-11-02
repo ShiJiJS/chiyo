@@ -355,11 +355,15 @@ class InformationService {
     if (!_sessionActive(session)) throw const AccessFailure('unauthorized');
   }
 
-  bool _canRead(_Request? request, FieldRef field) {
+  bool _canRead(
+    _Request? request,
+    FieldRef field, {
+    bool ignoreDecisionBarrier = false,
+  }) {
     if (request == null) return false;
     _expire(request);
     return _sessionActive(request.session) &&
-        !request.informationDecisionPending &&
+        (!request.informationDecisionPending || ignoreDecisionBarrier) &&
         request.state == AccessRequestState.approved &&
         request.grant!.fields.contains(field) &&
         !request.invalidatedFields.contains(field) &&

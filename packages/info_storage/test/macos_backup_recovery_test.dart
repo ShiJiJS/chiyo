@@ -72,7 +72,7 @@ void main() {
   });
   tearDownAll(() async => _removeOwned(tools));
 
-  for (final format in [8, 9]) {
+  for (final format in [8, 9, 17]) {
     test(
       'Mac AOT format$format interruption during 80MiB restore rolls back and retries with distinct target key',
       () async {
@@ -158,7 +158,7 @@ void main() {
           await service.agent.read(oldToken, textRef);
           service.agent.request(session, '不得恢复待审批', [textRef]);
           String? deliveryId;
-          if (format == 9) {
+          if (format >= 9) {
             final result = await service.agent.fetchInformationFile(
               session,
               InformationFileFetchInput.fromJson({
@@ -178,6 +178,45 @@ void main() {
           await service.owner.exportLibrary(
             () => source.backups.exportTo(backup.path),
           );
+          if (format < 17) {
+            // Produce the exact legacy table/payload shape, while retaining the
+            // same authenticated chunks. These cases still test real 8/9 restore.
+            final legacy = _raw(
+              backup.path,
+              base64Url.decode(recovery.split(':').last),
+            );
+            try {
+              final payload =
+                  jsonDecode(
+                        legacy
+                                .select('SELECT payload FROM backup_snapshot')
+                                .single['payload']
+                            as String,
+                      )
+                      as Map<String, dynamic>;
+              expect(payload['version'], 17);
+              payload['version'] = format;
+              final tables = payload['tables'] as Map<String, dynamic>;
+              expect(tables.remove('template_packages'), isEmpty);
+              if (format == 8)
+                expect(tables.remove('information_deliveries'), isEmpty);
+              for (final row in tables['information_items'] as List) {
+                expect((row as Map).remove('layout_json'), isNull);
+              }
+              for (final row in tables['grant_history'] as List) {
+                final history =
+                    jsonDecode(row['payload'] as String)
+                        as Map<String, dynamic>;
+                history.remove('itemVersions');
+                row['payload'] = jsonEncode(history);
+              }
+              legacy.execute('UPDATE backup_snapshot SET payload=?', [
+                jsonEncode(payload),
+              ]);
+            } finally {
+              legacy.close();
+            }
+          }
           final beforeHash = sha256
               .convert(await backup.readAsBytes())
               .toString();
@@ -361,7 +400,7 @@ void main() {
               restored.agent.read(oldToken, textRef),
               throwsA(isA<AccessFailure>()),
             );
-            if (format == 9) {
+            if (format >= 9) {
               final fact = target.informationFileDeliveries.single;
               expect(fact.runtime, isFalse);
               expect(fact.lease, isNull);

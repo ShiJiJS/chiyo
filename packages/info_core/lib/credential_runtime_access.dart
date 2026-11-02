@@ -911,15 +911,33 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
   bool credentialUseDecisionUnconfirmed(CredentialUseRequest request) =>
       _service._inactiveCredentialApprovals.contains(request.id);
 
-  String credentialFieldGrantState(CredentialUseRequest request) {
+  String credentialFieldGrantState(
+    CredentialUseRequest request, {
+    bool forReview = false,
+  }) {
     if (request.approvedFields.isEmpty) return 'not_approved';
     if (request.fieldExpiresAt == null ||
         !_service._clock().isBefore(request.fieldExpiresAt!)) {
       return 'expired';
     }
     final active = _service._requests[request.id];
+    final operation = pendingAdditionalApproval;
+    // The exact revoke validates its original review while its own read barrier
+    // is held. Agent reads and all other projections still observe the barrier.
+    final ownRevoke =
+        forReview &&
+        operation != null &&
+        identical(operation.owner, this) &&
+        operation.entered &&
+        operation.kind == 'credential' &&
+        operation.command.requestId == request.id &&
+        operation.command.action == InformationApprovalAction.revoke;
     return request.approvedFields.any(
-          (field) => _service._canRead(active, field),
+          (field) => _service._canRead(
+            active,
+            field,
+            ignoreDecisionBarrier: ownRevoke,
+          ),
         )
         ? 'available'
         : 'revoked';
