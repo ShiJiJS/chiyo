@@ -13,5 +13,7 @@
   "mainOrWindowsChanged": false,
   "cleanupLogicalBytes": 4047812422,
   "originalLibraryKeychainAndInfosPreserved": true,
-  "recoverableOriginalProgramAndEncryptedSnapshotPreserved": true
+  "recoverableOriginalProgramAndEncryptedSnapshotPreserved": true,
+  "startupSystemLogObserved": "SecItemCopyMatching followed by CSSMERR_CSP_OPERATION_AUTH_DENIED",
+  "startupSystemLogEvidence": "startup-keychain-log.json"
 }
