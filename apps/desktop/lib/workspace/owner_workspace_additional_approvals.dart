@@ -78,7 +78,9 @@ class OwnerWorkspaceAdditionalApprovals {
       owner.credentialUseRequests.singleWhere((r) => r.id == id);
   core.OrganizationTask _organization(String id) =>
       owner.organizationTasks.singleWhere((r) => r.id == id);
-  String _token(String id) {
+
+  /// Shared metadata stamp for history links and the original decision.
+  String historyReviewToken(String id) {
     if (owner.credentialUseRequests.any((r) => r.id == id)) {
       final r = _credential(id);
       final c = owner.credentials
@@ -143,7 +145,7 @@ class OwnerWorkspaceAdditionalApprovals {
     ];
     return WorkspaceApprovalDetail(
       request: organizationSummary(t),
-      reviewToken: _token(id),
+      reviewToken: historyReviewToken(id),
       scopes: scopes,
       approved: t.approvedAt == null ? const [] : t.itemVersions.keys,
       decidedAt: t.approvedAt,
@@ -234,7 +236,7 @@ class OwnerWorkspaceAdditionalApprovals {
     }
     return WorkspaceApprovalDetail(
       request: credentialSummary(r),
-      reviewToken: _token(r.id),
+      reviewToken: historyReviewToken(r.id),
       scopes: scopes,
       approved: [
         if (r.credentialApproved) 'credential:${r.id}',
@@ -286,7 +288,7 @@ class OwnerWorkspaceAdditionalApprovals {
     final originalToken = detail.reviewToken;
     void guard() {
       if (originalToken != c.reviewToken ||
-          _token(c.requestId) != originalToken) {
+          historyReviewToken(c.requestId) != originalToken) {
         throw const core.AccessFailure('scope_changed');
       }
     }
