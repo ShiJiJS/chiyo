@@ -14,6 +14,12 @@ class OwnerCredentialUseProjection {
     final status = owner.credentialUseState(r);
     if (status == 'pending') return WorkspaceCredentialRequestState.pending;
     if (status == 'denied') return WorkspaceCredentialRequestState.denied;
+    // The ordinary half has its own deadline. Keep its remaining permission
+    // visible/revocable when the credential half expires or is invalidated.
+    if (owner.credentialFieldGrantState(r) == 'available' &&
+        !{'available', 'consumed'}.contains(owner.credentialGrantState(r))) {
+      return WorkspaceCredentialRequestState.partiallyApproved;
+    }
     if (r.invalidatedCode == 'grant_revoked') {
       return WorkspaceCredentialRequestState.revoked;
     }

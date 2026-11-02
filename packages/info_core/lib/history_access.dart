@@ -245,7 +245,12 @@ extension OwnerAuditAccess on OwnerAccess {
     ]);
   }
 
-  Future<OwnerInformationHistory> informationHistory() async {
+  /// Ordinary-field history, excluding the field half of credential requests
+  /// by default. A unified Owner history may include those halves and merge
+  /// them by request identity with credential audit metadata.
+  Future<OwnerInformationHistory> informationHistory({
+    bool includeCredentialFields = false,
+  }) async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
     final audit = await history();
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
@@ -255,14 +260,19 @@ extension OwnerAuditAccess on OwnerAccess {
         ...repository.credentialUseRequests.map((r) => r.id),
     };
     final grants = audit.grants
-        .where((g) => !credentialIds.contains(g.requestId))
+        .where(
+          (g) =>
+              includeCredentialFields || !credentialIds.contains(g.requestId),
+        )
         .toList();
     final grantIds = grants.map((g) => g.id).toSet();
     return OwnerInformationHistory(
       AuditHistory(
         grants,
         audit.accesses.where((a) => grantIds.contains(a.grantId)),
-        audit.requests.where((r) => !credentialIds.contains(r.id)),
+        audit.requests.where(
+          (r) => includeCredentialFields || !credentialIds.contains(r.id),
+        ),
       ),
       _service._clock(),
     );

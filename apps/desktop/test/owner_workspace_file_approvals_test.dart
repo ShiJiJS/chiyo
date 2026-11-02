@@ -138,6 +138,7 @@ void main() {
     repo = await EncryptedInformationRepository.open(
       '${root.path}/library',
       keys,
+      clock: () => now,
     );
     service = core.InformationService(
       repository: repo,

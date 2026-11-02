@@ -2,12 +2,16 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:info_core/info_core.dart' as core;
 import 'owner_workspace_approvals.dart';
+import 'owner_workspace_additional_approvals.dart';
+import 'owner_credential_use_projection.dart';
 import 'owner_workspace_files.dart';
 import 'owner_pdf_preview.dart';
 import 'workspace_source.dart';
 import 'workspace_information_codec.dart';
 
-/// Ordinary audit facts from the same owner service as approvals. Lists never
+part 'owner_workspace_additional_grant_history.dart';
+
+/// Unified audit facts from the same owner service as approvals. Lists never
 /// decode field bodies; snapshot content requires an explicit owner read.
 class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
   OwnerWorkspaceGrantHistory({
@@ -136,33 +140,38 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
         (q.lastDays != null && ![1, 7, 30].contains(q.lastDays))) {
       throw const WorkspaceFailure('invalid_query', '授权历史查询条件无效。');
     }
-    final observed = await owner.informationHistory();
+    final observed = await owner.informationHistory(
+      includeCredentialFields: true,
+    );
     final needle = q.keyword.trim().toLowerCase();
     final cutoff = q.lastDays == null
         ? null
         : observed.observedAt.subtract(Duration(days: q.lastDays!));
+    final ordinary = _entries(observed.history);
+    final additionalIds = {
+      for (final r in owner.credentialUseRequests) r.id,
+      for (final t in owner.organizationTasks) t.id,
+    };
     final rows =
-        _entries(observed.history)
+        <WorkspaceGrantSummary>[
+              for (final e in ordinary)
+                if (!additionalIds.contains(e.requestId)) _summary(e),
+              ..._additionalSummaries(ordinary),
+            ]
             .where(
-              (e) =>
-                  (q.kind == null || q.kind == _summary(e).kind) &&
-                  (cutoff == null || !e.at.isBefore(cutoff)) &&
+              (s) =>
+                  (q.kind == null || q.kind == s.kind) &&
+                  (cutoff == null || !s.recordedAt.isBefore(cutoff)) &&
                   (needle.isEmpty ||
-                      [
-                        e.requestId,
-                        e.request?.sessionId ?? e.grant!.sessionId,
-                        e.request?.chatLabel ?? e.grant!.chatLabel,
-                        e.request?.purpose ?? '',
-                        ...e.fields.expand((f) => [f.itemName, f.fieldName]),
-                      ].any((s) => s.toLowerCase().contains(needle))),
-            )
-            .map(_summary)
-            .where(
-              (s) => switch (q.filter) {
-                WorkspaceGrantFilter.all => true,
-                WorkspaceGrantFilter.active => s.state.isActive,
-                WorkspaceGrantFilter.ended => !s.state.isActive,
-              },
+                      _historySearch(
+                        s,
+                        ordinary,
+                      ).any((v) => v.toLowerCase().contains(needle))) &&
+                  switch (q.filter) {
+                    WorkspaceGrantFilter.all => true,
+                    WorkspaceGrantFilter.active => s.state.isActive,
+                    WorkspaceGrantFilter.ended => !s.state.isActive,
+                  },
             )
             .toList()
           ..sort((a, b) {
@@ -188,7 +197,7 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
   });
 
   Future<_Entry> _entry(String id) async {
-    final audit = await owner.informationHistory();
+    final audit = await owner.informationHistory(includeCredentialFields: true);
     final e = _entries(audit.history).where((e) => e.id == id).firstOrNull;
     if (e == null) {
       throw const WorkspaceFailure('not_found', '未找到指定历史或它已按保留规则清理。');
@@ -199,6 +208,10 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
   core.InformationItem? _recordedItem(_Entry e, String itemId) {
     final version = e.grant?.itemVersions[itemId];
     if (version == null) return null;
+    return _recordedVersion(itemId, version);
+  }
+
+  core.InformationItem? _recordedVersion(String itemId, int version) {
     return owner.information
             .where((i) => i.id == itemId && i.version == version)
             .firstOrNull ??
@@ -225,6 +238,14 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
 
   @override
   Future<WorkspaceGrantDetail> read(String id) => _read(() async {
+    if (_additionalRequest(id)) return _readAdditionalHistory(id);
+    return _readInformationHistory(id);
+  });
+
+  Future<WorkspaceGrantDetail> _readInformationHistory(
+    String id, {
+    bool linkDecision = true,
+  }) async {
     var e = await _entry(id);
     final targets = <WorkspaceGrantTarget>[];
     final snapshots = <String, core.InformationItem?>{};
@@ -244,7 +265,7 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
     // Lookup can await retention; compute live state only after those reads.
     WorkspaceApprovalDetail? approval;
     try {
-      approval = await _approvals.read(e.requestId);
+      if (linkDecision) approval = await _approvals.read(e.requestId);
     } on WorkspaceFailure catch (error) {
       if (error.code != 'not_found') rethrow;
     }
@@ -356,11 +377,39 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
           ? '原申请记录已清理，仅保留授权与访问事实。'
           : null,
     );
-  });
+  }
 
   @override
   Future<WorkspaceArchive> snapshot(String id, WorkspaceRecordRef record) =>
       _read(() async {
+        final organization = _organizationHistory(id);
+        if (organization != null) {
+          if (record.kind != WorkspaceRecordKind.information ||
+              organization.approvedAt == null ||
+              !organization.itemVersions.containsKey(record.id)) {
+            throw const WorkspaceFailure('not_found', '此资料不属于指定批准范围。');
+          }
+          final version = organization.itemVersions[record.id]!;
+          await owner.revisionsFor(record.id);
+          final fresh = _organizationHistory(id);
+          if (fresh == null || fresh.itemVersions[record.id] != version) {
+            throw const WorkspaceFailure('not_found', '指定整理历史已变化或清理。');
+          }
+          final item = _recordedVersion(record.id, version);
+          if (item == null) {
+            throw const WorkspaceFailure(
+              'snapshot_unavailable',
+              '当时的资料快照已不可用。',
+            );
+          }
+          return WorkspaceArchive(
+            detail: _codec.decode(
+              item,
+              tagNames: {for (final t in owner.tags) t.id: t.name},
+            ),
+            archivedAt: organization.approvedAt!,
+          );
+        }
         final e = await _entry(id);
         if (record.kind != WorkspaceRecordKind.information ||
             !e.fields.any((f) => f.itemId == record.id)) {
