@@ -430,6 +430,7 @@ class InformationBackups {
       final credentialTemplates = tables['managed_credentials']!.any(
         (r) => _backupJson(r).containsKey('template'),
       );
+      final longTermAttachments = versions.isNotEmpty;
       final templatePackages =
           (await _repository._db
                   .customSelect('SELECT id FROM template_packages LIMIT 1')
@@ -440,9 +441,12 @@ class InformationBackups {
           hasGrantVersions ||
           credentialClassification ||
           templatePackages ||
-          credentialTemplates;
+          credentialTemplates ||
+          longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = credentialTemplates
+        formatVersion = longTermAttachments
+            ? 17
+            : credentialTemplates
             ? 16
             : templatePackages
             ? 15
@@ -456,7 +460,7 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (templatePackages || credentialTemplates
+            in (templatePackages || credentialTemplates || longTermAttachments
                     ? _v15Columns
                     : extendedColumns
                     ? _v12Columns
@@ -879,6 +883,11 @@ class InformationBackups {
             _credentialImportLibraryFormat,
           );
         }
+        if (contents.formatVersion >= 17) {
+          await _repository._requireAdmissionFormat(
+            _longTermAttachmentLibraryFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -951,6 +960,7 @@ class InformationBackups {
           14,
           15,
           16,
+          17,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -971,7 +981,7 @@ class InformationBackups {
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
       12 || 13 || 14 => _v12Columns,
-      15 || 16 => _v15Columns,
+      15 || 16 || 17 => _v15Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

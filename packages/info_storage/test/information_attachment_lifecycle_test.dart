@@ -165,10 +165,89 @@ void main() {
     },
   );
   test(
+    'owned originals survive years, reopen and complete encrypted backup even after information revisions expire',
+    () async {
+      final first = await save([1, 2, 3]);
+      final second = await save([4, 5], first);
+      final third = await save([6, 7, 8], second);
+      final old = first.fields.single.attachment!;
+      now = now.add(const Duration(days: 730));
+      await service.owner.purgeInformationAttachments();
+      expect(repo.informationRevisions, isEmpty);
+      expect((await service.owner.readInformationAttachment(old)).bytes, [
+        1,
+        2,
+        3,
+      ]);
+      expect(
+        (await repo.informationAttachmentVersions(
+          old.attachmentId,
+        )).every((v) => v.available),
+        true,
+      );
+      final db = inspect();
+      try {
+        expect(db.select('PRAGMA user_version').single.values.single, 46);
+      } finally {
+        db.close();
+      }
+      await service.close();
+      await repo.close();
+      repo = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        keys,
+        clock: () => now,
+      );
+      service = InformationService(repository: repo, clock: () => now);
+      expect(
+        (await service.owner.readInformationAttachment(
+          second.fields.single.attachment!,
+        )).bytes,
+        [4, 5],
+      );
+      final key = await enableTestBackups(repo.backups);
+      final path = '${root.path}/long-term.aimbackup';
+      await repo.backups.exportTo(path);
+      final target = await EncryptedInformationRepository.open(
+        '${root.path}/long-term-target',
+        _Keys(),
+        clock: () => now.add(const Duration(days: 365)),
+      );
+      try {
+        final backup = await target.backups.inspect(path, key);
+        expect(backup.formatVersion, 17);
+        expect(backup.attachmentCount, 3);
+        await target.backups.restore(backup);
+        expect(
+          (await target.informationAttachmentVersions(old.attachmentId)).length,
+          3,
+        );
+        expect(await target.readInformationAttachmentChunk(old, 0, 3), [
+          1,
+          2,
+          3,
+        ]);
+        expect(
+          await target.readInformationAttachmentChunk(
+            third.fields.single.attachment!,
+            0,
+            3,
+          ),
+          [6, 7, 8],
+        );
+      } finally {
+        await target.close();
+      }
+    },
+  );
+  test(
     'expired original cleanup failure rolls back revision pruning and can retry',
     () async {
       final first = await save([1, 2, 3]);
       final current = await save([7, 8], first);
+      await service.owner.deleteInformation(current.id, current.version);
+      final surviving = await save([7, 8]);
+      final revisionsBefore = repo.informationRevisions.length;
       final ref = first.fields.single.attachment!;
       now = now.add(const Duration(days: 30));
       var db = inspect();
@@ -180,7 +259,7 @@ void main() {
         service.owner.purgeInformationAttachments(),
         throwsA(isA<StorageFailure>()),
       );
-      expect(repo.informationRevisions.length, 1);
+      expect(repo.informationRevisions.length, revisionsBefore);
       expect(repo.revisionPurgeFacts, isEmpty);
       expect(await repo.readInformationAttachmentChunk(ref, 0, 3), [1, 2, 3]);
       db = inspect();
@@ -189,7 +268,7 @@ void main() {
           db
               .select('SELECT count(*) AS n FROM information_revisions')
               .single['n'],
-          1,
+          revisionsBefore,
         );
         db.execute('DROP TRIGGER fail_purge');
       } finally {
@@ -205,10 +284,10 @@ void main() {
         ref.attachmentId,
       );
       expect(versions.first.purgedAt, now);
-      expect(versions.last.retiredAt, isNull);
+      expect(versions.every((v) => !v.available), true);
       expect(
         await repo.readInformationAttachmentChunk(
-          current.fields.single.attachment!,
+          surviving.fields.single.attachment!,
           0,
           2,
         ),
@@ -377,20 +456,20 @@ void main() {
         ),
         [1, 2, 3],
       );
-      await expectLater(
-        repo.readInformationAttachmentChunk(
+      expect(
+        await repo.readInformationAttachmentChunk(
           next.fields.single.attachment!,
           0,
           2,
         ),
-        fails('attachment_missing'),
+        [7, 8],
       );
       final key = await enableTestBackups(repo.backups);
       final path = '${root.path}/active.aimbackup';
       await repo.backups.exportTo(path);
       final preview = await repo.backups.inspect(path, key);
-      expect(preview.attachmentCount, 1);
-      expect(preview.attachmentBytes, 3);
+      expect(preview.attachmentCount, 2);
+      expect(preview.attachmentBytes, 5);
     },
   );
   test(

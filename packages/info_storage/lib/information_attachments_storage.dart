@@ -43,6 +43,7 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
   Future<void> _reconcileAttachmentRetention(DateTime now) async {
     final versions = await _allAttachmentVersions();
     if (versions.isEmpty) return;
+    await _requireAdmissionFormat(_longTermAttachmentLibraryFormat);
     final current = {
       for (final row
           in await _db
