@@ -104,7 +104,7 @@ void main() {
     (d) => d.uri.pathSegments.any((s) => s.startsWith('.info-file-export-')),
   );
   test(
-    'replacement retires old original, keeps snapshots pinned and purges exactly at cutoff',
+    'replacement keeps every owned original beyond revision expiry, while deleted series still expire',
     () async {
       final old = await save([0, 255, 1]);
       final saved = await save([9, 8], old);
@@ -127,13 +127,11 @@ void main() {
         (await repo.informationAttachmentVersions(
           oldRef.attachmentId,
         )).first.available,
-        isFalse,
+        isTrue,
       );
       now = now.subtract(const Duration(days: 2));
-      await expectLater(
-        service.owner.exportInformationFile(oldRef, '${root.path}/old.pdf'),
-        fails('attachment_missing'),
-      );
+      await service.owner.exportInformationFile(oldRef, '${root.path}/old.pdf');
+      expect(await File('${root.path}/old.pdf').readAsBytes(), [0, 255, 1]);
       now = now.add(const Duration(days: 365));
       await service.owner.purgeInformationAttachments();
       expect(
@@ -149,6 +147,20 @@ void main() {
           oldRef.attachmentId,
         )).last.retiredAt,
         isNull,
+      );
+      expect((await service.owner.readInformationAttachment(oldRef)).bytes, [
+        0,
+        255,
+        1,
+      ]);
+      await service.owner.deleteInformation(saved.id, saved.version);
+      now = now.add(const Duration(days: 31));
+      await service.owner.purgeInformationAttachments();
+      expect(
+        (await repo.informationAttachmentVersions(
+          oldRef.attachmentId,
+        )).every((v) => !v.available),
+        true,
       );
     },
   );
@@ -196,13 +208,13 @@ void main() {
         ),
         [0, 255, 1],
       );
-      await expectLater(
-        repo.readInformationAttachmentChunk(
+      expect(
+        await repo.readInformationAttachmentChunk(
           second.fields.single.attachment!,
           0,
           2,
         ),
-        fails('attachment_missing'),
+        [8, 7],
       );
     },
   );

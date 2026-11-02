@@ -53,6 +53,7 @@ const _templateImportLibraryFormat = 42;
 const _importAdmissionLibraryFormat = 43;
 const _updateAdmissionLibraryFormat = 44;
 const _credentialImportLibraryFormat = 45;
+const _longTermAttachmentLibraryFormat = 46;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -494,7 +495,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _credentialImportLibraryFormat) {
+      if (headerVersion > _longTermAttachmentLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -510,7 +511,7 @@ class EncryptedInformationRepository
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
             (marker.single['version'] as int) >
-                _credentialImportLibraryFormat ||
+                _longTermAttachmentLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
