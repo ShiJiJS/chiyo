@@ -28,7 +28,9 @@
 
 原应用正常退出后，已逐字节核对并保护关闭状态的加密资料库，原Keychain项保留；原受信任程序另有逐成员核对的压缩保护。未清空原库，未导出数据库密钥，未改ACL。该关闭状态副本依赖原Keychain密钥，不冒充另有恢复密钥的便携备份。
 
-上一候选f88c78fe的正常Release启动返回`startup_failed`，随后通过本包CLI正常关闭，没有开放Agent端口，也没有替换原库。当前11ad2816正常启动同样返回`startup_failed`，已通过本包CLI正常退出；再次核对关闭保护，原加密库字节保持。启动原因尚未通过实际页面确认。需要在正常App中确认启动原因，完成必要的本人钥匙串决定，再用正式Skill和同模型新聊天重新录入原infos并逐项核对。原infos文件保持。
+上一候选f88c78fe的正常Release启动返回`startup_failed`，随后通过本包CLI正常关闭，没有开放Agent端口，也没有替换原库。当前11ad2816正常启动同样返回`startup_failed`，已通过本包CLI正常退出；再次核对关闭保护，原加密库字节保持。后续只读系统日志确认，同一进程启动时执行`SecItemCopyMatching`后出现`CSSMERR_CSP_OPERATION_AUTH_DENIED`，与原密钥访问被拒的代码路径一致，见[日志证据](evidence/ai-intake-synthetic-20261103/startup-keychain-log.json)。未使用computer use，也未再次启动或修改签名、Keychain设置。
+
+正常开库仍需本人处理系统决定：打开固定新版，若显示“无法打开信息库”，点击“请求钥匙串访问”，在系统提示中输入本机密码并选择允许。完成后再继续同模型新聊天的原infos重录和独立核对。原infos文件保持。
 
 ## 清理
 
