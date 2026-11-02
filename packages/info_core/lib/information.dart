@@ -17,6 +17,7 @@ import 'information_files.dart';
 import 'info_core.dart'
     show
         AccessFailure,
+        ProposalKind,
         CredentialRuntimeRepository,
         CredentialUseRequest,
         CredentialExecution,
@@ -329,6 +330,21 @@ class InformationItem {
   final InformationLayout? layout;
 }
 
+class InformationUpdateAdmission {
+  const InformationUpdateAdmission(
+    this.proposal, {
+    this.item,
+    this.previous,
+    this.recycled = const [],
+    this.facts = const [],
+  });
+  final UpdateProposal proposal;
+  final InformationItem? item;
+  final InformationRevision? previous;
+  final List<RecycleEntry> recycled;
+  final List<RecycleFact> facts;
+}
+
 /// Owner-side storage seam. Agent transports never receive this capability.
 abstract interface class InformationRepository {
   List<OrganizationTask> get organizationTasks;
@@ -375,11 +391,13 @@ abstract interface class InformationRepository {
 
   /// One owner decision can release several previously approved proposals.
   /// Records, candidate states and the deciding operation receipt commit together.
-  Future<void> commitImportAdmission(
+  Future<void> commitInformationAdmission(
     List<ImportProposal> proposals,
     List<InformationItem> items, {
     required String decisionProposalId,
     required bool confirm,
+    ProposalKind decisionKind = ProposalKind.addition,
+    List<InformationUpdateAdmission> updates = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
@@ -395,13 +413,6 @@ abstract interface class InformationRepository {
     InformationItem item,
     InformationRevision previous,
   );
-  Future<void> confirmUpdateProposal(
-    UpdateProposal proposal,
-    InformationItem item,
-    InformationRevision previous, {
-    List<RecycleEntry> recycled = const [],
-    List<RecycleFact> facts = const [],
-  });
   List<RecycleEntry> get recycleEntries;
   List<RecycleFact> get recycleFacts;
   List<DeleteProposal> get deleteProposals;
@@ -970,26 +981,6 @@ class MemoryInformationRepository
   }
 
   @override
-  Future<void> confirmUpdateProposal(
-    UpdateProposal proposal,
-    InformationItem item,
-    InformationRevision previous, {
-    List<RecycleEntry> recycled = const [],
-    List<RecycleFact> facts = const [],
-  }) async {
-    _items[item.id] = item;
-    _revisions.add(previous);
-    _updates[proposal.id] = proposal;
-    for (final entry in recycled) {
-      _recycle[entry.id] = entry;
-    }
-    _recycleFacts.addAll(facts);
-    _reconcileInformationFiles(
-      (item.modifiedAt ?? previous.replacedAt).toUtc(),
-    );
-  }
-
-  @override
   List<ImportProposal> get importProposals =>
       List.unmodifiable(_proposals.values);
   @override
@@ -998,11 +989,13 @@ class MemoryInformationRepository
   }
 
   @override
-  Future<void> commitImportAdmission(
+  Future<void> commitInformationAdmission(
     List<ImportProposal> proposals,
     List<InformationItem> items, {
     required String decisionProposalId,
     required bool confirm,
+    ProposalKind decisionKind = ProposalKind.addition,
+    List<InformationUpdateAdmission> updates = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
@@ -1019,6 +1012,23 @@ class MemoryInformationRepository
     }
     for (final proposal in proposals) {
       _proposals[proposal.id] = proposal;
+    }
+    for (final update in updates) {
+      final item = update.item;
+      if (item != null) _items[item.id] = item;
+      if (update.previous case final previous?) _revisions.add(previous);
+      for (final entry in update.recycled) {
+        _recycle[entry.id] = entry;
+      }
+      _recycleFacts.addAll(update.facts);
+      _updates[update.proposal.id] = update.proposal;
+    }
+    for (final update in updates) {
+      if (update.item case final item?) {
+        _reconcileInformationFiles(
+          (item.modifiedAt ?? update.previous!.replacedAt).toUtc(),
+        );
+      }
     }
   }
 

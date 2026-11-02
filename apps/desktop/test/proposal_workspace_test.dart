@@ -9,22 +9,26 @@ import 'package:info_desktop/ui.dart';
 class FailingImportRepository extends MemoryInformationRepository {
   bool fail = false;
   @override
-  Future<void> commitImportAdmission(
+  Future<void> commitInformationAdmission(
     List<ImportProposal> proposals,
     List<InformationItem> items, {
     required String decisionProposalId,
     required bool confirm,
+    ProposalKind decisionKind = ProposalKind.addition,
+    List<InformationUpdateAdmission> updates = const [],
     List<ImportReceipt> decisionRecords = const [],
     List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
     if (fail) throw StateError('synthetic storage failure');
-    await super.commitImportAdmission(
+    await super.commitInformationAdmission(
       proposals,
       items,
       decisionProposalId: decisionProposalId,
       confirm: confirm,
+      decisionKind: decisionKind,
+      updates: updates,
       decisionRecords: decisionRecords,
       awaitingKeys: awaitingKeys,
       newDirectories: newDirectories,

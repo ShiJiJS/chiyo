@@ -586,6 +586,179 @@ void main() {
     },
   );
   test(
+    'reviewed template modification waits for its reference, survives reopen and saves the owner values with it',
+    () async {
+      final base = await example('document');
+      final seed = await cli.execute(base);
+      await approve(await proposals.read(seed['proposalId'] as String));
+      final original = service.owner.information.single;
+      final targetPayload = await example('document');
+      ((targetPayload['items'] as List).single as Map).addAll(<String, dynamic>{
+        'key': 'target',
+        'name': '新维护说明',
+      });
+      final target = await cli.execute(targetPayload);
+      final input = (base['items'] as List).single as Map;
+      final result = await cli.execute({
+        'command': 'update-submit',
+        'update': {
+          'itemId': original.id,
+          'baseVersion': original.version,
+          'templateId': input['templateId'],
+          'templateVersion': input['templateVersion'],
+          'templateDigest': input['templateDigest'],
+          'values': {'bodyFormat': 'markdown', 'body': '## AI 提议修改'},
+          'relations': {
+            'related': [
+              {
+                'kind': 'information',
+                'itemKey': 'target',
+                'proposalId': target['proposalId'],
+              },
+            ],
+          },
+        },
+      });
+      expect(result['status'], 'pending');
+      final id = result['proposalId'] as String;
+      final detail = await proposals.read(id);
+      expect(detail.items.single.before!.values['body'], contains('## 维护说明'));
+      final proposed = WorkspaceProposalItemReview.fromItem(
+        detail.items.single,
+      );
+      final linked = await proposals
+          .relations(id, proposed.itemId, detail.summary.version)
+          .readSummaries(proposed.relations.values.expand((r) => r));
+      expect(linked.single.name, '新维护说明（待入库）');
+      final waiting = await approve(
+        detail,
+        reviewed: [
+          WorkspaceProposalItemReview(
+            itemId: proposed.itemId,
+            name: proposed.name,
+            description: proposed.description,
+            values: {
+              ...proposed.values,
+              'body': '## OWNER-REVIEWED-MODIFICATION',
+            },
+            relations: proposed.relations,
+          ),
+        ],
+      );
+      expect(waiting.records, isEmpty);
+      expect(waiting.awaitingItemIds, [original.id]);
+      expect(service.owner.information.single.version, 1);
+      expect(service.owner.informationRevisions, isEmpty);
+      final status = await cli.execute({
+        'command': 'update-status',
+        'proposalId': id,
+      });
+      expect(status['status'], 'approved_awaiting_admission');
+      expect(jsonEncode(status), isNot(contains('OWNER-REVIEWED')));
+      expect(
+        (await proposals.read(id)).summary.status,
+        WorkspaceProposalStatus.awaiting,
+      );
+      await close();
+      await open();
+      expect(
+        (await proposals.read(id)).items.single.proposed.values['body'],
+        '## OWNER-REVIEWED-MODIFICATION',
+      );
+      expect((await proposals.receipt(waiting.operationId))!.awaitingItemIds, [
+        original.id,
+      ]);
+      await approve(await proposals.read(target['proposalId'] as String));
+      final current = service.owner.information.singleWhere(
+            (i) => i.id == original.id,
+          ),
+          referenced = service.owner.information.singleWhere(
+            (i) => i.name == '新维护说明',
+          );
+      expect(
+        current.fields.singleWhere((f) => f.name == '正文').value,
+        '## OWNER-REVIEWED-MODIFICATION',
+      );
+      expect(current.layout!.relations['related']!.single.id, referenced.id);
+      expect(current.version, 2);
+      expect(service.owner.informationRevisions.single.item.version, 1);
+      expect(
+        (await proposals.read(id)).summary.status,
+        WorkspaceProposalStatus.completed,
+      );
+    },
+  );
+  test(
+    'CLI can repair a rejected update reference only by resetting the owner approval',
+    () async {
+      final base = await example('document');
+      final seed = await cli.execute(base);
+      await approve(await proposals.read(seed['proposalId'] as String));
+      final original = service.owner.information.single;
+      final targetPayload = await example('document');
+      ((targetPayload['items'] as List).single as Map)['key'] = 'target';
+      final target = await cli.execute(targetPayload);
+      final descriptor = (base['items'] as List).single as Map;
+      final update = <String, Object?>{
+        'itemId': original.id,
+        'baseVersion': original.version,
+        'templateId': descriptor['templateId'],
+        'templateVersion': descriptor['templateVersion'],
+        'templateDigest': descriptor['templateDigest'],
+        'values': {'bodyFormat': 'plain', 'body': '修改正文'},
+        'relations': {
+          'related': [
+            {
+              'kind': 'information',
+              'itemKey': 'target',
+              'proposalId': target['proposalId'],
+            },
+          ],
+        },
+      };
+      final submitted = await cli.execute({
+        'command': 'update-submit',
+        'update': update,
+      });
+      final id = submitted['proposalId'] as String;
+      await approve(await proposals.read(id));
+      await service.owner.rejectImport(target['proposalId'] as String, 1);
+      final blocked = await proposals.read(id);
+      expect(blocked.summary.status, WorkspaceProposalStatus.needsAttention);
+      expect(blocked.notice, contains('已被拒绝'));
+      final other = AgentClient(server.port);
+      addTearDown(other.close);
+      await other.execute({'command': 'session', 'chatLabel': '另一个会话'});
+      expect(
+        (await other.execute({
+          'command': 'update-revise',
+          'proposalId': id,
+          'version': blocked.summary.version,
+          'update': update,
+        }))['status'],
+        'unauthorized',
+      );
+      update['relations'] = <String, Object?>{};
+      final revised = await cli.execute({
+        'command': 'update-revise',
+        'proposalId': id,
+        'version': blocked.summary.version,
+        'update': update,
+      });
+      expect(revised['status'], 'pending');
+      expect(service.owner.updateProposals.single.approved, false);
+      expect(service.owner.information.single.version, 1);
+      await approve(await proposals.read(id));
+      expect(service.owner.information.single.version, 2);
+      expect(
+        service.owner.information.single.layout!.relations.values.expand(
+          (r) => r,
+        ),
+        isEmpty,
+      );
+    },
+  );
+  test(
     'a plugin disabled after submission stays reviewable but cannot be admitted',
     () async {
       final submitted = await cli.execute(await example('server'));

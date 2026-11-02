@@ -132,6 +132,98 @@ void main() {
             .approvedKeys,
         {'dependent'},
       );
+      late String modification, material, originalId;
+      await t.runAsync(() async {
+        final session = service.agent.openSession('修改界面验收');
+        final template =
+            service.agent.readInformationTemplate('document')['template']
+                as Map;
+        core.ImportItemInput document(String key) => core.ImportItemInput(
+          key,
+          '',
+          [],
+          key: key,
+          templateId: 'document',
+          templateVersion: template['version'] as String,
+          templateDigest: template['digest'] as String,
+          values: {'bodyFormat': 'plain', 'body': '原合成正文'},
+        );
+        final initial = await service.agent.submitImport(session, [
+          document('existing'),
+        ]);
+        originalId = (await service.owner.confirmImport(
+          initial,
+          1,
+          service.owner.importProposals
+              .singleWhere((p) => p.id == initial)
+              .items,
+        )).single.id;
+        material = await service.agent.submitImport(session, [
+          document('material'),
+        ]);
+        modification = await service.agent.submitUpdate(
+          session,
+          core.UpdateInput(
+            originalId,
+            1,
+            [],
+            templateId: 'document',
+            templateVersion: template['version'] as String,
+            templateDigest: template['digest'] as String,
+            values: {'bodyFormat': 'plain', 'body': '新合成正文'},
+            pendingRelations: {
+              'related': [
+                core.ImportPendingReference(
+                  'information',
+                  'material',
+                  proposalId: material,
+                ),
+              ],
+            },
+          ),
+        );
+        await model.open(modification);
+      });
+      await settle();
+      expect(model.detail!.summary.kind, WorkspaceProposalKind.modification);
+      expect(find.text('material（待入库）'), findsWidgets);
+      final approveModification = find.byKey(
+        const ValueKey('proposal-confirm'),
+      );
+      await t.ensureVisible(approveModification);
+      await t.tap(approveModification);
+      await settle();
+      expect(model.uncertain, false);
+      expect(model.writeFailure, isNull);
+      expect(model.detail!.summary.status, WorkspaceProposalStatus.awaiting);
+      expect(find.textContaining('原内容尚未改变'), findsWidgets);
+      expect(
+        service.owner.information
+            .singleWhere((i) => i.id == originalId)
+            .version,
+        1,
+      );
+      await t.runAsync(() async {
+        final pending = service.owner.importProposals.singleWhere(
+          (p) => p.id == material,
+        );
+        await service.owner.confirmImport(
+          material,
+          pending.version,
+          pending.items,
+        );
+        await model.open(modification);
+      });
+      await settle();
+      expect(model.detail!.summary.status, WorkspaceProposalStatus.completed);
+      expect(
+        service.owner.information
+            .singleWhere((i) => i.id == originalId)
+            .fields
+            .singleWhere((f) => f.name == '正文')
+            .value,
+        '新合成正文',
+      );
       expect(t.takeException(), isNull);
       await t.pumpWidget(const SizedBox.shrink());
       model.dispose();

@@ -108,7 +108,7 @@ void main() {
       service.owner.updateProposals.single.state,
       UpdateProposalState.confirmed,
     );
-    expect((await service.owner.confirmUpdate(id, 1)).version, 2);
+    expect((await service.owner.confirmUpdate(id, 1))!.version, 2);
     for (final file in folder.listSync().whereType<File>()) {
       if (file.path.endsWith('.lock')) continue;
       expect(

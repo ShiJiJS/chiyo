@@ -68,12 +68,24 @@ class UpdateInput {
     this.templateDigest,
     Map<String, Object?> values = const {},
     Map<String, List<InformationRelationRef>>? relations,
+    Map<String, List<ImportPendingReference>> pendingRelations = const {},
     this.compiledTemplate,
   }) : changes = List.unmodifiable(changes),
        values = ImportItemInput('', '', const [], values: values).values,
-       relations = relations == null
+       pendingRelations = ImportItemInput(
+         '',
+         '',
+         const [],
+         pendingRelations: pendingRelations,
+       ).pendingRelations,
+       relations = relations == null && pendingRelations.isEmpty
            ? null
-           : ImportItemInput('', '', const [], relations: relations).relations;
+           : ImportItemInput(
+               '',
+               '',
+               const [],
+               relations: relations ?? const {},
+             ).relations;
   final String itemId;
   final int baseVersion;
   final List<FieldChange> changes;
@@ -81,6 +93,7 @@ class UpdateInput {
   final String? templateId, templateVersion, templateDigest;
   final Map<String, Object?> values;
   final Map<String, List<InformationRelationRef>>? relations;
+  final Map<String, List<ImportPendingReference>> pendingRelations;
 
   /// Validated private snapshot, never accepted from Agent JSON.
   final ImportItemInput? compiledTemplate;
@@ -96,10 +109,13 @@ class UpdateInput {
       'templateDigest': templateDigest,
       'values': values,
       if (relations != null)
-        'relations': {
-          for (final e in relations!.entries)
-            e.key: e.value.map((r) => r.toJson()).toList(),
-        },
+        'relations': ImportItemInput(
+          '',
+          '',
+          const [],
+          relations: relations!,
+          pendingRelations: pendingRelations,
+        ).relationJson,
     },
   };
   Map<String, Object?> toJson() => {
@@ -108,11 +124,6 @@ class UpdateInput {
       'compiledTemplate': compiledTemplate!.toJson(),
   };
   factory UpdateInput.fromJson(Map<String, dynamic> json) {
-    if (importPendingRelationsFromJson(json['relations']).isNotEmpty) {
-      throw const FormatException(
-        'Pending update references are not yet supported',
-      );
-    }
     if (json.keys.any(
       (key) => !const {
         'itemId',
@@ -151,6 +162,7 @@ class UpdateInput {
     relations: json.containsKey('relations')
         ? importRelationsFromJson(json['relations'])
         : null,
+    pendingRelations: importPendingRelationsFromJson(json['relations']),
     compiledTemplate: private && json['compiledTemplate'] != null
         ? ImportItemInput.fromPrivateJson(
             Map<String, dynamic>.from(json['compiledTemplate'] as Map),
@@ -170,6 +182,7 @@ class UpdateProposal {
     this.state = UpdateProposalState.pending,
     this.version = 1,
     this.result,
+    this.approvedReview,
   });
   final String id, sessionBinding, chatLabel;
   final DateTime createdAt;
@@ -177,17 +190,32 @@ class UpdateProposal {
   final UpdateProposalState state;
   final int version;
   final UpdateReceipt? result;
-  UpdateProposal finish(UpdateProposalState state, {UpdateReceipt? result}) =>
-      UpdateProposal(
-        id: id,
-        sessionBinding: sessionBinding,
-        chatLabel: chatLabel,
-        createdAt: createdAt,
-        input: UpdateInput(input.itemId, input.baseVersion, const []),
-        state: state,
-        version: version + 1,
-        result: result,
-      );
+  final UpdateReview? approvedReview;
+  bool get approved => approvedReview != null;
+  UpdateProposal approve(UpdateReview review) => UpdateProposal(
+    id: id,
+    sessionBinding: sessionBinding,
+    chatLabel: chatLabel,
+    createdAt: createdAt,
+    input: review.input,
+    state: state,
+    version: version + 1,
+    approvedReview: review,
+  );
+  UpdateProposal finish(
+    UpdateProposalState state, {
+    UpdateReceipt? result,
+    int? resultingVersion,
+  }) => UpdateProposal(
+    id: id,
+    sessionBinding: sessionBinding,
+    chatLabel: chatLabel,
+    createdAt: createdAt,
+    input: UpdateInput(input.itemId, input.baseVersion, const []),
+    state: state,
+    version: resultingVersion ?? version + 1,
+    result: result,
+  );
   Map<String, Object?> toJson() => {
     'id': id,
     'sessionBinding': sessionBinding,
@@ -196,6 +224,12 @@ class UpdateProposal {
     'input': input.toJson(),
     'state': state.name,
     'version': version,
+    if (approvedReview case final review?)
+      'approval': {
+        'directoryId': review.directoryId,
+        'tagIds': review.tagIds,
+        'fieldDescriptions': review.fieldDescriptions,
+      },
     if (result != null)
       'result': {'itemId': result!.itemId, 'version': result!.version},
   };
@@ -207,6 +241,17 @@ class UpdateProposal {
     input: UpdateInput.fromPrivateJson(json['input'] as Map<String, dynamic>),
     state: UpdateProposalState.values.byName(json['state'] as String),
     version: json['version'] as int,
+    approvedReview: json['approval'] == null
+        ? null
+        : UpdateReview(
+            UpdateInput.fromPrivateJson(json['input'] as Map<String, dynamic>),
+            directoryId: (json['approval'] as Map)['directoryId'] as String?,
+            tagIds: ((json['approval'] as Map)['tagIds'] as List)
+                .cast<String>(),
+            fieldDescriptions: Map<String, String>.from(
+              (json['approval'] as Map)['fieldDescriptions'] as Map,
+            ),
+          ),
     result: json['result'] == null
         ? null
         : UpdateReceipt(

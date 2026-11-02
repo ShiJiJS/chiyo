@@ -193,7 +193,7 @@ void main() {
         for (final id in [first, second])
           service.owner
               .confirmUpdate(id, 1)
-              .then<Object>((item) => item, onError: (Object e) => e),
+              .then<Object>((item) => item!, onError: (Object e) => e),
       ]);
       expect(results.whereType<UpdateReceipt>(), hasLength(1));
       expect(
@@ -246,6 +246,7 @@ void main() {
       expect(service.agent.updateStatus(session, id), {
         'status': 'conflicted',
         'proposalId': id,
+        'version': 2,
       });
       expect(
         () => service.agent.updateStatus(other, id),
@@ -308,7 +309,7 @@ void main() {
         id,
         preview.proposal.version,
       );
-      expect(saved.version, 2);
+      expect(saved!.version, 2);
       expect(service.owner.information.single.fields.single.id, ref.fieldId);
       expect(
         await Future<String>.value(service.agent.read(grant.token, ref)),
@@ -318,7 +319,7 @@ void main() {
         (await service.owner.confirmUpdate(
           id,
           preview.proposal.version,
-        )).version,
+        ))!.version,
         2,
       );
       expect(

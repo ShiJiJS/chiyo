@@ -189,10 +189,147 @@ void main() {
         ))!.awaitingKeys,
         ['dependent'],
       );
+      final nextSession = service.agent.openSession('合成修改测试');
+      final newTarget = await service.agent.submitImport(nextSession, [
+        input('new-target'),
+      ]);
+      final original = service.owner.information.singleWhere(
+        (i) => i.name == 'dependent',
+      );
+      final modification = await service.agent.submitUpdate(
+        nextSession,
+        UpdateInput(
+          original.id,
+          original.version,
+          [],
+          templateId: 'note',
+          templateVersion: '1',
+          templateDigest: 'a' * 64,
+          values: {'body': 'PRIVATE-UPDATE-REVIEWED'},
+          pendingRelations: {
+            'related': [
+              ImportPendingReference(
+                'information',
+                'new-target',
+                proposalId: newTarget,
+              ),
+            ],
+          },
+        ),
+      );
+      final reviewedDirectory = await service.owner.createDirectory('主人核对的目录');
+      final pendingUpdate = service.owner.updateProposals.singleWhere(
+        (p) => p.id == modification,
+      );
+      final updateReceipt = await service.owner.performProposalDecision(
+        OwnerProposalCommand(
+          operationId: 'modification-approval',
+          proposalId: modification,
+          kind: ProposalKind.modification,
+          confirm: true,
+          version: pendingUpdate.version,
+          reviewToken: 'd' * 64,
+          commandDigest: 'e' * 64,
+        ),
+        validate: () {
+          if (service.owner.updateProposals
+                  .singleWhere((p) => p.id == modification)
+                  .version !=
+              pendingUpdate.version)
+            throw const AccessFailure('proposal_changed');
+        },
+        decide: () async {
+          expect(
+            await service.owner.confirmUpdate(
+              modification,
+              pendingUpdate.version,
+              review: UpdateReview(
+                pendingUpdate.input,
+                directoryId: reviewedDirectory.id,
+              ),
+            ),
+            isNull,
+          );
+        },
+      );
+      expect(updateReceipt.records, isEmpty);
+      expect(updateReceipt.awaitingKeys, [original.id]);
+      expect(
+        service.owner.information
+            .singleWhere((i) => i.id == original.id)
+            .version,
+        original.version,
+      );
+      await close();
+      await open();
+      final retained = service.owner.updateProposals.singleWhere(
+        (p) => p.id == modification,
+      );
+      expect(retained.approved, true);
+      expect(retained.approvedReview!.directoryId, reviewedDirectory.id);
+      expect(retained.input.values['body'], 'PRIVATE-UPDATE-REVIEWED');
+      sql(
+        "CREATE TRIGGER fail_update_release BEFORE INSERT ON owner_proposal_operations WHEN NEW.operation_id='new-target-approval' BEGIN SELECT RAISE(ABORT, 'synthetic failure'); END",
+      );
+      await expectLater(
+        approve(newTarget, 'new-target-approval'),
+        throwsA(isA<StorageFailure>()),
+      );
+      expect(service.owner.information.length, 2);
+      expect(
+        service.owner.information
+            .singleWhere((i) => i.id == original.id)
+            .fields
+            .single
+            .value,
+        'PRIVATE-ADMISSION-dependent',
+      );
+      expect(service.owner.informationRevisions, isEmpty);
+      await close();
+      await open();
+      expect(
+        service.owner.updateProposals
+            .singleWhere((p) => p.id == modification)
+            .approved,
+        true,
+      );
+      sql('DROP TRIGGER fail_update_release');
+      await approve(newTarget, 'new-target-approval');
+      final current = service.owner.information.singleWhere(
+            (i) => i.id == original.id,
+          ),
+          referenced = service.owner.information.singleWhere(
+            (i) => i.name == 'new-target',
+          );
+      expect(current.fields.single.value, 'PRIVATE-UPDATE-REVIEWED');
+      expect(current.layout!.relations['related']!.single.id, referenced.id);
+      expect(current.directoryId, reviewedDirectory.id);
+      expect(
+        service.owner.informationRevisions.single.item.fields.single.value,
+        'PRIVATE-ADMISSION-dependent',
+      );
+      await close();
+      await open();
+      expect(
+        service.owner.updateProposals
+            .singleWhere((p) => p.id == modification)
+            .state,
+        UpdateProposalState.confirmed,
+      );
+      expect(
+        service.owner.information
+            .singleWhere((i) => i.id == original.id)
+            .version,
+        2,
+      );
       for (final file in root.listSync().whereType<File>()) {
         expect(
           String.fromCharCodes(file.readAsBytesSync()),
           isNot(contains('PRIVATE-ADMISSION')),
+        );
+        expect(
+          String.fromCharCodes(file.readAsBytesSync()),
+          isNot(contains('PRIVATE-UPDATE')),
         );
       }
     },

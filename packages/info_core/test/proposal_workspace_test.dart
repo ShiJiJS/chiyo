@@ -113,7 +113,7 @@ void main() {
       expect(owner.information.single.fields.single.value, 'old.example');
       final receipt = await owner.confirmUpdate(id, 1, review: review);
       final current = owner.information.single;
-      expect(receipt.itemId, item.id);
+      expect(receipt!.itemId, item.id);
       expect(current.name, 'Reviewed docs');
       expect(current.description, 'Reviewed public');
       expect(current.directoryId, directory.id);
@@ -122,7 +122,7 @@ void main() {
       expect(current.fields.single.value, 'reviewed.example');
       expect(current.fields.single.description, 'Reviewed field description');
       expect(owner.updateProposals.single.input.changes, isEmpty);
-      expect((await owner.confirmUpdate(id, 1)).version, receipt.version);
+      expect((await owner.confirmUpdate(id, 1))!.version, receipt.version);
       expect(owner.information.single.version, 2);
     },
   );

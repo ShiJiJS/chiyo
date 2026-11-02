@@ -121,6 +121,7 @@ class AgentServer {
               request.uri.path == '/import/revise' ||
               request.uri.path == '/organization/submit' ||
               request.uri.path == '/update/submit' ||
+              request.uri.path == '/update/revise' ||
               request.uri.path == '/credentials/catalog' ||
               runtime
           ? 262144
@@ -151,6 +152,7 @@ class AgentServer {
               request.uri.path == '/import/submit' ||
               request.uri.path == '/import/revise' ||
               request.uri.path == '/update/submit' ||
+              request.uri.path == '/update/revise' ||
               request.uri.path.startsWith('/templates/') ||
               request.uri.path == '/plugins/catalog'
           ? decodeProtocolObject(utf8.decode(bytes))
@@ -530,6 +532,20 @@ class AgentServer {
         );
       case '/update/submit':
         return _submitUpdate(body);
+      case '/update/revise':
+        if (body['update'] is! Map<String, dynamic> ||
+            body['version'] is! int) {
+          throw const AccessFailure('invalid_request');
+        }
+        final session = _text(body, 'sessionSecret'),
+            id = _text(body, 'proposalId');
+        await _agent.reviseUpdate(
+          session,
+          id,
+          body['version'] as int,
+          UpdateInput.fromJson(body['update'] as Map<String, dynamic>),
+        );
+        return _agent.updateStatus(session, id);
       case '/update/status':
         return _agent.updateStatus(
           _text(body, 'sessionSecret'),

@@ -208,7 +208,19 @@ extension OwnerImportAdmission on OwnerAccess {
       approvedKeys: {...previous.approvedKeys, ...byKey.keys},
     );
     _validatePendingImportTargets(root, reviewed);
-    final proposals = {for (final p in importProposals) p.id: p, root.id: root};
+    return _settleApprovedAdmissions(
+      rootImport: root,
+      selectedKeys: byKey.keys.toSet(),
+    );
+  }
+
+  Future<List<ImportReceipt>> _settleApprovedAdmissions({
+    ImportProposal? rootImport,
+    UpdateProposal? rootUpdate,
+    Set<String> selectedKeys = const {},
+  }) async {
+    final proposals = {for (final p in importProposals) p.id: p};
+    if (rootImport != null) proposals[rootImport.id] = rootImport;
     final nodes = _importNodes(proposals.values);
     final eligible = {
       for (final e in nodes.entries)
@@ -309,7 +321,7 @@ extension OwnerImportAdmission on OwnerAccess {
       final admitted = p.items
           .where((i) => eligible.contains(_importNodeKey(p.id, i.key)))
           .toList();
-      if (p.id != root.id && admitted.isEmpty) continue;
+      if (p.id != rootImport?.id && admitted.isEmpty) continue;
       final remaining = p.items
           .where((i) => !eligible.contains(_importNodeKey(p.id, i.key)))
           .toList();
@@ -334,26 +346,59 @@ extension OwnerImportAdmission on OwnerAccess {
           state: remaining.isEmpty
               ? ImportProposalState.confirmed
               : ImportProposalState.pending,
-          version: p.id == root.id ? root.version : p.version + 1,
+          version: p.id == rootImport?.id ? rootImport!.version : p.version + 1,
         ),
       );
     }
-    final decided = updates.singleWhere((p) => p.id == root.id);
-    final selectedReceipts = [
-      for (final key in byKey.keys) ?decided.receiptFor(key),
-    ];
-    await _service._repository.commitImportAdmission(
+    final updateCommits = _prepareApprovedUpdates(
+      rootUpdate: rootUpdate,
+      imports: proposals,
+      identities: identities,
+    );
+    final selectedReceipts = rootImport == null
+        ? [
+            for (final update in updateCommits)
+              if (update.proposal.id == rootUpdate!.id && update.item != null)
+                ImportReceipt(update.item!.id, update.item!.version),
+          ]
+        : [
+            for (final key in selectedKeys)
+              ?updates
+                  .singleWhere((p) => p.id == rootImport.id)
+                  .receiptFor(key),
+          ];
+    final awaiting = rootImport == null
+        ? selectedReceipts.isEmpty
+              ? [rootUpdate!.input.itemId]
+              : <String>[]
+        : selectedKeys
+              .where(
+                (k) =>
+                    updates
+                        .singleWhere((p) => p.id == rootImport.id)
+                        .receiptFor(k) ==
+                    null,
+              )
+              .toList();
+    await _service._repository.commitInformationAdmission(
       updates,
       items,
-      decisionProposalId: root.id,
+      decisionProposalId: rootImport?.id ?? rootUpdate!.id,
+      decisionKind: rootImport == null
+          ? ProposalKind.modification
+          : ProposalKind.addition,
       confirm: true,
+      updates: updateCommits,
       decisionRecords: selectedReceipts,
-      awaitingKeys: byKey.keys
-          .where((k) => decided.receiptFor(k) == null)
-          .toList(),
+      awaitingKeys: awaiting,
       newDirectories: organization.newDirectories,
       newTags: organization.newTags,
     );
+    for (final update in updateCommits) {
+      if (update.item != null) {
+        _invalidateRemoved(update.previous!.item, update.item!);
+      }
+    }
     return selectedReceipts;
   }
 }

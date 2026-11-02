@@ -159,6 +159,10 @@ extension OwnerProposals on OwnerAccess {
             UpdateProposalState.pending =>
               updateConflict(p)
                   ? ProposalStatus.conflicted
+                  : updateAdmission(p.id).state == 'needs_attention'
+                  ? ProposalStatus.needsAttention
+                  : p.approved
+                  ? ProposalStatus.awaiting
                   : ProposalStatus.pending,
             UpdateProposalState.confirmed => ProposalStatus.completed,
             UpdateProposalState.rejected => ProposalStatus.rejected,
