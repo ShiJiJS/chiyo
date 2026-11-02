@@ -60,15 +60,19 @@ class OwnerProposalReceipt {
   OwnerProposalReceipt(
     this.command,
     this.resultingVersion,
-    Iterable<OwnerProposalTarget> records,
-  ) : records = List.unmodifiable(records);
+    Iterable<OwnerProposalTarget> records, {
+    Iterable<String> awaitingKeys = const [],
+  }) : records = List.unmodifiable(records),
+       awaitingKeys = List.unmodifiable(awaitingKeys);
   final OwnerProposalCommand command;
   final int resultingVersion;
   final List<OwnerProposalTarget> records;
+  final List<String> awaitingKeys;
   Map<String, Object?> toJson() => {
     'command': command.toJson(),
     'resultingVersion': resultingVersion,
     'records': records.map((r) => r.toJson()).toList(),
+    if (awaitingKeys.isNotEmpty) 'awaitingKeys': awaitingKeys,
   };
   factory OwnerProposalReceipt.fromJson(Map<String, dynamic> j) =>
       OwnerProposalReceipt(
@@ -83,6 +87,7 @@ class OwnerProposalReceipt {
             recycleId: r['recycleId'] as String?,
           ),
         ),
+        awaitingKeys: (j['awaitingKeys'] as List? ?? []).cast<String>(),
       );
 }
 
@@ -136,8 +141,9 @@ class OwnerProposalOperation {
     ProposalKind kind,
     bool confirm,
     int version,
-    Iterable<OwnerProposalTarget> records,
-  ) {
+    Iterable<OwnerProposalTarget> records, {
+    Iterable<String> awaitingKeys = const [],
+  }) {
     if (!_entered ||
         id != command.proposalId ||
         kind != command.kind ||
@@ -146,7 +152,12 @@ class OwnerProposalOperation {
       throw const AccessFailure('proposal_changed');
     }
     validate();
-    return OwnerProposalReceipt(command, version, records);
+    return OwnerProposalReceipt(
+      command,
+      version,
+      records,
+      awaitingKeys: awaitingKeys,
+    );
   }
 }
 

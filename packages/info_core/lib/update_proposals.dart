@@ -108,6 +108,11 @@ class UpdateInput {
       'compiledTemplate': compiledTemplate!.toJson(),
   };
   factory UpdateInput.fromJson(Map<String, dynamic> json) {
+    if (importPendingRelationsFromJson(json['relations']).isNotEmpty) {
+      throw const FormatException(
+        'Pending update references are not yet supported',
+      );
+    }
     if (json.keys.any(
       (key) => !const {
         'itemId',

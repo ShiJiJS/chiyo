@@ -118,6 +118,7 @@ class AgentServer {
       }
       final limit =
           request.uri.path == '/import/submit' ||
+              request.uri.path == '/import/revise' ||
               request.uri.path == '/organization/submit' ||
               request.uri.path == '/update/submit' ||
               request.uri.path == '/credentials/catalog' ||
@@ -148,6 +149,7 @@ class AgentServer {
               request.uri.path == '/request' ||
               request.uri.path == '/request/status' ||
               request.uri.path == '/import/submit' ||
+              request.uri.path == '/import/revise' ||
               request.uri.path == '/update/submit' ||
               request.uri.path.startsWith('/templates/') ||
               request.uri.path == '/plugins/catalog'
@@ -245,6 +247,8 @@ class AgentServer {
             if (tools != null) 'credential-tools.v1',
             if (_agent.informationTemplatesAvailable)
               'information-template-discovery.v1',
+            if (_agent.informationTemplatesAvailable)
+              'information-import-admission.v1',
           ],
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
@@ -533,6 +537,21 @@ class AgentServer {
         );
       case '/import/submit':
         return _submitImport(body);
+      case '/import/revise':
+        final raw = body['items'];
+        if (raw is! List ||
+            raw.isEmpty ||
+            raw.length > 20 ||
+            body['version'] is! int) {
+          throw const AccessFailure('invalid_request');
+        }
+        final session = _text(body, 'sessionSecret'),
+            id = _text(body, 'proposalId');
+        await _agent.reviseImport(session, id, body['version'] as int, [
+          for (final row in raw)
+            ImportItemInput.fromJson(Map<String, dynamic>.from(row as Map)),
+        ]);
+        return _agent.importStatus(session, id);
       case '/import/status':
         return _agent.importStatus(
           _text(body, 'sessionSecret'),

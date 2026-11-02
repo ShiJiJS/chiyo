@@ -124,7 +124,10 @@ extension OwnerTemplateImports on OwnerAccess {
       for (final r in definition['relations'] as List? ?? [])
         (r as Map)['key'] as String,
     };
-    if (input.relations.keys.any((key) => !relationKeys.contains(key))) {
+    if ({
+      ...input.relations.keys,
+      ...input.pendingRelations.keys,
+    }.any((key) => !relationKeys.contains(key))) {
       errors['_relations'] = '包含模板未定义的关联。';
     }
     for (final key in input.values.keys) {
@@ -270,6 +273,7 @@ extension OwnerTemplateImports on OwnerAccess {
       input.name,
       input.description,
       fields,
+      key: input.key,
       directoryId: input.directoryId,
       tagIds: input.tagIds,
       suggestedDirectory: input.suggestedDirectory,
@@ -280,6 +284,7 @@ extension OwnerTemplateImports on OwnerAccess {
       templateDigest: template.digest,
       values: input.values,
       relations: input.relations,
+      pendingRelations: input.pendingRelations,
       layout: layout,
       fieldKeys: slots,
     );

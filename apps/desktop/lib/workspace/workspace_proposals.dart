@@ -18,6 +18,8 @@ enum WorkspaceProposalKind {
 
 enum WorkspaceProposalStatus {
   pending('待确认'),
+  awaiting('已批准待入库'),
+  needsAttention('需要处理'),
   conflicted('版本冲突'),
   completed('已完成'),
   rejected('已拒绝'),
@@ -99,6 +101,7 @@ class WorkspaceProposalItem {
     required this.proposed,
     this.before,
     this.beforeState = WorkspaceProposalBeforeState.unread,
+    this.admissionNote = '',
     Iterable<WorkspaceProposalFieldChange> changes = const [],
   }) : changes = List.unmodifiable(changes) {
     if (proposed.record.ref.kind != WorkspaceRecordKind.information ||
@@ -107,6 +110,7 @@ class WorkspaceProposalItem {
     }
   }
   final String id;
+  final String admissionNote;
   final WorkspaceDetail proposed;
   final WorkspaceDetail? before;
   final WorkspaceProposalBeforeState beforeState;
@@ -256,6 +260,7 @@ class WorkspaceProposalDetail {
                   for (final i in items)
                     {
                       'id': i.id,
+                      'admissionNote': i.admissionNote,
                       'proposed': snapshot(i.proposed),
                       'before': i.before == null
                           ? null
@@ -284,7 +289,11 @@ class WorkspaceProposalDetail {
 
   bool get canConfirm =>
       summary.pending &&
-      summary.status == WorkspaceProposalStatus.pending &&
+      {
+        WorkspaceProposalStatus.pending,
+        WorkspaceProposalStatus.awaiting,
+        WorkspaceProposalStatus.needsAttention,
+      }.contains(summary.status) &&
       items.isNotEmpty &&
       (summary.kind == WorkspaceProposalKind.organization
           ? organization?.legacyReview == true &&
@@ -397,11 +406,14 @@ class WorkspaceProposalReceipt {
     required this.resultingVersion,
     required this.commandDigest,
     Iterable<WorkspaceRecordReceipt> records = const [],
-  }) : records = List.unmodifiable(records);
+    Iterable<String> awaitingItemIds = const [],
+  }) : records = List.unmodifiable(records),
+       awaitingItemIds = List.unmodifiable(awaitingItemIds);
   final String operationId, proposalId, reviewToken, commandDigest;
   final int reviewedVersion, resultingVersion;
   final WorkspaceProposalAction action;
   final List<WorkspaceRecordReceipt> records;
+  final List<String> awaitingItemIds;
 }
 
 /// Receipt verification needs identities and versions, never Owner old values.
@@ -428,7 +440,12 @@ class WorkspaceProposalExpectation {
         r.reviewedVersion != c.version ||
         r.resultingVersion <= c.version ||
         r.commandDigest != c.digest ||
-        r.records.length != expected ||
+        r.records.length + r.awaitingItemIds.length != expected ||
+        r.awaitingItemIds.toSet().length != r.awaitingItemIds.length ||
+        r.awaitingItemIds.any((id) => !c.reviewed.any((i) => i.itemId == id)) ||
+        r.awaitingItemIds.isNotEmpty &&
+            (kind != WorkspaceProposalKind.addition ||
+                c.action != WorkspaceProposalAction.confirm) ||
         r.records.map((x) => x.ref).toSet().length != r.records.length ||
         r.records.any(
           (x) => x.ref.kind != WorkspaceRecordKind.information || x.version < 1,

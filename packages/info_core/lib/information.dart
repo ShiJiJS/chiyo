@@ -373,13 +373,19 @@ abstract interface class InformationRepository {
   List<ImportProposal> get importProposals;
   Future<void> saveImportProposal(ImportProposal proposal);
 
-  /// Commits the entire batch and its terminal proposal state atomically.
-  Future<void> confirmImportProposal(
-    ImportProposal proposal,
+  /// One owner decision can release several previously approved proposals.
+  /// Records, candidate states and the deciding operation receipt commit together.
+  Future<void> commitImportAdmission(
+    List<ImportProposal> proposals,
     List<InformationItem> items, {
+    required String decisionProposalId,
+    required bool confirm,
+    List<ImportReceipt> decisionRecords = const [],
+    List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   });
+
   List<UpdateProposal> get updateProposals;
   List<InformationRevision> get informationRevisions;
   List<RevisionPurgeFact> get revisionPurgeFacts;
@@ -992,9 +998,13 @@ class MemoryInformationRepository
   }
 
   @override
-  Future<void> confirmImportProposal(
-    ImportProposal proposal,
+  Future<void> commitImportAdmission(
+    List<ImportProposal> proposals,
     List<InformationItem> items, {
+    required String decisionProposalId,
+    required bool confirm,
+    List<ImportReceipt> decisionRecords = const [],
+    List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
@@ -1007,7 +1017,9 @@ class MemoryInformationRepository
     for (final item in items) {
       _items[item.id] = item;
     }
-    _proposals[proposal.id] = proposal;
+    for (final proposal in proposals) {
+      _proposals[proposal.id] = proposal;
+    }
   }
 
   @override

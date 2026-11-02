@@ -473,7 +473,9 @@ class ProposalsController extends ChangeNotifier {
       filter = WorkspaceProposalFilter.all;
     }
     notice = r.action == WorkspaceProposalAction.confirm
-        ? '本次提案结果已记录。'
+        ? r.awaitingItemIds.isNotEmpty
+              ? '批准已记录，具体入库情况见下方。'
+              : '本次提案结果已记录。'
         : '已拒绝提案，信息库没有因此改变。';
     _notify();
     await load();

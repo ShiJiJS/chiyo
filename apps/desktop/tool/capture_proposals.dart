@@ -13,16 +13,24 @@ import 'package:info_desktop/ui.dart';
 class CaptureRepository extends MemoryInformationRepository {
   bool failImport = false;
   @override
-  Future<void> confirmImportProposal(
-    ImportProposal proposal,
+  Future<void> commitImportAdmission(
+    List<ImportProposal> proposals,
     List<InformationItem> items, {
+    required String decisionProposalId,
+    required bool confirm,
+    List<ImportReceipt> decisionRecords = const [],
+    List<String> awaitingKeys = const [],
     List<InformationDirectory> newDirectories = const [],
     List<InformationTag> newTags = const [],
   }) async {
     if (failImport) throw StateError('Synthetic confirmation failure');
-    await super.confirmImportProposal(
-      proposal,
+    await super.commitImportAdmission(
+      proposals,
       items,
+      decisionProposalId: decisionProposalId,
+      confirm: confirm,
+      decisionRecords: decisionRecords,
+      awaitingKeys: awaitingKeys,
       newDirectories: newDirectories,
       newTags: newTags,
     );

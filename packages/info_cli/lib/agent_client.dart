@@ -91,6 +91,7 @@ class AgentClient {
     if (utf8.encode(jsonEncode(input)).length >
         (command == 'credential-catalog' ||
                 command == 'import-submit' ||
+                command == 'import-revise' ||
                 command == 'update-submit' ||
                 command == 'organize-submit'
             ? 262144
@@ -248,6 +249,14 @@ class AgentClient {
         return _call('/import/status', {
           'sessionSecret': _session,
           'proposalId': input['proposalId'],
+        });
+      case 'import-revise':
+        if (_session == null) return {'status': 'unauthorized'};
+        return _call('/import/revise', {
+          'sessionSecret': _session,
+          'proposalId': input['proposalId'],
+          'version': input['version'],
+          'items': input['items'],
         });
       case 'catalog':
         return _call('/catalog', {
