@@ -127,6 +127,9 @@ class InformationTemplateDescription {
           'Provide every declared field from authorized source values; omission never means clear. Independent owner-added fields remain unchanged.',
       'revision':
           'update-revise supplies proposalId, current proposal version, and a revised update; a new owner approval is required.',
+      'retainFileValue': {'retain': true},
+      'fileValues':
+          'For a complete template update explicitly retain every existing ordinary file with {"retain":true}. New originals use the separate attachments plan. Omission or empty text never silently deletes an existing file.',
     },
     if (hasGuidance && recordKind == 'information')
       'submissionExample': {
@@ -156,14 +159,46 @@ class InformationTemplateDescription {
         'versions':
             'Group only revisions of the same material. Different purposes or directions are separate information items. Provide label and sourceNote explaining the source evidence; do not infer chronology just from submission order.',
         'currentVersion':
-            'One-based index among proposed originals. Choose from source evidence, not the largest software version number. New attachments require an explicit choice.',
+            'One-based index among proposed originals. Choose from source evidence, not the largest software version number. New attachments require an explicit choice. On an existing fieldId, null only adds historical originals and retains the existing current selection.',
         'retry':
             'Use a stable operationId. If submission is uncertain query import-status by operationId before retrying; import-file-status queries a reported upload operationId. Never report pending or approved-waiting as saved.',
         'credentials':
             'Private keys and login-session files use credential templates, never ordinary attachments.',
+        'update':
+            'Requires information-file-update.v1. Use update-submit with exact itemId, current baseVersion and attachments. Omit fieldId for a new independent field; supply the exact existing file fieldId to add versions. File-only updates omit templateId/values and preserve all other contents. Never select a target only by similarity.',
       },
+    if (recordKind == 'information')
+      'fileUpdateExamples': _fileUpdateExamples(),
     if (hasGuidance && recordKind == 'credential') ..._credentialExamples(),
   };
+
+  List<Map<String, Object?>> _fileUpdateExamples() => [
+    for (final mode in ['newAttachment', 'newCurrentVersion', 'addHistory'])
+      {
+        'command': 'update-submit',
+        'operationId': 'replace-with-unique-update-id',
+        'update': {
+          'itemId': 'exact-existing-catalog-item-id',
+          'baseVersion': 1,
+          'attachments': [
+            {
+              'key': 'original',
+              'name': '材料原文',
+              if (mode != 'newAttachment')
+                'fieldId': 'exact-existing-file-field-id',
+              'currentVersion': mode == 'addHistory' ? null : 1,
+              'versions': [
+                {
+                  'filePath': '/path/to/user-provided-original',
+                  'label': '源文件标明的版本',
+                  'sourceNote': '材料给出的用途或修订依据。',
+                },
+              ],
+            },
+          ],
+        },
+      },
+  ];
 
   List<Map<String, Object?>> get _exampleAttachments {
     if (!hasGuidance) return const [];

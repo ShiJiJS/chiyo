@@ -16,6 +16,45 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
   final void Function() changed;
   final core.OwnerLibraryScope _scope;
   final _codec = WorkspaceInformationCodec();
+  List<WorkspaceProposalAttachment> _attachments(
+    Iterable<core.ImportAttachmentInput> attachments, {
+    core.UpdateInput? update,
+    core.InformationItem? before,
+  }) => [
+    for (final a in attachments)
+      WorkspaceProposalAttachment(
+        key: a.key,
+        name: a.name,
+        description: a.description,
+        currentVersion: a.currentVersion,
+        templateField: a.templateField,
+        existingName:
+            before?.fields.where((f) => f.id == a.fieldId).firstOrNull?.name ??
+            '',
+        previous: (() {
+          final v = update?.filePlan?.previousVersions[a.fieldId];
+          return v == null
+              ? null
+              : WorkspaceProposalOriginal(
+                  filename: v.originalName,
+                  mediaType: v.mediaType,
+                  byteLength: v.byteLength,
+                  label: v.label,
+                  sourceNote: v.sourceNote,
+                );
+        })(),
+        versions: [
+          for (final v in a.versions)
+            WorkspaceProposalOriginal(
+              filename: v.upload!.originalName,
+              mediaType: v.upload!.mediaType,
+              byteLength: v.upload!.byteLength,
+              label: v.label,
+              sourceNote: v.sourceNote,
+            ),
+        ],
+      ),
+  ];
   String _suggestionId(String kind, String name) =>
       'proposed-$kind:${sha256.convert(utf8.encode(name.trim().toLowerCase()))}';
   Map<String, String> get _suggestedDirectories => {
@@ -76,6 +115,9 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
         switch (e.status) {
           'library_changed' => '资料库已替换，请重新读取提案。',
           'operation_conflict' => '原操作不能用于另一份决定。',
+          'attachment_capacity_exceeded' => '文件存储空间不足，请整理空间后重试；现有历史文件没有被自动清理。',
+          'upload_unavailable' => '待审批原文已不可用，请重新提交文件并审批。',
+          'attachment_integrity_failed' => '文件原文核对失败，原资料没有改变，请重新核对来源。',
           'proposal_changed' ||
           'proposal_conflict' ||
           'organization_conflict' => '提案或原资料已变化，请重新核对；尚未应用这份决定。',
@@ -267,7 +309,10 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
     final beforeIds = preview.before.fields.map((f) => f.id).toSet();
     final remap = <String, String>{
       for (final (index, f) in preview.after.fields.indexed)
-        if (!beforeIds.contains(f.id)) f.id: 'proposal:${p.id}:$index',
+        if (!beforeIds.contains(f.id) &&
+            !(p.input.filePlan?.fields.any((planned) => planned.id == f.id) ??
+                false))
+          f.id: 'proposal:${p.id}:$index',
     };
     final a = preview.after;
     return core.InformationItem(
@@ -341,7 +386,9 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                 beforeAvailable: true,
               );
             })(),
-        for (final next in after.fields)
+        for (final next in after.fields.where(
+          (f) => f.kind != core.FieldKind.file,
+        ))
           if (!preview.before.fields.any(
             (f) => f.id == next.id && f.value == next.value,
           ))
@@ -747,6 +794,11 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
             proposed: proposed,
             before: before,
             beforeState: WorkspaceProposalBeforeState.available,
+            attachments: _attachments(
+              p.input.attachments,
+              update: p.input,
+              before: preview.before,
+            ),
             changes: _changes(p, preview, after, before, proposed),
           ),
         );
@@ -984,10 +1036,13 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
 
   Map<String, Object?> _templateValues(
     WorkspaceDetail detail,
-    WorkspaceProposalItemReview review,
-  ) => {
+    WorkspaceProposalItemReview review, {
+    core.UpdateInput? input,
+  }) => {
     for (final field in detail.definition['fields'] as List)
-      field['key'] as String: field['type'] == 'entries'
+      field['key'] as String: field['type'] == 'file'
+          ? input!.values[field['key']]
+          : field['type'] == 'entries'
           ? [
               for (final row in review.values[field['key']] as List? ?? [])
                 {
@@ -1144,7 +1199,9 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                     templateId: p.input.templateId,
                     templateVersion: p.input.templateVersion,
                     templateDigest: p.input.templateDigest,
-                    values: _templateValues(item.proposed, r),
+                    values: _templateValues(item.proposed, r, input: p.input),
+                    attachments: p.input.attachments,
+                    filePlan: p.input.filePlan,
                     compiledTemplate: p.input.compiledTemplate,
                     relations: _reviewRelations(
                       r,
@@ -1244,6 +1301,8 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
                   p.input.itemId,
                   p.input.baseVersion,
                   changes,
+                  attachments: p.input.attachments,
+                  filePlan: p.input.filePlan,
                   name: r.name,
                   description: r.description,
                 ),

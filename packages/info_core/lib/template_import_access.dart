@@ -10,6 +10,22 @@ class InformationTemplateInputFailure extends AccessFailure {
 extension OwnerTemplateImports on OwnerAccess {
   UpdateInput _compileTemplateUpdate(UpdateInput input) {
     if (input.templateId == null) return input;
+    final previous = information.where((i) => i.id == input.itemId).firstOrNull;
+    final retainedFiles = <String>{};
+    for (final raw
+        in (previous?.layout?.snapshot['definition'] as Map?)?['fields']
+                as List? ??
+            []) {
+      final key = (raw as Map)['key'] as String;
+      if (raw['type'] == 'file' &&
+          previous!.fields.any(
+            (f) =>
+                f.id == previous.layout!.fieldIds[jsonEncode(['field', key])] &&
+                f.kind == FieldKind.file,
+          )) {
+        retainedFiles.add(key);
+      }
+    }
     final compiled = _compileTemplateImport(
       ImportItemInput(
         input.name ?? '模板修改',
@@ -22,8 +38,22 @@ extension OwnerTemplateImports on OwnerAccess {
         relations: input.relations ?? const {},
         pendingRelations: input.pendingRelations,
         layout: input.compiledTemplate?.layout,
+        attachments: [
+          for (final a in input.attachments.where(
+            (a) => a.templateField != null,
+          ))
+            ImportAttachmentInput(
+              key: a.key,
+              name: a.name,
+              description: a.description,
+              templateField: a.templateField,
+              currentVersion: a.currentVersion ?? 1,
+              versions: a.versions,
+            ),
+        ],
       ),
       _service.agent._currentInformationTemplates(),
+      retainedFileKeys: retainedFiles,
     );
     final missing = <String, String>{
       for (final field
@@ -46,6 +76,8 @@ extension OwnerTemplateImports on OwnerAccess {
       relations: input.relations,
       pendingRelations: input.pendingRelations,
       compiledTemplate: compiled,
+      attachments: input.attachments,
+      filePlan: input.filePlan,
     );
   }
 
@@ -100,6 +132,21 @@ extension OwnerTemplateImports on OwnerAccess {
       );
     }
     final bound = compiled.bindLayout(fields)!;
+    final fileKeys = {
+      for (final f
+          in (compiled.layout!.snapshot['definition'] as Map)['fields'] as List)
+        if ((f as Map)['type'] == 'file') f['key'] as String,
+    };
+    for (final key in fileKeys) {
+      final file = previous.fields
+          .where(
+            (f) =>
+                f.id == previous.layout!.fieldIds[jsonEncode(['field', key])] &&
+                f.kind == FieldKind.file,
+          )
+          .firstOrNull;
+      if (file != null) fields.add(file);
+    }
     fields.addAll(previous.fields.where((f) => !managed.contains(f.id)));
     if (fields.length > 200) throw const AccessFailure('invalid_proposal');
     final relationKeys = {
@@ -148,8 +195,9 @@ extension OwnerTemplateImports on OwnerAccess {
 
   ImportItemInput _compileTemplateImport(
     ImportItemInput input,
-    InformationTemplateCatalog catalog,
-  ) {
+    InformationTemplateCatalog catalog, {
+    Set<String> retainedFileKeys = const {},
+  }) {
     if (input.templateId == null) return input;
     final template = catalog.templates
         .where((t) => t.id == input.templateId)
@@ -212,10 +260,17 @@ extension OwnerTemplateImports on OwnerAccess {
           kind = field['type'] as String;
       final value = input.values[key];
       if (kind == 'file') {
+        if (value is Map &&
+            value.length == 1 &&
+            value['retain'] == true &&
+            retainedFileKeys.contains(key)) {
+          continue;
+        }
         final files = input.attachments
             .where((a) => a.templateField == key)
             .toList();
         if (files.length > 1 ||
+            files.isEmpty && retainedFileKeys.contains(key) ||
             files.isEmpty && field['required'] == true ||
             files.isNotEmpty && value != files.single.key ||
             files.isEmpty && value != null && value != '') {
@@ -327,7 +382,10 @@ extension OwnerTemplateImports on OwnerAccess {
     )) {
       errors['_files'] = '原文件尚未接收，请通过CLI提交后重新审批。';
     }
-    if (fields.isEmpty && input.attachments.isEmpty && errors.isEmpty) {
+    if (fields.isEmpty &&
+        input.attachments.isEmpty &&
+        retainedFileKeys.isEmpty &&
+        errors.isEmpty) {
       errors['_form'] = '模板至少需要一个可保存的字段。';
     }
     if (errors.isNotEmpty) throw InformationTemplateInputFailure(errors);

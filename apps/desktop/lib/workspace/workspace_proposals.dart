@@ -128,9 +128,13 @@ class WorkspaceProposalAttachment {
     required this.currentVersion,
     required Iterable<WorkspaceProposalOriginal> versions,
     this.templateField,
+    this.existingName = '',
+    this.previous,
   }) : versions = List.unmodifiable(versions);
   final String key, name, description;
   final String? templateField;
+  final String existingName;
+  final WorkspaceProposalOriginal? previous;
   final int? currentVersion;
   final List<WorkspaceProposalOriginal> versions;
 }
@@ -145,6 +149,13 @@ class WorkspaceProposalOriginal {
   });
   final String filename, mediaType, label, sourceNote;
   final int byteLength;
+  Map<String, Object?> toJson() => {
+    'filename': filename,
+    'mediaType': mediaType,
+    'byteLength': byteLength,
+    'label': label,
+    'sourceNote': sourceNote,
+  };
 }
 
 class WorkspaceProposalItem {
@@ -329,6 +340,22 @@ class WorkspaceProposalDetail {
                     {
                       'id': i.id,
                       'admissionNote': i.admissionNote,
+                      if (i.attachments.isNotEmpty)
+                        'attachments': [
+                          for (final a in i.attachments)
+                            {
+                              'key': a.key,
+                              'name': a.name,
+                              'description': a.description,
+                              'templateField': a.templateField,
+                              'existingName': a.existingName,
+                              'currentVersion': a.currentVersion,
+                              'previous': a.previous?.toJson(),
+                              'versions': a.versions
+                                  .map((v) => v.toJson())
+                                  .toList(),
+                            },
+                        ],
                       'proposed': snapshot(i.proposed),
                       'before': i.before == null
                           ? null

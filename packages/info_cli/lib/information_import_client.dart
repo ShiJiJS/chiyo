@@ -6,6 +6,63 @@ class _ImportFileClientFailure implements Exception {
 }
 
 extension _InformationImportClient on AgentClient {
+  Future<Map<String, dynamic>> _executeUpdateCommand(
+    Map<String, dynamic> input, {
+    required bool revise,
+  }) async {
+    if (_session == null) return {'status': 'unauthorized'};
+    if (input['update'] is! Map) return {'status': 'invalid_request'};
+    final update = Map<String, dynamic>.from(input['update'] as Map);
+    final attachments = update['attachments'];
+    final hasFiles = attachments is List && attachments.isNotEmpty;
+    if (hasFiles &&
+        !revise &&
+        (input['operationId'] is! String ||
+            !RegExp(
+              r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+            ).hasMatch(input['operationId'] as String))) {
+      return {'status': 'invalid_operation_id'};
+    }
+    if (hasFiles || input.containsKey('operationId')) {
+      final support = await _call('/capabilities', {});
+      if (support['status'] != 'ok') return support;
+      final capabilities = support['capabilities'] as List? ?? [];
+      if (hasFiles &&
+              (!capabilities.contains('information-file-upload.v1') ||
+                  !capabilities.contains('information-file-update.v1')) ||
+          !capabilities.contains('information-update-operations.v1')) {
+        return {'status': 'unsupported_capability'};
+      }
+      final live = await _call('/session/check', {'sessionSecret': _session});
+      if (live['status'] != 'ok') return live;
+    }
+    try {
+      if (attachments != null) {
+        update['attachments'] = await _prepareImportAttachments(
+          attachments,
+          rootOperation: revise
+              ? 'update:${input['proposalId']}:${input['version']}'
+              : 'update:${input['operationId'] ?? ''}',
+          itemIndex: 0,
+        );
+      }
+      UpdateInput.fromJson(update);
+    } on _ImportFileClientFailure catch (e) {
+      return e.result;
+    } on Object {
+      return {'status': 'invalid_request'};
+    }
+    return _call(revise ? '/update/revise' : '/update/submit', {
+      'sessionSecret': _session,
+      'update': update,
+      if (revise) ...{
+        'proposalId': input['proposalId'],
+        'version': input['version'],
+      } else if (input.containsKey('operationId'))
+        'operationId': input['operationId'],
+    });
+  }
+
   Future<List<Map<String, dynamic>>> _prepareImportAttachments(
     Object? input, {
     required String rootOperation,

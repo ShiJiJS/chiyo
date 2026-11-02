@@ -54,12 +54,15 @@ class WorkspaceFileVersion {
     required this.byteLength,
     required this.createdAt,
     this.available = true,
+    this.label = '',
+    this.sourceNote = '',
   });
   final WorkspaceFileRef ref;
   final String filename, mediaType;
   final int byteLength;
   final DateTime createdAt;
   final bool available;
+  final String label, sourceNote;
 }
 
 class WorkspaceFileHistory {

@@ -339,12 +339,14 @@ class InformationUpdateAdmission {
     this.previous,
     this.recycled = const [],
     this.facts = const [],
+    this.filePromotions = const [],
   });
   final UpdateProposal proposal;
   final InformationItem? item;
   final InformationRevision? previous;
   final List<RecycleEntry> recycled;
   final List<RecycleFact> facts;
+  final List<InformationImportFilePromotion> filePromotions;
 }
 
 /// Owner-side storage seam. Agent transports never receive this capability.
@@ -1028,7 +1030,9 @@ class MemoryInformationRepository
       List.unmodifiable(_revisions);
   @override
   Future<void> saveUpdateProposal(UpdateProposal proposal) async {
+    _claimFileChanges(proposal.sessionBinding, proposal.input.attachments);
     _updates[proposal.id] = proposal;
+    _reconcileImportOriginals();
   }
 
   @override
@@ -1072,6 +1076,7 @@ class MemoryInformationRepository
     final importedFiles = await _prepareImportedOriginals(
       filePromotions,
       proposals,
+      updates,
     );
     _informationFiles.addAll(importedFiles);
     _credentials.addAll(credentialRecords);
@@ -1088,7 +1093,6 @@ class MemoryInformationRepository
     for (final proposal in proposals) {
       _proposals[proposal.id] = proposal;
     }
-    _reconcileImportOriginals();
     for (final update in updates) {
       final item = update.item;
       if (item != null) _items[item.id] = item;
@@ -1099,6 +1103,7 @@ class MemoryInformationRepository
       _recycleFacts.addAll(update.facts);
       _updates[update.proposal.id] = update.proposal;
     }
+    _reconcileImportOriginals();
     for (final update in updates) {
       if (update.item case final item?) {
         _reconcileInformationFiles(

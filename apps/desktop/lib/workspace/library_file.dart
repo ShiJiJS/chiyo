@@ -647,12 +647,14 @@ class LibraryFilePreviewView extends StatefulWidget {
     required this.preview,
     required this.onPage,
     this.toolbarLeading = const [],
+    this.unsupportedMessage = '此文件格式暂不支持预览，可另存或用本机程序打开。',
   });
   final WorkspaceFilePreview preview;
   final ValueChanged<int> onPage;
   // Owner controls and reader controls share one wrapping toolbar. Historical
   // previews use the same reader without current-file actions.
   final List<Widget> toolbarLeading;
+  final String unsupportedMessage;
   @override
   State<LibraryFilePreviewView> createState() => _LibraryFilePreviewViewState();
 }
@@ -702,7 +704,7 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
     Widget body() {
       if (p.kind == WorkspaceFilePreviewKind.unsupported) {
         return Text(
-          '此文件格式暂不支持预览，可另存或用本机程序打开。',
+          widget.unsupportedMessage,
           style: libraryText(context, 14, color: c.muted),
         );
       }
@@ -993,7 +995,7 @@ class _FileVersionsState extends State<_FileVersions> {
                   unawaited(_read());
                 },
                 child: Text(
-                  'v${file.ref.version}${file.ref == _history.current.ref ? ' · 当前' : ' · 历史'}',
+                  '${file.label.isEmpty ? 'v${file.ref.version}' : file.label}${file.ref == _history.current.ref ? ' · 当前' : ' · 历史'}',
                 ),
               ),
           ],
@@ -1008,6 +1010,9 @@ class _FileVersionsState extends State<_FileVersions> {
             byteLength: file.byteLength,
             createdAt: file.createdAt,
           ),
+          if (file.label.isNotEmpty) SelectableText('来源版本：${file.label}'),
+          if (file.sourceNote.isNotEmpty)
+            SelectableText('来源依据：${file.sourceNote}'),
         ],
         if (_selectedVersion?.available == false)
           const Text('该版本原文已清理，仅保留版本记录，不能恢复。'),

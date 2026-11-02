@@ -1039,10 +1039,10 @@ void main() {
         source.grantHistory.filePreview(hid, scope()),
         fails('snapshot_unavailable'),
       );
-      // Delivery identity remains, but retention can remove its old original.
-      await expectLater(
-        source.grantHistory.filePreview(hid, event.fileScopeId!),
-        fails('attachment_missing'),
+      // The delivery pins the original version, still owned by this attachment.
+      expect(
+        (await source.grantHistory.filePreview(hid, event.fileScopeId!)).text,
+        utf8.decode(bytes),
       );
       expect(
         (await source.grantHistory.read(

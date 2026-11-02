@@ -279,4 +279,18 @@ final class InformationImportFilePromotion {
   const InformationImportFilePromotion(this.upload, this.version);
   final InformationImportUpload upload;
   final InformationAttachmentVersion version;
+  Map<String, Object?> toPrivateJson() => {
+    'upload': upload.toPrivateJson(),
+    'version': version.toPrivateJson(),
+  };
+  factory InformationImportFilePromotion.fromPrivateJson(
+    Map<String, dynamic> json,
+  ) => InformationImportFilePromotion(
+    InformationImportUpload.fromPrivateJson(
+      Map<String, dynamic>.from(json['upload'] as Map),
+    ),
+    InformationAttachmentVersion.fromPrivateJson(
+      Map<String, dynamic>.from(json['version'] as Map),
+    ),
+  );
 }

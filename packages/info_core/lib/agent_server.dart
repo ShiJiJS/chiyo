@@ -257,8 +257,11 @@ class AgentServer {
               'information-import-admission.v1',
             if (_agent.credentialImportAvailable) 'credential-import.v1',
             'information-import-operations.v1',
+            'information-update-operations.v1',
             if (_agent.informationImportFilesAvailable)
               'information-file-upload.v1',
+            if (_agent.informationImportFilesAvailable)
+              'information-file-update.v1',
           ],
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
@@ -590,6 +593,15 @@ class AgentServer {
         );
         return _agent.updateStatus(session, id);
       case '/update/status':
+        if (body.containsKey('operationId')) {
+          if (body.containsKey('proposalId')) {
+            throw const AccessFailure('invalid_request');
+          }
+          return _agent.updateStatusByOperation(
+            _text(body, 'sessionSecret'),
+            _text(body, 'operationId'),
+          );
+        }
         return _agent.updateStatus(
           _text(body, 'sessionSecret'),
           _text(body, 'proposalId'),
@@ -862,7 +874,13 @@ class AgentServer {
       throw const AccessFailure('invalid_request');
     }
     final session = _text(body, 'sessionSecret');
-    final id = await _agent.submitUpdate(session, UpdateInput.fromJson(raw));
+    final id = await _agent.submitUpdate(
+      session,
+      UpdateInput.fromJson(raw),
+      operationId: body['operationId'] == null
+          ? null
+          : _text(body, 'operationId'),
+    );
     return _agent.updateStatus(session, id);
   }
 

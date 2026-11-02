@@ -44,6 +44,8 @@ class OwnerWorkspaceFiles {
         byteLength: v.byteLength,
         createdAt: v.createdAt,
         available: v.available,
+        label: v.label,
+        sourceNote: v.sourceNote,
       );
 
   Future<WorkspaceFileHistory> history(
@@ -206,6 +208,8 @@ class OwnerWorkspaceAttachmentPreview {
         byteLength: v.byteLength,
         createdAt: v.createdAt,
         available: v.available,
+        label: v.label,
+        sourceNote: v.sourceNote,
       );
       return await renderContent(file, content.bytes, page: page);
     } on core.AccessFailure catch (e) {
