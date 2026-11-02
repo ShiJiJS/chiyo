@@ -632,6 +632,27 @@ class _ProposalsPageState extends State<ProposalsPage> {
               item.before!.record.name,
               style: libraryText(context, 22, weight: FontWeight.w700),
             ),
+            for (final metadata in [
+              (
+                label: '资料名称',
+                before: item.before!.record.name,
+                after: review.name,
+              ),
+              (
+                label: '用途说明',
+                before: item.before!.record.description,
+                after: review.description,
+              ),
+            ])
+              if (metadata.before != metadata.after)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: ProposalDiff(
+                    label: metadata.label,
+                    before: proposalValue(metadata.before),
+                    after: proposalValue(metadata.after),
+                  ),
+                ),
             for (final section in proposalChangeSections(item)) ...[
               Padding(
                 padding: const EdgeInsets.only(top: 22),
@@ -715,7 +736,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
             ],
             const SizedBox(height: 12),
             Text(
-              '只有列出的字段会被修改；目录、标签及凭据关联保持原样。',
+              '只有列出的名称、用途说明及字段变化会写入；目录、标签及凭据关联保持原样。',
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
             const SizedBox(height: 12),
@@ -726,11 +747,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
               child: const Text('核对当前资料和原提案'),
             ),
           ],
-          if (item.before == null ||
-              d.summary.kind != WorkspaceProposalKind.deletion &&
-                  item.changes.any(
-                    (c) => c.intent != WorkspaceProposalFieldIntent.remove,
-                  )) ...[
+          if (d.summary.kind != WorkspaceProposalKind.deletion) ...[
             const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerRight,

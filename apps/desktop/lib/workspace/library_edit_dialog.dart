@@ -66,6 +66,10 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
       controller.source,
       catalog,
       ref: detail?.record.ref,
+      initialDirectoryId:
+          ['all', 'unfiled'].contains(controller.query.directoryId)
+          ? null
+          : controller.query.directoryId,
       picker: credentialPicker,
     );
   }

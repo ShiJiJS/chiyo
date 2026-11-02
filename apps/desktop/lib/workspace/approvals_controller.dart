@@ -202,6 +202,7 @@ class ApprovalsController extends ChangeNotifier {
         if (_closed || generation != _generation) return;
       }
       if (selection != found.selection) {
+        notice = null;
         writeFailure = null;
         detail = null;
         detailScroll = 0;
@@ -293,6 +294,7 @@ class ApprovalsController extends ChangeNotifier {
     if (frozen) return;
     _explicitTarget = null;
     keyword = text;
+    notice = null;
     offset = 0;
     selection = null;
     listScroll = 0;
@@ -303,6 +305,7 @@ class ApprovalsController extends ChangeNotifier {
     if (frozen) return;
     _explicitTarget = null;
     filter = value;
+    notice = null;
     offset = 0;
     selection = null;
     listScroll = 0;
@@ -313,6 +316,7 @@ class ApprovalsController extends ChangeNotifier {
     if (frozen) return;
     _explicitTarget = null;
     offset = value;
+    notice = null;
     selection = null;
     listScroll = 0;
     await load();

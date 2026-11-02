@@ -185,7 +185,7 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
         children: [
           if (_error != null)
             Text(_error!, style: libraryText(context, 14, color: c.danger)),
-          if (_new) ...[
+          ...[
             DesktopTextField(
               key: const ValueKey('proposal-edit-name'),
               controller: _name,
@@ -210,6 +210,8 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
               ),
             ),
             const SizedBox(height: 16),
+          ],
+          if (_new) ...[
             DesktopSelect<String>(
               key: const ValueKey('proposal-edit-directory'),
               value: _directory ?? '',
@@ -252,7 +254,7 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
             ),
           ] else
             Text(
-              '这里只修改提案明确列出的字段。资料名称、分类和关联保持当前内容。',
+              '可核对名称、用途说明及提案列出的字段；分类和关联保持当前内容。',
               style: libraryText(context, 13, color: c.muted, height: 1.8),
             ),
           if (_fieldErrors['classification'] case final error?)

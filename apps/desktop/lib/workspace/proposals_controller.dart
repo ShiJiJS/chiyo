@@ -297,7 +297,11 @@ class ProposalsController extends ChangeNotifier {
       }
       results = found;
       offset = found.offset;
-      if (selection != found.selection) detail = null;
+      if (selection != found.selection) {
+        detail = null;
+        notice = null;
+        writeFailure = null;
+      }
       selection = found.selection;
       if (selection == null) {
         detail = null;
@@ -375,6 +379,7 @@ class ProposalsController extends ChangeNotifier {
   Future<void> page(int value) async {
     if (frozen || _closed) return;
     offset = value;
+    notice = null;
     selection = null;
     detail = null;
     listScroll = 0;

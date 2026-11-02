@@ -196,6 +196,27 @@ void main() {
     },
   );
   test(
+    'automatic selection of another proposal clears prior confirmation feedback',
+    () async {
+      await m.open('update');
+      await m.decide(WorkspaceProposalAction.confirm);
+      expect(m.notice, contains('已记录'));
+      port.queryOverride = (q, keep) async {
+        final result = await port.inner.query(q);
+        return WorkspaceProposalResults(
+          items: result.items,
+          total: result.total,
+          pending: result.pending,
+          offset: result.offset,
+          selection: 'import',
+        );
+      };
+      await m.load();
+      expect(m.detail!.summary.id, 'import');
+      expect(m.notice, isNull);
+    },
+  );
+  test(
     'mismatched command digest remains unknown until matching original receipt, never replays',
     () async {
       await m.open('update');

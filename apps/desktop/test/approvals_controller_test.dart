@@ -75,6 +75,30 @@ void main() {
   });
 
   test(
+    'automatic selection of another request clears the prior decision feedback',
+    () async {
+      await m.select('server');
+      await m.decide(WorkspaceApprovalAction.approve);
+      expect(m.notice, contains('已记录'));
+      port.queryOverride = (q, keep) async {
+        final result = await port.inner.query(q);
+        return WorkspaceApprovalResults(
+          items: result.items,
+          total: result.total,
+          pending: result.pending,
+          offset: result.offset,
+          selection: 'token',
+        );
+      };
+      await m.load();
+      expect(m.detail!.request.id, 'token');
+      expect(m.detail!.request.state, WorkspaceApprovalState.pending);
+      expect(m.notice, isNull);
+      await m.search('');
+      expect(m.notice, isNull);
+    },
+  );
+  test(
     'missing explicit request stays missing through refresh until owner selects another',
     () async {
       await m.open('does-not-exist');

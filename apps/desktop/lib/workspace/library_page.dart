@@ -48,6 +48,7 @@ class _LibraryPageState extends State<LibraryPage> {
   final _list = ScrollController(), _detailScroll = ScrollController();
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
+  final _workspaceFocus = FocusNode(debugLabel: 'library-workspace');
   int _focusRequest = 0, _viewReset = 0;
   bool _reading = false, _recyclePage = false;
   WorkspaceRecordRef? _lastSelection;
@@ -79,6 +80,7 @@ class _LibraryPageState extends State<LibraryPage> {
     _search.dispose();
     _searchFocus.removeListener(_searchFocusChanged);
     _searchFocus.dispose();
+    _workspaceFocus.dispose();
     super.dispose();
   }
 
@@ -147,6 +149,7 @@ class _LibraryPageState extends State<LibraryPage> {
       }
     } finally {
       widget.onModalChanged?.call(false);
+      if (mounted) _workspaceFocus.requestFocus();
     }
   }
 
@@ -1227,46 +1230,50 @@ class _LibraryPageState extends State<LibraryPage> {
       if (_reading)
         const SingleActivator(LogicalKeyboardKey.escape): _toggleReading,
       const SingleActivator(LogicalKeyboardKey.keyK, meta: true):
-          _searchFocus.requestFocus,
+          model.focusSearch,
     },
-    child: ScrollConfiguration(
-      behavior: DesktopScrollBehavior(
-        scrollbarGutter: DesktopScrollbarScope.gutterOf(context, 11),
-      ),
-      child: LayoutBuilder(
-        builder: (context, bounds) {
-          final metrics = LibraryMetrics(bounds.maxWidth);
-          if (_recyclePage) {
-            return LibraryRecyclePage(
-              source: model.source,
-              onModalChanged: widget.onModalChanged,
-              onBack: () => setState(() => _recyclePage = false),
-              onOpen: (ref) {
-                setState(() => _recyclePage = false);
-                model.openRelated(ref);
-              },
+    child: Focus(
+      focusNode: _workspaceFocus,
+      autofocus: true,
+      child: ScrollConfiguration(
+        behavior: DesktopScrollBehavior(
+          scrollbarGutter: DesktopScrollbarScope.gutterOf(context, 11),
+        ),
+        child: LayoutBuilder(
+          builder: (context, bounds) {
+            final metrics = LibraryMetrics(bounds.maxWidth);
+            if (_recyclePage) {
+              return LibraryRecyclePage(
+                source: model.source,
+                onModalChanged: widget.onModalChanged,
+                onBack: () => setState(() => _recyclePage = false),
+                onOpen: (ref) {
+                  setState(() => _recyclePage = false);
+                  model.openRelated(ref);
+                },
+              );
+            }
+            if (_reading) {
+              return Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: bounds.maxWidth.clamp(0, 1100).toDouble(),
+                  height: bounds.maxHeight,
+                  child: _detail(context, metrics),
+                ),
+              );
+            }
+            return Row(
+              key: const ValueKey('library-workspace'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _side(context, metrics),
+                _results(context, metrics),
+                Expanded(child: _detail(context, metrics)),
+              ],
             );
-          }
-          if (_reading) {
-            return Align(
-              alignment: Alignment.topCenter,
-              child: SizedBox(
-                width: bounds.maxWidth.clamp(0, 1100).toDouble(),
-                height: bounds.maxHeight,
-                child: _detail(context, metrics),
-              ),
-            );
-          }
-          return Row(
-            key: const ValueKey('library-workspace'),
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _side(context, metrics),
-              _results(context, metrics),
-              Expanded(child: _detail(context, metrics)),
-            ],
-          );
-        },
+          },
+        ),
       ),
     ),
   );

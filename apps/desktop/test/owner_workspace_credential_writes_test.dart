@@ -671,6 +671,7 @@ void main() {
             child: WorkspaceApp(
               source: source,
               windowTitle: '合成凭据新建检查',
+              initialQuery: WorkspaceQuery(directoryId: directory.id),
               inputsBuilder: (context) => WorkspaceInputs(
                 credential: (form) => showOwnerCredentialInput(
                   context,
@@ -700,8 +701,9 @@ void main() {
           find.byKey(const ValueKey('credential-edit-note')),
           '文件合成备注',
         );
-        await tap(t, find.text('未分类').last);
-        await tap(t, find.text('合成凭据目录').last);
+        // Returning from the native material input must retain the directory
+        // advertised by the library's creation entry, without reselecting it.
+        expect(find.text('合成凭据目录'), findsWidgets);
         await tap(t, find.text('合成凭据标签').last);
         await tap(
           t,

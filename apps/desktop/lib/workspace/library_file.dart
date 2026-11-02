@@ -484,10 +484,7 @@ class _LibraryFileState extends State<LibraryFile> {
         toolbar: true,
         quiet: true,
         tooltip: '文件操作',
-        triggerLabel: const PrototypeIcon(
-          PrototypeIconGlyph.more,
-          semanticLabel: '文件操作',
-        ),
+        triggerLabel: const Text('文件操作'),
         minimumTriggerSize: const Size(32, 32),
         triggerPadding: const EdgeInsets.all(6),
         onChanged: (action) {
