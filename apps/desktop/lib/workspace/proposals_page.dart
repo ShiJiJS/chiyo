@@ -181,6 +181,44 @@ class _ProposalsPageState extends State<ProposalsPage> {
     m.bindPasswords(widget.passwords);
   }
 
+  ProposalPendingFileReader? _pendingReader(
+    WorkspaceProposalDetail d,
+    WorkspaceProposalItem item, {
+    WorkspaceProposalItemReview? review,
+  }) {
+    final source = m.source;
+    if (source is! WorkspaceProposalOriginalSource) return null;
+    return (key, version, page) =>
+        (source as WorkspaceProposalOriginalSource).pendingOriginal(
+          d.summary.id,
+          d.summary.version,
+          item.id,
+          key,
+          version,
+          page: page,
+          review: review,
+          originalProposalVersion: item.originalProposalVersion,
+        );
+  }
+
+  ProposalStoredFileReader? _storedReader(
+    WorkspaceProposalDetail d, {
+    WorkspaceProposalItemReview? review,
+  }) {
+    final source = m.source;
+    if (source is! WorkspaceProposalOriginalSource) return null;
+    return (detail, key, file, page) =>
+        (source as WorkspaceProposalOriginalSource).storedOriginal(
+          d.summary.id,
+          d.summary.version,
+          detail.record.ref,
+          key,
+          file,
+          page: page,
+          review: review,
+        );
+  }
+
   Future<void> _previewRelated(WorkspaceRecordRef ref) async {
     final detail = m.detail;
     if (detail == null || m.frozen) return;
@@ -195,6 +233,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
     final source = m.source;
     if (source is! WorkspaceProposalPreviewSource) return;
     final previews = source as WorkspaceProposalPreviewSource;
+    final review = m.draft?.items[m.activeItemId];
     widget.onModalChanged?.call(true);
     try {
       await showDesktopDialog<void>(
@@ -203,13 +242,24 @@ class _ProposalsPageState extends State<ProposalsPage> {
           title: const Text('关联资料预览'),
           content: ProposalContentPreview(
             changes: m.changes,
+            readingState: m.readingState('related:${ref.key}'),
             load: () => previews.previewRelated(
               detail.summary.id,
               detail.summary.version,
               ref,
+              review: review,
             ),
             catalog: m.catalog!,
-            relations: previews.previewRelations(),
+            relations: m.activeItemId == null
+                ? previews.previewRelations()
+                : m.source.relations(
+                    detail.summary.id,
+                    m.activeItemId!,
+                    detail.summary.version,
+                  ),
+            readStoredFile: _storedReader(detail, review: review),
+            pendingReader: (item) =>
+                _pendingReader(detail, item, review: review),
           ),
           actions: [
             DesktopButton(
@@ -431,7 +481,10 @@ class _ProposalsPageState extends State<ProposalsPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${r.agentClaim} · ${r.itemCount}项',
+            [
+              if (r.agentClaim.isNotEmpty) r.agentClaim,
+              '${r.itemCount}项',
+            ].join(' · '),
             style: libraryText(context, 12, color: UiPalette.of(context).muted),
           ),
           if (m.batch.entry(r.id) case final queued?)
@@ -660,6 +713,10 @@ class _ProposalsPageState extends State<ProposalsPage> {
               ),
               onRecord: _previewRelated,
               enabled: !m.frozen,
+              originalsEnabled: !m.needsNewReview,
+              readingState: m.readingState(item.id),
+              readPendingFile: _pendingReader(d, item, review: review),
+              readStoredFile: _storedReader(d, review: review),
               onFile: widget.onFile == null
                   ? null
                   : (key, version) async {
@@ -704,6 +761,9 @@ class _ProposalsPageState extends State<ProposalsPage> {
                 ),
                 onRecord: _previewRelated,
                 enabled: !m.frozen,
+                originalsEnabled: !m.needsNewReview,
+                readingState: m.readingState(item.id),
+                readStoredFile: _storedReader(d, review: review),
               )
             else
               Padding(
@@ -734,6 +794,10 @@ class _ProposalsPageState extends State<ProposalsPage> {
               ),
               onRecord: _previewRelated,
               enabled: !m.frozen,
+              originalsEnabled: !m.needsNewReview,
+              readingState: m.readingState(item.id),
+              readPendingFile: _pendingReader(d, item, review: review),
+              readStoredFile: _storedReader(d, review: review),
               onFile: widget.onFile == null
                   ? null
                   : (key, version) => widget.onFile!(
@@ -859,21 +923,25 @@ class _ProposalsPageState extends State<ProposalsPage> {
                             MediaQuery.sizeOf(context).width <= 1300 ? 24 : 27,
                           ),
                         ),
-                        const SizedBox(height: 13),
-                        Text(
-                          s.purpose,
-                          style: libraryText(
-                            context,
-                            14,
-                            color: c.muted,
-                            height: 1.9,
+                        if (s.purpose.isNotEmpty) ...[
+                          const SizedBox(height: 13),
+                          Text(
+                            s.purpose,
+                            style: libraryText(
+                              context,
+                              14,
+                              color: c.muted,
+                              height: 1.9,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          s.agentClaim,
-                          style: libraryText(context, 12, color: c.muted),
-                        ),
+                        ],
+                        if (s.agentClaim.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            s.agentClaim,
+                            style: libraryText(context, 12, color: c.muted),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -997,6 +1065,10 @@ class _ProposalsPageState extends State<ProposalsPage> {
                           padding: const EdgeInsets.only(top: 24),
                           child: ProposalContentPreview(
                             changes: m.changes,
+                            readStoredFile: _storedReader(d),
+                            readingState: m.readingState(
+                              'saved:${target.record.key}',
+                            ),
                             key: ValueKey((
                               'saved-preview',
                               s.id,

@@ -5,6 +5,7 @@ import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'proposal_reading.dart';
 import 'workspace_source.dart';
+import 'proposal_reading_state.dart';
 
 /// Loads exact Owner-only content in place. No library route or management
 /// action is available from this preview.
@@ -15,11 +16,18 @@ class ProposalContentPreview extends StatefulWidget {
     required this.catalog,
     required this.relations,
     this.changes,
+    this.readStoredFile,
+    this.pendingReader,
+    this.readingState,
   });
   final Future<WorkspaceProposalItem> Function() load;
   final WorkspaceCatalog catalog;
   final WorkspaceRelationSource relations;
   final Stream<WorkspaceRecordRef?>? changes;
+  final ProposalStoredFileReader? readStoredFile;
+  final ProposalReadingState? readingState;
+  final ProposalPendingFileReader? Function(WorkspaceProposalItem)?
+  pendingReader;
   @override
   State<ProposalContentPreview> createState() => _ProposalContentPreviewState();
 }
@@ -87,6 +95,11 @@ class _ProposalContentPreviewState extends State<ProposalContentPreview> {
       final item = result.data;
       if (item == null) return const LinearProgressIndicator();
       final review = WorkspaceProposalItemReview.fromItem(item);
+      final reading = item.originalProposalVersion == null
+          ? widget.readingState
+          : widget.readingState?.child(
+              'proposal-version:${item.originalProposalVersion}',
+            );
       return item.before == null
           ? ProposalItemReading(
               item: item,
@@ -95,6 +108,9 @@ class _ProposalContentPreviewState extends State<ProposalContentPreview> {
               relations: widget.relations,
               onRecord: (_) {},
               enabled: false,
+              readStoredFile: widget.readStoredFile,
+              readingState: reading,
+              readPendingFile: widget.pendingReader?.call(item),
             )
           : ProposalItemComparison(
               item: item,
@@ -103,6 +119,9 @@ class _ProposalContentPreviewState extends State<ProposalContentPreview> {
               relations: widget.relations,
               onRecord: (_) {},
               enabled: false,
+              readStoredFile: widget.readStoredFile,
+              readingState: reading,
+              readPendingFile: widget.pendingReader?.call(item),
             );
     },
   );

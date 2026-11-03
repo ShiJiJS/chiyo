@@ -828,15 +828,21 @@ class _SampleProposals
   Future<WorkspaceProposalItem> previewRelated(
     String proposalId,
     int version,
-    WorkspaceRecordRef record,
-  ) async {
+    WorkspaceRecordRef record, {
+    WorkspaceProposalItemReview? review,
+  }) async {
     final proposal = await read(proposalId);
+    final reviewedRef =
+        review != null &&
+        proposal.items.any((i) => i.id == review.itemId) &&
+        review.relations.values.expand((refs) => refs).contains(record);
     if (proposal.summary.version != version ||
-        !proposal.items.any(
-          (i) => i.proposed.visibleRelations.values
-              .expand((refs) => refs)
-              .contains(record),
-        )) {
+        !reviewedRef &&
+            !proposal.items.any(
+              (i) => i.proposed.visibleRelations.values
+                  .expand((refs) => refs)
+                  .contains(record),
+            )) {
       throw const WorkspaceFailure('conflict', '关联范围已变化，请重新读取。');
     }
     return WorkspaceProposalItem(

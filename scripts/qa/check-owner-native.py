@@ -77,11 +77,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--workflow', action='store_true', help='Full owner workflow in two launches of one native test App')
+    parser.add_argument('--proposals', action='store_true', help='Whole proposal, inline passwords and originals through the production shell and an AOT CLI')
+    parser.add_argument('--proposals-os-input', action='store_true', help='With --proposals, wait for synthetic text typed into the real secure field')
     parser.add_argument('--real-codex-project', type=Path, help='Existing approved synthetic project; no hook/trust changes')
     parser.add_argument('--package', type=Path, help='Candidate payload for real Codex CLI')
     parser.add_argument('--file-codex', action='store_true', help='Real AI ordinary-file request/approval/history with the existing approved project')
     args = parser.parse_args()
     real_codex = args.real_codex_project is not None
+    if args.proposals_os_input and not args.proposals:
+        parser.error('--proposals-os-input requires --proposals')
+    if args.proposals and (args.workflow or real_codex or args.file_codex):
+        parser.error('--proposals is a separate synthetic scenario')
     if args.file_codex and not real_codex:
         parser.error('--file-codex requires --real-codex-project and --package')
     if real_codex != (args.package is not None) or (real_codex and args.workflow):
@@ -97,6 +103,8 @@ def main():
     target = 'integration_test/owner_workflow_native_test.dart' if args.workflow else TARGET
     if real_codex:
         target = 'integration_test/owner_codex_native_test.dart'
+    if args.proposals:
+        target = 'integration_test/owner_proposals_native_test.dart'
     workflow_run = uuid.uuid4().hex
     phase_data = []
     OUTPUT = args.output.resolve()
@@ -113,12 +121,13 @@ def main():
         binary = preview / 'Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'
         return hashlib.sha256(binary.read_bytes()).hexdigest() if binary.exists() else None
     original = preview_hash()
-    if original is None or preview.is_symlink():
-        raise RuntimeError('Expected the fixed ordinary Debug preview')
+    if preview.is_symlink():
+        raise RuntimeError('Refuse a linked Debug preview')
     # Preserve exact bytes as well as using a separate Xcode build database.
     # A shared derived-data root can delete the previous target's App as stale.
     preserved = OUTPUT / 'preserved-preview'
-    shutil.copytree(preview, preserved, symlinks=True)
+    if preview.exists():
+        shutil.copytree(preview, preserved, symlinks=True)
     env = dict(os.environ, XCODE_XCCONFIG_FILE=str(config),
                FLUTTER_MACOS_ARM64_ONLY='true',
                ZHIYU_PROFILE_DRIVER_REPORT=str(OUTPUT / 'driver.json'),
@@ -137,6 +146,7 @@ def main():
         run([launcher, 'flutter', 'build', 'macos', '--debug', '--config-only',
              '--no-pub', '--target', target, '--dart-define=OWNER_NATIVE_SYNTHETIC=true',
              '--dart-define=OWNER_NATIVE_WORKFLOW_RUN=' + workflow_run,
+             '--dart-define=OWNER_PROPOSALS_OS_INPUT=' + str(args.proposals_os_input).lower(),
              '--dart-define=OWNER_NATIVE_FILE_CODEX=' + str(args.file_codex).lower(),
              '--dart-define=INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'], 'configure.log')
         run(['xcodebuild', '-workspace', 'macos/Runner.xcworkspace', '-scheme', 'Runner',
@@ -146,6 +156,15 @@ def main():
              'SYMROOT=' + str(products), 'ARCHS=arm64',
              'COMPILER_INDEX_STORE_ENABLE=NO', '-quiet'], 'build.log')
         app = products / 'info_desktop.app'
+        if args.proposals:
+            helper = app / 'Contents/MacOS/info-proposal-check'
+            with (OUTPUT / 'compile-cli.log').open('w') as log:
+                subprocess.run([launcher, 'dart', 'compile', 'exe', '--target-os', 'macos', '--target-arch', 'arm64',
+                                'bin/info.dart', '-o', str(helper)], cwd=ROOT / 'packages/info_cli', env=env,
+                               stdout=log, stderr=subprocess.STDOUT, timeout=300, check=True)
+            run(['codesign', '--force', '--sign', '-', '--entitlements',
+                 str(DESKTOP / 'macos/Runner/Worker.entitlements'), str(helper)], 'sign-cli.log')
+            run(['codesign', '--force', '--sign', '-', '--preserve-metadata=entitlements,flags', str(app)], 'resign.log')
         info = plistlib.loads((app / 'Contents/Info.plist').read_bytes())
         if info['CFBundleIdentifier'] != IDENTITY or info.get('AgentInfoInterfacePreview') == 'YES':
             raise RuntimeError('Unexpected native test identity')
@@ -172,7 +191,7 @@ def main():
             data = json.loads(driver_file.read_text())
             if not isinstance(data, dict):
                 raise RuntimeError('Driver returned no scenario evidence; an empty test run is not a pass')
-            expected = (9 if phase == 'live' else 3) if args.workflow else (11 if args.file_codex else 6)
+            expected = 9 if args.proposals else ((9 if phase == 'live' else 3) if args.workflow else (11 if args.file_codex else 6))
             if data.get('runtime', {}).get('platform') != 'macos' or len(data.get('checks', [])) != expected:
                 raise RuntimeError('Missing native check evidence')
             if args.workflow:
@@ -187,6 +206,17 @@ def main():
                 phase_data.append(data)
             else:
                 (OUTPUT / ('real-ai-approval.png' if real_codex else 'saved-library.png')).write_bytes(base64.b64decode(data.pop('imagePngBase64')))
+                if args.proposals:
+                    if data.get('passed') is not True or data.get('fixtureRemoved') is not True:
+                        raise RuntimeError('Proposal flow or fixture cleanup incomplete')
+                    if args.proposals_os_input and data.get('nativePasswordInput') is not True:
+                        raise RuntimeError('Native secure keyboard input was not exercised')
+                    images = data.pop('imagesPngBase64')
+                    if set(images) != {'password', 'original', 'modification'}:
+                        raise RuntimeError('Missing proposal screens')
+                    for name, value in images.items():
+                        (OUTPUT / (name + '.png')).write_bytes(base64.b64decode(value))
+                    report['proposals'] = data
             if real_codex:
                 if data.get('passed') is not True or data.get('fixtureRemoved') is not True:
                     raise RuntimeError('Missing real-client native UI or cleanup evidence')
@@ -211,7 +241,8 @@ def main():
         if original != preview_hash():
             if preview.exists():
                 shutil.rmtree(preview)
-            preserved.rename(preview)
+            if preserved.exists():
+                preserved.rename(preview)
             report['previewRestoredFromPreservedBytes'] = True
         report['previewUnchanged'] = original == preview_hash()
         if preserved.exists():

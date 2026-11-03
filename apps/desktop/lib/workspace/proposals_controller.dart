@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 import 'proposal_batch.dart';
 import 'proposal_passwords.dart';
+import 'proposal_reading_state.dart';
 
 class ProposalDraft {
   ProposalDraft(WorkspaceProposalDetail d)
@@ -173,6 +174,9 @@ class ProposalsController extends ChangeNotifier {
   double listScroll = 0;
   final _positions = <String, double>{};
   final _activeItems = <String, String>{};
+  final _readingStates = <(String?, String), ProposalReadingState>{};
+  ProposalReadingState readingState(String itemId) =>
+      _readingStates.putIfAbsent((selection, itemId), ProposalReadingState.new);
   String? get activeItemId {
     final items = reviewItems;
     final current = _activeItems[selection];
@@ -648,6 +652,10 @@ class ProposalsController extends ChangeNotifier {
   @override
   void dispose() {
     _closed = true;
+    for (final state in _readingStates.values) {
+      state.dispose();
+    }
+    _readingStates.clear();
     _passwords?.removeListener(_notify);
     batch.removeListener(_batchChanged);
     batch.dispose();

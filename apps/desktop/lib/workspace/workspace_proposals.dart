@@ -4,6 +4,7 @@ import 'workspace_records.dart';
 import 'workspace_history.dart';
 import 'workspace_entries.dart';
 import 'workspace_organization.dart';
+import 'workspace_files.dart';
 export 'workspace_organization.dart';
 
 enum WorkspaceProposalKind {
@@ -167,6 +168,7 @@ class WorkspaceProposalItem {
     this.before,
     this.beforeState = WorkspaceProposalBeforeState.unread,
     this.admissionNote = '',
+    this.originalProposalVersion,
     this.credential,
     Iterable<WorkspaceProposalAttachment> attachments = const [],
     Iterable<WorkspaceProposalFieldChange> changes = const [],
@@ -187,6 +189,7 @@ class WorkspaceProposalItem {
   }
   final String id;
   final String admissionNote;
+  final int? originalProposalVersion;
   final WorkspaceProposalCredential? credential;
   final List<WorkspaceProposalAttachment> attachments;
   final WorkspaceDetail proposed;
@@ -204,6 +207,7 @@ class WorkspaceProposalItem {
       attachments: attachments,
       credential: credential,
       admissionNote: admissionNote,
+      originalProposalVersion: originalProposalVersion,
       beforeState: state,
       before: WorkspaceDetail(
         record: old.record,
@@ -641,13 +645,50 @@ abstract interface class WorkspaceProposalPreviewSource {
   Future<WorkspaceProposalItem> previewRelated(
     String proposalId,
     int version,
-    WorkspaceRecordRef record,
-  );
+    WorkspaceRecordRef record, {
+    WorkspaceProposalItemReview? review,
+  });
   Future<WorkspaceProposalItem> savedPreview(
     String proposalId,
     WorkspaceRecordRef record,
   );
   WorkspaceRelationSource previewRelations();
+}
+
+typedef ProposalPendingFileReader =
+    Future<WorkspaceFilePreview> Function(
+      String attachmentKey,
+      int version,
+      int page,
+    );
+typedef ProposalStoredFileReader =
+    Future<WorkspaceFilePreview> Function(
+      WorkspaceDetail detail,
+      String fieldKey,
+      WorkspaceFileRef file,
+      int page,
+    );
+
+abstract interface class WorkspaceProposalOriginalSource {
+  Future<WorkspaceFilePreview> pendingOriginal(
+    String proposalId,
+    int proposalVersion,
+    String itemId,
+    String attachmentKey,
+    int version, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+    int? originalProposalVersion,
+  });
+  Future<WorkspaceFilePreview> storedOriginal(
+    String proposalId,
+    int proposalVersion,
+    WorkspaceRecordRef record,
+    String fieldKey,
+    WorkspaceFileRef file, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+  });
 }
 
 String? workspaceProposalFieldId(

@@ -9,6 +9,8 @@ import 'workspace_source.dart';
 import 'workspace_entries.dart';
 import 'library_file_dialogs.dart';
 import 'template_record_content.dart';
+import 'proposal_original_reading.dart';
+import 'proposal_reading_state.dart';
 
 List<({String title, List<WorkspaceProposalFieldChange> changes})>
 proposalChangeSections(WorkspaceProposalItem item) {
@@ -220,8 +222,16 @@ class ProposalItemReading extends StatefulWidget {
     this.onFile,
     this.changedKeys = const {},
     this.passwordInput,
+    this.readPendingFile,
+    this.readStoredFile,
+    this.originalsEnabled = true,
+    this.readingState,
   });
   final Widget? passwordInput;
+  final ProposalPendingFileReader? readPendingFile;
+  final ProposalStoredFileReader? readStoredFile;
+  final bool originalsEnabled;
+  final ProposalReadingState? readingState;
   final Set<String> changedKeys;
   final WorkspaceProposalItem item;
   final WorkspaceProposalItemReview review;
@@ -235,17 +245,28 @@ class ProposalItemReading extends StatefulWidget {
 }
 
 class _ProposalItemReadingState extends State<ProposalItemReading> {
-  final _reading = DocumentReadingController();
+  DocumentReadingController? _ownedReading;
+  DocumentReadingController get _reading =>
+      widget.readingState?.document ??
+      (_ownedReading ??= DocumentReadingController());
   @override
   void dispose() {
-    _reading.dispose();
+    _ownedReading?.dispose();
     super.dispose();
   }
 
   Widget _attachment(WorkspaceProposalAttachment a) =>
       ProposalAttachmentReading(
+        key: ValueKey((
+          widget.item.id,
+          widget.item.originalProposalVersion,
+          a.key,
+        )),
         attachment: a,
         onFile: widget.onFile,
+        readFile: widget.readPendingFile,
+        originalsEnabled: widget.originalsEnabled,
+        readingState: widget.readingState,
         enabled: widget.enabled,
       );
 
@@ -295,9 +316,25 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
             final attachment = widget.item.attachments
                 .where((a) => a.templateField == fieldKey)
                 .firstOrNull;
-            return attachment == null
-                ? const Text('没有替换原文件。')
-                : _attachment(attachment);
+            if (attachment != null) return _attachment(attachment);
+            final ref = preview.values[fieldKey];
+            if (ref is Map && widget.readStoredFile != null) {
+              try {
+                final file = WorkspaceFileRef.fromJson(ref);
+                return ProposalOriginalReading(
+                  key: ValueKey((widget.item.id, fieldKey, file)),
+                  enabled: widget.originalsEnabled,
+                  readingState: widget.readingState?.child(
+                    'stored:$fieldKey:${file.id}:${file.version}',
+                  ),
+                  load: (page) =>
+                      widget.readStoredFile!(preview, fieldKey, file, page),
+                );
+              } on WorkspaceFailure {
+                /* Show an explicit unavailable file below. */
+              }
+            }
+            return const Text('原文件预览暂不可用。');
           },
           credentialBuilder: (_) {
             final credential = widget.item.credential!;
@@ -368,19 +405,105 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
 }
 
 /// New-file and modification approvals share the same human-readable originals.
-class ProposalAttachmentReading extends StatelessWidget {
+class ProposalAttachmentReading extends StatefulWidget {
   const ProposalAttachmentReading({
     super.key,
     required this.attachment,
     this.onFile,
     this.enabled = true,
+    this.readFile,
+    this.originalsEnabled = true,
+    this.readingState,
   });
   final WorkspaceProposalAttachment attachment;
+  final ProposalPendingFileReader? readFile;
+  final bool originalsEnabled;
+  final ProposalReadingState? readingState;
   final Future<void> Function(String attachmentKey, int version)? onFile;
   final bool enabled;
   @override
+  State<ProposalAttachmentReading> createState() =>
+      _ProposalAttachmentReadingState();
+}
+
+class _ProposalAttachmentReadingState extends State<ProposalAttachmentReading> {
+  late int _selected;
+  @override
+  void initState() {
+    super.initState();
+    _selected =
+        widget.readingState?.selectedOriginals[widget.attachment.key] ??
+        widget.attachment.currentVersion ??
+        (widget.attachment.previous != null ? 0 : 1);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final a = attachment;
+    final a = widget.attachment;
+    final enabled = widget.enabled, onFile = widget.onFile;
+    if (widget.readFile != null) {
+      final available = [
+        if (a.previous != null) 0,
+        for (final (index, _) in a.versions.indexed) index + 1,
+      ];
+      if (!available.contains(_selected)) _selected = available.first;
+      final original = _selected == 0 ? a.previous! : a.versions[_selected - 1];
+      String label(int version) => version == 0
+          ? '原文件'
+          : a.versions[version - 1].label.isNotEmpty
+          ? a.versions[version - 1].label
+          : a.versions[version - 1].filename;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (a.description.isNotEmpty) Text(a.description),
+          if (a.currentVersion == null) const Text('只补充历史版本，当前文件保持不变。'),
+          if (available.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final version in available)
+                    ChoiceChip(
+                      showCheckmark: false,
+                      selected: _selected == version,
+                      onSelected: enabled
+                          ? (_) => setState(() {
+                              _selected = version;
+                              widget.readingState?.selectedOriginals[a.key] =
+                                  version;
+                            })
+                          : null,
+                      label: Text(
+                        '${label(version)}${a.currentVersion == version ? ' · 当前' : ''}',
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          if (original.sourceNote.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SelectableText(original.sourceNote),
+            ),
+          ProposalOriginalReading(
+            key: ValueKey((
+              a.key,
+              _selected,
+              original.filename,
+              original.byteLength,
+            )),
+            enabled: widget.originalsEnabled,
+            readingState: widget.readingState?.child(
+              'pending:${a.key}:$_selected',
+            ),
+            load: (page) => widget.readFile!(a.key, _selected, page),
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -395,7 +518,7 @@ class ProposalAttachmentReading extends StatelessWidget {
           DesktopButton(
             kind: DesktopButtonKind.quiet,
             onPressed: enabled && onFile != null
-                ? () => onFile!(a.key, 0)
+                ? () => onFile(a.key, 0)
                 : null,
             child: const Text('查看原当前文件'),
           ),
@@ -420,7 +543,7 @@ class ProposalAttachmentReading extends StatelessWidget {
                 DesktopButton(
                   kind: DesktopButtonKind.quiet,
                   onPressed: enabled && onFile != null
-                      ? () => onFile!(a.key, index + 1)
+                      ? () => onFile(a.key, index + 1)
                       : null,
                   child: const Text('查看这份原文'),
                 ),
@@ -531,6 +654,10 @@ class ProposalItemComparison extends StatelessWidget {
     required this.onRecord,
     required this.enabled,
     this.onFile,
+    this.readPendingFile,
+    this.readStoredFile,
+    this.originalsEnabled = true,
+    this.readingState,
   });
   final WorkspaceProposalItem item;
   final WorkspaceProposalItemReview review;
@@ -539,6 +666,10 @@ class ProposalItemComparison extends StatelessWidget {
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final bool enabled;
   final Future<void> Function(String, int)? onFile;
+  final ProposalPendingFileReader? readPendingFile;
+  final ProposalStoredFileReader? readStoredFile;
+  final bool originalsEnabled;
+  final ProposalReadingState? readingState;
 
   @override
   Widget build(BuildContext context) {
@@ -609,6 +740,10 @@ class ProposalItemComparison extends StatelessWidget {
               enabled: enabled,
               changedKeys: after ? keys : const {},
               onFile: after ? onFile : null,
+              readPendingFile: after ? readPendingFile : null,
+              readStoredFile: readStoredFile,
+              originalsEnabled: originalsEnabled,
+              readingState: readingState?.child(after ? 'after' : 'before'),
             ),
         ],
       ),

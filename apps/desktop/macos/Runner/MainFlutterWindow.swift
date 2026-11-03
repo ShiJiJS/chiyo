@@ -55,6 +55,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     self.title = "信息授权"
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    let inlinePasswords = flutterViewController.registrar(forPlugin: "AgentInfoInlinePassword")
+    inlinePasswords.register(NativeInlinePasswordFactory(messenger: inlinePasswords.messenger),
+                             withId: "agent_info_manage/inline_password")
     if interfacePreview {
       configureInterfacePreview(flutterViewController)
       finishWindowSetup(flutterViewController)

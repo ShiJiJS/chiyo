@@ -147,6 +147,7 @@ class _InlinePasswordState extends State<_InlinePassword> {
           controller: widget.controller,
           enabled: widget.enabled,
           obscureText: !_visible,
+          inlineSecret: true,
           enableSuggestions: false,
           autocorrect: false,
           maxLength: 65536,

@@ -203,16 +203,16 @@ void main() {
     final proposals = t
         .widget<ProposalsPage>(find.byType(ProposalsPage))
         .controller;
-    await press('proposal-item-status');
+    expect(find.byKey(const ValueKey('proposal-item-status')), findsNothing);
     if (proposals.needsReview) await press('proposal-review-current');
     await press('proposal-confirm');
     expect(proposals.detail!.summary.status, WorkspaceProposalStatus.completed);
-    final created = proposals.detail!.targets.single.record;
-    await press('proposal-current-${created.key}');
-    expect(library.detail!.record.ref, created);
-    await press('workspace-back');
+    expect(proposals.detail!.targets, isNotEmpty);
+    expect(find.text('查看当前资料'), findsNothing);
+    expect(find.text('返回录入提案'), findsNothing);
+    expect(find.byType(ProposalsPage), findsOneWidget);
     expect(proposals.selection, 'import');
-    await stage('u06-proposal-result-current-return');
+    await stage('u06-whole-proposal-result-stays-inline');
 
     await press('workspace-nav-settings');
     await press('settings-section-appearance');

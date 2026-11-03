@@ -18,7 +18,7 @@ class MacSecretInput extends StatefulWidget {
     this.enabled = true,
     this.maxLength,
     this.onChanged,
-    this.label = '秘密内容',
+    this.label = '凭据内容',
   });
   final TextEditingController? controller;
   final FocusNode? focusNode;
