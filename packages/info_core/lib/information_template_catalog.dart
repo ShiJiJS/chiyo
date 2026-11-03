@@ -98,6 +98,12 @@ class InformationTemplateDescription {
         'credentialTransportUtf8Bytes': 6000000,
       },
     },
+    'classificationInput': {
+      'directoryId': 'Use an existing directory id when known.',
+      'suggestedDirectory':
+          'A directory name or path, for example Personal/Career. Separate levels with /, at most 8 levels. Empty levels, backslashes, . and .. are invalid. Approval reuses existing parents and creates missing levels together with the records.',
+      'suggestedTags': 'Tag names proposed for owner approval.',
+    },
     'relationInput': {
       'shape': 'Map<declared relation key, List<target>>',
       'target': {

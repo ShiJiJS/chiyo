@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "11ad2816f7ea49b1b71ee99b1d04589f8fee8243",
+  "ownerConfirmedKeychainAllow": true,
+  "normalReleaseRunningObserved": true,
+  "normalIndependentReopenWithExistingKeyObserved": true,
+  "emptyLibraryObserved": true,
+  "oldLibraryPreserved": true,
+  "backupIndependentRestore": {
+    "format": 17,
+    "information": 33,
+    "credentialsIncludingDeleted": 15,
+    "credentialMaterials": 18
+  },
+  "sourceFiles": 49,
+  "sourceFilesChangedByAgent": false,
+  "freshChat": "01a19f30-b23f-7662-820b-a45439036dfd",
+  "model": "gpt-6.1-sol",
+  "reasoning": "xhigh",
+  "realIntakeComplete": false
+}

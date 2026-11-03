@@ -35,7 +35,7 @@ void main() {
             'PENDING-PROPOSAL-MARKER-999',
             '',
             [const FieldInput('Host', '', 'PRIVATE-PROPOSAL-MARKER-999')],
-            suggestedDirectory: 'Services',
+            suggestedDirectory: 'Services/Backend',
             suggestedTags: ['Notes'],
           ),
           ImportItemInput('Second', '', [
@@ -78,7 +78,15 @@ void main() {
       final retry = await service.owner.confirmImport(id, 1, pending.items);
       expect(retry.map((i) => i.id), items.map((i) => i.id));
       expect(service.owner.information, hasLength(2));
-      expect(service.owner.directories.single.name, 'Services');
+      final parent = service.owner.directories.singleWhere(
+        (d) => d.parentId == null,
+      );
+      final child = service.owner.directories.singleWhere(
+        (d) => d.parentId == parent.id,
+      );
+      expect(parent.name, 'Services');
+      expect(child.name, 'Backend');
+      expect(service.owner.information.first.directoryId, child.id);
       expect(service.owner.tags.single.name, 'Notes');
       expect(service.owner.importProposals.single.items, isEmpty);
       expect(service.owner.importProposals.single.fieldCount, 2);
