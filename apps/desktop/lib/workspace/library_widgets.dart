@@ -457,7 +457,7 @@ class LibraryRelationRow extends StatelessWidget {
     this.first = true,
   });
   final WorkspaceRecordSummary record;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool first;
   @override
   Widget build(BuildContext context) => Container(

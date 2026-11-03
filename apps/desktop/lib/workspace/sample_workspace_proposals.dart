@@ -39,7 +39,8 @@ class _ProposalInput {
 
 /// Central, resettable Owner-review fixture. A proposal has one transaction;
 /// mixed queue operations do not claim a transaction spanning proposals.
-class _SampleProposals implements WorkspaceProposalSource {
+class _SampleProposals
+    implements WorkspaceProposalSource, WorkspaceProposalPreviewSource {
   _SampleProposals(this.s);
   final SampleWorkspaceSource s;
   final _rows = <String, _ProposalInput>{};
@@ -341,19 +342,8 @@ class _SampleProposals implements WorkspaceProposalSource {
               fieldOverrides: original.fieldOverrides,
               retainedFields: original.retainedFields,
               retainedRelations: original.retainedRelations,
-              values: wholeDeletion
-                  ? archive?.detail.values ?? const {}
-                  : {
-                      for (final c in item.changes)
-                        if (available(c))
-                          c.reviewKey: workspaceProposalFieldValue(
-                            archive!.detail,
-                            c,
-                          ),
-                    },
-              relations: wholeDeletion
-                  ? archive?.detail.relations ?? const {}
-                  : const {},
+              values: archive?.detail.values ?? const {},
+              relations: archive?.detail.relations ?? const {},
             ),
       changes: item.changes.map(
         (c) => c.withOwnerBefore(
@@ -604,6 +594,13 @@ class _SampleProposals implements WorkspaceProposalSource {
       if (_status(r) != WorkspaceProposalStatus.pending) {
         throw const WorkspaceFailure('conflict', '资料版本已变化，不能用旧提案覆盖。');
       }
+      if (r.kind == WorkspaceProposalKind.addition &&
+          c.reviewed.length != r.items.length) {
+        throw const WorkspaceFailure(
+          'proposal_incomplete',
+          '请核对整份提案后保存，不能只保存其中部分条目。',
+        );
+      }
       if (c.reviewed.isEmpty ||
           c.reviewed.length > 20 ||
           c.reviewed.map((i) => i.itemId).toSet().length != c.reviewed.length ||
@@ -823,6 +820,49 @@ class _SampleProposals implements WorkspaceProposalSource {
           'history_unavailable',
           '当时保存的资料快照已不可用，不会替换成当前或同名内容。',
         ));
+  }
+
+  @override
+  WorkspaceRelationSource previewRelations() => s;
+  @override
+  Future<WorkspaceProposalItem> previewRelated(
+    String proposalId,
+    int version,
+    WorkspaceRecordRef record,
+  ) async {
+    final proposal = await read(proposalId);
+    if (proposal.summary.version != version ||
+        !proposal.items.any(
+          (i) => i.proposed.visibleRelations.values
+              .expand((refs) => refs)
+              .contains(record),
+        )) {
+      throw const WorkspaceFailure('conflict', '关联范围已变化，请重新读取。');
+    }
+    return WorkspaceProposalItem(
+      id: record.key,
+      proposed: await s.readDetail(record),
+    );
+  }
+
+  @override
+  Future<WorkspaceProposalItem> savedPreview(
+    String proposalId,
+    WorkspaceRecordRef record,
+  ) async {
+    final archive = await snapshot(proposalId, record);
+    final proposal = await read(proposalId);
+    final before = proposal.summary.kind == WorkspaceProposalKind.modification
+        ? s._grantHistory.archive(record, archive.detail.version - 1)?.detail
+        : null;
+    return WorkspaceProposalItem(
+      id: record.key,
+      proposed: archive.detail,
+      before: before,
+      beforeState: before == null
+          ? WorkspaceProposalBeforeState.unavailable
+          : WorkspaceProposalBeforeState.available,
+    );
   }
 
   @override

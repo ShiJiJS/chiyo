@@ -1,4 +1,5 @@
 import 'workspace_source.dart';
+import 'proposal_passwords.dart';
 
 /// Optional host input adapters. Unconnected inputs never offer fixed examples.
 class WorkspaceInputs {
@@ -13,8 +14,7 @@ class WorkspaceInputs {
   });
   final WorkspaceFilePicker? file;
   final WorkspaceCredentialPicker? credential;
-  final Future<bool> Function(String proposalId, int version, String itemId)?
-  proposalPassword;
+  final ProposalPasswords? proposalPassword;
   final WorkspaceProposalFileOpener? proposalFile;
   final WorkspacePluginPicker? plugin;
   final WorkspaceHostFilePicker? hostFile;

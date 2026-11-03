@@ -42,6 +42,7 @@ void main() {
       late OwnerWorkspaceProposals source;
       late ProposalsController model;
       late String id;
+      late OwnerProposalPasswords passwords;
       await t.runAsync(() async {
         root = await Directory.systemTemp.createTemp('credential-owner-ui-');
         repo = await EncryptedInformationRepository.open(root.path, _Keys());
@@ -76,6 +77,7 @@ void main() {
           proposals: source,
           refreshInterval: Duration.zero,
         );
+        passwords = OwnerProposalPasswords(service.owner);
         model = ProposalsController(source, library.changes);
         await model.open(id);
       });
@@ -108,13 +110,7 @@ void main() {
               body: ProposalsPage(
                 controller: model,
                 onRecord: (_) {},
-                onPasswordInput: (p, v, i) => showOwnerProposalPasswordInput(
-                  context,
-                  service.owner,
-                  p,
-                  v,
-                  i,
-                ),
+                passwords: passwords,
               ),
             ),
           ),
@@ -144,21 +140,38 @@ void main() {
         ),
         true,
       );
-      final input = find.byKey(ValueKey('proposal-password-${item.id}'));
+      final input = find.byKey(ValueKey('proposal-owner-password-${item.id}'));
       await t.ensureVisible(input);
-      await t.tap(input);
+      await t.enterText(input, 'PRIVATE-OWNER-WIDGET-PASSWORD');
       await t.pumpAndSettle();
-      await t.enterText(
-        find.byKey(const ValueKey('proposal-owner-password')),
-        'PRIVATE-OWNER-WIDGET-PASSWORD',
-      );
-      await t.tap(find.byKey(const ValueKey('proposal-owner-password-save')));
-      await settle(dialog: true);
-      expect(model.detail!.items.single.credential!.ready, true);
+      expect(model.detail!.items.single.credential!.ready, false);
       expect(model.canConfirm, true);
       expect(model.draft!.items[item.id]!.name, '主人核对后的登录密码');
       expect(repo.managedCredentials, isEmpty);
-      expect(find.text('PRIVATE-OWNER-WIDGET-PASSWORD'), findsNothing);
+      expect(find.text('保存密码到提案'), findsNothing);
+      expect(
+        t
+            .widget<TextField>(
+              find.descendant(of: input, matching: find.byType(TextField)),
+            )
+            .obscureText,
+        true,
+      );
+      final visibility = find.byKey(
+        ValueKey('proposal-password-visible-${item.id}'),
+      );
+      await t.tap(visibility);
+      await t.pumpAndSettle();
+      expect(
+        t
+            .widget<TextField>(
+              find.descendant(of: input, matching: find.byType(TextField)),
+            )
+            .obscureText,
+        false,
+      );
+      await t.tap(visibility);
+      await t.pumpAndSettle();
       final before = await t.runAsync(
         () => cli.execute({'command': 'import-status', 'proposalId': id}),
       );
@@ -167,7 +180,7 @@ void main() {
       await t.ensureVisible(approve);
       await t.tap(approve);
       await settle();
-      expect(model.writeFailure, isNull);
+      expect(model.writeFailure, isNull, reason: model.writeFailure?.message);
       expect(model.uncertain, false);
       expect(repo.managedCredentials.length, 1);
       expect(repo.managedCredentials.single.name, '主人核对后的登录密码');
@@ -227,15 +240,15 @@ void main() {
         expect(model.canConfirm, true);
         expect(find.text('FAKE-EXAMPLE-ONLY'), findsNothing);
         if (kind == 'file') {
-          expect(find.textContaining('无需重新选择文件'), findsOneWidget);
+          expect(find.text('文件已提供'), findsOneWidget);
           expect(find.text('填写密码'), findsNothing);
         } else {
-          expect(find.text('AI 已接触过这份秘密，内容可能已经进入会话上下文。'), findsOneWidget);
+          expect(find.text('AI已提供此密码或凭证，内容可能已进入会话上下文。'), findsOneWidget);
         }
         await t.ensureVisible(approve);
         await t.tap(approve);
         await settle();
-        expect(model.writeFailure, isNull);
+        expect(model.writeFailure, isNull, reason: model.writeFailure?.message);
         expect(model.uncertain, false);
         expect(
           model.detail!.targets.single.record.kind,
@@ -246,6 +259,7 @@ void main() {
       expect(repo.items, isEmpty);
       await t.pumpWidget(const SizedBox());
       model.dispose();
+      passwords.dispose();
       await t.runAsync(() async {
         cli.close();
         await library.dispose();

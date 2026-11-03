@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show setEquals;
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_document.dart';
-import 'library_entries.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'workspace_entries.dart';
 import 'library_file_dialogs.dart';
+import 'template_record_content.dart';
 
 List<({String title, List<WorkspaceProposalFieldChange> changes})>
 proposalChangeSections(WorkspaceProposalItem item) {
@@ -216,7 +218,9 @@ class ProposalItemReading extends StatefulWidget {
     required this.onRecord,
     this.enabled = true,
     this.onFile,
+    this.changedKeys = const {},
   });
+  final Set<String> changedKeys;
   final WorkspaceProposalItem item;
   final WorkspaceProposalItemReview review;
   final WorkspaceCatalog catalog;
@@ -229,37 +233,11 @@ class ProposalItemReading extends StatefulWidget {
 }
 
 class _ProposalItemReadingState extends State<ProposalItemReading> {
-  late Future<List<WorkspaceRecordSummary>> _related;
-  void _load() => _related = widget.relations.readSummaries(
-    widget.review.relations.values.expand((x) => x),
-  );
+  final _reading = DocumentReadingController();
   @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  @override
-  void didUpdateWidget(ProposalItemReading old) {
-    super.didUpdateWidget(old);
-    if (old.item != widget.item || old.review != widget.review) _load();
-  }
-
-  Widget _value(Map<String, Object?> f) {
-    final key = f['key'] as String, value = widget.review.values[key];
-    if (f['type'] == 'entries') return LibraryEntryTimeline(value);
-    if (f['type'] == 'file') {
-      final file = widget.item.attachments
-          .where((a) => a.templateField == key)
-          .firstOrNull;
-      return file == null
-          ? const Text('没有新的文件原文；已有原文保持不变。')
-          : _attachment(file);
-    }
-    return SelectableText(
-      proposalValue(value),
-      style: libraryText(context, 15, weight: FontWeight.w600, height: 1.9),
-    );
+  void dispose() {
+    _reading.dispose();
+    super.dispose();
   }
 
   Widget _attachment(WorkspaceProposalAttachment a) =>
@@ -269,201 +247,12 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
         enabled: widget.enabled,
       );
 
-  Widget _fields(List<String> keys) {
-    final fields = workspaceFields(
-      widget.item.proposed,
-    ).where((f) => keys.contains(f['key'])).toList();
-    return LayoutBuilder(
-      builder: (context, b) {
-        final two =
-            b.maxWidth >= 600 &&
-            MediaQuery.textScalerOf(context).scale(1) < 1.6;
-        return Wrap(
-          spacing: 30,
-          runSpacing: 22,
-          children: [
-            for (final f in fields)
-              SizedBox(
-                width: two ? (b.maxWidth - 30) / 2 : b.maxWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      f['label'] as String? ?? f['key'] as String,
-                      style: libraryText(
-                        context,
-                        13,
-                        color: UiPalette.of(context).muted,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _value(f),
-                  ],
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _links(String key) => FutureBuilder<List<WorkspaceRecordSummary>>(
-    future: _related,
-    builder: (context, state) {
-      final refs = widget.review.relations[key] ?? [];
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (refs.isEmpty)
-            Text(
-              '未关联',
-              style: libraryText(
-                context,
-                14,
-                color: UiPalette.of(context).muted,
-              ),
-            ),
-          for (final ref in refs)
-            Builder(
-              builder: (context) {
-                final record = state.data
-                    ?.where((r) => r.ref == ref)
-                    .firstOrNull;
-                return DesktopButton(
-                  kind: DesktopButtonKind.quiet,
-                  alignment: Alignment.centerLeft,
-                  onPressed:
-                      widget.enabled &&
-                          !ref.id.startsWith('pending:') &&
-                          state.connectionState == ConnectionState.done &&
-                          !state.hasError &&
-                          record != null
-                      ? () => widget.onRecord(ref)
-                      : null,
-                  child: Text(
-                    record?.name ??
-                        (state.connectionState != ConnectionState.done
-                            ? '正在读取关联名称…'
-                            : state.hasError
-                            ? '关联名称暂时不可用'
-                            : '关联目标已不可用'),
-                  ),
-                );
-              },
-            ),
-        ],
-      );
-    },
-  );
   @override
   Widget build(BuildContext context) {
     final d = widget.item.proposed,
         r = widget.review,
-        c = UiPalette.of(context),
-        shown = <String>{},
-        links = <String>{};
-    final sections = <Widget>[];
-    if (widget.item.credential case final credential?) {
-      sections.add(
-        Text(
-          credential.source == 'owner'
-              ? credential.ready
-                    ? '主人已填写密码，秘密不返回 AI。'
-                    : '需要主人私下填写账号密码，填写后才能批准。'
-              : credential.source == 'agentFile'
-              ? 'AI 已提交凭据文件：${credential.fileName} · ${credential.byteLength}字节。无需重新选择文件。'
-              : 'AI 已填写凭据字符串，审批页不显示秘密原文。',
-          style: libraryText(context, 14, height: 1.8),
-        ),
-      );
-      if (credential.contextExposed) {
-        sections.add(
-          Text(
-            'AI 已接触过这份秘密，内容可能已经进入会话上下文。',
-            style: libraryText(context, 14, color: c.warning, height: 1.8),
-          ),
-        );
-      }
-      sections.add(
-        Text(
-          '批准只保存凭据，不允许 AI 使用；使用仍须另行申请。',
-          style: libraryText(context, 13, color: c.muted, height: 1.8),
-        ),
-      );
-    }
-    if (widget.item.admissionNote.isNotEmpty) {
-      sections.add(
-        Text(
-          widget.item.admissionNote,
-          style: libraryText(context, 14, color: c.warning, height: 1.8),
-        ),
-      );
-    }
-    for (final raw in d.definition['sections'] as List? ?? []) {
-      if (raw is! Map) continue;
-      final title = raw['title'] as String? ?? '内容';
-      if (raw['kind'] == 'fields') {
-        final keys = List<String>.from(raw['keys'] as List? ?? []);
-        shown.addAll(keys);
-        sections.add(proposalSection(context, title, _fields(keys)));
-      } else if (raw['kind'] == 'entries' && raw['key'] is String) {
-        final key = raw['key'] as String;
-        shown.add(key);
-        sections.add(
-          proposalSection(context, title, LibraryEntryTimeline(r.values[key])),
-        );
-      } else if (raw['kind'] == 'text' && raw['key'] is String) {
-        final key = raw['key'] as String;
-        shown.add(key);
-        if (raw['formatKey'] is String) shown.add(raw['formatKey'] as String);
-        sections.add(
-          proposalSection(
-            context,
-            title,
-            LibraryDocument(
-              body: r.values[key]?.toString() ?? '',
-              format: r.values[raw['formatKey']]?.toString() ?? 'plain',
-            ),
-          ),
-        );
-      } else if (raw['kind'] == 'relations' && raw['key'] is String) {
-        final key = raw['key'] as String;
-        links.add(key);
-        if (r.relations[key]?.isNotEmpty == true) {
-          sections.add(proposalSection(context, title, _links(key)));
-        }
-      }
-    }
-    for (final a in widget.item.attachments.where(
-      (a) => a.templateField == null,
-    )) {
-      sections.add(
-        proposalSection(context, '独立附件 · ${a.name}', _attachment(a)),
-      );
-    }
-    final extras = workspaceFields(
-      d,
-    ).map((f) => f['key'] as String).where((k) => !shown.contains(k)).toList();
-    if (extras.isNotEmpty) {
-      sections.add(proposalSection(context, '资料内容', _fields(extras)));
-    }
-    for (final key in r.values.keys.where(
-      (k) => !shown.contains(k) && !extras.contains(k),
-    )) {
-      sections.add(
-        proposalSection(
-          context,
-          '保留的内容',
-          SelectableText(
-            proposalValue(r.values[key]),
-            style: libraryText(context, 14),
-          ),
-        ),
-      );
-    }
-    for (final key in r.relations.keys.where((k) => !links.contains(k))) {
-      sections.add(proposalSection(context, '关联资料', _links(key)));
-    }
+        c = UiPalette.of(context);
+    final preview = proposalReadingDetail(widget.item, r);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -479,15 +268,6 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
             ProposalPill(d.record.type.name),
           ],
         ),
-        const SizedBox(height: 9),
-        Text(
-          widget.catalog.directories
-                  .where((x) => x.id == r.directoryId)
-                  .firstOrNull
-                  ?.name ??
-              (r.directoryId == null ? '未分类' : '原目录已移除，请重新核对'),
-          style: libraryText(context, 13, color: c.muted),
-        ),
         if (r.description.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 12),
@@ -497,14 +277,61 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
             ),
           ),
         if (d.templateState != WorkspaceTemplateState.available)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              '模板已停用或缺失，按提交时的结构查看，不会改用当前新模板。',
-              style: libraryText(context, 13, color: c.warning, height: 1.8),
-            ),
+          Text(
+            '模板已停用或缺失，按保留的内容显示。',
+            style: libraryText(context, 13, color: c.warning),
           ),
-        ...sections,
+        TemplateRecordContent(
+          key: ValueKey('proposal-template-${widget.item.id}'),
+          detail: preview,
+          relations: widget.relations,
+          onOpen: widget.enabled ? widget.onRecord : null,
+          documentController: _reading,
+          credentialIncludesRelations: false,
+          changedKeys: widget.changedKeys,
+          fileBuilder: (fieldKey) {
+            final attachment = widget.item.attachments
+                .where((a) => a.templateField == fieldKey)
+                .firstOrNull;
+            return attachment == null
+                ? const Text('没有替换原文件。')
+                : _attachment(attachment);
+          },
+          credentialBuilder: (_) {
+            final credential = widget.item.credential!;
+            return Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    credential.fileName ?? '••••••••',
+                    style: libraryText(context, 16),
+                  ),
+                  Text(
+                    credential.source == 'owner'
+                        ? credential.ready
+                              ? '密码已填写'
+                              : '待填写密码'
+                        : credential.source == 'agentFile'
+                        ? '文件已提供'
+                        : '凭证已提供',
+                    style: libraryText(context, 13, color: c.muted),
+                  ),
+                  if (credential.contextExposed)
+                    Text(
+                      'AI已提供此密码或凭证，内容可能已进入会话上下文。',
+                      style: libraryText(context, 13, color: c.warning),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+        for (final a in widget.item.attachments.where(
+          (a) => a.templateField == null,
+        ))
+          proposalSection(context, a.name, _attachment(a)),
         if (r.tagIds.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 22),
@@ -592,6 +419,240 @@ class ProposalAttachmentReading extends StatelessWidget {
               ],
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// Project the complete submitted result without changing the reviewed command.
+/// Older field-change proposals carry only changed values; their retained
+/// baseline fills the unchanged fields, including individual timeline leaves.
+WorkspaceDetail proposalReadingDetail(
+  WorkspaceProposalItem item,
+  WorkspaceProposalItemReview review,
+) {
+  final d = item.proposed;
+  final values = <String, Object?>{
+    if (item.beforeState == WorkspaceProposalBeforeState.available)
+      ...?item.before?.values,
+    ...d.values,
+    ...review.values,
+  };
+  final overrides = <String, Map<String, Object?>?>{...d.fieldOverrides};
+  final ids = <String, String>{...d.fieldIds};
+  for (final change in item.changes) {
+    if (change.entryId == null) {
+      if (change.intent == WorkspaceProposalFieldIntent.remove) {
+        values.remove(change.key);
+        ids.remove(change.key);
+        overrides[change.key] = null;
+      } else if (change.definition != null) {
+        overrides[change.key] = {...change.definition!, 'key': change.key};
+      }
+      continue;
+    }
+    if (!review.values.containsKey(change.reviewKey) &&
+        change.intent != WorkspaceProposalFieldIntent.remove) {
+      continue;
+    }
+    values.remove(change.reviewKey);
+    final rows = WorkspaceRepeatedEntry.read(
+      values[change.key],
+    ).map((e) => e.toJson()).toList();
+    var index = rows.indexWhere((row) => row['entryId'] == change.entryId);
+    if (index < 0 && change.intent == WorkspaceProposalFieldIntent.add) {
+      rows.add({
+        'entryId': change.entryId,
+        'fieldIds': <String, String>{},
+        for (final part in WorkspaceRepeatedEntry.parts) part: '',
+      });
+      index = rows.length - 1;
+    }
+    if (index < 0) continue;
+    final row = Map<String, Object?>.from(rows[index]);
+    final leaf = change.leaf!;
+    final fieldIds = Map<String, String>.from(row['fieldIds'] as Map);
+    final definitions = Map<String, Object?>.from(
+      row['definitions'] as Map? ?? {},
+    );
+    if (change.intent == WorkspaceProposalFieldIntent.remove) {
+      fieldIds.remove(leaf);
+      row[leaf] = '';
+      definitions.remove(leaf);
+    } else {
+      row[leaf] = review.values[change.reviewKey];
+      fieldIds[leaf] =
+          fieldIds[leaf] ?? 'proposal:${item.id}:${change.reviewKey}';
+      if (change.definition != null) definitions[leaf] = change.definition;
+    }
+    row['fieldIds'] = fieldIds;
+    row['definitions'] = definitions;
+    rows[index] = row;
+    values[change.key] = rows
+        .where((row) => (row['fieldIds'] as Map).isNotEmpty)
+        .toList();
+  }
+  return WorkspaceDetail(
+    record: d.record,
+    version: d.version,
+    templateState: d.templateState,
+    definition: d.definition,
+    values: values,
+    relations:
+        item.before != null &&
+            d.definition['templateVersion'] == null &&
+            review.relations.isEmpty
+        ? item.before!.relations
+        : review.relations,
+    fieldIds: ids,
+    fieldOverrides: overrides,
+    retainedFields: d.retainedFields,
+    retainedRelations: d.retainedRelations,
+  );
+}
+
+/// Both sides use the library's plugin display; the proposal adds only labels
+/// and change markers. Metadata edits are reflected in the complete after view.
+class ProposalItemComparison extends StatelessWidget {
+  const ProposalItemComparison({
+    super.key,
+    required this.item,
+    required this.review,
+    required this.catalog,
+    required this.relations,
+    required this.onRecord,
+    required this.enabled,
+    this.onFile,
+  });
+  final WorkspaceProposalItem item;
+  final WorkspaceProposalItemReview review;
+  final WorkspaceCatalog catalog;
+  final WorkspaceRelationSource relations;
+  final ValueChanged<WorkspaceRecordRef> onRecord;
+  final bool enabled;
+  final Future<void> Function(String, int)? onFile;
+
+  @override
+  Widget build(BuildContext context) {
+    final before = item.before!;
+    final afterDetail = proposalReadingDetail(item, review);
+    final keys = <String>{
+      for (final key in {...before.values.keys, ...afterDetail.values.keys})
+        if (jsonEncode(before.values[key]) !=
+            jsonEncode(afterDetail.values[key]))
+          key,
+    };
+    final labels = <String>[
+      if (before.record.name != review.name) '资料名称',
+      if (before.record.description != review.description) '用途说明',
+      for (final key in keys)
+        workspaceFields(
+                  item.proposed,
+                ).where((f) => f['key'] == key).firstOrNull?['label']
+                as String? ??
+            key,
+      if (jsonEncode({
+            for (final e in before.relations.entries)
+              e.key: e.value.map((r) => r.key).toList(),
+          }) !=
+          jsonEncode({
+            for (final e in afterDetail.relations.entries)
+              e.key: e.value.map((r) => r.key).toList(),
+          }))
+        '关联资料',
+      if (before.record.directoryId != review.directoryId) '目录',
+      if (!setEquals(
+        before.record.tags.map((t) => t.id).toSet(),
+        review.tagIds.toSet(),
+      ))
+        '标签',
+      if (item.attachments.isNotEmpty) '文件',
+    ];
+    Widget panel(String label, bool after) => Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        border: Border.all(color: UiPalette.of(context).line),
+        borderRadius: BorderRadius.circular(8),
+        color: after
+            ? UiPalette.of(context).successSurface
+            : UiPalette.of(context).rail,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(label, style: libraryText(context, 14, weight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          if (!after &&
+              item.beforeState != WorkspaceProposalBeforeState.available)
+            const Text('修改前的内容暂不可用，请重新核对。')
+          else
+            ProposalItemReading(
+              item: after
+                  ? item
+                  : WorkspaceProposalItem(id: item.id, proposed: before),
+              review: after
+                  ? review
+                  : WorkspaceProposalItemReview.fromItem(
+                      WorkspaceProposalItem(id: item.id, proposed: before),
+                    ),
+              catalog: catalog,
+              relations: relations,
+              onRecord: onRecord,
+              enabled: enabled,
+              changedKeys: after ? keys : const {},
+              onFile: after ? onFile : null,
+            ),
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          labels.isEmpty ? '没有内容变化' : '本次修改：${labels.join('、')}',
+          style: libraryText(context, 14, color: UiPalette.of(context).accent),
+        ),
+        if (item.changes.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final change in item.changes)
+                  ProposalPill(
+                    '${switch (change.intent) {
+                      WorkspaceProposalFieldIntent.add => '新增',
+                      WorkspaceProposalFieldIntent.replace => '替换',
+                      WorkspaceProposalFieldIntent.remove => '删除',
+                      WorkspaceProposalFieldIntent.correct => '修改',
+                    }}：${change.definition?['label'] ?? change.label}',
+                  ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 16),
+        LayoutBuilder(
+          builder: (context, bounds) =>
+              bounds.maxWidth < 780 ||
+                  MediaQuery.textScalerOf(context).scale(1) >= 1.6
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    panel('修改前', false),
+                    const SizedBox(height: 16),
+                    panel('修改后', true),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: panel('修改前', false)),
+                    const SizedBox(width: 16),
+                    Expanded(child: panel('修改后', true)),
+                  ],
+                ),
+        ),
       ],
     );
   }

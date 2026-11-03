@@ -64,6 +64,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   OwnerWorkspaceBackupFiles? _backupFiles;
   late OwnerWorkspacePlugins _plugins;
   late OwnerWorkspaceHosts _hosts;
+  late OwnerProposalPasswords _passwords;
   @override
   void initState() {
     super.initState();
@@ -75,6 +76,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   void _runtimeChanged() => _source.notifyExternalChange();
 
   void _bind() {
+    _passwords = OwnerProposalPasswords(widget.runtime.service.owner);
     _plugins = OwnerWorkspacePlugins(
       owner: widget.runtime.service.owner,
       picker: widget.pluginPicker,
@@ -145,12 +147,14 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
       final old = _source;
       final oldPlugins = _plugins;
       final oldHosts = _hosts;
+      final oldPasswords = _passwords;
       final oldBackups = _backups;
       unawaited(_changes?.cancel());
       setState(_bind);
       unawaited(old.dispose());
       oldPlugins.dispose();
       oldHosts.dispose();
+      oldPasswords.dispose();
       oldBackups?.dispose();
     });
   }
@@ -163,6 +167,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     _backups?.dispose();
     _plugins.dispose();
     _hosts.dispose();
+    _passwords.dispose();
     _desktop.dispose();
     super.dispose();
   }
@@ -185,13 +190,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
               attachment,
               fileVersion,
             ),
-        proposalPassword: (id, version, item) => showOwnerProposalPasswordInput(
-          context,
-          widget.runtime.service.owner,
-          id,
-          version,
-          item,
-        ),
+        proposalPassword: _passwords,
         backup: _backupFiles?.pick,
         plugin: _plugins.pick,
         hostFile: _hosts.pick,

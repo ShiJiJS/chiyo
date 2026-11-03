@@ -292,7 +292,9 @@ class WorkspaceProposalDetail {
   final bool currentAvailable;
   final WorkspaceOrganizationReport? organization;
   late final String snapshotDigest = _snapshotDigest();
-  String _snapshotDigest() {
+  String snapshotDigestAtVersion(int version) =>
+      _snapshotDigest(version: version, passwordFill: true);
+  String _snapshotDigest({int? version, bool passwordFill = false}) {
     Map<String, Object?> snapshot(
       WorkspaceDetail d, {
       bool includeValues = true,
@@ -307,7 +309,12 @@ class WorkspaceProposalDetail {
           for (final t in d.record.tags) {'id': t.id, 'name': t.name},
         ],
       },
-      'version': d.version,
+      'version':
+          version != null &&
+              d.record.ref.kind == WorkspaceRecordKind.credential &&
+              d.record.ref.id.startsWith('proposal:${summary.id}:')
+          ? version
+          : d.version,
       'definition': d.definition,
       'values': includeValues ? d.values : const <String, Object?>{},
       'fieldIds': d.fieldIds,
@@ -327,7 +334,7 @@ class WorkspaceProposalDetail {
             jsonEncode(
               _canonical({
                 'id': summary.id,
-                'version': summary.version,
+                'version': version ?? summary.version,
                 'kind': summary.kind.name,
                 'wholeDeletion': summary.wholeDeletion,
                 'title': summary.title,
@@ -339,7 +346,7 @@ class WorkspaceProposalDetail {
                   for (final i in items)
                     {
                       'id': i.id,
-                      'admissionNote': i.admissionNote,
+                      'admissionNote': passwordFill ? '' : i.admissionNote,
                       if (i.attachments.isNotEmpty)
                         'attachments': [
                           for (final a in i.attachments)
@@ -617,6 +624,21 @@ abstract interface class WorkspaceProposalSource {
   /// Owner explicitly compares a pending/conflicted target with its current
   /// ordinary record. This is not part of queue metadata or an Agent aperture.
   Future<WorkspaceDetail> currentTarget(String proposalId);
+}
+
+/// Owner-only, read-only content within a proposal. It never returns credential
+/// material or exposes record editing actions.
+abstract interface class WorkspaceProposalPreviewSource {
+  Future<WorkspaceProposalItem> previewRelated(
+    String proposalId,
+    int version,
+    WorkspaceRecordRef record,
+  );
+  Future<WorkspaceProposalItem> savedPreview(
+    String proposalId,
+    WorkspaceRecordRef record,
+  );
+  WorkspaceRelationSource previewRelations();
 }
 
 String? workspaceProposalFieldId(

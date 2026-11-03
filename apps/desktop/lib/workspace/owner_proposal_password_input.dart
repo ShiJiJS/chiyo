@@ -1,121 +1,167 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart' as core;
 import '../desktop_controls.dart';
-import '../ui_palette.dart';
+import 'proposal_passwords.dart';
+import 'workspace_source.dart';
 
-/// Only the trusted Host owns the password controller. The workspace receives
-/// a completion flag, never a secret or a reusable material handle.
-Future<bool> showOwnerProposalPasswordInput(
-  BuildContext context,
-  core.OwnerAccess owner,
-  String proposalId,
-  int version,
-  String itemId,
-) async =>
-    await showDesktopDialog<bool>(
-      context,
-      builder: (_) => _Password(owner, proposalId, version, itemId),
-    ) ??
-    false;
-
-class _Password extends StatefulWidget {
-  const _Password(this.owner, this.proposalId, this.version, this.itemId);
+/// Controllers and strings belong to the trusted Host, scoped to one library
+/// and proposal revision. The workspace receives widgets and readiness only.
+class OwnerProposalPasswords extends ProposalPasswords {
+  OwnerProposalPasswords(this.owner) : _scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
-  final String proposalId, itemId;
-  final int version;
-  @override
-  State<_Password> createState() => _PasswordState();
-}
+  final core.OwnerLibraryScope _scope;
+  final _inputs = <(String, int, String), TextEditingController>{};
 
-class _PasswordState extends State<_Password> {
-  final _password = TextEditingController();
-  late final _scope = widget.owner.captureLibraryScope();
-  bool _saving = false;
-  String? _error;
-  @override
-  void dispose() {
-    _password.clear();
-    _password.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (_saving) return;
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-    try {
-      await widget.owner.inLibraryScope(_scope, () async {
-        final p = widget.owner.importProposals
-            .where((p) => p.id == widget.proposalId)
+  TextEditingController _controller(String id, int version, String item) =>
+      _inputs.putIfAbsent((id, version, item), () {
+        final proposal = owner.importProposals
+            .where((p) => p.id == id && p.version == version)
             .firstOrNull;
-        final candidate = p?.items
-            .where((i) => 'proposal:${p.id}:${i.key}' == widget.itemId)
-            .firstOrNull;
-        if (p == null ||
-            p.version != widget.version ||
-            candidate?.credential?.source != 'owner') {
-          throw const core.AccessFailure('proposal_changed');
-        }
-        await widget.owner.fillImportCredential(
-          p.id,
-          p.version,
-          candidate!.key,
-          _password.text,
+        final credential = proposal?.items
+            .where((i) => 'proposal:$id:${i.key}' == item)
+            .firstOrNull
+            ?.credential;
+        return TextEditingController(
+          text: credential?.source == 'owner' && credential?.material != null
+              ? utf8.decode(credential!.material!)
+              : '',
         );
       });
-      _password.clear();
-      if (mounted) Navigator.pop(context, true);
-    } catch (error) {
-      if (mounted) {
-        setState(
-          () => _error =
-              error is core.AccessFailure &&
-                  error.status == 'invalid_credential_content'
-              ? '请填写有效密码，不能超过65536字节或包含空字符。'
-              : '提案已变化或暂时无法保存，请关闭后重新核对；尚未批准入库。',
-        );
+
+  @override
+  bool ready(String proposalId, int version, String itemId) =>
+      _inputs[(proposalId, version, itemId)]?.text.isNotEmpty ?? false;
+
+  @override
+  Widget input(
+    String proposalId,
+    int version,
+    String itemId, {
+    required bool enabled,
+  }) => _InlinePassword(
+    key: ValueKey((proposalId, version, itemId)),
+    controller: _controller(proposalId, version, itemId),
+    itemId: itemId,
+    enabled: enabled,
+    changed: notifyListeners,
+  );
+
+  @override
+  Future<Set<String>> store(String proposalId, int version) async {
+    final entries = _inputs.entries
+        .where(
+          (e) =>
+              e.key.$1 == proposalId &&
+              e.key.$2 == version &&
+              e.value.text.isNotEmpty,
+        )
+        .toList();
+    if (entries.isEmpty) return {};
+    try {
+      await owner.inLibraryScope(_scope, () async {
+        final proposal = owner.importProposals
+            .where((p) => p.id == proposalId)
+            .firstOrNull;
+        if (proposal == null || proposal.version != version) {
+          throw const core.AccessFailure('proposal_changed');
+        }
+        final values = <String, String>{};
+        for (final entry in entries) {
+          final candidate = proposal.items
+              .where((i) => 'proposal:${proposal.id}:${i.key}' == entry.key.$3)
+              .firstOrNull;
+          if (candidate?.credential?.source != 'owner') {
+            throw const core.AccessFailure('proposal_changed');
+          }
+          values[candidate!.key] = entry.value.text;
+        }
+        await owner.fillImportCredentials(proposalId, version, values);
+      });
+      // A failed admission must preserve both input and readiness. Move the
+      // private controllers to the revision this exact batch just produced.
+      for (final entry in entries) {
+        _inputs.remove(entry.key);
+        _inputs[(proposalId, version + 1, entry.key.$3)] = entry.value;
       }
-    } finally {
-      if (mounted) setState(() => _saving = false);
+      return entries.map((e) => e.key.$3).toSet();
+    } on core.AccessFailure catch (error) {
+      throw WorkspaceFailure(
+        error.status == 'proposal_changed' ? 'conflict' : error.status,
+        error.status == 'invalid_credential_content'
+            ? '密码不能为空，不能超过65536字节或包含空字符。输入仍保留。'
+            : '提案已变化或密码暂时无法保存，输入仍保留，请重新核对。',
+      );
+    } catch (_) {
+      throw const WorkspaceFailure('unavailable', '密码暂时无法保存，输入仍保留，请重试。');
     }
   }
 
   @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: const Text('为这份提案填写密码'),
-    closeEnabled: !_saving,
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text('密码只进入加密提案，不会返回给 AI。保存后请核对提案并批准，才会正式入库。'),
-        const SizedBox(height: 16),
-        DesktopTextField(
-          key: const ValueKey('proposal-owner-password'),
-          controller: _password,
-          obscureText: true,
+  void clear(String proposalId) {
+    final keys = _inputs.keys.where((k) => k.$1 == proposalId).toList();
+    for (final key in keys) {
+      final controller = _inputs.remove(key)!;
+      controller.clear();
+      // Widgets may still be mounted until the controller reloads the result.
+      WidgetsBinding.instance.addPostFrameCallback((_) => controller.dispose());
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _inputs.values) {
+      controller.clear();
+      controller.dispose();
+    }
+    _inputs.clear();
+    super.dispose();
+  }
+}
+
+class _InlinePassword extends StatefulWidget {
+  const _InlinePassword({
+    super.key,
+    required this.controller,
+    required this.itemId,
+    required this.enabled,
+    required this.changed,
+  });
+  final TextEditingController controller;
+  final String itemId;
+  final bool enabled;
+  final VoidCallback changed;
+  @override
+  State<_InlinePassword> createState() => _InlinePasswordState();
+}
+
+class _InlinePasswordState extends State<_InlinePassword> {
+  bool _visible = false;
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(
+        child: DesktopTextField(
+          key: ValueKey('proposal-owner-password-${widget.itemId}'),
+          controller: widget.controller,
+          enabled: widget.enabled,
+          obscureText: !_visible,
           enableSuggestions: false,
           autocorrect: false,
           maxLength: 65536,
-          decoration: const InputDecoration(labelText: '账号密码'),
+          onChanged: (_) => widget.changed(),
+          decoration: const InputDecoration(labelText: '密码'),
         ),
-        if (_error != null)
-          Text(_error!, style: TextStyle(color: UiPalette.of(context).danger)),
-      ],
-    ),
-    actions: [
-      DesktopButton(
-        onPressed: _saving ? null : () => Navigator.pop(context, false),
-        child: const Text('取消'),
       ),
+      const SizedBox(width: 10),
       DesktopButton(
-        key: const ValueKey('proposal-owner-password-save'),
-        busy: _saving,
-        kind: DesktopButtonKind.primary,
-        onPressed: _saving ? null : _save,
-        child: const Text('保存密码到提案'),
+        key: ValueKey('proposal-password-visible-${widget.itemId}'),
+        kind: DesktopButtonKind.quiet,
+        onPressed: widget.enabled
+            ? () => setState(() => _visible = !_visible)
+            : null,
+        child: Text(_visible ? '隐藏密码' : '显示密码'),
       ),
     ],
   );

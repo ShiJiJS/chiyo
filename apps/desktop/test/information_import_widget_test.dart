@@ -158,7 +158,7 @@ void main() {
       expect(find.textContaining('确认稿 · 保存为当前版本'), findsOneWidget);
       expect(find.textContaining('早期草稿 · 保留为历史版本'), findsOneWidget);
       expect(find.text('来源依据：文件中明确注明草稿日期。'), findsOneWidget);
-      expect(find.text('独立附件 · 相关证明'), findsOneWidget);
+      expect(find.text('相关证明'), findsOneWidget);
       expect(find.text('PRIVATE-CURRENT-ORIGINAL'), findsNothing);
       expect(repo.items, isEmpty);
       final preview = find.text('查看这份原文').first;

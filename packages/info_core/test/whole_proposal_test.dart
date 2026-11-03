@@ -18,6 +18,51 @@ void main() {
   tearDown(() => service.close());
 
   test(
+    'a password batch validates all values before changing one proposal revision',
+    () async {
+      final id = await service.agent.submitImport(session, [
+        for (final key in ['first', 'second'])
+          credentialInput(
+            key,
+            'accountPassword',
+            CredentialImportInput.owner(),
+          ),
+      ]);
+      final initial = proposal(id).version;
+      await expectLater(
+        service.owner.fillImportCredentials(id, initial, {
+          'first': 'SYNTHETIC-FIRST',
+          'second': '',
+        }),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(proposal(id).version, initial);
+      expect(proposal(id).items.every((i) => !i.credential!.ready), true);
+      await service.owner.fillImportCredentials(id, initial, {
+        'first': 'SYNTHETIC-FIRST',
+        'second': 'SYNTHETIC-SECOND',
+      });
+      expect(proposal(id).version, initial + 1);
+      expect(proposal(id).items.every((i) => i.credential!.ready), true);
+      expect(repo.managedCredentials, isEmpty);
+      expect(
+        jsonEncode(service.agent.importStatus(session, id)),
+        isNot(contains('SYNTHETIC-')),
+      );
+      await expectLater(
+        service.owner.fillImportCredentials(id, initial, {'first': 'STALE'}),
+        throwsA(isA<AccessFailure>()),
+      );
+      await service.owner.confirmImport(
+        id,
+        proposal(id).version,
+        proposal(id).items,
+      );
+      expect(repo.managedCredentials, hasLength(2));
+    },
+  );
+
+  test(
     'legacy partial proposal preserves saved receipts and filled passwords',
     () async {
       final saved = await service.agent.submitImport(session, [
