@@ -148,6 +148,17 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
       linkedInformation: credential.linkedItemIds.map(
         (id) => WorkspaceRecordRef(WorkspaceRecordKind.information, id),
       ),
+      referencingInformation: [
+        for (final item in owner.information)
+          if (item.layout?.relations.values
+                  .expand((refs) => refs)
+                  .any(
+                    (ref) =>
+                        ref.kind == 'credential' && ref.id == credential.id,
+                  ) ==
+              true)
+            WorkspaceRecordRef(WorkspaceRecordKind.information, item.id),
+      ],
       linkedCredentials: {
         for (final refs
             in credential.template?.relations.values ??

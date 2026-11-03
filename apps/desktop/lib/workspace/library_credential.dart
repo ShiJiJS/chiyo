@@ -471,6 +471,11 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                   '尚未关联资料。',
                   style: libraryText(context, 13, color: c.muted),
                 ),
+              if (detail.referencingInformation.isNotEmpty)
+                Text(
+                  '其他资料对这项凭据的引用，可打开对应资料修改。',
+                  style: libraryText(context, 12, color: c.muted),
+                ),
             ],
           ),
           id: 'relations',

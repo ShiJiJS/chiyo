@@ -57,7 +57,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
   late Future<List<WorkspaceRecordSummary>> _links;
   void _loadLinks() {
     _links = widget.source.readSummaries(
-      widget.detail.relations.values.expand((r) => r),
+      widget.detail.visibleRelations.values.expand((r) => r),
     );
   }
 
@@ -230,7 +230,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
     String key,
     AsyncSnapshot<List<WorkspaceRecordSummary>> snapshot,
   ) {
-    final targets = widget.detail.relations[key] ?? [];
+    final targets = widget.detail.visibleRelations[key] ?? [];
     final summaries = {
       for (final r in snapshot.data ?? <WorkspaceRecordSummary>[]) r.ref: r,
     };
@@ -266,6 +266,18 @@ class _LibraryDetailState extends State<LibraryDetail> {
                 ),
               ),
             ),
+        if (widget.detail.incomingRelations[key]?.isNotEmpty == true)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              '来自对方资料的关联，可打开对应资料修改。',
+              style: libraryText(
+                context,
+                12,
+                color: UiPalette.of(context).muted,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -601,13 +613,13 @@ class _LibraryDetailState extends State<LibraryDetail> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final relation in detail.relations.entries)
+                    for (final relation in detail.visibleRelations.entries)
                       _section(
                         context,
                         _relationName(relation.key),
                         _relationsFor(context, relation.key, snapshot),
                       ),
-                    if (detail.relations.isEmpty)
+                    if (detail.visibleRelations.isEmpty)
                       Text(
                         '还没有关联资料。',
                         style: libraryText(context, 13, color: c.muted),
@@ -694,7 +706,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                               style: libraryText(context, 14, height: 1.7),
                             ),
                           ),
-                    for (final relation in detail.relations.entries)
+                    for (final relation in detail.visibleRelations.entries)
                       if (record.ref.kind != WorkspaceRecordKind.credential)
                         _section(
                           context,
@@ -753,7 +765,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                           snapshot,
                         ),
                         trailing:
-                            '${detail.relations[section['key']]?.length ?? 0} 项',
+                            '${detail.visibleRelations[section['key']]?.length ?? 0} 项',
                       )
                     else if (section['kind'] == 'timeline')
                       _section(
@@ -802,7 +814,7 @@ class _LibraryDetailState extends State<LibraryDetail> {
                         section['title'] as String,
                         SelectableText(_value(detail.values[section['key']])),
                       ),
-                  for (final relation in detail.relations.entries)
+                  for (final relation in detail.visibleRelations.entries)
                     if (relation.value.isNotEmpty &&
                         !sections.any(
                           (s) =>
