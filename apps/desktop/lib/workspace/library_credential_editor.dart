@@ -497,6 +497,13 @@ class _CredentialEditorState extends State<_CredentialEditor> {
                 _edit();
               }),
             ),
+            if (_baseline?.referencingInformation.isNotEmpty ?? false) ...[
+              const SizedBox(height: 8),
+              Text(
+                '另有 ${_baseline!.referencingInformation.length} 项来自对方资料的关联，可在详情页查看并打开对方资料修改。',
+                style: libraryText(context, 13, color: c.muted),
+              ),
+            ],
             if (_latest case final latest?) ...[
               const SizedBox(height: 22),
               Text(

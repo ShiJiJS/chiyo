@@ -244,17 +244,23 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
       detail.record.type.id,
       detail.definition['packageId'] as String?,
     );
-    if (state == null ||
-        detail.templateState != WorkspaceTemplateState.available) {
-      return detail;
-    }
+    final incomingCredentials = owner.credentialsForInformation(ref.id);
     return WorkspaceDetail(
       record: detail.record,
       version: detail.version,
-      templateState: state,
+      templateState: detail.templateState == WorkspaceTemplateState.available
+          ? state ?? detail.templateState
+          : detail.templateState,
       definition: detail.definition,
       values: detail.values,
       relations: detail.relations,
+      incomingRelations: {
+        if (incomingCredentials.isNotEmpty)
+          'credentials': [
+            for (final credential in incomingCredentials)
+              WorkspaceRecordRef(WorkspaceRecordKind.credential, credential.id),
+          ],
+      },
       fieldIds: detail.fieldIds,
       fieldOverrides: detail.fieldOverrides,
       retainedFields: detail.retainedFields,

@@ -798,6 +798,14 @@ class _EditorState extends State<_Editor> {
                   _dirty = true;
                 }),
               ),
+              if (_detail?.incomingRelations[rule['key']]?.isNotEmpty == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '另有 ${_detail!.incomingRelations[rule['key']]!.length} 项来自对方资料的关联，可在详情页查看并打开对方资料修改。',
+                    style: libraryText(context, 12, color: c.muted),
+                  ),
+                ),
             ],
           ],
         ),

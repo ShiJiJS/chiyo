@@ -276,6 +276,12 @@ class InformationTemplateDescription {
             'Already seen passwords or other tokens are entered by the Agent; explain that they may be exposed in the AI context. Never read a password just to select this branch.',
         'agentFile':
             'Pass the whole user-provided file path to the CLI without reading its bytes into the AI context. The CLI uploads it to the private proposal.',
+        'selection':
+            'Choose by the authentication material needed, not the source extension. Passwords and tokens inside JSON or Markdown remain strings; use a file form when the authentication client needs the whole file. Preserving a source file alone does not finish credential organization.',
+        'missingPassword':
+            'For an identified account with no current password, submit the owner-input branch and explain the account and service. An old password or password hash is not a verified current login password.',
+        'association':
+            'Link directly to the server, service or account that uses the credential. Source documents may be linked additionally. Separate website passwords, API tokens and SSH identities by their actual use.',
         'approval':
             'Material must be complete and approved before admission. Status responses never return material; admission grants no use permission.',
       },

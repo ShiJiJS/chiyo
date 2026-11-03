@@ -379,6 +379,7 @@ class OwnerWorkspaceSource
         ],
       },
       relations: {'related': credential.linkedInformation},
+      incomingRelations: {'related': credential.referencingInformation},
     );
   });
   @override

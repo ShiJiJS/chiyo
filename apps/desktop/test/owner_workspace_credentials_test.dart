@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/library_credential.dart';
+import 'package:info_desktop/workspace/library_detail.dart';
+import 'package:info_desktop/workspace/library_widgets.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/owner_workspace_credentials.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -87,6 +89,97 @@ void main() {
   });
 
   test(
+    'credential-owned links appear on information without becoming editable copies',
+    () async {
+      final c = await create();
+      final item = await service.owner.createInformation(
+        'server metadata',
+        '',
+        [const core.FieldInput('host', '', 'synthetic.invalid')],
+      );
+      final ir = WorkspaceRecordRef(WorkspaceRecordKind.information, item.id);
+      await service.owner.setCredentialLinks(c.id, c.revision, [item.id]);
+      final detail = await source.readDetail(ir);
+      expect(detail.visibleRelations['credentials'], [ref(c)]);
+      expect(detail.relations['credentials'] ?? [], isEmpty);
+      final result = await source.saveRecord(
+        WorkspaceEdit(
+          operationId: workspaceOperationId(),
+          expectedVersion: detail.version,
+          record: detail.record,
+          values: detail.values,
+          relations: detail.relations,
+        ),
+      );
+      expect(result, isA<WorkspaceSaved>());
+      expect(service.owner.credential(c.id).linkedItemIds, [item.id]);
+      expect(
+        service.owner.information.single.layout?.relations['credentials'] ?? [],
+        isEmpty,
+      );
+      await close();
+      await open();
+      expect((await source.readDetail(ir)).visibleRelations['credentials'], [
+        ref(c),
+      ]);
+      final current = service.owner.credential(c.id);
+      await service.owner.setCredentialLinks(c.id, current.revision, []);
+      expect(
+        (await source.readDetail(ir)).visibleRelations['credentials'] ?? [],
+        isEmpty,
+      );
+    },
+  );
+
+  test(
+    'information-owned credential references appear on credential without changing link ownership',
+    () async {
+      final c = await create();
+      final template = await source.loadTemplate('server');
+      final result = await source.createRecord(
+        WorkspaceCreate(
+          operationId: workspaceOperationId(),
+          typeId: 'server',
+          name: 'synthetic server',
+          values: const {'host': 'synthetic.invalid'},
+          expectedTemplateVersion: template['templateVersion'] as String?,
+          expectedTemplateDigest: template['packageDigest'] as String?,
+          relations: {
+            'credentials': [ref(c)],
+          },
+        ),
+      );
+      expect(result, isA<WorkspaceSaved>());
+      final item = (result as WorkspaceSaved).detail;
+      final credential = await source.credentials.read(ref(c));
+      expect(credential.linkedInformation, isEmpty);
+      expect(credential.allLinks, [item.record.ref]);
+      expect((await source.readDetail(ref(c))).visibleRelations['related'], [
+        item.record.ref,
+      ]);
+      await close();
+      await open();
+      expect((await source.credentials.read(ref(c))).allLinks, [
+        item.record.ref,
+      ]);
+      final current = await source.readDetail(item.record.ref);
+      expect(
+        await source.saveRecord(
+          WorkspaceEdit(
+            operationId: workspaceOperationId(),
+            expectedVersion: current.version,
+            record: current.record,
+            values: current.values,
+            relations: const {'credentials': []},
+          ),
+        ),
+        isA<WorkspaceSaved>(),
+      );
+      expect((await source.credentials.read(ref(c))).allLinks, isEmpty);
+    },
+  );
+
+  test(
     'persisted credential opens through unified list with metadata only',
     () async {
       final c = await create();
@@ -129,6 +222,58 @@ void main() {
       expect(shell.values, isEmpty);
       expect(shell.record.ref, ref(c));
       expect(repo.credentialMaterials.single.bytes, utf8.encode(secret));
+    },
+  );
+
+  testWidgets(
+    'real information detail renders and opens the incoming credential',
+    (t) async {
+      final c = (await t.runAsync(() => create()))!;
+      final detail = (await t.runAsync(() async {
+        final item = await service.owner.createInformation(
+          'synthetic server',
+          '',
+          [const core.FieldInput('host', '', 'synthetic.invalid')],
+        );
+        await service.owner.setCredentialLinks(c.id, c.revision, [item.id]);
+        return source.readDetail(
+          WorkspaceRecordRef(WorkspaceRecordKind.information, item.id),
+        );
+      }))!;
+      t.view.physicalSize = const Size(1440, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      WorkspaceRecordRef? opened;
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: LibraryDetail(
+                detail: detail,
+                source: source,
+                metrics: const LibraryMetrics(1440),
+                revision: 1,
+                onOpen: (value) => opened = value,
+                onEdit: null,
+                onHistory: null,
+                onRecycle: null,
+                onSettings: () {},
+                onTag: (_) {},
+                onExpand: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.text(c.name), findsOneWidget);
+      expect(find.text(secret), findsNothing);
+      await t.ensureVisible(find.text(c.name));
+      await t.tap(find.text(c.name));
+      expect(opened, ref(c));
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
     },
   );
 

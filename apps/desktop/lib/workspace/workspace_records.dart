@@ -362,6 +362,7 @@ class WorkspaceDetail {
     Map<String, Object?> definition = const {},
     Map<String, Object?> values = const {},
     Map<String, List<WorkspaceRecordRef>> relations = const {},
+    Map<String, List<WorkspaceRecordRef>> incomingRelations = const {},
     Map<String, String> fieldIds = const {},
     Map<String, Map<String, Object?>?> fieldOverrides = const {},
     Iterable<Map<String, Object?>> retainedFields = const [],
@@ -369,6 +370,7 @@ class WorkspaceDetail {
   }) : definition = _freeze(definition) as Map<String, Object?>,
        values = _freeze(values) as Map<String, Object?>,
        relations = _freezeRelations(relations),
+       incomingRelations = _freezeRelations(incomingRelations),
        fieldIds = Map.unmodifiable(fieldIds),
        fieldOverrides = Map.unmodifiable(
          fieldOverrides.map(
@@ -391,6 +393,14 @@ class WorkspaceDetail {
   final WorkspaceTemplateState templateState;
   final Map<String, Object?> definition, values;
   final Map<String, List<WorkspaceRecordRef>> relations;
+
+  /// Current references owned by other records. Rendering includes these;
+  /// editing keeps only this record's stored relations.
+  final Map<String, List<WorkspaceRecordRef>> incomingRelations;
+  Map<String, List<WorkspaceRecordRef>> get visibleRelations => {
+    for (final key in {...relations.keys, ...incomingRelations.keys})
+      key: List.unmodifiable({...?relations[key], ...?incomingRelations[key]}),
+  };
 
   /// Definition keys address values; these opaque instance identities do not.
   final Map<String, String> fieldIds;
