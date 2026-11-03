@@ -4,6 +4,7 @@ import 'package:info_core/info_core.dart' as core;
 import 'workspace_information_codec.dart';
 import 'workspace_entries.dart';
 import 'workspace_source.dart';
+import 'owner_workspace_credentials.dart' show ownerCredentialType;
 
 class OwnerWorkspaceProposals
     implements WorkspaceProposalSource, WorkspaceProposalPreviewSource {
@@ -591,6 +592,7 @@ class OwnerWorkspaceProposals
                     .reason,
                 credential: WorkspaceProposalCredential(
                   source: material.source,
+                  account: material.account,
                   contextExposed: material.contextExposed,
                   ready: material.ready,
                   fileName: material.fileName,
@@ -606,7 +608,9 @@ class OwnerWorkspaceProposals
                     description: input.description,
                     type: WorkspaceType(
                       input.templateId!,
-                      definition['name'] as String? ?? '托管凭据',
+                      (input.layout!.snapshot['type'] as Map?)?['name']
+                              as String? ??
+                          _credentialTypeName(definition),
                       'key',
                     ),
                     updatedAt: p.createdAt,
@@ -1377,6 +1381,64 @@ class OwnerWorkspaceProposals
     String itemId,
     int version,
   ) => _ProposalRelations(this, proposalId, itemId, version);
+  String _credentialTypeName(Map definition) =>
+      switch ((definition['credential'] as Map?)?['secretKind']) {
+        'accountPassword' => '账号密码',
+        'token' => 'API Key / Token',
+        'file' => '凭据文件',
+        _ => '凭据',
+      };
+
+  WorkspaceProposalItem _credentialPreview(core.ManagedCredential credential) {
+    final layout = credential.template;
+    final definition = Map<String, Object?>.from(
+      layout?.snapshot['definition'] as Map? ?? {'fields': [], 'sections': []},
+    );
+    final ref = WorkspaceRecordRef(
+      WorkspaceRecordKind.credential,
+      credential.id,
+    );
+    return WorkspaceProposalItem(
+      id: ref.key,
+      credential: WorkspaceProposalCredential(
+        source: credential.form == core.CredentialForm.file
+            ? 'agentFile'
+            : 'stored',
+        contextExposed: false,
+        ready: true,
+        account: credential.account,
+        fileName: credential.fileName,
+      ),
+      proposed: WorkspaceDetail(
+        record: WorkspaceRecordSummary(
+          ref: ref,
+          name: credential.name,
+          description: credential.publicPurpose,
+          type: ownerCredentialType(credential),
+          updatedAt: credential.modifiedAt,
+          directoryId: credential.directoryId,
+          tags: [
+            for (final id in credential.tagIds)
+              WorkspaceTag(id, _tags[id] ?? '标签'),
+          ],
+        ),
+        version: credential.revision,
+        definition: definition,
+        relations: {
+          if (layout != null)
+            for (final e in layout.relations.entries)
+              e.key: [
+                for (final ref in e.value)
+                  WorkspaceRecordRef(
+                    WorkspaceRecordKind.values.byName(ref.kind),
+                    ref.id,
+                  ),
+              ],
+        },
+      ),
+    );
+  }
+
   @override
   WorkspaceRelationSource previewRelations() => library();
 
@@ -1407,17 +1469,18 @@ class OwnerWorkspaceProposals
       }
       return target;
     }
-    final detail = await library().readDetail(record);
+    if (record.kind == WorkspaceRecordKind.credential) {
+      final credential = owner.credentials
+          .where((c) => c.id == record.id)
+          .firstOrNull;
+      if (credential == null) {
+        throw const WorkspaceFailure('not_found', '关联凭据已不可用。');
+      }
+      return _credentialPreview(credential);
+    }
     return WorkspaceProposalItem(
       id: record.key,
-      proposed: detail,
-      credential: record.kind == WorkspaceRecordKind.credential
-          ? const WorkspaceProposalCredential(
-              source: 'stored',
-              contextExposed: false,
-              ready: true,
-            )
-          : null,
+      proposed: await library().readDetail(record),
     );
   });
 
@@ -1434,23 +1497,24 @@ class OwnerWorkspaceProposals
       throw const WorkspaceFailure('not_found', '这份提案没有保存此资料。');
     }
     if (record.kind == WorkspaceRecordKind.credential) {
-      final c = owner.credentials.where((c) => c.id == record.id).firstOrNull;
-      if (c == null || c.revision != target.version) {
+      final current = owner.credentials
+          .where((c) => c.id == record.id && c.deletedAt == null)
+          .firstOrNull;
+      final original = owner.importProposals
+          .where((p) => p.id == proposalId)
+          .firstOrNull;
+      final credential =
+          original?.credentialSnapshots.values
+              .where((c) => c.id == record.id)
+              .firstOrNull ??
+          (current?.revision == target.version ? current : null);
+      if (current == null || credential == null) {
         throw const WorkspaceFailure(
           'history_unavailable',
           '这次保存的凭据说明暂不可用，当前内容不会替代历史内容。',
         );
       }
-      return WorkspaceProposalItem(
-        id: record.key,
-        proposed: await library().readDetail(record),
-        credential: WorkspaceProposalCredential(
-          source: c.form == core.CredentialForm.file ? 'agentFile' : 'stored',
-          contextExposed: false,
-          ready: true,
-          fileName: c.fileName,
-        ),
-      );
+      return _credentialPreview(credential);
     }
     final saved = (await snapshot(proposalId, record)).detail;
     final before = proposal.summary.kind == WorkspaceProposalKind.modification

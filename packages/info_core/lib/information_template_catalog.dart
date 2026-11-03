@@ -259,7 +259,11 @@ class InformationTemplateDescription {
           'templateVersion': version,
           'templateDigest': digest,
           'values': <String, Object?>{},
-          'credential': material,
+          'credential': {
+            ...material,
+            if (config['secretKind'] == 'accountPassword')
+              'account': 'sample-user',
+          },
           'relations': <String, Object?>{},
         },
       ],
@@ -268,6 +272,8 @@ class InformationTemplateDescription {
       'submissionExample': example(materials.first),
       'submissionExamples': [for (final m in materials) example(m)],
       'credentialInput': {
+        'account':
+            '用户名或登录邮箱填写在 credential.account，不把账号藏在用途描述里；不知道时不要猜。密码或Token不得填入这个位置。',
         'channel':
             'dedicated credential material, never ordinary values or attachments',
         'owner':

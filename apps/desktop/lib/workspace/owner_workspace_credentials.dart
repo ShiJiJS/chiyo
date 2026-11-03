@@ -6,6 +6,23 @@ import 'package:info_core/info_core.dart' as core;
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
+WorkspaceType ownerCredentialType(core.ManagedCredential credential) {
+  final snapshot = credential.template?.snapshot;
+  final type = snapshot?['type'] as Map?;
+  final config = (snapshot?['definition'] as Map?)?['credential'] as Map?;
+  final name = switch (config?['secretKind']) {
+    'accountPassword' => '账号密码',
+    'token' => 'API Key / Token',
+    'file' => '凭据文件',
+    _ => '凭据',
+  };
+  return WorkspaceType(
+    credential.template?.typeId ?? 'credential',
+    type?['name'] as String? ?? name,
+    'key',
+  );
+}
+
 String ownerCredentialRecycleId(String id, int revision) =>
     'credential_${id}_$revision';
 
@@ -113,7 +130,7 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
         ref: WorkspaceRecordRef(WorkspaceRecordKind.credential, credential.id),
         name: credential.name,
         description: credential.publicPurpose,
-        type: const WorkspaceType('credential', '凭据', 'key'),
+        type: ownerCredentialType(credential),
         updatedAt: credential.modifiedAt,
         directoryId: credential.directoryId,
         tags: [
@@ -144,6 +161,7 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
           : WorkspaceCredentialDelivery.environment,
       binding: credential.suggestedBinding,
       privateNote: credential.privateNote,
+      account: credential.account,
       filename: credential.fileName,
       linkedInformation: credential.linkedItemIds.map(
         (id) => WorkspaceRecordRef(WorkspaceRecordKind.information, id),

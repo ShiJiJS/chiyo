@@ -70,7 +70,16 @@ extension _CredentialImportClient on AgentClient {
             item['credential'] as Map,
           );
           if (credential.containsKey('filePath')) {
-            if (credential.length != 3 ||
+            if (credential.keys.any(
+                  (key) => !{
+                    'source',
+                    'contextExposed',
+                    'filePath',
+                    'account',
+                  }.contains(key),
+                ) ||
+                credential.length !=
+                    (credential.containsKey('account') ? 4 : 3) ||
                 credential['source'] != 'agentFile' ||
                 credential['contextExposed'] is! bool ||
                 credential['filePath'] is! String) {
@@ -94,6 +103,7 @@ extension _CredentialImportClient on AgentClient {
                 file.uri.pathSegments.last,
                 bytes,
                 contextExposed: credential['contextExposed'] as bool,
+                account: credential['account'] as String? ?? '',
               ).submissionJson;
             } finally {
               await handle.close();

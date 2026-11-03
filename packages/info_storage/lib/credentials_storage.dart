@@ -5,6 +5,9 @@ extension _CredentialSnapshotValidation on EncryptedInformationRepository {
     List<ManagedCredential> credentials,
     List<CredentialMaterial> materials,
   ) async {
+    if (credentials.any((c) => c.account.isNotEmpty)) {
+      await _requireAdmissionFormat(_credentialProposalPreviewLibraryFormat);
+    }
     if (credentials.any((c) => c.template != null)) {
       await _requireAdmissionFormat(_credentialImportLibraryFormat);
     }

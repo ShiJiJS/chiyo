@@ -8,12 +8,16 @@ class CredentialImportInput {
     this.contextExposed,
     Iterable<int>? material,
     this.fileName,
+    this.account,
   ) : material = material == null ? null : List.unmodifiable(material) {
     if (!{'owner', 'agentString', 'agentFile'}.contains(source) ||
         source == 'owner' && contextExposed ||
         source == 'agentString' && !contextExposed ||
         source != 'agentFile' && fileName != null) {
       throw const FormatException('Invalid credential input source');
+    }
+    if (account.length > 512 || account.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+      throw const FormatException('Invalid credential account');
     }
     final bytes = this.material;
     if (source != 'owner' && bytes == null) {
@@ -42,17 +46,33 @@ class CredentialImportInput {
     }
   }
 
-  factory CredentialImportInput.owner() =>
-      CredentialImportInput._('owner', false, null, null);
-  factory CredentialImportInput.agentString(String secret) =>
-      CredentialImportInput._('agentString', true, utf8.encode(secret), null);
+  factory CredentialImportInput.owner({String account = ''}) =>
+      CredentialImportInput._('owner', false, null, null, account);
+  factory CredentialImportInput.agentString(
+    String secret, {
+    String account = '',
+  }) => CredentialImportInput._(
+    'agentString',
+    true,
+    utf8.encode(secret),
+    null,
+    account,
+  );
   factory CredentialImportInput.agentFile(
     String fileName,
     List<int> bytes, {
     bool contextExposed = false,
-  }) => CredentialImportInput._('agentFile', contextExposed, bytes, fileName);
+    String account = '',
+  }) => CredentialImportInput._(
+    'agentFile',
+    contextExposed,
+    bytes,
+    fileName,
+    account,
+  );
 
   final String source;
+  final String account;
   final bool contextExposed;
   final List<int>? material;
   final String? fileName;
@@ -63,7 +83,13 @@ class CredentialImportInput {
     if (source != 'owner') {
       throw const FormatException('Not an owner password input');
     }
-    return CredentialImportInput._('owner', false, utf8.encode(secret), null);
+    return CredentialImportInput._(
+      'owner',
+      false,
+      utf8.encode(secret),
+      null,
+      account,
+    );
   }
 
   Map<String, Object?> get metadata => {
@@ -74,6 +100,7 @@ class CredentialImportInput {
     if (material != null) 'byteLength': material!.length,
   };
   Map<String, Object?> get submissionJson => {
+    if (account.isNotEmpty) 'account': account,
     'source': source,
     'contextExposed': contextExposed,
     if (source == 'agentString') 'secret': utf8.decode(material!),
@@ -83,6 +110,7 @@ class CredentialImportInput {
     },
   };
   Map<String, Object?> toPrivateJson() => {
+    if (account.isNotEmpty) 'account': account,
     'source': source,
     'contextExposed': contextExposed,
     if (fileName != null) 'fileName': fileName,
@@ -91,6 +119,7 @@ class CredentialImportInput {
   factory CredentialImportInput.fromJson(Map<String, dynamic> json) {
     if (json.keys.any(
           (k) => !{
+            'account',
             'source',
             'contextExposed',
             'secret',
@@ -98,31 +127,44 @@ class CredentialImportInput {
             'bytes',
           }.contains(k),
         ) ||
-        json['contextExposed'] is! bool) {
+        json['contextExposed'] is! bool ||
+        json.containsKey('account') && json['account'] is! String) {
       throw const FormatException('Invalid credential input');
     }
+    final account = json['account'] as String? ?? '';
+    final count = json.length - (json.containsKey('account') ? 1 : 0);
     final source = json['source'];
-    if (source == 'owner' && json.length == 2 && !json['contextExposed']) {
-      return CredentialImportInput.owner();
+    if (source == 'owner' && count == 2 && !json['contextExposed']) {
+      return CredentialImportInput.owner(account: account);
     }
     if (source == 'agentString' &&
-        json.length == 3 &&
+        count == 3 &&
         json['contextExposed'] &&
         json['secret'] is String) {
-      return CredentialImportInput.agentString(json['secret'] as String);
+      return CredentialImportInput.agentString(
+        json['secret'] as String,
+        account: account,
+      );
     }
-    if (source == 'agentFile' && json.length == 4 && json['bytes'] is String) {
+    if (source == 'agentFile' && count == 4 && json['bytes'] is String) {
       return CredentialImportInput.agentFile(
         json['fileName'] as String,
         base64Decode(json['bytes'] as String),
         contextExposed: json['contextExposed'] as bool,
+        account: account,
       );
     }
     throw const FormatException('Invalid credential input');
   }
   factory CredentialImportInput.fromPrivateJson(Map<String, dynamic> json) {
     if (json.keys.any(
-      (k) => !{'source', 'contextExposed', 'fileName', 'material'}.contains(k),
+      (k) => !{
+        'source',
+        'contextExposed',
+        'fileName',
+        'material',
+        'account',
+      }.contains(k),
     )) {
       throw const FormatException('Invalid private credential input');
     }
@@ -133,6 +175,7 @@ class CredentialImportInput {
           ? null
           : base64Decode(json['material'] as String),
       json['fileName'] as String?,
+      json['account'] as String? ?? '',
     );
   }
 }

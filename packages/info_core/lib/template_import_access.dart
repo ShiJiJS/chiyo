@@ -512,6 +512,7 @@ extension OwnerTemplateImports on OwnerAccess {
       layout: InformationLayout(
         typeId: template.id,
         snapshot: {
+          'type': {'id': template.id, 'name': template.name, 'icon': 'key'},
           'definition': template.definition,
           'templateVersion': template.version,
           'templateDigest': template.digest,

@@ -34,6 +34,7 @@ void _validateBackupCredentials(
       {
         if (formatVersion >= 14) ...{'directoryId', 'tagIds'},
         if (formatVersion >= 16) 'template',
+        if (formatVersion >= 19) 'account',
       },
     );
     if (j.containsKey('directoryId') != j.containsKey('tagIds'))
@@ -80,6 +81,10 @@ void _validateBackupCredentials(
     _backupText(j, 'name', 60, required: true);
     _backupText(j, 'publicPurpose', 2000);
     _backupText(j, 'privateNote', 4000);
+    if (j.containsKey('account')) {
+      final account = _backupText(j, 'account', 512);
+      if (account.contains(RegExp(r'[\x00-\x1f\x7f]'))) _backupInvalid();
+    }
     final binding = _backupText(
       j,
       'suggestedBinding',

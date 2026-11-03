@@ -102,9 +102,11 @@ class WorkspaceProposalCredential {
     required this.contextExposed,
     required this.ready,
     this.fileName,
+    this.account = '',
     this.byteLength,
   });
   final String source;
+  final String account;
   final bool contextExposed, ready;
   final String? fileName;
   final int? byteLength;
@@ -347,6 +349,13 @@ class WorkspaceProposalDetail {
                     {
                       'id': i.id,
                       'admissionNote': passwordFill ? '' : i.admissionNote,
+                      if (i.credential case final credential?)
+                        'credentialMetadata': {
+                          'source': credential.source,
+                          'account': credential.account,
+                          'contextExposed': credential.contextExposed,
+                          'fileName': credential.fileName,
+                        },
                       if (i.attachments.isNotEmpty)
                         'attachments': [
                           for (final a in i.attachments)

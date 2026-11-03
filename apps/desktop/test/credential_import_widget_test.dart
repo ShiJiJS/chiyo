@@ -121,6 +121,9 @@ void main() {
       expect(item.proposed.record.ref.kind, WorkspaceRecordKind.credential);
       expect(item.proposed.values, isEmpty);
       expect(item.credential!.ready, false);
+      expect(item.credential!.account, 'sample-user');
+      expect(find.text('账号：sample-user'), findsOneWidget);
+      expect(find.text('账号密码'), findsOneWidget);
       expect(model.canConfirm, false);
       expect(repo.managedCredentials, isEmpty);
       final originalReview = WorkspaceProposalItemReview.fromItem(item);
@@ -184,6 +187,7 @@ void main() {
       expect(model.uncertain, false);
       expect(repo.managedCredentials.length, 1);
       expect(repo.managedCredentials.single.name, '主人核对后的登录密码');
+      expect(repo.managedCredentials.single.account, 'sample-user');
       expect(repo.items, isEmpty);
       expect(
         utf8.decode(repo.credentialMaterials.single.bytes),
@@ -203,6 +207,34 @@ void main() {
         );
         expect(saved.targets.single.exists, true);
         expect(saved.targets.single.snapshotAvailable, false);
+        final original = repo.managedCredentials.single;
+        await service.owner.updateCredentialMetadata(
+          original.id,
+          original.revision,
+          name: '后来改过的名称',
+          publicPurpose: original.publicPurpose,
+          privateNote: '后来添加的备注',
+          suggestedBinding: original.suggestedBinding,
+          discoverable: original.discoverable,
+        );
+        final preview = await source.savedPreview(
+          id,
+          saved.targets.single.record,
+        );
+        expect(preview.proposed.record.name, '主人核对后的登录密码');
+        expect(preview.credential!.account, 'sample-user');
+        expect(preview.proposed.values, isEmpty);
+        final currentDetail = await library.readDetail(
+          saved.targets.single.record,
+        );
+        expect(
+          currentDetail.record.type.name,
+          preview.proposed.record.type.name,
+        );
+        expect(
+          (await library.credentials.read(saved.targets.single.record)).account,
+          'sample-user',
+        );
       });
       for (final kind in ['accountPassword', 'token', 'file']) {
         late String proposalId;

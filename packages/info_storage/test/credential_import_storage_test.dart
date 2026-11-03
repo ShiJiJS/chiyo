@@ -9,6 +9,104 @@ import 'storage_test.dart' show TestKeyStore;
 
 void main() {
   test(
+    'account and exact credential admission metadata survive reopen and encrypted backup',
+    () async {
+      final root = await Directory.systemTemp.createTemp('credential-account-');
+      final keys = TestKeyStore();
+      var repo = await EncryptedInformationRepository.open(
+        '${root.path}/library',
+        keys,
+      );
+      var service = InformationService(repository: repo);
+      configureCredentialImports(service);
+      final session = service.agent.openSession('synthetic account');
+      final id = await service.agent.submitImport(session, [
+        credentialInput(
+          'login',
+          'accountPassword',
+          CredentialImportInput.owner(account: 'synthetic-user@example.test'),
+        ),
+      ]);
+      var p = service.owner.importProposals.single;
+      await service.owner.fillImportCredentials(id, p.version, {
+        'login': 'SYNTHETIC-PRIVATE-PASSWORD',
+      });
+      p = service.owner.importProposals.single;
+      await service.owner.confirmImport(id, p.version, p.items);
+      final saved = service.owner.credentials.single;
+      expect(saved.account, 'synthetic-user@example.test');
+      expect(
+        service
+            .owner
+            .importProposals
+            .single
+            .credentialSnapshots['login']!
+            .account,
+        saved.account,
+      );
+      expect(
+        jsonEncode(service.agent.importStatus(session, id)),
+        isNot(contains('synthetic-user')),
+      );
+      await service.owner.updateCredentialMetadata(
+        saved.id,
+        saved.revision,
+        name: 'Changed later',
+        publicPurpose: saved.publicPurpose,
+        privateNote: 'Later private note',
+        suggestedBinding: saved.suggestedBinding,
+        discoverable: saved.discoverable,
+      );
+      await service.close();
+      await repo.close();
+      repo = await EncryptedInformationRepository.open(
+        '${root.path}/library',
+        keys,
+      );
+      service = InformationService(repository: repo);
+      try {
+        final preview =
+            service.owner.importProposals.single.credentialSnapshots['login']!;
+        expect(preview.id, saved.id);
+        expect(preview.name, 'login');
+        expect(preview.privateNote, '');
+        expect(preview.account, saved.account);
+        expect(service.owner.credentials.single.name, 'Changed later');
+        expect(service.owner.credentials.single.account, saved.account);
+        await repo.backups.enable();
+        await repo.backups.saveRecoveryKeyTo('${root.path}/recovery.key');
+        final recovery = (await repo.backups.recoveryKey())!;
+        final path = '${root.path}/complete.aimbackup';
+        await repo.backups.exportTo(path);
+        final backup = await repo.backups.inspect(path, recovery);
+        expect(backup.formatVersion, 19);
+        final target = await EncryptedInformationRepository.open(
+          '${root.path}/restored',
+          TestKeyStore(),
+        );
+        try {
+          await target.backups.restore(backup);
+          expect(target.managedCredentials.single.account, saved.account);
+          expect(
+            utf8.decode(target.credentialMaterials.single.bytes),
+            'SYNTHETIC-PRIVATE-PASSWORD',
+          );
+        } finally {
+          await target.close();
+        }
+        for (final file in root.listSync(recursive: true).whereType<File>()) {
+          final content = latin1.decode(await file.readAsBytes());
+          expect(content, isNot(contains('synthetic-user@example.test')));
+          expect(content, isNot(contains('SYNTHETIC-PRIVATE-PASSWORD')));
+        }
+      } finally {
+        await service.close();
+        await repo.close();
+        await root.delete(recursive: true);
+      }
+    },
+  );
+  test(
     'credential drafts, cyclic admission and owner receipts are encrypted, atomic and recoverable',
     () async {
       final root = await Directory.systemTemp.createTemp('credential-import-');

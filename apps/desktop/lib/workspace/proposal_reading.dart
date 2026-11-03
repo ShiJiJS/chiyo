@@ -219,7 +219,9 @@ class ProposalItemReading extends StatefulWidget {
     this.enabled = true,
     this.onFile,
     this.changedKeys = const {},
+    this.passwordInput,
   });
+  final Widget? passwordInput;
   final Set<String> changedKeys;
   final WorkspaceProposalItem item;
   final WorkspaceProposalItemReview review;
@@ -268,7 +270,7 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
             ProposalPill(d.record.type.name),
           ],
         ),
-        if (r.description.isNotEmpty)
+        if (r.description.isNotEmpty && widget.item.credential == null)
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: SelectableText(
@@ -304,20 +306,26 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    credential.fileName ?? '••••••••',
-                    style: libraryText(context, 16),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SelectableText(
+                      '账号：${credential.account.isEmpty ? '未注明' : credential.account}',
+                      style: libraryText(context, 15),
+                    ),
                   ),
-                  Text(
-                    credential.source == 'owner'
-                        ? credential.ready
-                              ? '密码已填写'
-                              : '待填写密码'
-                        : credential.source == 'agentFile'
-                        ? '文件已提供'
-                        : '凭证已提供',
-                    style: libraryText(context, 13, color: c.muted),
-                  ),
+                  if (credential.source == 'owner')
+                    widget.passwordInput ??
+                        Text(credential.ready ? '密码已填写' : '待填写密码')
+                  else ...[
+                    Text(
+                      credential.fileName ?? '••••••••',
+                      style: libraryText(context, 16),
+                    ),
+                    Text(
+                      credential.source == 'agentFile' ? '文件已提供' : '凭证已提供',
+                      style: libraryText(context, 13, color: c.muted),
+                    ),
+                  ],
                   if (credential.contextExposed)
                     Text(
                       'AI已提供此密码或凭证，内容可能已进入会话上下文。',

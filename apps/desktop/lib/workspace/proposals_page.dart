@@ -637,6 +637,19 @@ class _ProposalsPageState extends State<ProposalsPage> {
         children: [
           if (item.before == null)
             ProposalItemReading(
+              passwordInput: item.credential?.source != 'owner'
+                  ? null
+                  : widget.passwords?.input(
+                          d.summary.id,
+                          d.summary.version,
+                          item.id,
+                          enabled: m.canEdit,
+                        ) ??
+                        Text(
+                          item.credential!.ready
+                              ? '密码已填写'
+                              : '密码输入暂不可用，请重新打开应用。',
+                        ),
               item: item,
               review: review,
               catalog: m.catalog!,
@@ -745,18 +758,6 @@ class _ProposalsPageState extends State<ProposalsPage> {
               ),
             ),
           if (d.summary.kind != WorkspaceProposalKind.deletion) ...[
-            if (item.credential?.source == 'owner') ...[
-              const SizedBox(height: 16),
-              if (widget.passwords != null)
-                widget.passwords!.input(
-                  d.summary.id,
-                  d.summary.version,
-                  item.id,
-                  enabled: m.canEdit,
-                )
-              else
-                Text(item.credential!.ready ? '密码已填写' : '密码输入暂不可用，请重新打开应用。'),
-            ],
             const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerRight,

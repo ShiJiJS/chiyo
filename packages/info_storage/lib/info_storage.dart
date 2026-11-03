@@ -57,6 +57,7 @@ const _credentialImportLibraryFormat = 45;
 const _longTermAttachmentLibraryFormat = 46;
 const _informationImportFileLibraryFormat = 47;
 const _informationFileUpdateLibraryFormat = 48;
+const _credentialProposalPreviewLibraryFormat = 49;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -520,7 +521,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _informationFileUpdateLibraryFormat) {
+      if (headerVersion > _credentialProposalPreviewLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -536,7 +537,7 @@ class EncryptedInformationRepository
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
             (marker.single['version'] as int) >
-                _informationFileUpdateLibraryFormat ||
+                _credentialProposalPreviewLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1323,6 +1324,10 @@ class EncryptedInformationRepository
     ImportProposal proposal, {
     bool operationReceipt = true,
   }) async {
+    if (proposal.credentialSnapshots.isNotEmpty ||
+        proposal.items.any((i) => i.credential?.account.isNotEmpty ?? false)) {
+      await _requireAdmissionFormat(_credentialProposalPreviewLibraryFormat);
+    }
     if (proposal.items.any((i) => i.attachments.isNotEmpty)) {
       await _requireAdmissionFormat(_informationImportFileLibraryFormat);
       await _claimProposalUploads(proposal);
