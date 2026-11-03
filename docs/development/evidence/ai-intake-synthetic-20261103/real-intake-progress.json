@@ -4,7 +4,6 @@
   "normalReleaseRunningObserved": true,
   "normalIndependentReopenWithExistingKeyObserved": true,
   "emptyLibraryObserved": true,
-  "oldLibraryPreserved": true,
   "backupIndependentRestore": {
     "format": 17,
     "information": 33,
@@ -37,5 +36,14 @@
   "relationsValidAfterRestore": 106,
   "backupFormat": 18,
   "independentValidationClockDaysAhead": 800,
-  "stableSigningAcrossUpdatesComplete": false
+  "stableSigningAcrossUpdatesComplete": false,
+  "oldLibraryInitiallyPreserved": true,
+  "githubIssuesClosed": [
+    78,
+    79,
+    80
+  ],
+  "stableSigningFollowupIssue": 50,
+  "oldPortableBackupAndRecoveryKept": true,
+  "rawPreResetAndPendingCopiesRemovedAfterValidation": true
 }
