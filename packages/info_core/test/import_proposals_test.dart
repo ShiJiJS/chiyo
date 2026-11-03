@@ -3,6 +3,60 @@ import 'package:test/test.dart';
 
 void main() async {
   test(
+    'directory suggestions create and reuse nested parents in one approved batch',
+    () async {
+      final service = InformationService(
+        repository: MemoryInformationRepository(),
+      );
+      addTearDown(service.close);
+      final session = service.agent.openSession('nested import');
+      Future<void> submit(String name, String path) async {
+        final id = await service.agent.submitImport(session, [
+          ImportItemInput(name, '', [
+            const FieldInput('body', '', 'value'),
+          ], suggestedDirectory: path),
+          ImportItemInput('$name companion', '', [
+            const FieldInput('body', '', 'companion'),
+          ], suggestedDirectory: path),
+        ]);
+        final proposal = service.owner.importProposals.singleWhere(
+          (p) => p.id == id,
+        );
+        await service.owner.confirmImport(id, proposal.version, proposal.items);
+      }
+
+      await submit('first', 'Personal / Career');
+      await submit('second', 'personal/Career');
+      expect(service.owner.directories, hasLength(2));
+      final parent = service.owner.directories.singleWhere(
+        (d) => d.parentId == null,
+      );
+      final child = service.owner.directories.singleWhere(
+        (d) => d.parentId == parent.id,
+      );
+      expect(parent.name, 'Personal');
+      expect(child.name, 'Career');
+      expect(
+        service.owner.information.every((i) => i.directoryId == child.id),
+        true,
+      );
+      final invalid = await service.agent.submitImport(session, [
+        ImportItemInput('invalid', '', [
+          const FieldInput('body', '', 'value'),
+        ], suggestedDirectory: 'Other//Invalid'),
+      ]);
+      final p = service.owner.importProposals.singleWhere(
+        (p) => p.id == invalid,
+      );
+      await expectLater(
+        service.owner.confirmImport(invalid, p.version, p.items),
+        throwsA(isA<AccessFailure>()),
+      );
+      expect(service.owner.directories, hasLength(2));
+      expect(service.owner.information, hasLength(4));
+    },
+  );
+  test(
     'import submission cannot overwrite existing values or expand existing grants',
     () async {
       final service = InformationService(

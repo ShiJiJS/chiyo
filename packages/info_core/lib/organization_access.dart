@@ -19,21 +19,32 @@ class _OrganizationPlan {
     }
     final name = suggestedDirectory.trim();
     if (id == null && name.isNotEmpty) {
-      owner._checkDirectoryName(name);
-      final found = [...owner.directories, ...newDirectories].where(
-        (d) => d.parentId == null && d.name.toLowerCase() == name.toLowerCase(),
-      );
-      if (found.isNotEmpty) {
-        id = found.first.id;
-      } else {
-        final directory = InformationDirectory(
-          owner._service._secret(),
-          name,
-          null,
-          1,
+      final parts = name.split('/').map((p) => p.trim()).toList();
+      if (parts.length > 8 || parts.any((p) => p == '.' || p == '..')) {
+        throw const AccessFailure('invalid_directory_name');
+      }
+      for (final part in parts) {
+        owner._checkDirectoryName(part);
+      }
+      for (final part in parts) {
+        final parent = id;
+        final found = [...owner.directories, ...newDirectories].where(
+          (d) =>
+              d.parentId == parent &&
+              d.name.toLowerCase() == part.toLowerCase(),
         );
-        newDirectories.add(directory);
-        id = directory.id;
+        if (found.isNotEmpty) {
+          id = found.first.id;
+        } else {
+          final directory = InformationDirectory(
+            owner._service._secret(),
+            part,
+            parent,
+            1,
+          );
+          newDirectories.add(directory);
+          id = directory.id;
+        }
       }
     }
     for (final raw in suggestedTags) {

@@ -70,19 +70,27 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
         for (final name in i.suggestedTags)
           if (name.trim().isNotEmpty) _suggestionId('tag', name): name.trim(),
   };
+  String? _suggestedDirectoryId(String path) {
+    String? parent;
+    for (final part in path.trim().split('/')) {
+      final found = owner.directories
+          .where(
+            (d) =>
+                d.parentId == parent &&
+                d.name.toLowerCase() == part.trim().toLowerCase(),
+          )
+          .firstOrNull;
+      if (found == null) return null;
+      parent = found.id;
+    }
+    return parent;
+  }
+
   String? _importDirectory(core.ImportItemInput i) =>
       i.directoryId ??
       (i.suggestedDirectory.trim().isEmpty
           ? null
-          : owner.directories
-                    .where(
-                      (d) =>
-                          d.parentId == null &&
-                          d.name.toLowerCase() ==
-                              i.suggestedDirectory.trim().toLowerCase(),
-                    )
-                    .firstOrNull
-                    ?.id ??
+          : _suggestedDirectoryId(i.suggestedDirectory) ??
                 _suggestionId('directory', i.suggestedDirectory));
   List<String> _importTags(core.ImportItemInput i) => {
     ...i.tagIds,
@@ -116,6 +124,8 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
           'library_changed' => '资料库已替换，请重新读取提案。',
           'operation_conflict' => '原操作不能用于另一份决定。',
           'attachment_capacity_exceeded' => '文件存储空间不足，请整理空间后重试；现有历史文件没有被自动清理。',
+          'invalid_directory_name' =>
+            '目录路径无效。请使用最多8层的名称，层级用 / 分隔；不能包含空层级、反斜线、. 或 ..。原提案未入库。',
           'upload_unavailable' => '待审批原文已不可用，请重新提交文件并审批。',
           'attachment_integrity_failed' => '文件原文核对失败，原资料没有改变，请重新核对来源。',
           'proposal_changed' ||

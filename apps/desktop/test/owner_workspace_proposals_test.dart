@@ -70,6 +70,27 @@ void main() {
         : [],
   );
   test(
+    'nested suggestions reuse the existing directory in the real approval adapter',
+    () async {
+      final parent = await service.owner.createDirectory('Personal');
+      final child = await service.owner.createDirectory(
+        'Career',
+        parentId: parent.id,
+      );
+      final session = service.agent.openSession('nested intake');
+      final id = await service.agent.submitImport(session, [
+        core.ImportItemInput('profile', '', [
+          const core.FieldInput('body', '', 'value'),
+        ], suggestedDirectory: ' personal / Career '),
+      ]);
+      final detail = await source.read(id);
+      expect(detail.items.single.proposed.record.directoryId, child.id);
+      await source.change(decision(detail));
+      expect(service.owner.directories, hasLength(2));
+      expect(service.owner.information.single.directoryId, child.id);
+    },
+  );
+  test(
     'real addition review, partial selection and suggested classification persist without terminal bodies',
     () async {
       final session = service.agent.openSession('合成聊天');
