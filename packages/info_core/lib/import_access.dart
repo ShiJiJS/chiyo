@@ -266,6 +266,14 @@ extension OwnerImports on OwnerAccess {
     int version,
     String key,
     String secret,
+  ) => fillImportCredentials(id, version, {key: secret});
+
+  /// The trusted App stages all private edits in a single revision before the
+  /// owner's whole-proposal save. Validation failure changes none of them.
+  Future<void> fillImportCredentials(
+    String id,
+    int version,
+    Map<String, String> values,
   ) => _serialize(() async {
     final proposal = importProposals.where((p) => p.id == id).firstOrNull;
     if (proposal == null ||
@@ -273,26 +281,30 @@ extension OwnerImports on OwnerAccess {
         proposal.version != version) {
       throw const AccessFailure('proposal_changed');
     }
-    final input = proposal.items.where((i) => i.key == key).firstOrNull;
-    if (input?.credential?.source != 'owner') {
-      throw const AccessFailure('invalid_credential_input');
+    if (values.isEmpty) return;
+    final revised = <String, ImportItemInput>{};
+    for (final entry in values.entries) {
+      final input = proposal.items.where((i) => i.key == entry.key).firstOrNull;
+      if (input?.credential?.source != 'owner') {
+        throw const AccessFailure('invalid_credential_input');
+      }
+      CredentialImportInput credential;
+      try {
+        credential = input!.credential!.withOwnerSecret(entry.value);
+      } on FormatException {
+        throw const AccessFailure('invalid_credential_content');
+      }
+      revised[entry.key] = ImportItemInput.fromPrivateJson({
+        ...input.toJson(),
+        'credential': credential.toPrivateJson(),
+      });
     }
-    CredentialImportInput credential;
-    try {
-      credential = input!.credential!.withOwnerSecret(secret);
-    } on FormatException {
-      throw const AccessFailure('invalid_credential_content');
-    }
-    final revised = ImportItemInput.fromPrivateJson({
-      ...input.toJson(),
-      'credential': credential.toPrivateJson(),
-    });
     await _service._repository.saveImportProposal(
       proposal.revise(
-        items: [
-          for (final old in proposal.items) old.key == key ? revised : old,
-        ],
-        approvedKeys: proposal.approvedKeys.where((k) => k != key),
+        items: [for (final old in proposal.items) revised[old.key] ?? old],
+        approvedKeys: proposal.approvedKeys.where(
+          (k) => !values.containsKey(k),
+        ),
       ),
     );
   });

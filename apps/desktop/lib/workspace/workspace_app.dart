@@ -465,15 +465,10 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             : location.page == WorkspacePage.proposals
             ? ProposalsPage(
                 controller: _proposals,
-                onPasswordInput: widget.inputsBuilder
+                passwords: widget.inputsBuilder
                     ?.call(context)
                     .proposalPassword,
                 onFile: widget.inputsBuilder?.call(context).proposalFile,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 onHistory: (id) => _navigate(WorkspacePage.history, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onModalChanged: _modalChanged,

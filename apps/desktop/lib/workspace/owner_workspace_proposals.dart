@@ -5,7 +5,8 @@ import 'workspace_information_codec.dart';
 import 'workspace_entries.dart';
 import 'workspace_source.dart';
 
-class OwnerWorkspaceProposals implements WorkspaceProposalSource {
+class OwnerWorkspaceProposals
+    implements WorkspaceProposalSource, WorkspaceProposalPreviewSource {
   OwnerWorkspaceProposals({
     required this.owner,
     required this.library,
@@ -1376,6 +1377,95 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
     String itemId,
     int version,
   ) => _ProposalRelations(this, proposalId, itemId, version);
+  @override
+  WorkspaceRelationSource previewRelations() => library();
+
+  @override
+  Future<WorkspaceProposalItem> previewRelated(
+    String proposalId,
+    int version,
+    WorkspaceRecordRef record,
+  ) => _run(() async {
+    final proposal = _detail(proposalId);
+    if (proposal.summary.version != version ||
+        !proposal.items.any(
+          (i) => i.proposed.visibleRelations.values
+              .expand((refs) => refs)
+              .contains(record),
+        )) {
+      throw const WorkspaceFailure('conflict', '关联范围已变化，请重新读取提案。');
+    }
+    final pending = _pendingTarget(record.id);
+    if (pending != null) {
+      final target = _detail(pending.proposal.id).items
+          .where(
+            (i) => i.id == 'proposal:${pending.proposal.id}:${pending.key}',
+          )
+          .firstOrNull;
+      if (target == null) {
+        throw const WorkspaceFailure('not_found', '待录入的关联内容已变化，请重新核对。');
+      }
+      return target;
+    }
+    final detail = await library().readDetail(record);
+    return WorkspaceProposalItem(
+      id: record.key,
+      proposed: detail,
+      credential: record.kind == WorkspaceRecordKind.credential
+          ? const WorkspaceProposalCredential(
+              source: 'stored',
+              contextExposed: false,
+              ready: true,
+            )
+          : null,
+    );
+  });
+
+  @override
+  Future<WorkspaceProposalItem> savedPreview(
+    String proposalId,
+    WorkspaceRecordRef record,
+  ) => _run(() async {
+    final proposal = _detail(proposalId);
+    final target = proposal.targets
+        .where((t) => t.record == record)
+        .firstOrNull;
+    if (target == null) {
+      throw const WorkspaceFailure('not_found', '这份提案没有保存此资料。');
+    }
+    if (record.kind == WorkspaceRecordKind.credential) {
+      final c = owner.credentials.where((c) => c.id == record.id).firstOrNull;
+      if (c == null || c.revision != target.version) {
+        throw const WorkspaceFailure(
+          'history_unavailable',
+          '这次保存的凭据说明暂不可用，当前内容不会替代历史内容。',
+        );
+      }
+      return WorkspaceProposalItem(
+        id: record.key,
+        proposed: await library().readDetail(record),
+        credential: WorkspaceProposalCredential(
+          source: c.form == core.CredentialForm.file ? 'agentFile' : 'stored',
+          contextExposed: false,
+          ready: true,
+          fileName: c.fileName,
+        ),
+      );
+    }
+    final saved = (await snapshot(proposalId, record)).detail;
+    final before = proposal.summary.kind == WorkspaceProposalKind.modification
+        ? _retained(record.id, target.version - 1)
+        : null;
+    return WorkspaceProposalItem(
+      id: record.key,
+      proposed: saved,
+      before: before == null ? null : _codec.decode(before, tagNames: _tags),
+      beforeState: before == null
+          ? WorkspaceProposalBeforeState.unavailable
+          : WorkspaceProposalBeforeState.available,
+    );
+  });
+
   @override
   Future<WorkspaceDetail> currentTarget(String id) => _run(() async {
     final d = _detail(id), ref = d.currentTargetRef;

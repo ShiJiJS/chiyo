@@ -140,22 +140,29 @@ void main() {
     },
   );
   test(
-    'explicit item selection and rejection change only their intended proposal',
+    'a subset is rejected and a whole save or rejection changes only its intended proposal',
     () async {
       final d = await s.proposals.read('import'),
           selected = WorkspaceProposalItemReview.fromItem(d.items.first);
+      await expectLater(
+        s.proposals.change(proposalChange(d, reviewed: [selected])),
+        proposalFailure('proposal_incomplete'),
+      );
       final receipt = await s.proposals.change(
         proposalChange(
           d,
-          reviewed: [editedReview(selected, name: 'Owner核对后的入口')],
+          reviewed: [
+            editedReview(selected, name: 'Owner核对后的入口'),
+            WorkspaceProposalItemReview.fromItem(d.items.last),
+          ],
         ),
       );
-      expect(receipt.records, hasLength(1));
+      expect(receipt.records, hasLength(2));
       expect(
-        (await s.readDetail(receipt.records.single.ref)).record.name,
+        (await s.readDetail(receipt.records.first.ref)).record.name,
         'Owner核对后的入口',
       );
-      expect((await s.proposals.read('import')).summary.itemCount, 1);
+      expect((await s.proposals.read('import')).summary.itemCount, 2);
       final before = (await s.readDetail(
         const WorkspaceRecordRef(WorkspaceRecordKind.information, 'aliyun'),
       )).values;
@@ -285,10 +292,12 @@ void main() {
       final receipt = await s.proposals.change(
         proposalChange(
           now,
-          reviewed: [WorkspaceProposalItemReview.fromItem(now.items.first)],
+          reviewed: now.items
+              .map(WorkspaceProposalItemReview.fromItem)
+              .toList(),
         ),
       );
-      final saved = await s.readDetail(receipt.records.single.ref);
+      final saved = await s.readDetail(receipt.records.first.ref);
       expect(saved.definition, definition);
       expect(saved.templateState, WorkspaceTemplateState.disabled);
     },
@@ -299,7 +308,9 @@ void main() {
       final d = await s.proposals.read('import'),
           c = proposalChange(
             d,
-            reviewed: [WorkspaceProposalItemReview.fromItem(d.items.first)],
+            reviewed: d.items
+                .map(WorkspaceProposalItemReview.fromItem)
+                .toList(),
           );
       s.loseNextProposalReply = true;
       await expectLater(
@@ -307,7 +318,7 @@ void main() {
         proposalFailure('unknown_outcome'),
       );
       final receipt = (await s.proposals.receipt(c.operationId))!,
-          ref = receipt.records.single.ref;
+          ref = receipt.records.first.ref;
       final original = await s.readDetail(ref);
       await s.saveRecord(
         WorkspaceEdit(
@@ -339,9 +350,9 @@ void main() {
           action: WorkspaceRecordAction.purge,
         ),
       );
-      expect((await s.proposals.read('import')).targets.single.exists, false);
+      expect((await s.proposals.read('import')).targets.first.exists, false);
       expect(
-        (await s.proposals.read('import')).targets.single.snapshotAvailable,
+        (await s.proposals.read('import')).targets.first.snapshotAvailable,
         false,
       );
       await expectLater(

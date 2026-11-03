@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 import 'proposal_batch.dart';
+import 'proposal_passwords.dart';
 
 class ProposalDraft {
   ProposalDraft(WorkspaceProposalDetail d)
@@ -12,7 +12,6 @@ class ProposalDraft {
         for (final i in d.items) i.id: i.withoutOwnerBefore(),
       }),
       reviewToken = d.reviewToken,
-      selected = {for (final i in d.items) i.id},
       items = {
         for (final i in d.items) i.id: WorkspaceProposalItemReview.fromItem(i),
       };
@@ -20,7 +19,6 @@ class ProposalDraft {
   final String sourceFingerprint;
   final Map<String, WorkspaceProposalItem> originals;
   String reviewToken;
-  final Set<String> selected;
   final Map<String, WorkspaceProposalItemReview> items;
   bool dirty = false;
 }
@@ -142,15 +140,14 @@ class ProposalsController extends ChangeNotifier {
       action: action,
       reviewed: action == WorkspaceProposalAction.reject
           ? []
-          : [
-              for (final i in d.items)
-                if (draft!.selected.contains(i.id)) draft!.items[i.id]!,
-            ],
+          : [for (final i in d.items) draft!.items[i.id]!],
     );
   }
 
   bool queueForBatch(WorkspaceProposalAction action) {
-    if (action == WorkspaceProposalAction.confirm ? !canConfirm : !canReject) {
+    if (action == WorkspaceProposalAction.confirm
+        ? !canQueueConfirm
+        : !canReject) {
       return false;
     }
     final added = batch.stage(detail!, _reviewedCommand(action));
@@ -175,12 +172,39 @@ class ProposalsController extends ChangeNotifier {
   bool loading = false, reading = false, busy = false, _closed = false;
   double listScroll = 0;
   final _positions = <String, double>{};
+  final _activeItems = <String, String>{};
+  String? get activeItemId {
+    final items = reviewItems;
+    final current = _activeItems[selection];
+    return items.any((i) => i.id == current) ? current : items.firstOrNull?.id;
+  }
+
+  void selectItem(String id) {
+    if (frozen || !reviewItems.any((i) => i.id == id) || selection == null) {
+      return;
+    }
+    _activeItems[selection!] = id;
+    _notify();
+  }
+
+  bool get canQueueConfirm =>
+      canConfirm &&
+      !detail!.items.any(
+        (i) =>
+            passwords?.ready(
+              detail!.summary.id,
+              detail!.summary.version,
+              i.id,
+            ) ==
+            true,
+      );
   final _drafts = <String, ProposalDraft>{};
   WorkspaceProposalChange? _command;
   ProposalDraft? get draft => _drafts[selection];
-  double get detailScroll => _positions[selection] ?? 0;
+  String get _positionKey => '$selection/$activeItemId';
+  double get detailScroll => _positions[_positionKey] ?? 0;
   set detailScroll(double value) {
-    if (selection case final id?) _positions[id] = value;
+    if (selection != null) _positions[_positionKey] = value;
   }
 
   bool get uncertain => writeFailure?.code == 'unknown_outcome';
@@ -211,10 +235,17 @@ class ProposalsController extends ChangeNotifier {
       detail!.canConfirm &&
       draft != null &&
       !needsReview &&
-      draft!.selected.isNotEmpty &&
-      detail!.items
-          .where((i) => draft!.selected.contains(i.id))
-          .every((i) => i.credential?.ready ?? true) &&
+      detail!.items.isNotEmpty &&
+      detail!.items.every(
+        (i) =>
+            (i.credential?.ready ?? true) ||
+            passwords?.ready(
+                  detail!.summary.id,
+                  detail!.summary.version,
+                  i.id,
+                ) ==
+                true,
+      ) &&
       writeFailure?.code != 'conflict';
   bool get canReject => _readable && detail!.summary.pending;
   bool get canEdit =>
@@ -362,48 +393,43 @@ class ProposalsController extends ChangeNotifier {
     await load();
   }
 
-  /// Only after this Host's password editor reports a committed fill. Preserve
-  /// local metadata edits only when the complete public proposal is unchanged.
-  Future<void> reloadAfterPasswordInput(
+  ProposalPasswords? _passwords;
+  ProposalPasswords? get passwords => _passwords;
+  void bindPasswords(ProposalPasswords? value) {
+    if (identical(value, _passwords)) return;
+    _passwords?.removeListener(_notify);
+    _passwords = value;
+    value?.addListener(_notify);
+  }
+
+  /// A private fill must never silently adopt an intervening Agent revision.
+  Future<void> _reloadFilledPasswords(
     WorkspaceProposalDetail previous,
-    String itemId,
+    Set<String> filled,
   ) async {
-    final old = draft;
-    await select(previous.summary.id);
-    final current = detail;
-    if (old == null ||
-        current == null ||
-        selection != previous.summary.id ||
-        current.summary.version != previous.summary.version + 1 ||
+    final old = draft!;
+    final current = await source.read(previous.summary.id);
+    if (current.summary.version != previous.summary.version + 1 ||
         old.version != previous.summary.version ||
-        current.items.length != previous.items.length) {
-      return;
+        current.items.length != previous.items.length ||
+        current.snapshotDigestAtVersion(current.summary.version) !=
+            previous.snapshotDigestAtVersion(current.summary.version)) {
+      throw const WorkspaceFailure('conflict', '提案内容已变化，密码输入仍保留，请重新核对。');
     }
-    for (final before in previous.items) {
-      final after = current.items.where((i) => i.id == before.id).firstOrNull;
-      if (after == null ||
-          jsonEncode(WorkspaceProposalItemReview.fromItem(before).toJson()) !=
-              jsonEncode(
-                WorkspaceProposalItemReview.fromItem(after).toJson(),
-              )) {
-        return;
-      }
-      if (before.id == itemId &&
-          (before.credential?.source != 'owner' ||
-              after.credential?.source != 'owner' ||
-              after.credential?.ready != true)) {
-        return;
+    for (final id in filled) {
+      final before = previous.items.where((i) => i.id == id).firstOrNull;
+      final after = current.items.where((i) => i.id == id).firstOrNull;
+      if (before?.credential?.source != 'owner' ||
+          after?.credential?.source != 'owner' ||
+          after?.credential?.ready != true) {
+        throw const WorkspaceFailure('conflict', '密码填写状态已变化，请重新核对。');
       }
     }
-    final next = ProposalDraft(current);
-    next.items.addAll(old.items);
-    next.selected
-      ..clear()
-      ..addAll(old.selected);
-    next.dirty = old.dirty;
+    final next = ProposalDraft(current)
+      ..items.addAll(old.items)
+      ..dirty = old.dirty;
+    detail = current;
     _drafts[current.summary.id] = next;
-    writeFailure = null;
-    _notify();
   }
 
   Future<void> _changeQuery(VoidCallback change) async {
@@ -434,18 +460,6 @@ class ProposalsController extends ChangeNotifier {
     viewRevision++;
     writeFailure = null;
     await load();
-  }
-
-  void chooseItem(String id, bool selected) {
-    if (!canEdit || !draft!.items.containsKey(id)) return;
-    if (selected) {
-      draft!.selected.add(id);
-    } else {
-      draft!.selected.remove(id);
-    }
-    draft!.dirty = true;
-    if (writeFailure?.code != 'conflict') writeFailure = null;
-    _notify();
   }
 
   bool editItem(
@@ -501,7 +515,7 @@ class ProposalsController extends ChangeNotifier {
     }
     old.reviewToken = detail!.reviewToken;
     writeFailure = null;
-    notice = '已读取当前提案与分类，原选择和编辑仍保留；请核对后再决定。';
+    notice = '已读取当前提案与分类，原编辑仍保留；请核对后再决定。';
     _notify();
   }
 
@@ -520,7 +534,7 @@ class ProposalsController extends ChangeNotifier {
     _drafts[proposalId] = ProposalDraft(detail!);
     detailScroll = 0;
     writeFailure = null;
-    notice = '已重新读取当前提案。旧审阅的编辑和勾选已放弃，请核对这份内容后再批准。';
+    notice = '已重新读取当前提案。旧审阅的编辑已放弃，请核对这份内容后再批准。';
     _notify();
   }
 
@@ -532,6 +546,7 @@ class ProposalsController extends ChangeNotifier {
     _command = null;
     writeFailure = null;
     _drafts.remove(r.proposalId);
+    passwords?.clear(r.proposalId);
     batch.handledElsewhere(r.proposalId);
     detail = null;
     _positions[r.proposalId] = 0;
@@ -552,12 +567,20 @@ class ProposalsController extends ChangeNotifier {
     if (action == WorkspaceProposalAction.confirm ? !canConfirm : !canReject) {
       return;
     }
-    _command = _reviewedCommand(action);
     busy = true;
     writeFailure = null;
     notice = null;
     _notify();
     try {
+      if (action == WorkspaceProposalAction.confirm && passwords != null) {
+        final previous = detail!;
+        final filled = await passwords!.store(
+          previous.summary.id,
+          previous.summary.version,
+        );
+        if (filled.isNotEmpty) await _reloadFilledPasswords(previous, filled);
+      }
+      _command = _reviewedCommand(action);
       final receipt = await source.change(_command!);
       if (!_closed) await _finished(_check(receipt));
     } catch (error) {
@@ -585,7 +608,7 @@ class ProposalsController extends ChangeNotifier {
         busy = false;
         _command = null;
         writeFailure = null;
-        notice = '已确认本次尚未提交，原选择和编辑仍保留；请核对后明确再次决定。';
+        notice = '已确认本次尚未提交，原编辑仍保留；请核对后明确再次决定。';
         _notify();
         await load();
       }
@@ -625,6 +648,7 @@ class ProposalsController extends ChangeNotifier {
   @override
   void dispose() {
     _closed = true;
+    _passwords?.removeListener(_notify);
     batch.removeListener(_batchChanged);
     batch.dispose();
     _generation++;

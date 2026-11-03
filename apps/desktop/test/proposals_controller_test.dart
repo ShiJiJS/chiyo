@@ -90,13 +90,13 @@ void main() {
     s.dispose();
   });
   test(
-    'each proposal retains its own edits, selection and reading position across pages and query changes',
+    'each proposal retains its own edits, active item and reading position across pages and query changes',
     () async {
       m.limit = 1;
       await m.open('import');
       final first = m.draft!.items['portal']!;
       m.editItem('import', 1, editedReview(first, name: 'Owner审阅名称'));
-      m.chooseItem('status', false);
+      m.selectItem('portal');
       m.detailScroll = 135;
       await m.select('update');
       expect(m.offset, 1);
@@ -104,7 +104,7 @@ void main() {
       await m.select('import');
       expect(m.offset, 0);
       expect(m.draft!.items['portal']!.name, 'Owner审阅名称');
-      expect(m.draft!.selected, {'portal'});
+      expect(m.activeItemId, 'portal');
       expect(m.detailScroll, 135);
       await m.select('update');
       expect(m.detailScroll, 244);
@@ -143,7 +143,7 @@ void main() {
     'lost reply freezes the exact review until original receipt resolves without a second write',
     () async {
       await m.open('import');
-      m.chooseItem('status', false);
+      m.selectItem('portal');
       final review = m.draft!.items['portal']!;
       m.editItem('import', 1, editedReview(review, name: '未知结果审阅'));
       s.loseNextProposalReply = true;
@@ -152,9 +152,9 @@ void main() {
       expect(port.commands, hasLength(1));
       await m.select('update');
       await m.search('other');
-      m.chooseItem('status', true);
+      m.selectItem('status');
       expect(m.selection, 'import');
-      expect(m.draft!.selected, {'portal'});
+      expect(m.activeItemId, 'portal');
       port.lookupFailure = true;
       await m.reconcile();
       expect(m.frozen, true);
@@ -166,7 +166,7 @@ void main() {
       expect(m.detail!.items, isEmpty);
       expect(port.commands, hasLength(1));
       expect(
-        (await s.readDetail(m.detail!.targets.single.record)).record.name,
+        (await s.readDetail(m.detail!.targets.first.record)).record.name,
         '未知结果审阅',
       );
     },
@@ -175,14 +175,14 @@ void main() {
     'confirmed absence preserves input and only an explicit new decision retries it',
     () async {
       await m.open('import');
-      m.chooseItem('status', false);
+      m.selectItem('portal');
       m.detailScroll = 113;
       port.absent = true;
       await m.decide(WorkspaceProposalAction.confirm);
       await m.reconcile();
       expect(m.frozen, false);
       expect(m.canConfirm, true);
-      expect(m.draft!.selected, {'portal'});
+      expect(m.activeItemId, 'portal');
       expect(m.detailScroll, 113);
       expect(port.commands, hasLength(1));
       port.absent = false;
@@ -345,7 +345,10 @@ void main() {
       final live = ProposalsController(port, s.changes);
       addTearDown(live.dispose);
       await live.open('update');
-      expect(live.detail!.items.single.before!.values.keys, ['port']);
+      expect(
+        live.detail!.items.single.before!.values,
+        (await s.proposals.currentTarget('update')).values,
+      );
       expect(live.draft!.originals.values.single.before!.values, isEmpty);
       expect(live.draft!.items.values.single.values.keys, ['port']);
       s.loseNextProposalReply = true;

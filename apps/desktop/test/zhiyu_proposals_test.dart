@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/library_page.dart';
-import 'package:info_desktop/workspace/library_history_dialog.dart';
+import 'package:info_desktop/workspace/proposal_reading.dart';
 import 'package:info_desktop/workspace/proposals_controller.dart';
 import 'package:info_desktop/workspace/proposals_page.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
@@ -194,8 +194,9 @@ void main() {
         );
         await tap(t, find.byKey(const ValueKey('proposal-edit-keep')));
         await closed(t);
-        expect(find.text('资料名称'), findsWidgets);
-        expect(find.text('用途说明'), findsWidgets);
+        expect(find.textContaining('本次修改：资料名称、用途说明'), findsOneWidget);
+        expect(find.text('修改前'), findsOneWidget);
+        expect(find.text('修改后'), findsOneWidget);
         expect(find.text('核对后的服务器'), findsOneWidget);
         expect(find.text('核对后的用途说明'), findsOneWidget);
         if (batch) {
@@ -220,14 +221,14 @@ void main() {
     );
   }
   testWidgets(
-    'actual import editing, item reduction and confirmation update shared library and return to the exact processed proposal',
+    'switching preview does not reduce the proposal, all records save together and results stay on the proposal',
     (t) async {
       final s = await start(t), m = model(t);
       expect(m.selection, 'import');
       await tap(t, find.byKey(const ValueKey('proposal-filter-pending')));
       await capture(t, 'proposals-1440-light-import');
-      await tap(t, find.byKey(const ValueKey('proposal-item-status')));
-      expect(m.draft!.selected, {'portal'});
+      await tap(t, find.byKey(const ValueKey('proposal-tab-portal')));
+      expect(m.activeItemId, 'portal');
       await tap(t, find.byKey(const ValueKey('proposal-edit-portal')));
       await t.enterText(
         find.byKey(const ValueKey('proposal-edit-name')),
@@ -245,30 +246,26 @@ void main() {
       expect(m.filter, WorkspaceProposalFilter.all);
       expect(m.detail!.summary.status, WorkspaceProposalStatus.completed);
       expect(m.detail!.items, isEmpty);
-      expect(m.detail!.targets, hasLength(1));
-      final ref = m.detail!.targets.single.record;
+      expect(m.detail!.targets, hasLength(2));
+      final ref = m.detail!.targets.first.record;
       expect(
         (await s.readDetail(ref)).values['url'],
         'https://reviewed.beichen.example',
       );
       expect((await s.loadSummary()).proposals, 1);
-      expect((await s.loadSummary()).records, 32);
+      expect((await s.loadSummary()).records, 33);
       await capture(t, 'proposals-1440-light-imported');
-      await tap(t, find.byKey(ValueKey('proposal-current-${ref.key}')));
-      expect(
-        t
-            .widget<LibraryPage>(find.byType(LibraryPage))
-            .controller
-            .detail!
-            .record
-            .ref,
-        ref,
+      expect(find.byType(ProposalsPage), findsOneWidget);
+      expect(find.byType(LibraryPage), findsNothing);
+      expect(find.byKey(ValueKey('proposal-current-${ref.key}')), findsNothing);
+      expect(find.text('https://reviewed.beichen.example'), findsOneWidget);
+      await tap(
+        t,
+        find.byKey(
+          ValueKey('proposal-saved-tab-${m.detail!.targets.last.record.key}'),
+        ),
       );
-      final position = m.detailScroll;
-      await tap(t, find.byKey(const ValueKey('workspace-back')));
-      expect(model(t), same(m));
-      expect(m.selection, 'import');
-      expect(m.detailScroll, position);
+      expect(find.text('https://status.beichen.example'), findsOneWidget);
     },
   );
   testWidgets(
@@ -359,13 +356,13 @@ void main() {
     },
   );
   testWidgets(
-    'explicit saved-version snapshot invalidates its mounted body after purge and never substitutes current content',
+    'inline saved content invalidates after purge and never substitutes current content',
     (t) async {
       final s = await start(t), m = model(t);
-      await tap(t, find.byKey(const ValueKey('proposal-item-status')));
+      await tap(t, find.byKey(const ValueKey('proposal-tab-portal')));
       await tap(t, find.byKey(const ValueKey('proposal-confirm')));
-      final ref = m.detail!.targets.single.record,
-          original = await s.readDetail(m.detail!.targets.single.record);
+      final ref = m.detail!.targets.first.record,
+          original = await s.readDetail(m.detail!.targets.first.record);
       await s.saveRecord(
         WorkspaceEdit(
           operationId: 'later',
@@ -375,15 +372,8 @@ void main() {
         ),
       );
       await ready(t);
-      await tap(t, find.byKey(ValueKey('proposal-snapshot-${ref.key}')));
-      expect(
-        t
-            .widget<LibrarySnapshotView>(find.byType(LibrarySnapshotView))
-            .archive
-            .detail
-            .values,
-        original.values,
-      );
+      expect(find.text(original.values['url'] as String), findsOneWidget);
+      expect(find.text('https://later.example'), findsNothing);
       final current = await s.readDetail(ref),
           deleted = await s.changeRecord(
             WorkspaceRecordChange(
@@ -403,20 +393,11 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      expect(find.byType(LibrarySnapshotView), findsNothing);
-      expect(find.textContaining('不会替换成当前或同名内容'), findsOneWidget);
-      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
-      await closed(t);
       await ready(t);
-      expect(m.detail!.targets.single.snapshotAvailable, false);
-      expect(
-        t
-            .widget<DesktopButton>(
-              find.byKey(ValueKey('proposal-current-${ref.key}')),
-            )
-            .onPressed,
-        isNull,
-      );
+      expect(find.text(original.values['url'] as String), findsNothing);
+      expect(find.textContaining('不会替换成当前或同名内容'), findsOneWidget);
+      expect(m.detail!.targets.first.snapshotAvailable, false);
+      expect(find.byKey(ValueKey('proposal-current-${ref.key}')), findsNothing);
     },
   );
   testWidgets(
@@ -563,7 +544,7 @@ void main() {
       );
       await ready(t);
       expect(m.needsReview, true);
-      await tap(t, find.byKey(const ValueKey('proposal-item-status')));
+      await tap(t, find.byKey(const ValueKey('proposal-tab-portal')));
       await tap(t, find.byKey(const ValueKey('proposal-edit-portal')));
       await tap(
         t,
@@ -592,7 +573,7 @@ void main() {
       ]);
       await tap(t, find.byKey(const ValueKey('proposal-review-current')));
       await tap(t, find.byKey(const ValueKey('proposal-confirm')));
-      final saved = await s.readDetail(m.detail!.targets.single.record);
+      final saved = await s.readDetail(m.detail!.targets.first.record);
       expect(saved.relations['hostedOn'], [
         const WorkspaceRecordRef(WorkspaceRecordKind.information, 'aliyun'),
       ]);
@@ -605,7 +586,6 @@ void main() {
       final s = await start(t), m = model(t);
       await tap(t, find.byKey(const ValueKey('proposal-row-update')));
       final old = await s.proposals.currentTarget('update');
-      await tap(t, find.byKey(const ValueKey('proposal-compare-server-port')));
       expect(find.text(old.values['port'] as String), findsWidgets);
       final deleted = await s.changeRecord(
         WorkspaceRecordChange(
@@ -626,14 +606,10 @@ void main() {
       );
       await t.pumpAndSettle();
       expect(find.text(old.values['port'] as String), findsNothing);
-      expect(find.text('当前普通资料已不可用。'), findsOneWidget);
-      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
-      await closed(t);
-      await ready(t);
       expect(m.detail!.items.single.before!.values, isEmpty);
       expect(m.draft!.originals.values.single.before!.values, isEmpty);
       expect(m.draft!.items.values.single.values.keys, ['port']);
-      expect(find.text('原版本内容已不可用。'), findsOneWidget);
+      expect(find.text('修改前的内容暂不可用，请重新核对。'), findsOneWidget);
       expect(m.canConfirm, false);
     },
   );
@@ -654,27 +630,20 @@ void main() {
       expect(m.detail!.summary.status, WorkspaceProposalStatus.completed);
       expect(m.detail!.items, isEmpty);
       expect(find.text('已移入回收站'), findsWidgets);
+      expect(find.byKey(ValueKey('proposal-current-${ref.key}')), findsNothing);
       expect(
-        t
-            .widget<DesktopButton>(
-              find.byKey(ValueKey('proposal-current-${ref.key}')),
-            )
-            .onPressed,
-        isNull,
+        find.byKey(ValueKey('proposal-snapshot-${ref.key}')),
+        findsNothing,
       );
-      await tap(t, find.byKey(ValueKey('proposal-snapshot-${ref.key}')));
-      expect(find.byType(LibrarySnapshotView), findsOneWidget);
       expect(
         t
-            .widget<LibrarySnapshotView>(find.byType(LibrarySnapshotView))
-            .archive
-            .detail
+            .widget<ProposalItemReading>(find.byType(ProposalItemReading))
+            .item
+            .proposed
             .version,
         1,
       );
       await capture(t, 'proposals-1440-light-deleted-snapshot');
-      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
-      await closed(t);
       await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
       await tap(t, find.byKey(const ValueKey('library-open-recycle')));
       expect(find.text('Blinko 笔记'), findsWidgets);
@@ -727,9 +696,9 @@ void main() {
       await tap(t, find.byKey(const ValueKey('proposal-row-fields-server')));
       final m = model(t),
           before = await s.proposals.currentTarget('fields-server');
-      expect(find.textContaining('新字段定义：运维联系标识'), findsOneWidget);
-      expect(find.textContaining('旧授权不包含新字段'), findsOneWidget);
-      await t.ensureVisible(find.textContaining('新字段定义：恢复联系人'));
+      expect(find.text('替换：运维联系标识'), findsOneWidget);
+      expect(find.textContaining('删除：'), findsWidgets);
+      await t.ensureVisible(find.text('新增：恢复联系人'));
       await capture(t, 'proposals-1440-light-field-intents');
       await tap(t, find.byKey(const ValueKey('proposal-edit-fields-server')));
       await t.enterText(
@@ -745,9 +714,9 @@ void main() {
       await closed(t);
       await tap(t, find.byKey(const ValueKey('proposal-confirm')));
       final ref = m.detail!.targets.single.record;
-      await tap(t, find.byKey(ValueKey('proposal-current-${ref.key}')));
-      expect(find.text('运维联系标识'), findsOneWidget);
-      expect(find.text('恢复联系人'), findsOneWidget);
+      expect(find.byKey(ValueKey('proposal-current-${ref.key}')), findsNothing);
+      expect(find.textContaining('运维联系标识'), findsWidgets);
+      expect(find.textContaining('恢复联系人'), findsWidgets);
       expect(find.text('owner@beichen.example'), findsOneWidget);
       final current = await s.readDetail(ref);
       expect(current.fieldIds['port'], before.fieldIds['port']);
@@ -776,7 +745,7 @@ void main() {
         maxScrolls: 20,
       );
       await tap(t, find.byKey(const ValueKey('proposal-row-fields-profile')));
-      expect(find.text('教育经历'), findsOneWidget);
+      expect(find.text('教育经历'), findsWidgets);
       final m = model(t),
           before = await s.proposals.currentTarget('fields-profile'),
           change = m.detail!.items.single.changes.first;
@@ -787,12 +756,12 @@ void main() {
       );
       await tap(t, find.byKey(const ValueKey('proposal-edit-keep')));
       await closed(t);
-      await t.ensureVisible(find.textContaining('第一段教育 · 名称修正'));
+      await t.ensureVisible(find.text('Owner核对后的教育名称'));
       await t.pumpAndSettle();
       await capture(t, 'proposals-1280-dark200-entry-leaves');
       await tap(t, find.byKey(const ValueKey('proposal-confirm')));
       final ref = m.detail!.targets.single.record;
-      await tap(t, find.byKey(ValueKey('proposal-current-${ref.key}')));
+      expect(find.byKey(ValueKey('proposal-current-${ref.key}')), findsNothing);
       expect(find.byType(LibraryEntryTimeline), findsWidgets);
       expect(find.text('Owner核对后的教育名称'), findsOneWidget);
       expect(find.text('研究成果'), findsOneWidget);
@@ -817,7 +786,7 @@ void main() {
       final m = model(t),
           before = await s.proposals.currentTarget('delete-field');
       expect(find.text('删除整条资料'), findsNothing);
-      expect(find.text('移除该字段；旧内容进入回收站。'), findsOneWidget);
+      expect(find.textContaining('删除：'), findsWidgets);
       expect(
         find.byKey(const ValueKey('proposal-edit-delete-field')),
         findsNothing,
@@ -1110,20 +1079,18 @@ void main() {
       );
       expect(find.byKey(const ValueKey('proposal-confirm')), findsNothing);
       final target = model(t).detail!.targets.first;
-      await tap(
-        t,
+      expect(
         find.byKey(ValueKey('proposal-snapshot-${target.record.key}')),
+        findsNothing,
       );
       expect(
         t
-            .widget<LibrarySnapshotView>(find.byType(LibrarySnapshotView))
-            .archive
-            .detail
+            .widget<ProposalItemReading>(find.byType(ProposalItemReading))
+            .item
+            .proposed
             .version,
         target.version,
       );
-      await tap(t, find.byKey(const ValueKey('proposal-read-close')));
-      await closed(t);
     },
   );
 

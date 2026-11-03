@@ -91,7 +91,7 @@ void main() {
     },
   );
   test(
-    'real addition review, partial selection and suggested classification persist without terminal bodies',
+    'real addition review, whole proposal and suggested classification persist without terminal bodies',
     () async {
       final session = service.agent.openSession('合成聊天');
       final id = await service.agent.submitImport(session, [
@@ -120,31 +120,41 @@ void main() {
         tagIds: review.tagIds,
         values: {for (final k in review.values.keys) k: '主人核对正文'},
       );
-      final command = decision(d, reviewed: [edit]);
+      await expectLater(
+        source.change(decision(d, reviewed: [edit])),
+        throwsA(
+          isA<WorkspaceFailure>().having(
+            (e) => e.code,
+            'code',
+            'proposal_incomplete',
+          ),
+        ),
+      );
+      expect(service.owner.information, isEmpty);
+      final command = decision(
+        d,
+        reviewed: [edit, WorkspaceProposalItemReview.fromItem(d.items.last)],
+      );
       final receipt = await source.change(command);
       WorkspaceProposalExpectation(d).check(command, receipt);
-      expect(service.owner.information.length, 1);
-      expect(service.owner.information.single.name, '主人核对名称');
-      expect(service.owner.information.single.fields.single.value, '主人核对正文');
+      expect(service.owner.information.length, 2);
+      expect(service.owner.information.first.name, '主人核对名称');
+      expect(service.owner.information.first.fields.single.value, '主人核对正文');
       expect(service.owner.directories.single.name, '合成新目录');
       expect(service.owner.tags.single.name, '合成新标签');
-      expect(service.owner.importProposals.single.items.single.name, '未选项');
-      expect(
-        service.owner.importProposals.single.items.single.fields.single.value,
-        '不应保存',
-      );
-      expect((await source.read(id)).items.length, 1);
-      expect((await source.read(id)).targets.length, 1);
-      final archive = await source.snapshot(id, receipt.records.single.ref);
+      expect(service.owner.importProposals.single.items, isEmpty);
+      expect((await source.read(id)).items, isEmpty);
+      expect((await source.read(id)).targets.length, 2);
+      final archive = await source.snapshot(id, receipt.records.first.ref);
       expect(archive.detail.record.name, '主人核对名称');
       await close();
       await open();
       expect(
-        (await source.receipt(command.operationId))!.records.single.ref,
-        receipt.records.single.ref,
+        (await source.receipt(command.operationId))!.records.first.ref,
+        receipt.records.first.ref,
       );
       expect((await source.change(command)).commandDigest, command.digest);
-      expect(service.owner.information.length, 1);
+      expect(service.owner.information.length, 2);
     },
   );
   test(

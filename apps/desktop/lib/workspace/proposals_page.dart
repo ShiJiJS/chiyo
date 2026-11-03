@@ -10,6 +10,8 @@ import 'proposals_controller.dart';
 import 'proposal_batch_dialog.dart';
 import 'organization_reading.dart';
 import 'workspace_source.dart';
+import 'proposal_passwords.dart';
+import 'proposal_content_preview.dart';
 
 String proposalStateLabel(WorkspaceProposalSummary s) =>
     s.organizationOutcome != null
@@ -30,7 +32,7 @@ class ProposalsPage extends StatefulWidget {
   const ProposalsPage({
     super.key,
     required this.controller,
-    this.onPasswordInput,
+    this.passwords,
     this.onFile,
     required this.onRecord,
     this.onModalChanged,
@@ -40,8 +42,7 @@ class ProposalsPage extends StatefulWidget {
     this.workspaceBackLabel = '返回上一页',
   });
   final ProposalsController controller;
-  final Future<bool> Function(String proposalId, int version, String itemId)?
-  onPasswordInput;
+  final ProposalPasswords? passwords;
   final WorkspaceProposalFileOpener? onFile;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final ValueChanged<bool>? onModalChanged;
@@ -61,12 +62,14 @@ class _ProposalsPageState extends State<ProposalsPage> {
   late final ScrollController _list, _detail;
   String? _selection, _state;
   String _query = '';
+  final _savedSelection = <String, WorkspaceRecordRef>{};
   bool _restoring = false;
   double _restoreAt = 0;
   double? _restoreListAt;
   @override
   void initState() {
     super.initState();
+    m.bindPasswords(widget.passwords);
     _selection = m.selection;
     _state = _stateKey;
     _query = _queryKey;
@@ -83,7 +86,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
   String get _queryKey => '${m.viewRevision}/${m.offset}/${m.limit}';
   String? get _stateKey => m.detail == null
       ? null
-      : '${m.detail!.summary.id}/${m.detail!.summary.version}/${m.detail!.summary.status.name}';
+      : '${m.detail!.summary.id}/${m.detail!.summary.version}/${m.detail!.summary.status.name}/${m.activeItemId}';
   void _changed() {
     if (!mounted) return;
     if (_query != _queryKey) {
@@ -172,14 +175,50 @@ class _ProposalsPageState extends State<ProposalsPage> {
     }
   }
 
-  Future<void> _password(WorkspaceProposalItem item) async {
-    final d = m.detail, callback = widget.onPasswordInput;
-    if (!m.canEdit || d == null || callback == null) return;
+  @override
+  void didUpdateWidget(covariant ProposalsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    m.bindPasswords(widget.passwords);
+  }
+
+  Future<void> _previewRelated(WorkspaceRecordRef ref) async {
+    final detail = m.detail;
+    if (detail == null || m.frozen) return;
+    final proposedId = ref.id.startsWith('pending:')
+        ? 'proposal:${ref.id.substring('pending:'.length)}'
+        : ref.id;
+    final item = m.reviewItems.where((i) => i.id == proposedId).firstOrNull;
+    if (item != null) {
+      m.selectItem(item.id);
+      return;
+    }
+    final source = m.source;
+    if (source is! WorkspaceProposalPreviewSource) return;
+    final previews = source as WorkspaceProposalPreviewSource;
     widget.onModalChanged?.call(true);
     try {
-      if (await callback(d.summary.id, d.summary.version, item.id)) {
-        await m.reloadAfterPasswordInput(d, item.id);
-      }
+      await showDesktopDialog<void>(
+        context,
+        builder: (context) => DesktopDialog(
+          title: const Text('关联资料预览'),
+          content: ProposalContentPreview(
+            changes: m.changes,
+            load: () => previews.previewRelated(
+              detail.summary.id,
+              detail.summary.version,
+              ref,
+            ),
+            catalog: m.catalog!,
+            relations: previews.previewRelations(),
+          ),
+          actions: [
+            DesktopButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('关闭'),
+            ),
+          ],
+        ),
+      );
     } finally {
       widget.onModalChanged?.call(false);
     }
@@ -194,7 +233,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
         context,
         builder: (context) => DesktopDialog(
           title: const Text('重新审阅当前提案'),
-          content: const Text('这会放弃本页旧审阅的未保存编辑和勾选，重新读取当前提案。已有资料不会改变，也不会自动批准。'),
+          content: const Text('这会放弃本页旧审阅的未保存编辑，重新读取当前提案。已有资料不会改变，也不会自动批准。'),
           actions: [
             DesktopButton(
               onPressed: () => Navigator.pop(context, false),
@@ -590,35 +629,12 @@ class _ProposalsPageState extends State<ProposalsPage> {
             m.draft?.items[item.id] ??
             WorkspaceProposalItemReview.fromItem(item),
         d = m.detail!,
-        c = UiPalette.of(context),
-        multiple = d.items.length > 1,
-        selected = m.draft?.selected.contains(item.id) ?? false;
+        c = UiPalette.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (multiple)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 15),
-              child: Semantics(
-                checked: selected,
-                child: DesktopButton(
-                  key: ValueKey('proposal-item-${item.id}'),
-                  kind: DesktopButtonKind.quiet,
-                  alignment: Alignment.centerLeft,
-                  onPressed: m.canEdit
-                      ? () => m.chooseItem(item.id, !selected)
-                      : null,
-                  leading: Icon(
-                    selected ? Icons.check_box : Icons.check_box_outline_blank,
-                    size: 19,
-                    color: selected ? c.accent : c.muted,
-                  ),
-                  child: Text('${selected ? '选中' : '未选中'} · ${review.name}'),
-                ),
-              ),
-            ),
           if (item.before == null)
             ProposalItemReading(
               item: item,
@@ -629,7 +645,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                 item.id,
                 d.summary.version,
               ),
-              onRecord: widget.onRecord,
+              onRecord: _previewRelated,
               enabled: !m.frozen,
               onFile: widget.onFile == null
                   ? null
@@ -673,7 +689,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                   item.id,
                   d.summary.version,
                 ),
-                onRecord: widget.onRecord,
+                onRecord: _previewRelated,
                 enabled: !m.frozen,
               )
             else
@@ -694,171 +710,52 @@ class _ProposalsPageState extends State<ProposalsPage> {
               child: const Text('核对当前资料和原提案'),
             ),
           ] else ...[
-            Text(
-              item.before!.record.name,
-              style: libraryText(context, 22, weight: FontWeight.w700),
-            ),
-            for (final metadata in [
-              (
-                label: '资料名称',
-                before: item.before!.record.name,
-                after: review.name,
-              ),
-              (
-                label: '用途说明',
-                before: item.before!.record.description,
-                after: review.description,
-              ),
-            ])
-              if (metadata.before != metadata.after)
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: ProposalDiff(
-                    label: metadata.label,
-                    before: proposalValue(metadata.before),
-                    after: proposalValue(metadata.after),
-                  ),
-                ),
-            for (final a in item.attachments)
-              proposalSection(
-                context,
-                a.existingName.isEmpty
-                    ? '新增独立附件 · ${a.name}'
-                    : '补充文件版本 · ${a.name}',
-                ProposalAttachmentReading(
-                  attachment: a,
-                  enabled: !m.frozen,
-                  onFile: widget.onFile == null
-                      ? null
-                      : (key, version) async {
-                          widget.onModalChanged?.call(true);
-                          try {
-                            await widget.onFile!(
-                              d.summary.id,
-                              d.summary.version,
-                              item.id,
-                              key,
-                              version,
-                            );
-                          } finally {
-                            widget.onModalChanged?.call(false);
-                          }
-                        },
-                ),
-              ),
-            ProposalRelationChanges(
-              before: item.before!,
-              after: review,
-              source: m.source.relations(
+            ProposalItemComparison(
+              item: item,
+              review: review,
+              catalog: m.catalog!,
+              relations: m.source.relations(
                 d.summary.id,
                 item.id,
                 d.summary.version,
               ),
-            ),
-            for (final section in proposalChangeSections(item)) ...[
-              Padding(
-                padding: const EdgeInsets.only(top: 22),
-                child: Text(
-                  section.title,
-                  style: libraryText(context, 18, weight: FontWeight.w600),
-                ),
-              ),
-              for (final change in section.changes)
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ProposalDiff(
-                        label:
-                            '字段：${change.label} · ${switch (change.intent) {
-                              WorkspaceProposalFieldIntent.correct => '修正原字段内容',
-                              WorkspaceProposalFieldIntent.add => '新增字段',
-                              WorkspaceProposalFieldIntent.replace => '替换字段含义',
-                              WorkspaceProposalFieldIntent.remove => '删除字段',
-                            }}',
-                        before:
-                            change.intent == WorkspaceProposalFieldIntent.add
-                            ? '原资料没有此字段。'
-                            : item.beforeState ==
-                                  WorkspaceProposalBeforeState.unread
-                            ? '原版本暂未读取，请先核对当前状态。'
-                            : item.beforeState ==
-                                      WorkspaceProposalBeforeState
-                                          .unavailable ||
-                                  !change.beforeAvailable
-                            ? '原版本内容已不可用。'
-                            : proposalValue(change.before),
-                        currentLabel:
-                            d.summary.status ==
-                                WorkspaceProposalStatus.conflicted
-                            ? '原资料v${item.before!.version}'
-                            : '当前内容',
-                        after:
-                            change.intent == WorkspaceProposalFieldIntent.remove
-                            ? '移除该字段；旧内容进入回收站。'
-                            : proposalValue(review.values[change.reviewKey]),
-                      ),
-                      if (change.definition != null &&
-                          (change.intent == WorkspaceProposalFieldIntent.add ||
-                              change.intent ==
-                                  WorkspaceProposalFieldIntent.replace))
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Text(
-                            '新字段定义：${change.definition!['label']} · ${const {'text': '文本', 'multiline': '多行文本', 'number': '数字', 'date': '日期'}[change.definition!['type']] ?? '保留结构'}\n${change.definition!['description'] ?? ''}',
-                            style: libraryText(
-                              context,
-                              13,
-                              color: c.muted,
-                              height: 1.8,
-                            ),
-                          ),
-                        ),
-                      Text(
-                        switch (change.intent) {
-                          WorkspaceProposalFieldIntent.correct => '修正保留原字段身份。',
-                          WorkspaceProposalFieldIntent.add =>
-                            '新增字段使用新身份；旧授权不包含它。',
-                          WorkspaceProposalFieldIntent.replace =>
-                            '替换含义使用新身份；旧内容进入回收，旧授权不包含新字段。',
-                          WorkspaceProposalFieldIntent.remove =>
-                            '删除只影响此字段；恢复时重新分配身份，不恢复旧授权。',
-                        },
-                        style: libraryText(
-                          context,
-                          13,
-                          color: c.muted,
-                          height: 1.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-            const SizedBox(height: 12),
-            Text(
-              '只有列出的名称、用途说明及字段变化会写入；目录、标签及凭据关联保持原样。',
-              style: libraryText(context, 13, color: c.muted, height: 1.9),
-            ),
-            const SizedBox(height: 12),
-            DesktopButton(
-              key: ValueKey('proposal-compare-${item.id}'),
-              kind: DesktopButtonKind.quiet,
-              onPressed: m.frozen ? null : () => _read(item: item),
-              child: const Text('核对当前资料和原提案'),
+              onRecord: _previewRelated,
+              enabled: !m.frozen,
+              onFile: widget.onFile == null
+                  ? null
+                  : (key, version) => widget.onFile!(
+                      d.summary.id,
+                      d.summary.version,
+                      item.id,
+                      key,
+                      version,
+                    ),
             ),
           ],
+          if (!d.summary.wholeDeletion &&
+              item.before != null &&
+              d.summary.status == WorkspaceProposalStatus.conflicted)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: DesktopButton(
+                key: ValueKey('proposal-compare-${item.id}'),
+                kind: DesktopButtonKind.quiet,
+                onPressed: m.frozen ? null : () => _read(item: item),
+                child: const Text('核对后来发生的修改'),
+              ),
+            ),
           if (d.summary.kind != WorkspaceProposalKind.deletion) ...[
             if (item.credential?.source == 'owner') ...[
               const SizedBox(height: 16),
-              DesktopButton(
-                key: ValueKey('proposal-password-${item.id}'),
-                onPressed: m.canEdit && widget.onPasswordInput != null
-                    ? () => _password(item)
-                    : null,
-                child: Text(item.credential!.ready ? '重新填写密码' : '填写密码'),
-              ),
+              if (widget.passwords != null)
+                widget.passwords!.input(
+                  d.summary.id,
+                  d.summary.version,
+                  item.id,
+                  enabled: m.canEdit,
+                )
+              else
+                Text(item.credential!.ready ? '密码已填写' : '密码输入暂不可用，请重新打开应用。'),
             ],
             const SizedBox(height: 18),
             Align(
@@ -973,11 +870,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${s.agentClaim} · ${s.chatClaim}',
-                          style: libraryText(context, 12, color: c.muted),
-                        ),
-                        Text(
-                          '名称和用途为Agent自述。',
+                          s.agentClaim,
                           style: libraryText(context, 12, color: c.muted),
                         ),
                       ],
@@ -1029,8 +922,36 @@ class _ProposalsPageState extends State<ProposalsPage> {
                       onHistory: m.frozen ? null : widget.onHistory,
                       onRefresh: m.frozen ? null : m.load,
                     ),
-                  if (d.organization == null)
-                    for (final item in m.reviewItems) _item(context, item),
+                  if (d.organization == null && m.reviewItems.isNotEmpty) ...[
+                    if (m.reviewItems.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final (index, item) in m.reviewItems.indexed)
+                              ChoiceChip(
+                                showCheckmark: false,
+                                key: ValueKey('proposal-tab-${item.id}'),
+                                selected: m.activeItemId == item.id,
+                                onSelected: m.frozen
+                                    ? null
+                                    : (_) => m.selectItem(item.id),
+                                label: Text(
+                                  '${index + 1}. ${m.draft?.items[item.id]?.name ?? item.proposed.record.name}${item.credential?.ready == false && m.passwords?.ready(s.id, s.version, item.id) != true ? ' · 待填密码' : ''}',
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    for (final item in m.reviewItems)
+                      if (item.id == m.activeItemId)
+                        KeyedSubtree(
+                          key: ValueKey('proposal-active-${item.id}'),
+                          child: _item(context, item),
+                        ),
+                  ],
                   if (!s.pending && d.targets.isEmpty && d.organization == null)
                     Padding(
                       padding: const EdgeInsets.only(top: 28),
@@ -1041,66 +962,56 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         style: libraryText(context, 14, color: c.muted),
                       ),
                     ),
-                  for (final target in d.targets)
-                    proposalSection(
-                      context,
-                      target.name,
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            s.kind == WorkspaceProposalKind.deletion
-                                ? '删除前的资料v${target.version}；回收不恢复旧授权。'
-                                : '当时保存为资料v${target.version}',
-                            style: libraryText(context, 13, color: c.muted),
-                          ),
-                          if (!target.exists)
-                            Text(
-                              '当前对象已删除或不可用，历史身份仍保留。',
-                              style: libraryText(
-                                context,
-                                13,
-                                color: c.muted,
-                                height: 1.8,
-                              ),
-                            ),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              DesktopButton(
+                  if (d.targets.isNotEmpty &&
+                      m.source is WorkspaceProposalPreviewSource) ...[
+                    if (d.targets.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final target in d.targets)
+                              ChoiceChip(
+                                showCheckmark: false,
                                 key: ValueKey(
-                                  'proposal-current-${target.record.key}',
+                                  'proposal-saved-tab-${target.record.key}',
                                 ),
-                                onPressed: m.frozen || !target.exists
-                                    ? null
-                                    : () => widget.onRecord(target.record),
-                                child: const Text('查看当前资料'),
+                                selected:
+                                    (_savedSelection[s.id] ??
+                                        d.targets.first.record) ==
+                                    target.record,
+                                onSelected: (_) => setState(
+                                  () => _savedSelection[s.id] = target.record,
+                                ),
+                                label: Text(target.name),
                               ),
-                              DesktopButton(
-                                key: ValueKey(
-                                  'proposal-snapshot-${target.record.key}',
-                                ),
-                                kind: DesktopButtonKind.quiet,
-                                onPressed: m.frozen || !target.snapshotAvailable
-                                    ? null
-                                    : () => _read(target: target),
-                                child: Text(
-                                  '查看${s.kind == WorkspaceProposalKind.deletion ? '删除前' : '当时保存'}v${target.version}',
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (!target.snapshotAvailable)
-                            Text(
-                              s.kind == WorkspaceProposalKind.deletion
-                                  ? '删除前的快照已不可用。'
-                                  : '当时保存的快照已不可用。',
-                              style: libraryText(context, 13, color: c.muted),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    for (final target in d.targets)
+                      if ((_savedSelection[s.id] ?? d.targets.first.record) ==
+                          target.record)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 24),
+                          child: ProposalContentPreview(
+                            changes: m.changes,
+                            key: ValueKey((
+                              'saved-preview',
+                              s.id,
+                              target.record,
+                              target.version,
+                            )),
+                            load: () =>
+                                (m.source as WorkspaceProposalPreviewSource)
+                                    .savedPreview(s.id, target.record),
+                            catalog: m.catalog!,
+                            relations:
+                                (m.source as WorkspaceProposalPreviewSource)
+                                    .previewRelations(),
+                          ),
+                        ),
+                  ],
                   if (s.pending)
                     Container(
                       margin: const EdgeInsets.only(top: 30),
@@ -1113,7 +1024,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         children: [
                           if (d.items.length > 1 && d.organization == null)
                             Text(
-                              '本次批准 ${m.draft?.selected.length ?? 0} / ${d.items.length} 份资料；未选中的继续待审批，有待审批关联的获准后一起入库。',
+                              '共 ${d.items.length} 条信息，填齐后一起保存。',
                               style: libraryText(
                                 context,
                                 13,
@@ -1130,7 +1041,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                 key: const ValueKey(
                                   'proposal-batch-add-confirm',
                                 ),
-                                onPressed: m.canConfirm
+                                onPressed: m.canQueueConfirm
                                     ? () => m.queueForBatch(
                                         WorkspaceProposalAction.confirm,
                                       )
@@ -1181,12 +1092,12 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                     : null,
                                 child: Text(
                                   s.kind == WorkspaceProposalKind.addition
-                                      ? '批准录入'
+                                      ? '保存整份提案'
                                       : d.organization?.legacyReview == true
                                       ? '确认旧版整批分类'
                                       : s.kind == WorkspaceProposalKind.deletion
                                       ? '确认移入回收站'
-                                      : '确认修改',
+                                      : '保存整份修改',
                                 ),
                               ),
                             ],

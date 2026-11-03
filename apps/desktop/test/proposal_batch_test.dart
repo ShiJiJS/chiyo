@@ -301,7 +301,7 @@ void main() {
       final m = ProposalsController(s.proposals, s.changes);
       addTearDown(m.dispose);
       await m.open('import');
-      m.chooseItem('status', false);
+      m.selectItem('portal');
       m.editItem(
         'import',
         1,
@@ -314,7 +314,7 @@ void main() {
         editedReview(m.draft!.items['portal']!, name: '尚未更新清单的编辑'),
       );
       expect(
-        m.batch.entry('import')!.command!.reviewed.single.name,
+        m.batch.entry('import')!.command!.reviewed.first.name,
         '已加入清单的名称',
       );
       s.loseNextProposalReply = true;
