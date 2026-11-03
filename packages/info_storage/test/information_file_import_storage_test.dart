@@ -77,11 +77,20 @@ void main() {
         ),
         fileInput('target', [target]),
       ]);
-      await service.owner.confirmImport(id, proposal(id).version, [
-        proposal(id).items.first,
-      ]);
+      await expectLater(
+        service.owner.confirmImport(id, proposal(id).version, [
+          proposal(id).items.first,
+        ]),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'proposal_incomplete',
+          ),
+        ),
+      );
       expect(repo.items, isEmpty);
-      expect(proposal(id).approvedKeys, {'resume'});
+      expect(proposal(id).approvedKeys, isEmpty);
       await close();
       await open();
       expect(sql('PRAGMA user_version'), 47);
@@ -122,11 +131,7 @@ void main() {
               throw const AccessFailure('proposal_changed');
           },
           decide: () async {
-            await service.owner.confirmImport(
-              id,
-              p.version,
-              p.items.where((i) => i.key == 'target').toList(),
-            );
+            await service.owner.confirmImport(id, p.version, p.items);
           },
         );
       }

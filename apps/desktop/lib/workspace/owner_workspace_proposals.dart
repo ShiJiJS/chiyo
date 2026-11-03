@@ -123,6 +123,8 @@ class OwnerWorkspaceProposals implements WorkspaceProposalSource {
         switch (e.status) {
           'library_changed' => '资料库已替换，请重新读取提案。',
           'operation_conflict' => '原操作不能用于另一份决定。',
+          'proposal_incomplete' => '请核对整份提案后保存，不能只保存其中部分条目。',
+          'credential_material_required' => '提案中还有密码或凭证未填齐，整份尚未入库。',
           'attachment_capacity_exceeded' => '文件存储空间不足，请整理空间后重试；现有历史文件没有被自动清理。',
           'invalid_directory_name' =>
             '目录路径无效。请使用最多8层的名称，层级用 / 分隔；不能包含空层级、反斜线、. 或 ..。原提案未入库。',

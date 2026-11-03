@@ -117,7 +117,7 @@ class InformationTemplateDescription {
             'omit for same proposal, otherwise own related proposal id',
       },
       'pendingApproval':
-          'Approved candidates wait for their references; all approved members of a cycle save together. Rejected references require repair and new approval.',
+          'A proposal saves as one whole: every remaining item must be complete and reviewed. No subset may be admitted. References within the proposal resolve together; unresolved external references block the whole proposal. Rejected references require repair and new review.',
       'approval':
           'References are saved only after owner approval; this grants no access to their content.',
       'update':

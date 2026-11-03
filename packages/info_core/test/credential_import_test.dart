@@ -142,7 +142,7 @@ void main() {
   );
 
   test(
-    'information and credentials in an approved cycle enter together, independent input saves first',
+    'information, credentials and independent siblings enter as one whole proposal',
     () async {
       final id = await service.agent.submitImport(session, [
         credentialInput(
@@ -170,19 +170,29 @@ void main() {
           CredentialImportInput.agentString('PRIVATE-INDEPENDENT'),
         ),
       ]);
-      await service.owner.confirmImport(
-        id,
-        proposal(id).version,
-        proposal(id).items.where((i) => i.key != 'note').toList(),
+      await expectLater(
+        service.owner.confirmImport(
+          id,
+          proposal(id).version,
+          proposal(id).items.where((i) => i.key != 'note').toList(),
+        ),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'proposal_incomplete',
+          ),
+        ),
       );
-      expect(repo.managedCredentials.single.name, 'independent');
+      expect(repo.managedCredentials, isEmpty);
       expect(repo.items, isEmpty);
-      expect(proposal(id).approvedKeys, {'token'});
+      expect(proposal(id).approvedKeys, isEmpty);
       await service.owner.confirmImport(
         id,
         proposal(id).version,
-        proposal(id).items.where((i) => i.key == 'note').toList(),
+        proposal(id).items,
       );
+      expect(repo.managedCredentials.length, 2);
       final note = repo.items.single,
           token = repo.managedCredentials.singleWhere((c) => c.name == 'token');
       expect(note.layout!.relations['related']!.single.id, token.id);

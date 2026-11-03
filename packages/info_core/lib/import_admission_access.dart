@@ -164,7 +164,7 @@ extension OwnerImportAdmission on OwnerAccess {
                 key,
                 'pending',
                 reason: node.input.credential?.ready == false
-                    ? '需要主人在提案中补填密码，填写后才能批准入库。'
+                    ? '请填写密码，整份内容齐全后保存。'
                     : '',
               );
             }
@@ -206,7 +206,8 @@ extension OwnerImportAdmission on OwnerAccess {
     ImportProposal previous,
     List<ImportItemInput> reviewed,
   ) async {
-    // The key stays stable after partial admission; indices are presentation only.
+    // Historical partially admitted proposals retain only their unfinished
+    // items here. Review that entire remainder without recreating receipts.
     reviewed = [
       for (final (index, r) in reviewed.indexed)
         r.key.isEmpty
@@ -218,6 +219,9 @@ extension OwnerImportAdmission on OwnerAccess {
     if (reviewed.map((i) => i.key).toSet().length != reviewed.length ||
         reviewed.any((i) => !previous.items.any((old) => old.key == i.key))) {
       throw const AccessFailure('proposal_changed');
+    }
+    if (reviewed.length != previous.items.length) {
+      throw const AccessFailure('proposal_incomplete');
     }
     reviewed = _compileTemplateImports(reviewed);
     _validateImport(reviewed);
@@ -254,8 +258,9 @@ extension OwnerImportAdmission on OwnerAccess {
             _importDirectProblem(e.value, proposals) == null)
           e.key,
     };
-    // Greatest fixed point keeps a fully approved cycle together. Any edge to
-    // an unapproved/invalid target removes its dependent, recursively.
+    // A proposal is the save unit, including legacy proposals' remaining items.
+    // One incomplete member or unresolved reference blocks its entire proposal.
+    // Fully approved cycles can still be committed together.
     bool changed;
     do {
       final blocked = {
@@ -272,6 +277,18 @@ extension OwnerImportAdmission on OwnerAccess {
           }))
             key,
       };
+      for (final proposal in proposals.values.where(
+        (p) => p.state == ImportProposalState.pending,
+      )) {
+        final keys = proposal.items
+            .map((item) => _importNodeKey(proposal.id, item.key))
+            .toSet();
+        if (keys.any(
+          (key) => !eligible.contains(key) || blocked.contains(key),
+        )) {
+          blocked.addAll(keys.where(eligible.contains));
+        }
+      }
       changed = blocked.isNotEmpty;
       eligible.removeAll(blocked);
     } while (changed);
