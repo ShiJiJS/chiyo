@@ -111,15 +111,26 @@ void main() {
           pending: [ImportPendingReference('information', 'a')],
         ),
       ]);
-      await service.owner.confirmImport(id, proposal(id).version, [
-        proposal(id).items.first,
-      ]);
+      await expectLater(
+        service.owner.confirmImport(id, proposal(id).version, [
+          proposal(id).items.first,
+        ]),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'proposal_incomplete',
+          ),
+        ),
+      );
       expect(repo.items, isEmpty);
       expect((await repo.informationAttachmentUsage()).availableVersions, 0);
       expect((await repo.informationFileStagingUsage()).files, 2);
-      await service.owner.confirmImport(id, proposal(id).version, [
-        proposal(id).items.last,
-      ]);
+      await service.owner.confirmImport(
+        id,
+        proposal(id).version,
+        proposal(id).items,
+      );
       expect(repo.items.length, 2);
       expect((await repo.informationFileStagingUsage()).files, 0);
       expect(proposal(id).items, isEmpty);

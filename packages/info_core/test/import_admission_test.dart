@@ -67,7 +67,7 @@ void main() {
   });
   tearDown(() => service.close());
   test(
-    'unrelated approved item saves now; fully approved mutual references save together later',
+    'a proposal rejects partial approval and saves unrelated and cyclic members together',
     () async {
       final id = await service.agent.submitImport(session, [
         input('a', target: 'b'),
@@ -75,29 +75,32 @@ void main() {
         input('unrelated'),
       ]);
       final first = proposal(id);
-      final receipts = await service.owner.confirmImport(id, first.version, [
-        first.items[0],
-        first.items[2],
-      ]);
-      expect(receipts.length, 1);
-      expect(service.owner.information.single.name, 'unrelated');
-      expect(proposal(id).approvedKeys, {'a'});
-      expect(proposal(id).items.map((i) => i.key), ['a', 'b']);
-      expect(
-        service.owner
-            .importAdmission(id)
-            .singleWhere((s) => s.key == 'a')
-            .state,
-        'approved',
+      await expectLater(
+        service.owner.confirmImport(id, first.version, [
+          first.items[0],
+          first.items[2],
+        ]),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'proposal_incomplete',
+          ),
+        ),
       );
+      expect(service.owner.information, isEmpty);
+      expect(proposal(id).approvedKeys, isEmpty);
+      expect(proposal(id).items.length, 3);
       expect(
         service.agent.importStatus(session, id).toString(),
         isNot(contains('PRIVATE')),
       );
-      final second = proposal(id);
-      await service.owner.confirmImport(id, second.version, [
-        second.items.singleWhere((i) => i.key == 'b'),
-      ]);
+      final receipts = await service.owner.confirmImport(
+        id,
+        first.version,
+        first.items,
+      );
+      expect(receipts.length, 3);
       expect(service.owner.information.length, 3);
       final a = service.owner.information.singleWhere((i) => i.name == 'a'),
           b = service.owner.information.singleWhere((i) => i.name == 'b');

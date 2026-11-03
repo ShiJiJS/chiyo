@@ -60,7 +60,7 @@ void main() {
             await service.owner.confirmImport(
               id,
               p.version,
-              p.items.where((i) => i.key == key).toList(),
+              p.items.where((i) => key == 'all' || i.key == key).toList(),
             );
           },
         );
@@ -123,15 +123,21 @@ void main() {
         'password',
         'PRIVATE-PASSWORD-KEEP',
       );
-      expect(
-        (await approve(id, 'password-approval', 'password')).awaitingKeys,
-        ['password'],
+      await expectLater(
+        approve(id, 'password-approval', 'password'),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'proposal_incomplete',
+          ),
+        ),
       );
       expect(repo.managedCredentials, isEmpty);
       await close();
       await open();
       expect(sql('PRAGMA user_version'), 45);
-      expect(proposal(id).approvedKeys, {'password'});
+      expect(proposal(id).approvedKeys, isEmpty);
       expect(
         utf8.decode(proposal(id).items.first.credential!.material!),
         'PRIVATE-PASSWORD-KEEP',
@@ -140,7 +146,7 @@ void main() {
         "CREATE TRIGGER fail_credential_import BEFORE INSERT ON owner_proposal_operations WHEN NEW.operation_id='note-approval' BEGIN SELECT RAISE(ABORT, 'synthetic'); END",
       );
       await expectLater(
-        approve(id, 'note-approval', 'note'),
+        approve(id, 'note-approval', 'all'),
         throwsA(isA<StorageFailure>()),
       );
       expect(repo.items, isEmpty);
@@ -149,10 +155,10 @@ void main() {
       await close();
       await open();
       expect(repo.managedCredentials, isEmpty);
-      expect(proposal(id).approvedKeys, {'password'});
+      expect(proposal(id).approvedKeys, isEmpty);
       sql('DROP TRIGGER fail_credential_import');
-      final result = await approve(id, 'note-approval', 'note');
-      expect(result.records.length, 1);
+      final result = await approve(id, 'note-approval', 'all');
+      expect(result.records.length, 2);
       expect(repo.items.length, 1);
       expect(repo.managedCredentials.length, 1);
       final credential = repo.managedCredentials.single;
@@ -179,7 +185,7 @@ void main() {
       expect(
         (await service.owner.ownerProposalReceipt(
           'note-approval',
-        ))!.records.single.id,
+        ))!.records.singleWhere((r) => r.kind == 'information').id,
         repo.items.single.id,
       );
 
