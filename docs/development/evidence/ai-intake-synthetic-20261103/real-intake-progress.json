@@ -39,11 +39,15 @@
   "stableSigningAcrossUpdatesComplete": false,
   "oldLibraryInitiallyPreserved": true,
   "githubIssuesClosed": [
-    78,
-    79,
     80
   ],
   "stableSigningFollowupIssue": 50,
   "oldPortableBackupAndRecoveryKept": true,
-  "rawPreResetAndPendingCopiesRemovedAfterValidation": true
+  "rawPreResetAndPendingCopiesRemovedAfterValidation": true,
+  "githubIssuesReopened": [
+    78,
+    79
+  ],
+  "credentialOrganizationAccepted": false,
+  "originalFilePreservationStillVerified": true
 }
