@@ -3,3 +3,6 @@
 # can exhaust the unchanged per-process deadlines before the receiver starts.
 # Serialize files; keep every behavioral assertion and timeout unchanged.
 concurrency: 1
+# A source-mode scenario may launch many cold Dart processes in series. This
+# suite budget does not change the explicit per-process or protocol deadlines.
+timeout: 2m

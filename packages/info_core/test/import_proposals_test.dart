@@ -50,7 +50,13 @@ void main() async {
       );
       await expectLater(
         service.owner.confirmImport(invalid, p.version, p.items),
-        throwsA(isA<AccessFailure>()),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'invalid_directory_name',
+          ),
+        ),
       );
       expect(service.owner.directories, hasLength(2));
       expect(service.owner.information, hasLength(4));

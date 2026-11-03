@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "6292bc93",
+  "core": {
+    "passed": 394,
+    "skipped": 6
+  },
+  "storage": {
+    "passed": 364,
+    "skipped": 19
+  },
+  "desktop": {
+    "passed": 1140,
+    "skipped": 6
+  },
+  "cli": {
+    "initialPassed": 92,
+    "initialOuterFrameworkTimeouts": 4,
+    "skipped": 40,
+    "recheckFiles": [
+      "codex_focused_fill_test.dart",
+      "codex_process_test.dart"
+    ],
+    "recheckPassed": 9,
+    "recheckFailed": 0,
+    "recheckSuiteBudgetSeconds": 120,
+    "distinctCasesPassedAfterRecheck": 96
+  },
+  "perProcessAndProtocolDeadlinesChanged": false,
+  "normalAppRealIntakeComplete": false,
+  "privateSourcesIncluded": false
+}

@@ -172,7 +172,7 @@ def main():
 
     try:
         if args.check:
-            run("source-checks", [LAUNCHER, "check"], timeout=1200)
+            run("source-checks", [LAUNCHER, "check"], timeout=1800)
         build_arguments = [LAUNCHER, "build"]
         if args.with_focused_fill_candidate:
             build_arguments.append("--with-focused-fill-candidate")

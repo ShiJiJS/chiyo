@@ -20,7 +20,10 @@ class _OrganizationPlan {
     final name = suggestedDirectory.trim();
     if (id == null && name.isNotEmpty) {
       final parts = name.split('/').map((p) => p.trim()).toList();
-      if (parts.length > 8 || parts.any((p) => p == '.' || p == '..')) {
+      if (parts.length > 8 ||
+          parts.any(
+            (p) => p.isEmpty || p.length > 200 || p == '.' || p == '..',
+          )) {
         throw const AccessFailure('invalid_directory_name');
       }
       for (final part in parts) {
