@@ -40,6 +40,7 @@ void main() {
       await file.writeAsBytes(bytes);
       item['credential'] = {
         'source': 'agentFile',
+        'account': 'synthetic-ssh-user',
         'contextExposed': false,
         'filePath': file.path,
       };
@@ -54,6 +55,7 @@ void main() {
       expect(repo.importProposals.length, 1);
       final p = service.owner.importProposals.single;
       expect(p.items.single.credential!.material, bytes);
+      expect(p.items.single.credential!.account, 'synthetic-ssh-user');
       await file.delete();
       final recovered = await cli.execute({
         'command': 'import-status',
@@ -67,6 +69,7 @@ void main() {
         file.uri.pathSegments.last,
       );
       expect(repo.credentialMaterials.single.bytes, bytes);
+      expect(repo.managedCredentials.single.account, 'synthetic-ssh-user');
       expect(
         (await cli.execute({
           'command': 'import-status',

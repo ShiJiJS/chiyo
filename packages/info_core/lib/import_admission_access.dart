@@ -356,6 +356,7 @@ extension OwnerImportAdmission on OwnerAccess {
             name: input.name.trim(),
             publicPurpose: input.description,
             privateNote: '',
+            account: credential.account,
             form: credential.isFile
                 ? CredentialForm.file
                 : CredentialForm.string,
@@ -438,6 +439,14 @@ extension OwnerImportAdmission on OwnerAccess {
             ...p.createdItemIds,
             for (final i in admitted) identities[_importNodeKey(p.id, i.key)]!,
           ],
+          credentialSnapshots: {
+            ...p.credentialSnapshots,
+            for (final input in admitted)
+              if (input.credential != null)
+                input.key: credentialRecords.singleWhere(
+                  (c) => c.id == identities[_importNodeKey(p.id, input.key)],
+                ),
+          },
           createdItemVersions: [
             ...p.createdItemVersions,
             for (final _ in admitted) 1,

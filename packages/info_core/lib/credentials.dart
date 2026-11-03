@@ -28,10 +28,14 @@ class ManagedCredential {
     this.byteLength = 0,
     this.directoryId,
     this.template,
+    this.account = '',
     Iterable<String> tagIds = const [],
     Iterable<String> linkedItemIds = const [],
   }) : linkedItemIds = List.unmodifiable(linkedItemIds),
        tagIds = List.unmodifiable(tagIds) {
+    if (account.length > 512 || account.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+      throw const FormatException('Invalid credential account');
+    }
     bool invalidId(String id) =>
         id.isEmpty || id.length > 200 || id.contains('\u0000');
     if (directoryId != null && invalidId(directoryId!) ||
@@ -42,6 +46,7 @@ class ManagedCredential {
     }
   }
   final String id, name, publicPurpose, privateNote, suggestedBinding;
+  final String account;
   final CredentialForm form;
   final int version, revision, byteLength, useGeneration;
   final DateTime createdAt, modifiedAt;
@@ -64,6 +69,7 @@ class ManagedCredential {
     'name': name,
     'publicPurpose': publicPurpose,
     'privateNote': privateNote,
+    if (account.isNotEmpty) 'account': account,
     'form': form.name,
     'version': version,
     'revision': revision,
@@ -95,6 +101,7 @@ class ManagedCredential {
       name: j['name'] as String,
       publicPurpose: j['publicPurpose'] as String,
       privateNote: j['privateNote'] as String,
+      account: j['account'] as String? ?? '',
       form: CredentialForm.values.byName(j['form'] as String),
       version: j['version'] as int,
       revision: j['revision'] as int,
@@ -129,6 +136,7 @@ class ManagedCredential {
     String? name,
     String? publicPurpose,
     String? privateNote,
+    String? account,
     String? suggestedBinding,
     bool? discoverable,
     bool? enabled,
@@ -151,6 +159,7 @@ class ManagedCredential {
     name: name ?? this.name,
     publicPurpose: publicPurpose ?? this.publicPurpose,
     privateNote: privateNote ?? this.privateNote,
+    account: account ?? this.account,
     form: form,
     version: version ?? this.version,
     revision: revision + 1,

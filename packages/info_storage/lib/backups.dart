@@ -430,6 +430,9 @@ class InformationBackups {
       final credentialTemplates = tables['managed_credentials']!.any(
         (r) => _backupJson(r).containsKey('template'),
       );
+      final accountMetadata = tables['managed_credentials']!.any(
+        (r) => (_backupJson(r)['account'] as String? ?? '').isNotEmpty,
+      );
       final longTermAttachments = versions.isNotEmpty;
       final describedFileVersions = versions.any(
         (v) => v.label.isNotEmpty || v.sourceNote.isNotEmpty,
@@ -445,9 +448,12 @@ class InformationBackups {
           credentialClassification ||
           templatePackages ||
           credentialTemplates ||
+          accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = describedFileVersions
+        formatVersion = accountMetadata
+            ? 19
+            : describedFileVersions
             ? 18
             : longTermAttachments
             ? 17
@@ -465,7 +471,10 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (templatePackages || credentialTemplates || longTermAttachments
+            in (templatePackages ||
+                        credentialTemplates ||
+                        accountMetadata ||
+                        longTermAttachments
                     ? _v15Columns
                     : extendedColumns
                     ? _v12Columns
@@ -898,6 +907,11 @@ class InformationBackups {
             _informationImportFileLibraryFormat,
           );
         }
+        if (contents.formatVersion >= 19) {
+          await _repository._requireAdmissionFormat(
+            _credentialProposalPreviewLibraryFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -972,6 +986,7 @@ class InformationBackups {
           16,
           17,
           18,
+          19,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -992,7 +1007,7 @@ class InformationBackups {
       8 => _v8Columns,
       9 || 10 || 11 => _v9Columns,
       12 || 13 || 14 => _v12Columns,
-      15 || 16 || 17 || 18 => _v15Columns,
+      15 || 16 || 17 || 18 || 19 => _v15Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

@@ -374,6 +374,8 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                           runSpacing: 22,
                           children: [
                             for (final (id, label, value) in [
+                              if (detail.account.isNotEmpty)
+                                ('account', '账号', detail.account),
                               ('delivery', '注入方式', detail.delivery.label),
                               if (detail.binding.isNotEmpty)
                                 ('binding', '引用名称', detail.binding),

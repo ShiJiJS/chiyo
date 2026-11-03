@@ -1,4 +1,5 @@
 import 'information.dart';
+import 'credentials.dart';
 import 'credential_import_input.dart';
 import 'information_import_files.dart';
 export 'credential_import_input.dart';
@@ -320,7 +321,9 @@ class ImportProposal {
     Map<String, String>? candidateNames,
     Map<String, String>? candidateKinds,
     this.admissionVersion = 1,
-  }) : items = state == ImportProposalState.pending
+    Map<String, ManagedCredential> credentialSnapshots = const {},
+  }) : credentialSnapshots = Map.unmodifiable(credentialSnapshots),
+       items = state == ImportProposalState.pending
            ? List.unmodifiable(
                items.indexed.map(
                  (e) => e.$2.key.isEmpty ? e.$2.withKey('item-${e.$1}') : e.$2,
@@ -361,7 +364,19 @@ class ImportProposal {
          createdItemVersions.isEmpty
              ? createdItemIds.map((_) => 1)
              : createdItemVersions,
-       );
+       ) {
+    for (final entry in this.credentialSnapshots.entries) {
+      final receipt = receiptFor(entry.key), snapshot = entry.value;
+      if (receipt == null ||
+          receipt.kind != 'credential' ||
+          receipt.id != snapshot.id ||
+          receipt.version != snapshot.version ||
+          snapshot.privateNote.isNotEmpty ||
+          snapshot.template == null) {
+        throw const FormatException('Invalid credential admission snapshot');
+      }
+    }
+  }
   final String id, sessionBinding, chatLabel;
   final String agentName, purpose;
   final String? operationId, submissionDigest;
@@ -378,6 +393,10 @@ class ImportProposal {
   final List<String> createdItemKeys;
   final Map<String, String> candidateNames;
   final Map<String, String> candidateKinds;
+
+  /// Immutable non-material facts from this admission. Password bytes and
+  /// private notes never belong here; Agent status does not expose this map.
+  final Map<String, ManagedCredential> credentialSnapshots;
   bool get awaitingAdmission =>
       state == ImportProposalState.pending &&
       items.isNotEmpty &&
@@ -400,6 +419,7 @@ class ImportProposal {
     Iterable<String>? createdItemKeys,
     Iterable<String>? createdItemIds,
     Iterable<int>? createdItemVersions,
+    Map<String, ManagedCredential>? credentialSnapshots,
     ImportProposalState? state,
     int? version,
   }) => ImportProposal(
@@ -415,6 +435,7 @@ class ImportProposal {
     createdItemKeys: createdItemKeys ?? this.createdItemKeys,
     createdItemIds: createdItemIds ?? this.createdItemIds,
     createdItemVersions: createdItemVersions ?? this.createdItemVersions,
+    credentialSnapshots: credentialSnapshots ?? this.credentialSnapshots,
     candidateNames: {
       ...candidateNames,
       for (final i in items ?? this.items) i.key: i.name,
@@ -467,10 +488,20 @@ class ImportProposal {
     'rejectedKeys': rejectedKeys.toList(),
     'createdItemKeys': createdItemKeys,
     'candidateNames': candidateNames,
+    if (credentialSnapshots.isNotEmpty)
+      'credentialSnapshots': {
+        for (final e in credentialSnapshots.entries) e.key: e.value.toJson(),
+      },
     if (candidateKinds.values.contains('credential'))
       'candidateKinds': candidateKinds,
   };
   factory ImportProposal.fromJson(Map<String, dynamic> json) => ImportProposal(
+    credentialSnapshots: {
+      for (final e in (json['credentialSnapshots'] as Map? ?? {}).entries)
+        e.key as String: ManagedCredential.fromJson(
+          Map<String, dynamic>.from(e.value as Map),
+        ),
+    },
     id: json['id'] as String,
     sessionBinding: json['sessionBinding'] as String,
     chatLabel: json['chatLabel'] as String,

@@ -62,6 +62,7 @@ class WorkspaceCredentialDetail {
     required this.delivery,
     required this.binding,
     required this.privateNote,
+    this.account = '',
     this.filename,
     Iterable<WorkspaceRecordRef> linkedInformation = const [],
     Iterable<WorkspaceRecordRef> linkedCredentials = const [],
@@ -75,7 +76,7 @@ class WorkspaceCredentialDetail {
   final String? useUnavailableReason;
   final WorkspaceCredentialForm form;
   final WorkspaceCredentialDelivery delivery;
-  final String format, binding, privateNote;
+  final String format, binding, privateNote, account;
   final String? filename;
   final List<WorkspaceRecordRef> linkedInformation;
   final List<WorkspaceRecordRef> linkedCredentials;
