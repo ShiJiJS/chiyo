@@ -481,11 +481,7 @@ void main() {
       final proposals = t
           .widget<ProposalsPage>(find.byType(ProposalsPage))
           .controller;
-      final reduce = find.byKey(const ValueKey('proposal-item-status'));
-      await t.ensureVisible(reduce);
-      await t.pumpAndSettle();
-      await t.tap(reduce);
-      await t.pumpAndSettle();
+      expect(find.byKey(const ValueKey('proposal-item-status')), findsNothing);
       if (proposals.needsReview) {
         final reread = find.byKey(const ValueKey('proposal-review-current'));
         await t.ensureVisible(reread);
@@ -519,9 +515,9 @@ void main() {
       await t.pumpAndSettle();
       expect(proposals.frozen, false);
       expect(proposals.detail!.items, isEmpty);
-      expect(proposals.detail!.targets, hasLength(1));
+      expect(proposals.detail!.targets, hasLength(2));
       final created = await source.readDetail(
-        proposals.detail!.targets.single.record,
+        proposals.detail!.targets.singleWhere((t) => t.name == '北辰服务入口').record,
       );
       expect(created.record.name, '北辰服务入口');
       expect(created.values['url'], 'https://portal.beichen.example');

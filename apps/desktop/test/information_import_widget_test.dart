@@ -35,6 +35,7 @@ void main() {
       late core.InformationService service;
       late OwnerWorkspaceSource library;
       late ProposalsController model;
+      late OwnerWorkspaceProposals proposals;
       late String id;
       await t.runAsync(() async {
         root = await Directory.systemTemp.createTemp('ordinary-owner-ui-');
@@ -96,7 +97,7 @@ void main() {
         id = await service.agent.submitImport(session, [
           core.ImportItemInput.fromJson(submittedItem),
         ]);
-        final proposals = OwnerWorkspaceProposals(
+        proposals = OwnerWorkspaceProposals(
           owner: service.owner,
           library: () => library,
           changed: () => library.notifyExternalChange(),
@@ -124,7 +125,10 @@ void main() {
             () => Future<void>.delayed(const Duration(milliseconds: 2)),
           );
           await t.pump(const Duration(milliseconds: 10));
-          if (!model.busy && !model.loading && !model.reading) {
+          if (!model.busy &&
+              !model.loading &&
+              !model.reading &&
+              find.byType(LinearProgressIndicator).evaluate().isEmpty) {
             await t.pumpAndSettle();
             return;
           }
@@ -154,32 +158,32 @@ void main() {
           ),
         ),
       );
-      await t.pumpAndSettle();
-      expect(find.textContaining('确认稿 · 保存为当前版本'), findsOneWidget);
-      expect(find.textContaining('早期草稿 · 保留为历史版本'), findsOneWidget);
-      expect(find.text('来源依据：文件中明确注明草稿日期。'), findsOneWidget);
-      expect(find.text('相关证明'), findsOneWidget);
-      expect(find.text('PRIVATE-CURRENT-ORIGINAL'), findsNothing);
-      expect(repo.items, isEmpty);
-      final preview = find.text('查看这份原文').first;
-      await t.ensureVisible(preview);
-      await t.tap(preview);
-      for (
-        var n = 0;
-        n < 100 && find.text('PRIVATE-CURRENT-ORIGINAL').evaluate().isEmpty;
-        n++
-      ) {
-        await t.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 2)),
-        );
-        await t.pump(const Duration(milliseconds: 10));
+      Future<void> content(String text) async {
+        for (var n = 0; n < 300 && find.text(text).evaluate().isEmpty; n++) {
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 2)),
+          );
+          await t.pump(const Duration(milliseconds: 10));
+        }
+        await settle();
+        expect(find.text(text), findsWidgets);
       }
-      await t.pumpAndSettle();
-      expect(find.text('核对待录入原文'), findsOneWidget);
-      expect(find.text('PRIVATE-CURRENT-ORIGINAL'), findsOneWidget);
+
+      await content('PRIVATE-CURRENT-ORIGINAL');
+      expect(find.text('确认稿 · 当前'), findsOneWidget);
+      expect(find.text('早期草稿'), findsOneWidget);
+      expect(find.text('相关证明'), findsOneWidget);
       expect(repo.items, isEmpty);
-      await t.tap(find.text('关闭').last);
+      expect(find.text('核对待录入原文'), findsNothing);
+      await t.ensureVisible(find.text('早期草稿'));
+      await t.tap(find.text('早期草稿'));
       await t.pumpAndSettle();
+      await content('PRIVATE-OLDER-ORIGINAL');
+      expect(find.text('PRIVATE-CURRENT-ORIGINAL'), findsNothing);
+      expect(find.text('文件中明确注明草稿日期。'), findsOneWidget);
+      await t.ensureVisible(find.text('确认稿 · 当前'));
+      await t.tap(find.text('确认稿 · 当前'));
+      await content('PRIVATE-CURRENT-ORIGINAL');
       final detail = model.detail!, item = detail.items.single;
       expect(item.attachments.length, 2);
       expect(
@@ -221,7 +225,7 @@ void main() {
         utf8.encode('PRIVATE-CURRENT-ORIGINAL'),
       );
       expect((await t.runAsync(repo.informationFileStagingUsage))!.files, 0);
-      expect(find.text('PRIVATE-CURRENT-ORIGINAL'), findsNothing);
+      await content('PRIVATE-CURRENT-ORIGINAL');
       late String updateId;
       await t.runAsync(() async {
         final session = service.agent.openSession('补交简历修订');
@@ -277,43 +281,15 @@ void main() {
         await model.open(updateId);
       });
       await settle();
-      expect(find.text('补充到已有附件：简历原文'), findsOneWidget);
-      expect(find.textContaining('补交确认稿 · 保存为当前版本'), findsOneWidget);
+      expect(find.text('补交确认稿 · 当前'), findsOneWidget);
       expect(repo.items.single.version, 1);
-      final oldPreview = find.text('查看原当前文件');
-      await t.ensureVisible(oldPreview);
-      await t.tap(oldPreview);
-      for (
-        var n = 0;
-        n < 100 && find.text('PRIVATE-CURRENT-ORIGINAL').evaluate().isEmpty;
-        n++
-      ) {
-        await t.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 2)),
-        );
-        await t.pump(const Duration(milliseconds: 10));
-      }
-      await t.pumpAndSettle();
-      expect(find.text('PRIVATE-CURRENT-ORIGINAL'), findsOneWidget);
-      await t.tap(find.text('关闭').last);
-      await t.pumpAndSettle();
-      final nextPreview = find.text('查看这份原文').first;
-      await t.ensureVisible(nextPreview);
-      await t.tap(nextPreview);
-      for (
-        var n = 0;
-        n < 100 && find.text('PRIVATE-NEXT-ORIGINAL').evaluate().isEmpty;
-        n++
-      ) {
-        await t.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 2)),
-        );
-        await t.pump(const Duration(milliseconds: 10));
-      }
-      await t.pumpAndSettle();
-      expect(find.text('PRIVATE-NEXT-ORIGINAL'), findsOneWidget);
-      await t.tap(find.text('关闭').last);
-      await t.pumpAndSettle();
+      await content('PRIVATE-CURRENT-ORIGINAL');
+      await content('PRIVATE-NEXT-ORIGINAL');
+      await content('PRIVATE-SUPPLEMENT');
+      expect(find.text('修改前'), findsOneWidget);
+      expect(find.text('修改后'), findsOneWidget);
+      expect(find.text('查看这份原文'), findsNothing);
+      expect(find.text('核对待录入原文'), findsNothing);
       final modification = model.detail!.items.single;
       final reviewed = WorkspaceProposalItemReview.fromItem(modification);
       expect(
@@ -362,6 +338,50 @@ void main() {
         final key = detail.fieldIds.entries
             .singleWhere((e) => e.value == repo.items.single.fields.first.id)
             .key;
+        final savedProposal = await proposals.read(id);
+        final savedItem = await proposals.savedPreview(id, record);
+        final oldFile = WorkspaceFileRef.fromJson(
+          savedItem.proposed.values[key],
+        );
+        final oldPreview = await proposals.storedOriginal(
+          id,
+          savedProposal.summary.version,
+          record,
+          key,
+          oldFile,
+        );
+        expect(oldPreview.text, 'PRIVATE-CURRENT-ORIGINAL');
+        final currentFile = WorkspaceFileRef.fromJson(detail.values[key]);
+        await expectLater(
+          proposals.storedOriginal(
+            id,
+            savedProposal.summary.version,
+            record,
+            key,
+            currentFile,
+          ),
+          throwsA(isA<WorkspaceFailure>()),
+        );
+        await expectLater(
+          proposals.storedOriginal(
+            id,
+            savedProposal.summary.version,
+            record,
+            'not-a-field',
+            oldFile,
+          ),
+          throwsA(isA<WorkspaceFailure>()),
+        );
+        await expectLater(
+          proposals.storedOriginal(
+            id,
+            savedProposal.summary.version + 1,
+            record,
+            key,
+            oldFile,
+          ),
+          throwsA(isA<WorkspaceFailure>()),
+        );
         final history = await library.loadFileHistory(record, key);
         expect(history.current.label, '补交确认稿');
         expect(history.current.sourceNote, '源文件明确的确认稿。');
@@ -375,7 +395,7 @@ void main() {
         ).templates.singleWhere((t) => t.id == 'file');
         final session = service.agent.openSession('仅修改资料说明');
         final current = repo.items.single;
-        final id = await service.agent.submitUpdate(
+        final retainId = await service.agent.submitUpdate(
           session,
           core.UpdateInput(
             current.id,
@@ -390,7 +410,7 @@ void main() {
             },
           ),
         );
-        await model.open(id);
+        await model.open(retainId);
       });
       await settle();
       final confirmRetain = find.byKey(const ValueKey('proposal-confirm'));

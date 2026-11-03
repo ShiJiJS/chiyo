@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
+import 'package:info_desktop/workspace/owner_agent_templates.dart';
 import 'package:info_desktop/workspace/owner_workspace_proposals.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 
@@ -68,6 +69,80 @@ void main() {
     reviewed: confirm
         ? reviewed ?? d.items.map(WorkspaceProposalItemReview.fromItem).toList()
         : [],
+  );
+  test(
+    'an owner-edited relation previews the new target without saving or opening the library',
+    () async {
+      service.owner.configureInformationTemplates(
+        () => currentAgentTemplates(service.owner),
+      );
+      final session = service.agent.openSession('合成关联预览');
+      Map<String, dynamic> example(String template) {
+        final value =
+            service.agent.readInformationTemplate(template)['template'] as Map;
+        return Map<String, dynamic>.from(
+          ((value['submissionExample'] as Map)['items'] as List).first as Map,
+        );
+      }
+
+      final servers = await service.agent.submitImport(session, [
+        for (final name in ['合成服务器A', '合成服务器B'])
+          core.ImportItemInput.fromJson({...example('server'), 'name': name}),
+      ]);
+      await source.change(decision(await source.read(servers)));
+      final refs = (await source.read(
+        servers,
+      )).targets.map((t) => t.record).toList();
+      final id = await service.agent.submitImport(session, [
+        core.ImportItemInput.fromJson({
+          ...example('service'),
+          'relations': {
+            'hostedOn': [
+              {'kind': 'information', 'id': refs.first.id},
+            ],
+          },
+        }),
+      ]);
+      final proposal = await source.read(id),
+          item = (await source.read(id)).items.single;
+      await expectLater(
+        source.previewRelated(id, proposal.summary.version, refs.last),
+        throwsA(isA<WorkspaceFailure>()),
+      );
+      final original = WorkspaceProposalItemReview.fromItem(item);
+      final edited = WorkspaceProposalItemReview(
+        itemId: item.id,
+        name: original.name,
+        description: original.description,
+        directoryId: original.directoryId,
+        tagIds: original.tagIds,
+        values: original.values,
+        relations: {
+          'hostedOn': [refs.last],
+        },
+      );
+      final preview = await source.previewRelated(
+        id,
+        proposal.summary.version,
+        refs.last,
+        review: edited,
+      );
+      expect(preview.proposed.record.name, '合成服务器B');
+      expect(
+        (await source.read(id)).items.single.proposed.relations['hostedOn'],
+        [refs.first],
+      );
+      expect(service.owner.information, hasLength(2));
+      await expectLater(
+        source.previewRelated(
+          id,
+          proposal.summary.version + 1,
+          refs.last,
+          review: edited,
+        ),
+        throwsA(isA<WorkspaceFailure>()),
+      );
+    },
   );
   test(
     'nested suggestions reuse the existing directory in the real approval adapter',

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart' as core;
 import '../desktop_controls.dart';
 import 'library_file.dart';
-import 'owner_workspace_files.dart';
+import 'owner_proposal_original_reader.dart';
 import 'owner_pdf_preview.dart';
 import 'workspace_source.dart';
 
@@ -47,7 +47,10 @@ class _Original extends StatefulWidget {
 }
 
 class _OriginalState extends State<_Original> {
-  late final _scope = widget.owner.captureLibraryScope();
+  late final _reader = OwnerProposalOriginalReader(
+    widget.owner,
+    pdf: widget.pdf,
+  );
   WorkspaceFilePreview? _preview;
   String? _error;
   int _generation = 0;
@@ -70,74 +73,14 @@ class _OriginalState extends State<_Original> {
       _error = null;
     });
     try {
-      final result = await widget.owner.inLibraryScope(_scope, () async {
-        final p = widget.owner.importProposals
-            .where((p) => p.id == widget.proposalId)
-            .firstOrNull;
-        late core.OwnerImportOriginal content;
-        if (p != null) {
-          final item = p.items
-              .where((i) => 'proposal:${p.id}:${i.key}' == widget.itemId)
-              .firstOrNull;
-          if (item == null) throw const core.AccessFailure('proposal_changed');
-          content = await widget.owner.readImportOriginal(
-            p.id,
-            item.key,
-            widget.attachmentKey,
-            widget.version,
-            proposalVersion: widget.proposalVersion,
-          );
-        } else {
-          final update = widget.owner.updateProposals
-              .where((p) => p.id == widget.proposalId)
-              .firstOrNull;
-          if (update == null ||
-              update.version != widget.proposalVersion ||
-              update.state != core.UpdateProposalState.pending ||
-              update.input.itemId != widget.itemId) {
-            throw const core.AccessFailure('proposal_changed');
-          }
-          final attachment = update.input.attachments
-              .where((a) => a.key == widget.attachmentKey)
-              .firstOrNull;
-          if (attachment == null) {
-            throw const core.AccessFailure('proposal_changed');
-          }
-          if (widget.version == 0) {
-            final previous =
-                update.input.filePlan?.previousVersions[attachment.fieldId];
-            if (previous == null) {
-              throw const core.AccessFailure('proposal_changed');
-            }
-            return OwnerWorkspaceAttachmentPreview(
-              widget.owner,
-              pdf: widget.pdf,
-            ).read(previous.reference, page: page);
-          }
-          content = await widget.owner.readUpdateOriginal(
-            update.id,
-            widget.proposalVersion,
-            widget.attachmentKey,
-            widget.version,
-          );
-        }
-        final upload = content.upload;
-        return OwnerWorkspaceAttachmentPreview(
-          widget.owner,
-          pdf: widget.pdf,
-        ).renderContent(
-          WorkspaceFileVersion(
-            ref: WorkspaceFileRef(upload.id, widget.version),
-            filename: upload.originalName,
-            mediaType: upload.mediaType,
-            byteLength: upload.byteLength,
-            createdAt: upload.createdAt,
-            available: true,
-          ),
-          content.bytes,
-          page: page,
-        );
-      });
+      final result = await _reader.read(
+        widget.proposalId,
+        widget.proposalVersion,
+        widget.itemId,
+        widget.attachmentKey,
+        widget.version,
+        page: page,
+      );
       if (mounted && generation == _generation) {
         setState(() => _preview = result);
       }

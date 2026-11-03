@@ -543,7 +543,7 @@ void main() {
     },
   );
   test(
-    'CLI pending references survive review, partial admission and encrypted reopen without a false saved receipt',
+    'CLI pending references survive rejected subset and encrypted reopen, then admit the whole proposal',
     () async {
       final payload = await example('document');
       final base = Map<String, dynamic>.from(
@@ -576,24 +576,27 @@ void main() {
       expect(submitted['status'], 'pending');
       final id = submitted['proposalId'] as String;
       final initial = await proposals.read(id);
-      final first = await approve(
-        initial,
-        reviewed: [
-          for (final i in initial.items.where(
-            (i) => i.proposed.record.name != '说明乙',
-          ))
-            WorkspaceProposalItemReview.fromItem(i),
-        ],
+      await expectLater(
+        approve(
+          initial,
+          reviewed: [
+            for (final i in initial.items.where(
+              (i) => i.proposed.record.name != '说明乙',
+            ))
+              WorkspaceProposalItemReview.fromItem(i),
+          ],
+        ),
+        throwsA(
+          isA<WorkspaceFailure>().having(
+            (e) => e.code,
+            'code',
+            'proposal_incomplete',
+          ),
+        ),
       );
-      expect(first.records.length, 1);
-      expect(first.awaitingItemIds, ['proposal:$id:a']);
-      expect(service.owner.information.single.name, '独立说明');
+      expect(service.owner.information, isEmpty);
       final remaining = await proposals.read(id);
-      expect(remaining.items.map((i) => i.proposed.record.name), [
-        '说明甲',
-        '说明乙',
-      ]);
-      expect(remaining.items.first.admissionNote, contains('已批准'));
+      expect(remaining.items, hasLength(3));
       final linked = await proposals
           .relations(id, remaining.items.first.id, remaining.summary.version)
           .readSummaries(
@@ -605,24 +608,24 @@ void main() {
         'proposalId': id,
       });
       expect(
-        (state['items'] as List).singleWhere((i) => i['key'] == 'a')['state'],
-        'approved',
+        (state['items'] as List).every((i) => i['state'] == 'pending'),
+        true,
       );
       expect(jsonEncode(state), isNot(contains('维护说明')));
       await close();
       await open();
       final reopened = await proposals.read(id);
-      expect(reopened.items.first.admissionNote, contains('已批准'));
-      expect(
-        (await proposals.receipt(first.operationId))!.awaitingItemIds,
-        first.awaitingItemIds,
-      );
-      final finalReceipt = await approve(
-        reopened,
-        reviewed: [WorkspaceProposalItemReview.fromItem(reopened.items.last)],
-      );
+      expect(reopened.items, hasLength(3));
+      expect(service.owner.information, isEmpty);
+      final finalReceipt = await approve(reopened);
       expect(finalReceipt.awaitingItemIds, isEmpty);
-      expect(finalReceipt.records.length, 1);
+      expect(finalReceipt.records, hasLength(3));
+      expect(
+        (await proposals.receipt(
+          finalReceipt.operationId,
+        ))!.records.map((r) => r.ref),
+        finalReceipt.records.map((r) => r.ref),
+      );
       expect(service.owner.information.length, 3);
       final a = service.owner.information.singleWhere((i) => i.name == '说明甲'),
           b = service.owner.information.singleWhere((i) => i.name == '说明乙');

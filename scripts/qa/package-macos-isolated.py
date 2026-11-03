@@ -28,8 +28,9 @@ def main():
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     preview = ROOT / 'apps/desktop/build/macos/Build/Products/Debug/info_desktop.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'
     digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+    preview_digest = lambda: digest(preview) if preview.is_file() else None
     report = {'sourceCommit': commit, 'complete': False, 'phases': [],
-              'previewBefore': digest(preview)}
+              'previewBefore': preview_digest()}
     env = dict(os.environ, DEVELOPER_DIR='/Applications/Xcode.app/Contents/Developer')
 
     def run(name, command, cwd=ROOT, timeout=600):
@@ -87,7 +88,7 @@ def main():
                     shutil.copy2(failed / 'verification.json', out / 'failed-verification.json')
             shutil.rmtree(source)
         report['temporaryCheckoutRemoved'] = not source.exists()
-        report['previewPreserved'] = digest(preview) == report['previewBefore']
+        report['previewPreserved'] = preview_digest() == report['previewBefore']
         (out / 'result.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     if live or not report['previewPreserved']:
         raise RuntimeError('Package checkout/preview lifecycle not preserved')

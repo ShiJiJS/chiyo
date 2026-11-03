@@ -571,6 +571,16 @@ void main() {
       expect(m.draft!.items['portal']!.relations['hostedOn'], [
         const WorkspaceRecordRef(WorkspaceRecordKind.information, 'aliyun'),
       ]);
+      await tap(
+        t,
+        find.byKey(const ValueKey('library-relation-information:aliyun')),
+      );
+      expect(find.text('关联资料预览'), findsOneWidget);
+      expect(find.byType(LibraryPage), findsNothing);
+      expect(m.selection, 'import');
+      expect(find.text('阿里云杭州服务器'), findsWidgets);
+      await tap(t, find.text('关闭').last);
+      await closed(t);
       await tap(t, find.byKey(const ValueKey('proposal-review-current')));
       await tap(t, find.byKey(const ValueKey('proposal-confirm')));
       final saved = await s.readDetail(m.detail!.targets.first.record);

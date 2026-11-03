@@ -3,11 +3,16 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'workspace_information_codec.dart';
 import 'workspace_entries.dart';
+import 'owner_proposal_original_reader.dart';
+import 'owner_workspace_files.dart';
 import 'workspace_source.dart';
 import 'owner_workspace_credentials.dart' show ownerCredentialType;
 
 class OwnerWorkspaceProposals
-    implements WorkspaceProposalSource, WorkspaceProposalPreviewSource {
+    implements
+        WorkspaceProposalSource,
+        WorkspaceProposalPreviewSource,
+        WorkspaceProposalOriginalSource {
   OwnerWorkspaceProposals({
     required this.owner,
     required this.library,
@@ -18,10 +23,12 @@ class OwnerWorkspaceProposals
   final void Function() changed;
   final core.OwnerLibraryScope _scope;
   final _codec = WorkspaceInformationCodec();
+  late final _originals = OwnerProposalOriginalReader(owner);
   List<WorkspaceProposalAttachment> _attachments(
     Iterable<core.ImportAttachmentInput> attachments, {
     core.UpdateInput? update,
     core.InformationItem? before,
+    WorkspaceDetail? after,
   }) => [
     for (final a in attachments)
       WorkspaceProposalAttachment(
@@ -29,7 +36,7 @@ class OwnerWorkspaceProposals
         name: a.name,
         description: a.description,
         currentVersion: a.currentVersion,
-        templateField: a.templateField,
+        templateField: a.templateField ?? _attachmentField(a, update, after),
         existingName:
             before?.fields.where((f) => f.id == a.fieldId).firstOrNull?.name ??
             '',
@@ -57,6 +64,32 @@ class OwnerWorkspaceProposals
         ],
       ),
   ];
+  String? _attachmentField(
+    core.ImportAttachmentInput attachment,
+    core.UpdateInput? update,
+    WorkspaceDetail? after,
+  ) {
+    if (after == null || update == null) return null;
+    final existing = after.fieldIds.entries
+        .where((e) => e.value == attachment.fieldId)
+        .firstOrNull;
+    if (existing != null) return existing.key;
+    final uploads = attachment.versions.map((v) => v.upload!.id).toSet();
+    final promoted = update.filePlan?.promotions
+        .where((p) => uploads.contains(p.upload.id))
+        .firstOrNull;
+    if (promoted == null) return null;
+    return after.values.entries
+        .where(
+          (e) =>
+              e.value is Map &&
+              (e.value as Map)['attachmentId'] ==
+                  promoted.version.reference.attachmentId,
+        )
+        .firstOrNull
+        ?.key;
+  }
+
   String _suggestionId(String kind, String name) =>
       'proposed-$kind:${sha256.convert(utf8.encode(name.trim().toLowerCase()))}';
   Map<String, String> get _suggestedDirectories => {
@@ -264,9 +297,9 @@ class OwnerWorkspaceProposals
           ? 1
           : 2,
       at: e.createdAt,
-      agentClaim: e.agentName.isEmpty ? '未提供 Agent 名称' : e.agentName,
+      agentClaim: e.agentName,
       chatClaim: e.chatLabel,
-      purpose: e.purpose.isEmpty ? '原提案未提供用途说明' : e.purpose,
+      purpose: e.purpose,
       itemCount: e.count,
       wholeDeletion: deletion != null && deletion.fieldId == null,
       organizationOutcome: task == null ? null : _organizationOutcome(task),
@@ -698,6 +731,7 @@ class OwnerWorkspaceProposals
           items.add(
             WorkspaceProposalItem(
               id: candidate,
+              originalProposalVersion: p.version,
               admissionNote: states
                   .singleWhere((s) => s.key == input.key)
                   .reason,
@@ -807,6 +841,7 @@ class OwnerWorkspaceProposals
         items.add(
           WorkspaceProposalItem(
             id: p.input.itemId,
+            originalProposalVersion: p.version,
             admissionNote: admission.reason,
             proposed: proposed,
             before: before,
@@ -815,6 +850,7 @@ class OwnerWorkspaceProposals
               p.input.attachments,
               update: p.input,
               before: preview.before,
+              after: proposed,
             ),
             changes: _changes(p, preview, after, before, proposed),
           ),
@@ -1446,15 +1482,21 @@ class OwnerWorkspaceProposals
   Future<WorkspaceProposalItem> previewRelated(
     String proposalId,
     int version,
-    WorkspaceRecordRef record,
-  ) => _run(() async {
+    WorkspaceRecordRef record, {
+    WorkspaceProposalItemReview? review,
+  }) => _run(() async {
     final proposal = _detail(proposalId);
+    final reviewedRef =
+        review != null &&
+        proposal.items.any((i) => i.id == review.itemId) &&
+        review.relations.values.expand((refs) => refs).contains(record);
     if (proposal.summary.version != version ||
-        !proposal.items.any(
-          (i) => i.proposed.visibleRelations.values
-              .expand((refs) => refs)
-              .contains(record),
-        )) {
+        !reviewedRef &&
+            !proposal.items.any(
+              (i) => i.proposed.visibleRelations.values
+                  .expand((refs) => refs)
+                  .contains(record),
+            )) {
       throw const WorkspaceFailure('conflict', '关联范围已变化，请重新读取提案。');
     }
     final pending = _pendingTarget(record.id);
@@ -1528,6 +1570,114 @@ class OwnerWorkspaceProposals
           ? WorkspaceProposalBeforeState.unavailable
           : WorkspaceProposalBeforeState.available,
     );
+  });
+
+  @override
+  Future<WorkspaceFilePreview> pendingOriginal(
+    String proposalId,
+    int proposalVersion,
+    String itemId,
+    String attachmentKey,
+    int version, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+    int? originalProposalVersion,
+  }) => _run(() async {
+    final proposal = _detail(proposalId);
+    if (proposal.summary.version != proposalVersion ||
+        (originalProposalVersion != null &&
+            proposal.items.any((i) => i.id == itemId) &&
+            originalProposalVersion != proposalVersion)) {
+      throw const WorkspaceFailure('conflict', '提案已变化，请重新核对。');
+    }
+    if (proposal.items.any((i) => i.id == itemId)) {
+      return _originals.read(
+        proposalId,
+        proposalVersion,
+        itemId,
+        attachmentKey,
+        version,
+        page: page,
+      );
+    }
+    final ref = WorkspaceRecordRef(
+      WorkspaceRecordKind.information,
+      itemId.replaceFirst('proposal:', 'pending:'),
+    );
+    final target = await previewRelated(
+      proposalId,
+      proposalVersion,
+      ref,
+      review: review,
+    );
+    final pending = _pendingTarget(ref.id);
+    if (pending == null ||
+        target.id != itemId ||
+        originalProposalVersion != pending.proposal.version) {
+      throw const WorkspaceFailure('not_found', '关联原文已不可用。');
+    }
+    return _originals.read(
+      pending.proposal.id,
+      pending.proposal.version,
+      itemId,
+      attachmentKey,
+      version,
+      page: page,
+    );
+  });
+
+  @override
+  Future<WorkspaceFilePreview> storedOriginal(
+    String proposalId,
+    int proposalVersion,
+    WorkspaceRecordRef record,
+    String fieldKey,
+    WorkspaceFileRef file, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+  }) => _run(() async {
+    final proposal = _detail(proposalId);
+    if (proposal.summary.version != proposalVersion ||
+        record.kind != WorkspaceRecordKind.information) {
+      throw const WorkspaceFailure('conflict', '提案已变化，请重新核对文件。');
+    }
+    final bodies = <WorkspaceDetail>[
+      for (final item in proposal.items) ...[
+        if (item.proposed.record.ref == record) item.proposed,
+        if (item.before?.record.ref == record &&
+            item.beforeState == WorkspaceProposalBeforeState.available)
+          item.before!,
+      ],
+    ];
+    for (final target in proposal.targets.where((t) => t.record == record)) {
+      final saved = _retained(record.id, target.version);
+      if (saved != null) bodies.add(_codec.decode(saved, tagNames: _tags));
+      if (proposal.summary.kind == WorkspaceProposalKind.modification) {
+        final before = _retained(record.id, target.version - 1);
+        if (before != null) bodies.add(_codec.decode(before, tagNames: _tags));
+      }
+    }
+    if (bodies.isEmpty) {
+      bodies.add(
+        (await previewRelated(
+          proposalId,
+          proposalVersion,
+          record,
+          review: review,
+        )).proposed,
+      );
+    }
+    final allowed = bodies.any((body) {
+      try {
+        return WorkspaceFileRef.fromJson(body.values[fieldKey]) == file;
+      } on WorkspaceFailure {
+        return false;
+      }
+    });
+    if (!allowed) throw const WorkspaceFailure('not_found', '这份内容没有引用所选文件版本。');
+    return OwnerWorkspaceAttachmentPreview(
+      owner,
+    ).read(core.InformationAttachmentRef(file.id, file.version), page: page);
   });
 
   @override

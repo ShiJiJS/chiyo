@@ -2,6 +2,7 @@ import 'mac_text_field_accessibility.dart';
 import 'package:flutter/material.dart';
 import 'ui_palette.dart';
 import 'mac_secret_input.dart';
+import 'mac_inline_password.dart';
 import 'anchored_surface.dart';
 import 'prototype_ui.dart';
 import 'dart:math' as math;
@@ -85,6 +86,7 @@ class DesktopTextField extends StatelessWidget {
     this.onChanged,
     this.keyboardType,
     this.obscureText = false,
+    this.inlineSecret = false,
     this.enableSuggestions = true,
     this.autocorrect = true,
   });
@@ -94,6 +96,7 @@ class DesktopTextField extends StatelessWidget {
   final int? maxLength, minLines, maxLines;
   final bool? enabled;
   final bool obscureText;
+  final bool inlineSecret;
   final bool enableSuggestions, autocorrect;
   final ValueChanged<String>? onChanged;
   final TextInputType? keyboardType;
@@ -101,10 +104,20 @@ class DesktopTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _FieldFrame(
     label: decoration.labelText,
-    inputPurpose: usesNativeSecretEditor && obscureText
+    inputPurpose: usesNativeSecretEditor && (obscureText || inlineSecret)
         ? null
         : decoration.labelText ?? decoration.hintText,
-    child: usesNativeSecretEditor && obscureText
+    child: usesNativeSecretEditor && inlineSecret
+        ? MacInlinePassword(
+            controller: controller!,
+            obscureText: obscureText,
+            enabled: enabled ?? true,
+            maxLength: maxLength,
+            onChanged: onChanged,
+            decoration: _inside(decoration, context),
+            label: decoration.labelText ?? '密码',
+          )
+        : usesNativeSecretEditor && obscureText
         ? MacSecretInput(
             controller: controller,
             focusNode: focusNode,
@@ -112,7 +125,7 @@ class DesktopTextField extends StatelessWidget {
             maxLength: maxLength,
             enabled: enabled ?? true,
             onChanged: onChanged,
-            label: decoration.labelText ?? '秘密内容',
+            label: decoration.labelText ?? '凭据内容',
             style: Theme.of(context).textTheme.bodyMedium,
           )
         : TextField(
