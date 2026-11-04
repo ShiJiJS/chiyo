@@ -103,6 +103,7 @@ class ZhiyuShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
     final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    final isMac = Theme.of(context).platform == TargetPlatform.macOS;
     return Scaffold(
       backgroundColor: c.canvas,
       body: Column(
@@ -116,15 +117,22 @@ class ZhiyuShell extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
-                    width: 24,
+                    width: isMac ? 28 : 24,
                     height: 31.390625,
                     child: Align(
                       alignment: Alignment.topCenter,
-                      child: PrototypeIcon(
-                        PrototypeIconGlyph.layers,
-                        size: 24,
-                        color: c.accent,
-                      ),
+                      child: isMac
+                          ? Image.asset(
+                              'macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png',
+                              width: 28,
+                              height: 28,
+                              excludeFromSemantics: true,
+                            )
+                          : PrototypeIcon(
+                              PrototypeIconGlyph.layers,
+                              size: 24,
+                              color: c.accent,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 11),
