@@ -1,14 +1,14 @@
 # Mac 开发预览：接入 Codex
 
-这份说明位于 Mac 整包根目录。App、CLI、worker 和模板的版本、来源与摘要见
-`manifest.json`；保留完整目录。先打开 `app/chiyo.app`，确认资料库正常可用。
+Mac 安装映像中的 `chiyo.app` 可以拖入「应用程序」独立运行。App 内已经包含同版本
+CLI、worker、Skill 模板和摘要清单，位置是 `Contents/Resources/AgentIntegration`。
+开发 ZIP 也保留 `app/chiyo.app` 和外部配套工具。先打开知予，确认资料库正常可用。
 应用和随包命令不需要 Xcode、Flutter、Dart 或 Python。
 
 ## 在 App 中核对接入材料
 
-在“设置 → Agent 接入 → 查看诊断”中核对配套文件。正式整包保留
-`app/chiyo.app`、`cli/` 和 `manifest.json` 的相对位置；整体移动目录可以，
-单独复制 App 会失去这项核对。诊断显示核对通过的整包目录，接入命令在该目录运行。
+在“设置 → Agent 接入 → 查看诊断”中核对配套文件。安装版优先核对 App 内的完整配套
+资源，独立复制 App 仍可核对。诊断显示已核对的位置，接入命令使用该位置的工具。
 
 “配套文件已核对”表示 App 主程序及身份文件、五个 CLI 程序、Skill 模板与接入说明
 符合随包清单的大小、权限和摘要。此检查不执行命令，不是签名/公证检查，也不证明
@@ -24,6 +24,14 @@ PATH 或个人安装中拼凑文件。普通刷新复用未变化文件的摘要
 会话已结束时可查历史，不能因此恢复授权；名称和用途仍属于 Agent 自述。
 
 ## 生成固定路径的材料
+
+已经配置过本机 Skill、需要把公开工具位置更新到安装版时，可运行以下命令。它只登记
+路径与摘要；保留已有聊天配置、hooks 和信任状态。
+
+```sh
+"/Applications/chiyo.app/Contents/Resources/AgentIntegration/cli/info-prepare-codex" \
+  --register-existing "/Applications/chiyo.app/Contents/Resources/AgentIntegration/cli"
+```
 
 在整包根目录打开终端，用随包生成器指定一个尚不存在的稳定目录：
 

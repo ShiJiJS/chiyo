@@ -69,10 +69,14 @@ def main():
         report['release'] = manifest['release']
         # The package verifier has already compared the extracted tree byte for
         # byte. Keep only its evidence, one usable payload, and the archive.
-        for name in ['chiyo', verified['archive'], verified['archive'] + '.sha256', 'verification.json', 'logs']:
+        for name in ['chiyo', verified['archive'], verified['archive'] + '.sha256',
+                     verified['diskImage'], verified['diskImage'] + '.sha256',
+                     'verification.json', 'logs']:
             shutil.move(str(package / name), str(out / name))
         if digest(out / verified['archive']) != verified['archiveSha256']:
             raise RuntimeError('Moved archive differs')
+        if digest(out / verified['diskImage']) != verified['diskImageSha256']:
+            raise RuntimeError('Moved disk image differs')
         report['complete'] = True
     finally:
         processes = subprocess.check_output(['ps', '-axo', 'pid=,comm='], text=True)

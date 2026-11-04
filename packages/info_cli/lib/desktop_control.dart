@@ -44,7 +44,10 @@ Future<({Map<String, Object?> output, int exitCode})> desktopControlCommand(
         ? MacAgentBundle.appExecutable
         : MacAgentBundle.legacyAppExecutable;
   }
-  final executable = File('$root/$relative').absolute.path;
+  const embeddedRoot = '/Contents/Resources/AgentIntegration';
+  final executable = Platform.isMacOS && root.endsWith(embeddedRoot)
+      ? '${root.substring(0, root.length - embeddedRoot.length)}/Contents/MacOS/info_desktop'
+      : File('$root/$relative').absolute.path;
   final execute = Platform.isMacOS
       ? MacDesktopControl.execute
       : WindowsDesktopControl.execute;
