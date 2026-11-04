@@ -63,6 +63,11 @@ class WorkspaceFileVersion {
   final DateTime createdAt;
   final bool available;
   final String label, sourceNote;
+
+  bool get isMarkdown =>
+      mediaType == 'text/markdown' ||
+      (mediaType == 'text/plain' &&
+          RegExp(r'\.(md|markdown)$', caseSensitive: false).hasMatch(filename));
 }
 
 class WorkspaceFileHistory {

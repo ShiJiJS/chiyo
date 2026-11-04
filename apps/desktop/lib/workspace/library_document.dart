@@ -20,10 +20,12 @@ class LibraryDocumentTools extends StatelessWidget {
     required this.controller,
     required this.format,
     required this.canToggle,
+    this.showFormatLabel = true,
   });
   final DocumentReadingController controller;
   final String format;
   final bool canToggle;
+  final bool showFormatLabel;
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<bool>(
     valueListenable: controller,
@@ -32,10 +34,11 @@ class LibraryDocumentTools extends StatelessWidget {
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(
-          format == 'markdown' ? 'Markdown' : '纯文本',
-          style: libraryText(context, 12, color: UiPalette.of(context).muted),
-        ),
+        if (showFormatLabel)
+          Text(
+            format == 'markdown' ? 'Markdown' : '纯文本',
+            style: libraryText(context, 12, color: UiPalette.of(context).muted),
+          ),
         if (format == 'markdown' && canToggle)
           DesktopButton(
             kind: DesktopButtonKind.quiet,

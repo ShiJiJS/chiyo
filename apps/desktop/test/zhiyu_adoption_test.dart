@@ -134,7 +134,7 @@ void main() {
       expect(after.record.directoryId, m.original.record.directoryId);
       expect(after.record.type.id, 'local.domain/domain');
       expect(after.fieldIds['domain'], m.original.fieldIds['body']);
-      expect(find.text('保留的原字段'), findsOneWidget);
+      expect(find.text('补充内容'), findsOneWidget);
       await t.ensureVisible(find.text('原来同名但不同含义的内容'));
       await t.pumpAndSettle();
       await capture(t, 'adoption-1440-light-result');
