@@ -548,19 +548,12 @@ class _TemplateRecordContentState extends State<TemplateRecordContent> {
             detail.retainedFields.isNotEmpty)
           _section(
             context,
-            '保留的原字段',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  '这些内容没有被目标模板覆盖。',
-                  style: libraryText(context, 13, color: c.muted),
-                ),
-                _fields(
-                  context,
-                  detail.retainedFields.map((f) => f['key']).toList(),
-                ),
-              ],
+            detail.retainedFields.every((f) => f['type'] == 'file')
+                ? '附件'
+                : '补充内容',
+            _fields(
+              context,
+              detail.retainedFields.map((f) => f['key']).toList(),
             ),
           ),
       ],
