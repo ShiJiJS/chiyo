@@ -388,8 +388,32 @@ def main():
         run("extracted-cli-and-worker", [LAUNCHER, "dart", "test",
             "test/bundle_preparation_test.dart", "test/macos_worker_lifetime_test.dart",
             "--reporter", "expanded"], cwd=ROOT / "packages/info_cli", env=test_env)
+        image_source = output / "disk-image"
+        image_source.mkdir()
+        shutil.copytree(app, image_source / "chiyo.app", symlinks=True)
+        (image_source / "Applications").symlink_to("/Applications", target_is_directory=True)
+        image = output / f"chiyo-{release}-macos-arm64.dmg"
+        run("disk-image", ["/usr/bin/hdiutil", "create", "-volname", "知予",
+                          "-srcfolder", str(image_source), "-format", "UDZO", str(image)])
+        mount = output / "verify/disk-image"
+        mount.mkdir()
+        run("disk-image-mount", ["/usr/bin/hdiutil", "attach", "-readonly", "-nobrowse",
+                                "-mountpoint", str(mount), str(image)])
+        try:
+            if inventory(mount / "chiyo.app") != inventory(app):
+                raise RuntimeError("Disk image app differs from the verified package")
+            if os.readlink(mount / "Applications") != "/Applications":
+                raise RuntimeError("Disk image installation shortcut differs")
+            run("disk-image-signature", ["/usr/bin/codesign", "--verify", "--deep",
+                                        "--strict", str(mount / "chiyo.app")])
+        finally:
+            run("disk-image-unmount", ["/usr/bin/hdiutil", "detach", str(mount)])
+        shutil.rmtree(image_source)
+        image_digest = digest(image)
+        (output / (image.name + ".sha256")).write_text(f"{image_digest}  {image.name}\n")
         clean_source(commit)
         facts.update(complete=True, archive=archive.name, archiveSha256=digest(archive),
+                     diskImage=image.name, diskImageSha256=image_digest,
                      scope=manifest["verificationScope"], extractedDirectory=str(final.relative_to(output)))
         print("Verified local development package:", archive, flush=True)
     finally:

@@ -20,7 +20,7 @@ import 'desktop_shell.dart';
 import 'ui.dart';
 import 'window_frame.dart';
 import 'prototype_dialog.dart';
-import 'bundled_focused_fill.dart';
+import 'platform/windows_library.dart';
 import 'package:info_core/macos_desktop_control.dart';
 import 'workspace/owner_workspace_host.dart';
 import 'desktop_fonts.dart';
@@ -63,42 +63,27 @@ Future<void> main() async {
 }
 
 Future<DesktopLibrary> _openLibrary({bool requestKeyAccess = false}) async {
-  final String directory;
-  final DatabaseKeyStore keys;
-  if (Platform.isWindows) {
-    final base = Platform.environment['LOCALAPPDATA'];
-    if (base == null || base.isEmpty) {
-      throw const StorageFailure('directory_unavailable');
-    }
-    directory = '$base/AgentInfoManage';
-    keys = WindowsDatabaseKeyStore('$directory/database-key.dpapi');
-  } else if (Platform.isMacOS) {
-    final base = Platform.environment['HOME'];
-    if (base == null || base.isEmpty) {
-      throw const StorageFailure('directory_unavailable');
-    }
-    directory = '$base/Library/Application Support/AgentInfoManage';
-    const channel = MethodChannel('agent_info_manage/database_key');
-    keys = MacOsDatabaseKeyStore((method, arguments) {
-      return channel.invokeMethod<Object?>(
-        requestKeyAccess && method == 'read' ? 'readWithInteraction' : method,
-        arguments,
-      );
-    });
-  } else {
+  if (Platform.isWindows) return openWindowsLibrary();
+  if (!Platform.isMacOS) {
     throw const StorageFailure('platform_unsupported');
   }
-  final fill = Platform.isWindows ? await loadBundledFocusedFill() : null;
+  final base = Platform.environment['HOME'];
+  if (base == null || base.isEmpty) {
+    throw const StorageFailure('directory_unavailable');
+  }
+  final directory = '$base/Library/Application Support/AgentInfoManage';
+  const channel = MethodChannel('agent_info_manage/database_key');
+  final keys = MacOsDatabaseKeyStore((method, arguments) {
+    return channel.invokeMethod<Object?>(
+      requestKeyAccess && method == 'read' ? 'readWithInteraction' : method,
+      arguments,
+    );
+  });
   final repository = await EncryptedInformationRepository.open(directory, keys);
   return DesktopLibrary(
     service: InformationService(
       repository: repository,
-      focusedFillDriver: fill,
-      informationDeliveryFiles: Platform.isWindows
-          ? WindowsInformationDeliveryFiles()
-          : Platform.isMacOS
-          ? NativeInformationDeliveryFiles()
-          : null,
+      informationDeliveryFiles: NativeInformationDeliveryFiles(),
     ),
     close: repository.close,
     backups: repository.backups,
