@@ -1,4 +1,4 @@
-# Agent Info Manage · Mac 开发预览
+# 知予（chiyo）· Mac 开发预览
 
 本候选用于接通普通资料的本机保存、AI 申请和主人审批，再按字段和期限提供获准内容。
 已接入普通资料、AI申请审批、提案整理、插件模板、日常设置、运行管理、备份附件和托管凭据管理及使用审批。实际验收状态以当前候选交付记录为准。
@@ -15,8 +15,8 @@
 
 ## 启动
 
-解压并保留完整 `AgentInfoManage` 目录，放在一个稳定位置，打开
-[app/info_desktop.app](app/info_desktop.app)。运行 App 和随包命令不需要安装
+解压并保留完整 `chiyo` 目录，放在一个稳定位置，打开
+[app/chiyo.app](app/chiyo.app)。运行 App 和随包命令不需要安装
 Xcode、Flutter、Dart 或 Python。完整载荷、来源与摘要见 [manifest.json](manifest.json)。
 
 首次使用需要系统钥匙串保存或读取本机资料库密钥。若出现“无法访问系统钥匙串”，

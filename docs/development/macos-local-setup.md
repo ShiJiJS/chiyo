@@ -3,7 +3,7 @@
 本页保留环境准备阶段的历史检查点；2026-10-20起的分支、代码适配与当前验证状态见 [Mac 适配记录](macos-runtime-adaptation.md)。
 
 本机目录为 `/Users/jiangxinyi/Documents/Project/agent-info`。2026-10-18 从
-`git@github.com:ShiJiJS/agent-info-manage.git` 拉取，使用本机已有 SSH 认证。
+`git@github.com:ShiJiJS/chiyo.git` 拉取，使用本机已有 SSH 认证。
 `main` 当前只有早期规格；本机 `codex/macos-development` 分支从已提交的
 `origin/codex/round05-windows-sync` / `916fd2a24b6f909113741a7344bca49eb633f72c`
 建立。Windows 尚未提交或推送的更改不在此副本中。

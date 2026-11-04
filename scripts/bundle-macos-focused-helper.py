@@ -34,9 +34,10 @@ def app_path(requested, *, readonly=False):
     app = requested.resolve(strict=True)
     allowed = [BUILD_PRODUCTS, ROOT / "build" if readonly else ADAPTATION]
     allowed = [base for base in allowed if base.resolve() == base]
-    if (app.name != "info_desktop.app" or
+    names = {"info_desktop.app", "chiyo.app"} if readonly else {"info_desktop.app"}
+    if (app.name not in names or
             not any(app.is_relative_to(base) for base in allowed)):
-        raise ValueError("Expected an info_desktop.app under this checkout's build directories")
+        raise ValueError("Expected a Mac app under this checkout's build directories")
     for part in ["Contents", "Contents/MacOS", "Contents/Resources", "Contents/XPCServices", str(RECORD.parent)]:
         directory = app / part
         if directory.is_symlink() or (directory.exists() and not directory.is_dir()):

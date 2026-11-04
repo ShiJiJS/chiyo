@@ -26,11 +26,12 @@ class MacAgentBundle {
     : _executable = executable ?? Platform.resolvedExecutable;
   final String _executable;
   final _hashes = <String, (String, String)>{};
-  static const appExecutable =
+  static const appExecutable = 'app/chiyo.app/Contents/MacOS/info_desktop';
+  static const legacyAppExecutable =
       'app/info_desktop.app/Contents/MacOS/info_desktop';
   static const requiredFiles = [
     appExecutable,
-    'app/info_desktop.app/Contents/Info.plist',
+    'app/chiyo.app/Contents/Info.plist',
     'cli/info',
     'cli/info-codex',
     'cli/info-codex-hook',
@@ -72,14 +73,16 @@ class MacAgentBundle {
       final embedded =
           await FileSystemEntity.type(embeddedRoot, followLinks: false) !=
           FileSystemEntityType.notFound;
-      if (!embedded && !binary.path.endsWith('/$appExecutable')) {
+      final legacy = binary.path.endsWith('/$legacyAppExecutable');
+      final packageExecutable = legacy ? legacyAppExecutable : appExecutable;
+      if (!embedded && !binary.path.endsWith('/$packageExecutable')) {
         return const MacAgentBundleObservation(status: 'not_packaged');
       }
       final rootPath = embedded
           ? embeddedRoot
           : binary.path.substring(
               0,
-              binary.path.length - appExecutable.length - 1,
+              binary.path.length - packageExecutable.length - 1,
             );
       final root = await Directory(rootPath).resolveSymbolicLinks();
       if (embedded && root != embeddedRoot) {
@@ -127,7 +130,18 @@ class MacAgentBundle {
           throw const FormatException('app source differs');
         }
       }
-      final required = embedded ? embeddedFiles : requiredFiles;
+      final required = embedded
+          ? embeddedFiles
+          : legacy
+          ? requiredFiles
+                .map(
+                  (path) => path.replaceFirst(
+                    'app/chiyo.app/',
+                    'app/info_desktop.app/',
+                  ),
+                )
+                .toList(growable: false)
+          : requiredFiles;
       final expectedTemplate = required
           .where((p) => p.startsWith('cli/template/'))
           .toSet();
@@ -168,7 +182,7 @@ class MacAgentBundle {
         }
         final file = await _file(root, relative), before = await file.stat();
         final executable =
-            relative == appExecutable ||
+            relative == packageExecutable ||
             (relative.startsWith('cli/') &&
                 !relative.startsWith('cli/template/'));
         if (before.size > 256 * 1024 * 1024 ||

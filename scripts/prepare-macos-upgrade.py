@@ -56,7 +56,9 @@ def check_payload(root, *, allow_extras):
     if not root.is_dir() or root.resolve() != root:
         raise RuntimeError('Payload must be an existing unlinked directory')
     manifest = json.loads((root / 'manifest.json').read_text())
-    if (manifest.get('format') != 1 or manifest.get('product') != 'Agent Info Manage'
+    app_names = {'Agent Info Manage': 'info_desktop.app', 'chiyo': 'chiyo.app'}
+    app_name = app_names.get(manifest.get('product'))
+    if (manifest.get('format') != 1 or app_name is None
             or manifest.get('architecture') != 'macos-arm64'
             or manifest.get('appIdentity') != 'com.example.infoDesktop'):
         raise RuntimeError('Unexpected Mac package identity')
@@ -75,7 +77,7 @@ def check_payload(root, *, allow_extras):
     extras = set(actual) - set(expected) - {'manifest.json'}
     if extras and not allow_extras:
         raise RuntimeError('Candidate contains unlisted files')
-    app = root / 'app/info_desktop.app'
+    app = root / 'app' / app_name
     with (app / 'Contents/Info.plist').open('rb') as stream:
         info = plistlib.load(stream)
     if info.get('CFBundleIdentifier') != manifest['appIdentity']:
