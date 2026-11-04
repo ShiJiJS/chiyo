@@ -971,11 +971,15 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         ],
                       ),
                     ),
-                  if (d.notice != null)
+                  for (final notice in [
+                    ?d.notice,
+                    if (s.pending && d.items.any(m.isPasswordMissing))
+                      '请填写密码，整份内容齐全后保存。',
+                  ])
                     Padding(
                       padding: const EdgeInsets.only(top: 20),
                       child: Text(
-                        d.notice!,
+                        notice,
                         style: libraryText(
                           context,
                           14,
@@ -1008,7 +1012,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                                     ? null
                                     : (_) => m.selectItem(item.id),
                                 label: Text(
-                                  '${index + 1}. ${m.draft?.items[item.id]?.name ?? item.proposed.record.name}${item.credential?.ready == false && m.passwords?.ready(s.id, s.version, item.id) != true ? ' · 待填密码' : ''}',
+                                  '${index + 1}. ${m.draft?.items[item.id]?.name ?? item.proposed.record.name}${m.isPasswordMissing(item) ? ' · 待填密码' : ''}',
                                 ),
                               ),
                           ],

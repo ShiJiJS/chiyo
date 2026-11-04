@@ -234,22 +234,21 @@ class ProposalsController extends ChangeNotifier {
       !reading &&
       readFailure == null &&
       detail != null;
+
+  bool isPasswordMissing(WorkspaceProposalItem item) {
+    final summary = detail?.summary;
+    return summary != null &&
+        item.credential?.ready == false &&
+        passwords?.ready(summary.id, summary.version, item.id) != true;
+  }
+
   bool get canConfirm =>
       _readable &&
       detail!.canConfirm &&
       draft != null &&
       !needsReview &&
       detail!.items.isNotEmpty &&
-      detail!.items.every(
-        (i) =>
-            (i.credential?.ready ?? true) ||
-            passwords?.ready(
-                  detail!.summary.id,
-                  detail!.summary.version,
-                  i.id,
-                ) ==
-                true,
-      ) &&
+      !detail!.items.any(isPasswordMissing) &&
       writeFailure?.code != 'conflict';
   bool get canReject => _readable && detail!.summary.pending;
   bool get canEdit =>
