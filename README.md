@@ -14,6 +14,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/ShiJiJS/chiyo/releases/tag/v0.4.2-mac-preview">下载 Mac 预览版</a> ·
   <a href="#开始使用">开始使用</a> ·
   <a href="#能做什么">能做什么</a> ·
   <a href="https://github.com/ShiJiJS/chiyo/issues">反馈问题</a> ·
@@ -24,7 +25,7 @@
 
 知予是一个本地资料管理与 AI 授权工具。你把文档、服务器信息、服务账号等保存在 App 里，AI 可以帮你整理并提交录入提案。需要使用资料时，AI 再提出申请，你在 App 中查看用途、选择范围并批准。
 
-**当前提供 macOS Apple Silicon 开发预览，最低系统要求 macOS 14。** 日常开发和打包以 Mac 为主。Windows 适配后续安排，当前没有 Windows 可用版本的承诺。
+**当前仅支持 macOS Apple Silicon，最低系统要求 macOS 14。** 当前为开发预览，日常开发和打包以 Mac 为主，Windows 适配后续安排。
 
 ## 能做什么
 
