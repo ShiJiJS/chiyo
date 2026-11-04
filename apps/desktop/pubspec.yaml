@@ -28,6 +28,7 @@ flutter:
   assets:
     - assets/fonts/OFL.txt
     - assets/zhiyu_files/
+    - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
   fonts:
     - family: ProductSans
       fonts:
