@@ -63,6 +63,23 @@ void main() {
     },
   );
 
+  test('older Mac packages still resolve using their original paths', () async {
+    await Directory(
+      '${root.path}/app/chiyo.app',
+    ).rename('${root.path}/app/info_desktop.app');
+    for (final row in manifest['files'] as List<Map<String, Object?>>) {
+      row['path'] = (row['path'] as String).replaceFirst(
+        'app/chiyo.app/',
+        'app/info_desktop.app/',
+      );
+    }
+    await writeManifest();
+    final legacy = MacAgentBundle(
+      executable: file(MacAgentBundle.legacyAppExecutable).path,
+    );
+    expect((await legacy.read()).verified, isTrue);
+  });
+
   test(
     'standalone app and absent manifest do not infer installation',
     () async {
@@ -179,7 +196,7 @@ void main() {
   test(
     'app-contained integration works without external delivery files',
     () async {
-      final contents = '${root.path}/app/info_desktop.app/Contents';
+      final contents = '${root.path}/app/chiyo.app/Contents';
       final embedded = Directory(
         '$contents/${MacAgentBundle.embeddedDirectory}',
       );

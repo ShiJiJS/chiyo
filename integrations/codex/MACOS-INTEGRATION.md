@@ -1,13 +1,13 @@
 # Mac 开发预览：接入 Codex
 
 这份说明位于 Mac 整包根目录。App、CLI、worker 和模板的版本、来源与摘要见
-`manifest.json`；保留完整目录。先打开 `app/info_desktop.app`，确认资料库正常可用。
+`manifest.json`；保留完整目录。先打开 `app/chiyo.app`，确认资料库正常可用。
 应用和随包命令不需要 Xcode、Flutter、Dart 或 Python。
 
 ## 在 App 中核对接入材料
 
 在“设置 → Agent 接入 → 查看诊断”中核对配套文件。正式整包保留
-`app/info_desktop.app`、`cli/` 和 `manifest.json` 的相对位置；整体移动目录可以，
+`app/chiyo.app`、`cli/` 和 `manifest.json` 的相对位置；整体移动目录可以，
 单独复制 App 会失去这项核对。诊断显示核对通过的整包目录，接入命令在该目录运行。
 
 “配套文件已核对”表示 App 主程序及身份文件、五个 CLI 程序、Skill 模板与接入说明

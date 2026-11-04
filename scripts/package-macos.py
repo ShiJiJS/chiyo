@@ -178,8 +178,8 @@ def main():
             build_arguments.append("--with-focused-fill-candidate")
         run("release-build", build_arguments)
         clean_source(commit)
-        payload = output / "AgentInfoManage"
-        app = payload / "app/info_desktop.app"
+        payload = output / "chiyo"
+        app = payload / "app/chiyo.app"
         app.parent.mkdir(parents=True)
         shutil.copytree(ROOT / "apps/desktop/build/macos/Build/Products/Release/info_desktop.app",
                         app, symlinks=True)
@@ -315,6 +315,9 @@ def main():
             raise RuntimeError("Release app must not carry the debugger entitlement")
         if info["CFBundleIdentifier"] != "com.example.infoDesktop":
             raise RuntimeError("Unexpected app identity")
+        if (info.get("CFBundleName") != "chiyo" or info.get("CFBundleDisplayName") != "知予"
+                or not (app / "Contents/Resources/AppIcon.icns").is_file()):
+            raise RuntimeError("Missing chiyo application branding")
         cipher = app / "Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher"
         version = re.search(r"^version:\s*(.+)$", (ROOT / "apps/desktop/pubspec.yaml").read_text(), re.M).group(1)
         release = f"{version}-mac-dev.{commit[:12]}"
@@ -331,7 +334,7 @@ def main():
             readme = readme.replace(token, value)
         (payload / "README.md").write_text(readme)
         manifest = {
-            "format": 1, "product": "Agent Info Manage", "release": release,
+            "format": 1, "product": "chiyo", "release": release,
             "sourceCommit": commit, "sourceDirty": False, "architecture": "macos-arm64",
             "appIdentity": info["CFBundleIdentifier"], "minimumSystemVersion": info["LSMinimumSystemVersion"],
             "testedBuildHost": platform.mac_ver()[0], "signing": "local ad-hoc development; not notarized",
@@ -355,22 +358,22 @@ def main():
                 "systemAcceptance": False, "helper": focus["helper"]}
         clean_source(commit)
         (payload / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-        archive = output / f"agent-info-manage-{release}-macos-arm64.zip"
+        archive = output / f"chiyo-{release}-macos-arm64.zip"
         run("archive", ["/usr/bin/ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", str(payload), str(archive)])
         (output / (archive.name + ".sha256")).write_text(f"{digest(archive)}  {archive.name}\n")
         extracted = output / "verify/中文 空格 路径"
         extracted.mkdir(parents=True)
         run("extract", ["/usr/bin/ditto", "-x", "-k", str(archive), str(extracted)])
-        final = extracted / "AgentInfoManage"
+        final = extracted / "chiyo"
         if inventory(final) != manifest["files"]:
             raise RuntimeError("Extracted bytes, permissions or symlinks differ")
         if (final / "manifest.json").read_bytes() != (payload / "manifest.json").read_bytes():
             raise RuntimeError("Extracted manifest differs")
-        if FOCUS_BUNDLE.inspect(final / "app/info_desktop.app") != focus:
+        if FOCUS_BUNDLE.inspect(final / "app/chiyo.app") != focus:
             raise RuntimeError("Extracted focused-fill candidate differs")
         facts["shippedDocumentationLinks"] = verify_documentation(final)
         run("extracted-app-signature", ["/usr/bin/codesign", "--verify", "--deep", "--strict",
-                                       str(final / "app/info_desktop.app")])
+                                       str(final / "app/chiyo.app")])
         temporary = output / "verify/tmp"
         temporary.mkdir()
         minimal = {"PATH": "/usr/bin:/bin", "TMPDIR": str(temporary) + "/"}

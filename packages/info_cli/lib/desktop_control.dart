@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'macos_agent_bundle.dart';
 import 'package:info_core/windows_desktop_control.dart';
 import 'package:info_core/macos_desktop_control.dart';
 
@@ -35,9 +36,15 @@ Future<({Map<String, Object?> output, int exitCode})> desktopControlCommand(
       timeoutMs = value;
     }
   }
-  final executable = File(
-    '${File(Platform.resolvedExecutable).parent.parent.path}/app/${Platform.isMacOS ? 'info_desktop.app/Contents/MacOS/info_desktop' : 'info_desktop.exe'}',
-  ).absolute.path;
+  final root = File(Platform.resolvedExecutable).parent.parent.path;
+  var relative = 'app/info_desktop.exe';
+  if (Platform.isMacOS) {
+    final current = File('$root/${MacAgentBundle.appExecutable}');
+    relative = await current.exists()
+        ? MacAgentBundle.appExecutable
+        : MacAgentBundle.legacyAppExecutable;
+  }
+  final executable = File('$root/$relative').absolute.path;
   final execute = Platform.isMacOS
       ? MacDesktopControl.execute
       : WindowsDesktopControl.execute;

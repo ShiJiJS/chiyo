@@ -1,10 +1,10 @@
-# Agent 信息访问授权
+# 知予 · chiyo
 
 为 Agent 提供按聊天申请、由用户批准的信息访问方式。Flutter 桌面端负责管理和审批，Dart CLI 通过本机接口申请与读取，核心服务逐次检查实际批准的字段范围。
 
 当前正在实现第一版，尚不能作为真实个人资料的正式存储工具。具体已验证能力及剩余工作见 [实施进度](docs/planning/implementation-status.md)。
 
-- [产品规格](docs/specs/0001-local-information-access.md) · [GitHub 父 Issue](https://github.com/ShiJiJS/agent-info-manage/issues/1)
+- [产品规格](docs/specs/0001-local-information-access.md) · [GitHub 父 Issue](https://github.com/ShiJiJS/chiyo/issues/1)
 - [18 张实施任务与依赖](docs/planning/ticket-breakdown.md)
 - [领域术语](GLOSSARY.md) · [架构决策](docs/adr/)
 - [第一条授权流程与运行方法](docs/development/first-authorization-slice.md)

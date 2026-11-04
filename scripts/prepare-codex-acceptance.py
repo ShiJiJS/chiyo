@@ -31,6 +31,8 @@ def prepare(delivery, bundle, workspace):
     if architecture not in targets:
         raise ValueError('Unsupported delivery architecture.')
     suffix, platform_name, app_relative = targets[architecture]
+    if architecture == 'macos-arm64' and manifest.get('product') == 'chiyo':
+        app_relative = 'app/chiyo.app'
     entries = {entry['path'].replace('\\', '/'): entry for entry in manifest['files']}
 
     def shipped(relative):

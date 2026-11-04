@@ -61,7 +61,7 @@ def main():
         run('package', [sys.executable, str(source / 'scripts/package-macos.py'), str(source / 'build/package')], source, 1200)
         package = source / 'build/package'
         verified = json.loads((package / 'verification.json').read_text())
-        manifest = json.loads((package / 'AgentInfoManage/manifest.json').read_text())
+        manifest = json.loads((package / 'chiyo/manifest.json').read_text())
         if (not verified.get('complete') or manifest['sourceCommit'] != commit
                 or manifest['sourceDirty'] is not False or not all(p['exit'] == 0 for p in verified['phases'])):
             raise RuntimeError('Missing fixed-source package verification')
@@ -69,7 +69,7 @@ def main():
         report['release'] = manifest['release']
         # The package verifier has already compared the extracted tree byte for
         # byte. Keep only its evidence, one usable payload, and the archive.
-        for name in ['AgentInfoManage', verified['archive'], verified['archive'] + '.sha256', 'verification.json', 'logs']:
+        for name in ['chiyo', verified['archive'], verified['archive'] + '.sha256', 'verification.json', 'logs']:
             shutil.move(str(package / name), str(out / name))
         if digest(out / verified['archive']) != verified['archiveSha256']:
             raise RuntimeError('Moved archive differs')

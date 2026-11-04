@@ -1,9 +1,9 @@
 # Issue tracker: GitHub
 
-仓库：https://github.com/ShiJiJS/agent-info-manage
+仓库：https://github.com/ShiJiJS/chiyo
 
 使用已登录的 GitHub CLI，显式指定
-`--repo ShiJiJS/agent-info-manage`。
+`--repo ShiJiJS/chiyo`。
 
 ## 操作约定
 
