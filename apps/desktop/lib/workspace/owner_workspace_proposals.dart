@@ -609,7 +609,8 @@ class OwnerWorkspaceProposals
       if (p.state == core.ImportProposalState.pending) {
         final states = owner.importAdmission(id);
         final problems = states
-            .where((s) => s.reason.isNotEmpty)
+            // Pending password input is tracked by the local review draft.
+            .where((s) => s.state != 'pending' && s.reason.isNotEmpty)
             .map((s) => s.reason)
             .toSet();
         if (problems.isNotEmpty) notice = problems.join('\n');

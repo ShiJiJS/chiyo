@@ -146,6 +146,8 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
+      final missingPassword = find.text('请填写密码，整份内容齐全后保存。');
+      expect(missingPassword, findsOneWidget);
       final first = model.detail!.items[0].id,
           second = model.detail!.items[1].id;
       Finder input(String item) =>
@@ -161,12 +163,14 @@ void main() {
       await t.enterText(input(first), 'SYNTHETIC-FIRST');
       await t.pumpAndSettle();
       expect(model.canConfirm, false);
+      expect(missingPassword, findsOneWidget);
       await tab(second);
       expect(input(first), findsNothing);
       await t.ensureVisible(input(second));
       await t.enterText(input(second), 'SYNTHETIC-SECOND');
       await t.pumpAndSettle();
       expect(model.canConfirm, true);
+      expect(missingPassword, findsNothing);
       expect(model.canQueueConfirm, false);
       expect(model.queueForBatch(WorkspaceProposalAction.confirm), false);
       expect(repo.managedCredentials, isEmpty);
