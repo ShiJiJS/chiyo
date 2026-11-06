@@ -1,0 +1,93 @@
+{
+  "captured_at": "2026-10-17T06:21:04.775986+08:00",
+  "items": [
+    {
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r1\\history-scope-1440-reference.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\history-scope-1440-reference.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:06:27.983063",
+      "sha256": "dc3a739b87fb6af787b506d700a549fd03115026e0a147cf9e0610431a32363f"
+    },
+    {
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\r3\\history-scope-1440.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\history-scope-1440-actual.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T06:12:29.223836",
+      "sha256": "0fcffec9ccc937ee3a0188f0408a50da30b23c0ab28e574dd87ccc14b2b2163f"
+    },
+    {
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r1\\history-scope-1280-reference.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\history-scope-1280-reference.png",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T03:06:28.055519",
+      "sha256": "51aab637bd5fa06da7c72d1542ca407cbe50ed0b89b6e5b96cf7eacb96d8db6f"
+    },
+    {
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\r3\\history-scope-1280.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\history-scope-1280-actual.png",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T06:12:30.593488",
+      "sha256": "ec707b590ae309e4ca5e904a27df4145492be323ed3fab46767588a8cab704b7"
+    },
+    {
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r1\\settings-appearance-1440-reference.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\settings-appearance-1440-reference.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:06:28.099104",
+      "sha256": "e0afae82d2236b73b7d65de3ffeb8f551e4ee2f8c76c8a23bd5f7f135b30d920"
+    },
+    {
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\r3\\settings-appearance-1440.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\settings-appearance-1440-actual.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T06:12:29.739671",
+      "sha256": "647f1acb5890e3545e30b40f554d85c3d011289f3691b232c631ed7723bfdd6a"
+    },
+    {
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r1\\settings-appearance-1280-reference.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\settings-appearance-1280-reference.png",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T03:06:28.147995",
+      "sha256": "4d87020d4b1990c955c2354993c05f5b2d5219ea5570ab81dd440158744c8026"
+    },
+    {
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\r3\\settings-appearance-1280.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r3\\settings-appearance-1280-actual.png",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T06:12:30.965604",
+      "sha256": "10667ab1a3f4f13e20c15b15287d549417800960ba660ee31ca0aa2fff3e8bdb"
+    }
+  ]
+}

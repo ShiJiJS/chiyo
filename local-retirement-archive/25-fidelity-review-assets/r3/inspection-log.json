@@ -1,0 +1,20 @@
+{
+  "candidate": "b0826ac26c59800473a39c0d92b18bb8198ac382",
+  "reviewType": "P3 current-missing two-image narrow static recheck",
+  "viewedAtUtc": "2026-10-17T00:12:53.557403+00:00",
+  "archiveImageCount": 2,
+  "viewedOriginalImageCount": 2,
+  "scope": "Leading punctuation, line breaking and direct effects, visible complete opaque ID; no reopening r2.",
+  "files": [
+    {
+      "file": "purple-1440-current-missing.png",
+      "sha256": "ad8de49bf81ab34d1eec531ed176e2629a7ecad25e2b70e99d79ee6c2d329587",
+      "viewed": true
+    },
+    {
+      "file": "purple-1280-current-missing.png",
+      "sha256": "213a18f8c0fce2050563eae74e859affb7cba45c6d1423396ec6d491ceb6ef31",
+      "viewed": true
+    }
+  ]
+}

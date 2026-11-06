@@ -1,0 +1,47 @@
+[
+  {
+    "file": "editor.png",
+    "state": "editor",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "scope.png",
+    "state": "scope",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "headingSpacing",
+        "label": "标题离上文比离下文还近",
+        "count": 1,
+        "examples": [
+          "h2.serif「提供哪些信息」（上 10px，下 17px）"
+        ]
+      }
+    ]
+  },
+  {
+    "file": "execution-start_failed.png",
+    "state": "execution-start_failed",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 1,
+        "examples": [
+          "div.command-preview「ssh -i {{file:ssh_key}} 」（每行约 153 个字符）"
+        ]
+      }
+    ]
+  }
+]

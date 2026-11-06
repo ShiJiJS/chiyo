@@ -1,0 +1,160 @@
+{
+  "1440-reference-secret_filename_ink": [
+    699,
+    426,
+    826,
+    439
+  ],
+  "1440-actual-secret_filename_ink": [
+    699,
+    426,
+    813,
+    439
+  ],
+  "1440-reference-secret_mask_ink": [
+    700,
+    430,
+    871,
+    434
+  ],
+  "1440-actual-secret_mask_ink": [
+    700,
+    430,
+    853,
+    434
+  ],
+  "1440-reference-warning_fill": [
+    639,
+    508,
+    1381,
+    593,
+    59602
+  ],
+  "1440-reference-warning_border": [
+    638,
+    507,
+    1382,
+    594,
+    1658
+  ],
+  "1440-reference-warning_text_ink": [
+    660,
+    529,
+    927,
+    570
+  ],
+  "1440-actual-warning_fill": [
+    638,
+    503,
+    1382,
+    581,
+    55580
+  ],
+  "1440-actual-warning_border": null,
+  "1440-actual-warning_text_ink": [
+    655,
+    525,
+    893,
+    560
+  ],
+  "1280-reference-secret_filename_ink": [
+    699,
+    426,
+    826,
+    439
+  ],
+  "1280-actual-secret_filename_ink": [
+    699,
+    426,
+    813,
+    439
+  ],
+  "1280-reference-secret_mask_ink": [
+    700,
+    430,
+    871,
+    434
+  ],
+  "1280-actual-secret_mask_ink": [
+    700,
+    430,
+    853,
+    434
+  ],
+  "1280-reference-warning_fill": [
+    639,
+    508,
+    1221,
+    593,
+    46002
+  ],
+  "1280-reference-warning_border": [
+    638,
+    507,
+    1222,
+    594,
+    1338
+  ],
+  "1280-reference-warning_text_ink": [
+    660,
+    529,
+    927,
+    570
+  ],
+  "1280-actual-warning_fill": [
+    638,
+    503,
+    1222,
+    581,
+    43100
+  ],
+  "1280-actual-warning_border": null,
+  "1280-actual-warning_text_ink": [
+    655,
+    525,
+    893,
+    560
+  ],
+  "add-file-reference-modal_paper_rows_gt500": [
+    144,
+    756
+  ],
+  "add-file-actual-modal_paper_rows_gt500": [
+    146,
+    754
+  ],
+  "add-string-reference-modal_paper_rows_gt500": [
+    146,
+    754
+  ],
+  "add-string-actual-modal_paper_rows_gt500": [
+    147,
+    753
+  ],
+  "rotate-reference-modal_paper_rows_gt500": [
+    265,
+    635
+  ],
+  "rotate-actual-modal_paper_rows_gt500": [
+    265,
+    635
+  ],
+  "links-reference-modal_paper_rows_gt500": [
+    131,
+    769
+  ],
+  "links-actual-modal_paper_rows_gt500": [
+    130,
+    770
+  ],
+  "discovery-reference-modal_paper_rows_gt500": [
+    174,
+    726
+  ],
+  "discovery-actual-modal_paper_rows_gt500": [
+    178,
+    722
+  ],
+  "purple-1280-save-failure.png-primary": null,
+  "purple-1440-save-failure.png-primary": null
+}

@@ -1,0 +1,374 @@
+{
+  "captured_at": "2026-10-17T07:24:57.394948+08:00",
+  "candidate": "b16e15b8f22928dc474c86a06b2d91bf3e8c2d11",
+  "files": [
+    {
+      "file": "actual\\settings-backup-error-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-error-1280.png",
+      "source_mtime": "2026-10-17T07:14:27.391803+08:00",
+      "sha256": "d77e65a6066adef9f495ddab66d442d3ac75d034124d14c95ea23d72fd4f252a",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backup-error-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-error-1440.png",
+      "source_mtime": "2026-10-17T07:14:19.093248+08:00",
+      "sha256": "9ed28262c775fe94a294a02c2c2ce7b14c97c770b0951b08123bb21c718f13cb",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-backup-flow-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-flow-1280.png",
+      "source_mtime": "2026-10-17T07:14:27.226985+08:00",
+      "sha256": "f55c8e8777a53c8b68fbd1297760967f9fa361862dc933702fbb7d78d9f32d98",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backup-flow-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-flow-1440.png",
+      "source_mtime": "2026-10-17T07:14:18.896573+08:00",
+      "sha256": "fe961ef14a2d1c30c14cd2b2e9bcbb763b19a2456ab4ac793bfeb803a17a8219",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-backup-flow-200-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-flow-200-1280.png",
+      "source_mtime": "2026-10-17T07:14:30.934660+08:00",
+      "sha256": "526c0ce0734cfb22b6f8d6054c5c5fe429a61ac316dac6a539a53ce5cff4123a",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backup-flow-200-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-flow-200-1440.png",
+      "source_mtime": "2026-10-17T07:14:24.045580+08:00",
+      "sha256": "1b5faab5b7c7a5f84d226e826d267ccb46a57f8e7fa432c756b4c13ccadd23a6",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-backup-flow-bottom-200-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-flow-bottom-200-1280.png",
+      "source_mtime": "2026-10-17T07:14:31.089561+08:00",
+      "sha256": "ca3fc5b018a6171d3c84a2964b88b92c012f70d4bf33f0f3cc8ff7f36f5cc4b8",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backup-flow-bottom-200-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backup-flow-bottom-200-1440.png",
+      "source_mtime": "2026-10-17T07:14:24.230292+08:00",
+      "sha256": "5739f329e1454099eedf01a425490668db367b88e2fee69f6db09eaa44474253",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-backups-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backups-1280.png",
+      "source_mtime": "2026-10-17T07:14:26.959546+08:00",
+      "sha256": "d4d72906b9ab323969e05355b42d70510d7c86c3925f2a39016e601c87696065",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backups-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backups-1440.png",
+      "source_mtime": "2026-10-17T07:14:18.561466+08:00",
+      "sha256": "65434ea89967b46762e9ab5a17eaef41e2bb041051cb338210b7fa54d7a32f4e",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-backups-empty-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backups-empty-1280.png",
+      "source_mtime": "2026-10-17T07:14:28.334137+08:00",
+      "sha256": "e6d00d66aa66606908433ab7211d3b60eb609593818e117efd0d6897ed523674",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backups-empty-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-backups-empty-1440.png",
+      "source_mtime": "2026-10-17T07:14:20.436689+08:00",
+      "sha256": "a629b7d0b650858c0c9f3855745e8a719feb59f08a7d23ec2170ce413d9a6933",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-notifications-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-notifications-1280.png",
+      "source_mtime": "2026-10-17T07:14:26.235564+08:00",
+      "sha256": "c68ffa2a7c4842f3b218a2cde05692d66446af80eb6a8dfe3b78f0986edb2013",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-notifications-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-notifications-1440.png",
+      "source_mtime": "2026-10-17T07:14:17.580429+08:00",
+      "sha256": "b97b442d44cfd05ceadcced85b93fef2d73f27c611cf075b4975c07d541d4cdb",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-records-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-records-1280.png",
+      "source_mtime": "2026-10-17T07:14:26.383553+08:00",
+      "sha256": "a3473e3d9366f963e6dd34df96d4c2ed3164362501860aacb7ee1b3680bbef13",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-records-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-records-1440.png",
+      "source_mtime": "2026-10-17T07:14:17.794463+08:00",
+      "sha256": "2d7456a88fbb52623119f1f9e0a368af2fcfa875ef27b7b31ffd7b46404c2e4c",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-records-200-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-records-200-1280.png",
+      "source_mtime": "2026-10-17T07:14:29.767211+08:00",
+      "sha256": "9eef8c969a2c60a1767c1d6f91859dc3d0f2fc54d4016a0319ca21e7ab385934",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-records-200-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-records-200-1440.png",
+      "source_mtime": "2026-10-17T07:14:22.435414+08:00",
+      "sha256": "09f4da9473c7394a4bce7dbaffcd4cb138b7a0599407128c8031cc221897631b",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-records-200-changed-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-records-200-changed-1280.png",
+      "source_mtime": "2026-10-17T07:14:29.956168+08:00",
+      "sha256": "c08e4c3890ecea3c82ad1465d049e09615fe54539a1a4423d2e794c75fe3e25c",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-records-200-changed-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-records-200-changed-1440.png",
+      "source_mtime": "2026-10-17T07:14:22.702154+08:00",
+      "sha256": "eb80ee6813de05b3bf1ed9f220a5d19929b8f19e5b0584fd325b6cff4c0ad59c",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-restore-complete-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-restore-complete-1280.png",
+      "source_mtime": "2026-10-17T07:14:29.484870+08:00",
+      "sha256": "70e59ec82e9e09b9e022332b77cfc0c4b5407083a10cced329f1b22b5b502871",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-restore-complete-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-restore-complete-1440.png",
+      "source_mtime": "2026-10-17T07:14:22.027945+08:00",
+      "sha256": "973e528d928062dd7ad3a56a13e62dff4db39ca49bdcc7ebe812a0f0bf0b52df",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-restore-preview-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-restore-preview-1280.png",
+      "source_mtime": "2026-10-17T07:14:28.804326+08:00",
+      "sha256": "1b017533605422c77e5dbedaeb9c9208cde4cc3d56369bbfbe7b8fd610eb0421",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-restore-preview-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-restore-preview-1440.png",
+      "source_mtime": "2026-10-17T07:14:21.105643+08:00",
+      "sha256": "26c0c650d8ad149f0cd5a22dee372b8603f1d32ea07ca092b40b320afba5ebdd",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-restore-preview-bottom-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-restore-preview-bottom-1280.png",
+      "source_mtime": "2026-10-17T07:14:28.957435+08:00",
+      "sha256": "5fb689d8a209e90e78dc6be423068f1fadb835619a4199dcf18a01f7685ef46e",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-restore-preview-bottom-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-restore-preview-bottom-1440.png",
+      "source_mtime": "2026-10-17T07:14:21.300352+08:00",
+      "sha256": "2b007ce323b34eb5fd7ed1d692cc954106a14df7ebe5d1976e05b008e5b2dba3",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-retention-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-retention-1280.png",
+      "source_mtime": "2026-10-17T07:14:26.677003+08:00",
+      "sha256": "e195a0440aa003d32b5be6c289fb1b0995d83a1e37c8716324e206cb615c23de",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-retention-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-retention-1440.png",
+      "source_mtime": "2026-10-17T07:14:18.224387+08:00",
+      "sha256": "d245eaa2a333d126e8cf7080b84a8d07314540147494ab8ad77f28c000570305",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-template-200-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-template-200-1280.png",
+      "source_mtime": "2026-10-17T07:14:30.227106+08:00",
+      "sha256": "b8d61ca028d7d15d803642b8269843d6221a701a5df87ef786b9b509b8aa1f29",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-template-200-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-template-200-1440.png",
+      "source_mtime": "2026-10-17T07:14:23.057517+08:00",
+      "sha256": "e9341433b36ede4fddf53b34748dc90fb253545096830cde13be10034ecae8a2",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-template-dialog-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-template-dialog-1280.png",
+      "source_mtime": "2026-10-17T07:14:25.704669+08:00",
+      "sha256": "7c36f24e9247877db5a8adf131e2a6ead65b99c9e4f3ea8605b62bb14734a5d7",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-template-dialog-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-template-dialog-1440.png",
+      "source_mtime": "2026-10-17T07:14:16.731214+08:00",
+      "sha256": "3fad80f1a2c82a5013db8dcdddb69befdbbbc6e99b2b56c6d5cf5d8b09624179",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-template-error-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-template-error-1280.png",
+      "source_mtime": "2026-10-17T07:14:26.024026+08:00",
+      "sha256": "a7bef52ca9b432fa042b33409250479c2be22e438535fe6bccf407aff217d72a",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-template-error-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-template-error-1440.png",
+      "source_mtime": "2026-10-17T07:14:17.230145+08:00",
+      "sha256": "5d74f4f87e357149eb1787411ff528e7d06267db8588c803528293527a0ea16b",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-templates-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-templates-1280.png",
+      "source_mtime": "2026-10-17T07:14:25.455434+08:00",
+      "sha256": "de28ce5dea663df56b9332f6519f62aebd434f36c07c7af41b5015a219ccbf9f",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-templates-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r2\\settings-templates-1440.png",
+      "source_mtime": "2026-10-17T07:14:16.323518+08:00",
+      "sha256": "e9ec652e38e5f049c1032dd200d62aa51ec24198e0ba4a54ec3f74636c9813a9",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "reference\\settings-templates\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-templates\\page-1440x900.png",
+      "sha256": "6546f15ef4623d1291f7b74db73175c27cf51fd16945d32cd80f4c3bb4bf99ff"
+    },
+    {
+      "file": "reference\\settings-templates\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-templates\\page-1280x800.png",
+      "sha256": "0e71d8ce474ac2f666e018f158fe127abc5a4e81d3e64eac040cf5ddace48c14"
+    },
+    {
+      "file": "reference\\settings-template-dialog\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-template-dialog\\page-1440x900.png",
+      "sha256": "1060c9ca18d8da8f88b82c5594f0105be4eeb5d1c3671e5cf691d1b502a92376"
+    },
+    {
+      "file": "reference\\settings-template-dialog\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-template-dialog\\page-1280x800.png",
+      "sha256": "12d1b4101e3d670086339cfc7497d7e92bd0e1a384a20fd73d6ce54534eb5761"
+    },
+    {
+      "file": "reference\\settings-notifications\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-notifications\\page-1440x900.png",
+      "sha256": "c86f66a92bf7e1c78dcc5c6a2f1746e65c1c6a4b7f487b51c808a07aba32272d"
+    },
+    {
+      "file": "reference\\settings-notifications\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-notifications\\page-1280x800.png",
+      "sha256": "3e61aa8d27b8a8e6bd4dc36423ee329971e9e03818857978f927b38153e7a941"
+    },
+    {
+      "file": "reference\\settings-records\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-records\\page-1440x900.png",
+      "sha256": "53e7cd9ef70799d79c679af6c41e3460606943d9b1e1f5e28cc0d93778484ac9"
+    },
+    {
+      "file": "reference\\settings-records\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-records\\page-1280x800.png",
+      "sha256": "cb122989fc6ac526eb414e5f442973f7b5b5ca074052f74a93b296ffc43f4a31"
+    },
+    {
+      "file": "reference\\settings-retention\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-retention\\page-1440x900.png",
+      "sha256": "5a03fc9e8ab99b19e118427d7a4eef96c67bacd11108291876e47075188bff68"
+    },
+    {
+      "file": "reference\\settings-retention\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-retention\\page-1280x800.png",
+      "sha256": "2a528df743c08011fab0b26b5f396ec0fef45735b3c1a95abd330217a776faf7"
+    },
+    {
+      "file": "reference\\settings-backups\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-backups\\page-1440x900.png",
+      "sha256": "0573daa9f9c7693551e9352f4821a36639db75698f2e5aa5c78328783df416d7"
+    },
+    {
+      "file": "reference\\settings-backups\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-backups\\page-1280x800.png",
+      "sha256": "8d0aa1ae25a82039a36727418a96e463109449efc374cb2dd7e2ed519329f610"
+    },
+    {
+      "file": "reference\\settings-backup-flow\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-backup-flow\\page-1440x900.png",
+      "sha256": "d351cdae8b29a789a756ad92243264ad746382f57ab7faf831c82226557eda4e"
+    },
+    {
+      "file": "reference\\settings-backup-flow\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-backup-flow\\page-1280x800.png",
+      "sha256": "e08d9897ae323adb63c1e38f3d5cdccc581cb156325edb774d43701d914eea9f"
+    },
+    {
+      "file": "reference\\settings-restore-preview\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-restore-preview\\page-1440x900.png",
+      "sha256": "2425a2f34fe1bf3af1df162d9ad7a00c2a9e7e36e77b3cfec0ce95cd464159c7"
+    },
+    {
+      "file": "reference\\settings-restore-preview\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-candidate-r1\\reference\\settings-restore-preview\\page-1280x800.png",
+      "sha256": "a959bcf75caa9cb0c1c7b6ff226c7cb6eb592c461c10d21e2be2f6d9bcfada87"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "reviewed_at_utc": "2026-10-17T00:06:10.394869+00:00",
+  "actual_count": 2,
+  "reference_count": 0,
+  "scope": "Maintenance failure QuietNotice readability, non-overlap, shared visual language and direct neighbourhood only",
+  "entries": [
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r4\\actual\\purple-1280-maintenance-failure.png",
+      "sha256": "0ed177139a8bbc35cf2c6f5ec2b27d478ba1f1119671eb6eefe9e0ec457404c5",
+      "method": "Actual original full image and native 1:1 notice/neighbourhood crop"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r4\\actual\\purple-1440-maintenance-failure.png",
+      "sha256": "f7dbec31a5159fc757493895b9fb0d4153dd56e5e3589a264642ebdd35195314",
+      "method": "Actual original full image and native 1:1 notice/neighbourhood crop"
+    }
+  ]
+}

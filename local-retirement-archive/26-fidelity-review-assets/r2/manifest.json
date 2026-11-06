@@ -1,0 +1,101 @@
+{
+  "captured_at": "2026-10-17T03:20:56.422301+08:00",
+  "items": [
+    {
+      "page": "history-scope",
+      "width": 1440,
+      "kind": "reference",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\history-scope-1440-reference.png",
+      "sha256": "dc3a739b87fb6af787b506d700a549fd03115026e0a147cf9e0610431a32363f",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "r1 immutable reference"
+    },
+    {
+      "page": "history-scope",
+      "width": 1440,
+      "kind": "actual",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\history-scope-1440-actual.png",
+      "sha256": "873f89f48d3acf1d0af0571b5e58fdf79d851dc2e195bee9016aec42ff7252f5",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:14:29.322293"
+    },
+    {
+      "page": "history-scope",
+      "width": 1280,
+      "kind": "reference",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\history-scope-1280-reference.png",
+      "sha256": "51aab637bd5fa06da7c72d1542ca407cbe50ed0b89b6e5b96cf7eacb96d8db6f",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "r1 immutable reference"
+    },
+    {
+      "page": "history-scope",
+      "width": 1280,
+      "kind": "actual",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\history-scope-1280-actual.png",
+      "sha256": "597e12dec7ef8c6fedd3ffda6875577089c39b020009d5033ef3dd0a22a5be30",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T03:14:31.206266"
+    },
+    {
+      "page": "settings-appearance",
+      "width": 1440,
+      "kind": "reference",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\settings-appearance-1440-reference.png",
+      "sha256": "e0afae82d2236b73b7d65de3ffeb8f551e4ee2f8c76c8a23bd5f7f135b30d920",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "r1 immutable reference"
+    },
+    {
+      "page": "settings-appearance",
+      "width": 1440,
+      "kind": "actual",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\settings-appearance-1440-actual.png",
+      "sha256": "0637fb56b4feaf24c8e8f0af1dec9d9e6de37671d3af90afbe2a34ff076b67ce",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:14:29.968961"
+    },
+    {
+      "page": "settings-appearance",
+      "width": 1280,
+      "kind": "reference",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\settings-appearance-1280-reference.png",
+      "sha256": "4d87020d4b1990c955c2354993c05f5b2d5219ea5570ab81dd440158744c8026",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "r1 immutable reference"
+    },
+    {
+      "page": "settings-appearance",
+      "width": 1280,
+      "kind": "actual",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\r2\\settings-appearance-1280-actual.png",
+      "sha256": "0ddf87af4a9df04e2b5546459afff73361f4932909daca586081fd4aa874bfa5",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T03:14:31.701125"
+    }
+  ]
+}

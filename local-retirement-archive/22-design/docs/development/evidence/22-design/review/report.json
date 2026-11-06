@@ -1,0 +1,74 @@
+[
+  {
+    "file": "scope.png",
+    "state": "scope",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "proposal-edit.png",
+    "state": "proposal-edit",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "backup-enable.png",
+    "state": "backup-enable",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 1,
+        "examples": [
+          "p「使用独立恢复密钥加密备份。信息、托管凭据和保留期」（每行约 51 字）"
+        ]
+      }
+    ]
+  },
+  {
+    "file": "credential-rotate.png",
+    "state": "credential-rotate",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "execution-start_failed.png",
+    "state": "execution-start_failed",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 1,
+        "examples": [
+          "div.command-preview「ssh -T -o BatchMode=yes 」（每行约 153 个字符）"
+        ]
+      }
+    ]
+  },
+  {
+    "file": "no-results.png",
+    "state": "no-results",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

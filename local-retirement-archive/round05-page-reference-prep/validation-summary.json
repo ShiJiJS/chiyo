@@ -1,0 +1,219 @@
+{
+  "screenshots": 46,
+  "pngDimensionErrors": [],
+  "issues": [],
+  "lint": [],
+  "fonts": [
+    "ProductSans 400 loaded"
+  ],
+  "stylesheets": [
+    {
+      "href": "http://127.0.0.1:8797/prototype.css",
+      "ruleCount": 219
+    },
+    {
+      "href": "http://127.0.0.1:8797/sections.css",
+      "ruleCount": 175
+    },
+    {
+      "href": "http://127.0.0.1:8797/credentials.css",
+      "ruleCount": 105
+    },
+    {
+      "href": "http://127.0.0.1:8797/runtime.css",
+      "ruleCount": 39
+    },
+    {
+      "href": "http://127.0.0.1:8797/lifecycle.css",
+      "ruleCount": 61
+    }
+  ],
+  "sourceHashesUnchanged": true,
+  "networkNon200": [
+    {
+      "id": "library-default",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "library-editor",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 2,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "library-taxonomy",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 2,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "library-no-results",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "proposal-new",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "proposal-diff",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 5,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "proposal-conflict",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 2,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "proposal-editor",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 2,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "proposal-confirm",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "history-scope",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 4,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "history-access",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "history-ended",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "history-revoke",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-appearance",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-notifications",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-records",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 2,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-retention",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-templates",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 4,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-template-dialog",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-backups",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-backup-flow",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-restore-preview",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 2,
+      "transferSize": 635,
+      "responseStatus": 404
+    },
+    {
+      "id": "settings-application",
+      "size": "1440x900",
+      "name": "http://127.0.0.1:8797/favicon.ico",
+      "duration": 3,
+      "transferSize": 635,
+      "responseStatus": 404
+    }
+  ],
+  "networkNote": "Only the automatic browser favicon.ico requests returned 404. The official tool excludes that irrelevant favicon from UI resource issues. CSS, JavaScript, font resources loaded normally; no server or source changes were made."
+}

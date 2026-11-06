@@ -1,0 +1,38 @@
+{
+  "reviewed_at_utc": "2026-10-16T23:55:00.795858+00:00",
+  "actual_count": 4,
+  "reference_count": 2,
+  "scope": "Disabled unchecked checkbox fill, edge appearance, and direct neighbourhood only",
+  "entries": [
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\mono-1280-links.png",
+      "sha256": "b9c533e8b1373c86c20b88debc0a7d0f755ba1d5bd152f7c6d8439ef47c6c51d",
+      "method": "Actual original full image plus native 1:1 row crop; original reference native crop"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\mono-1440-links.png",
+      "sha256": "5368bfb3c299c75dace969ab5b753f1be6cc8f92215a7d513e5b4d7a19ca46f8",
+      "method": "Actual original full image plus native 1:1 row crop; original reference native crop"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\purple-1280-links.png",
+      "sha256": "994da182f58f807fb344dcac84e63fc741055b2962fa3521408760e5b935ea0f",
+      "method": "Actual original full image plus native 1:1 row crop; original reference native crop"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\purple-1440-links.png",
+      "sha256": "5d8373a73da795257da4adcb496e42005aaa9eae674c06fe654ff604b28a1a3e",
+      "method": "Actual original full image plus native 1:1 row crop; original reference native crop"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\reference\\credential-links\\page-1440x900.png",
+      "sha256": "6b4cbf2582d209e054282dc40f29471bedcef90ffdfa156a0553a75305b93c17",
+      "method": "Actual original full image plus native 1:1 row crop; original reference native crop"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\reference\\credential-links\\page-1280x800.png",
+      "sha256": "15d939a7e1aa1d0d2e68ef83ddd62ff895dab0df0c95a4a77eba96aaccdf14e7",
+      "method": "Actual original full image plus native 1:1 row crop; original reference native crop"
+    }
+  ]
+}

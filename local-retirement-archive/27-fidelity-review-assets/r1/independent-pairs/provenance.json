@@ -1,0 +1,128 @@
+[
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-file.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-file\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-file.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-file.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-file\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-file.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-add-string.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-string\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-add-string.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-add-string.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-string\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-add-string.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-add-file.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-file\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-add-file.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-add-file.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-file\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-add-file.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-string.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-string\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-string.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-string.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-string\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-string.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-expired.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-expired\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-expired.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-expired.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-expired\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-expired.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-rotate.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-rotate\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-rotate.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-rotate.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-rotate\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-rotate.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-discovery.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-discovery\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-discovery.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-discovery.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-discovery\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-discovery.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-links.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-links\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-links.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-links.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-links\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-links.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1440-server.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\server-linked\\page-1440x900.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-server.png",
+    "scale": 1,
+    "left_reference": true
+  },
+  {
+    "file": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\independent-pairs\\purple-1280-server.png",
+    "reference": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\server-linked\\page-1280x800.png",
+    "actual": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-server.png",
+    "scale": 1,
+    "left_reference": true
+  }
+]

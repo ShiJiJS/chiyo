@@ -1,0 +1,33 @@
+{
+  "reviewCandidate": "b0826ac26c59800473a39c0d92b18bb8198ac382",
+  "archiveTimeUtc": "2026-10-17T00:12:24.562052+00:00",
+  "originalManifestSha256": "0966670c99caa6998aeb38dd6dd8a2fbda816b3dd0a008eed30b79cd7e204478",
+  "fileCount": 2,
+  "scope": "Only current-missing punctuation, line breaking, and opaque ID readability. r2 scope and conclusion remain intact.",
+  "files": [
+    {
+      "file": "purple-1440-current-missing.png",
+      "role": "Flutter",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ad8de49bf81ab34d1eec531ed176e2629a7ecad25e2b70e99d79ee6c2d329587",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\review-round5\\purple-1440-current-missing.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\25-fidelity-review-assets\\r3\\purple-1440-current-missing.png",
+      "bytes": 132394,
+      "sourceModifiedUtc": "2026-10-17T00:10:38.412280+00:00",
+      "verifiedSha256": "ad8de49bf81ab34d1eec531ed176e2629a7ecad25e2b70e99d79ee6c2d329587"
+    },
+    {
+      "file": "purple-1280-current-missing.png",
+      "role": "Flutter",
+      "width": 1280,
+      "height": 800,
+      "sha256": "213a18f8c0fce2050563eae74e859affb7cba45c6d1423396ec6d491ceb6ef31",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\25-proposals\\docs\\development\\evidence\\25-proposals\\review-round5\\purple-1280-current-missing.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\25-fidelity-review-assets\\r3\\purple-1280-current-missing.png",
+      "bytes": 113454,
+      "sourceModifiedUtc": "2026-10-17T00:10:43.888448+00:00",
+      "verifiedSha256": "213a18f8c0fce2050563eae74e859affb7cba45c6d1423396ec6d491ceb6ef31"
+    }
+  ]
+}

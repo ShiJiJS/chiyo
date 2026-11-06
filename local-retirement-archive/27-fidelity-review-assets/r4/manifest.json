@@ -1,0 +1,33 @@
+{
+  "candidate": "fba0393",
+  "integrated_root": "0c09d77",
+  "archived_at_utc": "2026-10-17T00:04:47.931840+00:00",
+  "source_manifest": "source-manifest.json",
+  "provided_baseCommit": "ef54caf782eea3b025342f3fc3d2fc480fc3a10d",
+  "all_png_hashes_verified": true,
+  "dedicated_reference": false,
+  "entries": [
+    {
+      "kind": "actual",
+      "source": "C:/Project/network_config/info-manage-worktrees/27-credentials/docs/development/evidence/27-credentials/r9/purple-1280-maintenance-failure.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r4\\actual\\purple-1280-maintenance-failure.png",
+      "source_modified_utc": "2026-10-17T00:01:37.355Z",
+      "bytes": 105894,
+      "width": 1280,
+      "height": 800,
+      "sha256": "0ed177139a8bbc35cf2c6f5ec2b27d478ba1f1119671eb6eefe9e0ec457404c5",
+      "provided_manifest_verified": true
+    },
+    {
+      "kind": "actual",
+      "source": "C:/Project/network_config/info-manage-worktrees/27-credentials/docs/development/evidence/27-credentials/r9/purple-1440-maintenance-failure.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r4\\actual\\purple-1440-maintenance-failure.png",
+      "source_modified_utc": "2026-10-17T00:01:35.889Z",
+      "bytes": 115163,
+      "width": 1440,
+      "height": 900,
+      "sha256": "f7dbec31a5159fc757493895b9fb0d4153dd56e5e3589a264642ebdd35195314",
+      "provided_manifest_verified": true
+    }
+  ]
+}

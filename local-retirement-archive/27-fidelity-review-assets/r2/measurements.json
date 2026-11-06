@@ -1,0 +1,124 @@
+{
+  "1440-file-reference-ink": [
+    699,
+    426,
+    826,
+    439
+  ],
+  "1440-file-actual-ink": [
+    699,
+    426,
+    826,
+    439
+  ],
+  "1440-string-reference-ink": [
+    700,
+    430,
+    871,
+    434
+  ],
+  "1440-string-actual-ink": [
+    701,
+    430,
+    871,
+    434
+  ],
+  "1440-warning-reference-border": [
+    638,
+    507,
+    1382,
+    594
+  ],
+  "1440-warning-actual-border": [
+    638,
+    507,
+    1382,
+    594
+  ],
+  "1280-file-reference-ink": [
+    699,
+    426,
+    826,
+    439
+  ],
+  "1280-file-actual-ink": [
+    699,
+    426,
+    826,
+    439
+  ],
+  "1280-string-reference-ink": [
+    700,
+    430,
+    871,
+    434
+  ],
+  "1280-string-actual-ink": [
+    701,
+    430,
+    871,
+    434
+  ],
+  "1280-warning-reference-border": [
+    638,
+    507,
+    1222,
+    594
+  ],
+  "1280-warning-actual-border": [
+    638,
+    507,
+    1222,
+    594
+  ],
+  "reference-checkbox-fill-patch": {
+    "box": [
+      449,
+      547,
+      458,
+      555
+    ],
+    "pixels": 72,
+    "colors": [
+      {
+        "rgb": [
+          248,
+          247,
+          247
+        ],
+        "count": 72
+      }
+    ]
+  },
+  "actual-checkbox-fill-patch": {
+    "box": [
+      449,
+      547,
+      458,
+      555
+    ],
+    "pixels": 72,
+    "colors": [
+      {
+        "rgb": [
+          239,
+          239,
+          239
+        ],
+        "count": 72
+      }
+    ]
+  },
+  "purple-1280-save-failure.png-primary-fill": [
+    840,
+    669,
+    932,
+    711
+  ],
+  "purple-1440-save-failure.png-primary-fill": [
+    920,
+    724,
+    1012,
+    766
+  ]
+}

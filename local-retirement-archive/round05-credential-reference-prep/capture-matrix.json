@@ -1,0 +1,117 @@
+[
+  {
+    "id": "credential-file",
+    "query": "theme=purple&page=credentials",
+    "steps": ""
+  },
+  {
+    "id": "credential-string",
+    "query": "theme=purple&page=credentials&state=token",
+    "steps": ""
+  },
+  {
+    "id": "credential-expired",
+    "query": "theme=purple&page=credentials&state=expired",
+    "steps": ""
+  },
+  {
+    "id": "credential-add-string",
+    "query": "theme=purple&page=credentials",
+    "steps": "click [aria-label=\"添加凭据\"]"
+  },
+  {
+    "id": "credential-add-file",
+    "query": "theme=purple&page=credentials",
+    "steps": "click [aria-label=\"添加凭据\"]; click .credential-form-options button:has-text(\"文件\")"
+  },
+  {
+    "id": "credential-rotate",
+    "query": "theme=purple&state=credential-rotate",
+    "steps": ""
+  },
+  {
+    "id": "credential-discovery",
+    "query": "theme=purple&state=credential-discovery",
+    "steps": ""
+  },
+  {
+    "id": "credential-links",
+    "query": "theme=purple&page=library",
+    "steps": "click .associated-credentials .section-heading button"
+  },
+  {
+    "id": "server-linked",
+    "query": "theme=purple&state=server",
+    "steps": ""
+  },
+  {
+    "id": "use-string",
+    "query": "theme=purple&state=use-token",
+    "steps": ""
+  },
+  {
+    "id": "use-file",
+    "query": "theme=purple&state=use-file",
+    "steps": ""
+  },
+  {
+    "id": "use-file-env",
+    "query": "theme=purple&state=file-env",
+    "steps": ""
+  },
+  {
+    "id": "use-file-tip",
+    "query": "theme=purple&state=use-file",
+    "steps": "click [aria-label=\"查看注入方式说明\"]"
+  },
+  {
+    "id": "use-request",
+    "query": "theme=purple&state=use-file",
+    "steps": "click .request-link"
+  },
+  {
+    "id": "use-file-confirm",
+    "query": "theme=purple&state=use-file",
+    "steps": "click .credential-request .decision-actions .primary"
+  },
+  {
+    "id": "use-string-confirm",
+    "query": "theme=purple&state=use-token",
+    "steps": "click .credential-request .decision-actions .primary"
+  },
+  {
+    "id": "execution-running",
+    "query": "theme=purple&state=execution-running",
+    "steps": ""
+  },
+  {
+    "id": "execution-prepare-failed",
+    "query": "theme=purple&state=execution-prepare_failed",
+    "steps": ""
+  },
+  {
+    "id": "execution-start-failed",
+    "query": "theme=purple&state=execution-start_failed",
+    "steps": ""
+  },
+  {
+    "id": "execution-nonzero",
+    "query": "theme=purple&state=execution-nonzero",
+    "steps": ""
+  },
+  {
+    "id": "execution-unknown",
+    "query": "theme=purple&state=execution-unknown",
+    "steps": ""
+  },
+  {
+    "id": "execution-token",
+    "query": "theme=purple&state=execution-token",
+    "steps": ""
+  },
+  {
+    "id": "execution-cleanup-failed",
+    "query": "theme=purple&state=cleanup",
+    "steps": ""
+  }
+]

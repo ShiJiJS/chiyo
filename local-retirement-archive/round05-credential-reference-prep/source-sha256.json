@@ -1,0 +1,19 @@
+{
+  "prototype": "C:\\Project\\network_config\\info-manage\\docs\\design\\prototypes\\round-05",
+  "skillTool": "C:/Users/Todoki/.agents/skills/oil-ui-pro/scripts/shoot.mjs",
+  "skillToolSha256": "1349cf6e3f5c54b3478884dff96a9b585c1825e9a0c63ae1777afcfa165116bf",
+  "files": {
+    "index.html": "42f700e02edd704470b9c13eae4be8fef69c8cb11e7239f2c05e72b1501a1380",
+    "prototype.css": "944c91c7f9588dad94a0662e4a9dac892eca3dce75d67af517839be9d33370d7",
+    "sections.css": "e97a2bc64f7ff62d3e2aa0f92be2108e3bc3b9c619cc499d07504783626880ad",
+    "credentials.css": "1b1a07a8ed5df3188dbf4a58671c42347713b8f4e284c4cd8f31b341ebfceee3",
+    "runtime.css": "3705b36e2ee4b7f826e6d6a438dd524e62042efda81aeef3acba92cb97c73d6c",
+    "lifecycle.css": "f5a306803c4367ae5c733fb942211a6f69138623670e35bf50f1564e5e1618dd",
+    "prototype.js": "5dd766626ae092936152fdbcdefc3ed4d0174f5dd310466fbcb29ba32f280292",
+    "sections.js": "b226bd0685d137fcabd09b644698f761817763d58fbf4d295656fd4c0053995f",
+    "credentials.js": "321e78e22be13f88f1a851d7d01daf96246c18cd1f2ea3956c15becee29af1a8",
+    "runtime.js": "f9715e1fcb6d56b0f835a36a105ee2347d7a9d27b40731a488c3419279ef885e",
+    "lifecycle.js": "ed0315316a539d7c8b4c76b1b4a2f94e5ae6d44e0ae54100928026720562abe5",
+    "fonts/NotoSansSC-Regular.otf": "faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9"
+  }
+}

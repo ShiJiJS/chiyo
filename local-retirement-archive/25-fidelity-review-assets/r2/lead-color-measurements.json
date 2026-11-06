@@ -1,0 +1,102 @@
+[
+  {
+    "case": "purple-1440-new.png",
+    "lead_655a62": 574,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-confirmed-new.png",
+    "lead_655a62": 574,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-confirmed.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-organization.png",
+    "lead_655a62": 349,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-diff.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-conflict.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-delete.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-organization-conflict.png",
+    "lead_655a62": 158,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-organization-noop.png",
+    "lead_655a62": 247,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1440-organization-revoked.png",
+    "lead_655a62": 158,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-new.png",
+    "lead_655a62": 574,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-confirmed-new.png",
+    "lead_655a62": 574,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-confirmed.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-organization.png",
+    "lead_655a62": 349,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-diff.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-conflict.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-delete.png",
+    "lead_655a62": 177,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-organization-conflict.png",
+    "lead_655a62": 158,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-organization-noop.png",
+    "lead_655a62": 247,
+    "lead_362e34": 0
+  },
+  {
+    "case": "purple-1280-organization-revoked.png",
+    "lead_655a62": 158,
+    "lead_362e34": 0
+  }
+]

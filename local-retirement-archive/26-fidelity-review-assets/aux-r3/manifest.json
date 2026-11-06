@@ -1,0 +1,110 @@
+{
+  "captured_at": "2026-10-17T07:36:15.104248+08:00",
+  "candidate": "308b08ccb9effdf078ceb3a5f3c0f15d71fe5149",
+  "files": [
+    {
+      "file": "actual\\settings-backups-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-backups-1280.png",
+      "source_mtime": "2026-10-17T07:33:53.196577+08:00",
+      "sha256": "59a1ceb9555f0b89f6a770c0115d7a7af592aa2c83a2e0673eadc161b7bf8952",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-backups-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-backups-1440.png",
+      "source_mtime": "2026-10-17T07:33:51.815226+08:00",
+      "sha256": "1363d7dcbbd8432faebeaae6075225d951238d2f15a4a73d303037701e388a1b",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-notifications-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-notifications-1280.png",
+      "source_mtime": "2026-10-17T07:33:52.749338+08:00",
+      "sha256": "1a2941b04dd6f967b99026386a199334bed6ce69ec3b4a6f9357b05dcd7a88e0",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-notifications-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-notifications-1440.png",
+      "source_mtime": "2026-10-17T07:33:51.277971+08:00",
+      "sha256": "3f8138b93e622bdc38a5bde63feb048e54e814b7493c09f40dc18a38a6f7474d",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-retention-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-retention-1280.png",
+      "source_mtime": "2026-10-17T07:33:53.007488+08:00",
+      "sha256": "1cdc867ce3eb3b36d16aae37c62960fc7d764645c41cfa31d2d164c08749ceb5",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-retention-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-retention-1440.png",
+      "source_mtime": "2026-10-17T07:33:51.603314+08:00",
+      "sha256": "a9919dde2bdf38f8d3387161fffc604bf98e76914aa3a1ddd4397f3c96127733",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "actual\\settings-template-dialog-1280.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-template-dialog-1280.png",
+      "source_mtime": "2026-10-17T07:33:52.608945+08:00",
+      "sha256": "0d489758d0dbcae55dd3dc30e58a33d3bb17556c040143cf1341b9bf338d5326",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "actual\\settings-template-dialog-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-history-settings\\docs\\development\\evidence\\26-history-settings\\aux-r3\\settings-template-dialog-1440.png",
+      "source_mtime": "2026-10-17T07:33:50.969820+08:00",
+      "sha256": "21c4e0d516a002082bd895eb6b422caa1461ca1e337cb1199d40d4f54c4b5d70",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "reference\\settings-template-dialog\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-template-dialog\\page-1440x900.png",
+      "sha256": "1060c9ca18d8da8f88b82c5594f0105be4eeb5d1c3671e5cf691d1b502a92376"
+    },
+    {
+      "file": "reference\\settings-template-dialog\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-template-dialog\\page-1280x800.png",
+      "sha256": "12d1b4101e3d670086339cfc7497d7e92bd0e1a384a20fd73d6ce54534eb5761"
+    },
+    {
+      "file": "reference\\settings-notifications\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-notifications\\page-1440x900.png",
+      "sha256": "c86f66a92bf7e1c78dcc5c6a2f1746e65c1c6a4b7f487b51c808a07aba32272d"
+    },
+    {
+      "file": "reference\\settings-notifications\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-notifications\\page-1280x800.png",
+      "sha256": "3e61aa8d27b8a8e6bd4dc36423ee329971e9e03818857978f927b38153e7a941"
+    },
+    {
+      "file": "reference\\settings-retention\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-retention\\page-1440x900.png",
+      "sha256": "5a03fc9e8ab99b19e118427d7a4eef96c67bacd11108291876e47075188bff68"
+    },
+    {
+      "file": "reference\\settings-retention\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-retention\\page-1280x800.png",
+      "sha256": "2a528df743c08011fab0b26b5f396ec0fef45735b3c1a95abd330217a776faf7"
+    },
+    {
+      "file": "reference\\settings-backups\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-backups\\page-1440x900.png",
+      "sha256": "0573daa9f9c7693551e9352f4821a36639db75698f2e5aa5c78328783df416d7"
+    },
+    {
+      "file": "reference\\settings-backups\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\26-fidelity-review-assets\\aux-r2\\reference\\settings-backups\\page-1280x800.png",
+      "sha256": "8d0aa1ae25a82039a36727418a96e463109449efc374cb2dd7e2ed519329f610"
+    }
+  ]
+}

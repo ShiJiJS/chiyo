@@ -1,0 +1,297 @@
+{
+  "reviewed_at_utc": "2026-10-16T23:43:11.026378+00:00",
+  "actual_count": 42,
+  "reference_count": 16,
+  "entries": [
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\blue-1440-discovery.png",
+      "sha256": "5c1ced6b01376f653632b3f8115f54d4544ab7447a5947c5bca286f34194ba89",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\blue-1440-expired.png",
+      "sha256": "fbfc5b290cf386194d27511f5f06af6ded0bead855d3be28b62311cfbcecd184",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\blue-1440-file.png",
+      "sha256": "35181c772f30e67d96be4b5e26a10c9cbca541138bff21a4e78ff09d950bd111",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\blue-1440-links.png",
+      "sha256": "a3fccd2caf0c35b040bd29ec3bba8356cfd356c9b1cc8143e636b16943d7f78c",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\blue-1440-rotate.png",
+      "sha256": "a6527679356887d6490932c665b34a7b1213d9a32aef2d8bc7c6c388cc551087",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\blue-1440-string.png",
+      "sha256": "ef11d1e87ddf9e9c3d102ea7370aa11920654f4b77a2a3fd1e94481695907c76",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\green-1440-discovery.png",
+      "sha256": "db083bfc90d1ea1575e011d0ae01fd4a015491561f013ba1792da8644205c4c7",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\green-1440-expired.png",
+      "sha256": "8f918b80eb671fffe8f3f57c25c68ca238faeb0907964b81596f2d3c95fabff9",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\green-1440-file.png",
+      "sha256": "b3c0e3f4f273826ae7a947afba658dd4f615334bd5ef3466a3caf98299efb73d",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\green-1440-links.png",
+      "sha256": "f1497556bef24342c97e6458ac556dcdea18142f72d713046e824c603137dca5",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\green-1440-rotate.png",
+      "sha256": "2046a71196e4c1b43c173ea1df1ca8b0ac031b66c06fd8cb3130049c4b9acac6",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\green-1440-string.png",
+      "sha256": "89c52bd00bf928f645a3ee16e3a905b609d2482186055cfcce7f361cc2a07ac5",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\mono-1440-discovery.png",
+      "sha256": "bd56c96bb776570f6bcb3a6ec5db405b01476521d72196ec640bbc88ebd481b9",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\mono-1440-expired.png",
+      "sha256": "ebe70905239d1a268eac6ed8b2340e6a3f8411ca188721cf5737d93055cb0b3b",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\mono-1440-file.png",
+      "sha256": "0e4d21677c47edcc4c95e20027e2e3167b450cc7adcc8bde0fba57bf179fbbb2",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\mono-1440-links.png",
+      "sha256": "346955748c0581e72dfe2dcc8786913b7e25b191044fc33be0c0748221a0fa60",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\mono-1440-rotate.png",
+      "sha256": "b7f49d39453ebe35a1c9bdfdf73cac6d64f41de091bd9fc4cf4bddb505b408ee",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\mono-1440-string.png",
+      "sha256": "dfda8f9aa2bcda90efd024e6bdfe49f5000a96db53c0ac8132e91839e51d0e54",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-add-file.png",
+      "sha256": "a8e109d4ac5ee1b81abce5069906712ccab1604fd8a5c24f0484bdd260074ec7",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-add-string.png",
+      "sha256": "6520b2d02c3c0c8487add2f094b72fc1b56e6be4fefafaa75bea02560fadd4ff",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-discovery.png",
+      "sha256": "dc95bc0633cd62cff14a32f186c7cc9e8b1f5bcff5df90b2b89bd67cbaa61029",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-expired.png",
+      "sha256": "6abe6d7b8e4ba2eabd051f942107c6a189a44c5ea641b9b89caf4411645a0f10",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-file.png",
+      "sha256": "06bacde3387ae09b5ee1935281fa06b6240feda1bcc6ede3aa00ca673fd65e10",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-links.png",
+      "sha256": "91d7a3b6a4308029adbb2207a8b9bd8eadcf59b63bb365c19122c1e438b14aa4",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-rotate.png",
+      "sha256": "a8f19adde2cd6a3f5c88a47b718b89604060936da416343b624741c4e1a099c6",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-save-failure.png",
+      "sha256": "aad66340b38c87dc8c416b222a8a99309f855568781a463862a95b773175ab7a",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-string.png",
+      "sha256": "4061d8403e0d093b65f4993c5f090bda8c7e30018b299981ad057c52018f878e",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1280-unsaved.png",
+      "sha256": "e37a8e1c319d541835f60ef11a37d7a1fbdeeb2020b91a8832e9bb89f0b9d3c1",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-add-file.png",
+      "sha256": "689a2bec54f3c978415b543d70b5cd7a5673042c41407a4889c35c3786a2b6a5",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-add-string.png",
+      "sha256": "7bae92cd8f2efda668b67b4c567d698fc2b7e274408291bcafb7a9b61cfeb35d",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-discovery.png",
+      "sha256": "d3031b9ed72034a16c2846134ddc5f53c5306db7f6f3ac7e749ff46bd4adaa5b",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-expired.png",
+      "sha256": "5b2efe8336b61541a298573a10b8bf681ca4126a638a490b2cce37a71c64463f",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-file.png",
+      "sha256": "e6da3d7744b67e9b48d82251ffe5f6a62eb648645834849929a929d63da596ed",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-links.png",
+      "sha256": "d1c4944ae829da9f0f509172c8d246b2473e31d6d8ba4b082014d43f662a89d2",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-rotate.png",
+      "sha256": "06df36019cb24f7ef2d7258d9b11c17eb3ba41ac4e4005bf7d5f81ede4a32dd5",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-save-failure.png",
+      "sha256": "bef3144574b968e8c54595e25c9c41d054b07ca27010c0168c88f65803b7632e",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-string.png",
+      "sha256": "cfe0740f6c058b5fb8853636451d31f29c53b6d1119a705f3e45439528808d99",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-1440-unsaved.png",
+      "sha256": "6f17a98700880d9fd3f974f0a4c2b890aac8585a0e169e1d413d580f61fc32ea",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-200-delete-action.png",
+      "sha256": "1a0dd59cee52dd794b403a8c6d02d71a20449cc67b9a11f0ab7313e3506502d9",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-200-file.png",
+      "sha256": "4944a460d3414487b2e81db7dda662a14c7cc2b4ea5882f2f7d2baf5e51f904d",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-200-rotate-action.png",
+      "sha256": "450b5b9e1c540d01aee143c4b1ad1969ea4b124765311bcea23303a1cc2252b0",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\actual\\purple-long-bottom.png",
+      "sha256": "9ea404798dbed0867cfbc8057a6b907328508376557172649a6125ddf1d8bdf7",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-file\\page-1440x900.png",
+      "sha256": "ade11a065bc593bc68de1fbbc15b34f84b17aa65fb96a3674c410d5a4d79e76b",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-file\\page-1280x800.png",
+      "sha256": "015a17b37cc6b382573d42d7a149045c5fd2dc40db7ad93ac3bf85dc68e5a830",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-string\\page-1440x900.png",
+      "sha256": "91670428df9ae5e8aed56bf62b5e418e88dd415153c7f2a257c590e53dfdf0c4",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-string\\page-1280x800.png",
+      "sha256": "e5a1208daf4d3661b170663e8db0e6c8397ef9132ae2bfc0a42f7e61900a98d5",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-expired\\page-1440x900.png",
+      "sha256": "0f15d05d980fab0cdf5cf6ce55855fd7ec132ab89eb5e48bd86f64eb873e8734",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-expired\\page-1280x800.png",
+      "sha256": "39e3af821161e39ce76afecbd1ab009362dda633978b12f6008ce31e51e3a4e6",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-rotate\\page-1440x900.png",
+      "sha256": "c0d71acb6f3fb6f37f3d33f02b45c2c580baf19d7497af5267c0513746a6da94",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-rotate\\page-1280x800.png",
+      "sha256": "ed2bd951393aab5c96aadee33658103ff9814900db55cfa9b91563cd8c534c30",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-discovery\\page-1440x900.png",
+      "sha256": "68280d2d19456b9c24c4c72d87a0ef8341c1386f600d3cb6228c676200766b62",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-discovery\\page-1280x800.png",
+      "sha256": "6e027d8a0867c6d9600ea98660b9c75767f1852dfba2067237151fdea4cc414e",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-links\\page-1440x900.png",
+      "sha256": "6b4cbf2582d209e054282dc40f29471bedcef90ffdfa156a0553a75305b93c17",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-links\\page-1280x800.png",
+      "sha256": "15d939a7e1aa1d0d2e68ef83ddd62ff895dab0df0c95a4a77eba96aaccdf14e7",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-add-file\\page-1440x900.png",
+      "sha256": "8d616c6e5013745188ba333781ff04ec09ec9e0b3a21c3fd91c55ad0283748f9",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-add-file\\page-1280x800.png",
+      "sha256": "86d21ff427afe621206f6259db4d0bfc40e2f36660cede1231d066e324f10f4a",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-add-string\\page-1440x900.png",
+      "sha256": "f36708f984214166f9a3b30983a3e819b3e709306e519333fe9772b8f385093c",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r2\\reference\\credential-add-string\\page-1280x800.png",
+      "sha256": "5c9c2aed64f674d8fd85f5e03b31cbc3ce57bc208026cf0aa09d0510e1e2a85b",
+      "method": "Native original or 1:1 focused crop; only directed issue/neighbourhood inspected"
+    }
+  ]
+}

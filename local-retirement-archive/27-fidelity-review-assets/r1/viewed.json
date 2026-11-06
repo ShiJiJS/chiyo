@@ -1,0 +1,481 @@
+{
+  "reviewed_at_utc": "2026-10-16T23:32:46.956971+00:00",
+  "actual_count": 61,
+  "reference_count": 18,
+  "entries": [
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-add-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-add-file.png",
+      "sha256": "0191e0157205e2a9a467dc50ad94781681d975737d8db5083aec0aa3da498ca3",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-add-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-add-string.png",
+      "sha256": "d9bd25eb849109f0eb30cb645c06f3ae39122fe49606936d504bd13e1d4a8023",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-discovery.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-discovery.png",
+      "sha256": "1dcdb22bdebec21906cf642d27dfac977d5a7a2fad9ff927f8f4d2ea130cde8f",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-empty.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-empty.png",
+      "sha256": "853305387e3151c5fdb58deb981746f545cee9bfcf1038518cf20ae7047a2582",
+      "review_method": "Original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-expired.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-expired.png",
+      "sha256": "7df4ef98b9e5d88d5d59d21ebe5f7a83fb6f1e4c73921657bda2cd0e81e6b031",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-file.png",
+      "sha256": "f1ec881d53e541b46574c491e86ef199ce91107727467ea698ef8278b6606501",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-links.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-links.png",
+      "sha256": "8f15504dfb46946f23c0623583960fa03adc1eb0ff99c2baefc5ed3ee6d7a9e1",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-rotate.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-rotate.png",
+      "sha256": "299543402b6d03b8d10471f9538f2f867eff0104a0c066c3eb8db8671c551e7a",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-server.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-server.png",
+      "sha256": "e2cf62f01e37604c817d6f93403779aef0caad57aacbb81f5cc74d4fff156736",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\blue-1440-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\blue-1440-string.png",
+      "sha256": "05c4ad22b9e6a297cf6f1c39a1e432fbe74fa592f3d310c87c6cf538eaed6082",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-add-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-add-file.png",
+      "sha256": "3963b412bf9a542d1900b9d21f67c81d7f66893c815be8bb435212bd7a359a16",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-add-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-add-string.png",
+      "sha256": "2fabde1cd9e18e0ada5fcdeb543ff255fa70f76be599d6593278f6e7df22d4ea",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-discovery.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-discovery.png",
+      "sha256": "700f89e1aaeb223c24b54a86230ebf22b657722152176eb00bc2ac2b53940843",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-empty.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-empty.png",
+      "sha256": "da56446cc7c9f721eb5a4e1f6624e6b3ccacde7d8006a641530e95defcbaaf5e",
+      "review_method": "Original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-expired.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-expired.png",
+      "sha256": "ee19e48db85a7bd212ddfe9d4599084c09efff472d4fd7c58040b6aa5f6a9e12",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-file.png",
+      "sha256": "37fdfda914a205a000d08690a63203c11cbca8b25d30bced81042168118cdb5c",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-links.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-links.png",
+      "sha256": "103aaeb28930122fe2e11133b0b12d5aa83dc94913dbee5a24fb7c54d8109eb0",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-rotate.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-rotate.png",
+      "sha256": "5b1e060c5af40ebbf213e1fee7533a12c1d33b96faa68d7a6f5cfb82a1a68bad",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-server.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-server.png",
+      "sha256": "d77bcbec7ac0f4df17597ebd46240ce1f1c05c667b5904ac114e63b72d583eee",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\green-1440-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\green-1440-string.png",
+      "sha256": "8ecc6cc263e432107f2fdac7e2f46fd0a69b957ed3b490072a2f7969765425a0",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-add-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-add-file.png",
+      "sha256": "5d920656e19df6cc77356fb63488fd33f84c2561158d1d61b5080f6c2cb664d2",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-add-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-add-string.png",
+      "sha256": "118dc894ae99e56730f0910f0a33a2fdadaaff59d92aa71fd349043b788c7153",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-discovery.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-discovery.png",
+      "sha256": "d6f30da1ed71d49f29159b1f267896abed60b7813a93728641c1ccaf3715123e",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-empty.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-empty.png",
+      "sha256": "2d793b6a3cf2c035fec9e01f110e37b269d05d300648d90c7cb9ed7c4cc07c0d",
+      "review_method": "Original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-expired.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-expired.png",
+      "sha256": "d5a882dd69a31de56d5d018f593b3910b3d6965bde116ddb226c2f908601c248",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-file.png",
+      "sha256": "acde353f0b17b0b665c52180c21a1efbc0bbd1b9ce2c827ff839167a81b71364",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-links.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-links.png",
+      "sha256": "7be51e04fe492dc2ea7c8f5a4ad701bc41dc6e7228de15871ec131457e147e18",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-rotate.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-rotate.png",
+      "sha256": "77a0cc3a29404bd6d29469ae2b26b43eca5d85f4fcc336d1566a1baa12df100a",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-server.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-server.png",
+      "sha256": "5fec630192fffe28e1bbb5bc514bb96b10d61bf3a75ae82ee70d8fe2866fd33e",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\mono-1440-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\mono-1440-string.png",
+      "sha256": "3b11147def9dc07f978c9d9a5d2279adb3d7b93a13ac3e052bb7e319b22b5573",
+      "review_method": "Native 1:1 regional collage; file also left navigation/list crop. Some presentation previews auto-fit by viewer; source and derivatives retain original pixels."
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-add-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-add-file.png",
+      "sha256": "3a9782d2b4b9406ab02da7557af9592e1ee70c253fe1b0e1951073b418784188",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-add-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-add-string.png",
+      "sha256": "95b0e5b8560c5863f795740491e834de37bf91e36f8006e1424a264608d95d57",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-discovery.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-discovery.png",
+      "sha256": "c5d7da0415245d5aac93a9601e52f695ee67fcd1a861b7d7874439cfb6b3a96c",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-empty.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-empty.png",
+      "sha256": "885aaa09874d1c4153032f1f4a001fa701638d0410b7f894068bd626d7f0e57d",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-expired.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-expired.png",
+      "sha256": "7f4d65ca7f3fdc3c39490e2f13f6b971441ac0565a80b8bc7c159d5806882a07",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-file.png",
+      "sha256": "1dc14d4caf795614ca531a1c8e6767dd7b09d206f7f8ff983a74c627143d559a",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-links.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-links.png",
+      "sha256": "95cd5c3c126c46604588c638354f82f773c65cbe2b88c35fa4659c873dd49491",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-rotate.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-rotate.png",
+      "sha256": "da97230be30e3c57a9c6baa8a0e42727522fc2ed7b65bd3f1d413f0fa01e5246",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-save-failure.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-save-failure.png",
+      "sha256": "327e711c6e0440282ac623c9880f7ace14b6c33d518fe0261a473516b1877521",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-server.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-server.png",
+      "sha256": "83a19d17b50739c58cbc04ec9ed8a45bdc1d4b6f389f3e6080eb3e97aa4a9fbc",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-string.png",
+      "sha256": "8b37c229ff38153f587745b912681076fa5cd5c7111e47b6202fee5bc7a1f62e",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1280-unsaved.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1280-unsaved.png",
+      "sha256": "6c5ab0e64f5a2a17d3ea53fcf1768cc206a452a7632e609e7efb4207b4862b1f",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-add-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-add-file.png",
+      "sha256": "96e23b704a339997a475e973c131edb4cbc470294f3bfb56a7079e9f512ad570",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-add-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-add-string.png",
+      "sha256": "ac67420d29ef227b71959da7472702952265fd17716a5d3018a3178864b91ae7",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-discovery.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-discovery.png",
+      "sha256": "b4570f19d58d11544c89a9f4debc3336c36fedd14fcf7901e0ebf4b4d337bd68",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-empty.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-empty.png",
+      "sha256": "3253b3aa5f053a249950b7d28a4f8baec1bf77fdcd1f537eccb38c9c93e33ad0",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-expired.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-expired.png",
+      "sha256": "9780acde314bcc3e1fd318860f0e67c433e4dc89ffbae9fe78fd1203849ef37c",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-file.png",
+      "sha256": "ce3d3fb9ffceecff8d5dff5b749327bc10f7d8178207b14afa4f036ab5e9a71d",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-links.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-links.png",
+      "sha256": "222cea962036bbe30e91ac9cf30921d49daf932dbfd2d1155ec38d93bac4a966",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-rotate.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-rotate.png",
+      "sha256": "9039160094d2e4833a989497098e95aa8ee2ff502a70b1f59004627f4b7e595b",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-save-failure.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-save-failure.png",
+      "sha256": "6f1ee0f7ae17d126f7bf81a87403d2d6cc5ec7c2436e16412619420884250ad0",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-server.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-server.png",
+      "sha256": "26badca765c2d068f59aea74499d8e42d4bac9cd17ff970f7b3d0338b2dc8c8f",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-string.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-string.png",
+      "sha256": "fb6c265d29aba1af90febb1f0507671812cc6ed16389e4e1ca9b9c5f5dafcd65",
+      "review_method": "Native 1:1 detail/modal crop and original full-scene pair overview"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-1440-unsaved.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-1440-unsaved.png",
+      "sha256": "fbb709c5c3b646950c1b4452f78753e4c3e261e12e68a9240bba2b706f9a88ae",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-long-bottom.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-long-bottom.png",
+      "sha256": "db191cac36b4bb3cd446fe0ef365f12d8f5356f60d81285b37fa6f40a4282950",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r4\\purple-long-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r4\\purple-long-file.png",
+      "sha256": "6eb7c3751c087747ae6ebff351339d787b94be0b341c9890cfd9779d97faec04",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r6\\purple-200-bottom.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r6\\purple-200-bottom.png",
+      "sha256": "b6cc61a8438a663eb7d8127a580041656e25dd3002f084857561bc565e895dc5",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r6\\purple-200-delete-action.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r6\\purple-200-delete-action.png",
+      "sha256": "acdc4a6220af5137fb345c7320b5d7bb45866b1adcf2498e062ee7fd8d57acbd",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r6\\purple-200-file.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r6\\purple-200-file.png",
+      "sha256": "38c0b34c7a2e634a653591ddec05acbc2acd6154970cf40217e12992d3ddb823",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r6\\purple-200-rotate-action.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r6\\purple-200-rotate-action.png",
+      "sha256": "3dbfede0fe701cadd6573084f3e4f89d1a3d9df1e4ad88ed8262b6be0ff8fa5e",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\actual\\r6\\purple-200-toolbar-end.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\27-credentials\\docs\\development\\evidence\\27-credentials\\r6\\purple-200-toolbar-end.png",
+      "sha256": "77086747351b0eba64d68a3f1c020473313032bd7b862d0e75835da153e70e17",
+      "review_method": "Native 1:1 original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-file\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-file\\page-1280x800.png",
+      "sha256": "015a17b37cc6b382573d42d7a149045c5fd2dc40db7ad93ac3bf85dc68e5a830",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-file\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-file\\page-1440x900.png",
+      "sha256": "ade11a065bc593bc68de1fbbc15b34f84b17aa65fb96a3674c410d5a4d79e76b",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-string\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-add-string\\page-1280x800.png",
+      "sha256": "5c9c2aed64f674d8fd85f5e03b31cbc3ce57bc208026cf0aa09d0510e1e2a85b",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-string\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-add-string\\page-1440x900.png",
+      "sha256": "f36708f984214166f9a3b30983a3e819b3e709306e519333fe9772b8f385093c",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-file\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-add-file\\page-1280x800.png",
+      "sha256": "86d21ff427afe621206f6259db4d0bfc40e2f36660cede1231d066e324f10f4a",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-add-file\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-add-file\\page-1440x900.png",
+      "sha256": "8d616c6e5013745188ba333781ff04ec09ec9e0b3a21c3fd91c55ad0283748f9",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-string\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-string\\page-1280x800.png",
+      "sha256": "e5a1208daf4d3661b170663e8db0e6c8397ef9132ae2bfc0a42f7e61900a98d5",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-string\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-string\\page-1440x900.png",
+      "sha256": "91670428df9ae5e8aed56bf62b5e418e88dd415153c7f2a257c590e53dfdf0c4",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-expired\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-expired\\page-1280x800.png",
+      "sha256": "39e3af821161e39ce76afecbd1ab009362dda633978b12f6008ce31e51e3a4e6",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-expired\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-expired\\page-1440x900.png",
+      "sha256": "0f15d05d980fab0cdf5cf6ce55855fd7ec132ab89eb5e48bd86f64eb873e8734",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-rotate\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-rotate\\page-1280x800.png",
+      "sha256": "ed2bd951393aab5c96aadee33658103ff9814900db55cfa9b91563cd8c534c30",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-rotate\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-rotate\\page-1440x900.png",
+      "sha256": "c0d71acb6f3fb6f37f3d33f02b45c2c580baf19d7497af5267c0513746a6da94",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-discovery\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-discovery\\page-1280x800.png",
+      "sha256": "6e027d8a0867c6d9600ea98660b9c75767f1852dfba2067237151fdea4cc414e",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-discovery\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-discovery\\page-1440x900.png",
+      "sha256": "68280d2d19456b9c24c4c72d87a0ef8341c1386f600d3cb6228c676200766b62",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-links\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-links\\page-1280x800.png",
+      "sha256": "15d939a7e1aa1d0d2e68ef83ddd62ff895dab0df0c95a4a77eba96aaccdf14e7",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\credential-links\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\credential-links\\page-1440x900.png",
+      "sha256": "6b4cbf2582d209e054282dc40f29471bedcef90ffdfa156a0553a75305b93c17",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\server-linked\\page-1280x800.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\server-linked\\page-1280x800.png",
+      "sha256": "bd484c9826b69a81b9b6b5a158c76481abce4bc63a55762ec350361b44a26153",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    },
+    {
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r1\\reference\\server-linked\\page-1440x900.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-credential-reference-prep\\cases\\server-linked\\page-1440x900.png",
+      "sha256": "a46cc2858c14e6686607071dc59154980f4c376ac6c5f062830aba78d060fe22",
+      "review_method": "Native 1:1 detail/modal crop, with full-scene pair overview; credential-file 1440 and server-linked both viewports also original full image"
+    }
+  ]
+}

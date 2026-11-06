@@ -1,0 +1,25 @@
+{
+  "captured_at": "2026-10-17T06:10:59.808870+08:00",
+  "items": [
+    {
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round3-recovery\\purple-1440-revision-confirm.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r3-recovery\\purple-1440-revision-confirm.png",
+      "sha256": "10fafdc190fcd390cebce1ad4d60aeab6f278ff0ddc44ad55af349559963b8b0",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:32:11.532067"
+    },
+    {
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round3-recovery\\purple-1440-revision-failure.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r3-recovery\\purple-1440-revision-failure.png",
+      "sha256": "77480f61bceffb39bb463a8d3e8807747a1b082b1a826c9469e5d7d60d110c2f",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:32:11.760765"
+    }
+  ]
+}

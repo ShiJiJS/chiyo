@@ -1,0 +1,86 @@
+{
+  "captured_at": "2026-10-17T06:23:32.675477+08:00",
+  "scope": "24 r4 targeted screenshots only; no product source read",
+  "files": [
+    {
+      "file": "purple-1280-taxonomy.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round4\\purple-1280-taxonomy.png",
+      "source_mtime": "2026-10-17T06:21:37.687405+08:00",
+      "sha256": "88fcd4cb87aa9d0f1780f15742f32bb822576a301f55bb7750f10a0ad594a4a9",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "purple-long-last.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round4\\purple-long-last.png",
+      "source_mtime": "2026-10-17T06:21:42.032100+08:00",
+      "sha256": "0c739ffbe0c09c33912766b9c4fdab34e76dd5c3d06f40d81ead347dd14613ef",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "purple-long-bottom.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round4\\purple-long-bottom.png",
+      "source_mtime": "2026-10-17T06:21:42.114224+08:00",
+      "sha256": "8de95a3946322adfd863f7ed1e3a88d66ff728233426d94e8844dbe2717ad455",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "purple-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round4\\purple-1440.png",
+      "source_mtime": "2026-10-17T06:21:32.212511+08:00",
+      "sha256": "06159a1fabcb1bd9071e9f2f9c3df1e183df4e784f4bff40704412bfb3e3a627",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "purple-1440-revision-confirm.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round4\\purple-1440-revision-confirm.png",
+      "source_mtime": "2026-10-17T06:21:35.327004+08:00",
+      "sha256": "2a64669a70603abe097ae0d3032354180b89e85bee6f64218dd647f695757c7d",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "purple-1440-revision-failure.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round4\\purple-1440-revision-failure.png",
+      "source_mtime": "2026-10-17T06:21:35.593774+08:00",
+      "sha256": "2c08fe3fc18b13cb318cb60e0e8babc92074bedee5ef59e57e880052d30227b4",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "prior-r3-purple-long-last.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round3\\purple-long-last.png",
+      "source_mtime": "2026-10-17T06:15:49.220243+08:00",
+      "sha256": "e648c5be6734f9adafd629b120ed693581e913ac501cd99054b883b2c4ee6cc5",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "taxonomy-1280-reference.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r3\\taxonomy-1280-reference.png",
+      "source_mtime": "2026-10-17T06:17:10.083687+08:00",
+      "sha256": "4ba6655b4313f811392b4d4167ff623d07e312465e1b00a218c74cf389b1925d",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "prior-r3-purple-1440.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r3\\purple-1440.png",
+      "source_mtime": "2026-10-17T06:17:10.026685+08:00",
+      "sha256": "06159a1fabcb1bd9071e9f2f9c3df1e183df4e784f4bff40704412bfb3e3a627",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "prior-r3-purple-1440-revision-failure.png",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r3\\purple-1440-revision-failure.png",
+      "source_mtime": "2026-10-17T06:17:10.064879+08:00",
+      "sha256": "2c08fe3fc18b13cb318cb60e0e8babc92074bedee5ef59e57e880052d30227b4",
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

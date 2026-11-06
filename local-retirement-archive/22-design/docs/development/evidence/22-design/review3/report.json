@@ -1,0 +1,39 @@
+[
+  {
+    "file": "proposal-edit.png",
+    "state": "proposal-edit",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "scope.png",
+    "state": "scope",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "execution-start_failed.png",
+    "state": "execution-start_failed",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": [
+      {
+        "rule": "longMeasure",
+        "label": "正文行太长",
+        "count": 2,
+        "examples": [
+          "p.flow-result「本次启动尝试已消耗，程序未启动。修正原因后，需由」（每行约 71 字）",
+          "div.command-preview「ssh -T -o BatchMode=yes 」（每行约 153 个字符）"
+        ]
+      }
+    ]
+  }
+]

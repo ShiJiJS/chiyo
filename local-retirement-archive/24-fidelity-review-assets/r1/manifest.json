@@ -1,0 +1,101 @@
+{
+  "captured_at": "2026-10-17T03:10:21.760112+08:00",
+  "items": [
+    {
+      "case": "default-1440",
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage\\docs\\design\\prototype-reference\\library-default-purple-1440.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\default-1440-reference.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T02:12:39.871885",
+      "sha256": "4297beaf6b37b7d63dee7a25634b87824bde3f4228c14b393f341de299af1e5d"
+    },
+    {
+      "case": "default-1440",
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round1\\purple-1440.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\default-1440-actual.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:05:46.815924",
+      "sha256": "49a0a2fbd309794da5dcd050dd08a8fae45466ae11fa515d09ec48e28a6c137e"
+    },
+    {
+      "case": "default-1280",
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage\\docs\\design\\prototype-reference\\library-default-purple-1280.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\default-1280-reference.png",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T02:12:40.408123",
+      "sha256": "c13751ab16c722295fbfb91d8e25cc7c313499904188ea4b22b9269736e90a14"
+    },
+    {
+      "case": "default-1280",
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round1\\purple-1280.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\default-1280-actual.png",
+      "size": [
+        1280,
+        800
+      ],
+      "source_modified": "2026-10-17T03:02:42.049875",
+      "sha256": "3988dc17387a6e06b34bc0727eb8e0994a9426cc089aba73684e2f25167ff7f1"
+    },
+    {
+      "case": "editor-1440",
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-page-reference-prep\\cases\\library-editor\\page-1440x900.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\editor-1440-reference.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T02:12:42.420814",
+      "sha256": "2f8c94a0c14312734c0d0ea93b2eb9ddbe0df37affac8124dcaadcb80d296532"
+    },
+    {
+      "case": "editor-1440",
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round1\\purple-1440-editor.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\editor-1440-actual.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:05:47.085802",
+      "sha256": "ddd9ba10bcf05705bb095eeb526e1fb241fc3ab96580ab84be6e8515e4947268"
+    },
+    {
+      "case": "taxonomy-1440",
+      "kind": "reference",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\round05-page-reference-prep\\cases\\library-taxonomy\\page-1440x900.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\taxonomy-1440-reference.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T02:12:45.068071",
+      "sha256": "fc03e4fe288b083c2935c52fc407a2c2100494b16b51c85313af4df5edf5bb20"
+    },
+    {
+      "case": "taxonomy-1440",
+      "kind": "actual",
+      "source": "C:\\Project\\network_config\\info-manage-worktrees\\24-library\\docs\\development\\evidence\\24-library\\review-round1\\purple-1440-taxonomy.png",
+      "snapshot": "C:\\Project\\network_config\\info-manage-worktrees\\24-fidelity-review-assets\\r1\\taxonomy-1440-actual.png",
+      "size": [
+        1440,
+        900
+      ],
+      "source_modified": "2026-10-17T03:05:47.628572",
+      "sha256": "c78f868ee189d74492373fd32feb03fb615d12da9e131ac25e2921b05d50a930"
+    }
+  ]
+}

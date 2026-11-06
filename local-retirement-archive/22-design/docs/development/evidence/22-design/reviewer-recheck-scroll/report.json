@@ -1,0 +1,38 @@
+[
+  {
+    "file": "scope-1440x900.png",
+    "state": "scope",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "proposal-edit-1440x900.png",
+    "state": "proposal-edit",
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "scope-1280x720.png",
+    "state": "scope",
+    "size": "1280x720",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  },
+  {
+    "file": "proposal-edit-1280x720.png",
+    "state": "proposal-edit",
+    "size": "1280x720",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

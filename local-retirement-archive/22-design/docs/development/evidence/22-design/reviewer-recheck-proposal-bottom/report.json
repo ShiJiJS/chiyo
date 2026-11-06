@@ -1,0 +1,22 @@
+[
+  {
+    "file": "page-1440x900.png",
+    "state": null,
+    "size": "1440x900",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [
+      "第 1 步「click [aria-label=\"字段名称 2\"]」：中心点被 div.modal-actions:nth-of-type(2) 挡住，动作仍照常执行"
+    ],
+    "lint": []
+  },
+  {
+    "file": "page-1280x720.png",
+    "state": null,
+    "size": "1280x720",
+    "zoom": 1,
+    "animationWaitMs": 0,
+    "issues": [],
+    "lint": []
+  }
+]

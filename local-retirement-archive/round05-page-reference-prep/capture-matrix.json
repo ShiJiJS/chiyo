@@ -1,0 +1,117 @@
+[
+  {
+    "id": "library-default",
+    "query": "theme=purple&page=library",
+    "steps": ""
+  },
+  {
+    "id": "library-editor",
+    "query": "theme=purple&page=library&state=edit",
+    "steps": ""
+  },
+  {
+    "id": "library-taxonomy",
+    "query": "theme=purple&page=library&state=taxonomy",
+    "steps": ""
+  },
+  {
+    "id": "library-no-results",
+    "query": "theme=purple&page=library&state=no-results",
+    "steps": ""
+  },
+  {
+    "id": "proposal-new",
+    "query": "theme=purple&page=proposals",
+    "steps": ""
+  },
+  {
+    "id": "proposal-diff",
+    "query": "theme=purple&page=proposals&state=diff",
+    "steps": ""
+  },
+  {
+    "id": "proposal-conflict",
+    "query": "theme=purple&page=proposals&state=conflict",
+    "steps": ""
+  },
+  {
+    "id": "proposal-editor",
+    "query": "theme=purple&page=proposals&state=proposal-edit",
+    "steps": ""
+  },
+  {
+    "id": "proposal-confirm",
+    "query": "theme=purple&page=proposals",
+    "steps": "click .document-actions .primary"
+  },
+  {
+    "id": "history-scope",
+    "query": "theme=purple&page=history",
+    "steps": ""
+  },
+  {
+    "id": "history-access",
+    "query": "theme=purple&page=history&state=access",
+    "steps": ""
+  },
+  {
+    "id": "history-ended",
+    "query": "theme=purple&page=history&grant=AUTH-018",
+    "steps": ""
+  },
+  {
+    "id": "history-revoke",
+    "query": "theme=purple&page=history",
+    "steps": "click .document-actions .secondary"
+  },
+  {
+    "id": "settings-appearance",
+    "query": "theme=purple&page=settings",
+    "steps": ""
+  },
+  {
+    "id": "settings-notifications",
+    "query": "theme=purple&page=settings&section=notifications",
+    "steps": ""
+  },
+  {
+    "id": "settings-records",
+    "query": "theme=purple&page=settings&section=records",
+    "steps": ""
+  },
+  {
+    "id": "settings-retention",
+    "query": "theme=purple&page=settings&section=records",
+    "steps": "select select[aria-label=\"记录保留期限\"] 30"
+  },
+  {
+    "id": "settings-templates",
+    "query": "theme=purple&page=settings&section=templates",
+    "steps": ""
+  },
+  {
+    "id": "settings-template-dialog",
+    "query": "theme=purple&page=settings&section=templates",
+    "steps": "click .inline-actions .secondary"
+  },
+  {
+    "id": "settings-backups",
+    "query": "theme=purple&page=settings&section=backups",
+    "steps": ""
+  },
+  {
+    "id": "settings-backup-flow",
+    "query": "theme=purple&page=settings&section=backups&state=backup-enable",
+    "steps": ""
+  },
+  {
+    "id": "settings-restore-preview",
+    "query": "theme=purple&page=settings&state=restore-preview",
+    "steps": ""
+  },
+  {
+    "id": "settings-application",
+    "query": "theme=purple&page=settings&section=application",
+    "steps": ""
+  }
+]

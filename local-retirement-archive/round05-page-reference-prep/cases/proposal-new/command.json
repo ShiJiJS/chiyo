@@ -1,0 +1,13 @@
+{
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "C:\\Project\\network_config\\info-manage-worktrees\\round05-page-reference-prep\\shoot-measured.mjs",
+    "http://127.0.0.1:8797/index.html",
+    "--query",
+    "theme=purple&page=proposals",
+    "--size",
+    "1440x900,1280x800",
+    "--out",
+    "C:\\Project\\network_config\\info-manage-worktrees\\round05-page-reference-prep\\cases\\proposal-new"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "candidate": "a12e668",
+  "integrated_root": "71e013d",
+  "archived_at_utc": "2026-10-16T23:53:13.851007+00:00",
+  "provided_baseCommit": "451a29b4b4339ffc11ac47a796ae4e6d2355e3b8",
+  "source_manifest": "source-manifest.json",
+  "all_png_hashes_verified": true,
+  "references_unchanged_from_r2": true,
+  "entries": [
+    {
+      "kind": "actual",
+      "source": "C:/Project/network_config/info-manage-worktrees/27-credentials/docs/development/evidence/27-credentials/r8/mono-1280-links.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\mono-1280-links.png",
+      "source_modified_utc": "2026-10-16T23:45:31.225Z",
+      "bytes": 132469,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b9c533e8b1373c86c20b88debc0a7d0f755ba1d5bd152f7c6d8439ef47c6c51d",
+      "provided_manifest_verified": true
+    },
+    {
+      "kind": "actual",
+      "source": "C:/Project/network_config/info-manage-worktrees/27-credentials/docs/development/evidence/27-credentials/r8/mono-1440-links.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\mono-1440-links.png",
+      "source_modified_utc": "2026-10-16T23:45:30.805Z",
+      "bytes": 145938,
+      "width": 1440,
+      "height": 900,
+      "sha256": "5368bfb3c299c75dace969ab5b753f1be6cc8f92215a7d513e5b4d7a19ca46f8",
+      "provided_manifest_verified": true
+    },
+    {
+      "kind": "actual",
+      "source": "C:/Project/network_config/info-manage-worktrees/27-credentials/docs/development/evidence/27-credentials/r8/purple-1280-links.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\purple-1280-links.png",
+      "source_modified_utc": "2026-10-16T23:45:30.346Z",
+      "bytes": 135949,
+      "width": 1280,
+      "height": 800,
+      "sha256": "994da182f58f807fb344dcac84e63fc741055b2962fa3521408760e5b935ea0f",
+      "provided_manifest_verified": true
+    },
+    {
+      "kind": "actual",
+      "source": "C:/Project/network_config/info-manage-worktrees/27-credentials/docs/development/evidence/27-credentials/r8/purple-1440-links.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\actual\\purple-1440-links.png",
+      "source_modified_utc": "2026-10-16T23:45:29.863Z",
+      "bytes": 151318,
+      "width": 1440,
+      "height": 900,
+      "sha256": "5d8373a73da795257da4adcb496e42005aaa9eae674c06fe654ff604b28a1a3e",
+      "provided_manifest_verified": true
+    },
+    {
+      "kind": "reference",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-credential-reference-prep/cases/credential-links/page-1440x900.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\reference\\credential-links\\page-1440x900.png",
+      "source_modified_utc": "2026-10-16T19:13:01.693Z",
+      "bytes": 199958,
+      "width": 1440,
+      "height": 900,
+      "sha256": "6b4cbf2582d209e054282dc40f29471bedcef90ffdfa156a0553a75305b93c17",
+      "provided_manifest_verified": true
+    },
+    {
+      "kind": "reference",
+      "source": "C:/Project/network_config/info-manage-worktrees/round05-credential-reference-prep/cases/credential-links/page-1280x800.png",
+      "archive": "C:\\Project\\network_config\\info-manage-worktrees\\27-fidelity-review-assets\\r3\\reference\\credential-links\\page-1280x800.png",
+      "source_modified_utc": "2026-10-16T19:13:02.552Z",
+      "bytes": 154045,
+      "width": 1280,
+      "height": 800,
+      "sha256": "15d939a7e1aa1d0d2e68ef83ddd62ff895dab0df0c95a4a77eba96aaccdf14e7",
+      "provided_manifest_verified": true
+    }
+  ]
+}

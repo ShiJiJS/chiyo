@@ -1,0 +1,156 @@
+{
+  "1440-reference-retention": {
+    "title": [
+      508,
+      439,
+      693,
+      450
+    ],
+    "body": [
+      509,
+      468,
+      792,
+      481
+    ]
+  },
+  "1440-reference-remove": {
+    "edge_bbox": [
+      965,
+      398,
+      978,
+      410
+    ]
+  },
+  "1440-reference-notice": {
+    "lines": [
+      442,
+      467,
+      498,
+      583
+    ]
+  },
+  "1440-reference-backups": {
+    "lines": [
+      419,
+      607,
+      630,
+      715
+    ]
+  },
+  "1440-actual-retention": {
+    "title": [
+      508,
+      439,
+      901,
+      450
+    ],
+    "body": [
+      509,
+      468,
+      792,
+      480
+    ]
+  },
+  "1440-actual-remove": {
+    "edge_bbox": [
+      965,
+      398,
+      977,
+      410
+    ]
+  },
+  "1440-actual-notice": {
+    "lines": [
+      442,
+      540,
+      565,
+      596,
+      681
+    ]
+  },
+  "1440-actual-backups": {
+    "lines": [
+      419,
+      607,
+      630,
+      715
+    ]
+  },
+  "1280-reference-retention": {
+    "title": [
+      428,
+      389,
+      613,
+      400
+    ],
+    "body": [
+      429,
+      418,
+      712,
+      431
+    ]
+  },
+  "1280-reference-remove": {
+    "edge_bbox": [
+      885,
+      348,
+      898,
+      360
+    ]
+  },
+  "1280-reference-notice": {
+    "lines": [
+      442,
+      467,
+      498,
+      583
+    ]
+  },
+  "1280-reference-backups": {
+    "lines": [
+      419,
+      607,
+      630,
+      715
+    ]
+  },
+  "1280-actual-retention": {
+    "title": [
+      428,
+      389,
+      821,
+      400
+    ],
+    "body": [
+      429,
+      418,
+      712,
+      430
+    ]
+  },
+  "1280-actual-remove": {
+    "edge_bbox": [
+      885,
+      348,
+      897,
+      360
+    ]
+  },
+  "1280-actual-notice": {
+    "lines": [
+      442,
+      540,
+      565,
+      596,
+      681
+    ]
+  },
+  "1280-actual-backups": {
+    "lines": [
+      419,
+      607,
+      630,
+      715
+    ]
+  }
+}
