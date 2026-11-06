@@ -44,6 +44,7 @@ part 'import_access.dart';
 part 'information_import_file_access.dart';
 part 'update_access.dart';
 part 'recycle_access.dart';
+part 'library_recycle.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
 part 'workspace_access.dart';
