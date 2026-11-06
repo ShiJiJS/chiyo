@@ -57,6 +57,28 @@ void main() {
         return jsonDecode(output.current) as Map<String, dynamic>;
       }
 
+      final empty = await service.owner.createDirectory(
+        'Empty child',
+        parentId: directory.id,
+      );
+      final directories = await command({'command': 'directory-list'});
+      expect(directories['status'], 'ok');
+      expect(directories['complete'], true);
+      expect(directories['total'], 2);
+      expect((directories['directories'] as List).last['pathIds'], [
+        directory.id,
+        empty.id,
+      ]);
+      expect(jsonEncode(directories), isNot(contains('PRIVATE-CLI-MARKER')));
+      expect(
+        (await command({'command': 'directory-list', 'limit': 1}))['status'],
+        'invalid_request',
+      );
+      expect(
+        (await command({'command': 'capabilities'}))['capabilities'],
+        contains('information-directory-discovery.v1'),
+      );
+
       final page = await command({
         'command': 'catalog',
         'query': 'network',

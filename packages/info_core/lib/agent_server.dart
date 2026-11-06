@@ -150,6 +150,7 @@ class AgentServer {
               runtime ||
               informationFile ||
               request.uri.path == '/catalog' ||
+              request.uri.path == '/directories/catalog' ||
               request.uri.path == '/request' ||
               request.uri.path == '/request/status' ||
               request.uri.path == '/import/submit' ||
@@ -258,6 +259,7 @@ class AgentServer {
             if (_agent.credentialImportAvailable) 'credential-import.v1',
             'information-import-operations.v1',
             'information-update-operations.v1',
+            'information-directory-discovery.v1',
             if (_agent.informationImportFilesAvailable)
               'information-file-upload.v1',
             if (_agent.informationImportFilesAvailable)
@@ -265,6 +267,12 @@ class AgentServer {
           ],
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
+          'directoryDiscovery': {
+            'command': 'directory-list',
+            'example': {'command': 'directory-list'},
+            'description':
+                'Returns all current directories, including empty ones, with complete paths and sibling order. Query before proposing a location; reuse existing IDs. Discovery does not permit writes or reveal record contents.',
+          },
         };
       case '/import-file/submit':
         if (body.keys.any(
@@ -703,6 +711,15 @@ class AgentServer {
           _text(body, 'sessionSecret'),
           _text(body, 'taskId'),
         );
+      case '/directories/catalog':
+        if (body.isNotEmpty) throw const AccessFailure('invalid_request');
+        final directories = _agent.catalogDirectories();
+        return {
+          'status': 'ok',
+          'directories': directories,
+          'total': directories.length,
+          'complete': true,
+        };
       case '/catalog':
         final query = body['query'] ?? '';
         final typeId = body['typeId'];

@@ -1,5 +1,53 @@
 part of 'info_core.dart';
 
+extension AgentDirectoryDiscovery on AgentAccess {
+  /// Complete current directory metadata, including empty directories. This
+  /// discovery grants no organization writes or access to information values.
+  List<Map<String, Object?>> catalogDirectories() {
+    if (_service._closed || _service._backupBusy) {
+      throw const AccessFailure('service_unavailable');
+    }
+    final directories = List<InformationDirectory>.of(
+      _service._repository.directories,
+    );
+    final byId = {for (final d in directories) d.id: d};
+    final orders = <String?, int>{};
+    return [
+      for (final directory in directories)
+        (() {
+          final chain = <InformationDirectory>[];
+          final visited = <String>{};
+          InformationDirectory? current = directory;
+          while (current != null) {
+            if (!visited.add(current.id)) {
+              throw const AccessFailure('invalid_directory_tree');
+            }
+            chain.insert(0, current);
+            final parent = current.parentId;
+            current = parent == null ? null : byId[parent];
+            if (parent != null && current == null) {
+              throw const AccessFailure('invalid_directory_tree');
+            }
+          }
+          final order = orders.update(
+            directory.parentId,
+            (n) => n + 1,
+            ifAbsent: () => 0,
+          );
+          return <String, Object?>{
+            'id': directory.id,
+            'name': directory.name,
+            'parentId': directory.parentId,
+            'version': directory.version,
+            'order': order,
+            'path': chain.map((d) => d.name).join('/'),
+            'pathIds': chain.map((d) => d.id).toList(),
+          };
+        })(),
+    ];
+  }
+}
+
 /// Builds labels without publishing them until the surrounding batch commits.
 class _OrganizationPlan {
   _OrganizationPlan(this.owner);

@@ -1,4 +1,4 @@
-/// Owner-only organization labels. These are not public catalog descriptions.
+/// Organization metadata discoverable by agents; edits remain owner-approved.
 class InformationDirectory {
   const InformationDirectory(this.id, this.name, this.parentId, this.version);
   final String id, name;
