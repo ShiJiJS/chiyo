@@ -287,6 +287,7 @@ class WorkspaceProposalDetail {
     this.currentTargetRef,
     this.currentAvailable = false,
     this.organization,
+    this.directoryFingerprint = '',
   }) : items = List.unmodifiable(items),
        targets = List.unmodifiable(targets);
   final WorkspaceProposalSummary summary;
@@ -297,6 +298,7 @@ class WorkspaceProposalDetail {
   final WorkspaceRecordRef? currentTargetRef;
   final bool currentAvailable;
   final WorkspaceOrganizationReport? organization;
+  final String directoryFingerprint;
   late final String snapshotDigest = _snapshotDigest();
   String snapshotDigestAtVersion(int version) =>
       _snapshotDigest(version: version, passwordFill: true);
@@ -348,6 +350,8 @@ class WorkspaceProposalDetail {
                 'agent': summary.agentClaim,
                 'chat': summary.chatClaim,
                 'organization': organization?.toJson(),
+                if (directoryFingerprint.isNotEmpty)
+                  'directories': directoryFingerprint,
                 'items': [
                   for (final i in items)
                     {
@@ -432,6 +436,7 @@ class WorkspaceProposalItemReview {
     required this.description,
     required Map<String, Object?> values,
     this.directoryId,
+    this.suggestedDirectory = '',
     Iterable<String> tagIds = const [],
     Map<String, List<WorkspaceRecordRef>> relations = const {},
   }) : values = workspaceImmutableMap(values),
@@ -451,6 +456,7 @@ class WorkspaceProposalItemReview {
         relations: item.proposed.relations,
       );
   final String itemId, name, description;
+  final String suggestedDirectory;
   final String? directoryId;
   final List<String> tagIds;
   final Map<String, Object?> values;
@@ -460,6 +466,7 @@ class WorkspaceProposalItemReview {
     'name': name,
     'description': description,
     'directory': directoryId,
+    if (suggestedDirectory.isNotEmpty) 'suggestedDirectory': suggestedDirectory,
     'tags': tagIds,
     'values': values,
     'relations': {

@@ -78,6 +78,7 @@ void main() {
       ))!;
       final templates = currentAgentTemplates(service.owner);
       service.owner.configureInformationTemplates(() => templates);
+      await t.runAsync(() => service.owner.createDirectory('账号与服务'));
       final session = service.agent.openSession('合成整份保存');
       core.ImportItemInput password(String key) {
         final template = templates.templates.singleWhere(
@@ -159,6 +160,21 @@ void main() {
         await t.pumpAndSettle();
       }
 
+      final changeLocation = find.text('查看目录树 / 更换位置');
+      await t.ensureVisible(changeLocation);
+      await t.tap(changeLocation);
+      await t.pumpAndSettle();
+      await t.tap(find.text('调整拟建目录路径'));
+      await t.pumpAndSettle();
+      await t.enterText(
+        find.byKey(const ValueKey('proposed-directory-path')),
+        '账号与服务 / 应用',
+      );
+      await t.tap(find.text('使用此路径'));
+      await t.pumpAndSettle();
+      expect(model.draft!.items[first]!.suggestedDirectory, '账号与服务/应用');
+      expect(find.text('本提案将新建 1 个目录'), findsOneWidget);
+      expect(repo.directories, hasLength(1));
       await t.ensureVisible(input(first));
       await t.enterText(input(first), 'SYNTHETIC-FIRST');
       await t.pumpAndSettle();
@@ -166,6 +182,14 @@ void main() {
       expect(missingPassword, findsOneWidget);
       await tab(second);
       expect(input(first), findsNothing);
+      await t.ensureVisible(changeLocation);
+      await t.tap(changeLocation);
+      await t.pumpAndSettle();
+      await t.tap(find.text('账号与服务 / 应用'));
+      await t.pumpAndSettle();
+      expect(model.draft!.items[second]!.suggestedDirectory, '账号与服务/应用');
+      expect(find.text('本提案将新建 1 个目录'), findsOneWidget);
+
       await t.ensureVisible(input(second));
       await t.enterText(input(second), 'SYNTHETIC-SECOND');
       await t.pumpAndSettle();
@@ -218,6 +242,13 @@ void main() {
         reason: '${model.writeFailure?.code}: ${model.writeFailure?.message}',
       );
       expect(port.counts, [3, 3]);
+      expect(repo.directories, hasLength(2));
+      final appDirectory = repo.directories.singleWhere((d) => d.name == '应用');
+      expect(
+        repo.managedCredentials.map((c) => c.directoryId),
+        everyElement(appDirectory.id),
+      );
+      expect(repo.items.single.directoryId, isNull);
       expect(repo.managedCredentials, hasLength(2));
       expect(repo.items, hasLength(1));
       expect(model.detail!.summary.status, WorkspaceProposalStatus.completed);

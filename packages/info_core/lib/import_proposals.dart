@@ -35,6 +35,20 @@ class ImportPendingReference {
   }
 }
 
+/// Directory metadata at admission, separate from later moves or renames.
+class ImportDirectoryReceipt {
+  ImportDirectoryReceipt(this.directoryId, Iterable<String> path)
+    : path = List.unmodifiable(path);
+  final String? directoryId;
+  final List<String> path;
+  Map<String, Object?> toJson() => {'directoryId': directoryId, 'path': path};
+  factory ImportDirectoryReceipt.fromJson(Map<String, dynamic> json) =>
+      ImportDirectoryReceipt(
+        json['directoryId'] as String?,
+        (json['path'] as List).cast<String>(),
+      );
+}
+
 /// Confirmation facts remain available even after the resulting item is deleted.
 class ImportReceipt {
   const ImportReceipt(this.id, this.version, {this.kind = 'information'});
@@ -322,7 +336,9 @@ class ImportProposal {
     Map<String, String>? candidateKinds,
     this.admissionVersion = 1,
     Map<String, ManagedCredential> credentialSnapshots = const {},
-  }) : credentialSnapshots = Map.unmodifiable(credentialSnapshots),
+    Map<String, ImportDirectoryReceipt> admissionDirectories = const {},
+  }) : admissionDirectories = Map.unmodifiable(admissionDirectories),
+       credentialSnapshots = Map.unmodifiable(credentialSnapshots),
        items = state == ImportProposalState.pending
            ? List.unmodifiable(
                items.indexed.map(
@@ -397,6 +413,7 @@ class ImportProposal {
   /// Immutable non-material facts from this admission. Password bytes and
   /// private notes never belong here; Agent status does not expose this map.
   final Map<String, ManagedCredential> credentialSnapshots;
+  final Map<String, ImportDirectoryReceipt> admissionDirectories;
   bool get awaitingAdmission =>
       state == ImportProposalState.pending &&
       items.isNotEmpty &&
@@ -420,6 +437,7 @@ class ImportProposal {
     Iterable<String>? createdItemIds,
     Iterable<int>? createdItemVersions,
     Map<String, ManagedCredential>? credentialSnapshots,
+    Map<String, ImportDirectoryReceipt>? admissionDirectories,
     ImportProposalState? state,
     int? version,
   }) => ImportProposal(
@@ -436,6 +454,7 @@ class ImportProposal {
     createdItemIds: createdItemIds ?? this.createdItemIds,
     createdItemVersions: createdItemVersions ?? this.createdItemVersions,
     credentialSnapshots: credentialSnapshots ?? this.credentialSnapshots,
+    admissionDirectories: admissionDirectories ?? this.admissionDirectories,
     candidateNames: {
       ...candidateNames,
       for (final i in items ?? this.items) i.key: i.name,
@@ -488,6 +507,10 @@ class ImportProposal {
     'rejectedKeys': rejectedKeys.toList(),
     'createdItemKeys': createdItemKeys,
     'candidateNames': candidateNames,
+    if (admissionDirectories.isNotEmpty)
+      'admissionDirectories': {
+        for (final e in admissionDirectories.entries) e.key: e.value.toJson(),
+      },
     if (credentialSnapshots.isNotEmpty)
       'credentialSnapshots': {
         for (final e in credentialSnapshots.entries) e.key: e.value.toJson(),
@@ -496,6 +519,12 @@ class ImportProposal {
       'candidateKinds': candidateKinds,
   };
   factory ImportProposal.fromJson(Map<String, dynamic> json) => ImportProposal(
+    admissionDirectories: {
+      for (final e in (json['admissionDirectories'] as Map? ?? {}).entries)
+        e.key as String: ImportDirectoryReceipt.fromJson(
+          Map<String, dynamic>.from(e.value as Map),
+        ),
+    },
     credentialSnapshots: {
       for (final e in (json['credentialSnapshots'] as Map? ?? {}).entries)
         e.key as String: ManagedCredential.fromJson(

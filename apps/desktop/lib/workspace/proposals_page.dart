@@ -12,6 +12,7 @@ import 'organization_reading.dart';
 import 'workspace_source.dart';
 import 'proposal_passwords.dart';
 import 'proposal_content_preview.dart';
+import 'proposal_directory.dart';
 
 String proposalStateLabel(WorkspaceProposalSummary s) =>
     s.organizationOutcome != null
@@ -682,6 +683,10 @@ class _ProposalsPageState extends State<ProposalsPage> {
             m.draft?.items[item.id] ??
             WorkspaceProposalItemReview.fromItem(item),
         d = m.detail!,
+        directoryCatalog = proposalDirectoryCatalog(
+          m.catalog!,
+          m.draft?.items.values ?? [review],
+        ),
         c = UiPalette.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 28),
@@ -705,7 +710,23 @@ class _ProposalsPageState extends State<ProposalsPage> {
                         ),
               item: item,
               review: review,
-              catalog: m.catalog!,
+              catalog: directoryCatalog,
+              onDirectoryChanged: m.canEdit
+                  ? (id) => m.editItem(
+                      d.summary.id,
+                      d.summary.version,
+                      WorkspaceProposalItemReview(
+                        itemId: review.itemId,
+                        name: review.name,
+                        description: review.description,
+                        values: review.values,
+                        directoryId: id.id,
+                        suggestedDirectory: id.proposedPath,
+                        tagIds: review.tagIds,
+                        relations: review.relations,
+                      ),
+                    )
+                  : null,
               relations: m.source.relations(
                 d.summary.id,
                 item.id,
@@ -753,7 +774,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
                 review: WorkspaceProposalItemReview.fromItem(
                   WorkspaceProposalItem(id: item.id, proposed: item.before!),
                 ),
-                catalog: m.catalog!,
+                catalog: directoryCatalog,
                 relations: m.source.relations(
                   d.summary.id,
                   item.id,
@@ -786,7 +807,23 @@ class _ProposalsPageState extends State<ProposalsPage> {
             ProposalItemComparison(
               item: item,
               review: review,
-              catalog: m.catalog!,
+              catalog: directoryCatalog,
+              onDirectoryChanged: m.canEdit
+                  ? (id) => m.editItem(
+                      d.summary.id,
+                      d.summary.version,
+                      WorkspaceProposalItemReview(
+                        itemId: review.itemId,
+                        name: review.name,
+                        description: review.description,
+                        values: review.values,
+                        directoryId: id.id,
+                        suggestedDirectory: id.proposedPath,
+                        tagIds: review.tagIds,
+                        relations: review.relations,
+                      ),
+                    )
+                  : null,
               relations: m.source.relations(
                 d.summary.id,
                 item.id,
@@ -996,6 +1033,14 @@ class _ProposalsPageState extends State<ProposalsPage> {
                       onRefresh: m.frozen ? null : m.load,
                     ),
                   if (d.organization == null && m.reviewItems.isNotEmpty) ...[
+                    ProposalDirectorySummary(
+                      catalog: m.catalog!,
+                      reviews: [
+                        for (final i in m.reviewItems)
+                          m.draft?.items[i.id] ??
+                              WorkspaceProposalItemReview.fromItem(i),
+                      ],
+                    ),
                     if (m.reviewItems.length > 1)
                       Padding(
                         padding: const EdgeInsets.only(top: 20),

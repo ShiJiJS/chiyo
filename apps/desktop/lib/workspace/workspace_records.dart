@@ -28,9 +28,15 @@ class WorkspaceRecordRef {
 }
 
 class WorkspaceDirectory {
-  const WorkspaceDirectory(this.id, this.name, {this.parentId});
+  const WorkspaceDirectory(
+    this.id,
+    this.name, {
+    this.parentId,
+    this.proposed = false,
+  });
   final String id, name;
   final String? parentId;
+  final bool proposed;
 }
 
 class WorkspaceTag {

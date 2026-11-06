@@ -33,7 +33,7 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json`，Windows 位于 `%LOCALAPPDATA%/AgentInfo/Codex/integration.json`。更新运行包须重新核对和登记，不能把旧描述当作新版已就绪。当前登记与定位的故障检查在 Mac 上运行；未据此宣称 Windows 原生安装验收通过。
 
-新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
+新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。新回执还给出 `savedLocation: {directoryId, path}`，其中 `path` 为保存时的完整目录名称数组，未分类为 `directoryId:null, path:[]`；这是保存当时的位置，之后移动或改名不回写。旧回执没有这一字段时不推测其历史位置。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
 
 `update-submit` 也支持上述待录入普通资料关联，必须提供目标的 `proposalId`。批准但未具备保存条件时，保留审核结果，原资料不变。`update-status` 返回提案 `version`，以及等待／待处理状态，真正保存后才返回 `result`。`update-revise` 携带 `proposalId`、当前 `version`、修订的 `update`，保留原资料ID，可以更新 `baseVersion`，修订后清除旧批准并重新审批。按模板修改的 `values` 要包含模板所有字段，不能靠省略来清空字段；补充字段保持不变。待审批凭据已在 Mac 开发分支接入共同流程，尚未替换本机预览；见[凭据录入](development/credential-intake.md)。
 

@@ -86,6 +86,28 @@ void main() {
         }))['status'],
         'confirmed',
       );
+      final saved = await command({
+        'command': 'import-status',
+        'proposalId': id,
+      });
+      final directory = service.owner.directories.single;
+      expect((saved['items'] as List).first['savedLocation'], {
+        'directoryId': directory.id,
+        'path': ['Servers'],
+      });
+      expect((saved['items'] as List).last['savedLocation'], {
+        'directoryId': null,
+        'path': [],
+      });
+      await service.owner.updateDirectory(directory.id, 'Renamed');
+      expect(
+        (await command({
+          'command': 'import-status',
+          'proposalId': id,
+        }))['items'],
+        saved['items'],
+      );
+      expect(saved.toString(), isNot(contains('PRIVATE-NOTE')));
       expect((await command({'command': 'catalog'}))['items'], hasLength(2));
       expect(
         (await command({
