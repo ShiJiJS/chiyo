@@ -161,7 +161,7 @@ class InformationTemplateDescription {
         'channel':
             'attachments contain CLI filePath values; paths and file bytes are never ordinary text values.',
         'binding':
-            'A declared file value is the matching attachment key, with templateField set to the declared field key. Omit templateField for an independent extra attachment.',
+            'New files must bind to a file field declared by the selected template using templateField. Extract useful facts first. When the original has independent value, create a separate file information item and relate it; do not append an unbound source copy.',
         'versions':
             'Group only revisions of the same material. Different purposes or directions are separate information items. Provide label and sourceNote explaining the source evidence; do not infer chronology just from submission order.',
         'currentVersion':
@@ -171,7 +171,7 @@ class InformationTemplateDescription {
         'credentials':
             'Private keys and login-session files use credential templates, never ordinary attachments.',
         'update':
-            'Requires information-file-update.v1. Use update-submit with exact itemId, current baseVersion and attachments. Omit fieldId for a new independent field; supply the exact existing file fieldId to add versions. File-only updates omit templateId/values and preserve all other contents. Never select a target only by similarity.',
+            'Requires information-file-update.v1. Use update-submit with exact itemId, current baseVersion and attachments. New files require templateField naming a declared file field. Supply the exact existing file fieldId to add versions, including legacy attachments. File-only updates omit templateId/values and preserve all other contents. Never select a target only by similarity.',
       },
     if (recordKind == 'information')
       'fileUpdateExamples': _fileUpdateExamples(),
@@ -179,7 +179,14 @@ class InformationTemplateDescription {
   };
 
   List<Map<String, Object?>> _fileUpdateExamples() => [
-    for (final mode in ['newAttachment', 'newCurrentVersion', 'addHistory'])
+    for (final mode in [
+      if ((definition['fields'] as List? ?? []).any(
+        (f) => (f as Map)['type'] == 'file',
+      ))
+        'newAttachment',
+      'newCurrentVersion',
+      'addHistory',
+    ])
       {
         'command': 'update-submit',
         'operationId': 'replace-with-unique-update-id',
@@ -190,6 +197,11 @@ class InformationTemplateDescription {
             {
               'key': 'original',
               'name': '材料原文',
+              if (mode == 'newAttachment')
+                'templateField': (definition['fields'] as List)
+                    .where((f) => (f as Map)['type'] == 'file')
+                    .map((f) => (f as Map)['key'])
+                    .firstOrNull,
               if (mode != 'newAttachment')
                 'fieldId': 'exact-existing-file-field-id',
               'currentVersion': mode == 'addHistory' ? null : 1,
