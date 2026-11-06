@@ -144,6 +144,7 @@ class EncryptedInformationRepository
         InformationImportFileRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
+        InformationAttachmentSeparationRepository,
         InformationLifecycleRepository,
         InformationApprovalRepository,
         InformationPurgeRepository,
@@ -229,6 +230,46 @@ class EncryptedInformationRepository
       throw const StorageFailure('invalid_operation_receipt');
     }
     return receipt;
+  }
+
+  @override
+  Future<void> commitAttachmentSeparation({
+    required InformationItem source,
+    required InformationRevision previous,
+    required InformationItem file,
+    required InformationRecordReceipt receipt,
+    required void Function() validate,
+  }) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    await _db.transaction(() async {
+      validate();
+      final rows = await _db
+          .customSelect(
+            'SELECT version FROM information_items WHERE id=?',
+            variables: [Variable(source.id)],
+          )
+          .get();
+      if (rows.length != 1 ||
+          rows.single.read<int>('version') != previous.item.version) {
+        throw const AccessFailure('version_conflict');
+      }
+      if (await informationRecordReceipt(receipt.operationId) != null ||
+          _items.containsKey(file.id)) {
+        throw const AccessFailure('operation_conflict');
+      }
+      await _writeItem(source);
+      await _writeItem(file);
+      await _writeRevision(previous);
+      await _db.customStatement(
+        'INSERT INTO information_record_operations(operation_id,payload) VALUES(?,?)',
+        [receipt.operationId, jsonEncode(receipt.toJson())],
+      );
+      await _checkAttachmentBackupBudget();
+      validate();
+    });
+    _items[source.id] = source;
+    _items[file.id] = file;
+    _revisions.add(previous);
   }
 
   @override

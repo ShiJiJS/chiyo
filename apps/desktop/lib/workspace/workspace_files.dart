@@ -6,6 +6,17 @@ import 'workspace_records.dart';
 
 final _operationRandom = Random.secure();
 
+abstract interface class WorkspaceAttachmentSeparation {
+  Future<WorkspaceRecordRef> separateAttachment({
+    required String operationId,
+    required WorkspaceRecordRef record,
+    required String fieldId,
+    required int expectedVersion,
+    required String name,
+    required String templateId,
+  });
+}
+
 /// Fresh across processes; keep the same value while reconciling one outcome.
 String workspaceFileOperationId() =>
     'file-${List.generate(16, (_) => _operationRandom.nextInt(256).toRadixString(16).padLeft(2, '0')).join()}';
