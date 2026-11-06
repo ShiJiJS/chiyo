@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
 import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_classification.dart';
+import 'owner_workspace_library_recycle.dart';
 import 'owner_workspace_credentials.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
@@ -28,6 +29,7 @@ import 'workspace_source.dart';
 class OwnerWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceLibraryRecycle,
         WorkspaceFileSelectionReleaser,
         WorkspaceAttachmentSeparation,
         WorkspaceFileActionRecovery,
@@ -106,6 +108,11 @@ class OwnerWorkspaceSource
       information: _information,
       onChanged: () => _changed(null),
     );
+    _libraryRecycle = OwnerWorkspaceLibraryRecycle(
+      owner,
+      _classification.loadCatalog,
+      () => _changed(null),
+    );
     _history = OwnerWorkspaceHistory(
       information: _information,
       onChanged: _changed,
@@ -130,6 +137,7 @@ class OwnerWorkspaceSource
   late final OwnerWorkspaceFileChanges _fileChanges;
   late final OwnerWorkspaceClassification _classification;
   late final OwnerWorkspaceHistory _history;
+  late final OwnerWorkspaceLibraryRecycle _libraryRecycle;
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
   late final StreamSubscription<String> _requests;
   Timer? _timer;
@@ -200,6 +208,9 @@ class OwnerWorkspaceSource
               ],
               [
                 for (final r in owner.recycleEntries) [r.id, r.version],
+                if (owner.libraryRecycleSupported)
+                  for (final b in owner.libraryRecycleBatches)
+                    [b.id, b.version],
                 for (final c in owner.recycledCredentials) [c.id, c.revision],
               ],
               [
@@ -336,6 +347,25 @@ class OwnerWorkspaceSource
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );
   });
+  @override
+  bool get libraryRecycleSupported => owner.libraryRecycleSupported;
+  @override
+  Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycle(
+    WorkspaceLibrarySelection selection,
+  ) => _read(() => _libraryRecycle.preview(selection));
+  @override
+  Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycleRestore(
+    String id,
+    WorkspaceLibraryRestoreOptions options,
+  ) => _read(() => _libraryRecycle.restorePreview(id, options));
+  @override
+  Future<WorkspaceLibraryRecycleReceipt> changeLibraryRecycle(
+    WorkspaceLibraryRecycleCommand command,
+  ) => _read(() => _libraryRecycle.change(command));
+  @override
+  Future<WorkspaceLibraryRecycleReceipt?> libraryRecycleOperationReceipt(
+    String id,
+  ) => _read(() => _libraryRecycle.receipt(id));
   @override
   Future<WorkspaceCatalog> loadCatalog() => _read(_classification.loadCatalog);
   @override

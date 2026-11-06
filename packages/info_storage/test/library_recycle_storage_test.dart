@@ -167,6 +167,14 @@ void main() {
       );
       final copiedService = InformationService(repository: copy);
       try {
+        final groupedPreview = await copy.backups.inspectRestore(
+          path: backup,
+          recoveryKey: recovery,
+          archiveId: 'grouped-backup',
+          archiveVersion: 1,
+        );
+        expect(groupedPreview.counts['directoryBatches'], 1);
+        groupedPreview.release();
         await copy.backups.restore(
           await copy.backups.inspect(backup, recovery),
         );
@@ -425,14 +433,16 @@ void main() {
         selection,
         preview.token,
       );
+      final earlyKey = await enableTestBackups(repo.backups),
+          earlyPath = '${root.path}/early.aim';
+      await repo.backups.exportTo(earlyPath);
       now = now.add(const Duration(days: 31));
       expect(service.owner.libraryRecycleBatches, isEmpty);
       await expectLater(
         service.owner.previewLibraryRecycleRestore(deleted.batchId),
         throwsA(isA<AccessFailure>()),
       );
-      final key = await enableTestBackups(repo.backups),
-          path = '${root.path}/expired.aim';
+      final key = earlyKey, path = '${root.path}/expired.aim';
       await repo.backups.exportTo(path);
       final recipient = await EncryptedInformationRepository.open(
         '${root.path}/copy',
@@ -444,6 +454,14 @@ void main() {
         clock: () => now,
       );
       try {
+        final earlyPreview = await recipient.backups.inspectRestore(
+          path: earlyPath,
+          recoveryKey: earlyKey,
+          archiveId: 'early-backup',
+          archiveVersion: 1,
+        );
+        expect(earlyPreview.counts['directoryBatches'] ?? 0, 0);
+        earlyPreview.release();
         final inspected = await recipient.backups.inspect(path, key);
         expect(inspected.formatVersion, 20);
         expect(inspected.directoryRecycleBatchCount, 0);

@@ -233,16 +233,22 @@ class LibraryRecycleRestorePreview {
     required this.options,
     required Iterable<InformationDirectory> directories,
     required Iterable<LibraryRecycleRecord> records,
+    required Map<String, List<String>> directoryPaths,
     required Iterable<String> warnings,
     required Iterable<String> conflicts,
   }) : directories = List.unmodifiable(directories),
        records = List.unmodifiable(records),
+       directoryPaths = Map.unmodifiable({
+         for (final e in directoryPaths.entries)
+           e.key: List<String>.unmodifiable(e.value),
+       }),
        warnings = List.unmodifiable(warnings),
        conflicts = List.unmodifiable(conflicts);
   final String batchId, stateToken;
   final LibraryRecycleRestoreOptions options;
   final List<InformationDirectory> directories;
   final List<LibraryRecycleRecord> records;
+  final Map<String, List<String>> directoryPaths;
   final List<String> warnings, conflicts;
   bool get canRestore => conflicts.isEmpty;
   late final String token = sha256

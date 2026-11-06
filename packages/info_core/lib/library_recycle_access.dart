@@ -1,6 +1,8 @@
 part of 'info_core.dart';
 
 extension OwnerLibraryRecycleOperations on OwnerAccess {
+  bool get libraryRecycleSupported =>
+      _service._repository is LibraryRecycleRepository;
   LibraryRecycleRepository get _libraryRecycleRepository {
     final repository = _service._repository;
     if (repository is LibraryRecycleRepository) {
@@ -89,7 +91,7 @@ extension OwnerLibraryRecycleOperations on OwnerAccess {
     for (final record in preview.records) {
       if (record.kind == 'information') {
         final item = itemsById[record.id]!;
-        final entry = _recycle(item, null);
+        final entry = _recycle(item, null, at: now);
         entries.add(entry);
         facts.add(_fact(entry, RecycleFactKind.deleted, entry.version));
         previous.add(InformationRevision(item, now));
@@ -309,6 +311,7 @@ extension OwnerLibraryRecycleOperations on OwnerAccess {
       stateToken: _libraryRecycleState(),
       options: options,
       directories: restoredDirs,
+      directoryPaths: {for (final d in restoredDirs) d.id: path(d.id)},
       records: records,
       warnings: warnings.toSet(),
       conflicts: conflicts.toSet(),

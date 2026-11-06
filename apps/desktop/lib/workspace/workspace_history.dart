@@ -1,4 +1,5 @@
 import 'workspace_records.dart';
+import 'workspace_library_recycle.dart';
 
 /// Immutable owner snapshot. Lists expose only [WorkspaceRevision] metadata;
 /// content and historical identity labels are requested explicitly.
@@ -59,13 +60,33 @@ class WorkspaceRecycleEntry {
   final bool wholeItem;
 }
 
+class WorkspaceRecycleRow {
+  const WorkspaceRecycleRow.entry(WorkspaceRecycleEntry value)
+    : entry = value,
+      batch = null;
+  const WorkspaceRecycleRow.batch(WorkspaceDirectoryRecycleBatch value)
+    : batch = value,
+      entry = null;
+  final WorkspaceRecycleEntry? entry;
+  final WorkspaceDirectoryRecycleBatch? batch;
+  String get id => entry?.id ?? batch!.id;
+  DateTime get deletedAt => entry?.deletedAt ?? batch!.deletedAt;
+}
+
 class WorkspaceRecycleResults {
   WorkspaceRecycleResults({
-    required Iterable<WorkspaceRecycleEntry> items,
+    Iterable<WorkspaceRecycleEntry> items = const [],
+    Iterable<WorkspaceRecycleRow>? rows,
     required this.total,
     required this.offset,
-  }) : items = List.unmodifiable(items);
+  }) : rows = List.unmodifiable(rows ?? items.map(WorkspaceRecycleRow.entry)),
+       items = List.unmodifiable(
+         rows == null
+             ? items
+             : rows.map((r) => r.entry).whereType<WorkspaceRecycleEntry>(),
+       );
   final List<WorkspaceRecycleEntry> items;
+  final List<WorkspaceRecycleRow> rows;
   final int total, offset;
 }
 

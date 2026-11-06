@@ -4,6 +4,7 @@ import '../ui_palette.dart';
 import 'classification_controller.dart';
 import 'library_controller.dart';
 import 'library_widgets.dart';
+import 'library_batch_recycle_dialog.dart';
 import 'workspace_source.dart';
 
 Future<bool> showLibraryDirectoryEditor(
@@ -15,6 +16,17 @@ Future<bool> showLibraryDirectoryEditor(
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return false;
+  if (action == WorkspaceDirectoryAction.delete &&
+      directory != null &&
+      controller.source is WorkspaceLibraryRecycle &&
+      (controller.source as WorkspaceLibraryRecycle).libraryRecycleSupported) {
+    return await showLibraryBatchRecycle(
+          context,
+          controller.source,
+          selection: WorkspaceLibrarySelection(directoryIds: [directory.id]),
+        ) !=
+        null;
+  }
   return await showClassificationEditor(
         context,
         controller.source,

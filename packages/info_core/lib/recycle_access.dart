@@ -125,12 +125,16 @@ extension OwnerRecycle on OwnerAccess {
       .toList();
   List<RecycleFact> get recycleFacts => _service._repository.recycleFacts;
 
-  RecycleEntry _recycle(InformationItem before, InformationItem? after) {
+  RecycleEntry _recycle(
+    InformationItem before,
+    InformationItem? after, {
+    DateTime? at,
+  }) {
     final retained = after?.fields.map((f) => f.id).toSet() ?? <String>{};
     final removed = before.fields
         .where((f) => !retained.contains(f.id))
         .toList();
-    final now = _service._clock();
+    final now = at ?? _service._clock();
     return RecycleEntry(
       id: _service._secret(),
       itemId: before.id,
