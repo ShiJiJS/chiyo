@@ -581,6 +581,7 @@ class InformationBackups {
                 'information_classification_operations',
                 'information_lifecycle_operations',
                 'library_recycle_operations',
+                'library_move_operations',
                 'information_approval_operations',
                 'desktop_preference_operations',
                 'owner_proposal_operations',
@@ -844,6 +845,7 @@ class InformationBackups {
                     'information_classification_operations',
                     'information_lifecycle_operations',
                     'library_recycle_operations',
+                    'library_move_operations',
                     'information_approval_operations',
                     'desktop_preference_operations',
                     'owner_proposal_operations',
@@ -882,6 +884,9 @@ class InformationBackups {
         );
         await _repository._db.customStatement(
           'UPDATE library_recycle_operations SET invalidated=1',
+        );
+        await _repository._db.customStatement(
+          'UPDATE library_move_operations SET invalidated=1',
         );
         await _repository._db.customStatement(
           'UPDATE information_approval_operations SET invalidated=1',

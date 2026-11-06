@@ -2,8 +2,8 @@ part of 'info_core.dart';
 
 /// Explicit owner selection. Descendants are resolved when reviewing the batch,
 /// never inferred from a title, a relation or a same-name directory.
-class LibraryRecycleSelection {
-  LibraryRecycleSelection({
+class LibrarySelection {
+  LibrarySelection({
     Iterable<String> directoryIds = const [],
     Iterable<String> informationIds = const [],
     Iterable<String> credentialIds = const [],
@@ -21,6 +21,10 @@ class LibraryRecycleSelection {
     'credentials': credentialIds,
   };
 }
+
+/// Kept for callers of the original whole-batch recycle API. Moving and
+/// recycling use the same explicit owner selection, not query-wide selection.
+typedef LibraryRecycleSelection = LibrarySelection;
 
 /// Confirmation metadata only. Field values, private notes and credential
 /// material do not belong in a deletion dialog or its review token payload.

@@ -18,6 +18,9 @@ import 'information_import_files.dart';
 import 'info_core.dart'
     show
         AccessFailure,
+        LibraryMoveRepository,
+        LibraryMoveReceipt,
+        LibraryMoveChange,
         LibraryRecycleRepository,
         LibraryRecycleBatch,
         LibraryRecycleReceipt,
@@ -58,6 +61,7 @@ part 'memory_information_files.dart';
 part 'memory_information_import_files.dart';
 part 'memory_classification_operations.dart';
 part 'memory_library_recycle.dart';
+part 'memory_library_move.dart';
 part 'memory_information_purge.dart';
 
 enum FieldKind { structured, textNote, file }
@@ -446,6 +450,7 @@ abstract interface class InformationRepository {
 class MemoryInformationRepository
     implements
         InformationRepository,
+        LibraryMoveRepository,
         LibraryRecycleRepository,
         CredentialRepository,
         CredentialRuntimeRepository,
@@ -464,6 +469,13 @@ class MemoryInformationRepository
   Future<void> commitInformationPurge(InformationPurgeChange change) async =>
       _commitPurge(change);
   final _libraryRecycleBatches = <String, LibraryRecycleBatch>{};
+  final _libraryMoveReceipts = <String, LibraryMoveReceipt>{};
+  @override
+  Future<LibraryMoveReceipt?> libraryMoveReceipt(String id) async =>
+      _libraryMoveReceipts[id];
+  @override
+  Future<LibraryMoveReceipt> commitLibraryMove(LibraryMoveChange change) =>
+      _commitLibraryMove(change);
   final _libraryRecycleReceipts = <String, LibraryRecycleReceipt>{};
   @override
   List<LibraryRecycleBatch> get libraryRecycleBatches =>
