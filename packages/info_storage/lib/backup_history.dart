@@ -679,6 +679,9 @@ extension _CompleteBackups on InformationBackups {
           in tables['template_packages'] ?? const <Map<String, Object?>>[])
         _templatePackageFromRow(row),
     ];
+    final libraryOrder = _libraryOrderFromRows(
+      tables['library_order_state'] ?? const [],
+    );
     final fields = tables['information_fields']!;
     final links = tables['information_item_tags']!;
     final items = [
@@ -785,6 +788,7 @@ extension _CompleteBackups on InformationBackups {
       contents.attachments,
     );
     return () {
+      _repository._libraryOrder = libraryOrder;
       _repository._libraryRecycleBatches
         ..clear()
         ..addEntries(recycleBatches.map((b) => MapEntry(b.id, b)));

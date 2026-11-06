@@ -78,6 +78,41 @@ void main() {
         (await command({'command': 'capabilities'}))['capabilities'],
         contains('information-directory-discovery.v1'),
       );
+      final sibling = await service.owner.createDirectory('New root');
+      final selection = LibrarySelection(directoryIds: [sibling.id]),
+          position = LibraryMovePosition(
+            LibraryEntryRef('directory', directory.id),
+          );
+      final placement = await service.owner.previewLibraryMove(
+        selection,
+        null,
+        position: position,
+      );
+      await service.owner.moveLibrarySelection(
+        'cli-order-fixture',
+        selection,
+        null,
+        placement.token,
+        position: position,
+      );
+      final ordered = await command({'command': 'directory-list'});
+      final roots = (ordered['directories'] as List)
+          .where((d) => d['parentId'] == null)
+          .toList();
+      expect(roots.map((d) => d['id']), [sibling.id, directory.id]);
+      expect(roots.map((d) => d['order']), [0, 1]);
+      final removal = await service.owner.previewLibraryRecycle(selection);
+      await service.owner.recycleLibrarySelection(
+        'cli-recycle-fixture',
+        selection,
+        removal.token,
+      );
+      final current = await command({'command': 'directory-list'});
+      expect(
+        (current['directories'] as List).any((d) => d['id'] == sibling.id),
+        false,
+      );
+      expect((current['directories'] as List).first['order'], 0);
 
       final page = await command({
         'command': 'catalog',

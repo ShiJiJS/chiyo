@@ -783,4 +783,210 @@ void main() {
       }
     },
   );
+
+  test(
+    'manual ordering uses complete siblings before filtering and paging and observation detects a pure reorder',
+    () async {
+      final f = await _Fixture.create();
+      try {
+        final a = await f.service.owner.createInformation('可见A', '', [
+          const core.FieldInput('正文', '', 'PRIVATE-A'),
+        ], directoryId: f.child.id);
+        final hidden = await f.service.owner.createInformation('隐藏B', '', [
+          const core.FieldInput('正文', '', 'PRIVATE-B'),
+        ], directoryId: f.child.id);
+        final c = await f.service.owner.createInformation('可见C', '', [
+          const core.FieldInput('正文', '', 'PRIVATE-C'),
+        ], directoryId: f.child.id);
+        f.source.refreshFromOwner();
+        await Future<void>.delayed(Duration.zero);
+        final query = WorkspaceQuery(
+          directoryId: f.child.id,
+          keyword: '可见',
+          sort: WorkspaceSort.manual,
+          limit: 1,
+        );
+        expect((await f.source.queryRecords(query)).items.single.ref.id, a.id);
+        final selection = WorkspaceLibrarySelection(
+          records: [WorkspaceRecordRef(WorkspaceRecordKind.information, c.id)],
+        );
+        final position = WorkspaceLibraryPosition.record(
+          WorkspaceRecordRef(WorkspaceRecordKind.information, a.id),
+        );
+        final preview = await f.source.previewLibraryMove(
+          selection,
+          f.child.id,
+          position: position,
+        );
+        expect(preview.anchorName, '可见A');
+        final command = WorkspaceLibraryMoveCommand(
+          operationId: 'manual-source-order',
+          selection: selection,
+          targetId: f.child.id,
+          reviewToken: preview.token,
+          position: position,
+        );
+        expect(
+          (await f.source.moveLibrarySelection(command)).matches(command),
+          isTrue,
+        );
+        expect((await f.source.queryRecords(query)).items.single.ref.id, c.id);
+        expect(
+          (await f.source.queryRecords(
+            query.copyWith(offset: 1),
+          )).items.single.ref.id,
+          a.id,
+        );
+        final complete = await f.source.queryRecords(
+          query.copyWith(keyword: '', limit: 50),
+        );
+        expect(complete.items.map((r) => r.ref.id), [
+          f.item.id,
+          c.id,
+          a.id,
+          hidden.id,
+        ]);
+        expect(
+          f.service.owner.information
+              .singleWhere((i) => i.id == hidden.id)
+              .version,
+          hidden.version,
+        );
+        f.source.refreshFromOwner();
+        await Future<void>.delayed(Duration.zero);
+        final changed = f.source.changes.first;
+        final coreSelection = core.LibrarySelection(informationIds: [a.id]);
+        final corePosition = core.LibraryMovePosition(
+          core.LibraryEntryRef('information', hidden.id),
+          after: true,
+        );
+        final p = await f.service.owner.previewLibraryMove(
+          coreSelection,
+          f.child.id,
+          position: corePosition,
+        );
+        await f.service.owner.moveLibrarySelection(
+          'external-reorder',
+          coreSelection,
+          f.child.id,
+          p.token,
+          position: corePosition,
+        );
+        f.source.refreshFromOwner();
+        await changed.timeout(const Duration(seconds: 2));
+        expect(
+          (await f.source.queryRecords(
+            query.copyWith(keyword: '', limit: 50),
+          )).items.map((r) => r.ref.id),
+          [f.item.id, c.id, hidden.id, a.id],
+        );
+        expect(
+          f.service.owner.information.singleWhere((i) => i.id == a.id).version,
+          a.version,
+        );
+      } finally {
+        await f.close();
+      }
+    },
+  );
+
+  testWidgets(
+    'the common dialog describes before or after placement and preserves the chosen anchor through save',
+    (t) async {
+      t.view.physicalSize = const Size(1100, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(_Fixture.create))!;
+      try {
+        final selection = WorkspaceLibrarySelection(
+          records: [
+            WorkspaceRecordRef(WorkspaceRecordKind.information, f.direct.id),
+          ],
+        );
+        await t.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => showLibraryMove(
+                    context,
+                    f.source,
+                    selection,
+                    initialTarget: f.child.id,
+                    position: WorkspaceLibraryPosition.record(
+                      WorkspaceRecordRef(
+                        WorkspaceRecordKind.information,
+                        f.item.id,
+                      ),
+                    ),
+                  ),
+                  child: const Text('调整顺序'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await t.tap(find.text('调整顺序'));
+        await _settle(t);
+        expect(find.text('目标：服务 / 配置'), findsOneWidget);
+        expect(find.text('排在“服务器资料”之前'), findsOneWidget);
+        await t.tap(find.byKey(const ValueKey('library-move-confirm')));
+        await _settle(t);
+        expect(f.source.writes, 1);
+        final rows = (await t.runAsync(
+          () => f.source.queryRecords(
+            WorkspaceQuery(directoryId: f.child.id, sort: WorkspaceSort.manual),
+          ),
+        ))!;
+        expect(rows.items.map((r) => r.ref.id), [f.direct.id, f.item.id]);
+        expect(f.service.owner.credential(f.credential.id).directoryId, isNull);
+        expect(t.takeException(), isNull);
+      } finally {
+        await _close(t, f);
+      }
+    },
+  );
+
+  testWidgets(
+    'library manual view is distinct from name and time sorting and displays the actual full directory',
+    (t) async {
+      t.view.physicalSize = const Size(1500, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(_Fixture.create))!;
+      final m = LibraryController(f.source);
+      await t.runAsync(() => m.load(const WorkspaceQuery()));
+      try {
+        await t.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: LibraryPage(controller: m, onNavigate: (_, _) {}),
+            ),
+          ),
+        );
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-sort')));
+        await _settle(t);
+        expect(find.text('最近更新优先'), findsOneWidget);
+        expect(find.text('按名称'), findsOneWidget);
+        await t.tap(find.text('手动顺序'));
+        await _settle(t);
+        expect(m.query.sort, WorkspaceSort.manual);
+        final card = find.byKey(
+          ValueKey('library-record-information:${f.item.id}'),
+        );
+        expect(
+          find.descendant(of: card, matching: find.text('服务 / 配置')),
+          findsOneWidget,
+        );
+        expect(find.text('不分组 · 手动顺序'), findsOneWidget);
+        expect(t.takeException(), isNull);
+      } finally {
+        m.dispose();
+        await _close(t, f);
+      }
+    },
+  );
 }

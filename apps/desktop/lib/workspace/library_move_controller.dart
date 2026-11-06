@@ -8,20 +8,27 @@ class LibraryMoveController
           WorkspaceLibraryMoveCommand,
           WorkspaceLibraryMoveReceipt
         > {
-  LibraryMoveController(super.source, this.selection, {this.targetId});
+  LibraryMoveController(
+    super.source,
+    this.selection, {
+    this.targetId,
+    this.position,
+  });
   final WorkspaceLibrarySelection selection;
   String? targetId;
+  WorkspaceLibraryPosition? position;
   WorkspaceLibraryMove get port => source as WorkspaceLibraryMove;
   Future<void> chooseTarget(String? id) async {
     if (frozen || reading) return;
     targetId = id;
+    position = null;
     needsReview = true;
     await load();
   }
 
   @override
   Future<WorkspaceLibraryMovePreview> readPreview() =>
-      port.previewLibraryMove(selection, targetId);
+      port.previewLibraryMove(selection, targetId, position: position);
   @override
   bool previewAllowsSave(WorkspaceLibraryMovePreview preview) =>
       preview.canSave;
@@ -33,6 +40,7 @@ class LibraryMoveController
     selection: selection,
     targetId: targetId,
     reviewToken: preview.token,
+    position: position,
   );
   @override
   Future<WorkspaceLibraryMoveReceipt> commit(

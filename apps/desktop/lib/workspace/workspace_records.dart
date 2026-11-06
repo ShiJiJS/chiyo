@@ -248,7 +248,7 @@ class WorkspaceRecordSummary {
 
 enum WorkspaceGrouping { none, type, directory }
 
-enum WorkspaceSort { updated, name }
+enum WorkspaceSort { updated, name, manual }
 
 class WorkspaceQuery {
   const WorkspaceQuery({

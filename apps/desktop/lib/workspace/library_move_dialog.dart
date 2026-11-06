@@ -11,16 +11,24 @@ Future<WorkspaceLibraryMoveReceipt?> showLibraryMove(
   WorkspaceSource source,
   WorkspaceLibrarySelection selection, {
   String? initialTarget,
+  WorkspaceLibraryPosition? position,
 }) => showDesktopDialog<WorkspaceLibraryMoveReceipt>(
   context,
-  builder: (_) => _LibraryMoveDialog(source, selection, initialTarget),
+  builder: (_) =>
+      _LibraryMoveDialog(source, selection, initialTarget, position),
 );
 
 class _LibraryMoveDialog extends StatefulWidget {
-  const _LibraryMoveDialog(this.source, this.selection, this.initialTarget);
+  const _LibraryMoveDialog(
+    this.source,
+    this.selection,
+    this.initialTarget,
+    this.position,
+  );
   final WorkspaceSource source;
   final WorkspaceLibrarySelection selection;
   final String? initialTarget;
+  final WorkspaceLibraryPosition? position;
   @override
   State<_LibraryMoveDialog> createState() => _LibraryMoveDialogState();
 }
@@ -30,6 +38,7 @@ class _LibraryMoveDialogState extends State<_LibraryMoveDialog> {
     widget.source,
     widget.selection,
     targetId: widget.initialTarget,
+    position: widget.position,
   );
   @override
   void initState() {
@@ -102,6 +111,11 @@ class _LibraryMoveDialogState extends State<_LibraryMoveDialog> {
                           p.roots.isNotEmpty &&
                           p.records.isNotEmpty)
                         const Text('单独选中的资料和凭据会归入“未分类”。'),
+                      if (p.position != null)
+                        Text(
+                          '排在“${p.anchorName}”${p.position!.after ? '之后' : '之前'}',
+                          key: const ValueKey('library-move-position'),
+                        ),
                     ],
                     if (m.catalog != null)
                       Align(

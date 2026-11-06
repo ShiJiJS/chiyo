@@ -63,6 +63,8 @@ class _LibraryPageState extends State<LibraryPage> {
       model.source is WorkspaceLibraryRecycle &&
       (model.source as WorkspaceLibraryRecycle).libraryRecycleSupported;
   bool get _canManage => _canMove || _canRecycle;
+  bool get _canOrder =>
+      _canMove && (model.source as WorkspaceLibraryMove).libraryOrderSupported;
 
   Future<void> _manage(
     WorkspaceLibrarySelection selection, {
@@ -459,76 +461,81 @@ class _LibraryPageState extends State<LibraryPage> {
                 onChanged: model.selectionAvailable ? (_) => activate() : null,
               ),
             Expanded(
-              child: DesktopButton(
-                key: ValueKey('library-directory-${directory.id}'),
-                tooltip: path.map((d) => d.name).join(' › '),
-                selected: selected,
-                kind: DesktopButtonKind.quiet,
-                onPressed: model.selectionAvailable ? activate : null,
-                fontSize: metrics.compact ? 13 : 14,
-                padding: EdgeInsets.fromLTRB(
-                  10 +
-                      (path.length - 1).clamp(0, 3) * (largeText ? 10.0 : 22.0),
-                  8,
-                  10,
-                  8,
-                ),
-                minimumSize: const Size(0, 39),
-                alignment: Alignment.centerLeft,
-                child: Row(
-                  children: [
-                    PrototypeIcon(
-                      directory.id == 'all'
-                          ? PrototypeIconGlyph.grid
-                          : PrototypeIconGlyph.folder,
-                      size: 17,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
+              child: LayoutBuilder(
+                builder: (context, bounds) {
+                  final desiredIndent =
+                      (path.length - 1).clamp(0, 3) * (largeText ? 10.0 : 22.0);
+                  final room = (bounds.maxWidth - 96).clamp(
+                    0.0,
+                    double.infinity,
+                  );
+                  final indent = desiredIndent.clamp(0.0, room);
+                  return DesktopButton(
+                    key: ValueKey('library-directory-${directory.id}'),
+                    tooltip: path.map((d) => d.name).join(' › '),
+                    selected: selected,
+                    kind: DesktopButtonKind.quiet,
+                    onPressed: model.selectionAvailable ? activate : null,
+                    fontSize: metrics.compact ? 13 : 14,
+                    padding: EdgeInsets.fromLTRB(10 + indent, 8, 10, 8),
+                    minimumSize: const Size(0, 39),
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        PrototypeIcon(
+                          directory.id == 'all'
+                              ? PrototypeIconGlyph.grid
+                              : PrototypeIconGlyph.folder,
+                          size: 17,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                directory.name,
+                                style: libraryText(
+                                  context,
+                                  metrics.compact ? 13 : 14,
+                                  color: selected
+                                      ? UiPalette.of(context).accent
+                                      : UiPalette.of(context).ink,
+                                  weight: selected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                                maxLines: largeText ? 2 : 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (largeText)
+                                Text(
+                                  '$count 项',
+                                  style: libraryText(
+                                    context,
+                                    12,
+                                    color: UiPalette.of(context).muted,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (!largeText) ...[
+                          const SizedBox(width: 5),
                           Text(
-                            directory.name,
+                            count,
                             style: libraryText(
                               context,
-                              metrics.compact ? 13 : 14,
-                              color: selected
-                                  ? UiPalette.of(context).accent
-                                  : UiPalette.of(context).ink,
-                              weight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              12,
+                              color: UiPalette.of(context).muted,
                             ),
-                            maxLines: largeText ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (largeText)
-                            Text(
-                              '$count 项',
-                              style: libraryText(
-                                context,
-                                12,
-                                color: UiPalette.of(context).muted,
-                              ),
-                            ),
                         ],
-                      ),
+                      ],
                     ),
-                    if (!largeText) ...[
-                      const SizedBox(width: 5),
-                      Text(
-                        count,
-                        style: libraryText(
-                          context,
-                          12,
-                          color: UiPalette.of(context).muted,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],
@@ -980,15 +987,20 @@ class _LibraryPageState extends State<LibraryPage> {
                       size: 14,
                     ),
                     triggerLabel: const Text('排序'),
-                    items: const [
-                      DropdownMenuItem(
+                    items: [
+                      const DropdownMenuItem(
                         value: WorkspaceSort.updated,
                         child: Text('最近更新优先'),
                       ),
-                      DropdownMenuItem(
+                      const DropdownMenuItem(
                         value: WorkspaceSort.name,
                         child: Text('按名称'),
                       ),
+                      if (_canOrder)
+                        const DropdownMenuItem(
+                          value: WorkspaceSort.manual,
+                          child: Text('手动顺序'),
+                        ),
                     ],
                     onChanged: (v) => model.apply(query.copyWith(sort: v)),
                   ),
@@ -1007,6 +1019,11 @@ class _LibraryPageState extends State<LibraryPage> {
     WorkspaceGrouping.type => '按类型',
     WorkspaceGrouping.directory => '按目录',
   };
+  String _sortName(WorkspaceSort sort) => switch (sort) {
+    WorkspaceSort.updated => '最近更新优先',
+    WorkspaceSort.name => '按名称',
+    WorkspaceSort.manual => '手动顺序',
+  };
   String _groupKey(WorkspaceRecordSummary r) => switch (model.query.grouping) {
     WorkspaceGrouping.none => '',
     WorkspaceGrouping.type => r.type.id,
@@ -1017,11 +1034,13 @@ class _LibraryPageState extends State<LibraryPage> {
         WorkspaceGrouping.none => '',
         WorkspaceGrouping.type => r.type.name,
         WorkspaceGrouping.directory =>
-          model.catalog?.directories
-                  .where((d) => d.id == (r.directoryId ?? 'unfiled'))
-                  .firstOrNull
-                  ?.name ??
-              '未分类',
+          model.query.sort == WorkspaceSort.manual && model.catalog != null
+              ? directoryPath(model.catalog!, r.directoryId)
+              : model.catalog?.directories
+                        .where((d) => d.id == (r.directoryId ?? 'unfiled'))
+                        .firstOrNull
+                        ?.name ??
+                    '未分类',
       };
 
   Widget _record(BuildContext context, WorkspaceRecordSummary r) {
@@ -1096,6 +1115,20 @@ class _LibraryPageState extends State<LibraryPage> {
                         style: libraryText(context, 12, color: c.muted),
                       ),
                     ),
+                    if (model.query.sort == WorkspaceSort.manual &&
+                        model.catalog != null)
+                      Tooltip(
+                        message: directoryPath(model.catalog!, r.directoryId),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            directoryPath(model.catalog!, r.directoryId),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: libraryText(context, 12, color: c.muted),
+                          ),
+                        ),
+                      ),
                     if (r.tags.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 7),
@@ -1240,7 +1273,7 @@ class _LibraryPageState extends State<LibraryPage> {
               children: [
                 Expanded(
                   child: Text(
-                    '${_groupName(model.query.grouping)} · ${model.query.sort == WorkspaceSort.name ? '按名称' : '最近更新优先'}',
+                    '${_groupName(model.query.grouping)} · ${_sortName(model.query.sort)}',
                     style: libraryText(context, 12, color: c.muted),
                   ),
                 ),

@@ -28,6 +28,7 @@ part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
 part 'library_recycle_storage.dart';
 part 'library_move_storage.dart';
+part 'library_order_storage.dart';
 part 'backup_library_recycle.dart';
 part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
@@ -62,6 +63,7 @@ const _informationImportFileLibraryFormat = 47;
 const _informationFileUpdateLibraryFormat = 48;
 const _credentialProposalPreviewLibraryFormat = 49;
 const _libraryRecycleLibraryFormat = 50;
+const _libraryOrderLibraryFormat = 51;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -142,6 +144,7 @@ class EncryptedInformationRepository
         InformationRepository,
         LibraryRecycleRepository,
         LibraryMoveRepository,
+        LibraryOrderRepository,
         CredentialRepository,
         CredentialRecordRepository,
         CredentialFieldMigrationRepository,
@@ -424,6 +427,9 @@ class EncryptedInformationRepository
   final _revisionPurges = <RevisionPurgeFact>[];
   final _recycle = <String, RecycleEntry>{};
   final _libraryRecycleBatches = <String, LibraryRecycleBatch>{};
+  LibraryOrderSnapshot? _libraryOrder;
+  @override
+  LibraryOrderSnapshot? get libraryOrder => _libraryOrder;
   @override
   Future<LibraryMoveReceipt?> libraryMoveReceipt(String id) =>
       _libraryMoveReceipt(id);
@@ -585,7 +591,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _libraryRecycleLibraryFormat) {
+      if (headerVersion > _libraryOrderLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -600,7 +606,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryRecycleLibraryFormat ||
+            (marker.single['version'] as int) > _libraryOrderLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -864,6 +870,7 @@ class EncryptedInformationRepository
       _settings[row.read<String>('name')] = row.read<int>('value');
     }
     await _loadLibraryRecycleBatches();
+    await _loadLibraryOrder();
     await _loadTemplatePackages();
     final items = await _db
         .customSelect('SELECT * FROM information_items ORDER BY rowid')
@@ -2058,6 +2065,9 @@ class _InformationDatabase extends GeneratedDatabase {
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS library_move_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS library_order_state(id TEXT PRIMARY KEY CHECK(id=\'current\'),payload TEXT NOT NULL)',
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS template_package_operations('

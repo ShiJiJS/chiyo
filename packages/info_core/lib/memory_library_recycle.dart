@@ -12,6 +12,7 @@ extension _MemoryLibraryRecycle on MemoryInformationRepository {
     entries: _recycle.values,
     facts: _recycleFacts,
     batches: _libraryRecycleBatches.values,
+    orderDigest: _libraryOrder?.digest,
   );
   Future<LibraryRecycleReceipt> _commitLibraryRecycle(
     LibraryRecycleChange change,
@@ -47,6 +48,7 @@ extension _MemoryLibraryRecycle on MemoryInformationRepository {
       ..clear()
       ..addAll(change.materials);
     _libraryRecycleBatches[change.batch.id] = change.batch;
+    if (change.order != null) _libraryOrder = change.order;
     _libraryRecycleReceipts[change.receipt.operationId] = change.receipt;
     return change.receipt;
   }

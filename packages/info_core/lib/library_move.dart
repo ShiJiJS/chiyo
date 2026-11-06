@@ -11,6 +11,8 @@ class LibraryMovePreview {
     required Iterable<LibraryRecycleRecord> records,
     required Iterable<String> conflicts,
     required this.token,
+    this.position,
+    this.anchorName,
   }) : targetPath = List.unmodifiable(targetPath),
        roots = List.unmodifiable(roots),
        records = List.unmodifiable(records),
@@ -20,6 +22,8 @@ class LibraryMovePreview {
   final List<String> targetPath, roots, conflicts;
   final List<LibraryRecycleRecord> records;
   final String token;
+  final LibraryMovePosition? position;
+  final String? anchorName;
   bool get canMove => conflicts.isEmpty;
 }
 
@@ -93,6 +97,7 @@ class LibraryMoveChange {
     required Iterable<InformationRevision> previous,
     required Iterable<ManagedCredential> credentials,
     required this.validate,
+    this.order,
   }) : directories = List.unmodifiable(directories),
        items = List.unmodifiable(items),
        previous = List.unmodifiable(previous),
@@ -104,6 +109,7 @@ class LibraryMoveChange {
   final List<InformationRevision> previous;
   final List<ManagedCredential> credentials;
   final void Function() validate;
+  final LibraryOrderSnapshot? order;
 }
 
 abstract interface class LibraryMoveRepository {
@@ -130,12 +136,16 @@ extension OwnerLibraryMove on OwnerAccess {
 
   Future<LibraryMovePreview> previewLibraryMove(
     LibrarySelection selection,
-    String? targetId,
-  ) => _serialize(() async => _previewLibraryMove(selection, targetId));
+    String? targetId, {
+    LibraryMovePosition? position,
+  }) => _serialize(
+    () async => _previewLibraryMove(selection, targetId, position),
+  );
 
   LibraryMovePreview _previewLibraryMove(
     LibrarySelection selection,
     String? targetId,
+    LibraryMovePosition? position,
   ) {
     final scope = _previewLibraryRecycle(selection);
     final dirs = {for (final d in directories) d.id: d};
@@ -150,6 +160,44 @@ extension OwnerLibraryMove on OwnerAccess {
         .where((r) => !included.contains(r.directoryId))
         .toList();
     final conflicts = <String>[];
+    LibraryRecycleRecord? anchorRecord;
+    InformationDirectory? anchorDirectory;
+    final anchor = position?.anchor;
+    if (anchor != null) {
+      if (!libraryOrderSupported) {
+        throw const AccessFailure('unsupported_capability');
+      }
+      if (anchor.kind == 'directory') {
+        anchorDirectory = dirs[anchor.id];
+        if (anchorDirectory == null ||
+            anchorDirectory.parentId != targetId ||
+            included.contains(anchor.id) ||
+            roots.isEmpty ||
+            records.isNotEmpty) {
+          conflicts.add('排序目标必须是同一上级下未选中的目录；目录和单独资料请分别排序。');
+        }
+      } else if ({'information', 'credential'}.contains(anchor.kind)) {
+        if (roots.isNotEmpty ||
+            records.isEmpty ||
+            records.any((r) => r.kind == anchor.kind && r.id == anchor.id)) {
+          conflicts.add('排序目标必须是未选中的资料或凭据；目录和单独资料请分别排序。');
+        }
+        final anchorScope = _previewLibraryRecycle(
+          LibrarySelection(
+            informationIds: anchor.kind == 'information'
+                ? [anchor.id]
+                : const [],
+            credentialIds: anchor.kind == 'credential' ? [anchor.id] : const [],
+          ),
+        );
+        anchorRecord = anchorScope.records.single;
+        if (anchorRecord.directoryId != targetId) {
+          conflicts.add('排序目标的位置已变化，请重新选择目标。');
+        }
+      } else {
+        throw const AccessFailure('invalid_library_position');
+      }
+    }
     final targetPath = <String>[];
     final visited = <String>{};
     var cursor = targetId;
@@ -183,6 +231,17 @@ extension OwnerLibraryMove on OwnerAccess {
       'action': 'move',
       'scope': scope.toJson(),
       'targetId': targetId,
+      if (position != null) ...{
+        'position': position.toJson(),
+        'anchor': anchorDirectory == null
+            ? anchorRecord?.toJson()
+            : [
+                anchorDirectory.id,
+                anchorDirectory.name,
+                anchorDirectory.version,
+              ],
+      },
+      if (_savedLibraryOrder != null) 'order': _savedLibraryOrder!.digest,
       'directories': [
         for (final d in sortedDirs) [d.id, d.name, d.parentId, d.version],
       ],
@@ -195,6 +254,8 @@ extension OwnerLibraryMove on OwnerAccess {
       records: records,
       conflicts: conflicts,
       token: token,
+      position: position,
+      anchorName: anchorDirectory?.name ?? anchorRecord?.name,
     );
   }
 
@@ -202,8 +263,9 @@ extension OwnerLibraryMove on OwnerAccess {
     String operationId,
     LibrarySelection selection,
     String? targetId,
-    String reviewToken,
-  ) => _serialize(() async {
+    String reviewToken, {
+    LibraryMovePosition? position,
+  }) => _serialize(() async {
     if (!serviceAvailable) throw const AccessFailure('service_unavailable');
     _validateRecordOperationId(operationId);
     final inputHash = _libraryRecycleHash({
@@ -211,6 +273,7 @@ extension OwnerLibraryMove on OwnerAccess {
       'selection': selection.toJson(),
       'targetId': targetId,
       'reviewToken': reviewToken,
+      if (position != null) 'position': position.toJson(),
     });
     final repository = _libraryMoveRepository;
     final old = await repository.libraryMoveReceipt(operationId);
@@ -220,7 +283,7 @@ extension OwnerLibraryMove on OwnerAccess {
       }
       return old;
     }
-    final preview = _previewLibraryMove(selection, targetId);
+    final preview = _previewLibraryMove(selection, targetId, position);
     if (preview.token != reviewToken) {
       throw const AccessFailure('library_selection_changed');
     }
@@ -279,14 +342,40 @@ extension OwnerLibraryMove on OwnerAccess {
       inputHash: inputHash,
       targetId: targetId,
       targetPath: preview.targetPath,
-      directoryIds: changedDirectories.map((d) => d.id),
-      informationIds: items.map((i) => i.id),
-      credentialIds: _vault.managedCredentials
-          .where(
-            (c) => movedCredentials.contains(c.id) && c.directoryId != targetId,
-          )
-          .map((c) => c.id),
+      directoryIds: position == null
+          ? changedDirectories.map((d) => d.id)
+          : preview.roots,
+      informationIds: position == null
+          ? items.map((i) => i.id)
+          : movedInformation,
+      credentialIds: position != null
+          ? movedCredentials
+          : _vault.managedCredentials
+                .where(
+                  (c) =>
+                      movedCredentials.contains(c.id) &&
+                      c.directoryId != targetId,
+                )
+                .map((c) => c.id),
     );
+    final order =
+        libraryOrderSupported &&
+            (position != null ||
+                receipt.directoryIds.isNotEmpty ||
+                receipt.informationIds.isNotEmpty ||
+                receipt.credentialIds.isNotEmpty)
+        ? _placedLibraryOrder(
+            directoryIds: receipt.directoryIds,
+            recordRefs: [
+              for (final id in receipt.informationIds)
+                LibraryEntryRef('information', id),
+              for (final id in receipt.credentialIds)
+                LibraryEntryRef('credential', id),
+            ],
+            targetId: targetId,
+            position: position,
+          )
+        : null;
     return repository.commitLibraryMove(
       LibraryMoveChange(
         beforeToken: beforeToken,
@@ -295,6 +384,7 @@ extension OwnerLibraryMove on OwnerAccess {
         items: items,
         previous: originals.map((i) => InformationRevision(i, now)),
         credentials: credentials,
+        order: order,
         validate: () => _validateLibraryRecycleState(generation, beforeToken),
       ),
     );

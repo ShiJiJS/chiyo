@@ -128,6 +128,10 @@ void main() {
         isNull,
       );
       sql((db) => db.execute('DROP TRIGGER fail_move'));
+      expect(
+        sql((db) => db.select('PRAGMA user_version').single.values.single),
+        oldFormat,
+      );
       final receipt = await service.owner.moveLibrarySelection(
         'move',
         selection,
@@ -136,7 +140,7 @@ void main() {
       );
       expect(
         sql((db) => db.select('PRAGMA user_version').single.values.single),
-        oldFormat,
+        51,
       );
       expect(receipt.directoryIds, [source.id]);
       await service.close();

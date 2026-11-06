@@ -164,6 +164,10 @@ class InformationBackups {
     ..._v15Columns,
     'library_recycle_batches': ['id', 'payload'],
   });
+  static final _v21Columns = Map<String, List<String>>.unmodifiable({
+    ..._v20Columns,
+    'library_order_state': ['id', 'payload'],
+  });
 
   // Portable formats 1–7 keep their table keys independent of the schema17+
   // physical names. Legacy readers must not find a writable old runtime table.
@@ -461,7 +465,13 @@ class InformationBackups {
                   )
                   .get())
               .isNotEmpty;
+      final orderedLibrary =
+          (await _repository._db
+                  .customSelect('SELECT id FROM library_order_state LIMIT 1')
+                  .get())
+              .isNotEmpty;
       final extendedColumns =
+          orderedLibrary ||
           directoryRecycle ||
           hasLayouts ||
           hasGrantVersions ||
@@ -471,7 +481,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = directoryRecycle
+        formatVersion = orderedLibrary
+            ? 21
+            : directoryRecycle
             ? 20
             : accountMetadata
             ? 19
@@ -493,7 +505,9 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (directoryRecycle
+            in (orderedLibrary
+                    ? _v21Columns
+                    : directoryRecycle
                     ? _v20Columns
                     : templatePackages ||
                           credentialTemplates ||
@@ -582,6 +596,7 @@ class InformationBackups {
                 'information_lifecycle_operations',
                 'library_recycle_operations',
                 'library_move_operations',
+                'library_order_state',
                 'information_approval_operations',
                 'desktop_preference_operations',
                 'owner_proposal_operations',
@@ -846,6 +861,7 @@ class InformationBackups {
                     'information_lifecycle_operations',
                     'library_recycle_operations',
                     'library_move_operations',
+                    'library_order_state',
                     'information_approval_operations',
                     'desktop_preference_operations',
                     'owner_proposal_operations',
@@ -865,6 +881,11 @@ class InformationBackups {
         }
         // Uncommitted owner forms are ephemeral, excluded from backup and
         // invalidated by a successful restore. A failed restore keeps them.
+        // Ordering alone is not recipient content. Replace it even when an
+        // older archive has no ordering table; never retain the previous IDs.
+        await _repository._db.customStatement(
+          'DELETE FROM library_order_state',
+        );
         await _repository._db.customStatement(
           'DELETE FROM information_file_stages',
         );
@@ -951,6 +972,9 @@ class InformationBackups {
             _libraryRecycleLibraryFormat,
           );
         }
+        if (contents.formatVersion >= 21) {
+          await _repository._requireAdmissionFormat(_libraryOrderLibraryFormat);
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -958,7 +982,9 @@ class InformationBackups {
           await _installAttachmentBodies(contents, reader);
         }
         for (final table
-            in (contents.formatVersion >= 20
+            in (contents.formatVersion >= 21
+                    ? _v21Columns
+                    : contents.formatVersion >= 20
                     ? _v20Columns
                     : contents.formatVersion >= 15
                     ? _v15Columns
@@ -1029,6 +1055,7 @@ class InformationBackups {
           18,
           19,
           20,
+          21,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1051,6 +1078,7 @@ class InformationBackups {
       12 || 13 || 14 => _v12Columns,
       15 || 16 || 17 || 18 || 19 => _v15Columns,
       20 => _v20Columns,
+      21 => _v21Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1273,6 +1301,7 @@ class InformationBackups {
       formatVersion: decoded['version'] as int,
     );
     _validateBackupLibraryRecycle(tables);
+    _validateBackupLibraryOrder(tables);
     final packageIds = <String>{};
     final packages =
         tables['template_packages'] ?? const <Map<String, Object?>>[];

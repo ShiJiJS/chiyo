@@ -139,6 +139,7 @@ extension _EncryptedLibraryRecycle on EncryptedInformationRepository {
       entries: entries,
       facts: facts,
       batches: await _storedLibraryRecycleBatches(),
+      orderDigest: (await _storedLibraryOrder())?.digest,
     );
   }
 
@@ -194,6 +195,7 @@ extension _EncryptedLibraryRecycle on EncryptedInformationRepository {
           );
         }
         await _writeRecycle(change.entries, change.facts);
+        if (change.order != null) await _writeLibraryOrder(change.order!);
         await _db.customStatement(
           'INSERT INTO library_recycle_batches(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
           [change.batch.id, jsonEncode(change.batch.toJson())],
@@ -221,6 +223,7 @@ extension _EncryptedLibraryRecycle on EncryptedInformationRepository {
       _recycleFacts.addAll(change.facts);
       _publishCredentialSnapshot(change.credentials, change.materials);
       _libraryRecycleBatches[change.batch.id] = change.batch;
+      if (change.order != null) _libraryOrder = change.order;
       return change.receipt;
     } on AccessFailure {
       rethrow;

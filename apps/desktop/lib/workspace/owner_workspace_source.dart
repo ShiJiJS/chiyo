@@ -280,6 +280,7 @@ class OwnerWorkspaceSource
                   ],
               ],
               owner.accessRecordObservation,
+              owner.libraryOrderRevision,
               owner.desktopPreferences.version,
               owner.templatePackageVersion,
               owner.sshKnownHosts?.id,
@@ -360,10 +361,15 @@ class OwnerWorkspaceSource
   @override
   bool get libraryMoveSupported => owner.libraryMoveSupported;
   @override
+  bool get libraryOrderSupported => owner.libraryOrderSupported;
+  @override
   Future<WorkspaceLibraryMovePreview> previewLibraryMove(
     WorkspaceLibrarySelection selection,
-    String? targetId,
-  ) => _read(() => _libraryMove.preview(selection, targetId));
+    String? targetId, {
+    WorkspaceLibraryPosition? position,
+  }) => _read(
+    () => _libraryMove.preview(selection, targetId, position: position),
+  );
   @override
   Future<WorkspaceLibraryMoveReceipt> moveLibrarySelection(
     WorkspaceLibraryMoveCommand command,

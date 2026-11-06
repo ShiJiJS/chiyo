@@ -1,6 +1,21 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_library_recycle.dart';
+import 'workspace_records.dart';
+
+class WorkspaceLibraryPosition {
+  const WorkspaceLibraryPosition.directory(this.id, {this.after = false})
+    : kind = 'directory';
+  WorkspaceLibraryPosition.record(WorkspaceRecordRef ref, {this.after = false})
+    : kind = ref.kind.name,
+      id = ref.id;
+  final String kind, id;
+  final bool after;
+  Map<String, Object?> toJson() => {
+    'anchor': [kind, id],
+    'after': after,
+  };
+}
 
 class WorkspaceLibraryMovePreview {
   WorkspaceLibraryMovePreview({
@@ -11,6 +26,8 @@ class WorkspaceLibraryMovePreview {
     required Iterable<String> roots,
     required Iterable<WorkspaceLibraryRecycleRecord> records,
     required Iterable<String> conflicts,
+    this.position,
+    this.anchorName,
   }) : targetPath = List.unmodifiable(targetPath),
        roots = List.unmodifiable(roots),
        records = List.unmodifiable(records),
@@ -20,6 +37,8 @@ class WorkspaceLibraryMovePreview {
   final String? targetId;
   final List<String> targetPath, roots, conflicts;
   final List<WorkspaceLibraryRecycleRecord> records;
+  final WorkspaceLibraryPosition? position;
+  final String? anchorName;
   bool get canSave => conflicts.isEmpty;
 }
 
@@ -29,10 +48,12 @@ class WorkspaceLibraryMoveCommand {
     required this.selection,
     required this.targetId,
     required this.reviewToken,
+    this.position,
   });
   final String operationId, reviewToken;
   final WorkspaceLibrarySelection selection;
   final String? targetId;
+  final WorkspaceLibraryPosition? position;
   String get inputHash => sha256
       .convert(
         utf8.encode(
@@ -41,6 +62,7 @@ class WorkspaceLibraryMoveCommand {
             'selection': selection.toJson(),
             'targetId': targetId,
             'reviewToken': reviewToken,
+            if (position != null) 'position': position!.toJson(),
           }),
         ),
       )
@@ -63,10 +85,12 @@ class WorkspaceLibraryMoveReceipt {
 
 abstract interface class WorkspaceLibraryMove {
   bool get libraryMoveSupported;
+  bool get libraryOrderSupported;
   Future<WorkspaceLibraryMovePreview> previewLibraryMove(
     WorkspaceLibrarySelection selection,
-    String? targetId,
-  );
+    String? targetId, {
+    WorkspaceLibraryPosition? position,
+  });
   Future<WorkspaceLibraryMoveReceipt> moveLibrarySelection(
     WorkspaceLibraryMoveCommand command,
   );

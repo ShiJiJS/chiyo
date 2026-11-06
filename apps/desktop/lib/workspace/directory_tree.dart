@@ -6,18 +6,21 @@ const libraryVirtualDirectoryIds = {'all', 'unfiled'};
 List<WorkspaceDirectory> libraryDirectoryTree(WorkspaceCatalog catalog) {
   final ordered = <WorkspaceDirectory>[];
   final visited = <String>{};
-  void append(String? parent) {
-    for (final d in catalog.directories.where(
-      (d) => !libraryVirtualDirectoryIds.contains(d.id) && d.parentId == parent,
-    )) {
-      if (!visited.add(d.id)) continue;
-      ordered.add(d);
-      append(d.id);
+  final children = <String?, List<WorkspaceDirectory>>{};
+  for (final d in catalog.directories) {
+    if (!libraryVirtualDirectoryIds.contains(d.id)) {
+      children.putIfAbsent(d.parentId, () => []).add(d);
     }
   }
-
   ordered.addAll(catalog.directories.where((d) => d.id == 'all'));
-  append(null);
+  final pending = (children[null] ?? const <WorkspaceDirectory>[]).reversed
+      .toList();
+  while (pending.isNotEmpty) {
+    final d = pending.removeLast();
+    if (!visited.add(d.id)) continue;
+    ordered.add(d);
+    pending.addAll((children[d.id] ?? const <WorkspaceDirectory>[]).reversed);
+  }
   ordered.addAll(catalog.directories.where((d) => d.id == 'unfiled'));
   return ordered;
 }

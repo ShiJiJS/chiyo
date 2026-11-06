@@ -54,6 +54,7 @@ extension _EncryptedLibraryMove on EncryptedInformationRepository {
           change.credentials,
           _credentialMaterials,
         );
+        if (change.order != null) await _writeLibraryOrder(change.order!);
         await _db.customStatement(
           'INSERT INTO library_move_operations(operation_id,payload) VALUES(?,?)',
           [change.receipt.operationId, jsonEncode(change.receipt.toJson())],
@@ -71,6 +72,7 @@ extension _EncryptedLibraryMove on EncryptedInformationRepository {
       _credentials
         ..clear()
         ..addAll(change.credentials);
+      if (change.order != null) _libraryOrder = change.order;
       return change.receipt;
     } on AccessFailure {
       rethrow;

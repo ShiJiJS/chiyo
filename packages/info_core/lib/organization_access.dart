@@ -8,7 +8,7 @@ extension AgentDirectoryDiscovery on AgentAccess {
       throw const AccessFailure('service_unavailable');
     }
     final directories = List<InformationDirectory>.of(
-      _service._repository.directories,
+      _service.owner.directories,
     );
     final byId = {for (final d in directories) d.id: d};
     final orders = <String?, int>{};
@@ -144,8 +144,7 @@ extension OwnerOrganization on OwnerAccess {
             .where((c) => c.deletedAt == null)
             .toList()
       : const [];
-  List<InformationDirectory> get directories =>
-      _service._repository.directories;
+  List<InformationDirectory> get directories => _orderedLibraryDirectories();
   List<InformationTag> get tags => _service._repository.tags;
 
   void _checkOrganizationName(String name) {

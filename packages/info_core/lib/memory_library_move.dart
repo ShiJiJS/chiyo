@@ -23,6 +23,7 @@ extension _MemoryLibraryMove on MemoryInformationRepository {
       ..clear()
       ..addAll(change.credentials);
     _libraryMoveReceipts[change.receipt.operationId] = change.receipt;
+    if (change.order != null) _libraryOrder = change.order;
     return change.receipt;
   }
 }
