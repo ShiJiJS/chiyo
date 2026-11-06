@@ -166,9 +166,13 @@ abstract interface class InformationLifecycleRepository {
 extension OwnerInformationLifecycle on OwnerAccess {
   /// Historical identity references remain in the archive. Restoring current
   /// content only keeps targets that still exist, never a same-name substitute.
-  InformationLayout? _existingLayoutRelations(InformationLayout? layout) {
+  InformationLayout? _existingLayoutRelations(
+    InformationLayout? layout, {
+    Set<String> additionalItems = const {},
+    Set<String> additionalCredentials = const {},
+  }) {
     if (layout == null) return null;
-    final items = information.map((i) => i.id).toSet();
+    final items = {...information.map((i) => i.id), ...additionalItems};
     final vault = _service._repository;
     final credentialIds = vault is CredentialRepository
         ? (vault as CredentialRepository).managedCredentials
@@ -176,6 +180,7 @@ extension OwnerInformationLifecycle on OwnerAccess {
               .map((c) => c.id)
               .toSet()
         : <String>{};
+    credentialIds.addAll(additionalCredentials);
     return InformationLayout(
       typeId: layout.typeId,
       snapshot: layout.snapshot,

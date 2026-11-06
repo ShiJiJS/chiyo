@@ -35,6 +35,36 @@ class LibraryRecycleRecord {
     required Iterable<String> directoryPath,
     this.materialVersion,
   }) : directoryPath = List.unmodifiable(directoryPath);
+  factory LibraryRecycleRecord.fromJson(Map<String, dynamic> json) {
+    final value = LibraryRecycleRecord(
+      kind: json['kind'] as String,
+      id: json['id'] as String,
+      name: json['name'] as String,
+      typeId: json['typeId'] as String,
+      version: json['version'] as int,
+      directoryId: json['directoryId'] as String?,
+      directoryPath: (json['directoryPath'] as List).cast<String>(),
+      materialVersion: json['materialVersion'] as int?,
+    );
+    if (json.length != (value.materialVersion == null ? 7 : 8) ||
+        !{'information', 'credential'}.contains(value.kind) ||
+        value.id.isEmpty ||
+        value.id.length > 200 ||
+        value.name.isEmpty ||
+        value.name.length > 200 ||
+        value.typeId.isEmpty ||
+        value.typeId.length > 200 ||
+        value.directoryId != null &&
+            (value.directoryId!.isEmpty || value.directoryId!.length > 200) ||
+        (value.directoryId == null) != value.directoryPath.isEmpty ||
+        (value.kind == 'credential') != (value.materialVersion != null) ||
+        value.version < 1 ||
+        value.materialVersion != null && value.materialVersion! < 1 ||
+        value.directoryPath.any((p) => p.isEmpty || p.length > 200)) {
+      throw const FormatException('Invalid recycle record metadata');
+    }
+    return value;
+  }
   final String kind, id, name, typeId;
   final String? directoryId;
   final List<String> directoryPath;
