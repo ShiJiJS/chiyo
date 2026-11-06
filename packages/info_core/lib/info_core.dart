@@ -47,6 +47,7 @@ part 'recycle_access.dart';
 part 'library_recycle.dart';
 part 'library_recycle_operations.dart';
 part 'library_recycle_access.dart';
+part 'library_move.dart';
 part 'revision_access.dart';
 part 'backup_access.dart';
 part 'workspace_access.dart';

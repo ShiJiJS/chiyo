@@ -27,6 +27,7 @@ part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
 part 'library_recycle_storage.dart';
+part 'library_move_storage.dart';
 part 'backup_library_recycle.dart';
 part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
@@ -140,6 +141,7 @@ class EncryptedInformationRepository
     implements
         InformationRepository,
         LibraryRecycleRepository,
+        LibraryMoveRepository,
         CredentialRepository,
         CredentialRecordRepository,
         CredentialFieldMigrationRepository,
@@ -422,6 +424,12 @@ class EncryptedInformationRepository
   final _revisionPurges = <RevisionPurgeFact>[];
   final _recycle = <String, RecycleEntry>{};
   final _libraryRecycleBatches = <String, LibraryRecycleBatch>{};
+  @override
+  Future<LibraryMoveReceipt?> libraryMoveReceipt(String id) =>
+      _libraryMoveReceipt(id);
+  @override
+  Future<LibraryMoveReceipt> commitLibraryMove(LibraryMoveChange change) =>
+      _commitLibraryMove(change);
   @override
   List<LibraryRecycleBatch> get libraryRecycleBatches =>
       List.unmodifiable(_libraryRecycleBatches.values);
@@ -2047,6 +2055,9 @@ class _InformationDatabase extends GeneratedDatabase {
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS library_recycle_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS library_move_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS template_package_operations('
