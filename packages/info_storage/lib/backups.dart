@@ -427,6 +427,13 @@ class InformationBackups {
       // Pending requests are not portable history. Select the new label only
       // after archiving, but before metadata admission/validation or publication.
       _archiveCredentialRuntime(tables, now);
+      final sessionSshGrants = tables['credential_use_requests']!.any(
+        (row) =>
+            CredentialUseRequest.fromJson(
+              _backupJson(row),
+            ).credentialValidity ==
+            CredentialUseValidity.session,
+      );
       final portableFills = _hasPortableFocusedFill(
         tables['credential_use_requests']!.map(
           (row) => CredentialUseRequest.fromJson(_backupJson(row)),
@@ -471,6 +478,7 @@ class InformationBackups {
                   .get())
               .isNotEmpty;
       final extendedColumns =
+          sessionSshGrants ||
           orderedLibrary ||
           directoryRecycle ||
           hasLayouts ||
@@ -481,7 +489,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = orderedLibrary
+        formatVersion = sessionSshGrants
+            ? 22
+            : orderedLibrary
             ? 21
             : directoryRecycle
             ? 20
@@ -505,7 +515,7 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (orderedLibrary
+            in (sessionSshGrants || orderedLibrary
                     ? _v21Columns
                     : directoryRecycle
                     ? _v20Columns
@@ -975,6 +985,11 @@ class InformationBackups {
         if (contents.formatVersion >= 21) {
           await _repository._requireAdmissionFormat(_libraryOrderLibraryFormat);
         }
+        if (contents.formatVersion >= 22) {
+          await _repository._requireAdmissionFormat(
+            _sshSessionUseLibraryFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -1056,6 +1071,7 @@ class InformationBackups {
           19,
           20,
           21,
+          22,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1078,7 +1094,7 @@ class InformationBackups {
       12 || 13 || 14 => _v12Columns,
       15 || 16 || 17 || 18 || 19 => _v15Columns,
       20 => _v20Columns,
-      21 => _v21Columns,
+      21 || 22 => _v21Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

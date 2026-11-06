@@ -246,12 +246,17 @@ class WorkspaceCredentialUseRequest {
     this.state = WorkspaceCredentialRequestState.pending,
     this.approvalReference,
     this.requestExpiresAt,
+    this.supportsSessionValidity = false,
   });
   final String id, credentialName, purpose;
   final String? approvalReference;
   String get approvalId => approvalReference ?? 'credential:$id';
   final WorkspaceRecordRef ref;
-  final int materialVersion, useGeneration, minutes;
+  final int materialVersion, useGeneration;
+  final int? minutes;
+  final bool supportsSessionValidity;
+  bool get sessionBound => minutes == null;
+  String get validityLabel => sessionBound ? '不限时（限本聊天）' : '$minutes 分钟';
   final WorkspaceCredentialDelivery delivery;
   final WorkspaceCredentialReceiver receiver;
   final WorkspaceCredentialSession session;
@@ -275,6 +280,7 @@ class WorkspaceCredentialUseRequest {
     state: value,
     approvalReference: approvalReference,
     requestExpiresAt: requestExpiresAt,
+    supportsSessionValidity: supportsSessionValidity,
   );
 }
 
@@ -305,7 +311,7 @@ class WorkspaceCredentialUseHistory {
   final int materialVersion;
   final WorkspaceCredentialDelivery delivery;
   final WorkspaceCredentialSession session;
-  final DateTime expiresAt;
+  final DateTime? expiresAt;
   final List<WorkspaceCredentialUseOperation> operations;
 }
 

@@ -282,24 +282,44 @@ class _LibraryPageState extends State<LibraryPage> {
       DesktopFeedback.show(context, '资料正在更新，请稍后再试。');
       return;
     }
+    setState(() => _placing = true);
     widget.onModalChanged?.call(true);
     try {
-      final receipt = moving
-          ? await showLibraryMove(context, model.source, selection)
-          : await showLibraryBatchRecycle(
-              context,
-              model.source,
-              selection: selection,
-            );
+      final Object? receipt;
+      if (moving) {
+        receipt = await showLibraryMove(context, model.source, selection);
+      } else if (selection.directoryIds.isEmpty &&
+          selection.records.length == 1) {
+        // Retain the existing single-record lifecycle, including its individual
+        // restore/purge actions. Only an actual group becomes one recycle batch.
+        final current = await model.source.readDetail(selection.records.single);
+        if (!mounted) return;
+        receipt = await showLibraryRecycle(
+          context,
+          model.source,
+          current: current,
+        );
+      } else {
+        receipt = await showLibraryBatchRecycle(
+          context,
+          model.source,
+          selection: selection,
+        );
+      }
       if (!mounted || receipt == null) return;
       model.cancelSelection();
       await model.load(model.query);
       if (mounted) {
         DesktopFeedback.show(context, moving ? '已移动所选内容' : '所选内容已移到回收站');
       }
+    } on WorkspaceFailure catch (e) {
+      if (mounted) DesktopFeedback.show(context, e.message);
     } finally {
       widget.onModalChanged?.call(false);
-      if (mounted) _workspaceFocus.requestFocus();
+      if (mounted) {
+        setState(() => _placing = false);
+        _workspaceFocus.requestFocus();
+      }
     }
   }
 

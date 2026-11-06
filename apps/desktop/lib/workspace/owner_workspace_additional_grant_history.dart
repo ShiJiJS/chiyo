@@ -338,6 +338,8 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
       decidedAt: r.decidedAt,
       fieldExpiresAt: r.fieldExpiresAt,
       credentialExpiresAt: r.credentialExpiresAt,
+      credentialSessionBound:
+          r.credentialValidity == core.CredentialUseValidity.session,
       scopes: [
         if (r.credentialApproved)
           WorkspaceGrantedScope(
@@ -390,7 +392,7 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
       ],
       events: events,
       scopeNotice:
-          '凭据使用与普通字段范围分别固定期限；每次使用独立记录。查询历史不会执行命令、领取材料或重新激活许可。${owner.credentialUseDecisionUnconfirmed(r) ? '原决定结果未确认，许可未启用。' : ''}',
+          'SSH可在本聊天内不限时使用，其他凭据与普通字段按批准期限处理；每次使用独立记录。查询历史不会执行命令、领取材料或重新激活许可。${owner.credentialUseDecisionUnconfirmed(r) ? '原决定结果未确认，许可未启用。' : ''}',
       legacyNotice: r.restoredAt != null
           ? '来自备份的历史事实，不恢复原设备授权、进程或临时材料。'
           : fields?.legacyNotice,

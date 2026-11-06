@@ -61,6 +61,18 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
         r = r.changed({'invalidatedCode': 'grant_revoked'});
       _credentialUseRequests.add(r);
     }
+    if (_credentialUseRequests.any(
+          (r) => r.credentialValidity == CredentialUseValidity.session,
+        ) &&
+        (await _db
+                    .customSelect(
+                      'SELECT version FROM library_format WHERE singleton=1',
+                    )
+                    .getSingle())
+                .read<int>('version') <
+            _sshSessionUseLibraryFormat) {
+      throw const StorageFailure('unsupported_schema');
+    }
     for (final row
         in await _db
             .customSelect(
@@ -117,6 +129,11 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     try {
       await _writeMetadata(() async {
         validate?.call();
+        if (requests.any(
+          (r) => r.credentialValidity == CredentialUseValidity.session,
+        )) {
+          await _requireAdmissionFormat(_sshSessionUseLibraryFormat);
+        }
         if (_hasPortableFocusedFill(requests)) {
           await _requirePortableFocusedFillFormat();
         }

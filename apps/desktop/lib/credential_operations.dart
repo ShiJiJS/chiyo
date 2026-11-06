@@ -130,7 +130,12 @@ class _CredentialUseOperationsState extends State<CredentialUseOperations> {
         LayoutBuilder(
           builder: (context, bounds) {
             final facts = [
-              _fact('授权到期', _time(r.credentialExpiresAt)),
+              _fact(
+                '授权期限',
+                r.credentialValidity == CredentialUseValidity.session
+                    ? '不限时（限本聊天）'
+                    : _time(r.credentialExpiresAt),
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

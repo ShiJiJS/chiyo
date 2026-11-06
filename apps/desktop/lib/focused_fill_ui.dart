@@ -415,7 +415,7 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
                             r.id,
                             approveCredential: approve && allowed,
                             fields: const [],
-                            lifetime: Duration(minutes: draft.minutes),
+                            lifetime: Duration(minutes: draft.minutes!),
                           );
                           if (dialogContext.mounted) {
                             Navigator.pop(dialogContext);

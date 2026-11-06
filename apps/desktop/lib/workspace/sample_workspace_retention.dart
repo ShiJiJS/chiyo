@@ -76,10 +76,14 @@ extension _SampleRetention on SampleWorkspaceSource {
     for (final e in _credentials.retainedHistory.entries) {
       for (final h in e.value) {
         final id = 'legacy:${e.key.key}:${h.grantId}';
-        final times = [h.expiresAt, ...h.operations.map((o) => o.at)];
+        final times = [
+          if (h.expiresAt != null) h.expiresAt!,
+          ...h.operations.map((o) => o.at),
+        ];
         // The legacy projection has no live process or lease metadata. Only
         // fixture records explicitly known ended are eligible, never unknown.
-        final protected = !{'已到期', '已撤销', '会话已结束'}.contains(h.state);
+        final protected =
+            times.isEmpty || !{'已到期', '已撤销', '会话已结束'}.contains(h.state);
         observation.add([
           id,
           h.state,

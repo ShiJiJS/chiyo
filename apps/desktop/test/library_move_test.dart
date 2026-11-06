@@ -695,7 +695,7 @@ void main() {
         await t.tap(find.text('移到回收站'));
         await _settle(t);
         expect(
-          find.byKey(const ValueKey('batch-recycle-confirm')),
+          find.byKey(const ValueKey('library-recycle-submit')),
           findsOneWidget,
         );
         await t.tap(find.text('取消'));

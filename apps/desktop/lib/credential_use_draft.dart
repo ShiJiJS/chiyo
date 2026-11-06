@@ -5,7 +5,7 @@ class CredentialUseApprovalDraft {
   CredentialUseApprovalDraft(Iterable<FieldRef> fields)
     : fields = fields.toSet();
   bool allowCredential = true, fieldsExpanded = false, planExpanded = false;
-  int minutes = 15;
+  int? minutes = 15;
   int fieldMinutes = 480;
   final Set<FieldRef> fields;
   String? tip;

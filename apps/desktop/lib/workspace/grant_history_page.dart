@@ -502,6 +502,11 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                 '普通范围至 ${libraryLocalDateTime(d.fieldExpiresAt!)}',
                 style: libraryText(context, 13, color: c.muted, height: 1.8),
               ),
+            if (d.credentialSessionBound)
+              Text(
+                '凭据：不限时（限本聊天）',
+                style: libraryText(context, 13, color: c.muted, height: 1.8),
+              ),
             if (d.credentialExpiresAt != null)
               Text(
                 '凭据至 ${libraryLocalDateTime(d.credentialExpiresAt!)}',
@@ -567,7 +572,8 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                 ),
             ]),
             if (m.linkedDecision &&
-                m.decision.detail!.credentialExpiresAt != null)
+                (m.decision.detail!.credentialExpiresAt != null ||
+                    m.decision.detail!.credentialSessionBound))
               ApprovalExecutions(controller: m.decision),
             if (d.events.isNotEmpty)
               _section(context, '访问与使用事件', [

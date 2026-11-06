@@ -23,6 +23,7 @@ class RuntimeHarness {
     List<int>? fileBytes,
     bool inspectTool = false,
     InformationRepository? repository,
+    DateTime Function()? clock,
     bool enableReusableCredentialUse = false,
   }) async {
     final exe = File(executablePath ?? Platform.resolvedExecutable);
@@ -30,6 +31,7 @@ class RuntimeHarness {
     final digest = 'sha256:${sha256.convert(await exe.readAsBytes())}';
     final service = InformationService(
       repository: repository ?? MemoryInformationRepository(),
+      clock: clock,
       credentialExecutableInspector: inspectTool
           ? inspectCredentialExecutable
           : (path, receiver) async => ExecutableIdentity(
@@ -78,6 +80,7 @@ class RuntimeHarness {
     List<Object?> argv = const ['api', 'user'],
     String? receiver,
     int protocolVersion = 1,
+    Duration? lifetime = const Duration(minutes: 15),
   }) async {
     final selectedReceiver =
         receiver ??
@@ -108,7 +111,11 @@ class RuntimeHarness {
       throw StateError('Controlled plan was rejected');
     }
     final id = r['requestId'] as String;
-    await service.owner.decideCredentialUse(id, approveCredential: true);
+    await service.owner.decideCredentialUse(
+      id,
+      approveCredential: true,
+      lifetime: lifetime,
+    );
     return id;
   }
 
