@@ -1,5 +1,8 @@
 part of 'info_core.dart';
 
+/// Display choice, separate from the saved identity order and content versions.
+enum LibraryDisplayOrder { updated, name, manual }
+
 class LibraryEntryRef {
   const LibraryEntryRef(this.kind, this.id);
   final String kind, id;
@@ -87,6 +90,25 @@ List<T> _completeLibraryOrder<T>(Iterable<T> saved, Iterable<T> current) =>
     {...saved, ...current}.toList();
 
 extension OwnerLibraryOrder on OwnerAccess {
+  LibraryDisplayOrder get libraryDisplayOrder {
+    if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+    final value = _service._repository.readSetting('desktopLibraryOrder');
+    return value != null &&
+            value >= 0 &&
+            value < LibraryDisplayOrder.values.length
+        ? LibraryDisplayOrder.values[value]
+        : LibraryDisplayOrder.updated;
+  }
+
+  Future<void> saveLibraryDisplayOrder(LibraryDisplayOrder order) =>
+      _serialize(() async {
+        if (!serviceAvailable) throw const AccessFailure('service_unavailable');
+        await _service._repository.writeSetting(
+          'desktopLibraryOrder',
+          order.index,
+        );
+      });
+
   bool get libraryOrderSupported =>
       _service._repository is LibraryOrderRepository;
   LibraryOrderSnapshot? get _savedLibraryOrder =>

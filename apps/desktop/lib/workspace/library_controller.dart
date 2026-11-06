@@ -6,12 +6,21 @@ import 'workspace_source.dart';
 class LibraryController extends WorkspaceRecordsController {
   LibraryController(
     super.source, {
-    this.initialQuery = const WorkspaceQuery(),
+    WorkspaceQuery? initialQuery,
     this.initialSelection,
-  }) {
-    query = initialQuery;
+  }) : _initialQuery = initialQuery {
+    query = this.initialQuery;
   }
-  final WorkspaceQuery initialQuery;
+  final WorkspaceQuery? _initialQuery;
+  WorkspaceQuery get initialQuery =>
+      _initialQuery ??
+      WorkspaceQuery(
+        sort: source is WorkspaceLibraryMove
+            ? (source as WorkspaceLibraryMove).preferredLibrarySort ??
+                  WorkspaceSort.updated
+            : WorkspaceSort.updated,
+      );
+  String? sortPreferenceNotice;
   final WorkspaceRecordRef? initialSelection;
   final _back =
       <({WorkspaceQuery query, WorkspaceRecordRef? selected, double scroll})>[];
@@ -145,11 +154,20 @@ class LibraryController extends WorkspaceRecordsController {
     notifyListeners();
   }
 
-  Future<void> apply(WorkspaceQuery next) {
-    ++_navigation;
+  Future<void> apply(WorkspaceQuery next) async {
+    final navigation = ++_navigation;
+    if (next.sort != query.sort && source is WorkspaceLibraryMove) {
+      try {
+        await (source as WorkspaceLibraryMove).saveLibrarySort(next.sort);
+        sortPreferenceNotice = null;
+      } catch (_) {
+        sortPreferenceNotice = '显示方式未能记住，重开后请重新选择。';
+      }
+      if (_closed || navigation != _navigation) return;
+    }
     scrollOffset = 0;
     navigationNotice = null;
-    return load(next.copyWith(offset: 0));
+    await load(next.copyWith(offset: 0));
   }
 
   Future<void> clearFilters() =>
