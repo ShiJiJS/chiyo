@@ -8,6 +8,13 @@ class OwnerWorkspaceLibraryMove {
   final core.OwnerAccess owner;
   final Future<WorkspaceCatalog> Function() catalog;
   final void Function() changed;
+  core.LibraryMovePosition? _position(WorkspaceLibraryPosition? position) =>
+      position == null
+      ? null
+      : core.LibraryMovePosition(
+          core.LibraryEntryRef(position.kind, position.id),
+          after: position.after,
+        );
   Future<T> _run<T>(Future<T> Function() action, {bool writing = false}) async {
     try {
       return await action();
@@ -55,12 +62,14 @@ class OwnerWorkspaceLibraryMove {
       );
   Future<WorkspaceLibraryMovePreview> preview(
     WorkspaceLibrarySelection selection,
-    String? targetId,
-  ) => _run(() async {
+    String? targetId, {
+    WorkspaceLibraryPosition? position,
+  }) => _run(() async {
     final c = await catalog(),
         p = await owner.previewLibraryMove(
           coreLibrarySelection(selection),
           targetId,
+          position: _position(position),
         );
     return WorkspaceLibraryMovePreview(
       scope: WorkspaceLibraryRecyclePreview(
@@ -77,6 +86,8 @@ class OwnerWorkspaceLibraryMove {
       roots: p.roots,
       records: workspaceLibraryRecords(p.records, c),
       conflicts: p.conflicts,
+      position: position,
+      anchorName: p.anchorName,
     );
   });
   Future<WorkspaceLibraryMoveReceipt> move(
@@ -88,6 +99,7 @@ class OwnerWorkspaceLibraryMove {
         coreLibrarySelection(command.selection),
         command.targetId,
         command.reviewToken,
+        position: _position(command.position),
       ),
     );
     changed();

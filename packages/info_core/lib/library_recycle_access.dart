@@ -29,6 +29,7 @@ extension OwnerLibraryRecycleOperations on OwnerAccess {
     entries: _service._repository.recycleEntries,
     facts: recycleFacts,
     batches: _libraryRecycleRepository.libraryRecycleBatches,
+    orderDigest: _savedLibraryOrder?.digest,
   );
   Future<LibraryRecycleReceipt?> libraryRecycleReceipt(String operationId) =>
       _serialize(() async {
@@ -134,6 +135,7 @@ extension OwnerLibraryRecycleOperations on OwnerAccess {
         beforeToken: beforeToken,
         batch: batch,
         receipt: receipt,
+        order: libraryOrderSupported ? _captureLibraryOrder() : null,
         directories: directories.where((d) => !removedDirs.contains(d.id)),
         removedInformationIds: informationEntries.keys,
         items: const [],
@@ -417,11 +419,52 @@ extension OwnerLibraryRecycleOperations on OwnerAccess {
           action: LibraryRecycleAction.restore,
           batchVersion: finished.version,
         );
+    LibraryOrderSnapshot? order;
+    if (libraryOrderSupported) {
+      order = _captureLibraryOrder(
+        additionalDirectories: preview.directories,
+        additionalItems: items,
+        additionalCredentials: credentials.where(
+          (c) => restoredCredentialIds.contains(c.id),
+        ),
+      );
+      final originalDirectories = {for (final d in batch.directories) d.id: d};
+      final originalRecords = {
+        for (final r in batch.records) LibraryEntryRef(r.kind, r.id): r,
+      };
+      final directoryMoves = <String?, List<String>>{};
+      final recordMoves = <String?, List<LibraryEntryRef>>{};
+      for (final d in preview.directories) {
+        if (d.parentId != originalDirectories[d.id]!.parentId) {
+          directoryMoves.putIfAbsent(d.parentId, () => []).add(d.id);
+        }
+      }
+      for (final r in preview.records) {
+        final ref = LibraryEntryRef(r.kind, r.id);
+        if (r.directoryId != originalRecords[ref]!.directoryId) {
+          recordMoves.putIfAbsent(r.directoryId, () => []).add(ref);
+        }
+      }
+      for (final target in {...directoryMoves.keys, ...recordMoves.keys}) {
+        order = _placedLibraryOrder(
+          directoryIds: directoryMoves[target] ?? const [],
+          recordRefs: recordMoves[target] ?? const [],
+          targetId: target,
+          captured: order,
+          additionalDirectories: preview.directories,
+          additionalItems: items,
+          additionalCredentials: credentials.where(
+            (c) => restoredCredentialIds.contains(c.id),
+          ),
+        );
+      }
+    }
     return _libraryRecycleRepository.commitLibraryRecycle(
       LibraryRecycleChange(
         beforeToken: preview.stateToken,
         batch: finished,
         receipt: receipt,
+        order: order,
         directories: [...directories, ...preview.directories],
         removedInformationIds: const [],
         items: items,

@@ -36,6 +36,13 @@ void _checkBackupAdmissionCounts(
     total += table.value.length;
   }
   var availableRecycle = 0;
+  for (final row
+      in tables['library_order_state'] ?? const <Map<String, Object?>>[]) {
+    final order = _backupJson(row);
+    nested +=
+        (order['directories'] as List).length +
+        (order['records'] as List).length;
+  }
   void snapshot(Map<String, dynamic> item) {
     nested +=
         1 + (item['fields'] as List).length + (item['tagIds'] as List).length;

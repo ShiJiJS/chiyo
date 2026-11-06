@@ -279,6 +279,7 @@ class LibraryRecycleChange {
     required Iterable<ManagedCredential> credentials,
     required Iterable<CredentialMaterial> materials,
     required this.validate,
+    this.order,
   }) : directories = List.unmodifiable(directories),
        removedInformationIds = List.unmodifiable(removedInformationIds),
        items = List.unmodifiable(items),
@@ -299,6 +300,7 @@ class LibraryRecycleChange {
   final List<ManagedCredential> credentials;
   final List<CredentialMaterial> materials;
   final void Function() validate;
+  final LibraryOrderSnapshot? order;
 }
 
 abstract interface class LibraryRecycleRepository {
@@ -320,6 +322,7 @@ String libraryRecycleStateToken({
   required Iterable<RecycleEntry> entries,
   required Iterable<RecycleFact> facts,
   required Iterable<LibraryRecycleBatch> batches,
+  String? orderDigest,
 }) {
   List<List<Object?>> sorted(Iterable<List<Object?>> rows) =>
       rows.toList()..sort((a, b) => jsonEncode(a).compareTo(jsonEncode(b)));
@@ -348,6 +351,7 @@ String libraryRecycleStateToken({
               facts.map((f) => [f.entryId, f.itemId, f.version, f.kind.name]),
             ),
             sorted(batches.map((b) => [b.id, b.version, b.state.name])),
+            ?orderDigest,
           ]),
         ),
       )

@@ -130,7 +130,7 @@ void main() {
       expect(service.owner.credentials, isEmpty);
       expect(
         sql((db) => db.select('PRAGMA user_version').single.values.single),
-        50,
+        51,
       );
       expect(
         await service.owner.recycleLibrarySelection(
@@ -160,7 +160,7 @@ void main() {
           backup = '${root.path}/deleted.aim';
       await repo.backups.exportTo(backup);
       final inspected = await repo.backups.inspect(backup, recovery);
-      expect(inspected.formatVersion, 20);
+      expect(inspected.formatVersion, 21);
       final copy = await EncryptedInformationRepository.open(
         '${root.path}/copy',
         TestKeyStore(),
@@ -375,8 +375,8 @@ void main() {
         ),
       );
       sql((db) {
-        db.execute('UPDATE library_format SET version=51');
-        db.execute('PRAGMA user_version=51');
+        db.execute('UPDATE library_format SET version=52');
+        db.execute('PRAGMA user_version=52');
       });
       await expectLater(
         EncryptedInformationRepository.open(root.path, keys),
@@ -389,8 +389,8 @@ void main() {
         ),
       );
       sql((db) {
-        db.execute('UPDATE library_format SET version=50');
-        db.execute('PRAGMA user_version=50');
+        db.execute('UPDATE library_format SET version=51');
+        db.execute('PRAGMA user_version=51');
       });
       repo = await EncryptedInformationRepository.open(root.path, keys);
       service = InformationService(repository: repo);
@@ -463,7 +463,7 @@ void main() {
         expect(earlyPreview.counts['directoryBatches'] ?? 0, 0);
         earlyPreview.release();
         final inspected = await recipient.backups.inspect(path, key);
-        expect(inspected.formatVersion, 20);
+        expect(inspected.formatVersion, 21);
         expect(inspected.directoryRecycleBatchCount, 0);
         await recipient.backups.restore(inspected);
         expect(recipient.directories, isEmpty);

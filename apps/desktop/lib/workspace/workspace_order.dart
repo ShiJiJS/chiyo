@@ -7,10 +7,37 @@ import 'workspace_records.dart';
 /// the platform comparator never sees fields, attachment bytes or secrets.
 void sortWorkspaceSummaries(
   List<WorkspaceRecordSummary> items,
-  WorkspaceSort sort,
-) {
+  WorkspaceSort sort, {
+  List<WorkspaceRecordRef>? manualRecords,
+  List<String?>? manualDirectories,
+}) {
   int stable(int order, WorkspaceRecordSummary a, WorkspaceRecordSummary b) =>
       order != 0 ? order : a.ref.key.compareTo(b.ref.key);
+  if (sort == WorkspaceSort.manual) {
+    final records = {
+      for (var i = 0; i < (manualRecords?.length ?? 0); i++)
+        manualRecords![i]: i,
+    };
+    final directories = {
+      for (var i = 0; i < (manualDirectories?.length ?? 0); i++)
+        manualDirectories![i]: i,
+    };
+    final initial = {for (var i = 0; i < items.length; i++) items[i].ref: i};
+    items.sort((a, b) {
+      final group = (directories[a.directoryId] ?? directories.length)
+          .compareTo(directories[b.directoryId] ?? directories.length);
+      return group != 0
+          ? group
+          : stable(
+              (records[a.ref] ?? records.length + initial[a.ref]!).compareTo(
+                records[b.ref] ?? records.length + initial[b.ref]!,
+              ),
+              a,
+              b,
+            );
+    });
+    return;
+  }
   if (sort == WorkspaceSort.updated) {
     items.sort((a, b) => stable(b.updatedAt.compareTo(a.updatedAt), a, b));
     return;

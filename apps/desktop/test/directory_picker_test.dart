@@ -19,6 +19,28 @@ final catalog = WorkspaceCatalog(
 );
 
 void main() {
+  test(
+    'shared tree preserves sibling order with moved parents and deep hierarchies',
+    () {
+      final dirs = <WorkspaceDirectory>[
+        const WorkspaceDirectory('child', '子目录', parentId: 'parent'),
+        const WorkspaceDirectory('other', '其他'),
+        const WorkspaceDirectory('parent', '上级'),
+        for (var i = 0; i < 3500; i++)
+          WorkspaceDirectory(
+            'deep-$i',
+            '层级$i',
+            parentId: i == 0 ? 'child' : 'deep-${i - 1}',
+          ),
+      ];
+      final tree = libraryDirectoryTree(
+        WorkspaceCatalog(directories: dirs, tags: const [], types: const []),
+      );
+      expect(tree.take(3).map((d) => d.id), ['other', 'parent', 'child']);
+      expect(tree.last.id, 'deep-3499');
+      expect(tree, hasLength(3503));
+    },
+  );
   testWidgets(
     'shared picker shows complete paths, searches and distinguishes same names',
     (t) async {

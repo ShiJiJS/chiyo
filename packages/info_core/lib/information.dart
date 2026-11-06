@@ -18,6 +18,8 @@ import 'information_import_files.dart';
 import 'info_core.dart'
     show
         AccessFailure,
+        LibraryOrderRepository,
+        LibraryOrderSnapshot,
         LibraryMoveRepository,
         LibraryMoveReceipt,
         LibraryMoveChange,
@@ -450,6 +452,7 @@ abstract interface class InformationRepository {
 class MemoryInformationRepository
     implements
         InformationRepository,
+        LibraryOrderRepository,
         LibraryMoveRepository,
         LibraryRecycleRepository,
         CredentialRepository,
@@ -469,6 +472,9 @@ class MemoryInformationRepository
   Future<void> commitInformationPurge(InformationPurgeChange change) async =>
       _commitPurge(change);
   final _libraryRecycleBatches = <String, LibraryRecycleBatch>{};
+  LibraryOrderSnapshot? _libraryOrder;
+  @override
+  LibraryOrderSnapshot? get libraryOrder => _libraryOrder;
   final _libraryMoveReceipts = <String, LibraryMoveReceipt>{};
   @override
   Future<LibraryMoveReceipt?> libraryMoveReceipt(String id) async =>
