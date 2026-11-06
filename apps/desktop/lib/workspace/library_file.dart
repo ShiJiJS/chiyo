@@ -9,6 +9,7 @@ import 'library_file_dialogs.dart';
 import 'library_widgets.dart';
 import 'library_document.dart';
 import 'workspace_source.dart';
+import 'library_attachment_separation.dart';
 
 enum _FileAction { replace, save, open, refresh }
 
@@ -438,6 +439,28 @@ class _LibraryFileState extends State<LibraryFile> {
         _previewFailure == null &&
         _preview != null;
     final toolbar = <Widget>[
+      if (widget.source is WorkspaceAttachmentSeparation &&
+          widget.detail.fieldIds[widget.fieldKey] != null &&
+          !(widget.detail.definition['fields'] as List? ?? []).any(
+            (f) => f['key'] == widget.fieldKey,
+          ) &&
+          workspaceFields(widget.detail).length > 1)
+        DesktopButton(
+          key: ValueKey('library-file-separate-${widget.fieldKey}'),
+          kind: DesktopButtonKind.quiet,
+          onPressed: blocked
+              ? null
+              : () => _modal(
+                  () => showAttachmentSeparation(
+                    context,
+                    widget.source,
+                    widget.detail,
+                    widget.detail.fieldIds[widget.fieldKey]!,
+                    history.current.filename,
+                  ),
+                ),
+          child: const Text('存为独立资料'),
+        ),
       Tooltip(
         message: history.current.filename,
         child: ConstrainedBox(

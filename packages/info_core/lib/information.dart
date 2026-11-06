@@ -39,6 +39,7 @@ import 'info_core.dart'
         InformationLifecycleAction,
         InformationLifecycleRepository,
         InformationRecordOperationRepository,
+        InformationAttachmentSeparationRepository,
         InformationClassificationRepository,
         InformationClassificationChange,
         InformationClassificationReceipt,
@@ -446,6 +447,7 @@ class MemoryInformationRepository
         InformationImportFileRepository,
         InformationFileDeliveryRepository,
         InformationRecordOperationRepository,
+        InformationAttachmentSeparationRepository,
         InformationLifecycleRepository,
         InformationApprovalRepository,
         InformationPurgeRepository,
@@ -623,6 +625,28 @@ class MemoryInformationRepository
       <InformationAttachmentRef, (InformationAttachmentVersion, Uint8List?)>{};
   final _informationCommits = <String, InformationDraftReceipt>{};
   final _informationRecordReceipts = <String, InformationRecordReceipt>{};
+  @override
+  Future<void> commitAttachmentSeparation({
+    required InformationItem source,
+    required InformationRevision previous,
+    required InformationItem file,
+    required InformationRecordReceipt receipt,
+    required void Function() validate,
+  }) async {
+    validate();
+    if (_items[source.id]?.version != previous.item.version ||
+        _items.containsKey(file.id)) {
+      throw const AccessFailure('version_conflict');
+    }
+    if (_informationRecordReceipts.containsKey(receipt.operationId)) {
+      throw const AccessFailure('operation_conflict');
+    }
+    _items[source.id] = source;
+    _items[file.id] = file;
+    _revisions.add(previous);
+    _informationRecordReceipts[receipt.operationId] = receipt;
+  }
+
   @override
   Future<InformationRecordReceipt?> informationRecordReceipt(
     String operationId,

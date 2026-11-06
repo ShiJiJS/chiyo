@@ -29,6 +29,7 @@ class OwnerWorkspaceSource
     implements
         WorkspaceSource,
         WorkspaceFileSelectionReleaser,
+        WorkspaceAttachmentSeparation,
         WorkspaceFileActionRecovery,
         WorkspaceFileOpenRecovery {
   OwnerWorkspaceSource({
@@ -473,6 +474,46 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
       _read(() => _fileChanges.importFile(input));
+  @override
+  Future<WorkspaceRecordRef> separateAttachment({
+    required String operationId,
+    required WorkspaceRecordRef record,
+    required String fieldId,
+    required int expectedVersion,
+    required String name,
+    required String templateId,
+  }) => _read(() async {
+    if (record.kind != WorkspaceRecordKind.information) {
+      throw const WorkspaceFailure('unsupported', '凭据文件不能转换成普通文件资料。');
+    }
+    core.InformationRecordReceipt receipt;
+    try {
+      receipt = await owner.separateInformationAttachment(
+        operationId: operationId,
+        itemId: record.id,
+        expectedVersion: expectedVersion,
+        fieldId: fieldId,
+        name: name,
+        templateId: templateId,
+      );
+    } on core.AccessFailure catch (e) {
+      throw WorkspaceFailure(e.status, switch (e.status) {
+        'version_conflict' => '资料已变化，请关闭后重新核对。',
+        'template_unavailable' => '文件模板已变化或停用，请关闭后重新选择。',
+        'operation_conflict' => '此操作编号已用于其他内容，请重新打开整理窗口。',
+        'invalid_information' => '只能将旧的额外附件整理为独立资料，不能移出模板的必要文件。',
+        'attachment_missing' => '文件原文暂时不可用，未改变现有资料。',
+        _ => '文件整理尚未完成，请核对资料状态后重试。',
+      });
+    }
+    final ref = WorkspaceRecordRef(
+      WorkspaceRecordKind.information,
+      receipt.itemId,
+    );
+    _changed(record);
+    _changed(ref);
+    return ref;
+  });
   @override
   Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change) =>
       _read(() => _fileChanges.change(change));
