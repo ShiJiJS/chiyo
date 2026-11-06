@@ -17,6 +17,9 @@ import 'library_recycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 import 'library_adoption_dialog.dart';
+import 'library_context_region.dart';
+import 'library_move_dialog.dart';
+import 'library_batch_recycle_dialog.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({
@@ -53,6 +56,173 @@ class _LibraryPageState extends State<LibraryPage> {
   bool _reading = false, _recyclePage = false;
   WorkspaceRecordRef? _lastSelection;
   LibraryController get model => widget.controller;
+  bool get _canMove =>
+      model.source is WorkspaceLibraryMove &&
+      (model.source as WorkspaceLibraryMove).libraryMoveSupported;
+  bool get _canRecycle =>
+      model.source is WorkspaceLibraryRecycle &&
+      (model.source as WorkspaceLibraryRecycle).libraryRecycleSupported;
+  bool get _canManage => _canMove || _canRecycle;
+
+  Future<void> _manage(
+    WorkspaceLibrarySelection selection, {
+    required bool moving,
+  }) async {
+    if (!model.selectionAvailable) {
+      DesktopFeedback.show(context, '资料正在更新，请稍后再试。');
+      return;
+    }
+    widget.onModalChanged?.call(true);
+    try {
+      final receipt = moving
+          ? await showLibraryMove(context, model.source, selection)
+          : await showLibraryBatchRecycle(
+              context,
+              model.source,
+              selection: selection,
+            );
+      if (!mounted || receipt == null) return;
+      model.cancelSelection();
+      await model.load(model.query);
+      if (mounted) {
+        DesktopFeedback.show(context, moving ? '已移动所选内容' : '所选内容已移到回收站');
+      }
+    } finally {
+      widget.onModalChanged?.call(false);
+      if (mounted) _workspaceFocus.requestFocus();
+    }
+  }
+
+  Future<void> _recordContext(
+    WorkspaceRecordSummary record,
+    Offset position,
+  ) async {
+    final selection = model.selectionForRecord(record.ref);
+    final action = await showLibraryContextMenu<String>(context, position, [
+      const PopupMenuItem(value: 'open', child: Text('打开资料')),
+      if (_canMove) const PopupMenuItem(value: 'move', child: Text('移动')),
+      if (_canRecycle)
+        const PopupMenuItem(value: 'recycle', child: Text('移到回收站')),
+      const PopupMenuItem(value: 'select', child: Text('选择或取消选择')),
+    ]);
+    if (!mounted) return;
+    switch (action) {
+      case 'open':
+        await model.select(record.ref);
+      case 'move':
+        await _manage(selection, moving: true);
+      case 'recycle':
+        await _manage(selection, moving: false);
+      case 'select':
+        model.toggleRecord(record.ref);
+    }
+  }
+
+  Future<void> _directoryContext(
+    WorkspaceDirectory directory,
+    Offset position,
+  ) async {
+    final selection = model.selectionForDirectory(directory.id);
+    final action = await showLibraryContextMenu<String>(context, position, [
+      const PopupMenuItem(value: 'child', child: Text('新建子目录')),
+      PopupMenuItem(value: 'edit', child: Text(_canMove ? '重命名' : '重命名或移动')),
+      if (_canMove) const PopupMenuItem(value: 'move', child: Text('移动')),
+      if (_canRecycle)
+        const PopupMenuItem(value: 'recycle', child: Text('移到回收站')),
+      const PopupMenuItem(value: 'select', child: Text('选择或取消选择')),
+    ]);
+    if (!mounted) return;
+    switch (action) {
+      case 'child':
+        await _changeDirectory(
+          WorkspaceDirectoryAction.create,
+          parent: directory.id,
+        );
+      case 'edit':
+        await _changeDirectory(
+          WorkspaceDirectoryAction.update,
+          directory: directory,
+        );
+      case 'move':
+        await _manage(selection, moving: true);
+      case 'recycle':
+        await _manage(selection, moving: false);
+      case 'select':
+        model.toggleDirectory(directory.id);
+    }
+  }
+
+  Widget _selectionToolbar() => Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (!model.selecting)
+              DesktopButton(
+                key: const ValueKey('library-select-mode'),
+                kind: DesktopButtonKind.quiet,
+                onPressed: model.selectionAvailable
+                    ? model.beginSelection
+                    : null,
+                child: const Text('多选'),
+              )
+            else ...[
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  '已选 ${model.selectedCount} 项',
+                  key: const ValueKey('library-selection-count'),
+                ),
+              ),
+              DesktopButton(
+                key: const ValueKey('library-select-page'),
+                kind: DesktopButtonKind.quiet,
+                onPressed: model.selectionAvailable
+                    ? model.selectDisplayedRecords
+                    : null,
+                child: const Text('全选本页资料'),
+              ),
+              if (_canMove)
+                DesktopButton(
+                  key: const ValueKey('library-selection-move'),
+                  onPressed: model.selectionAvailable && model.selectedCount > 0
+                      ? () => _manage(model.selectedBatch, moving: true)
+                      : null,
+                  child: const Text('移动'),
+                ),
+              if (_canRecycle)
+                DesktopButton(
+                  key: const ValueKey('library-selection-recycle'),
+                  onPressed: model.selectionAvailable && model.selectedCount > 0
+                      ? () => _manage(model.selectedBatch, moving: false)
+                      : null,
+                  child: const Text('移到回收站'),
+                ),
+              DesktopButton(
+                key: const ValueKey('library-selection-cancel'),
+                kind: DesktopButtonKind.quiet,
+                onPressed: model.cancelSelection,
+                child: const Text('取消多选'),
+              ),
+            ],
+          ],
+        ),
+        if (model.selectionNotice != null)
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              model.selectionNotice!,
+              key: const ValueKey('library-selection-notice'),
+            ),
+          ),
+      ],
+    ),
+  );
   @override
   void initState() {
     super.initState();
@@ -193,6 +363,12 @@ class _LibraryPageState extends State<LibraryPage> {
   Future<void> _recycleCurrent() async {
     final detail = model.detail;
     if (detail == null) return;
+    if (_canRecycle) {
+      return _manage(
+        WorkspaceLibrarySelection(records: [detail.record.ref]),
+        moving: false,
+      );
+    }
     widget.onModalChanged?.call(true);
     try {
       final receipt = await showLibraryRecycle(
@@ -250,91 +426,113 @@ class _LibraryPageState extends State<LibraryPage> {
     WorkspaceDirectory directory,
     LibraryMetrics metrics,
   ) {
-    final selected = (model.query.directoryId ?? 'all') == directory.id;
+    final real = !libraryVirtualDirectoryIds.contains(directory.id);
+    final selected = model.selecting && real
+        ? model.directoryIsSelected(directory.id)
+        : (model.query.directoryId ?? 'all') == directory.id;
     final path = libraryDirectoryAncestors(model.catalog!, directory);
     final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.6;
     final count = '${model.catalog?.directoryCounts[directory.id] ?? 0}';
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 3),
-      child: Row(
-        children: [
-          Expanded(
-            child: DesktopButton(
-              key: ValueKey('library-directory-${directory.id}'),
-              tooltip: path.map((d) => d.name).join(' › '),
-              selected: selected,
-              kind: DesktopButtonKind.quiet,
-              onPressed: () => directory.id == 'all'
-                  ? model.showAll()
-                  : model.apply(
-                      model.query.copyWith(directoryId: directory.id),
-                    ),
-              fontSize: metrics.compact ? 13 : 14,
-              padding: EdgeInsets.fromLTRB(
-                10 + (path.length - 1).clamp(0, 3) * (largeText ? 10.0 : 22.0),
-                8,
-                10,
-                8,
+    void activate() {
+      if (model.selecting && real) {
+        model.toggleDirectory(directory.id);
+      } else if (directory.id == 'all') {
+        model.showAll();
+      } else {
+        model.apply(model.query.copyWith(directoryId: directory.id));
+      }
+    }
+
+    return LibraryContextRegion(
+      enabled: _canManage && model.selectionAvailable && real,
+      onActivate: activate,
+      onContext: (position) async {
+        if (real) await _directoryContext(directory, position);
+      },
+      builder: (activate) => Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: Row(
+          children: [
+            if (model.selecting && real)
+              Checkbox(
+                value: model.directoryIsSelected(directory.id),
+                onChanged: model.selectionAvailable ? (_) => activate() : null,
               ),
-              minimumSize: const Size(0, 39),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                children: [
-                  PrototypeIcon(
-                    directory.id == 'all'
-                        ? PrototypeIconGlyph.grid
-                        : PrototypeIconGlyph.folder,
-                    size: 17,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          directory.name,
-                          style: libraryText(
-                            context,
-                            metrics.compact ? 13 : 14,
-                            color: selected
-                                ? UiPalette.of(context).accent
-                                : UiPalette.of(context).ink,
-                            weight: selected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                          ),
-                          maxLines: largeText ? 2 : 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (largeText)
+            Expanded(
+              child: DesktopButton(
+                key: ValueKey('library-directory-${directory.id}'),
+                tooltip: path.map((d) => d.name).join(' › '),
+                selected: selected,
+                kind: DesktopButtonKind.quiet,
+                onPressed: model.selectionAvailable ? activate : null,
+                fontSize: metrics.compact ? 13 : 14,
+                padding: EdgeInsets.fromLTRB(
+                  10 +
+                      (path.length - 1).clamp(0, 3) * (largeText ? 10.0 : 22.0),
+                  8,
+                  10,
+                  8,
+                ),
+                minimumSize: const Size(0, 39),
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    PrototypeIcon(
+                      directory.id == 'all'
+                          ? PrototypeIconGlyph.grid
+                          : PrototypeIconGlyph.folder,
+                      size: 17,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Text(
-                            '$count 项',
+                            directory.name,
                             style: libraryText(
                               context,
-                              12,
-                              color: UiPalette.of(context).muted,
+                              metrics.compact ? 13 : 14,
+                              color: selected
+                                  ? UiPalette.of(context).accent
+                                  : UiPalette.of(context).ink,
+                              weight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                             ),
+                            maxLines: largeText ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                      ],
-                    ),
-                  ),
-                  if (!largeText) ...[
-                    const SizedBox(width: 5),
-                    Text(
-                      count,
-                      style: libraryText(
-                        context,
-                        12,
-                        color: UiPalette.of(context).muted,
+                          if (largeText)
+                            Text(
+                              '$count 项',
+                              style: libraryText(
+                                context,
+                                12,
+                                color: UiPalette.of(context).muted,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
+                    if (!largeText) ...[
+                      const SizedBox(width: 5),
+                      Text(
+                        count,
+                        style: libraryText(
+                          context,
+                          12,
+                          color: UiPalette.of(context).muted,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -347,10 +545,14 @@ class _LibraryPageState extends State<LibraryPage> {
       label: '目录操作：${directory.name}',
       child: const PrototypeIcon(PrototypeIconGlyph.more, size: 16),
     ),
-    items: const [
-      DropdownMenuItem(value: 'child', child: Text('新建子目录')),
-      DropdownMenuItem(value: 'edit', child: Text('重命名或移动')),
-      DropdownMenuItem(value: 'delete', child: Text('删除空目录')),
+    items: [
+      const DropdownMenuItem(value: 'child', child: Text('新建子目录')),
+      DropdownMenuItem(value: 'edit', child: Text(_canMove ? '重命名' : '重命名或移动')),
+      if (_canMove) const DropdownMenuItem(value: 'move', child: Text('移动')),
+      DropdownMenuItem(
+        value: 'delete',
+        child: Text(_canRecycle ? '移到回收站' : '删除空目录'),
+      ),
     ],
     onChanged: model.loadState == WorkspaceLoad.loading
         ? null
@@ -365,6 +567,11 @@ class _LibraryPageState extends State<LibraryPage> {
                 _changeDirectory(
                   WorkspaceDirectoryAction.update,
                   directory: directory,
+                );
+              case 'move':
+                _manage(
+                  model.selectionForDirectory(directory.id),
+                  moving: true,
                 );
               case 'delete':
                 _changeDirectory(
@@ -789,6 +996,7 @@ class _LibraryPageState extends State<LibraryPage> {
               ),
             ),
           ),
+          if (_canManage) _selectionToolbar(),
         ],
       ),
     );
@@ -817,96 +1025,112 @@ class _LibraryPageState extends State<LibraryPage> {
       };
 
   Widget _record(BuildContext context, WorkspaceRecordSummary r) {
-    final c = UiPalette.of(context), selected = model.selection == r.ref;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 3),
-      child: DesktopButton(
-        key: ValueKey('library-record-${r.ref.key}'),
-        radius: 8,
-        selectedBorder: true,
-        kind: DesktopButtonKind.quiet,
-        selected: selected,
-        onPressed: () => model.select(r.ref),
-        // CSS border-box includes a 1px border outside its 12/14px padding.
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 15),
-        alignment: Alignment.topLeft,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RecordIcon(r.type),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    r.name,
-                    style: libraryText(
-                      context,
-                      14,
-                      weight: FontWeight.w700,
-                      color: selected ? c.accent : c.ink,
+    final c = UiPalette.of(context),
+        selected = model.selecting
+            ? model.recordIsSelected(r.ref)
+            : model.selection == r.ref;
+    return LibraryContextRegion(
+      enabled: _canManage && model.selectionAvailable,
+      onActivate: () =>
+          model.selecting ? model.toggleRecord(r.ref) : model.select(r.ref),
+      onContext: (position) => _recordContext(r, position),
+      builder: (activate) => Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: DesktopButton(
+          key: ValueKey('library-record-${r.ref.key}'),
+          radius: 8,
+          selectedBorder: true,
+          kind: DesktopButtonKind.quiet,
+          selected: selected,
+          onPressed: model.selectionAvailable ? activate : null,
+          // CSS border-box includes a 1px border outside its 12/14px padding.
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 15),
+          alignment: Alignment.topLeft,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (model.selecting)
+                Checkbox(
+                  value: selected,
+                  onChanged: model.selectionAvailable
+                      ? (_) => activate()
+                      : null,
+                ),
+              RecordIcon(r.type),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      r.name,
+                      style: libraryText(
+                        context,
+                        14,
+                        weight: FontWeight.w700,
+                        color: selected ? c.accent : c.ink,
+                      ),
                     ),
-                  ),
-                  if (r.description.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Text(
-                        r.description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: libraryText(
-                          context,
-                          13,
-                          height: 1.7,
-                          color: c.muted,
+                    if (r.description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: Text(
+                          r.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: libraryText(
+                            context,
+                            13,
+                            height: 1.7,
+                            color: c.muted,
+                          ),
                         ),
                       ),
-                    ),
-                  Padding(
-                    // Adjacent CSS margins collapse: max(summary bottom5, meta top8).
-                    padding: EdgeInsets.only(
-                      top: r.description.isEmpty ? 8 : 3,
-                    ),
-                    child: Text(
-                      r.type.name,
-                      style: libraryText(context, 12, color: c.muted),
-                    ),
-                  ),
-                  if (r.tags.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 7),
-                      child: Wrap(
-                        spacing: 5,
-                        runSpacing: 5,
-                        children: [
-                          for (final tag in r.tags.take(2))
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: selected ? c.paper : c.rail,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                tag.name,
-                                style: libraryText(
-                                  context,
-                                  12,
-                                  height: 1.5,
-                                  color: c.muted,
-                                ),
-                              ),
-                            ),
-                        ],
+                      // Adjacent CSS margins collapse: max(summary bottom5, meta top8).
+                      padding: EdgeInsets.only(
+                        top: r.description.isEmpty ? 8 : 3,
+                      ),
+                      child: Text(
+                        r.type.name,
+                        style: libraryText(context, 12, color: c.muted),
                       ),
                     ),
-                ],
+                    if (r.tags.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 7),
+                        child: Wrap(
+                          spacing: 5,
+                          runSpacing: 5,
+                          children: [
+                            for (final tag in r.tags.take(2))
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selected ? c.paper : c.rail,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  tag.name,
+                                  style: libraryText(
+                                    context,
+                                    12,
+                                    height: 1.5,
+                                    color: c.muted,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1202,6 +1426,14 @@ class _LibraryPageState extends State<LibraryPage> {
                             : () => _edit(),
                         onHistory: model.loadState != WorkspaceLoad.loading
                             ? _history
+                            : null,
+                        onMove: _canMove && model.selectionAvailable
+                            ? () => _manage(
+                                WorkspaceLibrarySelection(
+                                  records: [detail.record.ref],
+                                ),
+                                moving: true,
+                              )
                             : null,
                         onRecycle: model.loadState != WorkspaceLoad.loading
                             ? _recycleCurrent

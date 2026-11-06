@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
@@ -10,6 +11,8 @@ import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:info_desktop/workspace/library_move_controller.dart';
 import 'package:info_desktop/workspace/library_move_dialog.dart';
+import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/library_controller.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 
@@ -513,6 +516,269 @@ void main() {
         expect(f.source.writes, 0);
         expect(t.takeException(), isNull);
       } finally {
+        await _close(t, f);
+      }
+    },
+  );
+
+  testWidgets(
+    'library mixed multi-selection cancels intact then moves once and refreshes placement and counts',
+    (t) async {
+      t.view.physicalSize = const Size(1100, 900);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(_Fixture.create))!;
+      final m = LibraryController(f.source);
+      await t.runAsync(
+        () => m.load(const WorkspaceQuery(sort: WorkspaceSort.name)),
+      );
+      try {
+        await t.pumpWidget(
+          RepaintBoundary(
+            key: const ValueKey('library-selection-capture'),
+            child: MaterialApp(
+              theme: zhiyuTheme(Brightness.dark),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(1.4)),
+                child: child!,
+              ),
+              home: Scaffold(
+                body: LibraryPage(controller: m, onNavigate: (_, _) {}),
+              ),
+            ),
+          ),
+        );
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-select-mode')));
+        await _settle(t);
+        for (final key in [
+          'library-directory-${f.root.id}',
+          'library-directory-${f.child.id}',
+          'library-record-information:${f.item.id}',
+          'library-record-credential:${f.credential.id}',
+        ]) {
+          await t.tap(find.byKey(ValueKey(key)));
+          await _settle(t);
+        }
+        expect(find.text('已选 4 项'), findsOneWidget);
+        if (evidence.isNotEmpty) {
+          final boundary = t.renderObject<RenderRepaintBoundary>(
+            find.byKey(const ValueKey('library-selection-capture')),
+          );
+          await t.runAsync(() async {
+            final image = await boundary.toImage(pixelRatio: 1);
+            final data = await image.toByteData(format: ui.ImageByteFormat.png);
+            await File(
+              '$evidence/library-multiselect-dark.png',
+            ).writeAsBytes(data!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+
+        await t.tap(find.byKey(const ValueKey('library-selection-move')));
+        await _settle(t);
+        expect(find.text('2 个目录、1 条资料、1 项凭据'), findsOneWidget);
+        await t.tap(find.text('取消'));
+        await _settle(t);
+        expect(m.selectedCount, 4);
+        expect(f.source.writes, 0);
+        await t.tap(find.byKey(const ValueKey('library-selection-move')));
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-move-pick-target')));
+        await _settle(t);
+        await t.tap(find.text('目标上级 / 目标'));
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-move-confirm')));
+        await _settle(t);
+        expect(f.source.writes, 1);
+        expect(m.selectedCount, 0);
+        expect(m.selecting, isFalse);
+        expect(
+          f.service.owner.directories
+              .singleWhere((d) => d.id == f.root.id)
+              .parentId,
+          f.target.id,
+        );
+        expect(
+          f.service.owner.credential(f.credential.id).directoryId,
+          f.target.id,
+        );
+        expect(
+          f.service.owner.information
+              .singleWhere((i) => i.id == f.direct.id)
+              .directoryId,
+          isNull,
+        );
+        expect(m.catalog!.directoryCounts[f.target.id], 2);
+        expect(t.takeException(), isNull);
+      } finally {
+        m.dispose();
+        await _close(t, f);
+      }
+    },
+  );
+
+  testWidgets(
+    'Mac right-click, Control-click and detail menu reach the common move and recycle dialogs',
+    (t) async {
+      t.view.physicalSize = const Size(1600, 1100);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(_Fixture.create))!;
+      final m = LibraryController(f.source);
+      await t.runAsync(
+        () => m.load(const WorkspaceQuery(sort: WorkspaceSort.name)),
+      );
+      try {
+        await t.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: LibraryPage(controller: m, onNavigate: (_, _) {}),
+            ),
+          ),
+        );
+        await _settle(t);
+        final directory = find.byKey(
+          ValueKey('library-directory-${f.root.id}'),
+        );
+        await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await t.tap(directory, kind: PointerDeviceKind.mouse);
+        await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await _settle(t);
+        expect(
+          m.query.directoryId,
+          isNull,
+          reason: 'Control-click must not also open the directory',
+        );
+        expect(find.text('新建子目录'), findsOneWidget);
+        await t.tap(find.text('重命名'));
+        await _settle(t);
+        expect(find.text('重命名目录'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('library-directory-parent')),
+          findsNothing,
+        );
+        await t.tap(find.text('取消'));
+        await _settle(t);
+        final record = find.byKey(
+          ValueKey('library-record-information:${f.direct.id}'),
+        );
+        await t.tap(
+          record,
+          buttons: kSecondaryMouseButton,
+          kind: PointerDeviceKind.mouse,
+        );
+        await _settle(t);
+        await t.tap(find.text('移动'));
+        await _settle(t);
+        expect(find.text('0 个目录、1 条资料、0 项凭据'), findsOneWidget);
+        await t.tap(find.text('取消'));
+        await _settle(t);
+        await t.tap(record);
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-record-actions')));
+        await _settle(t);
+        await t.tap(find.text('移动'));
+        await _settle(t);
+        expect(
+          find.byKey(const ValueKey('library-move-confirm')),
+          findsOneWidget,
+        );
+        await t.tap(find.text('取消'));
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-record-actions')));
+        await _settle(t);
+        await t.tap(find.text('移到回收站'));
+        await _settle(t);
+        expect(
+          find.byKey(const ValueKey('batch-recycle-confirm')),
+          findsOneWidget,
+        );
+        await t.tap(find.text('取消'));
+        await _settle(t);
+        expect(f.source.writes, 0);
+        expect(f.service.owner.recycleEntries, isEmpty);
+        expect(t.takeException(), isNull);
+      } finally {
+        m.dispose();
+        await _close(t, f);
+      }
+    },
+  );
+
+  testWidgets(
+    'selected parent, child, information and credential recycle as one group from the context menu',
+    (t) async {
+      t.view.physicalSize = const Size(1600, 1100);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(_Fixture.create))!;
+      final m = LibraryController(f.source);
+      await t.runAsync(
+        () => m.load(const WorkspaceQuery(sort: WorkspaceSort.name)),
+      );
+      try {
+        await t.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: LibraryPage(controller: m, onNavigate: (_, _) {}),
+            ),
+          ),
+        );
+        await _settle(t);
+        await t.tap(find.byKey(const ValueKey('library-select-mode')));
+        await _settle(t);
+        final record = find.byKey(
+          ValueKey('library-record-information:${f.item.id}'),
+        );
+        for (final key in [
+          'library-directory-${f.root.id}',
+          'library-directory-${f.child.id}',
+          'library-record-information:${f.item.id}',
+          'library-record-credential:${f.credential.id}',
+        ]) {
+          await t.tap(find.byKey(ValueKey(key)));
+          await _settle(t);
+        }
+        await t.tap(find.byKey(const ValueKey('library-selection-recycle')));
+        await _settle(t);
+        await t.tap(find.text('取消'));
+        await _settle(t);
+        expect(m.selectedCount, 4);
+        await t.tap(
+          record,
+          buttons: kSecondaryMouseButton,
+          kind: PointerDeviceKind.mouse,
+        );
+        await _settle(t);
+        await t.tap(find.text('移到回收站').last);
+        await _settle(t);
+        expect(find.text('2 个目录、1 条资料、1 项凭据'), findsOneWidget);
+        await t.tap(find.byKey(const ValueKey('batch-recycle-confirm')));
+        await _settle(t);
+        expect(m.selecting, isFalse);
+        expect(m.selectedCount, 0);
+        final batch = f.service.owner.libraryRecycleBatches.single;
+        expect(batch.directories.map((d) => d.id).toSet(), {
+          f.root.id,
+          f.child.id,
+        });
+        expect(batch.records.map((r) => r.id).toSet(), {
+          f.item.id,
+          f.credential.id,
+        });
+        expect(f.service.owner.information.single.id, f.direct.id);
+        expect(m.results!.total, 1);
+        expect(m.catalog!.recycledCount, 1);
+        expect(m.catalog!.directoryCounts['all'], 1);
+        expect(t.takeException(), isNull);
+      } finally {
+        m.dispose();
         await _close(t, f);
       }
     },
