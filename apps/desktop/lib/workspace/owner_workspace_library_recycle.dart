@@ -26,17 +26,6 @@ class OwnerWorkspaceLibraryRecycle {
   final core.OwnerAccess owner;
   final Future<WorkspaceCatalog> Function() catalog;
   final void Function() changed;
-  core.LibraryRecycleSelection _selection(
-    WorkspaceLibrarySelection selection,
-  ) => core.LibraryRecycleSelection(
-    directoryIds: selection.directoryIds,
-    informationIds: selection.records
-        .where((r) => r.kind == WorkspaceRecordKind.information)
-        .map((r) => r.id),
-    credentialIds: selection.records
-        .where((r) => r.kind == WorkspaceRecordKind.credential)
-        .map((r) => r.id),
-  );
   core.LibraryRecycleRestoreOptions _options(
     WorkspaceLibraryRestoreOptions options,
   ) => core.LibraryRecycleRestoreOptions(
@@ -93,38 +82,18 @@ class OwnerWorkspaceLibraryRecycle {
     }
   }
 
-  List<WorkspaceLibraryRecycleRecord> _records(
-    Iterable<core.LibraryRecycleRecord> records,
-    WorkspaceCatalog catalog,
-  ) => [
-    for (final r in records)
-      WorkspaceLibraryRecycleRecord(
-        ref: WorkspaceRecordRef(
-          r.kind == 'credential'
-              ? WorkspaceRecordKind.credential
-              : WorkspaceRecordKind.information,
-          r.id,
-        ),
-        name: r.name,
-        type:
-            catalog.types.where((t) => t.id == r.typeId).firstOrNull?.name ??
-            (r.kind == 'credential' ? '凭据' : '资料'),
-        directoryId: r.directoryId,
-        path: r.directoryPath,
-      ),
-  ];
   Future<WorkspaceLibraryRecyclePreview> preview(
     WorkspaceLibrarySelection selection,
   ) => _run(() async {
     final c = await catalog(),
-        p = await owner.previewLibraryRecycle(_selection(selection));
+        p = await owner.previewLibraryRecycle(coreLibrarySelection(selection));
     return WorkspaceLibraryRecyclePreview(
       token: p.token,
       directories: p.directories.map(
         (d) => WorkspaceDirectory(d.id, d.name, parentId: d.parentId),
       ),
       paths: p.directoryPaths,
-      records: _records(p.records, c),
+      records: workspaceLibraryRecords(p.records, c),
     );
   });
   Future<WorkspaceLibraryRecyclePreview> restorePreview(
@@ -144,7 +113,7 @@ class OwnerWorkspaceLibraryRecycle {
         (d) => WorkspaceDirectory(d.id, d.name, parentId: d.parentId),
       ),
       paths: p.directoryPaths,
-      records: _records(p.records, c),
+      records: workspaceLibraryRecords(p.records, c),
       roots: batch.directories
           .where((d) => !ids.contains(d.parentId))
           .map((d) => d.id),
@@ -164,7 +133,7 @@ class OwnerWorkspaceLibraryRecycle {
           )
         : await owner.recycleLibrarySelection(
             c.operationId,
-            _selection(c.selection!),
+            coreLibrarySelection(c.selection!),
             c.reviewToken,
           );
     changed();
@@ -179,3 +148,36 @@ class OwnerWorkspaceLibraryRecycle {
     return r == null ? null : _receipt(r);
   });
 }
+
+core.LibrarySelection coreLibrarySelection(
+  WorkspaceLibrarySelection selection,
+) => core.LibrarySelection(
+  directoryIds: selection.directoryIds,
+  informationIds: selection.records
+      .where((r) => r.kind == WorkspaceRecordKind.information)
+      .map((r) => r.id),
+  credentialIds: selection.records
+      .where((r) => r.kind == WorkspaceRecordKind.credential)
+      .map((r) => r.id),
+);
+
+List<WorkspaceLibraryRecycleRecord> workspaceLibraryRecords(
+  Iterable<core.LibraryRecycleRecord> records,
+  WorkspaceCatalog catalog,
+) => [
+  for (final r in records)
+    WorkspaceLibraryRecycleRecord(
+      ref: WorkspaceRecordRef(
+        r.kind == 'credential'
+            ? WorkspaceRecordKind.credential
+            : WorkspaceRecordKind.information,
+        r.id,
+      ),
+      name: r.name,
+      type:
+          catalog.types.where((t) => t.id == r.typeId).firstOrNull?.name ??
+          (r.kind == 'credential' ? '凭据' : '资料'),
+      directoryId: r.directoryId,
+      path: r.directoryPath,
+    ),
+];
