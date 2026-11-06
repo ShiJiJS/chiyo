@@ -37,9 +37,10 @@ class LifecycleAdapters {
   final String bundle, host;
   static String get suffix => Platform.isWindows ? '.exe' : '';
   static Future<LifecycleAdapters> build() async {
-    final root = await Directory.systemTemp.createTemp(
+    final createdRoot = await Directory.systemTemp.createTemp(
       'aim-lifecycle-adapters-',
     );
+    final root = Directory(await createdRoot.resolveSymbolicLinks());
     final cli = Directory('../info_cli').absolute.path;
     final supplied = Platform.environment['INFO_TEST_BUNDLE'];
     final output = supplied ?? root.path;
@@ -245,6 +246,7 @@ class MixedLifecycle {
   final chat = 'synthetic-lifecycle';
   Future<void> start() async {
     root = await Directory.systemTemp.createTemp('aim-mixed-lifecycle-');
+    root = Directory(await root.resolveSymbolicLinks());
     keys = Platform.isMacOS
         ? _LifecycleMemoryKeys()
         : WindowsDatabaseKeyStore('${root.path}/database-key.dpapi');
