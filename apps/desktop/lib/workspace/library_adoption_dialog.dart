@@ -331,9 +331,9 @@ class _AdoptionDialogState extends State<_AdoptionDialog> {
           style: libraryText(context, 13, color: c.muted),
         ),
         const SizedBox(height: 18),
-        _label('保留的原字段（${plan.retained.length}）'),
+        _label('以下内容也会继续保存（${plan.retained.length}）'),
         if (plan.retained.isEmpty)
-          const Text('所有原字段已明确对应。')
+          const Text('原有内容已全部放入上面选择的位置。')
         else if (plan.retained.length <= 3 || _showRetained)
           for (final field in plan.result.retainedFields)
             Padding(

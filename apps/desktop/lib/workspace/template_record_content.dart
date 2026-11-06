@@ -546,12 +546,9 @@ class _TemplateRecordContentState extends State<TemplateRecordContent> {
           ),
         if ((!widget.relationsOnly || standalone) &&
             detail.retainedFields.isNotEmpty)
-          _section(
-            context,
-            detail.retainedFields.every((f) => f['type'] == 'file')
-                ? '附件'
-                : '补充内容',
-            _fields(
+          Padding(
+            padding: const EdgeInsets.only(top: 27),
+            child: _fields(
               context,
               detail.retainedFields.map((f) => f['key']).toList(),
             ),
