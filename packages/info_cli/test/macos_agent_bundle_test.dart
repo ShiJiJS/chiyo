@@ -13,6 +13,7 @@ void main() {
       file('manifest.json').writeAsString(jsonEncode(manifest));
   setUp(() async {
     root = await Directory.systemTemp.createTemp('agent-bundle-');
+    root = Directory(await root.resolveSymbolicLinks());
     final rows = <Map<String, Object?>>[];
     for (final path in MacAgentBundle.requiredFiles) {
       final f = await file(path).create(recursive: true);
