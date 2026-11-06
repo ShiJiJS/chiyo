@@ -34,7 +34,7 @@ class WorkspaceApp extends StatelessWidget {
     required this.source,
     required this.windowTitle,
     this.initialSelection,
-    this.initialQuery = const WorkspaceQuery(),
+    this.initialQuery,
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
@@ -42,7 +42,7 @@ class WorkspaceApp extends StatelessWidget {
   final WorkspaceSource source;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
-  final WorkspaceQuery initialQuery;
+  final WorkspaceQuery? initialQuery;
   final WorkspacePageBuilder? pageBuilder;
   final WorkspaceDesktop? desktop;
   final WorkspaceInputs Function(BuildContext)? inputsBuilder;
@@ -67,7 +67,7 @@ class _WorkspaceSession extends StatefulWidget {
     required this.source,
     required this.windowTitle,
     this.initialSelection,
-    this.initialQuery = const WorkspaceQuery(),
+    this.initialQuery,
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
@@ -75,7 +75,7 @@ class _WorkspaceSession extends StatefulWidget {
   final WorkspaceSource source;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
-  final WorkspaceQuery initialQuery;
+  final WorkspaceQuery? initialQuery;
   final WorkspacePageBuilder? pageBuilder;
   final WorkspaceDesktop? desktop;
   final WorkspaceInputs Function(BuildContext)? inputsBuilder;
@@ -465,9 +465,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             : location.page == WorkspacePage.proposals
             ? ProposalsPage(
                 controller: _proposals,
-                passwords: widget.inputsBuilder
-                    ?.call(context)
-                    .proposalPassword,
+                passwords: widget.inputsBuilder?.call(context).proposalPassword,
                 onFile: widget.inputsBuilder?.call(context).proposalFile,
                 onHistory: (id) => _navigate(WorkspacePage.history, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),

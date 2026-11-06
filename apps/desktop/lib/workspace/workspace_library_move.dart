@@ -120,6 +120,8 @@ class WorkspaceLibraryMoveReceipt {
 abstract interface class WorkspaceLibraryMove {
   bool get libraryMoveSupported;
   bool get libraryOrderSupported;
+  WorkspaceSort? get preferredLibrarySort;
+  Future<void> saveLibrarySort(WorkspaceSort sort);
   Future<List<WorkspaceLibraryPlacementTarget>> libraryPlacementTargets(
     WorkspaceLibrarySelection selection,
   );

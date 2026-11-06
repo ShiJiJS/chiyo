@@ -499,6 +499,8 @@ class _LibraryPageState extends State<LibraryPage> {
             ],
           ],
         ),
+        if (model.sortPreferenceNotice != null)
+          Semantics(liveRegion: true, child: Text(model.sortPreferenceNotice!)),
         if (model.selectionNotice != null)
           Semantics(
             liveRegion: true,

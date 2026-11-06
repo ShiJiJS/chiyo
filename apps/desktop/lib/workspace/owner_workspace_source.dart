@@ -363,6 +363,26 @@ class OwnerWorkspaceSource
   @override
   bool get libraryOrderSupported => owner.libraryOrderSupported;
   @override
+  WorkspaceSort? get preferredLibrarySort => !isCurrentLibrary
+      ? null
+      : switch (owner.libraryDisplayOrder) {
+          core.LibraryDisplayOrder.updated => WorkspaceSort.updated,
+          core.LibraryDisplayOrder.name => WorkspaceSort.name,
+          core.LibraryDisplayOrder.manual => WorkspaceSort.manual,
+        };
+  @override
+  Future<void> saveLibrarySort(WorkspaceSort sort) => _read(() async {
+    try {
+      await owner.saveLibraryDisplayOrder(switch (sort) {
+        WorkspaceSort.updated => core.LibraryDisplayOrder.updated,
+        WorkspaceSort.name => core.LibraryDisplayOrder.name,
+        WorkspaceSort.manual => core.LibraryDisplayOrder.manual,
+      });
+    } on StorageFailure {
+      throw const WorkspaceFailure('save_failed', '显示方式未能记住，重开后请重新选择。');
+    }
+  });
+  @override
   Future<List<WorkspaceLibraryPlacementTarget>> libraryPlacementTargets(
     WorkspaceLibrarySelection selection,
   ) => _read(() => _libraryMove.targets(selection));
