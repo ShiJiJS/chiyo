@@ -17,6 +17,40 @@ class WorkspaceLibraryPosition {
   };
 }
 
+class WorkspaceLibraryPlacement {
+  const WorkspaceLibraryPlacement(this.directoryId, {this.position});
+  final String? directoryId;
+  final WorkspaceLibraryPosition? position;
+}
+
+class WorkspaceLibraryPlacementTarget {
+  const WorkspaceLibraryPlacementTarget({
+    required this.kind,
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.path,
+    required this.directoryId,
+  });
+  final String kind, id, name, type, path;
+  final String? directoryId;
+  WorkspaceLibraryPlacement placement({required bool after}) =>
+      WorkspaceLibraryPlacement(
+        directoryId,
+        position: kind == 'directory'
+            ? WorkspaceLibraryPosition.directory(id, after: after)
+            : WorkspaceLibraryPosition.record(
+                WorkspaceRecordRef(
+                  kind == 'credential'
+                      ? WorkspaceRecordKind.credential
+                      : WorkspaceRecordKind.information,
+                  id,
+                ),
+                after: after,
+              ),
+      );
+}
+
 class WorkspaceLibraryMovePreview {
   WorkspaceLibraryMovePreview({
     required this.scope,
@@ -86,6 +120,9 @@ class WorkspaceLibraryMoveReceipt {
 abstract interface class WorkspaceLibraryMove {
   bool get libraryMoveSupported;
   bool get libraryOrderSupported;
+  Future<List<WorkspaceLibraryPlacementTarget>> libraryPlacementTargets(
+    WorkspaceLibrarySelection selection,
+  );
   Future<WorkspaceLibraryMovePreview> previewLibraryMove(
     WorkspaceLibrarySelection selection,
     String? targetId, {

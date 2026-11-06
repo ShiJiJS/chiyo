@@ -363,6 +363,10 @@ class OwnerWorkspaceSource
   @override
   bool get libraryOrderSupported => owner.libraryOrderSupported;
   @override
+  Future<List<WorkspaceLibraryPlacementTarget>> libraryPlacementTargets(
+    WorkspaceLibrarySelection selection,
+  ) => _read(() => _libraryMove.targets(selection));
+  @override
   Future<WorkspaceLibraryMovePreview> previewLibraryMove(
     WorkspaceLibrarySelection selection,
     String? targetId, {

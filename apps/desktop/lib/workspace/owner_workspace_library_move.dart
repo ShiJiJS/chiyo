@@ -2,6 +2,7 @@ import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart' show StorageFailure;
 import 'owner_workspace_library_recycle.dart';
 import 'workspace_source.dart';
+import 'directory_tree.dart';
 
 class OwnerWorkspaceLibraryMove {
   OwnerWorkspaceLibraryMove(this.owner, this.catalog, this.changed);
@@ -60,6 +61,69 @@ class OwnerWorkspaceLibraryMove {
         inputHash: receipt.inputHash,
         targetId: receipt.targetId,
       );
+  Future<List<WorkspaceLibraryPlacementTarget>> targets(
+    WorkspaceLibrarySelection selection,
+  ) => _run(() async {
+    final c = await catalog(),
+        p = await owner.previewLibraryMove(
+          coreLibrarySelection(selection),
+          null,
+        );
+    if (p.roots.isNotEmpty && p.records.isNotEmpty) {
+      throw const WorkspaceFailure(
+        'validation',
+        '目录和单独选中的资料请分别调整顺序；一起移动可以选择目标目录。',
+      );
+    }
+    if (p.roots.isNotEmpty) {
+      final selected = p.scope.directories.map((d) => d.id).toSet();
+      return [
+        for (final d in libraryDirectoryTree(c))
+          if (!libraryVirtualDirectoryIds.contains(d.id) &&
+              !selected.contains(d.id))
+            WorkspaceLibraryPlacementTarget(
+              kind: 'directory',
+              id: d.id,
+              name: d.name,
+              type: '目录',
+              path: directoryPath(c, d.id),
+              directoryId: d.parentId,
+            ),
+      ];
+    }
+    final selected = {for (final r in p.records) '${r.kind}:${r.id}'};
+    final entries = <String, WorkspaceLibraryPlacementTarget>{
+      for (final i in owner.information)
+        if (!selected.contains('information:${i.id}'))
+          'information:${i.id}': WorkspaceLibraryPlacementTarget(
+            kind: 'information',
+            id: i.id,
+            name: i.name,
+            type:
+                c.types
+                    .where((t) => t.id == (i.layout?.typeId ?? 'generic'))
+                    .firstOrNull
+                    ?.name ??
+                '资料',
+            path: directoryPath(c, i.directoryId),
+            directoryId: i.directoryId,
+          ),
+      for (final item in owner.credentials)
+        if (!selected.contains('credential:${item.id}'))
+          'credential:${item.id}': WorkspaceLibraryPlacementTarget(
+            kind: 'credential',
+            id: item.id,
+            name: item.name,
+            type: '凭据',
+            path: directoryPath(c, item.directoryId),
+            directoryId: item.directoryId,
+          ),
+    };
+    return [
+      for (final r in owner.libraryRecordsInOrder)
+        if (entries['${r.kind}:${r.id}'] != null) entries['${r.kind}:${r.id}']!,
+    ];
+  });
   Future<WorkspaceLibraryMovePreview> preview(
     WorkspaceLibrarySelection selection,
     String? targetId, {
