@@ -26,6 +26,8 @@ part 'information_attachments_storage.dart';
 part 'attachment_backup_integration.dart';
 part 'information_delivery_storage.dart';
 part 'classification_storage.dart';
+part 'library_recycle_storage.dart';
+part 'backup_library_recycle.dart';
 part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
 part 'backup_operations.dart';
@@ -58,6 +60,7 @@ const _longTermAttachmentLibraryFormat = 46;
 const _informationImportFileLibraryFormat = 47;
 const _informationFileUpdateLibraryFormat = 48;
 const _credentialProposalPreviewLibraryFormat = 49;
+const _libraryRecycleLibraryFormat = 50;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -136,6 +139,7 @@ InformationItem _informationFromRows(
 class EncryptedInformationRepository
     implements
         InformationRepository,
+        LibraryRecycleRepository,
         CredentialRepository,
         CredentialRecordRepository,
         CredentialFieldMigrationRepository,
@@ -417,6 +421,17 @@ class EncryptedInformationRepository
   final _revisions = <InformationRevision>[];
   final _revisionPurges = <RevisionPurgeFact>[];
   final _recycle = <String, RecycleEntry>{};
+  final _libraryRecycleBatches = <String, LibraryRecycleBatch>{};
+  @override
+  List<LibraryRecycleBatch> get libraryRecycleBatches =>
+      List.unmodifiable(_libraryRecycleBatches.values);
+  @override
+  Future<LibraryRecycleReceipt?> libraryRecycleReceipt(String id) =>
+      _libraryRecycleReceipt(id);
+  @override
+  Future<LibraryRecycleReceipt> commitLibraryRecycle(
+    LibraryRecycleChange change,
+  ) => _commitLibraryRecycle(change);
   final _recycleFacts = <RecycleFact>[];
   final _deletes = <String, DeleteProposal>{};
   final _credentials = <ManagedCredential>[];
@@ -562,7 +577,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _credentialProposalPreviewLibraryFormat) {
+      if (headerVersion > _libraryRecycleLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -577,8 +592,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) >
-                _credentialProposalPreviewLibraryFormat ||
+            (marker.single['version'] as int) > _libraryRecycleLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -841,6 +855,7 @@ class EncryptedInformationRepository
     for (final row in await _db.customSelect('SELECT * FROM settings').get()) {
       _settings[row.read<String>('name')] = row.read<int>('value');
     }
+    await _loadLibraryRecycleBatches();
     await _loadTemplatePackages();
     final items = await _db
         .customSelect('SELECT * FROM information_items ORDER BY rowid')
@@ -2026,6 +2041,12 @@ class _InformationDatabase extends GeneratedDatabase {
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS additional_approval_operations(operation_id TEXT PRIMARY KEY,request_id TEXT NOT NULL,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0)',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS library_recycle_batches(id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+      );
+      await customStatement(
+        'CREATE TABLE IF NOT EXISTS library_recycle_operations(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL,invalidated INTEGER NOT NULL DEFAULT 0 CHECK(invalidated IN (0,1)))',
       );
       await customStatement(
         'CREATE TABLE IF NOT EXISTS template_package_operations('

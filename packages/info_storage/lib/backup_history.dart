@@ -651,6 +651,12 @@ extension _CompleteBackups on InformationBackups {
 
   void Function() _prepareInstall(BackupContents contents) {
     final tables = contents._tables;
+    final recycleBatches = [
+      for (final row
+          in tables['library_recycle_batches'] ??
+              const <Map<String, Object?>>[])
+        LibraryRecycleBatch.fromJson(_backupJson(row)),
+    ];
     final packages = [
       for (final row
           in tables['template_packages'] ?? const <Map<String, Object?>>[])
@@ -762,6 +768,9 @@ extension _CompleteBackups on InformationBackups {
       contents.attachments,
     );
     return () {
+      _repository._libraryRecycleBatches
+        ..clear()
+        ..addEntries(recycleBatches.map((b) => MapEntry(b.id, b)));
       _repository._fileDeliveries
         ..clear()
         ..addEntries(deliveries.map((r) => MapEntry(r.id, r)));

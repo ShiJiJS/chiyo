@@ -56,6 +56,18 @@ void _checkBackupAdmissionCounts(
     nested += (fact['fieldIds'] as List).length;
     nested += (fact['restoredFieldIds'] as Map?)?.length ?? 0;
   }
+  for (final row
+      in tables['library_recycle_batches'] ?? const <Map<String, Object?>>[]) {
+    final batch = _backupJson(row);
+    nested +=
+        (batch['directories'] as List).length +
+        (batch['records'] as List).length +
+        (batch['informationEntries'] as Map).length +
+        (batch['credentialRevisions'] as Map).length;
+    for (final path in (batch['directoryPaths'] as Map).values) {
+      nested += (path as List).length;
+    }
+  }
   for (final row in tables['grant_history']!) {
     final grant = _backupJson(row);
     nested += (grant['fields'] as List).length;
