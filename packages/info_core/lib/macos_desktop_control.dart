@@ -408,7 +408,16 @@ Future<String> _canonical(String path) async {
   try {
     return await File(path).resolveSymbolicLinks();
   } on FileSystemException {
-    return File(path).absolute.path;
+    // macOS exposes /var through /private/var. Resolve the parent even when
+    // the running image has been removed, so its registry identity still
+    // matches and an unavailable proc_pidpath cannot masquerade as stopped.
+    final file = File(path).absolute;
+    try {
+      final parent = await file.parent.resolveSymbolicLinks();
+      return '$parent${Platform.pathSeparator}${file.uri.pathSegments.last}';
+    } on FileSystemException {
+      return file.path;
+    }
   }
 }
 

@@ -36,7 +36,8 @@ void main() {
         if (!actual.toLowerCase().startsWith(
               '${temp.toLowerCase()}${Platform.pathSeparator}',
             ) ||
-            actual.toLowerCase() != root.absolute.path.toLowerCase()) {
+            await root.parent.resolveSymbolicLinks() != temp ||
+            await FileSystemEntity.isLink(root.path)) {
           throw StateError('Unexpected recovery fixture');
         }
         await root.delete(recursive: true);
