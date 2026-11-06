@@ -7,6 +7,7 @@ import 'library_entries.dart';
 import 'library_relation_picker.dart';
 import 'workspace_entries.dart';
 import 'workspace_source.dart';
+import 'proposal_directory.dart';
 
 class ProposalItemEditor extends StatefulWidget {
   const ProposalItemEditor({
@@ -36,6 +37,16 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
   late Map<String, List<WorkspaceRecordRef>> _relations;
   late Set<String> _tags;
   String? _directory, _error;
+  late String _suggestedPath;
+  WorkspaceProposalItemReview get _directoryReview =>
+      WorkspaceProposalItemReview(
+        itemId: widget.review.itemId,
+        name: _name.text,
+        description: _description.text,
+        values: widget.review.values,
+        directoryId: _directory,
+        suggestedDirectory: _suggestedPath,
+      );
   bool get _new => widget.item.before == null;
   bool get _templateRelations =>
       widget.item.proposed.definition['templateVersion'] != null;
@@ -68,6 +79,7 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
     _name = TextEditingController(text: r.name);
     _description = TextEditingController(text: r.description);
     _directory = r.directoryId;
+    _suggestedPath = r.suggestedDirectory;
     _tags = r.tagIds.toSet();
     _relations = {for (final e in r.relations.entries) e.key: List.of(e.value)};
     for (final f in _fields) {
@@ -136,6 +148,7 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
       name: _name.text,
       description: _description.text,
       directoryId: _directory,
+      suggestedDirectory: _suggestedPath,
       tagIds: _tags,
       values: values,
       relations: _relations,
@@ -201,10 +214,7 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final c = UiPalette.of(context),
-        dirs = widget.catalog.directories
-            .where((d) => !['all', 'unfiled'].contains(d.id))
-            .toList();
+    final c = UiPalette.of(context);
     return DesktopDialog(
       title: const Text('编辑待审资料'),
       content: Column(
@@ -239,20 +249,21 @@ class _ProposalItemEditorState extends State<ProposalItemEditor> {
             const SizedBox(height: 16),
           ],
           if (_new) ...[
-            DesktopSelect<String>(
+            ProposalDirectoryLocation(
               key: const ValueKey('proposal-edit-directory'),
-              value: _directory ?? '',
-              items: [
-                const DropdownMenuItem(value: '', child: Text('未分类')),
-                if (_directory != null && !dirs.any((d) => d.id == _directory))
-                  DropdownMenuItem(
-                    value: _directory,
-                    child: const Text('原目录已移除，请重新选择'),
-                  ),
-                for (final d in dirs)
-                  DropdownMenuItem(value: d.id, child: Text(d.name)),
-              ],
-              onChanged: (v) => setState(() => _directory = v == '' ? null : v),
+              catalog: proposalDirectoryCatalog(widget.catalog, [
+                _directoryReview,
+              ]),
+              directoryId: proposalReviewDirectory(
+                proposalDirectoryCatalog(widget.catalog, [_directoryReview]),
+                _directoryReview,
+              ),
+              suggestedPath: _suggestedPath,
+              allowNew: true,
+              onChanged: (v) => setState(() {
+                _directory = v.id;
+                _suggestedPath = v.proposedPath;
+              }),
             ),
             const SizedBox(height: 16),
             Text('标签', style: libraryText(context, 13, color: c.muted)),

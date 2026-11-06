@@ -246,6 +246,8 @@ extension AgentImports on AgentAccess {
             if (proposal.receiptFor(state.key) case final receipt?) ...{
               'itemId': receipt.id,
               'version': receipt.version,
+              if (proposal.admissionDirectories[state.key] case final location?)
+                'savedLocation': location.toJson(),
             },
           },
       ],

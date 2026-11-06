@@ -54,6 +54,24 @@ class _OrganizationPlan {
   final OwnerAccess owner;
   final newDirectories = <InformationDirectory>[];
   final newTags = <InformationTag>[];
+  ImportDirectoryReceipt receipt(String? id) {
+    final dirs = {
+      for (final d in [...owner.directories, ...newDirectories]) d.id: d,
+    };
+    final path = <String>[];
+    final seen = <String>{};
+    var cursor = id;
+    while (cursor != null) {
+      final directory = dirs[cursor];
+      if (directory == null || !seen.add(cursor)) {
+        throw const AccessFailure('organization_conflict');
+      }
+      path.insert(0, directory.name);
+      cursor = directory.parentId;
+    }
+    return ImportDirectoryReceipt(id, path);
+  }
+
   (String?, Set<String>) resolve(
     String? id,
     Iterable<String> tags,
