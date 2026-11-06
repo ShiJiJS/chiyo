@@ -47,6 +47,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
       if (_disposed || generation != _queryGeneration) return;
       final lostDirectory =
           next.directoryId != null &&
+          !{'all', 'unfiled'}.contains(next.directoryId) &&
           !currentCatalog.directories.any((d) => d.id == next.directoryId);
       final lostTag =
           next.tagId != null &&

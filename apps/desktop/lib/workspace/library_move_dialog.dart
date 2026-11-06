@@ -12,10 +12,16 @@ Future<WorkspaceLibraryMoveReceipt?> showLibraryMove(
   WorkspaceLibrarySelection selection, {
   String? initialTarget,
   WorkspaceLibraryPosition? position,
+  LibraryMoveController? controller,
 }) => showDesktopDialog<WorkspaceLibraryMoveReceipt>(
   context,
-  builder: (_) =>
-      _LibraryMoveDialog(source, selection, initialTarget, position),
+  builder: (_) => _LibraryMoveDialog(
+    source,
+    selection,
+    initialTarget,
+    position,
+    controller,
+  ),
 );
 
 class _LibraryMoveDialog extends StatefulWidget {
@@ -24,31 +30,35 @@ class _LibraryMoveDialog extends StatefulWidget {
     this.selection,
     this.initialTarget,
     this.position,
+    this.controller,
   );
   final WorkspaceSource source;
   final WorkspaceLibrarySelection selection;
   final String? initialTarget;
   final WorkspaceLibraryPosition? position;
+  final LibraryMoveController? controller;
   @override
   State<_LibraryMoveDialog> createState() => _LibraryMoveDialogState();
 }
 
 class _LibraryMoveDialogState extends State<_LibraryMoveDialog> {
-  late final m = LibraryMoveController(
-    widget.source,
-    widget.selection,
-    targetId: widget.initialTarget,
-    position: widget.position,
-  );
+  late final m =
+      widget.controller ??
+      LibraryMoveController(
+        widget.source,
+        widget.selection,
+        targetId: widget.initialTarget,
+        position: widget.position,
+      );
   @override
   void initState() {
     super.initState();
-    m.load();
+    if (widget.controller == null) m.load();
   }
 
   @override
   void dispose() {
-    m.dispose();
+    if (widget.controller == null) m.dispose();
     super.dispose();
   }
 

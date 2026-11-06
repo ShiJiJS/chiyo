@@ -25,6 +25,22 @@ List<WorkspaceDirectory> libraryDirectoryTree(WorkspaceCatalog catalog) {
   return ordered;
 }
 
+List<WorkspaceDirectory> libraryVisibleDirectoryTree(
+  WorkspaceCatalog catalog,
+  Set<String> collapsed,
+) {
+  final hidden = <String>{};
+  final visible = <WorkspaceDirectory>[];
+  for (final d in libraryDirectoryTree(catalog)) {
+    if (collapsed.contains(d.parentId) || hidden.contains(d.parentId)) {
+      hidden.add(d.id);
+    } else {
+      visible.add(d);
+    }
+  }
+  return visible;
+}
+
 List<WorkspaceDirectory> libraryDirectoryAncestors(
   WorkspaceCatalog catalog,
   WorkspaceDirectory directory,
