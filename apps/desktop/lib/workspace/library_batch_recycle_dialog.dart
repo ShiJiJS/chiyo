@@ -1,3 +1,4 @@
+import 'library_selection_scope.dart';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
@@ -64,65 +65,11 @@ class _BatchRecycleDialogState extends State<_BatchRecycleDialog> {
     if (mounted && choice != null) await m.moveRoot(d.id, choice.id);
   }
 
-  List<WorkspaceDirectory> _orderedDirectories(
-    WorkspaceLibraryRecyclePreview p,
-  ) {
-    final ids = p.directories.map((d) => d.id).toSet();
-    final all = <String, WorkspaceDirectory>{
-      for (final d in m.catalog?.directories ?? <WorkspaceDirectory>[]) d.id: d,
-      for (final d in p.directories) d.id: d,
-    };
-    final ordered = libraryDirectoryTree(
-      WorkspaceCatalog(
-        directories: all.values,
-        tags: const [],
-        types: const [],
-      ),
-    ).where((d) => ids.contains(d.id)).toList();
-    final seen = ordered.map((d) => d.id).toSet();
-    return [...ordered, ...p.directories.where((d) => !seen.contains(d.id))];
-  }
-
-  Widget _scope(WorkspaceLibraryRecyclePreview p) {
-    final dirs = _orderedDirectories(p);
-    return ExpansionTile(
-      title: const Text('查看完整范围'),
-      children: [
-        SizedBox(
-          height: 280,
-          child: ListView.builder(
-            key: const ValueKey('batch-recycle-scope'),
-            itemCount: dirs.length + p.records.length,
-            itemBuilder: (context, index) {
-              if (index < dirs.length) {
-                final d = dirs[index];
-                return ListTile(
-                  leading: const Icon(Icons.folder_outlined),
-                  title: Text(d.name),
-                  subtitle: Text(
-                    '目录 · ${(p.paths[d.id] ?? [d.name]).join(' / ')}',
-                  ),
-                );
-              }
-              final r = p.records[index - dirs.length];
-              return ListTile(
-                title: Text(r.name),
-                subtitle: Text(
-                  '${r.type} · ${r.path.isEmpty ? '未分类' : r.path.join(' / ')}',
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _locations(WorkspaceLibraryRecyclePreview p) {
     String searchable(String value) =>
         value.toLowerCase().replaceAll(RegExp(r'\s*/\s*'), '/');
     final query = searchable(_nameSearch.trim());
-    final dirs = _orderedDirectories(p)
+    final dirs = orderedLibrarySelectionDirectories(p, m.catalog)
         .where(
           (d) =>
               searchable((p.paths[d.id] ?? [d.name]).join('/')).contains(query),
@@ -237,7 +184,7 @@ class _BatchRecycleDialogState extends State<_BatchRecycleDialog> {
                                 .join('\n'),
                           ),
                         ),
-                      _scope(p),
+                      LibrarySelectionScope(preview: p, catalog: m.catalog),
                       if (m.restoring && p.directories.isNotEmpty)
                         _locations(p),
                       for (final warning in p.warnings)

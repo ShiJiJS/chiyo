@@ -10,6 +10,7 @@ import 'package:info_core/info_core.dart' as core;
 import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_classification.dart';
 import 'owner_workspace_library_recycle.dart';
+import 'owner_workspace_library_move.dart';
 import 'owner_workspace_credentials.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
@@ -30,6 +31,7 @@ class OwnerWorkspaceSource
     implements
         WorkspaceSource,
         WorkspaceLibraryRecycle,
+        WorkspaceLibraryMove,
         WorkspaceFileSelectionReleaser,
         WorkspaceAttachmentSeparation,
         WorkspaceFileActionRecovery,
@@ -113,6 +115,11 @@ class OwnerWorkspaceSource
       _classification.loadCatalog,
       () => _changed(null),
     );
+    _libraryMove = OwnerWorkspaceLibraryMove(
+      owner,
+      _classification.loadCatalog,
+      () => _changed(null),
+    );
     _history = OwnerWorkspaceHistory(
       information: _information,
       onChanged: _changed,
@@ -138,6 +145,7 @@ class OwnerWorkspaceSource
   late final OwnerWorkspaceClassification _classification;
   late final OwnerWorkspaceHistory _history;
   late final OwnerWorkspaceLibraryRecycle _libraryRecycle;
+  late final OwnerWorkspaceLibraryMove _libraryMove;
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
   late final StreamSubscription<String> _requests;
   Timer? _timer;
@@ -349,6 +357,20 @@ class OwnerWorkspaceSource
   });
   @override
   bool get libraryRecycleSupported => owner.libraryRecycleSupported;
+  @override
+  bool get libraryMoveSupported => owner.libraryMoveSupported;
+  @override
+  Future<WorkspaceLibraryMovePreview> previewLibraryMove(
+    WorkspaceLibrarySelection selection,
+    String? targetId,
+  ) => _read(() => _libraryMove.preview(selection, targetId));
+  @override
+  Future<WorkspaceLibraryMoveReceipt> moveLibrarySelection(
+    WorkspaceLibraryMoveCommand command,
+  ) => _read(() => _libraryMove.move(command));
+  @override
+  Future<WorkspaceLibraryMoveReceipt?> libraryMoveOperationReceipt(String id) =>
+      _read(() => _libraryMove.receipt(id));
   @override
   Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycle(
     WorkspaceLibrarySelection selection,

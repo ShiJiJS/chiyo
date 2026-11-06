@@ -15,6 +15,7 @@ Future<DirectorySelection?> showDirectoryPicker(
   WorkspaceCatalog catalog, {
   String? selected,
   String? parentFor,
+  Set<String> excludeSubtrees = const {},
   bool parentMode = false,
   bool readOnly = false,
   bool allowNew = false,
@@ -29,6 +30,7 @@ Future<DirectorySelection?> showDirectoryPicker(
     readOnly,
     allowNew,
     initialPath,
+    Set.unmodifiable(excludeSubtrees),
   ),
 );
 
@@ -41,12 +43,14 @@ class _DirectoryPicker extends StatefulWidget {
     this.readOnly,
     this.allowNew,
     this.initialPath,
+    this.excludeSubtrees,
   );
   final WorkspaceCatalog catalog;
   final String? selected, parentFor;
   final bool parentMode;
   final bool readOnly, allowNew;
   final String initialPath;
+  final Set<String> excludeSubtrees;
   @override
   State<_DirectoryPicker> createState() => _DirectoryPickerState();
 }
@@ -101,7 +105,12 @@ class _DirectoryPickerState extends State<_DirectoryPicker> {
     final rows = libraryDirectoryTree(widget.catalog).where((d) {
       if (d.id == 'all' || d.id == 'unfiled') return false;
       final path = libraryDirectoryAncestors(widget.catalog, d);
-      if (path.any((p) => p.id == widget.parentFor)) return false;
+      if (path.any(
+        (p) =>
+            p.id == widget.parentFor || widget.excludeSubtrees.contains(p.id),
+      )) {
+        return false;
+      }
       if (query.isNotEmpty) {
         return _searchable(directoryPath(widget.catalog, d.id)).contains(query);
       }
