@@ -30,9 +30,10 @@ class _Fixture {
   final String session;
   final CredentialUseRequest request;
   static Future<_Fixture> create() async {
-    final root = await Directory.systemTemp.createTemp(
+    final createdRoot = await Directory.systemTemp.createTemp(
       'credential-reuse-storage-',
     );
+    final root = Directory(await createdRoot.resolveSymbolicLinks());
     final keys = TestKeyStore(), clock = _Clock();
     final repo = await EncryptedInformationRepository.open(
       '${root.path}/source',

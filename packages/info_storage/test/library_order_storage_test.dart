@@ -353,7 +353,7 @@ void main() {
       final saved = repo.libraryOrder!;
       await service.close();
       await repo.close();
-      for (final format in [50, 52]) {
+      for (final format in [50, 53]) {
         sql((db) {
           db.execute('UPDATE library_format SET version=?', [format]);
           db.execute('PRAGMA user_version=$format');

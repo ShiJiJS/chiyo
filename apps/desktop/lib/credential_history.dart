@@ -611,6 +611,9 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
                                   : '审批时间'}  ${time(r.decidedAt ?? r.createdAt)}',
                               13,
                             ),
+                            if (r.credentialValidity ==
+                                CredentialUseValidity.session)
+                              t('允许本聊天使用：不限时', 13),
                             if (r.credentialExpiresAt != null)
                               t('允许启动至  ${time(r.credentialExpiresAt)}', 13),
                             if (r.revokedAt != null)

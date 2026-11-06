@@ -342,14 +342,16 @@ class OwnerWorkspaceAdditionalApprovals {
               core.FieldRef(scopes[id]!.record.id, scopes[id]!.fieldId!),
         ];
         if (approve &&
-            (!const [15, 30].contains(c.credentialMinutes) ||
+            ((c.credentialMinutes == null
+                    ? !r.supportsSessionValidity
+                    : !const [15, 30].contains(c.credentialMinutes)) ||
                 !(r.protocolVersion == 2
                         ? const [15, 30, 60, 480]
                         : const [15, 30])
                     .contains(c.fieldMinutes))) {
           throw const WorkspaceFailure(
             'invalid_scope',
-            '凭据支持15或30分钟；普通字段请选择协议支持的期限。',
+            '只有本聊天的SSH使用可选不限时；其他凭据支持15或30分钟。普通字段独立选择期限。',
           );
         }
         await owner.decideCredentialUse(
@@ -357,7 +359,9 @@ class OwnerWorkspaceAdditionalApprovals {
           approveCredential:
               approve && c.selected.contains('credential:${r.id}'),
           fields: refs,
-          lifetime: Duration(minutes: c.credentialMinutes),
+          lifetime: c.credentialMinutes == null
+              ? null
+              : Duration(minutes: c.credentialMinutes!),
           fieldLifetime: Duration(minutes: c.fieldMinutes),
           reviewedVersions: {
             for (final f in refs)

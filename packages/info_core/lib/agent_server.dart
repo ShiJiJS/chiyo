@@ -247,6 +247,8 @@ class AgentServer {
           'capabilities': [
             'information-request-operations.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
+            if (enableReusableCredentialUse)
+              'credential-ssh-session-validity.v1',
             if (_focusedFillEnabled) 'credential-focused-fill.v1',
             if (_focusedFillEnabled && _agent.focusedFillDiscoveryAvailable)
               'credential-focused-target.v1',
@@ -265,6 +267,13 @@ class AgentServer {
             if (_agent.informationImportFilesAvailable)
               'information-file-update.v1',
           ],
+          if (enableReusableCredentialUse)
+            'sshGrantValidity': {
+              'receiver': 'ssh_identity',
+              'options': ['timed', 'session'],
+              'description':
+                  'The user chooses the lifetime during approval. Session validity has no fixed deadline and remains bound to the original live chat, credential version and receiver. Revocation stops future use; completed remote operations are not rolled back.',
+            },
           if (tools != null)
             'credentialTools': tools.map((tool) => tool.toJson()).toList(),
           'directoryDiscovery': {

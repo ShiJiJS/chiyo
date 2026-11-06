@@ -25,7 +25,8 @@ class ApprovalDraft {
   final Set<String> selected;
   final Map<String, int> files;
   final Set<String> expanded = {};
-  int fieldMinutes = 30, credentialMinutes = 15;
+  int fieldMinutes = 30;
+  int? credentialMinutes = 15;
   bool dirty = false;
 }
 
@@ -354,11 +355,12 @@ class ApprovalsController extends ChangeNotifier {
     edited();
   }
 
-  void lifetime(int value, {bool credential = false}) {
+  void lifetime(int? value, {bool credential = false}) {
     if (!canDecide) return;
     if (credential) {
       draft!.credentialMinutes = value;
     } else {
+      if (value == null) return;
       draft!.fieldMinutes = value;
     }
     edited();
@@ -405,6 +407,9 @@ class ApprovalsController extends ChangeNotifier {
     writeFailure = null;
     _refreshPending = false;
     _drafts.remove(receipt.requestId);
+    // The prior pending detail must not render after its draft is discarded.
+    // Query the committed decision before exposing a fresh detail/draft pair.
+    detail = null;
     selection = receipt.requestId;
     filter = WorkspaceApprovalFilter.all;
     notice = '本次决定已记录。';

@@ -66,7 +66,7 @@ class _SampleGrantHistory implements WorkspaceGrantHistorySource {
     agentClaim: h.session.agentClaim,
     chatClaim: h.session.label,
     purpose: h.purpose,
-    recordedAt: h.operations.isEmpty ? h.expiresAt : h.operations.last.at,
+    recordedAt: h.operations.isEmpty ? h.expiresAt! : h.operations.last.at,
     operationCount: h.operations.length,
   );
   List<WorkspaceGrantSummary> get all =>

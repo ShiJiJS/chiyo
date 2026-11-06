@@ -139,6 +139,7 @@ class WorkspaceGrantDetail {
     this.decidedAt,
     this.fieldExpiresAt,
     this.credentialExpiresAt,
+    this.credentialSessionBound = false,
     this.legacyNotice,
     this.scopeNotice,
   }) : scopes = List.unmodifiable(scopes),
@@ -150,6 +151,7 @@ class WorkspaceGrantDetail {
   final List<WorkspaceGrantEvent> events;
   final String? reviewToken, legacyNotice, scopeNotice;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
+  final bool credentialSessionBound;
   bool get canRevoke => summary.requestId != null && summary.state.isActive;
 }
 

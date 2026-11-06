@@ -422,7 +422,7 @@ void main() {
       final history = await source.credentials.history(
         WorkspaceRecordRef(WorkspaceRecordKind.credential, r.credentialId),
       );
-      expect(history.single.operations.single.description, '主人审批');
+      expect(history.single.operations.single.description, '用户审批');
       final bearer = service.agent.claim(session, r.id).token;
       expect(
         await service.agent.read(

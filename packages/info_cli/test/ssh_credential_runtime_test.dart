@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:info_core/info_core.dart';
 import 'support/runtime_harness.dart';
-import '../../info_core/test/ssh_credential_use_test.dart' show knownHostBytes;
+import '../../info_core/test/fixtures/ssh_session_fixture.dart' show knownHostBytes;
 
 void main() {
   test(

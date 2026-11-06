@@ -683,7 +683,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
           ? (selected.values.any(
                   (x) => x.kind == WorkspaceApprovalScopeKind.credential,
                 )
-                ? at.add(Duration(minutes: c.credentialMinutes))
+                ? at.add(Duration(minutes: c.credentialMinutes!))
                 : null)
           : old?.credentialEnd,
       ++_revision,
