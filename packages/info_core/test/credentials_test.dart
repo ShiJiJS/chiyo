@@ -274,6 +274,7 @@ void main() {
       'publicPurpose': 'Maintain skills',
       'form': 'string',
       'version': 1,
+      'directoryId': null,
       'availability': 'available',
     });
     expect(jsonEncode(catalog), isNot(contains('fictional-secret')));
