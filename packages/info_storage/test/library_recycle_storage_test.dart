@@ -375,8 +375,8 @@ void main() {
         ),
       );
       sql((db) {
-        db.execute('UPDATE library_format SET version=52');
-        db.execute('PRAGMA user_version=52');
+        db.execute('UPDATE library_format SET version=53');
+        db.execute('PRAGMA user_version=53');
       });
       await expectLater(
         EncryptedInformationRepository.open(root.path, keys),
