@@ -111,9 +111,7 @@ extension BackupOwnerOperations on InformationBackups {
         if (token is! String ||
             !RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(token) ||
             counts == null ||
-            counts.length != _backupCountNames.length ||
-            !counts.keys.toSet().containsAll(_backupCountNames) ||
-            counts.values.any((n) => n < 0))
+            !_validBackupCounts(counts))
           throw const FormatException();
       } else if (token != null || counts != null) {
         throw const FormatException();

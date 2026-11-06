@@ -519,6 +519,23 @@ extension _CompleteBackups on InformationBackups {
         'payload': jsonEncode(entry.finish(RecycleState.purged).toJson()),
       };
     }).toList();
+    if (tables.containsKey('library_recycle_batches')) {
+      tables['library_recycle_batches'] = [
+        for (final row in tables['library_recycle_batches']!)
+          (() {
+            final batch = LibraryRecycleBatch.fromJson(_backupJson(row));
+            return batch.state == RecycleState.available &&
+                    !now.isBefore(batch.expiresAt)
+                ? <String, Object?>{
+                    'id': batch.id,
+                    'payload': jsonEncode(
+                      batch.finish(RecycleState.purged).toJson(),
+                    ),
+                  }
+                : row;
+          })(),
+      ];
+    }
     var days = 90;
     for (final setting in tables['settings']!) {
       if (setting['name'] == 'auditRetentionDays') {

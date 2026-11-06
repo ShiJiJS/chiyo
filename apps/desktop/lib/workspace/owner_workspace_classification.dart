@@ -67,6 +67,15 @@ class OwnerWorkspaceClassification {
     for (final record in records) {
       types.putIfAbsent(record.type.id, () => record.type);
     }
+    final batches = owner.libraryRecycleSupported
+        ? owner.libraryRecycleBatches
+        : <core.LibraryRecycleBatch>[];
+    final groupedEntries = {
+          for (final b in batches) ...b.informationEntries.values,
+        },
+        groupedCredentials = {
+          for (final b in batches) ...b.credentialRevisions.keys,
+        };
     return WorkspaceCatalog(
       directories: [
         for (final d in snapshot.directories)
@@ -79,7 +88,13 @@ class OwnerWorkspaceClassification {
       tagCounts: tagCounts,
       version: snapshot.version,
       recycledCount:
-          owner.recycleEntries.length + owner.recycledCredentials.length,
+          batches.length +
+          owner.recycleEntries
+              .where((e) => !groupedEntries.contains(e.id))
+              .length +
+          owner.recycledCredentials
+              .where((c) => !groupedCredentials.contains(c.id))
+              .length,
     );
   }
 

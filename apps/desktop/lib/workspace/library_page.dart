@@ -231,7 +231,13 @@ class _LibraryPageState extends State<LibraryPage> {
       if (saved && mounted) {
         DesktopFeedback.show(
           context,
-          action == WorkspaceDirectoryAction.delete ? '已删除空目录' : '目录已保存',
+          action == WorkspaceDirectoryAction.delete
+              ? model.source is WorkspaceLibraryRecycle &&
+                        (model.source as WorkspaceLibraryRecycle)
+                            .libraryRecycleSupported
+                    ? '目录和内容已移到回收站'
+                    : '已删除空目录'
+              : '目录已保存',
         );
       }
     } finally {

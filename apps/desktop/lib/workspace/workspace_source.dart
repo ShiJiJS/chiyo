@@ -1,4 +1,5 @@
 import 'workspace_records.dart';
+export 'workspace_library_recycle.dart';
 import 'workspace_history.dart';
 import 'workspace_files.dart';
 import 'workspace_credentials.dart';

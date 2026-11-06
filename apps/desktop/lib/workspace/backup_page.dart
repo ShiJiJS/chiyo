@@ -225,6 +225,11 @@ class _BackupFlowState extends State<_BackupFlow> {
         '资料修订 ${counts[WorkspaceBackupCategory.revisions]} 条 · 回收对象 ${counts[WorkspaceBackupCategory.recycled]} 条',
         style: libraryText(context, 14, height: 1.9),
       ),
+      if (counts[WorkspaceBackupCategory.directoryBatches] > 0)
+        Text(
+          '一起回收的目录和内容：${counts[WorkspaceBackupCategory.directoryBatches]} 批',
+          style: libraryText(context, 14, height: 1.9),
+        ),
       Text(
         '授权历史 ${counts[WorkspaceBackupCategory.grants]} 条 · 操作事实 ${counts[WorkspaceBackupCategory.operations]} 条 · 主机信任 ${counts[WorkspaceBackupCategory.hosts]} 份',
         style: libraryText(context, 14, height: 1.9),
