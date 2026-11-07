@@ -707,7 +707,11 @@ class ProposalItemComparison extends StatelessWidget {
                   item.proposed,
                 ).where((f) => f['key'] == key).firstOrNull?['label']
                 as String? ??
-            key,
+            workspaceFields(
+                  before,
+                ).where((f) => f['key'] == key).firstOrNull?['label']
+                as String? ??
+            '补充内容',
       if (jsonEncode({
             for (final e in before.relations.entries)
               e.key: e.value.map((r) => r.key).toList(),
