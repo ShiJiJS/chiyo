@@ -263,7 +263,7 @@ void main() {
         expect(decoded.definition, proposed.definition);
         if (saved.layout!.typeId == 'document') {
           expect(decoded.values['bodyFormat'], 'markdown');
-          expect(decoded.values['body'], contains('## 维护说明'));
+          expect(decoded.values['body'], proposed.values['body']);
         }
         if (saved.layout!.typeId.contains('profile')) {
           final education = decoded.values['education'] as List;
@@ -358,7 +358,7 @@ void main() {
       final beforeRestart = await proposals.read(id);
       expect(
         beforeRestart.items.single.before!.values['body'],
-        contains('## 维护说明'),
+        (template['values'] as Map)['body'],
       );
       expect(
         beforeRestart.items.single.proposed.values['body'],
@@ -397,7 +397,7 @@ void main() {
         service.owner.informationRevisions.single.item.fields
             .singleWhere((f) => f.name == '正文')
             .value,
-        contains('## 维护说明'),
+        (template['values'] as Map)['body'],
       );
       expect(service.owner.updateProposals.single.input.values, isEmpty);
       final bad = jsonDecode(jsonEncode(update)) as Map<String, dynamic>;
@@ -738,7 +738,10 @@ void main() {
       expect(result['status'], 'pending');
       final id = result['proposalId'] as String;
       final detail = await proposals.read(id);
-      expect(detail.items.single.before!.values['body'], contains('## 维护说明'));
+      expect(
+        detail.items.single.before!.values['body'],
+        (input['values'] as Map)['body'],
+      );
       final proposed = WorkspaceProposalItemReview.fromItem(
         detail.items.single,
       );

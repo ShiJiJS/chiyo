@@ -1,4 +1,5 @@
 import 'owner_workspace_adoption.dart';
+import 'owner_agent_templates.dart';
 import 'owner_workspace_file_opens.dart';
 import 'owner_file_open_dispatcher.dart';
 import 'package:info_storage/info_storage.dart';
@@ -556,6 +557,24 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
       _read(() => _fileChanges.importFile(input));
+  @override
+  Future<List<WorkspacePluginTemplate>> attachmentSeparationTemplates() =>
+      _read(
+        () async => [
+          for (final t in currentAgentTemplates(owner).templates)
+            if (t.enabled && t.recordKind == 'information')
+              WorkspacePluginTemplate(
+                id: t.id,
+                type: WorkspaceType(
+                  t.id,
+                  t.name,
+                  t.definition['icon'] as String? ?? 'file',
+                ),
+                definition: t.definition,
+              ),
+        ],
+      );
+
   @override
   Future<WorkspaceRecordRef> separateAttachment({
     required String operationId,

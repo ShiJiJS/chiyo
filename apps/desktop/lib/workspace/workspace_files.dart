@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
 import 'dart:math';
 import 'workspace_records.dart';
+import 'workspace_plugins.dart';
 
 final _operationRandom = Random.secure();
 
 abstract interface class WorkspaceAttachmentSeparation {
+  Future<List<WorkspacePluginTemplate>> attachmentSeparationTemplates();
   Future<WorkspaceRecordRef> separateAttachment({
     required String operationId,
     required WorkspaceRecordRef record,
