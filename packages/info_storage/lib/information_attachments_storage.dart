@@ -294,7 +294,8 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
         .customSelect(
           'SELECT 1 FROM information_items WHERE layout_json IS NOT NULL '
           'UNION ALL SELECT 1 FROM information_revisions WHERE instr(payload,\'"layout":\')>0 '
-          'UNION ALL SELECT 1 FROM recycle_entries WHERE instr(payload,\'"layout":\')>0 LIMIT 1',
+          'UNION ALL SELECT 1 FROM recycle_entries WHERE instr(payload,\'"layout":\')>0 '
+          'UNION ALL SELECT 1 FROM library_recycle_batches LIMIT 1',
         )
         .get();
     if (exists.isEmpty &&

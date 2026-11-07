@@ -373,9 +373,9 @@ extension OwnerTemplateImports on OwnerAccess {
     };
     if (input.attachments.any(
       (a) =>
-          a.templateField != null && !declaredFiles.contains(a.templateField),
+          a.templateField == null || !declaredFiles.contains(a.templateField),
     )) {
-      errors['_files'] = '文件绑定必须指向模板声明的文件字段；独立补充附件省略templateField。';
+      errors['_files'] = '新文件必须绑定模板声明的文件字段；独立原件请建立文件资料并关联。';
     }
     if (input.attachments.any(
       (a) => a.versions.any((v) => v.upload == null || v.upload!.consumed),

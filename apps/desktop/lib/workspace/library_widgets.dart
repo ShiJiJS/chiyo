@@ -3,6 +3,8 @@ import '../desktop_controls.dart';
 import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'workspace_records.dart';
+import 'directory_picker.dart';
+export 'directory_tree.dart';
 
 String libraryLocalDateTime(DateTime value) {
   final time = value.toLocal();
@@ -282,44 +284,6 @@ class LibraryEmpty extends StatelessWidget {
   }
 }
 
-const _virtualDirectories = {'all', 'unfiled'};
-
-/// One tree order and one path label for browsing and all assignment forms.
-List<WorkspaceDirectory> libraryDirectoryTree(WorkspaceCatalog catalog) {
-  final ordered = <WorkspaceDirectory>[];
-  final visited = <String>{};
-  void append(String? parent) {
-    for (final d in catalog.directories.where(
-      (d) => !_virtualDirectories.contains(d.id) && d.parentId == parent,
-    )) {
-      if (!visited.add(d.id)) continue;
-      ordered.add(d);
-      append(d.id);
-    }
-  }
-
-  ordered.addAll(catalog.directories.where((d) => d.id == 'all'));
-  append(null);
-  ordered.addAll(catalog.directories.where((d) => d.id == 'unfiled'));
-  return ordered;
-}
-
-List<WorkspaceDirectory> libraryDirectoryAncestors(
-  WorkspaceCatalog catalog,
-  WorkspaceDirectory directory,
-) {
-  final path = <WorkspaceDirectory>[directory];
-  final visited = {directory.id};
-  var parent = directory.parentId;
-  while (parent != null && visited.add(parent)) {
-    final d = catalog.directories.where((d) => d.id == parent).firstOrNull;
-    if (d == null) break;
-    path.insert(0, d);
-    parent = d.parentId;
-  }
-  return path;
-}
-
 class LibraryDirectorySelect extends StatelessWidget {
   const LibraryDirectorySelect({
     super.key,
@@ -344,20 +308,18 @@ class LibraryDirectorySelect extends StatelessWidget {
         isExpanded: true,
         decoration: InputDecoration(labelText: parentMode ? '上级目录' : '资料目录'),
         items: [
-          if (parentMode &&
-              value != null &&
-              !catalog.directories.any((d) => d.id == value))
+          if (value != null && !catalog.directories.any((d) => d.id == value))
             DropdownMenuItem(
               value: value,
               enabled: false,
-              child: const Text('原上级已移除，请重新选择'),
+              child: Text(parentMode ? '原上级已移除，请重新选择' : '原目录已移除，请重新选择'),
             ),
           DropdownMenuItem(
             value: null,
             child: Text(parentMode ? '顶层目录' : '未分类'),
           ),
           for (final d in libraryDirectoryTree(catalog))
-            if (!_virtualDirectories.contains(d.id) &&
+            if (!libraryVirtualDirectoryIds.contains(d.id) &&
                 (parentFor == null ||
                     !libraryDirectoryAncestors(
                       catalog,
@@ -367,13 +329,34 @@ class LibraryDirectorySelect extends StatelessWidget {
                 value: d.id,
                 child: Text(
                   libraryDirectoryAncestors(
-                    catalog,
-                    d,
-                  ).map((p) => p.name).join(' › '),
+                        catalog,
+                        d,
+                      ).map((p) => p.name).join(' › ') +
+                      (d.proposed ? ' · 将新建' : ''),
                 ),
               ),
         ],
         onChanged: onChanged,
+      ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          onPressed: onChanged == null
+              ? null
+              : () async {
+                  final choice = await showDirectoryPicker(
+                    context,
+                    catalog,
+                    selected: value,
+                    parentFor: parentFor,
+                    parentMode: parentMode,
+                  );
+                  if (context.mounted && choice != null) {
+                    onChanged?.call(choice.id);
+                  }
+                },
+          child: const Text('浏览完整目录树'),
+        ),
       ),
       if (errorText != null)
         Padding(

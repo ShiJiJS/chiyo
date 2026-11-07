@@ -296,7 +296,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       WorkspaceApprovalKind.focus =>
         'Mac本机焦点填充尚未启用。本次只能查看申请与限制，不能批准填充。网页或工具的DOM焦点不代表系统前台焦点；未来真实能力由单独验收决定。',
       WorkspaceApprovalKind.credential =>
-        '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，秘密不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
+        '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
     };
     await showDesktopDialog<void>(
       context,
@@ -359,7 +359,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            '显示的是首个启动计划。授权期内可按批准方式复用，每次操作独立记录；不会在这里执行命令或返回凭据原文。',
+            '显示的是首个启动计划。许可绑定本聊天、凭据版本和接收程序，每次操作独立记录。撤销、聊天结束或重启会阻止后续使用。撤销不会撤回已经完成的远端操作，也不会自动终止已运行的命令或SSH连接。',
             style: libraryText(context, 13, color: c.muted, height: 1.9),
           ),
         ],
@@ -385,29 +385,38 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         enabled = model.canDecide && pending;
     Widget duration(bool credential) => Padding(
       padding: const EdgeInsets.only(top: 18),
-      child: DesktopSelect<int>(
+      child: DesktopSelect<String>(
         key: ValueKey(
           credential ? 'approval-credential-ttl' : 'approval-field-ttl',
         ),
-        value: credential ? draft.credentialMinutes : draft.fieldMinutes,
+        value: credential
+            ? draft.credentialMinutes?.toString() ?? 'session'
+            : draft.fieldMinutes.toString(),
         decoration: InputDecoration(
           labelText: credential
               ? '凭据期限'
               : '${r.kind == WorkspaceApprovalKind.organization ? '整理' : '普通范围'}期限',
         ),
         items: [
+          if (credential && detail.credential?.supportsSessionValidity == true)
+            const DropdownMenuItem(value: 'session', child: Text('不限时（限本聊天）')),
           for (final m
               in credential || r.kind == WorkspaceApprovalKind.organization
                   ? [15, 30]
                   : [15, 30, 60, 480])
             DropdownMenuItem(
-              value: m,
+              value: m.toString(),
               child: Text(m < 60 ? '$m 分钟' : '${m ~/ 60} 小时'),
             ),
         ],
         onChanged: enabled
             ? (v) {
-                if (v != null) model.lifetime(v, credential: credential);
+                if (v != null) {
+                  model.lifetime(
+                    v == 'session' ? null : int.parse(v),
+                    credential: credential,
+                  );
+                }
               }
             : null,
       ),
@@ -501,6 +510,11 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               Text(
                 '普通范围至 ${libraryLocalDateTime(detail.fieldExpiresAt!)}',
                 style: libraryText(context, 13, color: c.muted),
+              ),
+            if (detail.credentialSessionBound)
+              Text(
+                '凭据：不限时（限本聊天）',
+                style: libraryText(context, 13, color: c.muted, height: 1.8),
               ),
             if (detail.credentialExpiresAt != null)
               Text(

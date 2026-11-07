@@ -28,7 +28,9 @@ class OwnerCredentialUseProjection {
       return WorkspaceCredentialRequestState.revoked;
     }
     if (grant == 'available') return WorkspaceCredentialRequestState.approved;
-    if (grant == 'expired' || fields == 'expired' || status == 'expired') {
+    if (grant == 'expired' ||
+        !r.credentialApproved && fields == 'expired' ||
+        status == 'expired') {
       return WorkspaceCredentialRequestState.expired;
     }
     final session = owner.credentialRequestSessionId(r.id);
@@ -109,7 +111,10 @@ class OwnerCredentialUseProjection {
         '未提供 Agent 名称',
       ),
       purpose: r.purpose,
-      minutes: r.credentialExpiresAt != null && r.decidedAt != null
+      supportsSessionValidity: r.supportsSessionValidity,
+      minutes: r.credentialValidity == core.CredentialUseValidity.session
+          ? null
+          : r.credentialExpiresAt != null && r.decidedAt != null
           ? r.credentialExpiresAt!.difference(r.decidedAt!).inMinutes
           : 15,
       submittedAt: r.createdAt,

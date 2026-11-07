@@ -1,5 +1,18 @@
 # 通用 CLI 申请与等待
 
+## 查询完整资料目录（Mac 开发分支，#83）
+
+能力查询中的 `information-directory-discovery.v1` 表示支持
+`{"command":"directory-list"}`。结果一次返回全部当前目录，含空目录，
+`complete:true`、`total` 与 `directories` 明确表示完整结果，不接受分页参数。
+每个目录包含稳定 `id`、`parentId`、`version`、完整 `path`、从根开始的
+`pathIds` 和从零开始的同级 `order`。同名目录按完整路径和 ID 区分。
+
+目录数据来自当前 App；新建、移动、重命名或删除后重新查询即可取得最新结构。
+录入建议可复用目录 ID，可发现普通资料和凭据的元数据包含 `directoryId`。
+此查询不返回正文、文件内容、凭据材料或待审批资料，不创建整理任务，也不授予写入能力。
+目录写入及整理继续按原审批流程。Skill 的相关引导依照本轮要求暂缓修改。
+
 ## 查询当前插件和资料模板（Mac 开发分支）
 
 App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}`；后者支持 `packageId`、`offset`、`limit`。选择启用的模板后发送 `{"command":"template-read","templateId":"查询所得ID"}`，按返回的 `definition` 和 `submissionExample` 填写，不能把固定模板列表抄进 Skill。插件安装、更新、启停和移除在下一次查询中生效。没有适合的模板就建议用户补充并暂缓，不自行生成安装插件。
@@ -10,9 +23,9 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 ## 普通文件新建录入（Mac 开发分支）
 
-先核对`information-file-upload.v1`，按`template-read`返回的`fileInput`及`submissionExample`填写。CLI的`attachments[].versions[].filePath`接收用户给定原文件路径，`values`中的声明文件字段填匹配的附件key，`templateField`标明声明字段；额外独立附件省略templateField。每组用从1开始数的`currentVersion`选择当前原文，并填写`label`与`sourceNote`说明来源。单份文件上限10MiB，原文不会进入Agent的响应或普通字段。
+先核对`information-file-upload.v1`，按`template-read`返回的`fileInput`及`submissionExample`填写。CLI的`attachments[].versions[].filePath`接收用户给定原文件路径，`values`中的声明文件字段填匹配的附件key，`templateField`标明声明字段；新文件必须绑定声明字段，原件有独立用途时建立文件资料并关联，不追加未绑定来源副本。每组用从1开始数的`currentVersion`选择当前原文，并填写`label`与`sourceNote`说明来源。单份文件上限10MiB，原文不会进入Agent的响应或普通字段。
 
-新建文件提案须给稳定`operationId`，不确定时先用`import-status`按此编号核对；CLI另报上传编号时用`import-file-status`查询原文收件情况。提案待审批、已批准待引用与真正入库分别报告。主人可预览待审原文，批准时原文、资料、版本与回执一起保存。已有资料文件修改另核对`information-file-update.v1`，按动态`fileUpdateExamples`走`update-submit`：在`update`中给准确itemId、baseVersion及attachments；新独立附件省略fieldId，已有附件加版本指定现有文件字段。只补历史时currentVersion为null，原当前选择不变。只补文件可省略templateId和values，无关正文保持；完整模板修改则对已有文件提供`{"retain":true}`，其他values仍完整。修改的稳定operationId可用`update-status`查询，发生冲突要重新核对原资料并审批；详见[实现进度](development/ordinary-file-ingestion.md)。
+新建文件提案须给稳定`operationId`，不确定时先用`import-status`按此编号核对；CLI另报上传编号时用`import-file-status`查询原文收件情况。提案待审批、已批准待引用与真正入库分别报告。主人可预览待审原文，批准时原文、资料、版本与回执一起保存。已有资料文件修改另核对`information-file-update.v1`，按动态`fileUpdateExamples`走`update-submit`：在`update`中给准确itemId、baseVersion及attachments；新文件绑定templateField所指的声明文件字段，已有附件加版本指定现有文件字段fieldId（包括旧的额外附件）。只补历史时currentVersion为null，原当前选择不变。只补文件可省略templateId和values，无关正文保持；完整模板修改则对已有文件提供`{"retain":true}`，其他values仍完整。修改的稳定operationId可用`update-status`查询，发生冲突要重新核对原资料并审批；详见[实现进度](development/ordinary-file-ingestion.md)。
 
 ## 登记已准备好的 Codex 运行包
 
@@ -20,7 +33,7 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json`，Windows 位于 `%LOCALAPPDATA%/AgentInfo/Codex/integration.json`。更新运行包须重新核对和登记，不能把旧描述当作新版已就绪。当前登记与定位的故障检查在 Mac 上运行；未据此宣称 Windows 原生安装验收通过。
 
-新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
+新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。新回执还给出 `savedLocation: {directoryId, path}`，其中 `path` 为保存时的完整目录名称数组，未分类为 `directoryId:null, path:[]`；这是保存当时的位置，之后移动或改名不回写。旧回执没有这一字段时不推测其历史位置。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
 
 `update-submit` 也支持上述待录入普通资料关联，必须提供目标的 `proposalId`。批准但未具备保存条件时，保留审核结果，原资料不变。`update-status` 返回提案 `version`，以及等待／待处理状态，真正保存后才返回 `result`。`update-revise` 携带 `proposalId`、当前 `version`、修订的 `update`，保留原资料ID，可以更新 `baseVersion`，修订后清除旧批准并重新审批。按模板修改的 `values` 要包含模板所有字段，不能靠省略来清空字段；补充字段保持不变。待审批凭据已在 Mac 开发分支接入共同流程，尚未替换本机预览；见[凭据录入](development/credential-intake.md)。
 

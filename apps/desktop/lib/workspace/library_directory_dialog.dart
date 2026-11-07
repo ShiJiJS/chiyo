@@ -4,6 +4,7 @@ import '../ui_palette.dart';
 import 'classification_controller.dart';
 import 'library_controller.dart';
 import 'library_widgets.dart';
+import 'library_batch_recycle_dialog.dart';
 import 'workspace_source.dart';
 
 Future<bool> showLibraryDirectoryEditor(
@@ -15,6 +16,17 @@ Future<bool> showLibraryDirectoryEditor(
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return false;
+  if (action == WorkspaceDirectoryAction.delete &&
+      directory != null &&
+      controller.source is WorkspaceLibraryRecycle &&
+      (controller.source as WorkspaceLibraryRecycle).libraryRecycleSupported) {
+    return await showLibraryBatchRecycle(
+          context,
+          controller.source,
+          selection: WorkspaceLibrarySelection(directoryIds: [directory.id]),
+        ) !=
+        null;
+  }
   return await showClassificationEditor(
         context,
         controller.source,
@@ -23,6 +35,10 @@ Future<bool> showLibraryDirectoryEditor(
         action: action.name,
         directory: directory,
         initialParent: initialParent,
+        allowMove:
+            !(controller.source is WorkspaceLibraryMove &&
+                (controller.source as WorkspaceLibraryMove)
+                    .libraryMoveSupported),
       ) !=
       null;
 }
@@ -36,6 +52,7 @@ Future<WorkspaceClassificationReceipt?> showClassificationEditor(
   WorkspaceDirectory? directory,
   WorkspaceTag? tag,
   String? initialParent,
+  bool allowMove = true,
 }) => showDesktopDialog<WorkspaceClassificationReceipt>(
   context,
   builder: (_) => _ClassificationEditor(
@@ -46,6 +63,7 @@ Future<WorkspaceClassificationReceipt?> showClassificationEditor(
     directory: directory,
     tag: tag,
     initialParent: initialParent,
+    allowMove: allowMove,
   ),
 );
 
@@ -58,6 +76,7 @@ class _ClassificationEditor extends StatefulWidget {
     this.directory,
     this.tag,
     this.initialParent,
+    this.allowMove = true,
   });
   final WorkspaceSource source;
   final WorkspaceCatalog catalog;
@@ -66,6 +85,7 @@ class _ClassificationEditor extends StatefulWidget {
   final WorkspaceDirectory? directory;
   final WorkspaceTag? tag;
   final String? initialParent;
+  final bool allowMove;
   @override
   State<_ClassificationEditor> createState() => _ClassificationEditorState();
 }
@@ -83,7 +103,9 @@ class _ClassificationEditorState extends State<_ClassificationEditor> {
       ? '新建$_noun'
       : m.tag
       ? '重命名标签'
-      : '重命名或移动目录';
+      : widget.allowMove
+      ? '重命名或移动目录'
+      : '重命名目录';
   @override
   void initState() {
     super.initState();
@@ -189,7 +211,8 @@ class _ClassificationEditorState extends State<_ClassificationEditor> {
                           errorText: m.failure?.fieldErrors['name'],
                         ),
                       ),
-                      if (!m.tag) ...[
+                      if (!m.tag &&
+                          (widget.action == 'create' || widget.allowMove)) ...[
                         const SizedBox(height: 18),
                         LibraryDirectorySelect(
                           key: const ValueKey('library-directory-parent'),

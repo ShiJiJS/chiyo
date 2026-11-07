@@ -7,6 +7,7 @@ import 'workspace_history.dart';
 import 'workspace_information_codec.dart';
 import 'workspace_records.dart';
 import 'workspace_order.dart';
+import 'directory_tree.dart';
 import 'owner_workspace_legacy_templates.dart';
 
 /// Ordinary-information part of the production source. The composition root
@@ -116,7 +117,37 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
               _keyword(r, query.keyword),
         )
         .toList();
-    sortWorkspaceSummaries(items, query.sort);
+    if (query.sort == WorkspaceSort.manual) {
+      final directoryOrder = <String?>[
+        for (final d in libraryDirectoryTree(
+          WorkspaceCatalog(
+            directories: owner.directories.map(
+              (d) => WorkspaceDirectory(d.id, d.name, parentId: d.parentId),
+            ),
+            tags: const [],
+            types: const [],
+          ),
+        ))
+          d.id,
+        null,
+      ];
+      sortWorkspaceSummaries(
+        items,
+        query.sort,
+        manualDirectories: directoryOrder,
+        manualRecords: [
+          for (final r in owner.libraryRecordsInOrder)
+            WorkspaceRecordRef(
+              r.kind == 'credential'
+                  ? WorkspaceRecordKind.credential
+                  : WorkspaceRecordKind.information,
+              r.id,
+            ),
+        ],
+      );
+    } else {
+      sortWorkspaceSummaries(items, query.sort);
+    }
     final groups = <String, List<WorkspaceRecordSummary>>{};
     for (final item in items) {
       final key = switch (query.grouping) {

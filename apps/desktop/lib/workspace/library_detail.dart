@@ -23,6 +23,8 @@ class LibraryDetail extends StatefulWidget {
     required this.onEdit,
     this.onHistory,
     this.onRecycle,
+    this.onMove,
+    this.onOrder,
     this.onAdopt,
     this.onApproval,
     this.filePicker,
@@ -37,7 +39,7 @@ class LibraryDetail extends StatefulWidget {
   final LibraryMetrics metrics;
   final int revision;
   final ValueChanged<WorkspaceRecordRef> onOpen;
-  final VoidCallback? onEdit, onHistory, onRecycle;
+  final VoidCallback? onEdit, onHistory, onRecycle, onMove, onOrder;
   final VoidCallback? onAdopt;
   final ValueChanged<String>? onApproval;
   final VoidCallback onSettings, onExpand;
@@ -325,6 +327,13 @@ class _LibraryDetailState extends State<LibraryDetail> {
                   key: const ValueKey('library-record-actions'),
                   items: [
                     const DropdownMenuItem(value: 'edit', child: Text('编辑信息')),
+                    if (widget.onMove != null)
+                      const DropdownMenuItem(value: 'move', child: Text('移动')),
+                    if (widget.onOrder != null)
+                      const DropdownMenuItem(
+                        value: 'order',
+                        child: Text('调整顺序'),
+                      ),
                     if (widget.onAdopt != null)
                       const DropdownMenuItem(
                         value: 'adopt',
@@ -349,6 +358,10 @@ class _LibraryDetailState extends State<LibraryDetail> {
                       ? null
                       : (action) {
                           switch (action) {
+                            case 'move':
+                              widget.onMove?.call();
+                            case 'order':
+                              widget.onOrder?.call();
                             case 'adopt':
                               widget.onAdopt?.call();
                             case 'history':

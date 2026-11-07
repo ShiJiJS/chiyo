@@ -1,4 +1,5 @@
 import 'owner_workspace_adoption.dart';
+import 'owner_agent_templates.dart';
 import 'owner_workspace_file_opens.dart';
 import 'owner_file_open_dispatcher.dart';
 import 'package:info_storage/info_storage.dart';
@@ -9,6 +10,8 @@ import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
 import 'builtin_workspace_definitions.dart';
 import 'owner_workspace_classification.dart';
+import 'owner_workspace_library_recycle.dart';
+import 'owner_workspace_library_move.dart';
 import 'owner_workspace_credentials.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
@@ -28,7 +31,10 @@ import 'workspace_source.dart';
 class OwnerWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceLibraryRecycle,
+        WorkspaceLibraryMove,
         WorkspaceFileSelectionReleaser,
+        WorkspaceAttachmentSeparation,
         WorkspaceFileActionRecovery,
         WorkspaceFileOpenRecovery {
   OwnerWorkspaceSource({
@@ -105,6 +111,16 @@ class OwnerWorkspaceSource
       information: _information,
       onChanged: () => _changed(null),
     );
+    _libraryRecycle = OwnerWorkspaceLibraryRecycle(
+      owner,
+      _classification.loadCatalog,
+      () => _changed(null),
+    );
+    _libraryMove = OwnerWorkspaceLibraryMove(
+      owner,
+      _classification.loadCatalog,
+      () => _changed(null),
+    );
     _history = OwnerWorkspaceHistory(
       information: _information,
       onChanged: _changed,
@@ -129,6 +145,8 @@ class OwnerWorkspaceSource
   late final OwnerWorkspaceFileChanges _fileChanges;
   late final OwnerWorkspaceClassification _classification;
   late final OwnerWorkspaceHistory _history;
+  late final OwnerWorkspaceLibraryRecycle _libraryRecycle;
+  late final OwnerWorkspaceLibraryMove _libraryMove;
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
   late final StreamSubscription<String> _requests;
   Timer? _timer;
@@ -199,6 +217,9 @@ class OwnerWorkspaceSource
               ],
               [
                 for (final r in owner.recycleEntries) [r.id, r.version],
+                if (owner.libraryRecycleSupported)
+                  for (final b in owner.libraryRecycleBatches)
+                    [b.id, b.version],
                 for (final c in owner.recycledCredentials) [c.id, c.revision],
               ],
               [
@@ -260,6 +281,7 @@ class OwnerWorkspaceSource
                   ],
               ],
               owner.accessRecordObservation,
+              owner.libraryOrderRevision,
               owner.desktopPreferences.version,
               owner.templatePackageVersion,
               owner.sshKnownHosts?.id,
@@ -335,6 +357,68 @@ class OwnerWorkspaceSource
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );
   });
+  @override
+  bool get libraryRecycleSupported => owner.libraryRecycleSupported;
+  @override
+  bool get libraryMoveSupported => owner.libraryMoveSupported;
+  @override
+  bool get libraryOrderSupported => owner.libraryOrderSupported;
+  @override
+  WorkspaceSort? get preferredLibrarySort => !isCurrentLibrary
+      ? null
+      : switch (owner.libraryDisplayOrder) {
+          core.LibraryDisplayOrder.updated => WorkspaceSort.updated,
+          core.LibraryDisplayOrder.name => WorkspaceSort.name,
+          core.LibraryDisplayOrder.manual => WorkspaceSort.manual,
+        };
+  @override
+  Future<void> saveLibrarySort(WorkspaceSort sort) => _read(() async {
+    try {
+      await owner.saveLibraryDisplayOrder(switch (sort) {
+        WorkspaceSort.updated => core.LibraryDisplayOrder.updated,
+        WorkspaceSort.name => core.LibraryDisplayOrder.name,
+        WorkspaceSort.manual => core.LibraryDisplayOrder.manual,
+      });
+    } on StorageFailure {
+      throw const WorkspaceFailure('save_failed', '显示方式未能记住，重开后请重新选择。');
+    }
+  });
+  @override
+  Future<List<WorkspaceLibraryPlacementTarget>> libraryPlacementTargets(
+    WorkspaceLibrarySelection selection,
+  ) => _read(() => _libraryMove.targets(selection));
+  @override
+  Future<WorkspaceLibraryMovePreview> previewLibraryMove(
+    WorkspaceLibrarySelection selection,
+    String? targetId, {
+    WorkspaceLibraryPosition? position,
+  }) => _read(
+    () => _libraryMove.preview(selection, targetId, position: position),
+  );
+  @override
+  Future<WorkspaceLibraryMoveReceipt> moveLibrarySelection(
+    WorkspaceLibraryMoveCommand command,
+  ) => _read(() => _libraryMove.move(command));
+  @override
+  Future<WorkspaceLibraryMoveReceipt?> libraryMoveOperationReceipt(String id) =>
+      _read(() => _libraryMove.receipt(id));
+  @override
+  Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycle(
+    WorkspaceLibrarySelection selection,
+  ) => _read(() => _libraryRecycle.preview(selection));
+  @override
+  Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycleRestore(
+    String id,
+    WorkspaceLibraryRestoreOptions options,
+  ) => _read(() => _libraryRecycle.restorePreview(id, options));
+  @override
+  Future<WorkspaceLibraryRecycleReceipt> changeLibraryRecycle(
+    WorkspaceLibraryRecycleCommand command,
+  ) => _read(() => _libraryRecycle.change(command));
+  @override
+  Future<WorkspaceLibraryRecycleReceipt?> libraryRecycleOperationReceipt(
+    String id,
+  ) => _read(() => _libraryRecycle.receipt(id));
   @override
   Future<WorkspaceCatalog> loadCatalog() => _read(_classification.loadCatalog);
   @override
@@ -473,6 +557,64 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
       _read(() => _fileChanges.importFile(input));
+  @override
+  Future<List<WorkspacePluginTemplate>> attachmentSeparationTemplates() =>
+      _read(
+        () async => [
+          for (final t in currentAgentTemplates(owner).templates)
+            if (t.enabled && t.recordKind == 'information')
+              WorkspacePluginTemplate(
+                id: t.id,
+                type: WorkspaceType(
+                  t.id,
+                  t.name,
+                  t.definition['icon'] as String? ?? 'file',
+                ),
+                definition: t.definition,
+              ),
+        ],
+      );
+
+  @override
+  Future<WorkspaceRecordRef> separateAttachment({
+    required String operationId,
+    required WorkspaceRecordRef record,
+    required String fieldId,
+    required int expectedVersion,
+    required String name,
+    required String templateId,
+  }) => _read(() async {
+    if (record.kind != WorkspaceRecordKind.information) {
+      throw const WorkspaceFailure('unsupported', '凭据文件不能转换成普通文件资料。');
+    }
+    core.InformationRecordReceipt receipt;
+    try {
+      receipt = await owner.separateInformationAttachment(
+        operationId: operationId,
+        itemId: record.id,
+        expectedVersion: expectedVersion,
+        fieldId: fieldId,
+        name: name,
+        templateId: templateId,
+      );
+    } on core.AccessFailure catch (e) {
+      throw WorkspaceFailure(e.status, switch (e.status) {
+        'version_conflict' => '资料已变化，请关闭后重新核对。',
+        'template_unavailable' => '文件模板已变化或停用，请关闭后重新选择。',
+        'operation_conflict' => '此操作编号已用于其他内容，请重新打开整理窗口。',
+        'invalid_information' => '只能将旧的额外附件整理为独立资料，不能移出模板的必要文件。',
+        'attachment_missing' => '文件原文暂时不可用，未改变现有资料。',
+        _ => '文件整理尚未完成，请核对资料状态后重试。',
+      });
+    }
+    final ref = WorkspaceRecordRef(
+      WorkspaceRecordKind.information,
+      receipt.itemId,
+    );
+    _changed(record);
+    _changed(ref);
+    return ref;
+  });
   @override
   Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change) =>
       _read(() => _fileChanges.change(change));

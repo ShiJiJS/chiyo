@@ -3,8 +3,21 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
 import 'dart:math';
 import 'workspace_records.dart';
+import 'workspace_plugins.dart';
 
 final _operationRandom = Random.secure();
+
+abstract interface class WorkspaceAttachmentSeparation {
+  Future<List<WorkspacePluginTemplate>> attachmentSeparationTemplates();
+  Future<WorkspaceRecordRef> separateAttachment({
+    required String operationId,
+    required WorkspaceRecordRef record,
+    required String fieldId,
+    required int expectedVersion,
+    required String name,
+    required String templateId,
+  });
+}
 
 /// Fresh across processes; keep the same value while reconciling one outcome.
 String workspaceFileOperationId() =>
@@ -63,6 +76,11 @@ class WorkspaceFileVersion {
   final DateTime createdAt;
   final bool available;
   final String label, sourceNote;
+
+  bool get isMarkdown =>
+      mediaType == 'text/markdown' ||
+      (mediaType == 'text/plain' &&
+          RegExp(r'\.(md|markdown)$', caseSensitive: false).hasMatch(filename));
 }
 
 class WorkspaceFileHistory {

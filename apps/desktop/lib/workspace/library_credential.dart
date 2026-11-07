@@ -550,7 +550,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                           ),
                         ),
                         Text(
-                          '${request.purpose} · 材料v${request.materialVersion} · 申请${request.minutes}分钟',
+                          '${request.purpose} · 材料v${request.materialVersion} · ${request.validityLabel}',
                           style: libraryText(context, 13, color: c.muted),
                         ),
                         if (widget.onApproval != null)
@@ -774,7 +774,9 @@ class _CredentialHistoryState extends State<_CredentialHistory> {
                 ),
                 Text(grant.purpose),
                 Text(
-                  '到期时间（本地）：${libraryLocalDateTime(grant.expiresAt)}',
+                  grant.expiresAt == null
+                      ? '不限时（限本聊天）'
+                      : '到期时间（本地）：${libraryLocalDateTime(grant.expiresAt!)}',
                   style: libraryText(
                     context,
                     13,

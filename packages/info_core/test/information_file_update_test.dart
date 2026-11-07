@@ -52,22 +52,43 @@ void main() {
   );
 
   test(
-    'explicit attachment revisions append after latest stored version; extra files stay independent and operations retry once',
+    'new unbound copies are rejected without changing existing files',
     () async {
-      final file = await upload('revision'), extra = await upload('proof');
+      final file = await upload('unbound-copy');
+      await expectLater(
+        service.agent.submitUpdate(
+          session,
+          UpdateInput(
+            item.id,
+            item.version,
+            [],
+            attachments: [
+              ImportAttachmentInput(
+                key: 'copy',
+                name: '多余来源',
+                versions: [ImportAttachmentVersionInput(file.id)],
+                currentVersion: 1,
+              ),
+            ],
+          ),
+        ),
+        throwsA(isA<InformationTemplateInputFailure>()),
+      );
+      expect(repo.items.single, same(item));
+      expect(repo.updateProposals, isEmpty);
+      expect((await repo.importFileUpload(file.id))!.consumed, false);
+    },
+  );
+
+  test(
+    'explicit attachment revisions append after latest stored version and operations retry once',
+    () async {
+      final file = await upload('revision');
       final input = UpdateInput(
         item.id,
         item.version,
         [],
-        attachments: [
-          change(file),
-          ImportAttachmentInput(
-            key: 'proof',
-            name: '相关证明',
-            versions: [ImportAttachmentVersionInput(extra.id)],
-            currentVersion: 1,
-          ),
-        ],
+        attachments: [change(file)],
       );
       final id = await service.agent.submitUpdate(
         session,
@@ -92,7 +113,7 @@ void main() {
       final preview = service.owner.previewUpdate(id);
       expect(preview.after.fields.first.id, item.fields.single.id);
       expect(preview.after.fields.first.attachment!.attachmentVersion, 3);
-      expect(preview.after.fields.length, 2);
+      expect(preview.after.fields.length, 1);
       expect(
         jsonEncode(
           service.agent.updateStatusByOperation(session, 'revise-once'),

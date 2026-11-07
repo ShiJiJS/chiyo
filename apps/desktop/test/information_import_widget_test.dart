@@ -24,7 +24,7 @@ class _Keys implements DatabaseKeyStore {
 
 void main() {
   testWidgets(
-    'file approval shows source versions and independent extras, previews real pending original, and preserves files through owner metadata edits',
+    'file approval previews versions and a related independent file, preserving originals through owner edits',
     (t) async {
       t.view.physicalSize = const Size(1440, 1100);
       t.view.devicePixelRatio = 1;
@@ -37,6 +37,9 @@ void main() {
       late ProposalsController model;
       late OwnerWorkspaceProposals proposals;
       late String id;
+      late String savedResumeId;
+      core.InformationItem resume() =>
+          repo.items.singleWhere((i) => i.id == savedResumeId);
       await t.runAsync(() async {
         root = await Directory.systemTemp.createTemp('ordinary-owner-ui-');
         repo = await EncryptedInformationRepository.open(root.path, _Keys());
@@ -85,17 +88,40 @@ void main() {
               },
             ],
           },
-          {
-            'key': 'proof',
-            'name': '相关证明',
-            'currentVersion': 1,
-            'versions': [
-              {'uploadId': revision.id},
-            ],
-          },
         ];
+        final proofUpload = await service.agent.uploadImportFile(
+          session,
+          operationId: 'proof',
+          originalName: '证明.txt',
+          mediaType: 'text/plain',
+          bytes: Uint8List.fromList(utf8.encode('PRIVATE-PROOF-ORIGINAL')),
+        );
+        final proofItem = <String, dynamic>{
+          ...submittedItem,
+          'key': 'proof',
+          'name': '相关证明',
+          'attachments': [
+            {
+              'key': 'primary',
+              'name': '证明原文',
+              'templateField': 'file',
+              'currentVersion': 1,
+              'versions': [
+                {'uploadId': proofUpload.id},
+              ],
+            },
+          ],
+        };
+        final relation =
+            ((template['definition'] as Map)['relations'] as List).first as Map;
+        submittedItem['relations'] = {
+          relation['key']: [
+            {'kind': 'information', 'itemKey': 'proof'},
+          ],
+        };
         id = await service.agent.submitImport(session, [
           core.ImportItemInput.fromJson(submittedItem),
+          core.ImportItemInput.fromJson(proofItem),
         ]);
         proposals = OwnerWorkspaceProposals(
           owner: service.owner,
@@ -172,7 +198,8 @@ void main() {
       await content('PRIVATE-CURRENT-ORIGINAL');
       expect(find.text('确认稿 · 当前'), findsOneWidget);
       expect(find.text('早期草稿'), findsOneWidget);
-      expect(find.text('相关证明'), findsOneWidget);
+      expect(find.textContaining('相关证明'), findsWidgets);
+      expect(model.detail!.items, hasLength(2));
       expect(repo.items, isEmpty);
       expect(find.text('核对待录入原文'), findsNothing);
       await t.ensureVisible(find.text('早期草稿'));
@@ -184,8 +211,9 @@ void main() {
       await t.ensureVisible(find.text('确认稿 · 当前'));
       await t.tap(find.text('确认稿 · 当前'));
       await content('PRIVATE-CURRENT-ORIGINAL');
-      final detail = model.detail!, item = detail.items.single;
-      expect(item.attachments.length, 2);
+      final detail = model.detail!,
+          item = detail.items.singleWhere((i) => i.id == model.activeItemId);
+      expect(item.attachments.length, 1);
       expect(
         model.editItem(
           id,
@@ -213,13 +241,15 @@ void main() {
         reason: '${model.writeFailure?.code}: ${model.writeFailure?.message}',
       );
       expect(model.uncertain, false);
-      expect(repo.items.single.name, '主人确认后的简历');
-      expect(repo.items.single.fields.length, 2);
-      expect(repo.items.single.fields.first.attachment!.attachmentVersion, 1);
+      savedResumeId = repo.items.singleWhere((i) => i.name == '主人确认后的简历').id;
+      expect(repo.items, hasLength(2));
+      expect(resume().name, '主人确认后的简历');
+      expect(resume().fields.length, 1);
+      expect(resume().fields.first.attachment!.attachmentVersion, 1);
       expect(
         (await t.runAsync(
           () => service.owner.readInformationAttachment(
-            repo.items.single.fields.first.attachment!,
+            resume().fields.first.attachment!,
           ),
         ))!.bytes,
         utf8.encode('PRIVATE-CURRENT-ORIGINAL'),
@@ -236,14 +266,7 @@ void main() {
           mediaType: 'text/plain',
           bytes: Uint8List.fromList(utf8.encode('PRIVATE-NEXT-ORIGINAL')),
         );
-        final supplement = await service.agent.uploadImportFile(
-          session,
-          operationId: 'supplement',
-          originalName: '补充证明.txt',
-          mediaType: 'text/plain',
-          bytes: Uint8List.fromList(utf8.encode('PRIVATE-SUPPLEMENT')),
-        );
-        final current = repo.items.single;
+        final current = resume();
         updateId = await service.agent.submitUpdate(
           session,
           core.UpdateInput(
@@ -264,17 +287,6 @@ void main() {
                   ),
                 ],
               ),
-              core.ImportAttachmentInput(
-                key: 'supplement',
-                name: '补充证明',
-                currentVersion: 1,
-                versions: [
-                  core.ImportAttachmentVersionInput(
-                    supplement.id,
-                    label: '证明原文',
-                  ),
-                ],
-              ),
             ],
           ),
         );
@@ -282,10 +294,10 @@ void main() {
       });
       await settle();
       expect(find.text('补交确认稿 · 当前'), findsOneWidget);
-      expect(repo.items.single.version, 1);
+      expect(resume().version, 1);
       await content('PRIVATE-CURRENT-ORIGINAL');
       await content('PRIVATE-NEXT-ORIGINAL');
-      await content('PRIVATE-SUPPLEMENT');
+
       expect(find.text('修改前'), findsOneWidget);
       expect(find.text('修改后'), findsOneWidget);
       expect(find.text('查看这份原文'), findsNothing);
@@ -317,14 +329,14 @@ void main() {
         isNull,
         reason: '${model.writeFailure?.code}: ${model.writeFailure?.message}',
       );
-      expect(repo.items.single.version, 2);
-      expect(repo.items.single.fields.length, 3);
-      expect(repo.items.single.name, '主人确认后的第二稿');
-      expect(repo.items.single.fields.first.attachment!.attachmentVersion, 3);
+      expect(resume().version, 2);
+      expect(resume().fields.length, 1);
+      expect(resume().name, '主人确认后的第二稿');
+      expect(resume().fields.first.attachment!.attachmentVersion, 3);
       expect(
         (await t.runAsync(
           () => service.owner.readInformationAttachment(
-            repo.items.single.fields.first.attachment!,
+            resume().fields.first.attachment!,
           ),
         ))!.bytes,
         utf8.encode('PRIVATE-NEXT-ORIGINAL'),
@@ -332,11 +344,11 @@ void main() {
       await t.runAsync(() async {
         final record = WorkspaceRecordRef(
           WorkspaceRecordKind.information,
-          repo.items.single.id,
+          resume().id,
         );
         final detail = await library.readDetail(record);
         final key = detail.fieldIds.entries
-            .singleWhere((e) => e.value == repo.items.single.fields.first.id)
+            .singleWhere((e) => e.value == resume().fields.first.id)
             .key;
         final savedProposal = await proposals.read(id);
         final savedItem = await proposals.savedPreview(id, record);
@@ -394,7 +406,7 @@ void main() {
           service.owner,
         ).templates.singleWhere((t) => t.id == 'file');
         final session = service.agent.openSession('仅修改资料说明');
-        final current = repo.items.single;
+        final current = resume();
         final retainId = await service.agent.submitUpdate(
           session,
           core.UpdateInput(
@@ -422,10 +434,27 @@ void main() {
         isNull,
         reason: '${model.writeFailure?.code}: ${model.writeFailure?.message}',
       );
-      expect(repo.items.single.version, 3);
-      expect(repo.items.single.name, '保留文件后的名称');
-      expect(repo.items.single.fields.length, 3);
-      expect(repo.items.single.fields.first.attachment!.attachmentVersion, 3);
+      expect(resume().version, 3);
+      expect(resume().name, '保留文件后的名称');
+      final proof = repo.items.singleWhere((i) => i.id != savedResumeId);
+      expect(proof.name, '相关证明');
+      expect(proof.fields, hasLength(1));
+      expect(
+        (await t.runAsync(
+          () => service.owner.readInformationAttachment(
+            proof.fields.single.attachment!,
+          ),
+        ))!.bytes,
+        utf8.encode('PRIVATE-PROOF-ORIGINAL'),
+      );
+      expect(
+        resume().layout!.relations.values
+            .expand((refs) => refs)
+            .any((r) => r.id == proof.id),
+        isTrue,
+      );
+      expect(resume().fields.length, 1);
+      expect(resume().fields.first.attachment!.attachmentVersion, 3);
       await t.pumpWidget(const SizedBox());
     },
   );

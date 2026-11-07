@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-07",
+  "productVersion": "0.4.4+18",
+  "sourceCommit": "612cb89b004a7e780720b6086b6498bb9484c9e1",
+  "dataVerification": {
+    "complete": true,
+    "productionDatabaseOpened": false,
+    "productionKeyRead": false,
+    "independentEncryptedRestore": true,
+    "beforeInformation": 26,
+    "afterInformation": 28,
+    "activeCredentials": 15,
+    "credentialRecordsIncludingRecycled": 27,
+    "allCredentialMaterialPreserved": true,
+    "credentialVersionAndUseGenerationPreserved": true,
+    "retainedOrdinaryVersionsReadable": 30,
+    "currentOrdinaryVersions": 9,
+    "currentFilesMatchOriginalInfos": true,
+    "resumeVersionsPreserved": 3,
+    "factsPreserved": true,
+    "duplicateSourceRemoved": true,
+    "independentScreenshotRecords": 2,
+    "screenshotRelationsBothDirections": true,
+    "validRelationships": 74,
+    "directoriesPreserved": 9,
+    "unrelatedInformationPreserved": true,
+    "unrelatedCredentialMetadataPreserved": true,
+    "credentialDescriptionsCleaned": 12,
+    "backupFormat": 18
+  },
+  "installedTemplateVerification": {
+    "complete": true,
+    "queriedInstalledApp": true,
+    "appVersion": "0.4.4+18",
+    "sourceCommit": "612cb89b004a7e780720b6086b6498bb9484c9e1",
+    "templateListCount": 9,
+    "templateExamplesVerified": [
+      "service",
+      "document",
+      "file",
+      "credential.accountPassword"
+    ],
+    "currentTemplateIdentitiesMatchExamples": true,
+    "serviceDeploymentAndDeviceConfigurationGuidance": true,
+    "normalFileCatalogStatus": "ok",
+    "normalCatalogComplete": true,
+    "normalCatalogInformation": 28,
+    "normalCatalogFileFields": 7
+  },
+  "scope": "Real library via normal App management and backup export; independent encrypted restoration; no production database key export. Relevant source checks passed; no new full-suite or fresh-chat run claimed."
+}

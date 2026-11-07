@@ -7,7 +7,9 @@ import '../ui_palette.dart';
 import '../desktop_scroll.dart';
 import 'library_file_dialogs.dart';
 import 'library_widgets.dart';
+import 'library_document.dart';
 import 'workspace_source.dart';
+import 'library_attachment_separation.dart';
 
 enum _FileAction { replace, save, open, refresh }
 
@@ -437,17 +439,28 @@ class _LibraryFileState extends State<LibraryFile> {
         _previewFailure == null &&
         _preview != null;
     final toolbar = <Widget>[
-      DesktopButton(
-        key: ValueKey('library-file-versions-${widget.fieldKey}'),
-        kind: DesktopButtonKind.quiet,
-        fontSize: 13,
-        minimumSize: const Size(0, 32),
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        tooltip: '文件版本 · 当前 v${history.current.ref.version}',
-        selected: true,
-        onPressed: blocked ? null : _versions,
-        child: Text('v${history.current.ref.version} · 已选用'),
-      ),
+      if (widget.source is WorkspaceAttachmentSeparation &&
+          widget.detail.fieldIds[widget.fieldKey] != null &&
+          !(widget.detail.definition['fields'] as List? ?? []).any(
+            (f) => f['key'] == widget.fieldKey,
+          ) &&
+          workspaceFields(widget.detail).length > 1)
+        DesktopButton(
+          key: ValueKey('library-file-separate-${widget.fieldKey}'),
+          kind: DesktopButtonKind.quiet,
+          onPressed: blocked
+              ? null
+              : () => _modal(
+                  () => showAttachmentSeparation(
+                    context,
+                    widget.source,
+                    widget.detail,
+                    widget.detail.fieldIds[widget.fieldKey]!,
+                    history.current.filename,
+                  ),
+                ),
+          child: const Text('存为独立资料'),
+        ),
       Tooltip(
         message: history.current.filename,
         child: ConstrainedBox(
@@ -471,12 +484,26 @@ class _LibraryFileState extends State<LibraryFile> {
         minimumSize: const Size(0, 32),
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         onPressed: blocked ? null : _metadata,
-        child: Text(switch (history.current.mediaType) {
-          'application/pdf' => 'PDF',
-          'image/png' => 'PNG',
-          'text/plain' => 'TXT',
-          _ => '文件信息',
-        }),
+        child: Text(
+          history.current.isMarkdown
+              ? 'Markdown'
+              : switch (history.current.mediaType) {
+                  'application/pdf' => 'PDF',
+                  'image/png' => 'PNG',
+                  'text/plain' => 'TXT',
+                  _ => '文件信息',
+                },
+        ),
+      ),
+      DesktopButton(
+        key: ValueKey('library-file-versions-${widget.fieldKey}'),
+        kind: DesktopButtonKind.quiet,
+        fontSize: 13,
+        minimumSize: const Size(0, 32),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        tooltip: '文件版本 · 当前 v${history.current.ref.version}',
+        onPressed: blocked ? null : _versions,
+        child: const Text('版本记录'),
       ),
       DesktopSelect<_FileAction>(
         key: ValueKey('library-file-actions-${widget.fieldKey}'),
@@ -662,6 +689,7 @@ class LibraryFilePreviewView extends StatefulWidget {
 class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
   double _zoom = 1;
   bool _text = false;
+  final _reading = DocumentReadingController();
   MemoryImage? _image;
   void _updateImage() {
     final previous = _image;
@@ -683,6 +711,7 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
     if (oldWidget.preview.file.ref != widget.preview.file.ref) {
       _zoom = 1;
       _text = false;
+      _reading.value = false;
     }
     if (!identical(oldWidget.preview.image, widget.preview.image)) {
       _updateImage();
@@ -691,6 +720,7 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
 
   @override
   void dispose() {
+    _reading.dispose();
     if (_image != null) unawaited(_image!.evict());
     super.dispose();
   }
@@ -709,10 +739,17 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
         );
       }
       if (p.kind == WorkspaceFilePreviewKind.text) {
-        return SelectableText(
-          p.text,
-          style: libraryText(context, 14, height: 1.8),
-        );
+        return p.file.isMarkdown
+            ? LibraryDocument(
+                body: p.text,
+                format: 'markdown',
+                controller: _reading,
+                showControls: false,
+              )
+            : SelectableText(
+                p.text,
+                style: libraryText(context, 14, height: 1.8),
+              );
       }
       if (_text) {
         return SelectableText(
@@ -781,13 +818,20 @@ class _LibraryFilePreviewViewState extends State<LibraryFilePreviewView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (visual || widget.toolbarLeading.isNotEmpty)
+        if (visual || widget.toolbarLeading.isNotEmpty || p.file.isMarkdown)
           Wrap(
             spacing: 6,
             runSpacing: 6,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               ...widget.toolbarLeading,
+              if (p.kind == WorkspaceFilePreviewKind.text && p.file.isMarkdown)
+                LibraryDocumentTools(
+                  controller: _reading,
+                  format: 'markdown',
+                  canToggle: !libraryDocumentIsLarge(p.text),
+                  showFormatLabel: false,
+                ),
               if (visual) ...[
                 DesktopButton(
                   key: const ValueKey('library-file-page-back'),

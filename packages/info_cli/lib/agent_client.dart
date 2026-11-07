@@ -125,6 +125,9 @@ class AgentClient {
       case 'plugin-list':
         if (input.length != 1) return {'status': 'invalid_request'};
         return _call('/plugins/catalog', {});
+      case 'directory-list':
+        if (input.length != 1) return {'status': 'invalid_request'};
+        return _call('/directories/catalog', {});
       case 'template-list':
         if (input.keys.any(
           (k) => !{'command', 'packageId', 'offset', 'limit'}.contains(k),

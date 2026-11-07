@@ -11,6 +11,7 @@ import 'library_file_dialogs.dart';
 import 'template_record_content.dart';
 import 'proposal_original_reading.dart';
 import 'proposal_reading_state.dart';
+import 'proposal_directory.dart';
 
 List<({String title, List<WorkspaceProposalFieldChange> changes})>
 proposalChangeSections(WorkspaceProposalItem item) {
@@ -226,8 +227,12 @@ class ProposalItemReading extends StatefulWidget {
     this.readStoredFile,
     this.originalsEnabled = true,
     this.readingState,
+    this.onDirectoryChanged,
+    this.showDirectory = true,
   });
   final Widget? passwordInput;
+  final ValueChanged<DirectorySelection>? onDirectoryChanged;
+  final bool showDirectory;
   final ProposalPendingFileReader? readPendingFile;
   final ProposalStoredFileReader? readStoredFile;
   final bool originalsEnabled;
@@ -291,6 +296,17 @@ class _ProposalItemReadingState extends State<ProposalItemReading> {
             ProposalPill(d.record.type.name),
           ],
         ),
+        if (widget.showDirectory)
+          ProposalDirectoryLocation(
+            catalog: proposalDirectoryCatalog(widget.catalog, [r]),
+            directoryId: proposalReviewDirectory(
+              proposalDirectoryCatalog(widget.catalog, [r]),
+              r,
+            ),
+            allowNew: widget.item.before == null,
+            suggestedPath: r.suggestedDirectory,
+            onChanged: widget.enabled ? widget.onDirectoryChanged : null,
+          ),
         if (r.description.isNotEmpty && widget.item.credential == null)
           Padding(
             padding: const EdgeInsets.only(top: 12),
@@ -658,6 +674,7 @@ class ProposalItemComparison extends StatelessWidget {
     this.readStoredFile,
     this.originalsEnabled = true,
     this.readingState,
+    this.onDirectoryChanged,
   });
   final WorkspaceProposalItem item;
   final WorkspaceProposalItemReview review;
@@ -670,6 +687,7 @@ class ProposalItemComparison extends StatelessWidget {
   final ProposalStoredFileReader? readStoredFile;
   final bool originalsEnabled;
   final ProposalReadingState? readingState;
+  final ValueChanged<DirectorySelection>? onDirectoryChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -689,7 +707,11 @@ class ProposalItemComparison extends StatelessWidget {
                   item.proposed,
                 ).where((f) => f['key'] == key).firstOrNull?['label']
                 as String? ??
-            key,
+            workspaceFields(
+                  before,
+                ).where((f) => f['key'] == key).firstOrNull?['label']
+                as String? ??
+            '补充内容',
       if (jsonEncode({
             for (final e in before.relations.entries)
               e.key: e.value.map((r) => r.key).toList(),
@@ -726,6 +748,7 @@ class ProposalItemComparison extends StatelessWidget {
             const Text('修改前的内容暂不可用，请重新核对。')
           else
             ProposalItemReading(
+              showDirectory: false,
               item: after
                   ? item
                   : WorkspaceProposalItem(id: item.id, proposed: before),
@@ -754,6 +777,17 @@ class ProposalItemComparison extends StatelessWidget {
         Text(
           labels.isEmpty ? '没有内容变化' : '本次修改：${labels.join('、')}',
           style: libraryText(context, 14, color: UiPalette.of(context).accent),
+        ),
+        ProposalDirectoryLocation(
+          catalog: WorkspaceCatalog(
+            directories: catalog.directories.where((d) => !d.proposed),
+            tags: catalog.tags,
+            types: catalog.types,
+          ),
+          directoryId: review.directoryId,
+          beforeId: before.record.directoryId,
+          compare: true,
+          onChanged: enabled ? onDirectoryChanged : null,
         ),
         if (item.changes.isNotEmpty)
           Padding(

@@ -4,6 +4,7 @@ import 'owner_workspace_credentials.dart';
 import 'workspace_history.dart';
 import 'workspace_information_codec.dart';
 import 'workspace_records.dart';
+import 'owner_workspace_library_recycle.dart';
 
 /// Owner-only history projection over the same library as ordinary information.
 /// The composition root owns both modules and their change stream.
@@ -124,8 +125,18 @@ class OwnerWorkspaceHistory {
         .toLowerCase()
         .split(RegExp(r'\s+'))
         .where((s) => s.isNotEmpty);
+    final batches = owner.libraryRecycleSupported
+        ? owner.libraryRecycleBatches
+        : <core.LibraryRecycleBatch>[];
+    final groupedEntries = {
+          for (final b in batches) ...b.informationEntries.values,
+        },
+        groupedCredentials = {
+          for (final b in batches) ...b.credentialRevisions.keys,
+        };
     final entries = <WorkspaceRecycleEntry>[];
     for (final entry in owner.recycleEntries) {
+      if (groupedEntries.contains(entry.id)) continue;
       final item = entry.snapshot;
       if (item == null) continue;
       final summary = _codec.summary(item, tagNames: _tagNames);
@@ -146,22 +157,41 @@ class OwnerWorkspaceHistory {
       );
     }
     for (final credential in owner.recycledCredentials) {
+      if (groupedCredentials.contains(credential.id)) continue;
       final entry = ownerCredentialRecycleEntry(owner, credential);
       final metadata =
           '${entry.record.name} ${entry.record.description} 凭据 ${entry.record.tags.map((t) => t.name).join(' ')}'
               .toLowerCase();
       if (words.every(metadata.contains)) entries.add(entry);
     }
-    entries.sort((a, b) {
+    final rows = <WorkspaceRecycleRow>[
+      ...entries.map(WorkspaceRecycleRow.entry),
+    ];
+    for (final batch in batches) {
+      final metadata = [
+        if (batch.directories.isNotEmpty) '目录',
+        if (batch.informationEntries.isNotEmpty) '资料',
+        if (batch.credentialRevisions.isNotEmpty) '凭据',
+        ...batch.directories.map((d) => d.name),
+        ...batch.directoryPaths.values.map((p) => p.join('/')),
+        ...batch.records.expand((r) => [r.name, r.typeId, ...r.directoryPath]),
+      ].join(' ').toLowerCase();
+      if (words.every(metadata.contains)) {
+        rows.add(
+          WorkspaceRecycleRow.batch(workspaceDirectoryRecycleBatch(batch)),
+        );
+      }
+    }
+    rows.sort((a, b) {
       final time = b.deletedAt.compareTo(a.deletedAt);
       return time == 0 ? a.id.compareTo(b.id) : time;
     });
-    final start = entries.isEmpty
+    final start = rows.isEmpty
         ? 0
-        : offset.clamp(0, (entries.length - 1) ~/ limit * limit);
+        : offset.clamp(0, (rows.length - 1) ~/ limit * limit);
     return WorkspaceRecycleResults(
-      items: entries.skip(start).take(limit),
-      total: entries.length,
+      rows: rows.skip(start).take(limit),
+      total: rows.length,
       offset: start,
     );
   }

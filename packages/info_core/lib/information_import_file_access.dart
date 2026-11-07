@@ -119,6 +119,11 @@ extension OwnerImportFiles on OwnerAccess {
         bindings = <String, String>{};
     final now = _service._clock().toUtc();
     for (final a in resolved) {
+      if (a.fieldId == null && a.templateField == null) {
+        throw InformationTemplateInputFailure({
+          '_files': '新文件必须绑定模板声明的文件字段；独立原件请建立文件资料并关联。',
+        });
+      }
       final old = previous.fields.where((f) => f.id == a.fieldId).firstOrNull;
       if (a.fieldId != null && (old == null || old.kind != FieldKind.file) ||
           input.changes.any(

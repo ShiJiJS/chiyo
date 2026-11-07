@@ -626,6 +626,10 @@ class CredentialLaunchPlan {
   }
 }
 
+/// A session grant has no clock deadline. It remains scoped to the original
+/// live chat and the approved credential version/receiver.
+enum CredentialUseValidity { timed, session }
+
 class CredentialUseRequest {
   CredentialUseRequest({
     this.protocolVersion = 1,
@@ -646,6 +650,7 @@ class CredentialUseRequest {
     this.credentialApproved = false,
     Iterable<FieldRef> approvedFields = const [],
     this.credentialExpiresAt,
+    this.credentialValidity = CredentialUseValidity.timed,
     this.fieldExpiresAt,
     this.executionId,
     this.attemptConsumed = false,
@@ -663,7 +668,20 @@ class CredentialUseRequest {
          fields,
        ),
        fields = List.unmodifiable(fields),
-       approvedFields = List.unmodifiable(approvedFields);
+       approvedFields = List.unmodifiable(approvedFields) {
+    if (credentialValidity == CredentialUseValidity.session &&
+        (!supportsSessionValidity ||
+            !credentialApproved ||
+            !{'approved', 'partially_approved'}.contains(state) ||
+            credentialExpiresAt != null ||
+            decidedAt == null ||
+            attemptConsumed)) {
+      throw const CredentialUseFailure(
+        'invalid_plan',
+        fieldPath: 'credentialValidity',
+      );
+    }
+  }
   final String id, chatLabel, purpose, alias, credentialId, state;
   final int version, useGeneration;
   final int protocolVersion;
@@ -686,6 +704,12 @@ class CredentialUseRequest {
   final List<FieldRef> fields, approvedFields;
   final bool credentialApproved, attemptConsumed;
   final DateTime? credentialExpiresAt, fieldExpiresAt;
+  final CredentialUseValidity credentialValidity;
+  bool get supportsSessionValidity =>
+      protocolVersion == 2 && !isFocusedFill && plan.receiver == 'ssh_identity';
+  bool credentialGrantExpired(DateTime now) =>
+      credentialValidity != CredentialUseValidity.session &&
+      (credentialExpiresAt == null || !now.isBefore(credentialExpiresAt!));
   final String? executionId, invalidatedCode;
   final String? credentialName;
   final DateTime? decidedAt, revokedAt, attemptedAt;
@@ -712,6 +736,8 @@ class CredentialUseRequest {
     'credentialApproved': credentialApproved,
     'approvedFields': approvedFields.map((f) => f.toJson()).toList(),
     'credentialExpiresAt': _useTimestamp(credentialExpiresAt),
+    if (credentialValidity == CredentialUseValidity.session)
+      'credentialValidity': 'session',
     'fieldExpiresAt': _useTimestamp(fieldExpiresAt),
     'executionId': executionId,
     'attemptConsumed': attemptConsumed,
@@ -760,6 +786,14 @@ class CredentialUseRequest {
         credentialExpiresAt: j['credentialExpiresAt'] == null
             ? null
             : DateTime.parse(j['credentialExpiresAt'] as String),
+        credentialValidity: !j.containsKey('credentialValidity')
+            ? CredentialUseValidity.timed
+            : j['credentialValidity'] == 'session'
+            ? CredentialUseValidity.session
+            : throw const CredentialUseFailure(
+                'invalid_plan',
+                fieldPath: 'credentialValidity',
+              ),
         fieldExpiresAt: j['fieldExpiresAt'] == null
             ? null
             : DateTime.parse(j['fieldExpiresAt'] as String),

@@ -814,7 +814,8 @@ void main() {
 Future<void> removeFixture(Directory root) async {
   final resolved = await root.resolveSymbolicLinks();
   final temp = await Directory.systemTemp.resolveSymbolicLinks();
-  if (resolved.toLowerCase() != root.absolute.path.toLowerCase() ||
+  if (await root.parent.resolveSymbolicLinks() != temp ||
+      await FileSystemEntity.isLink(root.path) ||
       !resolved.toLowerCase().startsWith(
         '${temp.toLowerCase()}${Platform.pathSeparator}',
       )) {

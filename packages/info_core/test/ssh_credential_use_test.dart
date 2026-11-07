@@ -2,22 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
-
-List<int> knownHostBytes() {
-  final key = base64Encode([
-    0,
-    0,
-    0,
-    11,
-    ...ascii.encode('ssh-ed25519'),
-    0,
-    0,
-    0,
-    32,
-    ...List.generate(32, (i) => i + 1),
-  ]);
-  return utf8.encode('[test.beichen.example]:2222 ssh-ed25519 $key\n');
-}
+import 'fixtures/ssh_session_fixture.dart' show knownHostBytes;
 
 void main() {
   test(

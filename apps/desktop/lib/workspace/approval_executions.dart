@@ -14,7 +14,9 @@ class ApprovalExecutions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final detail = controller.detail!, c = UiPalette.of(context);
-    if (detail.credentialExpiresAt == null && detail.executions.isEmpty) {
+    if (detail.credentialExpiresAt == null &&
+        !detail.credentialSessionBound &&
+        detail.executions.isEmpty) {
       return const SizedBox.shrink();
     }
     return Padding(

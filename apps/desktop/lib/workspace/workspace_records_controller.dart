@@ -47,6 +47,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
       if (_disposed || generation != _queryGeneration) return;
       final lostDirectory =
           next.directoryId != null &&
+          !{'all', 'unfiled'}.contains(next.directoryId) &&
           !currentCatalog.directories.any((d) => d.id == next.directoryId);
       final lostTag =
           next.tagId != null &&
@@ -75,6 +76,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
       revision++;
       selection = value.selection;
       if (selection == null) detail = null;
+      projectionLoaded();
       loadState = value.total == 0 ? WorkspaceLoad.empty : WorkspaceLoad.ready;
       notifyListeners();
       if (selection != null) await select(selection!);
@@ -90,6 +92,12 @@ class WorkspaceRecordsController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Subclasses reconcile view-only state before the new rows become
+  /// interactive. A selection from an old page must not survive until the
+  /// unrelated detail read finishes.
+  @protected
+  void projectionLoaded() {}
 
   Future<void> select(WorkspaceRecordRef ref) async {
     if (_disposed) return;

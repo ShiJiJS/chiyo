@@ -42,6 +42,7 @@ void main() {
   late String childPath;
   setUpAll(() async {
     tools = await Directory.systemTemp.createTemp('aim-macos-restore-tools-');
+    tools = Directory(await tools.resolveSymbolicLinks());
     childPath = '${tools.path}/bundle/bin/macos_restore_child';
     final build = await Process.run(Platform.resolvedExecutable, [
       'build',
@@ -76,9 +77,10 @@ void main() {
     test(
       'Mac AOT format$format interruption during 80MiB restore rolls back and retries with distinct target key',
       () async {
-        final root = await Directory.systemTemp.createTemp(
+        final createdRoot = await Directory.systemTemp.createTemp(
           'aim-macos-restore-',
         );
+        final root = Directory(await createdRoot.resolveSymbolicLinks());
         var completed = false;
         // Preserve only the test's own fixture after a failure for diagnosis.
         // No database/recovery key is written by the child or printed.

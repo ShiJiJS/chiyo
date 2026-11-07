@@ -8,6 +8,7 @@ import 'library_credential_lifecycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 import 'record_mutation.dart';
+import 'library_batch_recycle_dialog.dart';
 
 Future<WorkspaceRecordReceipt?> showLibraryRecycle(
   BuildContext context,
@@ -423,6 +424,52 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
     }
   }
 
+  Future<void> _viewBatch(WorkspaceDirectoryRecycleBatch batch) async {
+    widget.onModalChanged?.call(true);
+    try {
+      final receipt = await showLibraryBatchRecycle(
+        context,
+        widget.source,
+        batchId: batch.id,
+      );
+      if (!mounted || receipt == null) return;
+      setState(() => _restored = null);
+      await _load();
+      if (mounted) DesktopFeedback.show(context, '整批目录和内容已恢复');
+    } finally {
+      widget.onModalChanged?.call(false);
+    }
+  }
+
+  Widget _batchRow(WorkspaceDirectoryRecycleBatch batch) => Container(
+    padding: const EdgeInsets.symmetric(vertical: 18),
+    decoration: BoxDecoration(
+      border: Border(bottom: BorderSide(color: UiPalette.of(context).line)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          batch.title,
+          style: libraryText(context, 16, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '整批回收 · ${batch.counts}\n保留至 ${batch.expiresAt.toLocal().toIso8601String().substring(0, 10)}',
+          style: libraryText(context, 13, color: UiPalette.of(context).muted),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: DesktopButton(
+            key: ValueKey('library-recycle-batch-${batch.id}'),
+            onPressed: () => _viewBatch(batch),
+            child: const Text('查看与整体恢复'),
+          ),
+        ),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context), results = _results;
@@ -507,9 +554,11 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
                   : ListView.builder(
                       key: const PageStorageKey('library-recycle-list'),
                       padding: const EdgeInsets.symmetric(horizontal: 28),
-                      itemCount: results.items.length,
+                      itemCount: results.rows.length,
                       itemBuilder: (context, index) {
-                        final entry = results.items[index];
+                        final row = results.rows[index];
+                        if (row.batch != null) return _batchRow(row.batch!);
+                        final entry = row.entry!;
                         return Container(
                           padding: const EdgeInsets.symmetric(vertical: 18),
                           decoration: BoxDecoration(
@@ -568,7 +617,7 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
                   runSpacing: 8,
                   children: [
                     Text(
-                      '${results.offset + 1}–${results.offset + results.items.length} / ${results.total}',
+                      '${results.offset + 1}–${results.offset + results.rows.length} / ${results.total}',
                     ),
                     DesktopButton(
                       onPressed: _loading || _offset == 0

@@ -151,10 +151,7 @@ extension BackupRestoreOperations on InformationBackups {
       final counts = (value['counts'] as Map).cast<String, int>();
       _validateKeyOperation(id, digest, expected);
       _validateRestoreResource(archiveId, name, archiveVersion);
-      if (version != expected + 1 ||
-          counts.length != _backupCountNames.length ||
-          !counts.keys.toSet().containsAll(_backupCountNames) ||
-          counts.values.any((n) => n < 0)) {
+      if (version != expected + 1 || !_validBackupCounts(counts)) {
         throw const FormatException();
       }
       return BackupRestoreReceipt._(

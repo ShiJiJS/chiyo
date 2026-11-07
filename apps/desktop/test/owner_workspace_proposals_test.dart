@@ -71,6 +71,179 @@ void main() {
         : [],
   );
   test(
+    'proposed directory levels reuse existing parents and save once for the whole proposal',
+    () async {
+      final parent = await service.owner.createDirectory('账号与服务');
+      final session = service.agent.openSession('合成目录提案');
+      final id = await service.agent.submitImport(session, [
+        for (final name in ['A', 'B'])
+          core.ImportItemInput(name, '', [
+            const core.FieldInput('用途', '', '合成内容'),
+          ], suggestedDirectory: '账号与服务 / 应用 / VPN'),
+      ]);
+      final detail = await source.read(id), catalog = await source.catalog();
+      final proposed = catalog.directories.where((d) => d.proposed).toList();
+      expect(proposed.map((d) => d.name), ['应用', 'VPN']);
+      expect(proposed.first.parentId, parent.id);
+      expect(proposed.last.parentId, proposed.first.id);
+      expect(
+        detail.items.every(
+          (i) => i.proposed.record.directoryId == proposed.last.id,
+        ),
+        true,
+      );
+      expect(service.owner.directories.length, 1);
+      await source.change(decision(detail));
+      expect(service.owner.directories.length, 3);
+      expect(
+        service.owner.information.map((i) => i.directoryId).toSet().length,
+        1,
+      );
+      expect(
+        service.owner.directories.singleWhere((d) => d.name == 'VPN').id,
+        service.owner.information.first.directoryId,
+      );
+    },
+  );
+
+  test(
+    'edited proposed paths admit information and credentials together and retain actual receipt paths',
+    () async {
+      service.owner.configureInformationTemplates(
+        () => currentAgentTemplates(service.owner),
+      );
+      final parent = await service.owner.createDirectory('账号与服务');
+      final session = service.agent.openSession('合成目录与密码');
+      final template = currentAgentTemplates(
+        service.owner,
+      ).templates.singleWhere((t) => t.id == 'credential.accountPassword');
+      final id = await service.agent.submitImport(session, [
+        core.ImportItemInput(
+          '说明',
+          '',
+          [const core.FieldInput('正文', '', '合成正文')],
+          key: 'note',
+          suggestedDirectory: '旧建议',
+        ),
+        core.ImportItemInput(
+          '密码',
+          '',
+          [],
+          key: 'password',
+          templateId: template.id,
+          templateVersion: template.version,
+          templateDigest: template.digest,
+          credential: core.CredentialImportInput.owner(),
+        ),
+      ]);
+      final initial = await source.read(id);
+      await service.owner.fillImportCredential(
+        id,
+        initial.summary.version,
+        'password',
+        'SYNTHETIC-ONLY',
+      );
+      final detail = await source.read(id);
+      final reviews = [
+        for (final item in detail.items)
+          (() {
+            final r = WorkspaceProposalItemReview.fromItem(item);
+            return WorkspaceProposalItemReview(
+              itemId: r.itemId,
+              name: r.name,
+              description: r.description,
+              values: r.values,
+              relations: r.relations,
+              tagIds: r.tagIds,
+              suggestedDirectory: '账号与服务 / 应用 / VPN',
+            );
+          })(),
+      ];
+      expect(service.owner.directories, hasLength(1));
+      expect(service.owner.information, isEmpty);
+      expect(service.owner.credentials, isEmpty);
+      await source.change(decision(detail, reviewed: reviews));
+      expect(service.owner.directories, hasLength(3));
+      expect(service.owner.directories.any((d) => d.name == '旧建议'), false);
+      final vpn = service.owner.directories.singleWhere((d) => d.name == 'VPN');
+      expect(service.owner.information.single.directoryId, vpn.id);
+      expect(service.owner.credentials.single.directoryId, vpn.id);
+      expect(
+        service.owner.directories.singleWhere((d) => d.name == '应用').parentId,
+        parent.id,
+      );
+      final status = service.agent.importStatus(session, id);
+      final expectedLocation = {
+        'directoryId': vpn.id,
+        'path': ['账号与服务', '应用', 'VPN'],
+      };
+      expect(
+        (status['items'] as List).map((i) => (i as Map)['savedLocation']),
+        everyElement(expectedLocation),
+      );
+      await service.owner.updateDirectory(
+        vpn.id,
+        '已改名',
+        parentId: vpn.parentId,
+      );
+      expect(
+        (service.agent.importStatus(session, id)['items'] as List)
+            .first['savedLocation'],
+        expectedLocation,
+      );
+      await close();
+      await open();
+      expect(
+        service.owner.importProposals.single.admissionDirectories.values.map(
+          (r) => r.toJson(),
+        ),
+        everyElement(expectedLocation),
+      );
+    },
+  );
+
+  test(
+    'rejecting a proposal with new directory suggestions creates nothing',
+    () async {
+      final session = service.agent.openSession('合成取消');
+      final id = await service.agent.submitImport(session, [
+        core.ImportItemInput('A', '', [
+          const core.FieldInput('正文', '', '合成正文'),
+        ], suggestedDirectory: '未创建/子目录'),
+      ]);
+      final detail = await source.read(id);
+      expect(
+        (await source.catalog()).directories.where((d) => d.proposed),
+        hasLength(2),
+      );
+      await source.change(decision(detail, confirm: false));
+      expect(service.owner.directories, isEmpty);
+      expect(service.owner.information, isEmpty);
+    },
+  );
+
+  test('a directory changed after review requires a fresh decision', () async {
+    final directory = await service.owner.createDirectory('原目录');
+    final session = service.agent.openSession('合成目录变化');
+    final id = await service.agent.submitImport(session, [
+      core.ImportItemInput('A', '', [
+        const core.FieldInput('用途', '', '合成内容'),
+      ], directoryId: directory.id),
+    ]);
+    final detail = await source.read(id);
+    await service.owner.updateDirectory(directory.id, '新名称');
+    await expectLater(
+      source.change(decision(detail)),
+      throwsA(isA<WorkspaceFailure>()),
+    );
+    expect(service.owner.information, isEmpty);
+    final current = await source.read(id);
+    expect(current.reviewToken, isNot(detail.reviewToken));
+    await source.change(decision(current));
+    expect(service.owner.information.single.directoryId, directory.id);
+  });
+
+  test(
     'an owner-edited relation previews the new target without saving or opening the library',
     () async {
       service.owner.configureInformationTemplates(
@@ -184,7 +357,10 @@ void main() {
       final d = await source.read(id);
       expect(d.canConfirm, isTrue);
       final catalog = await source.catalog();
-      expect(catalog.directories.any((d) => d.name == '建议新建：合成新目录'), isTrue);
+      expect(
+        catalog.directories.any((d) => d.name == '合成新目录' && d.proposed),
+        isTrue,
+      );
       final original = d.items.first,
           review = WorkspaceProposalItemReview.fromItem(original);
       final edit = WorkspaceProposalItemReview(
@@ -235,6 +411,7 @@ void main() {
   test(
     'agent metadata changes remain reviewable and owner edits persist with the field correction',
     () async {
+      final destination = await service.owner.createDirectory('新位置');
       final session = service.agent.openSession('合成聊天');
       final item = await service.owner.createInformation('旧名称', '旧用途', [
         const core.FieldInput('步骤', '', '旧步骤'),
@@ -263,7 +440,7 @@ void main() {
               name: '主人核对名称',
               description: '主人核对用途',
               values: proposed.values,
-              directoryId: proposed.directoryId,
+              directoryId: destination.id,
               tagIds: proposed.tagIds,
               relations: proposed.relations,
             ),
@@ -273,6 +450,7 @@ void main() {
       final saved = service.owner.information.single;
       expect(saved.name, '主人核对名称');
       expect(saved.description, '主人核对用途');
+      expect(saved.directoryId, destination.id);
       expect(saved.fields.single.value, '新步骤');
       expect(saved.fields.single.id, item.fields.single.id);
     },

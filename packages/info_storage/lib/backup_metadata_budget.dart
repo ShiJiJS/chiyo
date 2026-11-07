@@ -36,6 +36,13 @@ void _checkBackupAdmissionCounts(
     total += table.value.length;
   }
   var availableRecycle = 0;
+  for (final row
+      in tables['library_order_state'] ?? const <Map<String, Object?>>[]) {
+    final order = _backupJson(row);
+    nested +=
+        (order['directories'] as List).length +
+        (order['records'] as List).length;
+  }
   void snapshot(Map<String, dynamic> item) {
     nested +=
         1 + (item['fields'] as List).length + (item['tagIds'] as List).length;
@@ -55,6 +62,18 @@ void _checkBackupAdmissionCounts(
     final fact = _backupJson(row);
     nested += (fact['fieldIds'] as List).length;
     nested += (fact['restoredFieldIds'] as Map?)?.length ?? 0;
+  }
+  for (final row
+      in tables['library_recycle_batches'] ?? const <Map<String, Object?>>[]) {
+    final batch = _backupJson(row);
+    nested +=
+        (batch['directories'] as List).length +
+        (batch['records'] as List).length +
+        (batch['informationEntries'] as Map).length +
+        (batch['credentialRevisions'] as Map).length;
+    for (final path in (batch['directoryPaths'] as Map).values) {
+      nested += (path as List).length;
+    }
   }
   for (final row in tables['grant_history']!) {
     final grant = _backupJson(row);
