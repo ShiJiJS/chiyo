@@ -12,6 +12,7 @@ import 'library_controller.dart';
 import 'library_detail.dart';
 import 'library_directory_dialog.dart';
 import 'library_edit_dialog.dart';
+import 'library_credential_editor.dart';
 import 'library_history_dialog.dart';
 import 'library_credential_lifecycle.dart';
 import 'library_recycle.dart';
@@ -593,15 +594,30 @@ class _LibraryPageState extends State<LibraryPage> {
     if (model.loadState == WorkspaceLoad.loading) return;
     widget.onModalChanged?.call(true);
     try {
-      final ref = await showLibraryEditor(
-        context,
-        model,
-        detail: create ? null : model.detail,
-        filePicker: widget.filePicker,
-        credentialPicker: widget.credentialPicker,
-        onOpenPlugins: () =>
-            widget.onNavigate(WorkspacePage.settings, 'plugins'),
-      );
+      final detail = model.detail;
+      WorkspaceRecordRef? ref;
+      if (!create &&
+          detail?.record.ref.kind == WorkspaceRecordKind.credential) {
+        final catalog = await model.source.loadCatalog();
+        if (!mounted) return;
+        ref = await showLibraryCredentialEditor(
+          context,
+          model.source,
+          catalog,
+          ref: detail!.record.ref,
+          picker: widget.credentialPicker,
+        );
+      } else {
+        ref = await showLibraryEditor(
+          context,
+          model,
+          detail: create ? null : detail,
+          filePicker: widget.filePicker,
+          credentialPicker: widget.credentialPicker,
+          onOpenPlugins: () =>
+              widget.onNavigate(WorkspacePage.settings, 'plugins'),
+        );
+      }
       if (!mounted || ref == null) return;
       await model.openRelated(ref, rememberOrigin: create);
       if (mounted) {
