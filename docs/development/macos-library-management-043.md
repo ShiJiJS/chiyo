@@ -7,7 +7,10 @@
 本地最新安装包：`local/中文 Mac 预览/chiyo-0.4.3+15-mac-dev.8d8849b47847-macos-arm64.dmg`。
 SHA-256：`43b40b36e736732cd7897d31c69d08bbc1ab196468e2c4973acc7c9f131d5d84`。
 这是 Apple Silicon、macOS 14 及以上的开发预览；本机 ad-hoc 签名，未公证。
-当前 `/Applications/chiyo.app` 仍是原来的0.4.2，本轮只交付预览包，没有替换原安装。
+打包完成时没有替换原安装。随后用户明确要求安装，0.4.3已替换到原
+`/Applications/chiyo.app`；原加密资料在首次启动前逐文件不变，关闭状态的完整资料
+快照及旧程序回退已验证。当前首次开库等待用户处理系统钥匙串提示，开库后的
+资料核对尚待；最新状态见[当前安装记录](macos-latest-delivery.md)。
 
 ## 逐票核对
 
