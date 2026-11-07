@@ -3,33 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/workspace/library_attachment_separation.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
-import 'package:info_desktop/workspace/unavailable_workspace_sources.dart';
+import 'package:info_desktop/workspace/owner_agent_templates.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import '../../../packages/info_core/test/fixtures/legacy_attachment_fixture.dart';
-
-class _Plugins extends UnavailableWorkspacePlugin {
-  const _Plugins(this.definition);
-  final Map<String, Object?> definition;
-  @override
-  Future<WorkspacePluginCatalog> load() async => WorkspacePluginCatalog(1, [
-    WorkspacePlugin(
-      id: 'test.files',
-      name: '文件',
-      version: '1',
-      author: '',
-      description: '',
-      digest: 'a' * 64,
-      origin: '',
-      templates: [
-        WorkspacePluginTemplate(
-          id: 'file',
-          type: const WorkspaceType('file', '文件', 'file'),
-          definition: definition,
-        ),
-      ],
-    ),
-  ]);
-}
 
 void main() {
   testWidgets('owner saves an old original as a dynamically selected file type', (
@@ -40,14 +16,13 @@ void main() {
     final original = (await t.runAsync(
       () => createLegacyAttachment(service, repo),
     ))!;
-    final definition = Map<String, Object?>.from(
-      (service.agent.readInformationTemplate('file')['template']
-              as Map)['definition']
-          as Map,
+    // Use the actual host catalog. A fake plugin containing the built-in file
+    // template hid the production bug: the package list does not include it.
+    service.owner.configureInformationTemplates(
+      () => currentAgentTemplates(service.owner),
     );
     final source = OwnerWorkspaceSource(
       owner: service.owner,
-      plugins: _Plugins(definition),
       refreshInterval: Duration.zero,
     );
     addTearDown(

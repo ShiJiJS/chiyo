@@ -47,24 +47,23 @@ class _SeparationState extends State<_Separation> {
 
   Future<void> _load() async {
     try {
-      final catalog = await widget.source.plugins.load();
+      final templates = await (widget.source as WorkspaceAttachmentSeparation)
+          .attachmentSeparationTemplates();
       if (!mounted) return;
       _templates = [
-        for (final p in catalog.packages)
-          if (p.enabled)
-            for (final t in p.templates)
-              if ((t.definition['fields'] as List? ?? []).length == 1 &&
-                  ((t.definition['fields'] as List).single as Map)['type'] ==
-                      'file' &&
-                  (t.definition['relations'] as List? ?? []).any(
-                    (r) =>
-                        r['key'] == 'related' &&
-                        ((r['targetTemplates'] as List? ?? []).isEmpty ||
-                            (r['targetTemplates'] as List).contains(
-                              widget.detail.record.type.id,
-                            )),
-                  ))
-                t,
+        for (final t in templates)
+          if ((t.definition['fields'] as List? ?? []).length == 1 &&
+              ((t.definition['fields'] as List).single as Map)['type'] ==
+                  'file' &&
+              (t.definition['relations'] as List? ?? []).any(
+                (r) =>
+                    r['key'] == 'related' &&
+                    ((r['targetTemplates'] as List? ?? []).isEmpty ||
+                        (r['targetTemplates'] as List).contains(
+                          widget.detail.record.type.id,
+                        )),
+              ))
+            t,
       ];
       if (_templates.isNotEmpty) {
         _selected = _templates.first.type.id;
