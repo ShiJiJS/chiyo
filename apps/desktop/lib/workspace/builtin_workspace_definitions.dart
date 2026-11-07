@@ -70,7 +70,7 @@ Map<String, Object?> _guidance(String type) {
     'example': {
       'name': switch (type) {
         'server' => '业务服务器',
-        'service' => 'WireGuard 云主机',
+        'service' => 'NetBird 云主机',
         'profile' => '个人基本档案',
         'document' => 'Syncthing Mac 配置',
         'file' => '后端岗位简历',
