@@ -128,7 +128,7 @@ class OwnerWorkspaceAttachmentPreview {
         return await pdf.render(file, bytes, page);
       }
       if (page != 0) throw const WorkspaceFailure('invalid_request', '页码超出范围。');
-      if (file.mediaType == 'text/plain') {
+      if (file.mediaType == 'text/plain' || file.mediaType == 'text/markdown') {
         return WorkspaceFilePreview(
           file: file,
           kind: WorkspaceFilePreviewKind.text,

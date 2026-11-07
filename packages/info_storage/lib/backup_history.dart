@@ -519,6 +519,23 @@ extension _CompleteBackups on InformationBackups {
         'payload': jsonEncode(entry.finish(RecycleState.purged).toJson()),
       };
     }).toList();
+    if (tables.containsKey('library_recycle_batches')) {
+      tables['library_recycle_batches'] = [
+        for (final row in tables['library_recycle_batches']!)
+          (() {
+            final batch = LibraryRecycleBatch.fromJson(_backupJson(row));
+            return batch.state == RecycleState.available &&
+                    !now.isBefore(batch.expiresAt)
+                ? <String, Object?>{
+                    'id': batch.id,
+                    'payload': jsonEncode(
+                      batch.finish(RecycleState.purged).toJson(),
+                    ),
+                  }
+                : row;
+          })(),
+      ];
+    }
     var days = 90;
     for (final setting in tables['settings']!) {
       if (setting['name'] == 'auditRetentionDays') {
@@ -651,11 +668,20 @@ extension _CompleteBackups on InformationBackups {
 
   void Function() _prepareInstall(BackupContents contents) {
     final tables = contents._tables;
+    final recycleBatches = [
+      for (final row
+          in tables['library_recycle_batches'] ??
+              const <Map<String, Object?>>[])
+        LibraryRecycleBatch.fromJson(_backupJson(row)),
+    ];
     final packages = [
       for (final row
           in tables['template_packages'] ?? const <Map<String, Object?>>[])
         _templatePackageFromRow(row),
     ];
+    final libraryOrder = _libraryOrderFromRows(
+      tables['library_order_state'] ?? const [],
+    );
     final fields = tables['information_fields']!;
     final links = tables['information_item_tags']!;
     final items = [
@@ -762,6 +788,10 @@ extension _CompleteBackups on InformationBackups {
       contents.attachments,
     );
     return () {
+      _repository._libraryOrder = libraryOrder;
+      _repository._libraryRecycleBatches
+        ..clear()
+        ..addEntries(recycleBatches.map((b) => MapEntry(b.id, b)));
       _repository._fileDeliveries
         ..clear()
         ..addEntries(deliveries.map((r) => MapEntry(r.id, r)));

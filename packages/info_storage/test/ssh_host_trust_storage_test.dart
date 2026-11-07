@@ -4,7 +4,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'storage_test.dart' show TestKeyStore;
-import '../../info_core/test/ssh_credential_use_test.dart' show knownHostBytes;
+import '../../info_core/test/fixtures/ssh_session_fixture.dart' show knownHostBytes;
 
 void main() {
   test(

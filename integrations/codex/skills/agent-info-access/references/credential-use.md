@@ -6,7 +6,7 @@ main Skill. Choose command injection below for a CLI tool, or
 box. The app's resident host handles the secret; your own shell does not receive
 the secret or a secret-file path. Approval alone performs neither operation.
 
-## Command injection: request once, operate within the fixed deadline
+## Command injection: request once, reuse within the approved validity
 
 1. Query `capabilities`. New `request-use`, `run-use` and `operation-status`
    default to protocol2 and require `credential-use-reuse.v1`. An unsupported
@@ -30,14 +30,21 @@ the secret or a secret-file path. Approval alone performs neither operation.
 3. Keep the returned `requestId`. Use `status` or bounded `wait` on that same
    request (`timeoutMs`0–300000) and continue unrelated work while pending.
    Approval does not start anything. Inspect `decision.credentialUse.approved`,
-   current `state` and fixed `expiresAt`; only `available` admits a new operation.
-   Credential use defaults to15minutes (owner may choose30); ordinary fields
-   independently default to8hours and use the main Skill's claim/read workflow.
+   current `state` and the returned validity; only `available` admits a new operation.
+   Timed credential use has a fixed `expiresAt` (normally15minutes, owner may
+   choose30). If `credential-ssh-session-validity.v1` is available for protocol2
+   `ssh_identity`, the user may instead choose “不限时（限本聊天）” in the App.
+   The decision then returns `validity:"session"`, `expiresAt:null` and `sessionId`.
+   Null expiry alone is not permission: check this capability, the explicit
+   validity, approved scope and `available` state. The Agent submits the normal
+   request; it does not self-approve session validity or send a huge duration.
+   This option applies only to SSH, not ordinary reads or other receivers.
+   Ordinary fields independently default to8hours and use claim/read.
 4. For each logical command, choose a new unique `operationId` and send
    `run-use` with the same `requestId` and that command's complete `launch`.
    The alias, credential version and receiver remain in the approved scope.
    Legal new commands within that scope need no new approval and never extend
-   the deadline. CLI validates the real receiver and freezes each operation's
+   a timed deadline or turn a session grant into permission for another chat. CLI validates the real receiver and freezes each operation's
    executable identity, parameters, directory and effective injection plan.
 5. Keep `executionId`. `accepted` means the operation was registered, not that
    the process started or succeeded. Query `execution-status` and distinguish
@@ -67,6 +74,27 @@ After approval, the first operation still needs its own ID and full launch:
 
 For a second different command use another operationId and supply its full launch
 under the same request. Preserve each submitted object until its result is known.
+
+## SSH example: several commands in the same chat
+
+Query `capabilities` and `credential-catalog`, choose the actual SSH key and the
+host already trusted in App settings. Submit a normal protocol2 `request-use`
+with `receiver:"ssh_identity"`, the discovered OpenSSH `executable`, typed
+`"-i",{"file":"ssh_key"}` arguments and an empty `env`. The user may approve
+“本聊天内不限时”; then check the returned decision above. Run `uname -s` and
+`uptime` as two logical `run-use` operations with different operationIds under
+the same requestId, checking each execution result. This example uses read-only
+commands; the approved remote task determines actual arguments, not this list.
+
+The request's approval-wait deadline, a timed grant's expiry, a command timeout
+and an already-open SSH connection are separate. Revocation, session end,
+credential disable/change or host-trust change blocks **new uses**. Revocation
+neither terminates a running command/connection nor undoes remote changes.
+Application restart does not restore the old permission, even if its history
+remains visible. If the actual root end callback was not delivered, do not claim
+switching or archiving a chat ended permission; the user can revoke it or exit
+the App. Keep ordinary reads, other credential types and older timed grants on
+their existing rules.
 
 ## Retry identity and uncertain results
 

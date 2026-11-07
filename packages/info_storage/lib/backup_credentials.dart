@@ -302,6 +302,7 @@ void _validateBackupCredentialHistory(
         'requestedPlan',
         'restoredAt',
         if (formatVersion >= 6) 'protocolVersion',
+        if (formatVersion >= 22) 'credentialValidity',
       },
     );
     final id = _backupId(j, 'id');
@@ -361,7 +362,9 @@ void _validateBackupCredentialHistory(
                   r.executionId != null && !r.credentialApproved) ||
         r.executionId != null && r.attemptedAt == null ||
         r.credentialApproved &&
-            (r.decidedAt == null || r.credentialExpiresAt == null) ||
+            (r.decidedAt == null ||
+                r.credentialValidity != CredentialUseValidity.session &&
+                    r.credentialExpiresAt == null) ||
         r.approvedFields.isNotEmpty && r.fieldExpiresAt == null)
       _backupInvalid();
     // Also rejects unknown nested plan/identity/reference keys; no filesystem

@@ -41,7 +41,10 @@ class _Fixture {
   );
   late ManagedCredential credential;
   static Future<_Fixture> create({List<int>? key}) async {
-    final root = await Directory.systemTemp.createTemp('focused-fill-storage-');
+    final createdRoot = await Directory.systemTemp.createTemp(
+      'focused-fill-storage-',
+    );
+    final root = Directory(await createdRoot.resolveSymbolicLinks());
     final keys = TestKeyStore()..key = key;
     final repo = await EncryptedInformationRepository.open(
       '${root.path}/source',

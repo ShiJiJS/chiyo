@@ -57,6 +57,63 @@ void main() {
         return jsonDecode(output.current) as Map<String, dynamic>;
       }
 
+      final empty = await service.owner.createDirectory(
+        'Empty child',
+        parentId: directory.id,
+      );
+      final directories = await command({'command': 'directory-list'});
+      expect(directories['status'], 'ok');
+      expect(directories['complete'], true);
+      expect(directories['total'], 2);
+      expect((directories['directories'] as List).last['pathIds'], [
+        directory.id,
+        empty.id,
+      ]);
+      expect(jsonEncode(directories), isNot(contains('PRIVATE-CLI-MARKER')));
+      expect(
+        (await command({'command': 'directory-list', 'limit': 1}))['status'],
+        'invalid_request',
+      );
+      expect(
+        (await command({'command': 'capabilities'}))['capabilities'],
+        contains('information-directory-discovery.v1'),
+      );
+      final sibling = await service.owner.createDirectory('New root');
+      final selection = LibrarySelection(directoryIds: [sibling.id]),
+          position = LibraryMovePosition(
+            LibraryEntryRef('directory', directory.id),
+          );
+      final placement = await service.owner.previewLibraryMove(
+        selection,
+        null,
+        position: position,
+      );
+      await service.owner.moveLibrarySelection(
+        'cli-order-fixture',
+        selection,
+        null,
+        placement.token,
+        position: position,
+      );
+      final ordered = await command({'command': 'directory-list'});
+      final roots = (ordered['directories'] as List)
+          .where((d) => d['parentId'] == null)
+          .toList();
+      expect(roots.map((d) => d['id']), [sibling.id, directory.id]);
+      expect(roots.map((d) => d['order']), [0, 1]);
+      final removal = await service.owner.previewLibraryRecycle(selection);
+      await service.owner.recycleLibrarySelection(
+        'cli-recycle-fixture',
+        selection,
+        removal.token,
+      );
+      final current = await command({'command': 'directory-list'});
+      expect(
+        (current['directories'] as List).any((d) => d['id'] == sibling.id),
+        false,
+      );
+      expect((current['directories'] as List).first['order'], 0);
+
       final page = await command({
         'command': 'catalog',
         'query': 'network',

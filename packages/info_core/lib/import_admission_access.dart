@@ -298,6 +298,7 @@ extension OwnerImportAdmission on OwnerAccess {
     final credentialMaterials = <CredentialMaterial>[];
     final filePromotions = <InformationImportFilePromotion>[];
     final organization = _OrganizationPlan(this);
+    final admissionDirectories = <String, ImportDirectoryReceipt>{};
     final now = _service._clock();
     for (final key in eligible) {
       final node = nodes[key]!, input = node.input;
@@ -346,6 +347,7 @@ extension OwnerImportAdmission on OwnerAccess {
         input.suggestedDirectory,
         input.suggestedTags,
       );
+      admissionDirectories[key] = organization.receipt(location.$1);
       if (input.credential case final credential?) {
         final id = identities[key]!;
         final config = input.layout!.snapshot['definition'] as Map;
@@ -439,6 +441,11 @@ extension OwnerImportAdmission on OwnerAccess {
             ...p.createdItemIds,
             for (final i in admitted) identities[_importNodeKey(p.id, i.key)]!,
           ],
+          admissionDirectories: {
+            ...p.admissionDirectories,
+            for (final i in admitted)
+              i.key: admissionDirectories[_importNodeKey(p.id, i.key)]!,
+          },
           credentialSnapshots: {
             ...p.credentialSnapshots,
             for (final input in admitted)

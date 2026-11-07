@@ -546,21 +546,11 @@ class _TemplateRecordContentState extends State<TemplateRecordContent> {
           ),
         if ((!widget.relationsOnly || standalone) &&
             detail.retainedFields.isNotEmpty)
-          _section(
-            context,
-            '保留的原字段',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  '这些内容没有被目标模板覆盖。',
-                  style: libraryText(context, 13, color: c.muted),
-                ),
-                _fields(
-                  context,
-                  detail.retainedFields.map((f) => f['key']).toList(),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.only(top: 27),
+            child: _fields(
+              context,
+              detail.retainedFields.map((f) => f['key']).toList(),
             ),
           ),
       ],

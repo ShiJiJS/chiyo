@@ -91,13 +91,24 @@ class OwnerWorkspaceProposals
   }
 
   String _suggestionId(String kind, String name) =>
-      'proposed-$kind:${sha256.convert(utf8.encode(name.trim().toLowerCase()))}';
+      'proposed-$kind:${sha256.convert(utf8.encode((kind == 'directory' ? name.split('/').map((p) => p.trim()).join('/') : name.trim()).toLowerCase()))}';
   Map<String, String> get _suggestedDirectories => {
     for (final p in owner.importProposals)
       for (final i in p.items)
         if (i.suggestedDirectory.trim().isNotEmpty)
-          _suggestionId('directory', i.suggestedDirectory): i.suggestedDirectory
-              .trim(),
+          for (
+            var depth = 1;
+            depth <= i.suggestedDirectory.split('/').length;
+            depth++
+          )
+            _suggestionId(
+              'directory',
+              i.suggestedDirectory.split('/').take(depth).join('/'),
+            ): i.suggestedDirectory
+                .split('/')
+                .take(depth)
+                .map((p) => p.trim())
+                .join('/'),
   };
   Map<String, String> get _suggestedTags => {
     for (final p in owner.importProposals)
@@ -958,6 +969,18 @@ class OwnerWorkspaceProposals
       currentAvailable:
           currentTarget != null && _current(currentTarget.id) != null,
       organization: organization,
+      directoryFingerprint: summary.pending
+          ? sha256
+                .convert(
+                  utf8.encode(
+                    jsonEncode([
+                      for (final d in owner.directories)
+                        [d.id, d.name, d.parentId, d.version],
+                    ]),
+                  ),
+                )
+                .toString()
+          : '',
     );
     return result(result('').snapshotDigest);
   }
@@ -1018,6 +1041,10 @@ class OwnerWorkspaceProposals
       throw const WorkspaceFailure('validation', '请选择原提案中的准确资料范围。');
     }
     for (final r in c.reviewed) {
+      if (d.summary.kind != WorkspaceProposalKind.addition &&
+          r.suggestedDirectory.isNotEmpty) {
+        throw const WorkspaceFailure('validation', '修改资料时请选择已有目录。');
+      }
       final original = d.items.singleWhere((i) => i.id == r.itemId).proposed;
       for (final descriptor in workspaceFields(
         original,
@@ -1215,11 +1242,13 @@ class OwnerWorkspaceProposals
                                   : r.values[field['key']] ?? '',
                           },
                     directoryId:
-                        _suggestedDirectories.containsKey(r.directoryId)
+                        r.suggestedDirectory.isNotEmpty ||
+                            _suggestedDirectories.containsKey(r.directoryId)
                         ? null
                         : r.directoryId,
-                    suggestedDirectory:
-                        _suggestedDirectories[r.directoryId] ?? '',
+                    suggestedDirectory: r.suggestedDirectory.isNotEmpty
+                        ? r.suggestedDirectory
+                        : _suggestedDirectories[r.directoryId] ?? '',
                     tagIds: r.tagIds.where(
                       (id) => !_suggestedTags.containsKey(id),
                     ),
@@ -1385,17 +1414,38 @@ class OwnerWorkspaceProposals
   @override
   Future<WorkspaceCatalog> catalog() => _run(() async {
     final original = await library().loadCatalog();
+    final directories = List<WorkspaceDirectory>.of(original.directories);
+    for (final path in _suggestedDirectories.values) {
+      String? parent;
+      final parts = path.split('/');
+      if (parts.length > 8 ||
+          parts.any(
+            (p) => p.isEmpty || p == '.' || p == '..' || p.contains(r'\'),
+          )) {
+        continue;
+      }
+      for (var n = 0; n < parts.length; n++) {
+        final part = parts[n];
+        final existing = directories
+            .where(
+              (d) =>
+                  d.parentId == parent &&
+                  d.name.toLowerCase() == part.toLowerCase(),
+            )
+            .firstOrNull;
+        if (existing != null) {
+          parent = existing.id;
+          continue;
+        }
+        final id = _suggestionId('directory', parts.take(n + 1).join('/'));
+        directories.add(
+          WorkspaceDirectory(id, part, parentId: parent, proposed: true),
+        );
+        parent = id;
+      }
+    }
     return WorkspaceCatalog(
-      directories: [
-        ...original.directories,
-        for (final e in _suggestedDirectories.entries)
-          if (!owner.directories.any(
-            (d) =>
-                d.parentId == null &&
-                d.name.toLowerCase() == e.value.toLowerCase(),
-          ))
-            WorkspaceDirectory(e.key, '建议新建：${e.value}'),
-      ],
+      directories: directories,
       tags: [
         ...original.tags,
         for (final e in _suggestedTags.entries)

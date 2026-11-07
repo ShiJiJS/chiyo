@@ -248,21 +248,24 @@ class OwnerWorkspaceCredentials extends UnavailableWorkspaceCredential {
             delivery: request.delivery,
             session: request.session,
             purpose: r.purpose,
-            expiresAt: r.credentialExpiresAt ?? r.requestExpiresAt,
+            expiresAt:
+                r.credentialValidity == core.CredentialUseValidity.session
+                ? null
+                : r.credentialExpiresAt ?? r.requestExpiresAt,
             state: request.state.label,
             operations: [
               if (r.decidedAt != null)
                 WorkspaceCredentialUseOperation(
                   'decision:${r.id}',
                   r.decidedAt!,
-                  '主人审批',
+                  '用户审批',
                   r.state,
                 ),
               if (r.revokedAt != null)
                 WorkspaceCredentialUseOperation(
                   'revoke:${r.id}',
                   r.revokedAt!,
-                  '主人撤销',
+                  '用户撤销',
                   '已撤销',
                 ),
               for (final f in owner.focusedFillOperations.where(

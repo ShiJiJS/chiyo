@@ -554,6 +554,7 @@ extension CredentialAgentAccess on AgentAccess {
           'publicPurpose': c.publicPurpose,
           'form': c.form.name,
           'version': c.version,
+          'directoryId': c.directoryId,
           'availability': c.availability(_service._clock()).name,
           if (c.tagIds.isNotEmpty) 'tagIds': c.tagIds,
           if (c.tagIds.isNotEmpty)

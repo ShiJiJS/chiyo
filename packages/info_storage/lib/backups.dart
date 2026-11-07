@@ -17,6 +17,13 @@ class BackupContents {
   final int formatVersion;
   int get informationCount => _tables['information_items']!.length;
   int get directoryCount => _tables['information_directories']!.length;
+  int get directoryRecycleBatchCount =>
+      _tables['library_recycle_batches']?.where((row) {
+        final b = LibraryRecycleBatch.fromJson(_backupJson(row));
+        return b.state == RecycleState.available &&
+            createdAt.isBefore(b.expiresAt);
+      }).length ??
+      0;
   int get tagCount => _tables['information_tags']!.length;
   int get templateCount => _tables['field_templates']!.length;
   int get templatePackageCount => _tables['template_packages']?.length ?? 0;
@@ -151,6 +158,15 @@ class InformationBackups {
   static final _v15Columns = Map<String, List<String>>.unmodifiable({
     ..._v12Columns,
     'template_packages': ['id', 'source', 'enabled', 'origin', 'legacy_json'],
+  });
+
+  static final _v20Columns = Map<String, List<String>>.unmodifiable({
+    ..._v15Columns,
+    'library_recycle_batches': ['id', 'payload'],
+  });
+  static final _v21Columns = Map<String, List<String>>.unmodifiable({
+    ..._v20Columns,
+    'library_order_state': ['id', 'payload'],
   });
 
   // Portable formats 1–7 keep their table keys independent of the schema17+
@@ -411,6 +427,13 @@ class InformationBackups {
       // Pending requests are not portable history. Select the new label only
       // after archiving, but before metadata admission/validation or publication.
       _archiveCredentialRuntime(tables, now);
+      final sessionSshGrants = tables['credential_use_requests']!.any(
+        (row) =>
+            CredentialUseRequest.fromJson(
+              _backupJson(row),
+            ).credentialValidity ==
+            CredentialUseValidity.session,
+      );
       final portableFills = _hasPortableFocusedFill(
         tables['credential_use_requests']!.map(
           (row) => CredentialUseRequest.fromJson(_backupJson(row)),
@@ -442,7 +465,22 @@ class InformationBackups {
                   .customSelect('SELECT id FROM template_packages LIMIT 1')
                   .get())
               .isNotEmpty;
+      final directoryRecycle =
+          (await _repository._db
+                  .customSelect(
+                    'SELECT id FROM library_recycle_batches LIMIT 1',
+                  )
+                  .get())
+              .isNotEmpty;
+      final orderedLibrary =
+          (await _repository._db
+                  .customSelect('SELECT id FROM library_order_state LIMIT 1')
+                  .get())
+              .isNotEmpty;
       final extendedColumns =
+          sessionSshGrants ||
+          orderedLibrary ||
+          directoryRecycle ||
           hasLayouts ||
           hasGrantVersions ||
           credentialClassification ||
@@ -451,7 +489,13 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = accountMetadata
+        formatVersion = sessionSshGrants
+            ? 22
+            : orderedLibrary
+            ? 21
+            : directoryRecycle
+            ? 20
+            : accountMetadata
             ? 19
             : describedFileVersions
             ? 18
@@ -471,10 +515,14 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (templatePackages ||
-                        credentialTemplates ||
-                        accountMetadata ||
-                        longTermAttachments
+            in (sessionSshGrants || orderedLibrary
+                    ? _v21Columns
+                    : directoryRecycle
+                    ? _v20Columns
+                    : templatePackages ||
+                          credentialTemplates ||
+                          accountMetadata ||
+                          longTermAttachments
                     ? _v15Columns
                     : extendedColumns
                     ? _v12Columns
@@ -556,6 +604,9 @@ class InformationBackups {
                 'information_classification_state',
                 'information_classification_operations',
                 'information_lifecycle_operations',
+                'library_recycle_operations',
+                'library_move_operations',
+                'library_order_state',
                 'information_approval_operations',
                 'desktop_preference_operations',
                 'owner_proposal_operations',
@@ -818,6 +869,9 @@ class InformationBackups {
                     'information_classification_state',
                     'information_classification_operations',
                     'information_lifecycle_operations',
+                    'library_recycle_operations',
+                    'library_move_operations',
+                    'library_order_state',
                     'information_approval_operations',
                     'desktop_preference_operations',
                     'owner_proposal_operations',
@@ -837,6 +891,11 @@ class InformationBackups {
         }
         // Uncommitted owner forms are ephemeral, excluded from backup and
         // invalidated by a successful restore. A failed restore keeps them.
+        // Ordering alone is not recipient content. Replace it even when an
+        // older archive has no ordering table; never retain the previous IDs.
+        await _repository._db.customStatement(
+          'DELETE FROM library_order_state',
+        );
         await _repository._db.customStatement(
           'DELETE FROM information_file_stages',
         );
@@ -853,6 +912,12 @@ class InformationBackups {
         );
         await _repository._db.customStatement(
           'UPDATE information_lifecycle_operations SET invalidated=1',
+        );
+        await _repository._db.customStatement(
+          'UPDATE library_recycle_operations SET invalidated=1',
+        );
+        await _repository._db.customStatement(
+          'UPDATE library_move_operations SET invalidated=1',
         );
         await _repository._db.customStatement(
           'UPDATE information_approval_operations SET invalidated=1',
@@ -912,6 +977,19 @@ class InformationBackups {
             _credentialProposalPreviewLibraryFormat,
           );
         }
+        if (contents.formatVersion >= 20) {
+          await _repository._requireAdmissionFormat(
+            _libraryRecycleLibraryFormat,
+          );
+        }
+        if (contents.formatVersion >= 21) {
+          await _repository._requireAdmissionFormat(_libraryOrderLibraryFormat);
+        }
+        if (contents.formatVersion >= 22) {
+          await _repository._requireAdmissionFormat(
+            _sshSessionUseLibraryFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -919,7 +997,11 @@ class InformationBackups {
           await _installAttachmentBodies(contents, reader);
         }
         for (final table
-            in (contents.formatVersion >= 15
+            in (contents.formatVersion >= 21
+                    ? _v21Columns
+                    : contents.formatVersion >= 20
+                    ? _v20Columns
+                    : contents.formatVersion >= 15
                     ? _v15Columns
                     : contents.formatVersion >= 12
                     ? _v12Columns
@@ -987,6 +1069,9 @@ class InformationBackups {
           17,
           18,
           19,
+          20,
+          21,
+          22,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1008,6 +1093,8 @@ class InformationBackups {
       9 || 10 || 11 => _v9Columns,
       12 || 13 || 14 => _v12Columns,
       15 || 16 || 17 || 18 || 19 => _v15Columns,
+      20 => _v20Columns,
+      21 || 22 => _v21Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1229,6 +1316,8 @@ class InformationBackups {
       tables,
       formatVersion: decoded['version'] as int,
     );
+    _validateBackupLibraryRecycle(tables);
+    _validateBackupLibraryOrder(tables);
     final packageIds = <String>{};
     final packages =
         tables['template_packages'] ?? const <Map<String, Object?>>[];

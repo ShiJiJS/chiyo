@@ -7,6 +7,7 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'classification_controller.dart';
 import 'library_directory_dialog.dart';
+import 'library_batch_recycle_dialog.dart';
 import 'library_widgets.dart';
 import 'settings_layout.dart';
 import 'workspace_source.dart';
@@ -69,6 +70,22 @@ class _ClassificationPageState extends State<ClassificationPage> {
     if (c == null || m.loading || m.failure != null) return;
     widget.onModalChanged?.call(true);
     try {
+      if (action == 'delete' &&
+          m.kind == WorkspaceClassificationKind.directory &&
+          id != null &&
+          m.source is WorkspaceLibraryRecycle &&
+          (m.source as WorkspaceLibraryRecycle).libraryRecycleSupported) {
+        final result = await showLibraryBatchRecycle(
+          context,
+          m.source,
+          selection: WorkspaceLibrarySelection(directoryIds: [id]),
+        );
+        if (mounted && result != null) {
+          await m.load();
+          if (mounted) DesktopFeedback.show(context, '目录和内容已移到回收站');
+        }
+        return;
+      }
       final receipt = await showClassificationEditor(
         context,
         m.source,

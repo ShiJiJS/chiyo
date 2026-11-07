@@ -28,7 +28,39 @@ void main() {
   ImportProposal proposal(String id) =>
       repo.importProposals.singleWhere((p) => p.id == id);
   test(
-    'multiple originals form one independently authorized attachment with explicit current choice; extras remain independent',
+    'unbound source copies cannot bypass a declared file template',
+    () async {
+      final file = await upload('unbound', 'SOURCE-COPY');
+      final unbound = ImportAttachmentInput(
+        key: 'source',
+        name: '来源汇总',
+        versions: [ImportAttachmentVersionInput(file.id)],
+        currentVersion: 1,
+      );
+      for (final input in [
+        ImportItemInput('无模板来源', '', [], attachments: [unbound]),
+        fileInput('with-extra', [file], extra: [unbound]),
+      ]) {
+        await expectLater(
+          service.agent.submitImport(session, [input]),
+          throwsA(
+            isA<AccessFailure>().having(
+              (e) => e.status,
+              'status',
+              input.templateId == null
+                  ? 'invalid_proposal'
+                  : 'validation_failed',
+            ),
+          ),
+        );
+      }
+      expect(repo.items, isEmpty);
+      expect(repo.importProposals, isEmpty);
+      expect((await repo.importFileUpload(file.id))!.consumed, false);
+    },
+  );
+  test(
+    'revisions stay together while a different material is a related file item',
     () async {
       final first = await upload('original', 'PRIVATE-ORIGINAL'),
           second = await upload('revision', 'PRIVATE-REVISION'),
@@ -37,15 +69,9 @@ void main() {
         fileInput(
           'resume',
           [first, second],
-          extra: [
-            ImportAttachmentInput(
-              key: 'proof',
-              name: '相关证明',
-              versions: [ImportAttachmentVersionInput(proof.id)],
-              currentVersion: 1,
-            ),
-          ],
+          pending: [ImportPendingReference('information', 'proof')],
         ),
+        fileInput('proof', [proof]),
       ], operationId: 'file-intake');
       expect(repo.items, isEmpty);
       expect((await repo.informationFileStagingUsage()).files, 3);
@@ -65,8 +91,9 @@ void main() {
         proposal(id).version,
         proposal(id).items,
       );
-      final item = repo.items.single;
-      expect(item.fields.length, 2);
+      final item = repo.items.firstWhere((i) => i.name == 'resume');
+      expect(repo.items.length, 2);
+      expect(item.fields.length, 1);
       expect(item.fields.every((f) => f.kind == FieldKind.file), true);
       final primary = item.fields.first;
       expect(primary.attachment!.attachmentVersion, 1);
@@ -88,7 +115,7 @@ void main() {
         )).bytes,
         utf8.encode('PRIVATE-REVISION'),
       );
-      expect(primary.id, isNot(item.fields.last.id));
+      expect(primary.id, isNot(repo.items.last.fields.single.id));
       expect((await repo.informationFileStagingUsage()).files, 0);
       expect((await repo.importFileUpload(first.id))!.consumed, true);
       expect(proposal(id).items, isEmpty);

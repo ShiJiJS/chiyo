@@ -18,6 +18,7 @@ enum WorkspaceBackupCategory {
   legacyTemplates('旧版模板'),
   revisions('资料修订'),
   recycled('回收对象'),
+  directoryBatches('一起回收的目录和内容'),
   grants('授权历史'),
   operations('操作事实'),
   hosts('主机信任');

@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-07",
+  "firstChat": "01a1b39e-7c92-7a50-8222-b7466e8129e6",
+  "freshRetryChat": "01a1b3a2-8a88-7bd0-996f-18eea0d5dc6b",
+  "scope": "synthetic production-core HTTP service and unchanged installed CLI, not native GUI or production data",
+  "initialIssue": "SSH account alone incorrectly caused two owner-password proposals; first trial not approved",
+  "checks": {
+    "existing_directories_reused": true,
+    "no_duplicate_existing_host": true,
+    "same_host_identity_and_directory": true,
+    "independent_deployments": true,
+    "separate_linked_mac_configuration": true,
+    "only_two_independently_useful_originals_submitted": true,
+    "same_original_two_versions_submitted": true,
+    "only_evidenced_credentials": true,
+    "no_unrequired_host_passwords": true,
+    "whole_import_and_update_confirmed": true,
+    "nine_information_items_two_credentials": true,
+    "no_correction_process_in_saved_text": true
+  },
+  "afterApproval": {
+    "informationItems": 9,
+    "credentials": 2,
+    "directories": 7
+  },
+  "independentAgentConfirmedReceiptsAndHostFields": true,
+  "independentAgentRecheckedFileVersionsAndRelationsAfterSave": false,
+  "fixtureLimitation": "No informationDeliveryFiles driver; catalog pages containing file fields explicitly return unsupported_capability. This is not evidence of an installed App failure.",
+  "sshActualConnectionRun": false,
+  "productionAppReplaced": false,
+  "keychainRequested": false
+}

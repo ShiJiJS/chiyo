@@ -183,6 +183,7 @@ class WorkspaceApprovalDetail {
             e.operationId == next.operationId ? next : e,
         ],
       );
+  bool get credentialSessionBound => credential?.sessionBound == true;
   bool get canApprove =>
       request.state == WorkspaceApprovalState.pending &&
       scopes.any((s) => s.available) &&
@@ -208,7 +209,8 @@ class WorkspaceApprovalChange {
   final WorkspaceApprovalAction action;
   final List<String> selected;
   final Map<String, int> fileVersions;
-  final int fieldMinutes, credentialMinutes;
+  final int fieldMinutes;
+  final int? credentialMinutes;
   String get digest => sha256
       .convert(
         utf8.encode(

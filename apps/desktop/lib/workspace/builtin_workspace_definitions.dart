@@ -29,7 +29,8 @@ Map<String, Object?> _guidance(String type) {
     'generic': {'body': '资料内容；只填写用户提供的事实。'},
     'document': {
       'bodyFormat': 'markdown',
-      'body': '## 维护说明\n\n每次更新前检查备份。\n\n- 确认服务状态\n- 记录修改内容',
+      'body':
+          '## Mac 同步配置\n\n- 本地目录：`/Users/example/Notes`\n- 同步文件夹：`Notes`\n- 连接部署在云主机上的 Syncthing 服务。',
     },
     'server': {
       'host': '192.0.2.10',
@@ -38,9 +39,9 @@ Map<String, Object?> _guidance(String type) {
       'purpose': '运行内部应用及保存业务数据。',
     },
     'service': {
-      'url': 'https://notes.example.invalid',
-      'purpose': '个人笔记与资料查找。',
-      'auth': 'API 凭据另存为托管凭据，不能写进普通字段。',
+      'url': 'https://vpn-cloud.example.invalid',
+      'purpose': '连接云主机与个人设备。',
+      'auth': '通过外部身份服务登录，未提供静态密码。',
     },
     'profile': {
       'name': '示例姓名',
@@ -57,27 +58,29 @@ Map<String, Object?> _guidance(String type) {
   return {
     'instructions': switch (type) {
       'server' => '用于一台服务器。地址、SSH端口、登录用户分别填写简短值；密码和私钥另存为凭据并关联。不同服务器分别建资料。',
-      'service' => '用于一个应用或服务。分别填写访问入口、用途和认证说明；关联实际部署主机及凭据，不能把秘密写入普通字段。',
+      'service' =>
+        '用于一个应用或服务的实际部署或外部平台连接。名称用软件名，独立部署可加位置，例如“WireGuard 云主机”“WireGuard 校园网”；用途放描述。两套部署分别填写各自入口，并用hostedOn关联对应服务器，不合并为一个应用的版本。Mac或Windows专属配置用文档资料单独填写，用docs关联；不要把使用步骤另建成应用。关系格式见本次relationInput：如hostedOn:[{"kind":"information","id":"已有服务器ID"}]，同份提案的新服务器改用itemKey。外部平台无需编造部署主机。认证方式未知就明确未知；只有确知使用密码登录才准备待填密码，Token和密钥按凭据模板另存并关联。',
       'profile' => '只填写源资料中明确给出的个人事实。教育和工作经历按title、period、detail逐段填写，未知内容不编造。',
       'document' =>
-        '用于长说明。bodyFormat明确选择plain或markdown，body存相应正文；名称和公开用途简短，不含私人值。',
-      'file' => '普通文件保留原文。不同用途的材料各建一条，同一材料的前后修订用版本。私钥、登录会话等走凭据入口。',
+        '用于有独立用途的正文或设备配置。bodyFormat选择plain或markdown，body存对应格式；名称与公开用途简短。例子是“Syncthing Mac 配置”：只记录Mac本地目录、同步文件夹和连接端点，related关联实际Syncthing应用，关系格式如related:[{"kind":"information","id":"已有应用ID"}]；同份提案新应用改用itemKey。Windows有不同配置时另建一条并关联同一服务，未知的平台配置不编造。已经由业务Skill及其配置维护的流程不再抄一份；汇总来源先提取事实，需保管原件则用文件模板关联，不把整篇原文塞在这里。',
+      'file' =>
+        '用于需要独立保管、交付或继续修订的普通原件。信息已完整提取且原件没有独立用途时不再保存来源副本。多处使用同一原件时复用本资料，通过related关联相应对象；同一材料的修订作为文件版本，不同用途各建一条。私钥、登录会话等走凭据入口。',
       _ => '仅在通用资料确实符合内容用途时使用。body填写清晰正文，不堆源文档或过程编号；缺少合适模板时建议并暂缓，不自行创建插件。',
     },
     'example': {
       'name': switch (type) {
         'server' => '业务服务器',
-        'service' => '笔记服务',
+        'service' => 'NetBird 云主机',
         'profile' => '个人基本档案',
-        'document' => '服务维护说明',
+        'document' => 'Syncthing Mac 配置',
         'file' => '后端岗位简历',
         _ => '项目说明',
       },
       'summary': switch (type) {
         'server' => '运行内部应用，可按需申请连接信息和维护资料。',
-        'service' => '保存个人笔记，提供网页与API入口。',
+        'service' => '云主机上的设备组网服务。',
         'profile' => '联系资料、求职方向与教育工作经历。',
-        'document' => '服务更新前的备份与状态检查步骤。',
+        'document' => 'Mac 本地目录与同步服务的对应设置。',
         'file' => '用于后端开发岗位投递的简历原文。',
         _ => '项目的用途及基本说明。',
       },

@@ -202,6 +202,8 @@ void main() {
   );
   setUp(() async {
     root = await Directory.systemTemp.createTemp('owner-backups-');
+    // Match native panels: the publisher intentionally rejects symlink paths.
+    root = Directory(await root.resolveSymbolicLinks());
     keys = _Keys();
     picker = _Picker(root);
     restored = 0;
@@ -272,7 +274,23 @@ void main() {
       expect((await source.status()).keySaved, isFalse);
       await saveKey();
       expect((await source.status()).keySaved, isTrue);
+      final directory = await service.owner.createDirectory('回收目录');
+      await service.owner.createInformation('已回收资料', '', [
+        const core.FieldInput('正文', '', 'retained-synthetic'),
+      ], directoryId: directory.id);
+      final selection = core.LibraryRecycleSelection(
+        directoryIds: [directory.id],
+      );
+      final deletionPreview = await service.owner.previewLibraryRecycle(
+        selection,
+      );
+      final deletion = await service.owner.recycleLibrarySelection(
+        'backup-group',
+        selection,
+        deletionPreview.token,
+      );
       final receipt = await export();
+      expect(receipt.counts![WorkspaceBackupCategory.directoryBatches], 1);
       expect(receipt.counts![WorkspaceBackupCategory.information], 1);
       expect((await source.status()).cleanupCount, 0);
       expect((await source.status()).latestArchive!.name, '合成 备份.aimbackup');
@@ -295,6 +313,7 @@ void main() {
         await pick(WorkspaceBackupPick.keyInput, '${root.path}/恢复 密钥.txt'),
       );
       expect(preview.counts[WorkspaceBackupCategory.information], 1);
+      expect(preview.counts[WorkspaceBackupCategory.directoryBatches], 1);
       expect(recovery.trim().isNotEmpty, isTrue); // never print secrets
       final scope = service.owner.captureLibraryScope();
       final oldSession = service.agent.openSession('old synthetic session');
@@ -318,6 +337,13 @@ void main() {
       expect(
         service.owner.information.single.fields.single.value,
         'synthetic-value',
+      );
+      expect(service.owner.libraryRecycleBatches.single.id, deletion.batchId);
+      expect(
+        (await service.owner.previewLibraryRecycleRestore(
+          deletion.batchId,
+        )).canRestore,
+        true,
       );
       final newSession = service.agent.openSession('new synthetic session');
       await File(archive).delete();

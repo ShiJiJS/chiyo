@@ -120,7 +120,7 @@ extension _CredentialRuntimeService on InformationService {
     if (r.attemptConsumed) return 'consumed';
     if (!r.credentialApproved) return 'not_approved';
     if (r.invalidatedCode != null) return 'revoked';
-    if (!_clock().isBefore(r.credentialExpiresAt!)) return 'expired';
+    if (r.credentialGrantExpired(_clock())) return 'expired';
     final session = _credentialUseSessions[r.id];
     if (session == null || !_sessionActive(session)) return 'revoked';
     try {
@@ -147,7 +147,7 @@ extension _CredentialRuntimeService on InformationService {
     if (!r.credentialApproved) {
       throw const CredentialUseFailure('scope_not_approved');
     }
-    if (!_clock().isBefore(r.credentialExpiresAt!)) {
+    if (r.credentialGrantExpired(_clock())) {
       throw const CredentialUseFailure('grant_expired');
     }
     _useEligible(r);
@@ -710,6 +710,10 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
               'credentialId': r.credentialId,
               'version': r.version,
               'expiresAt': _useTimestamp(r.credentialExpiresAt),
+              if (r.credentialValidity == CredentialUseValidity.session) ...{
+                'validity': 'session',
+                'sessionId': _service._sessionBindings[session],
+              },
               if (r.protocolVersion == 1) ...{
                 'maxAttempts': 1,
                 'attemptsConsumed': r.attemptConsumed ? 1 : 0,
@@ -765,7 +769,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     if (!r.credentialApproved) {
       throw const CredentialUseFailure('scope_not_approved');
     }
-    if (!_service._clock().isBefore(r.credentialExpiresAt!)) {
+    if (r.credentialGrantExpired(_service._clock())) {
       throw const CredentialUseFailure('grant_expired');
     }
     final c = _service._useEligible(r);
@@ -798,7 +802,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       if (!_service._sessionActive(session)) {
         throw const CredentialUseFailure('grant_revoked');
       }
-      if (!_service._clock().isBefore(r.credentialExpiresAt!)) {
+      if (r.credentialGrantExpired(_service._clock())) {
         throw const CredentialUseFailure('grant_expired');
       }
       _service._useEligible(r);
@@ -963,7 +967,7 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     String id, {
     required bool approveCredential,
     List<FieldRef> fields = const [],
-    Duration lifetime = const Duration(minutes: 15),
+    Duration? lifetime = const Duration(minutes: 15),
     Duration? fieldLifetime,
     Map<FieldRef, int>? reviewedVersions,
   }) => _serialize(() async {
@@ -974,15 +978,17 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     final fieldDurations = r.protocolVersion == 2
         ? const [15, 30, 60, 480]
         : const [15, 30];
-    if (lifetime != const Duration(minutes: 15) &&
-            lifetime != const Duration(minutes: 30) ||
+    if ((lifetime == null
+            ? !r.supportsSessionValidity
+            : lifetime != const Duration(minutes: 15) &&
+                  lifetime != const Duration(minutes: 30)) ||
         fieldLifetime != null &&
             !fieldDurations.any((m) => fieldLifetime == Duration(minutes: m))) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final effectiveFieldLifetime =
         fieldLifetime ??
-        (r.protocolVersion == 2 ? const Duration(hours: 8) : lifetime);
+        (r.protocolVersion == 2 ? const Duration(hours: 8) : lifetime!);
     if (fields.toSet().length != fields.length ||
         fields.any(
           (f) => !r.fields.contains(f) || _service._field(f) == null,
@@ -1009,9 +1015,11 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
       'decidedAt': _useTimestamp(now),
       'credentialApproved': approveCredential,
       'approvedFields': fields.map((f) => f.toJson()).toList(),
-      'credentialExpiresAt': approveCredential
+      'credentialExpiresAt': approveCredential && lifetime != null
           ? _useTimestamp(now.add(lifetime))
           : null,
+      if (approveCredential && lifetime == null)
+        'credentialValidity': 'session',
       'fieldExpiresAt': fields.isNotEmpty
           ? _useTimestamp(now.add(effectiveFieldLifetime))
           : null,

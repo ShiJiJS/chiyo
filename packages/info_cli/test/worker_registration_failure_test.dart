@@ -44,7 +44,8 @@ void main() {
         await h.close();
         final actual = await root.resolveSymbolicLinks(),
             temp = await Directory.systemTemp.resolveSymbolicLinks();
-        if (actual.toLowerCase() != root.absolute.path.toLowerCase() ||
+        if (await root.parent.resolveSymbolicLinks() != temp ||
+            await FileSystemEntity.isLink(root.path) ||
             !actual.toLowerCase().startsWith(
               '${temp.toLowerCase()}${Platform.pathSeparator}',
             )) {

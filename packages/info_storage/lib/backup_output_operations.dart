@@ -95,6 +95,15 @@ const _backupCountNames = {
   'hosts',
 };
 
+// Old receipts keep their original map. The new count is present only when
+// there are directory groups; absence continues to mean zero.
+bool _validBackupCounts(Map<String, int> counts) =>
+    counts.keys.toSet().containsAll(_backupCountNames) &&
+    counts.keys.every(
+      (key) => _backupCountNames.contains(key) || key == 'directoryBatches',
+    ) &&
+    counts.values.every((n) => n >= 0);
+
 extension BackupOutputOperations on InformationBackups {
   Future<Map<String, dynamic>?> _backupOperationPayload(String id) async {
     _checkOpen();
@@ -178,8 +187,7 @@ extension BackupOutputOperations on InformationBackups {
       if (counts.values.any((n) => n < 0) ||
           (action == BackupOutputAction.saveKey
               ? counts.isNotEmpty
-              : counts.length != _backupCountNames.length ||
-                    !counts.keys.toSet().containsAll(_backupCountNames)) ||
+              : !_validBackupCounts(counts)) ||
           !json['cleanupPending'] &&
               {
                 BackupOutputPhase.prepared,
@@ -237,6 +245,8 @@ extension BackupOutputOperations on InformationBackups {
     'legacyTemplates': p.templateCount,
     'revisions': p.revisionCount,
     'recycled': p.recycleCount,
+    if (p.directoryRecycleBatchCount > 0)
+      'directoryBatches': p.directoryRecycleBatchCount,
     'grants': p.grantHistoryCount,
     'operations':
         p.accessRecordCount +

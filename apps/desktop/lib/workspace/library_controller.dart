@@ -6,12 +6,21 @@ import 'workspace_source.dart';
 class LibraryController extends WorkspaceRecordsController {
   LibraryController(
     super.source, {
-    this.initialQuery = const WorkspaceQuery(),
+    WorkspaceQuery? initialQuery,
     this.initialSelection,
-  }) {
-    query = initialQuery;
+  }) : _initialQuery = initialQuery {
+    query = this.initialQuery;
   }
-  final WorkspaceQuery initialQuery;
+  final WorkspaceQuery? _initialQuery;
+  WorkspaceQuery get initialQuery =>
+      _initialQuery ??
+      WorkspaceQuery(
+        sort: source is WorkspaceLibraryMove
+            ? (source as WorkspaceLibraryMove).preferredLibrarySort ??
+                  WorkspaceSort.updated
+            : WorkspaceSort.updated,
+      );
+  String? sortPreferenceNotice;
   final WorkspaceRecordRef? initialSelection;
   final _back =
       <({WorkspaceQuery query, WorkspaceRecordRef? selected, double scroll})>[];
@@ -20,8 +29,115 @@ class LibraryController extends WorkspaceRecordsController {
   String? navigationNotice;
   int searchFocusRequest = 0, viewReset = 0;
   bool get canGoBack => _back.isNotEmpty;
+  bool selecting = false;
+  String? selectionNotice;
+  final _selectedRecords = <WorkspaceRecordRef>{};
+  final _selectedDirectories = <String>{};
+  int get selectedCount =>
+      _selectedRecords.length + _selectedDirectories.length;
+  bool get selectionAvailable =>
+      catalog != null &&
+      (loadState == WorkspaceLoad.ready || loadState == WorkspaceLoad.empty);
+  bool recordIsSelected(WorkspaceRecordRef ref) =>
+      _selectedRecords.contains(ref);
+  bool directoryIsSelected(String id) => _selectedDirectories.contains(id);
+  WorkspaceLibrarySelection get selectedBatch => WorkspaceLibrarySelection(
+    directoryIds: _selectedDirectories,
+    records: _selectedRecords,
+  );
+  WorkspaceLibrarySelection selectionForRecord(WorkspaceRecordRef ref) =>
+      selecting && recordIsSelected(ref)
+      ? selectedBatch
+      : WorkspaceLibrarySelection(records: [ref]);
+  WorkspaceLibrarySelection selectionForDirectory(String id) =>
+      selecting && directoryIsSelected(id)
+      ? selectedBatch
+      : WorkspaceLibrarySelection(directoryIds: [id]);
+
+  void beginSelection() {
+    if (_closed || !selectionAvailable) return;
+    selecting = true;
+    selectionNotice = null;
+    notifyListeners();
+  }
+
+  void cancelSelection() {
+    if (_closed) return;
+    selecting = false;
+    _selectedRecords.clear();
+    _selectedDirectories.clear();
+    selectionNotice = null;
+    notifyListeners();
+  }
+
+  void toggleRecord(WorkspaceRecordRef ref) {
+    if (_closed ||
+        !selectionAvailable ||
+        results?.items.any((r) => r.ref == ref) != true) {
+      return;
+    }
+    selecting = true;
+    if (!_selectedRecords.add(ref)) _selectedRecords.remove(ref);
+    selectionNotice = null;
+    notifyListeners();
+  }
+
+  void toggleDirectory(String id) {
+    if (_closed ||
+        !selectionAvailable ||
+        {'all', 'unfiled'}.contains(id) ||
+        catalog?.directories.any((d) => d.id == id) != true) {
+      return;
+    }
+    selecting = true;
+    if (!_selectedDirectories.add(id)) _selectedDirectories.remove(id);
+    selectionNotice = null;
+    notifyListeners();
+  }
+
+  void selectDisplayedRecords() {
+    if (_closed || !selectionAvailable) return;
+    selecting = true;
+    _selectedRecords.addAll(results!.items.map((r) => r.ref));
+    selectionNotice = null;
+    notifyListeners();
+  }
+
+  Object _scopeKey(WorkspaceQuery q) => (
+    q.directoryId,
+    q.keyword,
+    q.typeId,
+    q.tagId,
+    q.grouping,
+    q.sort,
+    q.offset,
+    q.limit,
+  );
+
+  @override
+  Future<void> load(WorkspaceQuery next, {WorkspaceRecordRef? keepSelection}) {
+    if (_scopeKey(next) != _scopeKey(query) && selectedCount > 0) {
+      _selectedRecords.clear();
+      _selectedDirectories.clear();
+      selectionNotice = '显示范围已改变，已清除多选。';
+    }
+    return super.load(next, keepSelection: keepSelection);
+  }
+
+  @override
+  void projectionLoaded() {
+    final before = selectedCount;
+    final displayed = results!.items.map((r) => r.ref).toSet();
+    final directories = catalog!.directories.map((d) => d.id).toSet();
+    _selectedRecords.removeWhere((r) => !displayed.contains(r));
+    _selectedDirectories.removeWhere((id) => !directories.contains(id));
+    if (selectedCount != before) {
+      selectionNotice = '显示结果已更新，已移除不在当前范围的选择。';
+    }
+  }
 
   Future<void> resetView() {
+    cancelSelection();
     viewReset++;
     ++_navigation;
     _back.clear();
@@ -38,11 +154,20 @@ class LibraryController extends WorkspaceRecordsController {
     notifyListeners();
   }
 
-  Future<void> apply(WorkspaceQuery next) {
-    ++_navigation;
+  Future<void> apply(WorkspaceQuery next) async {
+    final navigation = ++_navigation;
+    if (next.sort != query.sort && source is WorkspaceLibraryMove) {
+      try {
+        await (source as WorkspaceLibraryMove).saveLibrarySort(next.sort);
+        sortPreferenceNotice = null;
+      } catch (_) {
+        sortPreferenceNotice = '显示方式未能记住，重开后请重新选择。';
+      }
+      if (_closed || navigation != _navigation) return;
+    }
     scrollOffset = 0;
     navigationNotice = null;
-    return load(next.copyWith(offset: 0));
+    await load(next.copyWith(offset: 0));
   }
 
   Future<void> clearFilters() =>

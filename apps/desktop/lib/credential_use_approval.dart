@@ -152,7 +152,9 @@ class _CredentialUseApprovalPanelState
                   for (final entry in reviewed.entries)
                     entry.key: entry.value.version,
                 },
-                lifetime: Duration(minutes: draft.minutes),
+                lifetime: draft.minutes == null
+                    ? null
+                    : Duration(minutes: draft.minutes!),
                 fieldLifetime: reusable
                     ? Duration(minutes: draft.fieldMinutes)
                     : null,
@@ -210,8 +212,13 @@ class _CredentialUseApprovalPanelState
                     allowCredential
                         ? pending
                               ? reusable
-                                    ? '${draft.minutes} 分钟内可重复使用，不续期'
+                                    ? draft.minutes == null
+                                          ? '不限时（限本聊天）'
+                                          : '${draft.minutes} 分钟内可重复使用，不续期'
                                     : '${draft.minutes} 分钟内允许启动一次'
+                              : r.credentialValidity ==
+                                    CredentialUseValidity.session
+                              ? '不限时（限本聊天）'
                               : '截止 ${_time(r.credentialExpiresAt)}'
                         : '不批准',
                   ),
@@ -1113,21 +1120,35 @@ class _CredentialUseApprovalPanelState
                 SizedBox(
                   height:
                       MediaQuery.textScalerOf(context).scale(13) * 1.5 + 21.5,
-                  child: DesktopSelect<int>(
-                    value: draft.minutes,
+                  child: DesktopSelect<String>(
+                    value: draft.minutes?.toString() ?? 'session',
                     isExpanded: true,
                     items: [
+                      if (r.supportsSessionValidity)
+                        const DropdownMenuItem(
+                          value: 'session',
+                          child: Text('不限时（限本聊天）'),
+                        ),
                       for (final n in [15, 30])
-                        DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                        DropdownMenuItem(
+                          value: n.toString(),
+                          child: Text('$n 分钟'),
+                        ),
                     ],
                     onChanged: pending
-                        ? (v) => setState(() => draft.minutes = v ?? 15)
+                        ? (v) => setState(
+                            () => draft.minutes = v == 'session'
+                                ? null
+                                : int.parse(v ?? '15'),
+                          )
                         : null,
                   ),
                 ),
               if (!pending && reusable)
                 Text(
-                  _time(r.credentialExpiresAt),
+                  r.credentialValidity == CredentialUseValidity.session
+                      ? '不限时（限本聊天）'
+                      : _time(r.credentialExpiresAt),
                   style: prototypeText(context, 12),
                 ),
               if (reusable && r.fields.isNotEmpty) ...[
@@ -1212,7 +1233,7 @@ class _CredentialUseApprovalPanelState
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '凭据截止 ${_time(r.credentialExpiresAt)}\n字段截止 ${_time(r.fieldExpiresAt)}',
+                  '凭据${r.credentialValidity == CredentialUseValidity.session ? '不限时（限本聊天）' : '截止 ${_time(r.credentialExpiresAt)}'}\n字段截止 ${_time(r.fieldExpiresAt)}',
                   style: prototypeText(
                     context,
                     12,

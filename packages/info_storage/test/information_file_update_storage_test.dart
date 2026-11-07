@@ -10,7 +10,7 @@ import 'storage_test.dart' show TestKeyStore;
 
 void main() {
   test(
-    'a pending revision and extra original survive reopen, receipt failure rolls back everything, and retry preserves both history and source labels',
+    'a pending revision survives reopen, receipt failure rolls back everything, and retry preserves history and source labels',
     () async {
       final root = await Directory.systemTemp.createTemp('file-update-sql-');
       final keys = TestKeyStore();
@@ -47,7 +47,7 @@ void main() {
       final p = repo.importProposals.single;
       await service.owner.confirmImport(initial, p.version, p.items);
       final item = repo.items.single, old = repo.items.single.fields.single;
-      final revision = await upload('revision'), extra = await upload('proof');
+      final revision = await upload('revision');
       final input = UpdateInput(
         item.id,
         item.version,
@@ -66,12 +66,6 @@ void main() {
                 sourceNote: '来源说明明确为确认稿。',
               ),
             ],
-          ),
-          ImportAttachmentInput(
-            key: 'proof',
-            name: '相关证明',
-            currentVersion: 1,
-            versions: [ImportAttachmentVersionInput(extra.id)],
           ),
         ],
       );
@@ -141,7 +135,7 @@ void main() {
       await approve();
       await approve();
       expect(repo.items.single.version, 2);
-      expect(repo.items.single.fields.length, 2);
+      expect(repo.items.single.fields.length, 1);
       expect(repo.items.single.fields.first.attachment!.attachmentVersion, 3);
       expect(repo.updateProposals.single.input.attachments, isEmpty);
       expect((await repo.importFileUpload(revision.id))!.consumed, true);
@@ -166,9 +160,9 @@ void main() {
       );
       expect(
         (await service.owner.readInformationAttachment(
-          current.fields.last.attachment!,
+          history[1].reference,
         )).bytes,
-        utf8.encode('PRIVATE-proof'),
+        utf8.encode('PRIVATE-history'),
       );
       final raw = await File('${root.path}/library.db').readAsBytes();
       expect(
