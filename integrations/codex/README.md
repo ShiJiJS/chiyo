@@ -1,5 +1,9 @@
 # Codex 接入开发预览（Issue #6、#7）
 
+## 服务端版接入
+
+当前 Mac 服务端版的接入按 [服务器连接说明](REMOTE-INTEGRATION.md)，使用 App 生成的受限设备配置。下面保留早期本机接入的开发记录；不能据此将用户管理 Token 或旧回环端口用于新的服务端版。
+
 这份接入用官方 SessionStart hook 提供当前聊天的私密关联。用户不需要
 手工生成 token。它仍须真实桌面两聊天验收；当前实现不等于已安装或已验收。
 来源：[OpenAI Hooks 文档](https://learn.chatgpt.com/docs/hooks)，2026-10-16 核对。

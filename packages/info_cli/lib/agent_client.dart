@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
+import 'package:info_remote/agent_connection.dart';
 import 'credential_output_filter.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
@@ -20,7 +21,9 @@ class AgentClient {
     CredentialProcessStarter? credentialProcessStarter,
     this.hostedCredentialExecutions = false,
     String? runtimeWorkerExecutable,
+    AgentConnectionProfile? connection,
   }) : _session = sessionSecret,
+       _remote = connection == null ? null : AgentConnection(connection),
        _runtimeWorkerExecutable = runtimeWorkerExecutable,
        _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
@@ -32,6 +35,19 @@ class AgentClient {
              env,
              workerExecutable: runtimeWorkerExecutable,
            ));
+  factory AgentClient.remote(
+    AgentConnectionProfile profile, {
+    String? sessionSecret,
+    String sourceAgent = '通用 CLI',
+    bool hostedCredentialExecutions = false,
+  }) => AgentClient(
+    profile.address.port,
+    sessionSecret: sessionSecret,
+    sourceAgent: sourceAgent,
+    hostedCredentialExecutions: hostedCredentialExecutions,
+    connection: profile,
+  );
+  final AgentConnection? _remote;
   final bool hostedCredentialExecutions;
   final String? _runtimeWorkerExecutable;
   final CredentialProcessStarter _credentialProcessStarter;
@@ -47,6 +63,10 @@ class AgentClient {
   /// Private capability, for trusted adapters only. Never include in diagnostics.
   String? get sessionSecret => _session;
   String? get endCapability => _endCapability;
+  Future<Map<String, dynamic>> endLifecycleSession(
+    String capability, {
+    Duration timeout = const Duration(seconds: 5),
+  }) => _call('/session/end', {'endCapability': capability}, timeout: timeout);
   final _tokens = <String, String>{};
 
   /// Trusted hook bootstrap only; creates a fresh, unapproved session.
@@ -70,6 +90,7 @@ class AgentClient {
     _session = null;
     _endCapability = null;
     _http.close(force: true);
+    _remote?.close();
   }
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
@@ -415,6 +436,7 @@ class AgentClient {
     Map<String, dynamic> data, {
     Duration timeout = const Duration(seconds: 5),
   }) async {
+    if (_remote != null) return _remote.call(path, data, timeout: timeout);
     try {
       return await (() async {
         final request = await _http.post('127.0.0.1', port, path);

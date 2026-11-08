@@ -9,12 +9,20 @@ Future<void> writeCodexConfiguration(
   Directory? finalDirectory,
   String? credentialUseReference,
   String? informationFilesReference,
+  String? connectionFile,
+  String? stateRoot,
+  Map<String, String> additionalReferences = const {},
 }) async {
   final bundle = finalDirectory ?? output;
   final suffix = Platform.isWindows ? '.exe' : '';
   final hook = '${bundle.path}/info-codex-hook$suffix';
   String shellQuote(String value) => "'${value.replaceAll("'", "'\"'\"'")}'";
-  final windowsCommand = "& '${hook.replaceAll("'", "''")}'";
+  final hookArguments = [
+    if (connectionFile != null) ...['--connection', connectionFile],
+    if (stateRoot != null) ...['--state-root', stateRoot],
+  ];
+  String psQuote(String value) => "'${value.replaceAll("'", "''")}'";
+  final windowsCommand = '& ${[hook, ...hookArguments].map(psQuote).join(' ')}';
   final encoded = <int>[];
   for (final unit in windowsCommand.codeUnits) {
     encoded.add(unit & 255);
@@ -22,7 +30,7 @@ Future<void> writeCodexConfiguration(
   }
   Map<String, Object> definition(int timeout) => {
     'type': 'command',
-    'command': shellQuote(hook),
+    'command': [hook, ...hookArguments].map(shellQuote).join(' '),
     'commandWindows':
         'powershell.exe -NoProfile -NonInteractive -EncodedCommand ${base64Encode(encoded)}',
     'timeout': timeout,
@@ -56,7 +64,9 @@ Future<void> writeCodexConfiguration(
   final skill = Directory('${output.path}/skills/agent-info-access');
   await skill.create(recursive: true);
   await File('${skill.path}/SKILL.md').writeAsString(
-    '$skillSource\nBundle executable: `${bundle.path}/info-codex$suffix`.\n',
+    '$skillSource\nBundle executable: `${bundle.path}/info-codex$suffix`.\n'
+    '${connectionFile == null ? '' : 'Connection profile: `$connectionFile`.\n'}'
+    '${stateRoot == null ? '' : 'Session state directory: `$stateRoot`.\n'}',
   );
   if (credentialUseReference != null) {
     await Directory('${skill.path}/references').create();
@@ -69,5 +79,14 @@ Future<void> writeCodexConfiguration(
     await File(
       '${skill.path}/references/information-files.md',
     ).writeAsString(informationFilesReference);
+  }
+  for (final reference in additionalReferences.entries) {
+    if (!RegExp(r'^[a-z0-9][a-z0-9-]*\.md$').hasMatch(reference.key)) {
+      throw const FormatException('Invalid reference name');
+    }
+    await Directory('${skill.path}/references').create(recursive: true);
+    await File(
+      '${skill.path}/references/${reference.key}',
+    ).writeAsString(reference.value);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:info_remote/agent_connection.dart';
 
 import 'package:test/test.dart';
 
@@ -38,6 +39,16 @@ void main() {
       await fileReference.copy(
         '${template.path}/references/information-files.md',
       );
+      final extraReferences = <String>[];
+      await for (final file in Directory('$sourceTemplate/references').list()) {
+        if (file is! File || !file.path.endsWith('.md')) continue;
+        final name = file.uri.pathSegments.last;
+        if (const {'credential-use.md', 'information-files.md'}.contains(name)) {
+          continue;
+        }
+        await file.copy('${template.path}/references/$name');
+        extraReferences.add(name);
+      }
       for (final name in [
         'info-codex',
         'info-codex-hook',
@@ -125,6 +136,81 @@ void main() {
         await credentialReference.readAsString(),
       );
       final refused = await prepare();
+      if (Platform.isMacOS) {
+        final profile = AgentConnectionProfile(
+          address: Uri.parse('https://localhost:47126'),
+          deviceToken: '${'a' * 22}.${'b' * 43}',
+          serverId: 'synthetic-bundle-server',
+        );
+        final profileFile = await profile.saveIn(
+          Directory("${root.path}/private ' \$(touch profile-injected)"),
+        );
+        final stateRoot = "${root.path}/state ' \$(touch state-injected)";
+        final remoteOutput = '${root.path}/remote prepared';
+        final remotePrepared = await Process.run(
+          delivered == null
+              ? Platform.resolvedExecutable
+              : '$delivered/cli/info-prepare-codex$suffix',
+          [
+            if (delivered == null) ...['run', 'bin/prepare_codex.dart'],
+            '--source-bundle',
+            source.path,
+            '--connection',
+            profileFile.path,
+            '--state-root',
+            stateRoot,
+            remoteOutput,
+          ],
+          environment: {'PATH': restrictedPath},
+        );
+        expect(remotePrepared.exitCode, 0, reason: '${remotePrepared.stderr}');
+        final remoteConfig = jsonDecode(
+          await File('$remoteOutput/hooks.json').readAsString(),
+        );
+        final remoteCommand =
+            remoteConfig['hooks']['SessionStart'][0]['hooks'][0]['command']
+                as String;
+        final remoteProcess = await Process.start(
+          '/bin/sh',
+          ['-c', remoteCommand],
+          workingDirectory: root.path,
+          environment: {'PATH': restrictedPath},
+        );
+        final remoteResult = remoteProcess.stdout
+            .transform(utf8.decoder)
+            .join();
+        final remoteErrors = remoteProcess.stderr
+            .transform(utf8.decoder)
+            .join();
+        remoteProcess.stdin.writeln(
+          jsonEncode({'hook_event_name': 'SessionStart', 'source': 'compact'}),
+        );
+        await remoteProcess.stdin.close();
+        expect(await remoteProcess.exitCode, 0);
+        expect(await remoteErrors, isEmpty);
+        expect(
+          jsonDecode(
+            await remoteResult,
+          )['hookSpecificOutput']['additionalContext'],
+          contains('Retain'),
+        );
+        expect(await File('${root.path}/profile-injected').exists(), isFalse);
+        expect(await File('${root.path}/state-injected').exists(), isFalse);
+        final remoteSkill = await File(
+          '$remoteOutput/skills/agent-info-access/SKILL.md',
+        ).readAsString();
+        expect(remoteSkill, contains(profileFile.path));
+        expect(remoteSkill, contains(stateRoot));
+        expect(remoteSkill.contains(profile.deviceToken), isFalse);
+      }
+      for (final name in extraReferences) {
+        expect(
+          await File(
+            '$output/skills/agent-info-access/references/$name',
+          ).readAsString(),
+          await File('$sourceTemplate/references/$name').readAsString(),
+        );
+      }
       expect(
         await File(
           '$output/skills/agent-info-access/references/information-files.md',
