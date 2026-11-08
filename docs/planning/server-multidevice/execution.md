@@ -430,4 +430,6 @@ OwnerWorkspaceHistory、OwnerWorkspaceLibraryRecycle、OwnerWorkspaceGrantHistor
 
 原App历史/整批回收/授权/凭据/文件及控件回归30通过；新增纯Dart真实SQLCipher连续场景在Mac及Linux ARM64各1通过：正常用户审批和读取、历史事件、旧版本恢复、目录+资料+凭据批次回收、加密重开原回执去重、整体恢复、凭据停用及旧读取证明拒绝、再重开保持。相关共享/App/服务测试分析无问题。证据server-a10 README。初次语法/测试调用错误日志保留未计通过。
 
-#100仍未完成，下一步OwnerHistoryRoutes及严格DTO：资料/版本/回收批次/回执和GrantHistory查询/快照/历史文件。接RemoteWorkspaceSource当前未重写的历史/回收接口及grantHistory；recordOperationReceipt当前只有保存/文件/凭据回执，需要补原InformationLifecycle回执并保持多个存储查找失败不作缺失的旧规则。服务器统一在runtime.run内调用共享模块，用户接口不得放给Agent设备。历史文件只按共享resolveFile核对出的准确原附件读取，参考现有OwnerFileRoutes将字节交客户端原渲染器，不替换为当前文件。补正常UI、真实TLS丢回复、整套服务重开/独立客户端、失败批次及版本/关联核对后才关票。#101–#102待续，后三票不动。
+#100仍未完成，下一步OwnerHistoryRoutes及严格DTO：资料/版本/回收批次/回执和GrantHistory查询/快照/历史文件。接RemoteWorkspaceSource当前未重写的历史/回收接口及grantHistory；recordOperationReceipt当前只查询普通资料保存回执（文件和凭据另有专用入口），需要补原InformationLifecycle回执并保持多个存储查找失败不作缺失的旧规则。服务器统一在runtime.run内调用共享模块，用户接口不得放给Agent设备。历史文件只按共享resolveFile核对出的准确原附件读取，参考现有OwnerFileRoutes将字节交客户端原渲染器，不替换为当前文件。补正常UI、真实TLS丢回复、整套服务重开/独立客户端、失败批次及版本/关联核对后才关票。#101–#102待续，后三票不动。
+
+共享抽取及证据已推送01173dc1；GitHub #100阶段评论已发布并回读，仍Open/Close issue，未关闭。继续复用18/p1。当前无本轮运行测试、worker、看护或容器。下一步按上段接真实历史/回收接口和RemoteWorkspaceSource，不重做已通过的纯Dart抽取。
