@@ -1,3 +1,5 @@
+import 'package:info_workspace/file_transport.dart';
+import 'workspace_attachment_renderer.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_workspace/proposal_transport.dart';
 import 'package:info_workspace/workspace_transport.dart';
@@ -7,8 +9,59 @@ import 'workspace_source.dart';
 /// The normal proposal UI and its whole-decision controller use this transport.
 /// Server rules are shared with the desktop owner adapter; no auto approval.
 class RemoteWorkspaceProposals
-    implements WorkspaceProposalSource, WorkspaceProposalPreviewSource {
+    implements
+        WorkspaceProposalSource,
+        WorkspaceProposalPreviewSource,
+        WorkspaceProposalOriginalSource {
   RemoteWorkspaceProposals(this.client, {required this.changed});
+  final _renderer = const WorkspaceAttachmentRenderer();
+  @override
+  Future<WorkspaceFilePreview> pendingOriginal(
+    String proposalId,
+    int proposalVersion,
+    String itemId,
+    String attachmentKey,
+    int version, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+    int? originalProposalVersion,
+  }) => _read(() async {
+    final content = fileOriginalFromJson(
+      await client.request('POST', '${_path(proposalId)}/originals/pending', {
+        'proposalVersion': proposalVersion,
+        'itemId': itemId,
+        'attachmentKey': attachmentKey,
+        'version': version,
+        'review': review?.toJson(),
+        'originalProposalVersion': originalProposalVersion,
+      }),
+    );
+    return _renderer.renderContent(content.file, content.bytes, page: page);
+  });
+  @override
+  Future<WorkspaceFilePreview> storedOriginal(
+    String proposalId,
+    int proposalVersion,
+    WorkspaceRecordRef record,
+    String fieldKey,
+    WorkspaceFileRef file, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+  }) => _read(() async {
+    final content = fileOriginalFromJson(
+      await client.request('POST', '${_path(proposalId)}/originals/stored', {
+        'proposalVersion': proposalVersion,
+        'record': recordRefToJson(record),
+        'fieldKey': fieldKey,
+        'file': file.toJson(),
+        'review': review?.toJson(),
+      }),
+    );
+    if (content.file.ref != file) {
+      throw const FormatException('Mismatched original reference');
+    }
+    return _renderer.renderContent(content.file, content.bytes, page: page);
+  });
   final OwnerClient client;
   final void Function() changed;
   static const _prefix = '/v1/owner/proposals';

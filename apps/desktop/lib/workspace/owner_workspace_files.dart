@@ -1,6 +1,6 @@
-import 'dart:convert';
+import 'package:info_workspace/owner_workspace_file_reads.dart';
+import 'workspace_attachment_renderer.dart';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:info_core/info_core.dart' as core;
 import 'owner_workspace_information.dart';
 import 'owner_pdf_preview.dart';
@@ -18,62 +18,9 @@ class OwnerWorkspaceFiles {
   final core.OwnerAccess owner;
   final OwnerWorkspaceInformation information;
 
-  Future<({WorkspaceDetail detail, core.InformationAttachmentRef ref})>
-  _resolve(WorkspaceRecordRef record, String key) async {
-    final detail = await information.readDetail(record);
-    final fieldId = detail.fieldIds[key];
-    final item = owner.information.where((i) => i.id == record.id).firstOrNull;
-    final field = item?.fields.where((f) => f.id == fieldId).firstOrNull;
-    if (record.kind != WorkspaceRecordKind.information ||
-        field == null ||
-        field.kind != core.FieldKind.file ||
-        field.attachment == null) {
-      throw const WorkspaceFailure('not_found', '此资料的文件字段已不可用。');
-    }
-    return (detail: detail, ref: field.attachment!);
-  }
-
-  WorkspaceFileVersion _version(core.InformationAttachmentVersion v) =>
-      WorkspaceFileVersion(
-        ref: WorkspaceFileRef(
-          v.reference.attachmentId,
-          v.reference.attachmentVersion,
-        ),
-        filename: v.originalName,
-        mediaType: v.mediaType,
-        byteLength: v.byteLength,
-        createdAt: v.createdAt,
-        available: v.available,
-        label: v.label,
-        sourceNote: v.sourceNote,
-      );
-
-  Future<WorkspaceFileHistory> history(
-    WorkspaceRecordRef record,
-    String key,
-  ) async {
-    final resolved = await _resolve(record, key);
-    final versions = await owner.informationAttachmentVersions(
-      resolved.ref.attachmentId,
-    );
-    final current = versions
-        .where((v) => v.reference == resolved.ref)
-        .firstOrNull;
-    if (current == null) {
-      throw const WorkspaceFailure('attachment_missing', '文件版本说明已不可用。');
-    }
-    return WorkspaceFileHistory(
-      recordVersion: resolved.detail.version,
-      current: _version(current),
-      versions:
-          (versions.toList()..sort(
-                (a, b) => b.reference.attachmentVersion.compareTo(
-                  a.reference.attachmentVersion,
-                ),
-              ))
-              .map(_version),
-    );
-  }
+  late final _reads = OwnerWorkspaceFileReads(owner, information);
+  Future<WorkspaceFileHistory> history(WorkspaceRecordRef record, String key) =>
+      _reads.history(record, key);
 
   Future<WorkspaceFilePreview> preview(
     WorkspaceRecordRef record,
@@ -81,7 +28,7 @@ class OwnerWorkspaceFiles {
     int? version,
     int page = 0,
   }) async {
-    final resolved = await _resolve(record, key);
+    final resolved = await _reads.resolve(record, key);
     if (page < 0 || (version != null && version < 1)) {
       throw const WorkspaceFailure('invalid_request', '页码或文件版本无效。');
     }
@@ -121,65 +68,9 @@ class OwnerWorkspaceAttachmentPreview {
     WorkspaceFileVersion file,
     Uint8List bytes, {
     int page = 0,
-  }) async {
-    if (page < 0) throw const WorkspaceFailure('invalid_request', '页码无效。');
-    try {
-      if (file.mediaType == 'application/pdf') {
-        return await pdf.render(file, bytes, page);
-      }
-      if (page != 0) throw const WorkspaceFailure('invalid_request', '页码超出范围。');
-      if (file.mediaType == 'text/plain' || file.mediaType == 'text/markdown') {
-        return WorkspaceFilePreview(
-          file: file,
-          kind: WorkspaceFilePreviewKind.text,
-          text: utf8.decode(bytes),
-        );
-      }
-      if (!{'image/png', 'image/jpeg', 'image/webp'}.contains(file.mediaType)) {
-        return WorkspaceFilePreview(
-          file: file,
-          kind: WorkspaceFilePreviewKind.unsupported,
-        );
-      }
-      final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-      ui.ImageDescriptor? descriptor;
-      ui.Codec? codec;
-      ui.Image? image;
-      try {
-        descriptor = await ui.ImageDescriptor.encoded(buffer);
-        if (descriptor.width < 1 ||
-            descriptor.height < 1 ||
-            descriptor.width > 16384 ||
-            descriptor.height > 16384 ||
-            descriptor.width * descriptor.height > 16 * 1024 * 1024) {
-          return WorkspaceFilePreview(
-            file: file,
-            kind: WorkspaceFilePreviewKind.unsupported,
-          );
-        }
-        codec = await descriptor.instantiateCodec();
-        image = (await codec.getNextFrame()).image;
-        final png = await image.toByteData(format: ui.ImageByteFormat.png);
-        if (png == null) throw const FormatException();
-        return WorkspaceFilePreview(
-          file: file,
-          kind: WorkspaceFilePreviewKind.image,
-          image: png.buffer.asUint8List(png.offsetInBytes, png.lengthInBytes),
-          pixelWidth: image.width,
-          pixelHeight: image.height,
-        );
-      } finally {
-        image?.dispose();
-        codec?.dispose();
-        descriptor?.dispose();
-        buffer.dispose();
-      }
-    } on WorkspaceFailure {
-      rethrow;
-    } on Object {
-      throw const WorkspaceFailure('preview_unavailable', '文件内容无法预览，未修改原文件。');
-    }
-  }
+  }) => WorkspaceAttachmentRenderer(
+    pdf: pdf,
+  ).renderContent(file, bytes, page: page);
 
   Future<WorkspaceFilePreview> _read(
     core.InformationAttachmentRef ref, {

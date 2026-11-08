@@ -9,10 +9,16 @@ import 'workspace/workspace_inputs.dart';
 import 'workspace/zhiyu_theme.dart';
 import 'desktop_controls.dart';
 import 'online_agent_connection_dialog.dart';
+import 'information_files.dart';
 
 class OnlineDesktopLauncher extends StatefulWidget {
-  const OnlineDesktopLauncher({super.key, required this.profiles});
+  const OnlineDesktopLauncher({
+    super.key,
+    required this.profiles,
+    this.filePicker,
+  });
   final ConnectionProfileStore profiles;
+  final InformationFilePicker? filePicker;
   @override
   State<OnlineDesktopLauncher> createState() => _OnlineDesktopLauncherState();
 }
@@ -93,7 +99,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       }
       _previous = profile;
       setState(() {
-        _source = RemoteWorkspaceSource(client!);
+        _source = RemoteWorkspaceSource(client!, filePicker: widget.filePicker);
         _offline = false;
         _busy = false;
       });
@@ -181,8 +187,10 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                   child: WorkspaceApp(
                     source: source,
                     windowTitle: '知予',
-                    inputsBuilder: (_) =>
-                        WorkspaceInputs(plugin: source.plugins.pick),
+                    inputsBuilder: (_) => WorkspaceInputs(
+                      plugin: source.plugins.pick,
+                      file: source.files.pick,
+                    ),
                     onConnectionSettings: _settings,
                     onAgentConnectionSetup:
                         widget.profiles is PrivateConnectionProfileStore

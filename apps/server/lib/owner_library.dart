@@ -1,3 +1,4 @@
+import 'package:info_workspace/owner_file_stages.dart';
 import 'package:info_workspace/owner_workspace_classification.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_workspace/owner_credential_type.dart';
@@ -9,7 +10,10 @@ import 'package:info_workspace/workspace_source.dart';
 /// Trusted owner projections used by proposal review and relation pickers.
 /// The encrypted library remains on the host; this owns no desktop or cache.
 final class OnlineOwnerLibrary
-    implements WorkspaceProposalLibrary, WorkspaceClassificationInformation {
+    implements
+        WorkspaceProposalLibrary,
+        WorkspaceClassificationInformation,
+        OwnerFileInformation {
   OnlineOwnerLibrary(this.owner, this.plugins)
     : _scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
@@ -45,7 +49,7 @@ final class OnlineOwnerLibrary
   late final classification = OwnerWorkspaceClassification(
     owner: owner,
     information: this,
-    fileCreationEnabled: false,
+    fileCreationEnabled: true,
     credentialCreationEnabled: false,
   );
   @override

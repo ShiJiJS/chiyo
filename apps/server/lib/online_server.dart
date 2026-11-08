@@ -19,6 +19,7 @@ import 'package:info_workspace/workspace_transport.dart';
 import 'owner_library.dart';
 import 'owner_proposal_routes.dart';
 import 'owner_library_routes.dart';
+import 'owner_file_routes.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -38,6 +39,15 @@ final class OnlineServer {
     _service.owner.configureInformationTemplates(
       () => currentAgentTemplates(_service.owner),
     );
+    _fileCleanupTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (_fileCleanup != null || _files?.needsCleanup != true) return;
+      _fileCleanup = _runtime
+          .run(() => _files!.cleanup())
+          .catchError((Object _) {
+            /* Retry next sweep; shutdown also releases staging. */
+          })
+          .whenComplete(() => _fileCleanup = null);
+    });
     _http.listen(
       _handle,
       onError: (Object error, StackTrace stack) {
@@ -68,6 +78,10 @@ final class OnlineServer {
   );
   late final _proposalRoutes = OwnerProposalRoutes(_proposals);
   late final _libraryRoutes = OwnerLibraryRoutes(_library);
+  OwnerFileRoutes? _files;
+  late final Timer _fileCleanupTimer;
+  Future<void>? _fileCleanup;
+  OwnerFileRoutes get _fileRoutes => _files ??= OwnerFileRoutes(_library);
   int get port => _http.port;
 
   static Future<OnlineServer> start({
@@ -92,7 +106,10 @@ final class OnlineServer {
   }
 
   Future<void> close() async {
+    _fileCleanupTimer.cancel();
     await _http.close(force: true);
+    await _fileCleanup;
+    await _files?.dispose();
     _plugins.dispose();
   }
 
@@ -110,14 +127,23 @@ final class OnlineServer {
     if (request.headers.contentType?.mimeType != 'application/json') {
       throw const FormatException('Expected JSON');
     }
+    // Only dedicated file upload routes accept the existing 10 MiB original
+    // plus Base64 and bounded metadata. Ordinary management stays at 2 MiB.
+    final limit =
+        const {
+          '/v1/owner/files/uploads',
+          '/v1/agent/import-file/submit',
+        }.contains(request.uri.path)
+        ? ((informationFileByteLimit + 2) ~/ 3) * 4 + 16384
+        : 2 * 1024 * 1024;
     final bytes = <int>[];
     await for (final chunk in request.timeout(const Duration(seconds: 15))) {
-      if (bytes.length + chunk.length > 2 * 1024 * 1024) {
+      if (bytes.length + chunk.length > limit) {
         throw const FormatException('Request too large');
       }
       bytes.addAll(chunk);
     }
-    return decodeProtocolObject(utf8.decode(bytes), maxBytes: 2 * 1024 * 1024);
+    return decodeProtocolObject(utf8.decode(bytes), maxBytes: limit);
   }
 
   Future<String> _observation() async {
@@ -233,6 +259,14 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/files') {
+          final (code, value) = await _fileRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(2).join('/') == 'v1/owner' &&
             const {'classification', 'library'}.contains(path[2])) {
