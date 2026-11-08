@@ -72,6 +72,54 @@ void main() {
     await root.delete(recursive: true);
   });
   test(
+    'legacy duration survives unrelated changes and exact replay without permitting a new non-preset duration',
+    () async {
+      final owner = service.owner;
+      DesktopPreferences values(int version, int minutes) => DesktopPreferences(
+        version: version,
+        dark: true,
+        notifications: false,
+        requestMinutes: minutes,
+        retentionDays: 90,
+        background: false,
+      );
+      Future<DesktopPreferencesReceipt> write(
+        String id,
+        int expected,
+        int minutes,
+      ) => owner.saveDesktopPreferences(
+        operationId: id,
+        commandDigest: 'c' * 64,
+        expectedVersion: expected,
+        desired: values(expected + 1, minutes),
+      );
+      await expectLater(
+        write('arbitrary', 1, 47),
+        throwsA(
+          isA<AccessFailure>().having(
+            (e) => e.status,
+            'status',
+            'invalid_preferences',
+          ),
+        ),
+      );
+      await owner.setRequestLifetime(const Duration(minutes: 47));
+      await write('legacy', 1, 47);
+      await write('preset', 2, 60);
+      expect((await write('legacy', 1, 47)).preferences.requestMinutes, 47);
+      expect(owner.requestLifetime, const Duration(minutes: 60));
+      await close();
+      await open();
+      expect(
+        (await service.owner.desktopPreferencesReceipt(
+          'legacy',
+        ))!.preferences.requestMinutes,
+        47,
+      );
+      expect(service.owner.requestLifetime, const Duration(minutes: 60));
+    },
+  );
+  test(
     'all real settings and exact receipt survive independent reopen',
     () async {
       final receipt = await save();

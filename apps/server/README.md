@@ -186,6 +186,14 @@ CLI在自己的电脑核对程序、工作目录、进程组和文件身份，�
 
 ## 自动检查
 
+### 共享设置
+
+正式宿主现提供受用户身份保护的 `/v1/owner/settings`：GET 读取共享请求期限与历史保留时间，POST `changes` 使用原设置事务和清理计划保存，POST `retention-preview` 先核对缩短保留时间的影响。GET `operations/<marker>/<operationId>` 核对原结果；明确未提交后不允许迟到的旧操作保存。资料库恢复会改变设置标记，旧命令不能写入新库。
+
+这组接口不接收本机主题、通知或后台偏好，也不返回私有服务器状态或密钥；Agent 设备凭证不能调用。具体传输与当前验收范围见 `docs/development/evidence/server-a12/settings.md`（从仓库根目录）。App 的本机设置适配仍在 #102 接续，不能把接口通过说成原页面已完成。
+
+### 自动检查命令
+
 ```sh
 dart test --reporter expanded
 dart analyze bin lib test
