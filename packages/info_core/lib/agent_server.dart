@@ -49,39 +49,26 @@ class CredentialToolLocation {
   };
 }
 
-class AgentServer {
+class AgentServer extends AgentProtocol {
   AgentServer._(
     this._server,
-    this._agent,
-    this._credentialExecutionHandler,
-    this.enableReusableCredentialUse,
-    this.enableFocusedFill,
-    this.enableInformationFiles,
-    this._credentialTools,
-  ) {
+    AgentAccess agent,
+    CredentialExecutionHandler? credentialExecutionHandler,
+    bool reusable,
+    bool focused,
+    bool files,
+    Future<List<CredentialToolLocation>> Function()? credentialTools,
+  ) : super(
+        agent,
+        credentialExecutionHandler: credentialExecutionHandler,
+        enableReusableCredentialUse: reusable,
+        enableFocusedFill: focused,
+        enableInformationFiles: files,
+        credentialTools: credentialTools,
+      ) {
     _server.listen(_handle);
   }
   final HttpServer _server;
-  final AgentAccess _agent;
-  final CredentialExecutionHandler? _credentialExecutionHandler;
-  final Future<List<CredentialToolLocation>> Function()? _credentialTools;
-
-  /// Enable only after the caller's storage and executor support v2 semantics.
-  final bool enableReusableCredentialUse;
-
-  /// Kept off until the repository, native host, and owner UI support fills.
-  final bool enableFocusedFill;
-
-  /// Off until storage, file driver and owner UI are connected by the host.
-  final bool enableInformationFiles;
-  bool get _informationFilesEnabled =>
-      enableReusableCredentialUse &&
-      enableInformationFiles &&
-      _agent.informationFileDeliveryAvailable;
-  bool get _focusedFillEnabled =>
-      enableReusableCredentialUse &&
-      enableFocusedFill &&
-      _agent.focusedFillAvailable;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
@@ -231,6 +218,46 @@ class AgentServer {
       /* A disconnected caller must not terminate the desktop. */
     }
   }
+}
+
+/// Agent-only command processing shared by local and authenticated remote
+/// transports. Callers must enforce their own origin, identity and body limits.
+/// It receives no OwnerAccess, so cannot approve or manage information.
+class AgentProtocol {
+  AgentProtocol(
+    this._agent, {
+    CredentialExecutionHandler? credentialExecutionHandler,
+    this.enableReusableCredentialUse = false,
+    this.enableFocusedFill = false,
+    this.enableInformationFiles = false,
+    Future<List<CredentialToolLocation>> Function()? credentialTools,
+  }) : _credentialExecutionHandler = credentialExecutionHandler,
+       _credentialTools = credentialTools;
+  final AgentAccess _agent;
+  final CredentialExecutionHandler? _credentialExecutionHandler;
+  final Future<List<CredentialToolLocation>> Function()? _credentialTools;
+
+  /// Enable only after the caller's storage and executor support v2 semantics.
+  final bool enableReusableCredentialUse;
+
+  /// Kept off until the repository, native host, and owner UI support fills.
+  final bool enableFocusedFill;
+
+  /// Off until storage, file driver and owner UI are connected by the host.
+  final bool enableInformationFiles;
+  bool get _informationFilesEnabled =>
+      enableReusableCredentialUse &&
+      enableInformationFiles &&
+      _agent.informationFileDeliveryAvailable;
+  bool get _focusedFillEnabled =>
+      enableReusableCredentialUse &&
+      enableFocusedFill &&
+      _agent.focusedFillAvailable;
+
+  Future<Map<String, Object?>> dispatch(
+    String path,
+    Map<String, dynamic> body,
+  ) => _dispatch(path, body);
 
   Future<Map<String, Object?>> _dispatch(
     String path,
