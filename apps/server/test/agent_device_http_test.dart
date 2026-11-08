@@ -29,10 +29,10 @@ void main() {
         '${root.path}/data',
         MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
       );
-      final service = InformationService(repository: repo);
+      final runtime = await OnlineInformationRuntime.open(repository: repo);
       final registry = AgentDeviceRegistry(repo);
       final server = await OnlineServer.start(
-        service: service,
+        runtime: runtime,
         devices: registry,
         tls: tls,
         ownerToken: owner,
@@ -118,7 +118,7 @@ void main() {
       } finally {
         client.close(force: true);
         await server.close();
-        await service.close();
+        await runtime.close();
         await repo.close();
       }
     },

@@ -33,6 +33,7 @@ void main() {
   late Directory root;
   late EncryptedInformationRepository repo;
   late InformationService service;
+  late OnlineInformationRuntime runtime;
   late AgentDeviceRegistry devices;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('chiyo-agent-gateway-');
@@ -41,11 +42,12 @@ void main() {
       '${root.path}/data',
       MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
     );
-    service = InformationService(repository: repo);
+    runtime = await OnlineInformationRuntime.open(repository: repo);
+    service = runtime.service;
     devices = AgentDeviceRegistry(repo);
   });
   tearDown(() async {
-    await service.close();
+    await runtime.close();
     await repo.close();
     await root.delete(recursive: true);
   });
@@ -62,8 +64,8 @@ void main() {
       final ownerToken = base64Url
           .encode(await File('${root.path}/secrets/owner.token').readAsBytes())
           .replaceAll('=', '');
-      final server = await OnlineServer.start(
-        service: service,
+      var server = await OnlineServer.start(
+        runtime: runtime,
         devices: devices,
         tls: tls,
         ownerToken: ownerToken,
@@ -196,8 +198,8 @@ void main() {
         fields: [FieldRef(item.id, item.fields.first.id)],
         itemVersions: {item.id: item.version},
       );
-      await service.owner.decideInformationRequest(command);
-      await service.owner.decideInformationRequest(command);
+      await runtime.run(() => service.owner.decideInformationRequest(command));
+      await runtime.run(() => service.owner.decideInformationRequest(command));
       final grant = (await agent(a.bearer, '/claim', claimBody)).$2;
       expect(grant['status'], 'ok');
       expect((await agent(a.bearer, '/claim', claimBody)).$2, grant);
@@ -214,6 +216,30 @@ void main() {
         })).$1,
         401,
       );
+      expect(
+        (await agent(a.bearer, '/read', readBody)).$2['value'],
+        'PRIVATE_SELECTED',
+      );
+      // Recreate every host object over the same encrypted volume. No in-memory
+      // service, device registry or gateway can account for the resumed proof.
+      await server.close();
+      await runtime.close();
+      await repo.close();
+      repo = await EncryptedInformationRepository.open(
+        '${root.path}/data',
+        MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
+      );
+      runtime = await OnlineInformationRuntime.open(repository: repo);
+      service = runtime.service;
+      devices = AgentDeviceRegistry(repo);
+      server = await OnlineServer.start(
+        runtime: runtime,
+        devices: devices,
+        tls: tls,
+        ownerToken: ownerToken,
+        serverId: 'synthetic-agent-gateway',
+      );
+      expect((await agent(a.bearer, '/claim', claimBody)).$2, grant);
       expect(
         (await agent(a.bearer, '/read', readBody)).$2['value'],
         'PRIVATE_SELECTED',

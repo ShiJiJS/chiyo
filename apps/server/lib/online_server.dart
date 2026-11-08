@@ -14,11 +14,11 @@ import 'package:info_core/protocol_json.dart';
 final class OnlineServer {
   OnlineServer._(
     this._http,
-    this._service,
+    this._runtime,
     this._ownerToken,
     this.serverId,
     this._devices,
-  ) : _agents = AgentGateway(AgentProtocol(_service.agent), _devices) {
+  ) : _agents = AgentGateway(AgentProtocol(_runtime.service.agent), _devices) {
     _http.listen(
       _handle,
       onError: (Object error, StackTrace stack) {
@@ -33,7 +33,8 @@ final class OnlineServer {
     );
   }
   final HttpServer _http;
-  final InformationService _service;
+  final OnlineInformationRuntime _runtime;
+  InformationService get _service => _runtime.service;
   final String _ownerToken;
   final String serverId;
   final AgentDeviceRegistry _devices;
@@ -41,7 +42,7 @@ final class OnlineServer {
   int get port => _http.port;
 
   static Future<OnlineServer> start({
-    required InformationService service,
+    required OnlineInformationRuntime runtime,
     required AgentDeviceRegistry devices,
     required SecurityContext tls,
     required String ownerToken,
@@ -58,7 +59,7 @@ final class OnlineServer {
       port,
       tls,
     );
-    return OnlineServer._(http, service, ownerToken, serverId, devices);
+    return OnlineServer._(http, runtime, ownerToken, serverId, devices);
   }
 
   Future<void> close() => _http.close(force: true);
@@ -88,177 +89,219 @@ final class OnlineServer {
   }
 
   Future<void> _handle(HttpRequest request) async {
-    Future<void> reply(int status, Object value) async {
+    int status = 500;
+    Object result = {'error': 'service_failure'};
+    Future<void> reply(int code, Object value) async {
+      status = code;
+      result = value;
+    }
+
+    Map<String, dynamic>? parsedBody;
+    Future<void> route() async {
+      try {
+        // No browser management surface is part of this version.
+        if (request.headers.value('origin') != null) {
+          await reply(401, {'error': 'unauthorized'});
+          return;
+        }
+        final expectedServer = request.headers.value('x-chiyo-server-id');
+        if (expectedServer != null && expectedServer != serverId) {
+          await reply(409, {'error': 'server_changed'});
+          return;
+        }
+        final path = request.uri.pathSegments;
+        if (path.length >= 3 && path.take(2).join('/') == 'v1/agent') {
+          final authorization = request.headers.value('authorization') ?? '';
+          if (!authorization.startsWith('Bearer ')) {
+            await reply(401, {'error': 'unauthorized'});
+            return;
+          }
+          final bearer = authorization.substring(7);
+          // Authenticate before parsing body or consulting the shared protocol.
+          await _devices.authenticate(bearer);
+          if (request.method != 'POST') {
+            await reply(405, {'error': 'method_not_allowed'});
+            return;
+          }
+          final result = await _agents.dispatch(
+            bearer,
+            '/${path.skip(2).join('/')}',
+            parsedBody!,
+          );
+          await reply(200, result);
+          return;
+        }
+        if (!_authenticated(request.headers.value('authorization'))) {
+          await reply(401, {'error': 'unauthorized'});
+          return;
+        }
+        if (request.method == 'GET' && request.uri.path == '/v1/server') {
+          await reply(200, {'protocolVersion': 1, 'serverId': serverId});
+        } else if (request.uri.path == '/v1/owner/devices' &&
+            request.method == 'GET') {
+          await reply(200, {'devices': await _devices.metadata()});
+        } else if (request.uri.path == '/v1/owner/devices' &&
+            request.method == 'POST') {
+          final input = parsedBody!;
+          if (input.keys.any((k) => !const {'operationId', 'name'}.contains(k)))
+            throw const FormatException('Invalid device request');
+          final device = await _devices.enroll(
+            input['operationId'] as String,
+            input['name'] as String,
+          );
+          await reply(200, {
+            'deviceId': device.identity.id,
+            'name': device.identity.name,
+            'generation': device.identity.generation,
+            'deviceToken': device.bearer,
+          });
+        } else if (request.method == 'POST' &&
+            path.length == 5 &&
+            path.take(3).join('/') == 'v1/owner/devices' &&
+            path.last == 'revoke') {
+          final input = parsedBody!;
+          if (input.length != 1 || input['operationId'] is! String)
+            throw const FormatException('Invalid device request');
+          await _devices.revoke(input['operationId'] as String, path[3]);
+          await reply(200, {'status': 'revoked', 'deviceId': path[3]});
+        } else if (request.method == 'GET' &&
+            request.uri.path == '/v1/owner/catalog') {
+          final classification = await _service.owner
+              .informationClassificationSnapshot();
+          await reply(200, {
+            'version': classification.version,
+            'summary': {
+              'records':
+                  _service.owner.information.length +
+                  _service.owner.credentials.length,
+              'pending': _service.owner.queryInbox(limit: 1).pendingCount,
+              'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
+            },
+            'directories': [
+              for (final d in _service.owner.directories)
+                {'id': d.id, 'name': d.name, 'parentId': d.parentId},
+            ],
+            'tags': [
+              for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
+            ],
+            'templates': builtinWorkspaceDefinitions.values.toList(),
+          });
+        } else if (request.method == 'GET' &&
+            request.uri.path == '/v1/owner/summaries') {
+          await reply(200, {
+            'items': [
+              for (final item in _service.owner.information)
+                {
+                  ...informationToJson(item),
+                  'fields': [],
+                  if (item.layout != null)
+                    'layout': InformationLayout(
+                      typeId: item.layout!.typeId,
+                      snapshot: {
+                        if (item.layout!.snapshot['type'] != null)
+                          'type': item.layout!.snapshot['type'],
+                      },
+                      fieldIds: {},
+                    ).toJson(),
+                },
+            ],
+          });
+        } else if (request.method == 'GET' &&
+            path.length == 4 &&
+            path.take(3).join('/') == 'v1/owner/information') {
+          final item = _service.owner.information
+              .where((i) => i.id == path.last)
+              .firstOrNull;
+          await reply(
+            item == null ? 404 : 200,
+            item == null ? {'error': 'not_found'} : informationToJson(item),
+          );
+        } else if (request.method == 'GET' &&
+            request.uri.path == '/v1/owner/information') {
+          await reply(200, {
+            'items': _service.owner.information.map(informationToJson).toList(),
+          });
+        } else if (path.length == 4 &&
+            path.take(3).join('/') == 'v1/owner/operations' &&
+            request.method == 'GET') {
+          final receipt = await _service.owner.informationRecordReceipt(
+            path.last,
+          );
+          await reply(
+            receipt == null ? 404 : 200,
+            receipt?.toJson() ?? {'error': 'operation_not_found'},
+          );
+        } else if (path.length == 4 &&
+            path.take(3).join('/') == 'v1/owner/saves' &&
+            request.method == 'POST') {
+          final receipt = await _service.owner.saveInformationRecord(
+            path.last,
+            informationDraftFromJson(parsedBody!),
+          );
+          await reply(200, receipt.toJson());
+        } else {
+          await reply(404, {'error': 'not_found'});
+        }
+      } on AccessFailure catch (e) {
+        await reply(e.status == 'unauthorized' ? 401 : 409, {
+          'error': e.status,
+          'status': e.status,
+        });
+      } on CredentialUseFailure catch (e) {
+        await reply(400, e.toJson());
+      } on FormatException {
+        await reply(400, {'error': 'invalid_request'});
+      } on TypeError {
+        await reply(400, {'error': 'invalid_request'});
+      } on Object {
+        // Never reflect field values, tokens, filesystem paths or exception text.
+        try {
+          await reply(500, {'error': 'service_failure'});
+        } on Object {
+          /* disconnected */
+        }
+      }
+    }
+
+    try {
+      // Reject unauthenticated peers and parse bounded request bodies before
+      // entering the serialized business queue. No network await holds its lock.
+      if (request.headers.value('origin') != null) {
+        throw const AccessFailure('unauthorized');
+      }
+      final path = request.uri.pathSegments;
+      final authorization = request.headers.value('authorization') ?? '';
+      if (path.length >= 3 && path.take(2).join('/') == 'v1/agent') {
+        if (!authorization.startsWith('Bearer '))
+          throw const AccessFailure('unauthorized');
+        await _devices.authenticate(authorization.substring(7));
+      } else if (!_authenticated(authorization)) {
+        throw const AccessFailure('unauthorized');
+      }
+      if (request.method == 'POST') parsedBody = await _body(request);
+      await _runtime.run(route);
+    } on AccessFailure catch (e) {
+      status = e.status == 'unauthorized' ? 401 : 409;
+      result = {'error': e.status, 'status': e.status};
+    } on FormatException {
+      status = 400;
+      result = {'error': 'invalid_request'};
+    } on Object {
+      status = 500;
+      result = {'error': 'service_failure'};
+    }
+    // Never publish content, new session proofs or approval success before the
+    // encrypted runtime checkpoint has committed. A failed checkpoint replaces
+    // the staged response above with a fixed error.
+    try {
       request.response.statusCode = status;
       request.response.headers.contentType = ContentType.json;
       request.response.headers.set('cache-control', 'no-store');
       request.response.headers.set('x-chiyo-server-id', serverId);
-      request.response.write(jsonEncode(value));
+      request.response.write(jsonEncode(result));
       await request.response.close();
-    }
-
-    try {
-      // No browser management surface is part of this version.
-      if (request.headers.value('origin') != null) {
-        await reply(401, {'error': 'unauthorized'});
-        return;
-      }
-      final expectedServer = request.headers.value('x-chiyo-server-id');
-      if (expectedServer != null && expectedServer != serverId) {
-        await reply(409, {'error': 'server_changed'});
-        return;
-      }
-      final path = request.uri.pathSegments;
-      if (path.length >= 3 && path.take(2).join('/') == 'v1/agent') {
-        final authorization = request.headers.value('authorization') ?? '';
-        if (!authorization.startsWith('Bearer ')) {
-          await reply(401, {'error': 'unauthorized'});
-          return;
-        }
-        final bearer = authorization.substring(7);
-        // Authenticate before parsing body or consulting the shared protocol.
-        await _devices.authenticate(bearer);
-        if (request.method != 'POST') {
-          await reply(405, {'error': 'method_not_allowed'});
-          return;
-        }
-        final result = await _agents.dispatch(
-          bearer,
-          '/${path.skip(2).join('/')}',
-          await _body(request),
-        );
-        await reply(200, result);
-        return;
-      }
-      if (!_authenticated(request.headers.value('authorization'))) {
-        await reply(401, {'error': 'unauthorized'});
-        return;
-      }
-      if (request.method == 'GET' && request.uri.path == '/v1/server') {
-        await reply(200, {'protocolVersion': 1, 'serverId': serverId});
-      } else if (request.uri.path == '/v1/owner/devices' &&
-          request.method == 'GET') {
-        await reply(200, {'devices': await _devices.metadata()});
-      } else if (request.uri.path == '/v1/owner/devices' &&
-          request.method == 'POST') {
-        final input = await _body(request);
-        if (input.keys.any((k) => !const {'operationId', 'name'}.contains(k)))
-          throw const FormatException('Invalid device request');
-        final device = await _devices.enroll(
-          input['operationId'] as String,
-          input['name'] as String,
-        );
-        await reply(200, {
-          'deviceId': device.identity.id,
-          'name': device.identity.name,
-          'generation': device.identity.generation,
-          'deviceToken': device.bearer,
-        });
-      } else if (request.method == 'POST' &&
-          path.length == 5 &&
-          path.take(3).join('/') == 'v1/owner/devices' &&
-          path.last == 'revoke') {
-        final input = await _body(request);
-        if (input.length != 1 || input['operationId'] is! String)
-          throw const FormatException('Invalid device request');
-        await _devices.revoke(input['operationId'] as String, path[3]);
-        await reply(200, {'status': 'revoked', 'deviceId': path[3]});
-      } else if (request.method == 'GET' &&
-          request.uri.path == '/v1/owner/catalog') {
-        final classification = await _service.owner
-            .informationClassificationSnapshot();
-        await reply(200, {
-          'version': classification.version,
-          'summary': {
-            'records':
-                _service.owner.information.length +
-                _service.owner.credentials.length,
-            'pending': _service.owner.queryInbox(limit: 1).pendingCount,
-            'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
-          },
-          'directories': [
-            for (final d in _service.owner.directories)
-              {'id': d.id, 'name': d.name, 'parentId': d.parentId},
-          ],
-          'tags': [
-            for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
-          ],
-          'templates': builtinWorkspaceDefinitions.values.toList(),
-        });
-      } else if (request.method == 'GET' &&
-          request.uri.path == '/v1/owner/summaries') {
-        await reply(200, {
-          'items': [
-            for (final item in _service.owner.information)
-              {
-                ...informationToJson(item),
-                'fields': [],
-                if (item.layout != null)
-                  'layout': InformationLayout(
-                    typeId: item.layout!.typeId,
-                    snapshot: {
-                      if (item.layout!.snapshot['type'] != null)
-                        'type': item.layout!.snapshot['type'],
-                    },
-                    fieldIds: {},
-                  ).toJson(),
-              },
-          ],
-        });
-      } else if (request.method == 'GET' &&
-          path.length == 4 &&
-          path.take(3).join('/') == 'v1/owner/information') {
-        final item = _service.owner.information
-            .where((i) => i.id == path.last)
-            .firstOrNull;
-        await reply(
-          item == null ? 404 : 200,
-          item == null ? {'error': 'not_found'} : informationToJson(item),
-        );
-      } else if (request.method == 'GET' &&
-          request.uri.path == '/v1/owner/information') {
-        await reply(200, {
-          'items': _service.owner.information.map(informationToJson).toList(),
-        });
-      } else if (path.length == 4 &&
-          path.take(3).join('/') == 'v1/owner/operations' &&
-          request.method == 'GET') {
-        final receipt = await _service.owner.informationRecordReceipt(
-          path.last,
-        );
-        await reply(
-          receipt == null ? 404 : 200,
-          receipt?.toJson() ?? {'error': 'operation_not_found'},
-        );
-      } else if (path.length == 4 &&
-          path.take(3).join('/') == 'v1/owner/saves' &&
-          request.method == 'POST') {
-        final receipt = await _service.owner.saveInformationRecord(
-          path.last,
-          informationDraftFromJson(await _body(request)),
-        );
-        await reply(200, receipt.toJson());
-      } else {
-        await reply(404, {'error': 'not_found'});
-      }
-    } on AccessFailure catch (e) {
-      await reply(e.status == 'unauthorized' ? 401 : 409, {
-        'error': e.status,
-        'status': e.status,
-      });
-    } on CredentialUseFailure catch (e) {
-      await reply(400, e.toJson());
-    } on FormatException {
-      await reply(400, {'error': 'invalid_request'});
-    } on TypeError {
-      await reply(400, {'error': 'invalid_request'});
     } on Object {
-      // Never reflect field values, tokens, filesystem paths or exception text.
-      try {
-        await reply(500, {'error': 'service_failure'});
-      } on Object {
-        /* disconnected */
-      }
+      /* disconnected */
     }
   }
 }

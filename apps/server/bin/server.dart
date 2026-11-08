@@ -27,13 +27,13 @@ Future<void> main(List<String> args) async {
       config.dataDirectory,
       MountedDatabaseKeyStore(config.databaseKeyFile),
     );
-    final service = InformationService(repository: repository);
+    final runtime = await OnlineInformationRuntime.open(repository: repository);
     OnlineServer? server;
     StreamSubscription<ProcessSignal>? interrupt, terminate;
     try {
       server = await OnlineServer.start(
         devices: AgentDeviceRegistry(repository),
-        service: service,
+        runtime: runtime,
         tls: config.tls,
         ownerToken: config.ownerToken,
         serverId: config.serverId,
@@ -60,7 +60,7 @@ Future<void> main(List<String> args) async {
       await interrupt?.cancel();
       await terminate?.cancel();
       await server?.close();
-      await service.close();
+      await runtime.close();
       await repository.close();
     }
   } on StorageFailure catch (error) {
