@@ -351,7 +351,7 @@ void main() {
             .onPressed,
         isNull,
       );
-      await t.ensureVisible(find.text('当前 ED25519 指纹'));
+      await t.ensureVisible(find.text('当前公钥指纹'));
       await t.pumpAndSettle();
       await capture(t, 'hosts-1280-dark-200-changed');
       await tap(t, find.byKey(const ValueKey('host-acknowledge-change')));

@@ -8,6 +8,8 @@ import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/online_server.dart';
 import 'package:info_server/server_configuration.dart';
 import 'package:info_storage/info_storage.dart';
+import 'package:info_workspace/host_transport.dart';
+import 'package:info_workspace/workspace_source.dart';
 import 'tls_fixture.dart';
 
 class DeviceCredentialFixture {
@@ -30,6 +32,33 @@ class DeviceCredentialFixture {
   HttpServer? proxy;
   HttpClient? upstream;
   int claimPosts = 0;
+  Future<void> importHostTrust(List<int> bytes) async {
+    final upload = await owner.request('POST', '/v1/owner/ssh-hosts/inputs', {
+      'version': 1,
+      'operationId': 'fixture-ssh-trust',
+      'name': 'synthetic-known_hosts',
+      'bytes': base64Encode(bytes),
+    });
+    final file = hostFileFromJson(upload['file']);
+    final preview = await owner.request(
+      'GET',
+      '/v1/owner/ssh-hosts/previews/${file.selectionId}',
+    );
+    final change = WorkspaceHostImportChange(
+      'fixture-import-ssh-trust',
+      hostImportPreviewFromJson(preview['preview']),
+    );
+    final receipt = hostImportReceiptFromJson(
+      await owner.request(
+        'POST',
+        '/v1/owner/ssh-hosts/imports',
+        hostImportChangeToJson(change),
+      ),
+    );
+    if (!receipt.matches(change))
+      throw StateError('Synthetic SSH trust receipt mismatch');
+  }
+
   static Future<DeviceCredentialFixture> create({
     bool loseFirstClaim = false,
   }) async {

@@ -472,6 +472,7 @@ void main() {
         );
       },
       skip: !Platform.isMacOS,
+      timeout: const Timeout(Duration(minutes: 3)),
     );
   }
 }

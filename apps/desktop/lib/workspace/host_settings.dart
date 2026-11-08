@@ -472,7 +472,7 @@ class _HostDialogState extends State<_HostDialog> {
               _fact('服务器', h.name),
               _fact('连接地址', h.endpoint?.label ?? '地址或端口不完整'),
               _fact('当前状态', h.state.label),
-              _fact('当前 ED25519 指纹', h.fingerprint ?? '尚未取得指纹，不能确认主机。'),
+              _fact('当前公钥指纹', h.fingerprint ?? '尚未取得指纹，不能确认主机。'),
               if (h.trustedFingerprint != null)
                 _fact('已确认的指纹', h.trustedFingerprint!),
               if (h.state == WorkspaceHostState.changed) ...[

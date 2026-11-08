@@ -73,11 +73,11 @@ class OwnerCredentialUseProjection {
         arguments: p.argv.map(
           (v) => switch (v.kind) {
             core.LaunchValueKind.literal => v.value,
-            core.LaunchValueKind.file => '〈已批准普通文件〉',
+            core.LaunchValueKind.file => '〈凭据文件〉',
             _ => '〈托管材料〉',
           },
         ),
-        binding: p.env.keys.join('、'),
+        binding: p.receiver == 'ssh_identity' ? '-i' : p.env.keys.join('、'),
       );
   WorkspaceCredentialUseRequest request(core.CredentialUseRequest r) {
     final c = owner.credentials
