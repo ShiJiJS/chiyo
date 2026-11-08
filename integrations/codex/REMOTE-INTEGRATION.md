@@ -14,6 +14,8 @@ info-prepare-codex --connection <App显示的连接配置路径> <新的稳定�
 
 模板插件仍在正常 App「设置 → 插件」选择 JSON、核对预览后安装。安装、更新、启停或移除后的下一次 CLI `plugin-list`、`template-list` 和 `template-read` 直接查询服务器，不复制模板清单到 Skill。模板返回字段格式、关联说明和填写例子；使用实际查询到的模板 ID，停用后不能继续新建，已有资料保留原来的类型和内容。模板查询和提案保存是不同能力：只有 capabilities 声明录入能力时才提交提案，当前未接通的能力不能当作已保存。
 
+当前已接文字资料的 `import-submit`、`import-revise`、`import-status` 和 `update-submit`、`update-revise`、`update-status`。使用稳定的 operationId；提交只产生待核对提案，用户在 App「录入提案」预览并一次保存。相互引用的多条资料在同一份提案里一起入库。App 关闭时仍能提交，重开后处理；状态以服务器返回为准，不能把 pending 或 approved_awaiting_admission 说成保存成功。文件和凭据录入仍需核对各自 capabilities，缺少能力时暂缓该整份提案，不省略材料继续保存。
+
 App 关闭后 CLI 仍直接连接服务器。服务器普通维护不单独结束有效许可，重开后沿用原聊天、原批准字段和原到期时间；根聊天结束、撤销或到期后不能继续新访问。配置文件更新只影响以后首次连接的聊天，已有聊天和结束通知保留原设备与服务器配置。
 
 首次接入失败时先检查服务器地址、证书和设备是否被撤销，不关闭证书校验，不恢复为旧的本机端口接入。确需更换设备配置时在 App 重新生成，既有聊天不会被静默迁移或续期。当前端到端验收范围见 [执行记录](../../docs/planning/server-multidevice/execution.md)；另一台电脑及跨端提醒分别留 #104/#105。

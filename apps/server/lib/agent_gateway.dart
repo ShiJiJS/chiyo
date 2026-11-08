@@ -26,6 +26,12 @@ final class AgentGateway {
     '/cancel',
     '/status',
     '/claim',
+    '/import/submit',
+    '/import/revise',
+    '/import/status',
+    '/update/submit',
+    '/update/revise',
+    '/update/status',
   };
 
   Future<Map<String, Object?>> dispatch(
@@ -64,6 +70,27 @@ final class AgentGateway {
       throw const AccessFailure('unsupported_capability');
     }
     final device = await _devices.authorize(bearer, capabilities: capabilities);
+    // Files and credentials use dedicated delivery paths in #97/#98. Until
+    // connected, refuse the whole submission rather than omit these materials.
+    if (path == '/import/submit' || path == '/import/revise') {
+      final items = body['items'];
+      if (items is List) {
+        for (final item in items.whereType<Map>()) {
+          if (item['credential'] != null ||
+              item['attachments'] is List &&
+                  (item['attachments'] as List).isNotEmpty) {
+            throw const AccessFailure('unsupported_capability');
+          }
+        }
+      }
+    } else if (path == '/update/submit' || path == '/update/revise') {
+      final input = body['update'];
+      if (input is Map &&
+          input['attachments'] is List &&
+          (input['attachments'] as List).isNotEmpty) {
+        throw const AccessFailure('unsupported_capability');
+      }
+    }
     final result = await _protocol.dispatch(path, body);
     final minted = <AgentDeviceCapability>[
       if (_open.contains(path)) ...[
@@ -87,11 +114,17 @@ final class AgentGateway {
       return {
         ...result,
         // Advertise only commands actually connected to this online gateway.
-        // Proposals, files and credentials follow their own tickets.
+        // Files and credentials follow their own tickets.
         'capabilities': [
           'information-request-operations.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
+          'information-import-operations.v1',
+          'information-update-operations.v1',
+          if ((result['capabilities'] as List).contains(
+            'information-import-admission.v1',
+          ))
+            'information-import-admission.v1',
           if ((result['capabilities'] as List).contains(
             'information-template-discovery.v1',
           ))

@@ -7,6 +7,8 @@ import 'workspace_order.dart';
 import 'unavailable_workspace_sources.dart';
 import 'remote_workspace_approvals.dart';
 import 'remote_workspace_plugins.dart';
+import 'remote_workspace_proposals.dart';
+import 'remote_workspace_relations.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -15,6 +17,15 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   RemoteWorkspaceSource(this.client)
     : _observation = client.initialWorkspaceObservation;
   final OwnerClient client;
+  @override
+  late final WorkspaceProposalSource proposals = RemoteWorkspaceProposals(
+    client,
+    changed: notifyConnectionChanged,
+  );
+  @override
+  Future<WorkspaceResults> queryRelationCandidates(
+    WorkspaceRelationQuery query,
+  ) => RemoteWorkspaceRelations(client).queryRelationCandidates(query);
   @override
   late final RemoteWorkspacePlugins plugins = RemoteWorkspacePlugins(
     client,

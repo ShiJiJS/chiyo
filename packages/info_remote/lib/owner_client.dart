@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:info_core/info_core.dart';
 
 final class RemoteFailure implements Exception {
-  const RemoteFailure(this.code);
+  const RemoteFailure(this.code, {this.fieldErrors = const {}});
   final String code;
+  final Map<String, String> fieldErrors;
   @override
   String toString() => 'RemoteFailure($code)';
 }
@@ -105,7 +106,14 @@ final class OwnerClient {
       }
       final value = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
       if (response.statusCode != 200) {
-        throw RemoteFailure(value['error'] as String? ?? 'service_failure');
+        throw RemoteFailure(
+          value['error'] as String? ?? 'service_failure',
+          fieldErrors: value['fieldErrors'] == null
+              ? const {}
+              : Map<String, String>.unmodifiable(
+                  (value['fieldErrors'] as Map).cast<String, String>(),
+                ),
+        );
       }
       return value;
     } on HandshakeException {

@@ -164,7 +164,8 @@ void main() {
           (await cli.execute({'command': 'capabilities'}))['capabilities']
               as List;
       expect(caps, contains('information-template-discovery.v1'));
-      expect(caps, isNot(contains('information-import-admission.v1')));
+      expect(caps, contains('information-import-admission.v1'));
+      expect(caps, isNot(contains('credential-import.v1')));
       final initial = await cli.execute({'command': 'template-list'});
       expect(
         (initial['templates'] as List).any((t) => t['id'] == 'file'),
@@ -254,8 +255,8 @@ void main() {
         'id': 'local.synthetic/note',
       }, first['definition']);
 
-      // Validate returned examples through the existing importer. Remote proposal
-      // submission is intentionally not advertised until #96 is implemented.
+      // Validate all returned examples through the existing importer. Remote
+      // files and credentials remain unadvertised until #97/#98 are connected.
       final protocol = AgentProtocol(runtime.service.agent);
       final session =
           (await runtime.run(
