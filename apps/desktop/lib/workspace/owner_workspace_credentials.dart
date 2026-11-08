@@ -1,3 +1,5 @@
+import 'package:info_workspace/owner_credential_type.dart';
+export 'package:info_workspace/owner_credential_type.dart';
 import 'owner_credential_use_projection.dart';
 import 'dart:async';
 import 'package:info_storage/info_storage.dart';
@@ -5,23 +7,6 @@ import 'owner_credential_staging.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
-
-WorkspaceType ownerCredentialType(core.ManagedCredential credential) {
-  final snapshot = credential.template?.snapshot;
-  final type = snapshot?['type'] as Map?;
-  final config = (snapshot?['definition'] as Map?)?['credential'] as Map?;
-  final name = switch (config?['secretKind']) {
-    'accountPassword' => '账号密码',
-    'token' => 'API Key / Token',
-    'file' => '凭据文件',
-    _ => '凭据',
-  };
-  return WorkspaceType(
-    credential.template?.typeId ?? 'credential',
-    type?['name'] as String? ?? name,
-    'key',
-  );
-}
 
 String ownerCredentialRecycleId(String id, int revision) =>
     'credential_${id}_$revision';
