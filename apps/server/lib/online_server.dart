@@ -24,6 +24,7 @@ import 'owner_credential_routes.dart';
 import 'owner_host_routes.dart';
 import 'owner_history_routes.dart';
 import 'owner_backup_routes.dart';
+import 'owner_adoption_routes.dart';
 import 'package:info_storage/info_storage.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
@@ -114,6 +115,9 @@ final class OnlineServer {
   OwnerLibraryRoutes get _libraryRoutes =>
       _libraryRoutesValue ??= OwnerLibraryRoutes(_library);
   OwnerHistoryRoutes? _historyRoutesValue;
+  OwnerAdoptionRoutes? _adoptionRoutesValue;
+  OwnerAdoptionRoutes get _adoptionRoutes =>
+      _adoptionRoutesValue ??= OwnerAdoptionRoutes(_library);
   OwnerHistoryRoutes get _historyRoutes =>
       _historyRoutesValue ??= OwnerHistoryRoutes(_library);
   OwnerFileRoutes? _files;
@@ -137,6 +141,8 @@ final class OnlineServer {
     _credentials?.dispose();
     _hosts?.dispose();
     _plugins.dispose();
+    _adoptionRoutesValue?.dispose();
+    _adoptionRoutesValue = null;
     _files = null;
     _credentials = null;
     _hosts = null;
@@ -221,6 +227,7 @@ final class OnlineServer {
       _credentials?.dispose();
       _hosts?.dispose();
       _plugins.dispose();
+      _adoptionRoutesValue?.dispose();
     }
   }
 
@@ -419,6 +426,14 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/adoption') {
+          final (code, value) = await _adoptionRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/backups') {
           final backups = _backups;

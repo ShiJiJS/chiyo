@@ -26,6 +26,7 @@ import 'remote_workspace_file_actions.dart';
 import 'remote_workspace_hosts.dart';
 import 'remote_workspace_history.dart';
 import 'remote_workspace_backups.dart';
+import 'package:info_workspace/adoption_transport.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -306,8 +307,25 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
           'server_changed',
           '服务器已变化，请重新确认连接。',
         ),
-        'version_conflict' || 'information_conflict' || 'operation_conflict' =>
-          const WorkspaceFailure('conflict', '资料已变化，请重新读取后再修改。'),
+        'version_conflict' ||
+        'information_conflict' ||
+        'operation_conflict' ||
+        'template_changed' => const WorkspaceFailure(
+          'conflict',
+          '资料已变化，请重新读取后再修改。',
+        ),
+        'preview_expired' => const WorkspaceFailure(
+          'preview_expired',
+          '预览已关闭或服务已重开，请重新预览。',
+        ),
+        'preview_busy' => const WorkspaceFailure(
+          'preview_busy',
+          '待核对的模板预览过多，请先关闭已有预览。',
+        ),
+        'template_unavailable' => const WorkspaceFailure(
+          'template_unavailable',
+          '目标模板已停用或移除，请重新选择。',
+        ),
         'conflict' || 'selection_expired' || 'validation' => WorkspaceFailure(
           e.code,
           e.code == 'selection_expired' ? '附件选择已失效，请重新选择。' : '资料或模板已变化，请重新核对。',
@@ -381,6 +399,62 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
       throw const WorkspaceFailure('not_found', '模板不可用，请重新读取。');
     }
     return definition;
+  });
+
+  @override
+  Future<WorkspaceAdoptionPreview> previewAdoption(
+    WorkspaceAdoptionDraft draft,
+  ) => _remote(
+    () async => adoptionPreviewFromJson(
+      await client.request(
+        'POST',
+        '/v1/owner/adoption/previews',
+        adoptionDraftToJson(draft),
+      ),
+    ),
+  );
+  @override
+  Future<void> releaseAdoption(String planId) => _remote(() async {
+    await client.request(
+      'DELETE',
+      '/v1/owner/adoption/previews/${Uri.encodeComponent(planId)}',
+    );
+  });
+  @override
+  Future<WorkspaceRecordReceipt> applyAdoption(
+    String operationId,
+    String planId,
+  ) => _remote(() async {
+    WorkspaceRecordReceipt receipt;
+    try {
+      receipt = adoptionReceiptFromJson(
+        await client.request('POST', '/v1/owner/adoption/changes', {
+          'wireVersion': 1,
+          'operationId': operationId,
+          'planId': planId,
+        }),
+      );
+    } on RemoteFailure catch (e) {
+      if (const {
+        'unauthorized',
+        'invalid_request',
+        'validation',
+        'conflict',
+        'version_conflict',
+        'information_conflict',
+        'operation_conflict',
+        'preview_expired',
+        'template_changed',
+        'template_unavailable',
+      }.contains(e.code)) {
+        rethrow;
+      }
+      throw const WorkspaceFailure('unknown_outcome', '模板切换结果暂时无法确认，请核对原操作。');
+    } on Object {
+      throw const WorkspaceFailure('unknown_outcome', '模板切换结果暂时无法确认，请核对原操作。');
+    }
+    if (!_changes.isClosed) _changes.add(receipt.ref);
+    return receipt;
   });
 
   @override
@@ -615,12 +689,17 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     return WorkspaceOperationReceipt(
       operationId: r.operationId,
       intent: WorkspaceOperationIntent(
-        kind: r.baseVersion == null
+        kind: command.adoptionPlanId != null
+            ? WorkspaceOperationKind.adoptTemplate
+            : r.baseVersion == null
             ? WorkspaceOperationKind.create
             : WorkspaceOperationKind.edit,
         ref: r.baseVersion == null ? null : ref,
         typeId: command.typeId,
         expectedVersion: r.baseVersion,
+        planId: command.adoptionPlanId,
+        legacyTemplateId: command.legacyTemplateId,
+        legacyTemplateVersion: command.legacyTemplateVersion,
       ),
       result: WorkspaceRecordReceipt(ref: ref, version: r.version),
     );

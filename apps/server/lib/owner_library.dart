@@ -1,4 +1,5 @@
 import 'package:info_workspace/owner_file_stages.dart';
+import 'package:info_workspace/owner_workspace_adoption.dart';
 import 'package:info_workspace/owner_workspace_credentials.dart';
 import 'package:info_workspace/credential_transport.dart';
 import 'package:info_workspace/owner_workspace_classification.dart';
@@ -14,9 +15,11 @@ final class OnlineOwnerLibrary
     implements
         WorkspaceProposalLibrary,
         WorkspaceClassificationInformation,
-        OwnerFileInformation {
+        OwnerFileInformation,
+        WorkspaceAdoptionInformation {
   OnlineOwnerLibrary(this.owner, this.plugins)
     : _scope = owner.captureLibraryScope();
+  @override
   final core.OwnerAccess owner;
   final OwnerWorkspaceTemplatePackages plugins;
   final core.OwnerLibraryScope _scope;
