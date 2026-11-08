@@ -1,3 +1,5 @@
+import 'package:info_workspace/owner_workspace_classification.dart'
+    show WorkspaceClassificationInformation;
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_workspace/owner_credential_type.dart';
 import 'package:info_workspace/owner_workspace_relation_queries.dart';
@@ -7,13 +9,16 @@ import 'package:info_workspace/workspace_source.dart';
 
 /// Trusted owner projections used by proposal review and relation pickers.
 /// The encrypted library remains on the host; this owns no desktop or cache.
-final class OnlineOwnerLibrary implements WorkspaceProposalLibrary {
+final class OnlineOwnerLibrary
+    implements WorkspaceProposalLibrary, WorkspaceClassificationInformation {
   OnlineOwnerLibrary(this.owner, this.plugins)
     : _scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
   final OwnerWorkspaceTemplatePackages plugins;
   final core.OwnerLibraryScope _scope;
   final _codec = WorkspaceInformationCodec();
+  @override
+  Map<String, Map<String, Object?>> get templates => plugins.templates;
   void _check() {
     if (!_scope.isCurrent || !owner.serviceAvailable) {
       throw const WorkspaceFailure('library_changed', '资料库已变化，请重新连接。');
