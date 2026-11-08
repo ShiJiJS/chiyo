@@ -324,6 +324,10 @@ final class DeviceInformationFiles {
             _digest('${profile.serverId}\n${profile.deviceToken}\n$session')) {
       return _public(response);
     }
+    bool cleaned(Map value) =>
+        value['lease'] == null &&
+        {'released', 'expired'}.contains(value['phase']);
+    if (cleaned(record)) return _public(response);
     if (record['workerPid'] is int &&
         record['workerIdentity'] is String &&
         CredentialProcessIdentity.isActive(
@@ -334,7 +338,22 @@ final class DeviceInformationFiles {
       await _recoverDead(file, record);
       return _public(response);
     }
-    return _public(await _control(record, 'release', {}));
+    final result = await _control(record, 'release', {});
+    if (result['status'] != 'ok') {
+      // The periodic guardian may finish cleanup and close its control socket
+      // between the server release and this request. Only its original,
+      // acknowledged terminal journal can resolve that race as successful.
+      final latest = await _read(file);
+      if (latest != null &&
+          latest['scope'] == record['scope'] &&
+          latest['manifest'] is Map &&
+          record['manifest'] is Map &&
+          _sameManifest(latest['manifest'] as Map, record['manifest'] as Map) &&
+          cleaned(latest)) {
+        return _public(response);
+      }
+    }
+    return _public(result);
   }
 
   Future<Map<String, dynamic>> _start(
