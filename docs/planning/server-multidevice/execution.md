@@ -513,3 +513,5 @@ RemoteWorkspaceBackups接原WorkspaceBackupSource、BackupController/Page与输�
 最新相关 App 31 项通过，Mac 服务 6 项、Linux ARM64 同组 6 项通过且无跳过，相关分析无问题。所有测试会话结束。详见 docs/development/evidence/server-a12/adoption.md。新 server integration 组可用 local/server-first-stage/run-a12-adoption-linux.py 重跑；挂载当前 lib/test 到现有 a05 验证镜像及固定真实 SQLCipher，这不是最终候选镜像。
 
 下一步接设置：先读 core 的 desktop_preferences.dart、owner_workspace_settings.dart、settings_controller.dart 及原设置页面；复用原请求期限、历史保留和清理逻辑，但本机外观/通知/后台偏好不写入共享服务器。当前原 DesktopPreferences 把这些值放一个版本/保存事务里，联网需要明确的设备适配及原操作核对；不要用第二份本机资料库或只提供固定默认值。之后接运行/窗口/退出与设备/会话只读状态，不能把独立服务停掉或操作别台设备的进程。最后才做统一候选和获准的 fork-none Agent。
+
+模板转换阶段实现 7243f555 已推送；GitHub #102 评论 6726223028 已发布并重新加载核实正文/提交/持久评论锚点，#102 仍为 Open。工作页 20/p1 保持在 #102，未结束整个目标。测试/分析会话都已结束；当前没有等待用户或外部进程的阻塞。

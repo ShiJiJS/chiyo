@@ -29,3 +29,5 @@
 ## 接下来
 
 设置、应用运行/原生桌面和 Agent 接入观察仍需要接通。随后构建同一源码的正式候选、连续试用全部功能，再做无上下文独立 Agent 试用。当前模块通过不等于 #102 整票完成，更不等于真实安装或跨电脑交付；#103–#105 不动。
+
+实现 `7243f555` 已推送 `codex/server-first-stage`；[GitHub 阶段评论](https://github.com/ShiJiJS/chiyo/issues/102#issuecomment-6726223028) 已发布并重新加载回读，#102 仍为 Open。
