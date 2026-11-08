@@ -1,29 +1,36 @@
 # 服务端首轮开发接续
 
-## 范围与当前任务
+## 当前范围与任务
 
-用户已启动持续开发目标：完成 #91–#102 及自动测试和统一候选；#103–#105 不动。独立分支 codex/server-first-stage，真实资料与正式 App 保持原状。
+持续目标 #91–#102，#103–#105 后置。分支 codex/server-first-stage。当前 #91 已完成并已在 GitHub 写回测试结果、关闭；下一任务为 #92 App 连接服务器。真实资料、正式 App 与个人钥匙串未操作。
 
-当前 #91 **进行中，尚未完成**，其他票尚未开始。GitHub #91–#102 已重新读取正文、活动/评论、标签；本地公开页面文本在忽略目录 local/server-first-stage/tracker。后续写回进度继续使用 ego-browser 的 TaskSpace **443 / p1**；该空间仍属于本持续目标，没有 finish，不新开空间恢复。浏览器提示有更新，本轮不升级。
+浏览器沿用 TaskSpace **443 / p1**，该空间仍属于整个持续目标，未 finish。不要新开空间恢复。工单当前文本与活动读取材料在忽略目录 local/server-first-stage/tracker。
 
-## 已有代码及证据
+## #91 已有实现
 
-- 新增 apps/server，复用 info_core、info_storage 和真实 SQLCipher；没有改动核心业务规则。
-- MountedDatabaseKeyStore 只读取已独立提供的 32 字节密钥，不自动创建/替换密钥；拒绝符号链接、不合法长度及宽松权限。丢失或错误密钥时原库字节保持。
-- OnlineServer 使用 HTTPS，用户 Token 与其他调用身份分离；提供服务身份、文字资料列表、按操作编号保存/查询回执。复用核心持久回执，同一请求重试不重复保存，输入不同返回冲突。该接口尚未代替完整 Agent 接入。
-- Mac Dart 3.13.5：5 项测试通过，lib/test 静态分析无问题。
-- Docker Linux ARM64：同一包 5 项测试通过，实际 SQLCipher 存储、TLS 请求及宿主关闭重开均执行。测试镜像 chiyo-server-verification:a01；Dockerfile 目前仅是验收镜像，不是最终服务发布镜像。
-- 测试从正常 Owner 保存接口写入，关闭 HTTPS、核心与库，再以新的 HttpClient 和重开的宿主取回。**还未验证整个独立进程或容器重建**，不能扩大完成结论。
-- 初次 Mac TLS 检查失败：同一自签证书兼任根和服务端证书不通过本机验证。已改为独立合成 CA 签发带 SAN/用途扩展的服务证书；未关闭证书验证或修改系统信任。无信任客户端仍拒绝连接。
+- apps/server/bin/server.dart：独立启动、正常关闭、一次性密钥/身份初始化；配置路径相对配置文件，秘密不写镜像/日志。
+- HTTPS 管理接口复用现有 Owner 保存、版本检查及持久回执；新增/修改、操作查询、响应丢失后去重、服务器身份均实际验证。尚未提供 Agent 协议；#93 接续受限接入，不能给 CLI 管理 Token。
+- Linux 与 Mac 只读挂载密钥，缺失/错误时拒绝并保持原库。TLS 由独立合成 CA 签发证书，正常校验及未信任时拒绝均通过；未改全局信任。
+- 为 Linux 补 renameat2 的 no-replace 文件发布；不覆盖已有文件、符号链接和空目录，不支持时拒绝。原 Windows/Mac 分支不变。
+- 最小备份通过现有单机 App 同一加密备份接口产生，在另一密钥的新库恢复；新服务接入 Token/身份独立。完整备份界面及全部类型仍属 #101。
 
-相关日志在 local/server-first-stage 的 macos-tests.log、linux-tests.log、analyze.log、docker-build.log；测试临时库和证书由测试清理，不包含个人资料。
+## 证据与实际范围
+
+- Mac 服务包 7 项通过，新增进程修改场景单项复验通过；服务 bin/lib/test 静态分析无问题。
+- Linux ARM64 容器服务包最终 7 项通过；核心文件发布专项另 1 项通过。Mac 同项专项 1 项与其静态分析通过。
+- scripts/qa/check-server-container.py 实际删除首个容器，用原持久目录创建另一个容器：资料、服务器身份、回执保持，同一写入重试仍只有一条，TLS 验证开启。脚本正常结束，所属容器与临时目录已回收。
+- 独立服务进程实际经历启动、保存、退出、重新启动、查询及修改；不是仅在同进程重新建对象。
+- 初次 Linux 备份失败真实发现平台缺口，已修复 no-replace 发布并复验通过，不把首次结果写作全绿。
+- 初次 TLS 合成证书在 Mac 上失败，改为独立 CA 与服务证书后通过，未放宽证书校验。
+
+日志在 local/server-first-stage 下的 macos-tests.log、process-tests.log、linux-tests.log、linux-publication.log、container-recreation.log、docker-build.log、analyze.log。仅用合成资料；没有真实资料或生产密钥。Dockerfile 目前是验收镜像，不是 #102 最终发布。
 
 ## 下一步
 
-1. 为 #91 补独立无界面启动入口和明确的配置/秘密挂载流程。密钥、用户接入身份、服务器身份与镜像分开，禁止启动时覆盖丢失的旧密钥。
-2. 把当前 HTTPS 场景升级为独立服务进程及容器数据卷重建验证，并实现最小备份恢复/旧格式合成导入。补用户与 Agent 接入身份的明确契约，不能把用户 Token 交给 CLI。
-3. #91 验收全部达到后记录提交及证据、更新 GitHub，再接 #92 的正常 App 入口。按真实依赖连续推进，保留首轮全部范围。
+1. 从 #92 正常 App 的 WorkspaceSource 接口接远程数据、连接配置及空白客户端拉取。当前 OwnerWorkspaceSource 直接持有 OwnerAccess；WorkspaceSource 已有稳定界面边界，应新增远程实现并保持现有展示/编辑器。main.dart 当前仍创建本地 DesktopBootstrap，需要在测试隔离的新入口接入，最终 #102 统一为服务器模式。
+2. 接入方式与核心规则见 apps/server/README.md；App 必须保持正常界面和模板逻辑，不先做新的演示界面。新版最终只走服务器，开发期间不替换日常安装。
+3. 按真实依赖推进 #93 与 #94；新 Agent 无上下文试用按 #93/#102 安排。后置事项不得变成首轮阻塞，也不能将首轮功能缺陷任意后移。
 
-## 交付状态
+## 整体状态
 
-当前没有正式预览包，也没有安装或真实迁移。完整完成标准仍是 #91–#102 正文，不能以当前几个通过的测试替代。当前轮取得实际代码与运行证据，目标保持 active。
+仅 #91 达到当前阶段条件。#92–#102 未完成，没有正式预览包、正式安装或真实迁移。完整目标保持 active。
