@@ -74,8 +74,29 @@ final class BackupExportSummary {
 /// Owner-only manual backup capability. It is never part of the agent server.
 /// All supported payload versions use the existing SQLCipher 4 envelope.
 class InformationBackups {
-  InformationBackups._(this._repository);
-  final EncryptedInformationRepository _repository;
+  InformationBackups._(EncryptedInformationRepository repository)
+    : _repositoryValue = repository,
+      _db = repository._db,
+      _isClosed = (() => repository._closed),
+      _preparedVerifier = null;
+
+  /// Device publication uses the original journal/state machine and native
+  /// publisher, but has no information repository, recovery key or snapshots.
+  InformationBackups._device(this._db, this._isClosed, this._preparedVerifier)
+    : _repositoryValue = null;
+  final EncryptedInformationRepository? _repositoryValue;
+  EncryptedInformationRepository get _repository =>
+      _repositoryValue ??
+      (throw const StorageFailure('unsupported_capability'));
+  final GeneratedDatabase _db;
+  final bool Function() _isClosed;
+  final Future<Map<String, int>> Function(
+    String id,
+    BackupOutputAction action,
+    String commandDigest,
+    MacBackupPublication publication,
+  )?
+  _preparedVerifier;
   final _preparedBackupOutputs = <String>{};
   final _activeBackupOutputs = <String>{};
   static const _keyPrefix = 'aim-recovery-v1:';
@@ -177,7 +198,7 @@ class InformationBackups {
   };
 
   void _checkOpen() {
-    if (_repository._closed) throw const StorageFailure('library_closed');
+    if (_isClosed()) throw const StorageFailure('library_closed');
   }
 
   /// The key is stored only inside the local encrypted database, separately

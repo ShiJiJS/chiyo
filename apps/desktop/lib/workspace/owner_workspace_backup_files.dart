@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:info_core/info_core.dart'
-    show OwnerAccess, OwnerLibraryScope, OwnerInbox;
+import 'package:info_core/info_core.dart' show OwnerAccess, OwnerInbox;
 import '../backups.dart';
 import 'workspace_source.dart';
 
@@ -12,12 +11,27 @@ class OwnerWorkspaceBackupFiles {
   OwnerWorkspaceBackupFiles({
     required OwnerAccess owner,
     BackupFilePicker picker = const NativeBackupFilePicker(),
-  }) : _owner = owner,
-       _scope = owner.captureLibraryScope(),
+  }) : _checkBinding = _binding(owner),
+       _picker = picker;
+  OwnerWorkspaceBackupFiles.remote({
+    required void Function() checkBinding,
+    BackupFilePicker picker = const NativeBackupFilePicker(),
+  }) : _checkBinding = checkBinding,
        _picker = picker;
 
-  final OwnerAccess _owner;
-  final OwnerLibraryScope _scope;
+  final void Function() _checkBinding;
+  static void Function() _binding(OwnerAccess owner) {
+    final scope = owner.captureLibraryScope();
+    return () {
+      if (!scope.isCurrent) {
+        throw const WorkspaceFailure('library_changed', '资料库已更换，请重新选择备份文件。');
+      }
+      if (!owner.serviceAvailable) {
+        throw const WorkspaceFailure('unavailable', '信息库暂时不可用，请稍后重试。');
+      }
+    };
+  }
+
   final BackupFilePicker _picker;
   final _random = Random.secure();
   final _selected =
@@ -31,12 +45,11 @@ class OwnerWorkspaceBackupFiles {
     if (_closed) {
       throw const WorkspaceFailure('unavailable', '此备份窗口已关闭，请重新打开。');
     }
-    if (!_scope.isCurrent) {
-      _selected.clear();
-      throw const WorkspaceFailure('library_changed', '资料库已更换，请重新选择备份文件。');
-    }
-    if (!_owner.serviceAvailable) {
-      throw const WorkspaceFailure('unavailable', '信息库暂时不可用，请稍后重试。');
+    try {
+      _checkBinding();
+    } on WorkspaceFailure catch (e) {
+      if (e.code == 'library_changed') _selected.clear();
+      rethrow;
     }
   }
 
@@ -112,4 +125,6 @@ class OwnerWorkspaceBackupFiles {
     _closed = true;
     _selected.clear();
   }
+
+  void clear() => _selected.clear();
 }

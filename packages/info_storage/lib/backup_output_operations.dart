@@ -110,7 +110,7 @@ extension BackupOutputOperations on InformationBackups {
     if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(id)) {
       throw const StorageFailure('invalid_backup_operation');
     }
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           'SELECT payload,invalidated FROM backup_operations WHERE operation_id=?',
           variables: [Variable(id)],
@@ -229,9 +229,7 @@ extension BackupOutputOperations on InformationBackups {
     return _decodeOutput(value);
   }
 
-  Future<void> _writeOutput(
-    _BackupOutputRecord value,
-  ) => _repository._db.customStatement(
+  Future<void> _writeOutput(_BackupOutputRecord value) => _db.customStatement(
     'UPDATE backup_operations SET payload=? WHERE operation_id=? AND invalidated=0',
     [jsonEncode(value.toPrivateJson()), value.id],
   );
@@ -299,7 +297,7 @@ extension BackupOutputOperations on InformationBackups {
   }) async {
     _checkOpen();
     _validateKeyOperation(operationId, commandDigest, expectedVersion);
-    final created = await _repository._db.transaction(() async {
+    final created = await _db.transaction(() async {
       final previous = await _outputRecord(operationId);
       if (previous != null) {
         if (previous.digest != commandDigest ||
@@ -320,16 +318,26 @@ extension BackupOutputOperations on InformationBackups {
         action,
         publication,
       );
-      final key = await recoveryKey();
-      if (key == null) throw const StorageFailure('backup_not_enabled');
       MacBackupPublicationFiles.verifyPrepared(publication);
       late Map<String, int> counts;
-      if (action == BackupOutputAction.saveKey) {
+      final deviceVerifier = _preparedVerifier;
+      if (deviceVerifier != null) {
+        counts = await deviceVerifier(
+          operationId,
+          action,
+          commandDigest,
+          publication,
+        );
+      } else if (action == BackupOutputAction.saveKey) {
+        final key = await recoveryKey();
+        if (key == null) throw const StorageFailure('backup_not_enabled');
         if (await readRecoveryKeyFrom(publication.source) != key) {
           throw const StorageFailure('invalid_recovery_key');
         }
         counts = const {};
       } else {
+        final key = await recoveryKey();
+        if (key == null) throw const StorageFailure('backup_not_enabled');
         if (!await recoveryKeySaved())
           throw const StorageFailure('recovery_key_not_saved');
         counts = _outputCounts(await inspect(publication.source, key));
@@ -344,7 +352,7 @@ extension BackupOutputOperations on InformationBackups {
         publication: publication,
         counts: counts,
       );
-      await _repository._db.customStatement(
+      await _db.customStatement(
         'INSERT INTO backup_operations(operation_id,payload) VALUES(?,?)',
         [operationId, jsonEncode(record.toPrivateJson())],
       );
@@ -356,7 +364,7 @@ extension BackupOutputOperations on InformationBackups {
 
   Future<BackupOutputReceipt> _finishOutput(
     String id,
-  ) => _repository._db.transaction(() async {
+  ) => _db.transaction(() async {
     final value = await _outputRecord(id);
     if (value == null) throw const StorageFailure('backup_operation_missing');
     if (value.phase == BackupOutputPhase.succeeded)
@@ -367,13 +375,23 @@ extension BackupOutputOperations on InformationBackups {
       throw const StorageFailure('backup_outcome_unknown');
     }
     if (value.action == BackupOutputAction.saveKey) {
-      if (await readRecoveryKeyFrom(value.publication.source) !=
-          await recoveryKey()) {
-        throw const StorageFailure('backup_outcome_unknown');
+      final deviceVerifier = _preparedVerifier;
+      if (deviceVerifier != null) {
+        await deviceVerifier(
+          value.id,
+          value.action,
+          value.digest,
+          value.publication,
+        );
+      } else {
+        if (await readRecoveryKeyFrom(value.publication.source) !=
+            await recoveryKey()) {
+          throw const StorageFailure('backup_outcome_unknown');
+        }
+        await _db.customStatement(
+          'UPDATE backup_configuration SET recovery_saved=1 WHERE singleton=1',
+        );
       }
-      await _repository._db.customStatement(
-        'UPDATE backup_configuration SET recovery_saved=1 WHERE singleton=1',
-      );
     }
     await _advanceOperationVersion();
     final completed = value.change(
@@ -399,7 +417,7 @@ extension BackupOutputOperations on InformationBackups {
         if (receipt != null) return receipt;
         throw const StorageFailure('backup_not_published');
       }
-      final value = await _repository._db.transaction(() async {
+      final value = await _db.transaction(() async {
         final record = await _outputRecord(id);
         if (record == null || record.phase != BackupOutputPhase.prepared) {
           throw const StorageFailure('backup_outcome_unknown');
@@ -413,7 +431,7 @@ extension BackupOutputOperations on InformationBackups {
         // flush_failed can occur AFTER rename. All other driver failures occur
         // before it; record that definite failure before reporting it as such.
         if (error.code != 'flush_failed') {
-          await _repository._db.transaction(() async {
+          await _db.transaction(() async {
             final current = await _outputRecord(id);
             if (current == null ||
                 current.phase != BackupOutputPhase.publishing) {
@@ -453,7 +471,7 @@ extension BackupOutputOperations on InformationBackups {
     if (value.phase == BackupOutputPhase.prepared) {
       // No process may publish until the publishing phase has committed. A
       // reconciled preparation is abandoned; resubmission needs a new intent.
-      await _repository._db.transaction(() async {
+      await _db.transaction(() async {
         final current = await _outputRecord(id);
         if (current == null || current.phase != BackupOutputPhase.prepared) {
           throw const StorageFailure('backup_outcome_unknown');
@@ -507,7 +525,7 @@ extension BackupOutputOperations on InformationBackups {
         throw const StorageFailure('backup_outcome_unknown');
       }
       MacBackupPublicationFiles.cleanup(value.publication);
-      await _repository._db.transaction(() async {
+      await _db.transaction(() async {
         final current = await _outputRecord(id);
         if (current == null || current.phase != value.phase)
           throw const StorageFailure('backup_outcome_unknown');
@@ -525,7 +543,7 @@ extension BackupOutputOperations on InformationBackups {
 
   Future<int> pendingOutputCleanupCount() async {
     _checkOpen();
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           "SELECT operation_id FROM backup_operations WHERE invalidated=0 AND operation_id NOT LIKE 'file-output:%' AND operation_id NOT LIKE 'file-open:%'",
         )

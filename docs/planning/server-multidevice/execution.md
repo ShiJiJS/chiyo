@@ -475,3 +475,15 @@ Mac最终新恢复/传输4项、原runtime7项通过；相关Mac用户回归9项
 **#101仍未完成，下一步App原生另存/恢复适配。** 当前客户端测试仅在隔离目录做普通文件IO，不能代表App正常文件发布：必须复用原Mac无覆盖发布器、私有原操作记录/书签和原BackupController及控件，持久记住设备端已保存而服务确认未明的操作；不能把服务器准备完成显示为本机已保存。输入路径和原生选择留设备，备份输入分块上传、密钥仅请求/预览内存。随后全类型联合、执行历史、实际进程中断及容器升级/回退；再接#102全部入口/统一候选/无上下文Agent。#103–#105未动。
 
 导出实现e8617d72已推送；GitHub #101阶段评论6725114684已发布、重新加载回读，仍Open。所有本轮测试/推送句柄终结，Docker无chiyo-a11运行容器。继续复用19/p1，未finish持续目标。客户端接续时先读DeviceFileOperations、InformationFileOutputs、WorkspaceFileActions及OwnerWorkspaceBackupFiles，避免将256MiB备份伪装为10MiB普通附件或另建本机资料库；本机只保留必要操作/发布记录，不把恢复密钥放偏好或日志。
+
+## #101 App 原备份控件与原生发布已接入
+
+RemoteWorkspaceBackups接原WorkspaceBackupSource、BackupController/Page与输入选择器。原OwnerWorkspaceBackupFiles共用选择登记，RemoteSource及OnlineDesktopLauncher正式入口已连好。输入文件留设备，分块上传；App不持有本机资料库。
+
+新增DeviceBackupOperations元数据记录：共用DeviceFileOperations的SQLCipher、锁、服务器绑定及私有密钥，新增版本2的backup_operation_state/device_backup_intents两张操作表，旧文件回执保留且绑定在迁移前核对。InformationBackups的操作/暂存函数改用同一db字段；完整资料功能仍要求真实Repository，设备上下文明确不支持。原prepare/publish/reconcile/书签/cleanup状态机全部复用，设备钩子只核对已固定的远程摘要/长度/统计；操作记录不保存恢复密钥或原文字节。服务器命令版本与设备原生版本分开。原生写入新增同一私有写入器的备份256MiB入口，普通附件10MiB不变，已实际验证18MiB发布。
+
+发现并修复原控制器source事件与写入最终刷新竞争，合并在途load并等待最新状态。实际正常App设置界面完成创建/另存密钥、导出、再接空服务器预览/恢复/回库；真HTTPS+SQLCipher+原Mac发布运行，文件面板替换为合成路径，没有computer use。丢恢复回复/失败查询/App及服务重开只查同一次原恢复；已发布密钥确认未知只补发确认，不重复写；已有输出、书签丢失、取消重选、原inode核对均通过。
+
+最终App相关34项通过（新控制器4+UI1+原检查29）；存储/原操作/原Mac发布62通过（含新7）；Linux服务/设备元数据14通过6项Mac原生跳过。相关分析无问题，详见server-a11 README及a11-app-backup-final-regression.log、a11-device-backup-shared-final-fixed.log、a11-device-journal-linux.log。早期import/非const测试构造与实际10MiB边界/刷新竞争失败未算通过。
+
+**#101仍未完成**：接续完整同一合成库逐项核对全部资料/文件及凭据版本、关联、目录标签排序、回收批次、插件/示例及#99真实执行历史；实际进程中断/合成回退；容器升级和数据/运行密钥恢复说明。现有workspace_backups_test有原始完整场景可参考，但不能把它单独当联网联合完成。正常App原生面板本体及人工项目留#103集中检查；#102候选/全入口/独立Agent仍待续，#103–#105未动。

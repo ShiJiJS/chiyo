@@ -131,14 +131,23 @@ final class DeviceFileOperations implements _FileOperationContext {
       );
       final version =
           native.select('PRAGMA user_version').single.values.single as int;
-      if (version > 1 ||
+      if (version > 2 ||
           tables.any(
             (r) => !const {
               'backup_operations',
               'device_file_scope',
+              'backup_operation_state',
+              'device_backup_intents',
             }.contains(r['name']),
           )) {
         throw const StorageFailure('unsupported_device_journal');
+      }
+      // Verify the binding before an additive migration touches an old journal.
+      if (version > 0) {
+        final scope = native.select('SELECT server_id FROM device_file_scope');
+        if (scope.length != 1 || scope.single['server_id'] != serverId) {
+          throw const StorageFailure('device_journal_scope_changed');
+        }
       }
       final database = _DeviceFileDatabase(NativeDatabase.opened(native));
       db = database;
@@ -222,7 +231,7 @@ final class _PrivateDeviceFileKey implements DatabaseKeyStore {
 final class _DeviceFileDatabase extends GeneratedDatabase {
   _DeviceFileDatabase(super.executor);
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
@@ -234,8 +243,21 @@ final class _DeviceFileDatabase extends GeneratedDatabase {
       await customStatement(
         'CREATE TABLE device_file_scope(singleton INTEGER PRIMARY KEY CHECK(singleton=1),server_id TEXT NOT NULL)',
       );
+      await _backupTables();
     },
-    onUpgrade: (_, _, _) async =>
-        throw const StorageFailure('unsupported_device_journal'),
+    onUpgrade: (_, from, to) async {
+      if (from != 1 || to != 2)
+        throw const StorageFailure('unsupported_device_journal');
+      await _backupTables();
+    },
   );
+  Future<void> _backupTables() async {
+    await customStatement(
+      'CREATE TABLE backup_operation_state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),version INTEGER NOT NULL CHECK(version>=1))',
+    );
+    await customStatement('INSERT INTO backup_operation_state VALUES(1,1)');
+    await customStatement(
+      'CREATE TABLE device_backup_intents(operation_id TEXT PRIMARY KEY,payload TEXT NOT NULL)',
+    );
+  }
 }

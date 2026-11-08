@@ -255,6 +255,22 @@ class MacBackupPublicationFiles {
     if (bytes.length > 10 * 1024 * 1024 || bytes.any((b) => b < 0 || b > 255)) {
       throw const BackupPublicationFailure('invalid_file_content');
     }
+    _writePrivate(path, bytes);
+  }
+
+  /// The received encrypted backup has the original container's 256 MiB cap,
+  /// independently of the ordinary attachment limit. The caller pins its
+  /// complete authenticated manifest before using the common publisher.
+  static void writeBackupFile(String path, List<int> bytes) {
+    if (bytes.length < 4096 ||
+        bytes.length > 256 * 1024 * 1024 ||
+        bytes.any((b) => b < 0 || b > 255)) {
+      throw const BackupPublicationFailure('invalid_backup_content');
+    }
+    _writePrivate(path, bytes);
+  }
+
+  static void _writePrivate(String path, List<int> bytes) {
     final (parent, name) = _MacFiles.path(path);
     final dir = _native.directory(parent, private: true);
     var fd = -1;

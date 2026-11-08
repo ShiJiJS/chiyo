@@ -12,6 +12,7 @@ class OwnerReplyProxy {
   final Uri Function() target;
   final String serverId;
   String? dropNextPath, failGetPrefix;
+  String? failPostPrefix, failPostsAfterDrop, failGetsAfterDrop;
   final requests = <String, int>{};
   Uri get address => Uri.parse('https://127.0.0.1:${server.port}');
   static Future<OwnerReplyProxy> start({
@@ -30,9 +31,12 @@ class OwnerReplyProxy {
     final key = '${incoming.method} $path';
     requests[key] = (requests[key] ?? 0) + 1;
     try {
-      if (incoming.method == 'GET' &&
-          failGetPrefix != null &&
-          path.startsWith(failGetPrefix!)) {
+      if ((incoming.method == 'GET' &&
+              failGetPrefix != null &&
+              path.startsWith(failGetPrefix!)) ||
+          (incoming.method == 'POST' &&
+              failPostPrefix != null &&
+              path.startsWith(failPostPrefix!))) {
         incoming.response.statusCode = 503;
         incoming.response.headers.set('x-chiyo-server-id', serverId);
         incoming.response.headers.contentType = ContentType.json;
@@ -57,6 +61,8 @@ class OwnerReplyProxy {
       final bytes = await response.fold<List<int>>([], (a, b) => a..addAll(b));
       if (path == dropNextPath) {
         dropNextPath = null;
+        if (failPostsAfterDrop != null) failPostPrefix = failPostsAfterDrop;
+        if (failGetsAfterDrop != null) failGetPrefix = failGetsAfterDrop;
         (await incoming.response.detachSocket(writeHeaders: false)).destroy();
         return;
       }

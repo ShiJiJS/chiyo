@@ -71,7 +71,7 @@ class WorkspaceBackupPage extends StatelessWidget {
                     ? '恢复密钥已另存，可导出备份。'
                     : v.keyCreated
                     ? '恢复密钥已创建，尚未另存；请先独立保存。'
-                    : '尚未创建恢复密钥。它与本机数据库密钥分开，换设备恢复需要它。',
+                    : '尚未创建恢复密钥。它独立于数据库密钥，恢复备份时需要它。',
                 control: DesktopButton(
                   key: const ValueKey('backup-open-key'),
                   onPressed: m.available
