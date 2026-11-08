@@ -544,3 +544,5 @@ RemoteWorkspaceSettings 复用 CLI 私有原子文件写入，仅保存非秘密
 最新 App 相关48项一次通过（联网设置10、原设置/运行/界面32、转换5、备份界面1）；Mac服务策略/转换6项通过。真实TLS/SQLCipher，含正常启动器原设置页面、丢回复和查失败后重开、本机原子发布失败及恢复、同设备旧草稿冲突、跨设备共享策略、准确清理确认失效与新确认。相关静态分析和diff检查通过。早期缺扩展导入及测试未等菜单回调的失败均保留、不计通过。
 
 #102仍Open。下一步必须补运行/桌面与Agent观察，随后同源候选和无上下文Agent完整试用。通知/后台选项已保存不等于其原生效果已验证。未替换日常App或访问个人钥匙串，未改真实资料或推进#103–#105。
+
+设置实现 c3b73660 已推送。GitHub评论6726776390已发布、刷新回读，#102仍Open，前置#101显示Completed。工作页20/p1继续保留，不逐阶段结束整个目标。运行适配应复用DesktopPlatform、原WorkspaceRuntimeController/Page和WorkspaceDesktop导航契约；旧DesktopRuntime/OwnerWorkspaceRuntime直接依赖本机InformationService并在退出停止服务，不能直接用于独立服务器模式或创建假本机库来适配。
