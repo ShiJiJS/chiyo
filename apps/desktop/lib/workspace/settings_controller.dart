@@ -75,10 +75,22 @@ class WorkspaceSettingsController extends ChangeNotifier {
     _notify();
     try {
       final result = await source.read();
+      final pending = source is WorkspaceSettingsRecovery
+          ? await (source as WorkspaceSettingsRecovery).pendingChange()
+          : null;
       if (_closed || generation != _generation || frozen) return;
       final keep = dirty;
       value = result;
-      if (!keep) draft = result;
+      if (pending != null) {
+        _command = pending;
+        draft = pending.desired;
+        writeFailure = const WorkspaceFailure(
+          'unknown_outcome',
+          '有上次设置保存需要核对，请先查看原操作结果。',
+        );
+      } else if (!keep) {
+        draft = result;
+      }
       onTheme(result.theme);
     } catch (error) {
       if (!_closed && generation == _generation) {
@@ -275,9 +287,17 @@ class WorkspaceSettingsController extends ChangeNotifier {
       } else {
         await _finished(_check(result));
       }
-    } catch (_) {
+    } catch (error) {
       if (!_closed) {
         busy = false;
+        if (error is WorkspaceFailure && error.code == 'library_changed') {
+          _command = null;
+          writeFailure = error;
+          draft = null;
+          await load();
+          _notify();
+          return;
+        }
         writeFailure = const WorkspaceFailure(
           'unknown_outcome',
           '仍无法确认原设置操作，请继续核对。',

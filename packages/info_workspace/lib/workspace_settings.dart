@@ -113,3 +113,9 @@ abstract interface class WorkspaceSettingsSource {
   Future<WorkspaceNotificationPreview> notificationPreview();
   Future<WorkspaceRetentionPreview> previewRetention(int days);
 }
+
+/// Restores an already submitted device operation after the App reopens. This
+/// grants no new save and never supplies a replacement operation identifier.
+abstract interface class WorkspaceSettingsRecovery {
+  Future<WorkspaceSettingsChange?> pendingChange();
+}

@@ -196,3 +196,92 @@ WorkspaceRetentionPreview retentionPreviewFromJson(Object? raw) {
     preserved: historyInt(b['preserved']),
   );
 }
+
+Map<String, Object?> preferencesToJson(WorkspacePreferences p) => {
+  'wireVersion': 1,
+  'version': p.version,
+  ...p.values,
+};
+WorkspacePreferences preferencesFromJson(Object? raw) {
+  final b = historyEnvelope(raw, [
+    'version',
+    'theme',
+    'notifications',
+    'requestMinutes',
+    'retentionDays',
+    'background',
+  ]);
+  if (b['notifications'] is! bool ||
+      b['background'] is! bool ||
+      !const ['light', 'dark'].contains(b['theme']) ||
+      !const [30, 90, 180, 365].contains(b['retentionDays']) ||
+      historyInt(b['requestMinutes'], min: 1) > 10080) {
+    throw const FormatException('Invalid device preferences');
+  }
+  return WorkspacePreferences(
+    version: historyInt(b['version'], min: 1),
+    theme: WorkspaceTheme.values.byName(b['theme'] as String),
+    notifications: b['notifications'] as bool,
+    background: b['background'] as bool,
+    requestMinutes: b['requestMinutes'] as int,
+    retentionDays: b['retentionDays'] as int,
+  );
+}
+
+Map<String, Object?> settingsChangeToJson(WorkspaceSettingsChange c) => {
+  'wireVersion': 1,
+  'operationId': c.operationId,
+  'expectedVersion': c.expectedVersion,
+  'desired': preferencesToJson(c.desired),
+  'retentionToken': c.retentionToken,
+};
+WorkspaceSettingsChange settingsChangeFromJson(Object? raw) {
+  final b = historyEnvelope(raw, [
+    'operationId',
+    'expectedVersion',
+    'desired',
+    'retentionToken',
+  ]);
+  final desired = preferencesFromJson(b['desired']);
+  final expected = historyInt(b['expectedVersion'], min: 1);
+  if (desired.version != expected) {
+    throw const FormatException('Invalid settings intent');
+  }
+  return WorkspaceSettingsChange(
+    operationId: policyOperationId(b['operationId']),
+    expectedVersion: expected,
+    desired: desired,
+    retentionToken: b['retentionToken'] == null
+        ? null
+        : historyText(b['retentionToken']),
+  );
+}
+
+Map<String, Object?> settingsReceiptToJson(WorkspaceSettingsReceipt r) => {
+  'wireVersion': 1,
+  'operationId': r.operationId,
+  'commandDigest': r.commandDigest,
+  'expectedVersion': r.expectedVersion,
+  'preferences': preferencesToJson(r.preferences),
+};
+WorkspaceSettingsReceipt settingsReceiptFromJson(Object? raw) {
+  final b = historyEnvelope(raw, [
+    'operationId',
+    'commandDigest',
+    'expectedVersion',
+    'preferences',
+  ]);
+  final p = preferencesFromJson(b['preferences']);
+  final expected = historyInt(b['expectedVersion'], min: 1);
+  final digest = historyText(b['commandDigest']);
+  if (p.version != expected + 1 ||
+      !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest)) {
+    throw const FormatException('Invalid settings receipt');
+  }
+  return WorkspaceSettingsReceipt(
+    operationId: policyOperationId(b['operationId']),
+    commandDigest: digest,
+    expectedVersion: expected,
+    preferences: p,
+  );
+}
