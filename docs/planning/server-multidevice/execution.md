@@ -396,3 +396,6 @@ DeviceCredentialHost复用CredentialExecutionHost，独立CLI通过原聊天证�
 实际检查：Token及文件2个真实多进程Codex场景通过，包含竞争、共享输出、跨聊天拒绝、服务重开、丢接受回复和丢记录不重放、回环门禁与活动执行停止保护。相同场景用编译的info-codex/info-runtime-worker再次2项通过；后台ps核实为独立worker而非Dart SDK。原CLI18项通过（6项平台跳过），直接原生Token/文件/SSH6项通过，正式普通文件CLI及文字Codex2项通过。相关CLI与新增测试静态分析无问题。证据详见server-a09 README。
 
 **#99仍未完成。** 下一步提取原OwnerWorkspaceHosts的纯Dart信任/导入/版本和回执逻辑到info_workspace，App保留薄文件选择封装，服务端复用同一投影接Owner接口；RemoteWorkspaceSource接原主机设置和预览界面，避免另造最小信任界面或在服务器探测网络。随后完成凭据审批连续试用、未确认审批重开回执处理，再推进#100–#102。#103–#105未动。隔离二进制不是统一候选，尚无正式安装或真实迁移。
+
+
+后台实现及证据已推送5391519e，GitHub #99阶段评论已发布并回读，仍Open/Close issue。补用同一独立客户端/worker验证文件命令完成时服务完全关闭：设备先物理清理并保留准确终态，原服务重开后正常状态查询补交原回执和清理确认，2个Codex场景通过且无重跑。日志a09-device-host-offline-standalone-tests.log。独立验证包manifest已记录源码提交与两文件摘要；没有替换日常App。所有本轮测试进程/后台/容器已结束，下一步仍为SSH信任管理和凭据App连续验收；#99–#102未完成，#103–#105不动。

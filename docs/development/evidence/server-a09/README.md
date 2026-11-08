@@ -74,3 +74,8 @@
 | 正式文件CLI及普通文字Codex接入回归 | 2个连续场景通过 | a09-device-host-file-text-cli-regression.log |
 
 CLI lib和新增服务端测试静态分析无问题。本轮客户端二进制仅为隔离验证产物，尚非#102统一匹配的最终候选；未安装日常App、未启动真实资料服务或个人钥匙串。SSH信任设置、凭据App连续试用和未确认审批重开处理仍需接续，#99不关闭。
+
+
+### 独立包断线补验
+
+用同一5391519e客户端/worker二进制再运行正常Codex场景：文件操作正在运行时关闭原服务，随后让原命令结束；两份私有登记均证明已物理清理、文件路径不存在，准确exited回执仍保留。用原端口重开服务后，正常execution-status调用补交这两个原回执与清理确认，原退出结果、输出和两次操作计数保持，没有重跑。Token与文件两场景通过（文件场景实际经历离线），日志a09-device-host-offline-standalone-tests.log；新增测试静态分析通过。二进制摘要在local/server-first-stage/a09-standalone-host-candidate/manifest.json，尚非统一候选。
