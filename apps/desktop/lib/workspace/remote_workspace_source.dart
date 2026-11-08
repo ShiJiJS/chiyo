@@ -27,6 +27,7 @@ import 'remote_workspace_hosts.dart';
 import 'remote_workspace_history.dart';
 import 'remote_workspace_backups.dart';
 import 'remote_workspace_settings.dart';
+import 'remote_workspace_agents.dart';
 import 'package:info_workspace/adoption_transport.dart';
 
 /// Live projections through the existing UI seam; no local library or body
@@ -58,6 +59,8 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  @override
+  late final WorkspaceAgentsSource agents = RemoteWorkspaceAgents(client);
   @override
   late final RemoteWorkspaceSettings settings = RemoteWorkspaceSettings(
     client,
