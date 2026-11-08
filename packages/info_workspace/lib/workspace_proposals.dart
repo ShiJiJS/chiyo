@@ -7,6 +7,14 @@ import 'workspace_organization.dart';
 import 'workspace_files.dart';
 export 'workspace_organization.dart';
 
+/// Only these library reads are needed to review proposals. This keeps the
+/// shared owner adapter independent of unrelated native desktop operations.
+abstract interface class WorkspaceProposalLibrary
+    implements WorkspaceRelationSource {
+  Future<WorkspaceCatalog> loadCatalog();
+  Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref);
+}
+
 enum WorkspaceProposalKind {
   addition('新增资料'),
   modification('修改信息'),

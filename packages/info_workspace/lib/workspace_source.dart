@@ -45,7 +45,8 @@ class WorkspaceSummary {
   bool get isEmpty => records == 0 && pending == 0 && proposals == 0;
 }
 
-abstract interface class WorkspaceSource implements WorkspaceRelationSource {
+abstract interface class WorkspaceSource
+    implements WorkspaceRelationSource, WorkspaceProposalLibrary {
   WorkspaceSettingsSource get settings;
   WorkspaceBackupSource get backups;
   WorkspaceRuntimeSource get runtime;
@@ -61,6 +62,7 @@ abstract interface class WorkspaceSource implements WorkspaceRelationSource {
   /// Invalidates UI projections; null means a reset or a catalog change.
   Stream<WorkspaceRecordRef?> get changes;
   Future<WorkspaceSummary> loadSummary();
+  @override
   Future<WorkspaceCatalog> loadCatalog();
 
   /// Returns the created/updated directory, or null after an empty deletion.
@@ -86,6 +88,7 @@ abstract interface class WorkspaceSource implements WorkspaceRelationSource {
     WorkspaceQuery query, {
     WorkspaceRecordRef? keepSelection,
   });
+  @override
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref);
   @override
   Future<WorkspaceResults> queryRelationCandidates(
