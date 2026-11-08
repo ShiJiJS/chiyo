@@ -97,3 +97,6 @@ _Avoid_: 安全沙箱、用途说明
 
 **临时授权凭证（Temporary Authorization Credential）**：向本软件证明某项访问或使用许可的私密证明，不是外部服务的登录秘密，也不等于请求编号。
 _Avoid_: 托管凭据、聊天 ID
+
+**服务接入 Token（Service Access Token）**：用户让客户端连接自己部署的信息服务时使用的私密接入凭证。它不等于某次 AI 聊天获得资料访问许可，也不同于用户保存的外部服务 Token。
+_Avoid_: 临时授权凭证、托管凭据
