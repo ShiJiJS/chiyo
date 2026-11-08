@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/online_desktop_launcher.dart';
+import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/online_server.dart';
@@ -170,8 +171,24 @@ void main() {
               .whereType<String>()
               .join(' | '),
         );
-        await t.runAsync(() => t.tap(find.text('编辑信息').first));
+        final enabledEdit = find
+            .ancestor(
+              of: find.text('编辑信息'),
+              matching: find.byWidgetPredicate(
+                (w) => w is DesktopButton && w.onPressed != null,
+              ),
+            )
+            .first;
+        await waitFor(enabledEdit);
+        expect(enabledEdit, findsOneWidget);
+        await t.runAsync(() => t.tap(enabledEdit));
         await settle();
+        await waitFor(
+          find.descendant(
+            of: find.byKey(const ValueKey('library-edit-body')),
+            matching: find.byType(TextField),
+          ),
+        );
         await t.enterText(
           find.descendant(
             of: find.byKey(const ValueKey('library-edit-body')),

@@ -14,6 +14,9 @@ final class AgentGateway {
     '/capabilities',
     '/catalog',
     '/directories/catalog',
+    '/plugins/catalog',
+    '/templates/catalog',
+    '/templates/read',
   };
   static const _open = {'/session', '/session/lifecycle'};
   static const _session = {
@@ -84,11 +87,15 @@ final class AgentGateway {
       return {
         ...result,
         // Advertise only commands actually connected to this online gateway.
-        // Templates, proposals, files and credentials follow their own tickets.
+        // Proposals, files and credentials follow their own tickets.
         'capabilities': [
           'information-request-operations.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
+          if ((result['capabilities'] as List).contains(
+            'information-template-discovery.v1',
+          ))
+            'information-template-discovery.v1',
         ],
       };
     }

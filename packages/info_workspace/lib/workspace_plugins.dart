@@ -5,6 +5,27 @@ import 'package:info_core/template_packages.dart' as core;
 String workspaceTemplateTypeId(String package, String template) =>
     core.templatePackageTypeId(package, template);
 
+WorkspaceTemplateState workspacePluginTemplateState(
+  Iterable<WorkspacePlugin> packages,
+  String type,
+  String? packageId,
+) {
+  final package = packages
+      .where(
+        (p) => p.id == packageId || p.templates.any((t) => t.type.id == type),
+      )
+      .firstOrNull;
+  if (package == null) {
+    return packageId == null && !type.contains('/')
+        ? WorkspaceTemplateState.available
+        : WorkspaceTemplateState.missing;
+  }
+  if (!package.enabled) return WorkspaceTemplateState.disabled;
+  return package.templates.any((t) => t.type.id == type)
+      ? WorkspaceTemplateState.available
+      : WorkspaceTemplateState.removedDefinition;
+}
+
 class WorkspacePluginTemplate {
   WorkspacePluginTemplate({
     required this.id,

@@ -5,6 +5,7 @@ import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/owner_client.dart';
 import 'workspace/remote_workspace_source.dart';
 import 'workspace/workspace_app.dart';
+import 'workspace/workspace_inputs.dart';
 import 'workspace/zhiyu_theme.dart';
 import 'desktop_controls.dart';
 import 'online_agent_connection_dialog.dart';
@@ -180,6 +181,8 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                   child: WorkspaceApp(
                     source: source,
                     windowTitle: '知予',
+                    inputsBuilder: (_) =>
+                        WorkspaceInputs(plugin: source.plugins.pick),
                     onConnectionSettings: _settings,
                     onAgentConnectionSetup:
                         widget.profiles is PrivateConnectionProfileStore
