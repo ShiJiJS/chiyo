@@ -385,3 +385,5 @@ Mac长驻CLI已用真实原生worker执行Token和文件合成接收程序，工
 实际检查：设备HTTPS专项Mac/Linux各8通过；Mac原生Token/文件/崩溃/丢回复4通过，真实SSH2通过，严格登记校验后联合复验6通过；服务整组回归37通过（SSH测试新增前），核心27、存储20、CLI21通过（9项原平台条件跳过）。本轮服务端/CLI相关分析无问题，Core全lib只有未改builtin_information_definitions.dart:7旧提示。准确范围和日志见docs/development/evidence/server-a09/README.md。
 
 **#99仍未完成。** 下一步复用CredentialExecutionHost接逐命令Codex的独立设备宿主（目前hosted=true仍向旧服务路径请求，在线拒绝，没有本机fallback），保留全局16执行/30分钟已结束输出限制。通过私有loopback控制和内存bootstrap传session，不能写可读聊天证明进磁盘。随后接正常App的SSH信任管理、完整凭据审批连续试用及未确认审批重开原回执恢复。再接#100–#102；#103–#105不动。没有统一候选、正式安装或真实资料迁移。
+
+本轮实现及证据已提交并推送902ab7f3。GitHub #99阶段评论已发布并回读，页面仍提供Close issue且本票Open；没有关闭。浏览器仍为17/p1，不结束整个持续目标。原生联合6项最后复验通过，所属所有测试进程、原生worker和SSH容器均已退出，无个人资料或日常App变更。下一轮从上段设备后台宿主接续，不重做已通过的私有操作层。
