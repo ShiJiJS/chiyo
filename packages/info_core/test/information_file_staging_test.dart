@@ -61,6 +61,84 @@ void main() {
   });
 
   test(
+    'owner byte intake freezes uploads and retains the native draft lifetime',
+    () async {
+      await service.close();
+      final paused = _PausedRepository();
+      service = InformationService(repository: paused);
+      final draft = await service.owner.beginInformationFileDraft();
+      final original = Uint8List.fromList([0, 255, 1, 2, 3]);
+      final supplied = Uint8List.fromList(original);
+      final writing = service.owner.stageInformationBytes(
+        draft,
+        originalName: 'synthetic upload.bin',
+        bytes: supplied,
+      );
+      supplied.fillRange(0, supplied.length, 8);
+      await paused.entered.future;
+      expect(service.owner.information, isEmpty);
+      paused.continueWrite.complete();
+      final saved = await writing;
+      expect(saved.sha256, sha256.convert(original).toString());
+      expect(saved.byteLength, original.length);
+      expect(jsonEncode(saved.toPrivateJson()), isNot(contains(root.path)));
+      await service.owner.releaseInformationFileDraft(draft);
+      expect((await paused.informationFileStagingUsage()).files, 0);
+      await expectLater(
+        service.owner.stageInformationBytes(
+          draft,
+          originalName: 'late.bin',
+          bytes: original,
+        ),
+        fails('stage_unavailable'),
+      );
+    },
+  );
+
+  test(
+    'byte intake rejects oversized metadata and another owner before storing content',
+    () async {
+      final draft = await service.owner.beginInformationFileDraft();
+      final other = InformationService(repository: repository);
+      addTearDown(other.close);
+      await expectLater(
+        other.owner.stageInformationBytes(
+          draft,
+          originalName: 'foreign.bin',
+          bytes: Uint8List(1),
+        ),
+        fails('stage_unavailable'),
+      );
+      for (final name in ['../source.txt', 'bad\nname', '..']) {
+        await expectLater(
+          service.owner.stageInformationBytes(
+            draft,
+            originalName: name,
+            bytes: Uint8List(1),
+          ),
+          fails('invalid_information_file'),
+        );
+      }
+      await expectLater(
+        service.owner.stageInformationBytes(
+          draft,
+          originalName: 'large.bin',
+          bytes: Uint8List(informationFileByteLimit + 1),
+        ),
+        fails('attachment_too_large'),
+      );
+      expect((await repository.informationFileStagingUsage()).files, 0);
+      final empty = await service.owner.stageInformationBytes(
+        draft,
+        originalName: 'empty.bin',
+        bytes: Uint8List(0),
+      );
+      expect(empty.byteLength, 0);
+      expect((await repository.informationFileStagingUsage()).files, 1);
+    },
+  );
+
+  test(
     'stage owns private metadata without creating public or formal content',
     () async {
       final draft = await service.owner.beginInformationFileDraft();
