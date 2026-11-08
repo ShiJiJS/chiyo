@@ -180,6 +180,35 @@ final class InformationFileDeviceInput {
   }
 }
 
+/// A device guardian can observe and acknowledge cleanup, but cannot read
+/// original bytes or recover a chat's access proof with this message.
+final class InformationFileCleanupInput {
+  InformationFileCleanupInput._(this.command, this.deliveryId, this.capability);
+  final String command, deliveryId, capability;
+  factory InformationFileCleanupInput.fromJson(Map<String, dynamic> j) {
+    _deliveryShape(j, {
+      'protocolVersion',
+      'command',
+      'deliveryId',
+      'cleanupCapability',
+    });
+    if (j['protocolVersion'] is! int ||
+        j['protocolVersion'] != 2 ||
+        !{'file-watch', 'file-discard'}.contains(j['command']) ||
+        j['cleanupCapability'] is! String ||
+        !RegExp(
+          r'^[A-Za-z0-9_-]{43}$',
+        ).hasMatch(j['cleanupCapability'] as String)) {
+      throw const InformationFileFailure('invalid_request');
+    }
+    return InformationFileCleanupInput._(
+      j['command'] as String,
+      _deliveryId(j['deliveryId']),
+      j['cleanupCapability'] as String,
+    );
+  }
+}
+
 /// Durable operation and cleanup facts. Private registry/session association
 /// never appear in status/history projections or portable archives.
 final class InformationFileDelivery {
@@ -242,6 +271,7 @@ final class InformationFileDelivery {
 
   /// The server tracks delivery to a device; it owns no local file lease.
   bool get deviceDelivery => _json['deviceDelivery'] == true;
+  String? get cleanupCapability => _json['cleanupCapability'] as String?;
   DateTime? get restoredAt =>
       _json['restoredAt'] == null ? null : _deliveryDate(_json['restoredAt']);
   bool get holdsCopy =>
@@ -261,6 +291,7 @@ final class InformationFileDelivery {
     required DateTime createdAt,
     required DateTime expiresAt,
     bool deviceDelivery = false,
+    String? cleanupCapability,
   }) => InformationFileDelivery.fromPrivateJson({
     'id': id,
     'sessionBinding': sessionBinding,
@@ -285,6 +316,7 @@ final class InformationFileDelivery {
     'restoredAt': null,
     'finishedAt': null,
     if (deviceDelivery) 'deviceDelivery': true,
+    'cleanupCapability': ?cleanupCapability,
   });
   factory InformationFileDelivery.fromPrivateJson(Map<String, dynamic> j) {
     _deliveryShape(j, {
@@ -311,11 +343,20 @@ final class InformationFileDelivery {
       'restoredAt',
       'finishedAt',
       if (j.containsKey('deviceDelivery')) 'deviceDelivery',
+      if (j.containsKey('cleanupCapability')) 'cleanupCapability',
     });
     for (final k in ['id', 'operationId', 'requestId', 'grantId']) {
       _deliveryId(j[k]);
     }
     final device = j.containsKey('deviceDelivery');
+    if (j.containsKey('cleanupCapability') &&
+        (!device ||
+            j['cleanupCapability'] is! String ||
+            !RegExp(
+              r'^[A-Za-z0-9_-]{43}$',
+            ).hasMatch(j['cleanupCapability'] as String))) {
+      throw const InformationFileFailure('invalid_request');
+    }
     if (device &&
             (j['deviceDelivery'] != true ||
                 j['runtime'] != true ||
@@ -453,7 +494,9 @@ final class InformationFileDelivery {
 
   /// Dedicated device transport metadata. No host path or native capability is
   /// fabricated; ready is recorded only after the device confirms its copy.
-  Map<String, Object?> deviceManifestJson() => {
+  Map<String, Object?> deviceManifestJson({
+    bool includeCleanupCapability = false,
+  }) => {
     ...statusJson(),
     'deviceDelivery': true,
     'operationId': operationId,
@@ -463,6 +506,8 @@ final class InformationFileDelivery {
     'mediaType': mediaType,
     'byteLength': byteLength,
     'sha256': sha256,
+    if (includeCleanupCapability && cleanupCapability != null)
+      'cleanupCapability': cleanupCapability,
   };
   Map<String, Object?> historyJson() => {
     ...statusJson(),

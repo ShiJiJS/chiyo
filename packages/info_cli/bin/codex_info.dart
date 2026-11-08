@@ -27,6 +27,9 @@ Future<void> main(List<String> args) async {
             sessionSecret: association.secret,
             sourceAgent: 'Codex',
             hostedCredentialExecutions: true,
+            deviceFileStateDirectory: Directory(
+              '${File(input['association'] as String).absolute.parent.path}/device-files',
+            ),
           )
         : AgentClient(
             association.port,

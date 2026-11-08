@@ -42,7 +42,12 @@ Future<void> main(List<String> args) async {
   try {
     client = connection == null
         ? AgentClient(port)
-        : AgentClient.remote(connection);
+        : AgentClient.remote(
+            connection,
+            deviceFileStateDirectory: Directory(
+              '${File(args.last).absolute.parent.path}/device-files',
+            ),
+          );
   } on Object {
     stdout.writeln(jsonEncode({'status': 'connection_unavailable'}));
     exitCode = 64;

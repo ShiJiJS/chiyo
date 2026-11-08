@@ -71,6 +71,7 @@ const _sshSessionUseLibraryFormat = 52;
 const _serverRuntimeLibraryFormat = 53;
 // Server deliveries have device-side copies instead of a host-native lease.
 const _deviceDeliveryLibraryFormat = 54;
+const _copyCleanupLibraryFormat = 55;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -607,7 +608,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _deviceDeliveryLibraryFormat) {
+      if (headerVersion > _copyCleanupLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -622,7 +623,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _deviceDeliveryLibraryFormat ||
+            (marker.single['version'] as int) > _copyCleanupLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }

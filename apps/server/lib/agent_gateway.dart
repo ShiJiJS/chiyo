@@ -75,6 +75,11 @@ final class AgentGateway {
 
     if (_session.contains(path)) {
       capabilities.add(AgentDeviceCapability('session', text('sessionSecret')));
+    } else if (path == '/information-file/watch' ||
+        path == '/information-file/discard') {
+      capabilities.add(
+        AgentDeviceCapability('file-cleanup', text('cleanupCapability')),
+      );
     } else if (path == '/session/end') {
       capabilities.add(AgentDeviceCapability('end', text('endCapability')));
     } else if (path == '/read') {
@@ -104,6 +109,10 @@ final class AgentGateway {
       ],
       if (path == '/claim')
         AgentDeviceCapability('grant', result['token'] as String),
+      if (path == '/information-file/fetch')
+        if (result['delivery'] case final Map delivery)
+          if (delivery['cleanupCapability'] case final String proof)
+            AgentDeviceCapability('file-cleanup', proof),
     ];
     if (minted.isNotEmpty) {
       await _devices.bindCapabilities(bearer, device.generation, minted);
@@ -130,6 +139,7 @@ final class AgentGateway {
           )) ...[
             'information-attachments.v1',
             'information-device-delivery.v1',
+            'information-file-cleanup-watch.v1',
           ],
           if ((result['capabilities'] as List).contains(
             'information-file-upload.v1',

@@ -395,6 +395,18 @@ class AgentProtocol {
         return path.endsWith('/status')
             ? _agent.informationFileStatus(session, input.deliveryId!)
             : _agent.releaseInformationFile(session, input.deliveryId!);
+      case '/information-file/watch':
+      case '/information-file/discard':
+        if (!_informationFilesEnabled) {
+          throw const InformationFileFailure('unsupported_capability');
+        }
+        final input = InformationFileCleanupInput.fromJson(body);
+        if (input.command != 'file-${path.split('/').last}') {
+          throw const InformationFileFailure('invalid_request');
+        }
+        return path.endsWith('/watch')
+            ? _agent.watchDeviceInformationFile(input)
+            : _agent.discardDeviceInformationFile(input);
       case '/information-file/download':
       case '/information-file/complete':
       case '/information-file/cleanup':

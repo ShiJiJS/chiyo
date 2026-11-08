@@ -32,7 +32,18 @@ extension DeviceInformationFileAgentAccess on AgentAccess {
       input.requestId,
       input.field,
     );
-    if (existing != null) return _fileReply(existing);
+    if (existing != null) {
+      var result = existing;
+      if (result.cleanupCapability == null &&
+          !InformationFileDelivery.terminals.contains(result.state)) {
+        result = result.changed({
+          'cleanupCapability': _service._secret().replaceAll('=', ''),
+        });
+        await _service._saveInformationDelivery(result);
+        _service._checkDeviceFileDelivery(session, result);
+      }
+      return _fileReply(result, deviceProof: true);
+    }
     final field = _service._field(input.field)!;
     if (field.kind != FieldKind.file) {
       throw const InformationFileFailure('not_a_file');
@@ -70,10 +81,11 @@ extension DeviceInformationFileAgentAccess on AgentAccess {
       createdAt: _service._clock().toUtc(),
       expiresAt: request.grant!.expiresAt.toUtc(),
       deviceDelivery: true,
+      cleanupCapability: _service._secret().replaceAll('=', ''),
     );
     await _service._saveInformationDelivery(record, claim: true);
     _service._checkDeviceFileDelivery(session, record);
-    return _fileReply(record);
+    return _fileReply(record, deviceProof: true);
   }
 
   Future<Map<String, Object?>> downloadDeviceInformationFile(
@@ -97,7 +109,10 @@ extension DeviceInformationFileAgentAccess on AgentAccess {
       record,
       validate: () => _service._checkDeviceFileDelivery(session, record),
     );
-    return {..._fileReply(record), 'bytes': base64Encode(bytes)};
+    return {
+      ..._fileReply(record, deviceProof: true),
+      'bytes': base64Encode(bytes),
+    };
   });
 
   Future<Map<String, Object?>> completeDeviceInformationFile(
@@ -114,14 +129,14 @@ extension DeviceInformationFileAgentAccess on AgentAccess {
     if (byteLength != record.byteLength || digest != record.sha256) {
       throw const InformationFileFailure('attachment_integrity_failed');
     }
-    if (record.state == 'ready') return _fileReply(record);
+    if (record.state == 'ready') return _fileReply(record, deviceProof: true);
     if (record.state != 'preparing') {
       throw const InformationFileFailure('not_authorized');
     }
     record = record.changed({'state': 'ready'});
     await _service._saveInformationDelivery(record);
     _service._checkDeviceFileDelivery(session, record);
-    return _fileReply(record);
+    return _fileReply(record, deviceProof: true);
   });
 
   /// Cleanup acknowledgement conveys no content authority. An ended session
@@ -146,12 +161,71 @@ extension DeviceInformationFileAgentAccess on AgentAccess {
     if (!record.deviceDelivery) {
       throw const InformationFileFailure('not_authorized');
     }
+    record = await _service._acknowledgeDeviceCopyCleanup(record);
+    return _fileReply(record);
+  });
+
+  Future<Map<String, Object?>> watchDeviceInformationFile(
+    InformationFileCleanupInput input,
+  ) => _service.owner._serialize(() async {
+    var record = _service._cleanupDeviceCopy(input);
+    await _service._reconcileInformationDeliveries();
+    record = _service._cleanupDeviceCopy(input);
+    return {
+      'protocolVersion': 2,
+      'status': 'ok',
+      'delivery': record.statusJson(),
+    };
+  });
+
+  Future<Map<String, Object?>> discardDeviceInformationFile(
+    InformationFileCleanupInput input,
+  ) => _service.owner._serialize(() async {
+    _service._cleanupDeviceCopy(input);
+    await _service._reconcileInformationDeliveries();
+    final record = await _service._acknowledgeDeviceCopyCleanup(
+      _service._cleanupDeviceCopy(input),
+    );
+    return {
+      'protocolVersion': 2,
+      'status': 'ok',
+      'delivery': record.statusJson(),
+    };
+  });
+}
+
+extension _DeviceInformationFileService on InformationService {
+  InformationFileDelivery _cleanupDeviceCopy(
+    InformationFileCleanupInput input,
+  ) {
+    if (!_deviceFileDelivery || !agent.informationFileDeliveryAvailable) {
+      throw const InformationFileFailure('unsupported_capability');
+    }
+    if (_closed || _backupBusy) {
+      throw const InformationFileFailure('service_unavailable');
+    }
+    final record = _informationDeliveries
+        .where((r) => r.runtime && r.deviceDelivery && r.id == input.deliveryId)
+        .firstOrNull;
+    final expected = sha256
+        .convert(utf8.encode(record?.cleanupCapability ?? ''))
+        .bytes;
+    final supplied = sha256.convert(utf8.encode(input.capability)).bytes;
+    var different = 0;
+    for (var n = 0; n < expected.length; n++) {
+      different |= expected[n] ^ supplied[n];
+    }
+    if (record == null || record.cleanupCapability == null || different != 0) {
+      throw const InformationFileFailure('not_authorized');
+    }
+    return record;
+  }
+
+  Future<InformationFileDelivery> _acknowledgeDeviceCopyCleanup(
+    InformationFileDelivery record,
+  ) async {
     if (record.state == 'ready' || record.state == 'preparing') {
-      record = await _service._finishInformationDelivery(
-        record,
-        'released',
-        'released',
-      );
+      record = await _finishInformationDelivery(record, 'released', 'released');
     }
     if (record.state == 'cleanup_pending') {
       record = record.changed({
@@ -159,13 +233,11 @@ extension DeviceInformationFileAgentAccess on AgentAccess {
         'targetState': null,
         'cleanupError': null,
       });
-      await _service._saveInformationDelivery(record);
+      await _saveInformationDelivery(record);
     }
-    return _fileReply(record);
-  });
-}
+    return record;
+  }
 
-extension _DeviceInformationFileService on InformationService {
   void _deviceFileSession(String session) {
     if (!_deviceFileDelivery || !agent.informationFileDeliveryAvailable) {
       throw const InformationFileFailure('unsupported_capability');

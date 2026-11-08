@@ -122,6 +122,7 @@ void main() {
         containsAll([
           'information-attachments.v1',
           'information-device-delivery.v1',
+          'information-file-cleanup-watch.v1',
         ]),
       );
       final bytes = Uint8List(informationFileByteLimit);
@@ -191,10 +192,62 @@ void main() {
           Map<String, dynamic>.from(result['delivery'] as Map);
       final first = delivery(await command('fetch', fetch));
       final id = first['deliveryId'] as String;
+      final cleanup = first['cleanupCapability'] as String;
+      Future<Map<String, dynamic>> watch({
+        AgentConnection? from,
+        String? proof,
+        String? target,
+        String action = 'watch',
+      }) => (from ?? agent).call('/information-file/$action', {
+        'protocolVersion': 2,
+        'command': 'file-$action',
+        'deliveryId': target ?? id,
+        'cleanupCapability': proof ?? cleanup,
+      });
       expect(first['state'], 'preparing');
       expect(first, isNot(contains('path')));
       expect(first, isNot(contains('bytes')));
       expect(delivery(await command('fetch', fetch)), first);
+      final observed = delivery(await watch());
+      expect(observed['state'], 'preparing');
+      for (final key in [
+        'cleanupCapability',
+        'path',
+        'bytes',
+        'fileName',
+        'sha256',
+      ]) {
+        expect(observed, isNot(contains(key)));
+      }
+      expect((await watch(from: otherDevice))['status'], 'unauthorized');
+      expect((await watch(proof: 'A' * 43))['status'], 'unauthorized');
+      expect(
+        (await watch(target: 'another-delivery'))['status'],
+        'unauthorized',
+      );
+      expect(
+        delivery(await command('status', {'deliveryId': id})),
+        isNot(contains('cleanupCapability')),
+      );
+      expect(
+        (await agent.call('/information-file/watch', {
+          'protocolVersion': 2,
+          'command': 'file-watch',
+          'deliveryId': id,
+          'cleanupCapability': cleanup,
+          'sessionSecret': session,
+        }))['status'],
+        'invalid_request',
+      );
+      expect(
+        (await agent.call('/information-file/download', {
+          'protocolVersion': 2,
+          'command': 'file-download',
+          'deliveryId': id,
+          'sessionSecret': cleanup,
+        }))['status'],
+        'unauthorized',
+      );
       final wrongDevice = await otherDevice.call('/information-file/download', {
         'sessionSecret': session,
         'protocolVersion': 2,
@@ -242,6 +295,14 @@ void main() {
       await reopen();
       agent = AgentConnection(profile);
       expect(delivery(await command('fetch', fetch)), done);
+      expect(delivery(await watch())['state'], 'ready');
+      final privateRecord =
+          runtime.service.owner.informationFileDeliveries.single;
+      expect(
+        jsonEncode(privateRecord.toArchiveJson()),
+        isNot(contains(cleanup)),
+      );
+      expect(jsonEncode(privateRecord.historyJson()), isNot(contains(cleanup)));
       expect(
         base64Decode(
           (await command('download', {'deliveryId': id}))['bytes'] as String,
@@ -268,11 +329,12 @@ void main() {
         delivery(await command('cleanup', {'deliveryId': id}))['state'],
         'released',
       );
-      final endedId =
-          delivery(
-                await command('fetch', {...fetch, 'operationId': 'root-ends'}),
-              )['deliveryId']
-              as String;
+      final ended = delivery(
+        await command('fetch', {...fetch, 'operationId': 'root-ends'}),
+      );
+      final endedId = ended['deliveryId'] as String;
+      final endedCleanup = ended['cleanupCapability'] as String;
+      expect((await watch(target: endedId))['status'], 'unauthorized');
       expect(
         (await agent.call('/session/end', {'endCapability': end}))['status'],
         'ended',
@@ -285,7 +347,19 @@ void main() {
         'session_ended',
       );
       expect(
-        delivery(await command('cleanup', {'deliveryId': endedId}))['state'],
+        delivery(await watch(target: endedId, proof: endedCleanup))['state'],
+        'cleanup_pending',
+      );
+      expect(
+        delivery(
+          await watch(target: endedId, proof: endedCleanup, action: 'discard'),
+        )['state'],
+        'expired',
+      );
+      expect(
+        delivery(
+          await watch(target: endedId, proof: endedCleanup, action: 'discard'),
+        )['state'],
         'expired',
       );
       expect(

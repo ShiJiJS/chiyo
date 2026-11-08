@@ -114,6 +114,85 @@ void main() {
   }
 
   test(
+    'older device records acquire a stable cleanup-only proof without changing the operation',
+    () async {
+      final (session, request) = await requested();
+      final first = manifest(
+        await runtime.run(
+          () => runtime.service.agent.fetchInformationFile(
+            session.sessionSecret,
+            input(request),
+          ),
+        ),
+      );
+      final id = first['deliveryId'] as String;
+      await runtime.close();
+      await repo.close();
+      final db = sqlite3.open('${root.path}/library.db');
+      try {
+        final key = keys.key!
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join();
+        db.execute('PRAGMA key = "x\'$key\'"');
+        final payload =
+            jsonDecode(
+                  db.select(
+                        'SELECT payload FROM information_deliveries WHERE id=?',
+                        [id],
+                      ).single['payload']
+                      as String,
+                )
+                as Map<String, dynamic>;
+        payload.remove('cleanupCapability');
+        db.execute('UPDATE information_deliveries SET payload=? WHERE id=?', [
+          jsonEncode(payload),
+          id,
+        ]);
+        db.execute('PRAGMA user_version=54');
+      } finally {
+        db.close();
+      }
+      await open();
+      final upgraded = manifest(
+        await runtime.run(
+          () => runtime.service.agent.fetchInformationFile(
+            session.sessionSecret,
+            input(request),
+          ),
+        ),
+      );
+      expect(upgraded['deliveryId'], id);
+      expect(upgraded['expiresAt'], first['expiresAt']);
+      expect(upgraded['cleanupCapability'], isA<String>());
+      final record = runtime.service.owner.informationFileDeliveries.single;
+      await expectLater(
+        repo.saveInformationFileDelivery(
+          record.changed({'cleanupCapability': 'B' * 43}),
+        ),
+        throwsA(
+          isA<StorageFailure>().having(
+            (e) => e.code,
+            'code',
+            'delivery_conflict',
+          ),
+        ),
+      );
+      await reopen();
+      expect(
+        manifest(
+          await runtime.run(
+            () => runtime.service.agent.fetchInformationFile(
+              session.sessionSecret,
+              input(request),
+            ),
+          ),
+        ),
+        upgraded,
+      );
+    },
+  );
+
+  test(
     'online delivery reuses approved scope, exact original and original operation without a host path',
     () async {
       final (session, request) = await requested(approve: false);
@@ -252,6 +331,7 @@ void main() {
       final archive = record.toArchiveJson();
       expect(archive, isNot(contains('deviceDelivery')));
       expect(archive, isNot(contains('lease')));
+      expect(archive, isNot(contains('cleanupCapability')));
       expect(
         InformationFileDelivery.fromArchiveJson(
           Map<String, dynamic>.from(archive),
@@ -264,7 +344,7 @@ void main() {
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
             .join();
         db.execute('PRAGMA key = "x\'$key\'"');
-        expect(db.select('PRAGMA user_version').single.values.single, 54);
+        expect(db.select('PRAGMA user_version').single.values.single, 55);
       } finally {
         db.close();
       }

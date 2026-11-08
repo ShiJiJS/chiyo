@@ -248,11 +248,12 @@ extension InformationFileAgentAccess on AgentAccess {
 Map<String, Object?> _fileReply(
   InformationFileDelivery record, {
   bool ready = false,
+  bool deviceProof = false,
 }) => {
   'protocolVersion': 2,
   'status': 'ok',
   'delivery': record.deviceDelivery
-      ? record.deviceManifestJson()
+      ? record.deviceManifestJson(includeCleanupCapability: deviceProof)
       : ready
       ? record.readyJson()
       : record.statusJson(),
