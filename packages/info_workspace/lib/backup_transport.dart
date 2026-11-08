@@ -1,6 +1,51 @@
 import 'dart:convert';
 import 'workspace_backups.dart';
 
+/// A prepared encrypted export is not proof of a completed device save.
+class WorkspaceBackupTransfer {
+  const WorkspaceBackupTransfer({
+    required this.command,
+    required this.phase,
+    required this.sha256,
+    required this.byteLength,
+    required this.counts,
+  });
+  final WorkspaceBackupChange command;
+  final String phase, sha256;
+  final int byteLength;
+  final WorkspaceBackupCounts counts;
+}
+
+Map<String, Object?> backupTransferToJson(WorkspaceBackupTransfer t) => {
+  'wireVersion': 1,
+  'command': backupChangeToJson(t.command),
+  'phase': t.phase,
+  'sha256': t.sha256,
+  'byteLength': t.byteLength,
+  'counts': t.counts.json,
+};
+WorkspaceBackupTransfer backupTransferFromJson(Object? raw) {
+  final v = backupEnvelope(raw, [
+    'command',
+    'phase',
+    'sha256',
+    'byteLength',
+    'counts',
+  ]);
+  final command = backupChangeFromJson(v['command']);
+  if (command.action != WorkspaceBackupAction.export ||
+      !const {'prepared', 'saved', 'abandoned'}.contains(v['phase'])) {
+    throw const FormatException('Invalid backup transfer');
+  }
+  return WorkspaceBackupTransfer(
+    command: command,
+    phase: v['phase'] as String,
+    sha256: backupHash(v['sha256']),
+    byteLength: backupInt(v['byteLength'], min: 4096, max: 256 * 1024 * 1024),
+    counts: backupCountsFromJson(v['counts']),
+  );
+}
+
 Map<String, dynamic> _object(Object? value, Iterable<String> keys) {
   if (value is! Map ||
       value.length != keys.length ||

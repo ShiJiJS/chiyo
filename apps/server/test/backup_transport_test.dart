@@ -41,6 +41,42 @@ void main() {
     counts: counts,
   );
   test(
+    'a prepared export stays a transfer rather than a successful device save',
+    () {
+      final c = WorkspaceBackupChange(
+        operationId: 'export',
+        action: WorkspaceBackupAction.export,
+        expectedVersion: 2,
+        selection: const WorkspaceBackupResource(
+          id: 'output',
+          name: 'synthetic.aimbackup',
+          kind: WorkspaceBackupPick.archiveOutput,
+        ),
+      );
+      final transfer = WorkspaceBackupTransfer(
+        command: c,
+        phase: 'prepared',
+        sha256: 'a' * 64,
+        byteLength: 8192,
+        counts: counts,
+      );
+      final wire = backupTransferToJson(transfer);
+      final decoded = backupTransferFromJson(wire);
+      expect(decoded.command.digest, c.digest);
+      expect(decoded.phase, 'prepared');
+      expect(() => backupReceiptFromJson(wire), throwsFormatException);
+      for (final malformed in [
+        {...wire, 'phase': 'done'},
+        {...wire, 'byteLength': 0},
+        {...wire, 'sha256': 'invalid'},
+        {...wire, 'recoveryKey': 'SYNTHETIC_KEY'},
+        {...wire, 'command': backupChangeToJson(change)},
+      ]) {
+        expect(() => backupTransferFromJson(malformed), throwsFormatException);
+      }
+    },
+  );
+  test(
     'backup metadata keeps exact resources, counts, intent and acknowledgement',
     () {
       final decodedChange = backupChangeFromJson(backupChangeToJson(change));

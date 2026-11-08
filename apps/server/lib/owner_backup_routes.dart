@@ -7,6 +7,8 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_workspace/backup_transport.dart';
 import 'package:info_workspace/workspace_source.dart';
 
+part 'owner_backup_outputs.dart';
+
 final class _BackupUpload {
   _BackupUpload(this.resource, this.path, this.bytes, this.digest, this.until);
   final WorkspaceBackupResource resource;
@@ -37,6 +39,8 @@ final class OwnerBackupRoutes {
   static const chunkBytes = 512 * 1024;
   static const archiveBytes = AttachmentBackupContainer.maxFileBytes;
   final _uploads = <String, _BackupUpload>{};
+  bool _inputSweepNeeded = true;
+  bool _outputCleanupRequested = true;
   final _previews =
       <String, ({WorkspaceBackupPreview page, BackupRestorePreview storage})>{};
   static Duration Function() _clock() {
@@ -70,7 +74,10 @@ final class OwnerBackupRoutes {
       );
 
   bool get needsCleanup =>
-      !_scope.isCurrent || _uploads.values.any((v) => v.until <= _elapsed());
+      _inputSweepNeeded ||
+      _outputCleanupRequested ||
+      !_scope.isCurrent ||
+      _uploads.values.any((v) => v.until <= _elapsed());
 
   Future<void> _release(String id) async {
     final upload = _uploads[id];
@@ -87,6 +94,25 @@ final class OwnerBackupRoutes {
   }
 
   Future<void> cleanup() async {
+    await _cleanupOutputs(forceOrphans: !_scope.isCurrent);
+    if (_inputSweepNeeded) {
+      // No preview survives a host restart. The dedicated transfer directory
+      // may contain only this host's old encrypted incoming folders; never
+      // remove one registered in this process or follow a filesystem link.
+      final registered = _uploads.values
+          .map((u) => File(u.path).parent.path)
+          .toSet();
+      await for (final entity in directory.list(followLinks: false)) {
+        final name = entity.uri.pathSegments.where((v) => v.isNotEmpty).last;
+        if (name.startsWith('incoming-') &&
+            !registered.contains(entity.path) &&
+            await FileSystemEntity.type(entity.path, followLinks: false) ==
+                FileSystemEntityType.directory) {
+          await entity.delete(recursive: true);
+        }
+      }
+      _inputSweepNeeded = false;
+    }
     for (final entry in _uploads.entries.toList()) {
       if (!_scope.isCurrent || entry.value.until <= _elapsed()) {
         await _release(entry.key);
@@ -104,13 +130,27 @@ final class OwnerBackupRoutes {
   Future<WorkspaceBackupStatus> status() => owner.exportLibrary(() async {
     final empty = await backups.recipientEmpty();
     final pending = await backups.pendingOwnerOperations();
+    final saved =
+        (await backups.remoteOutputs())
+            .where(
+              (r) =>
+                  r.action == BackupOutputAction.export &&
+                  r.phase == BackupRemoteOutputPhase.saved,
+            )
+            .toList()
+          ..sort((a, b) => b.version.compareTo(a.version));
     return WorkspaceBackupStatus(
       version: await backups.operationVersion(),
       keyCreated: await backups.recoveryKey() != null,
       keySaved: await backups.recoveryKeySaved(),
       recipientEmpty: empty,
       blockers: empty ? [] : ['已有资料或历史，不能覆盖或合并恢复'],
-      cleanupCount: _uploads.values.where((v) => v.until <= _elapsed()).length,
+      cleanupCount:
+          _uploads.values.where((v) => v.until <= _elapsed()).length +
+          (_outputCleanupRequested ? 1 : 0),
+      latestArchive: saved.isEmpty
+          ? null
+          : _remoteReceipt(saved.first).resource,
       pending: pending.isEmpty
           ? null
           : WorkspaceBackupPending(
@@ -177,6 +217,7 @@ final class OwnerBackupRoutes {
       );
       return {'wireVersion': 1, 'uploadId': id, 'received': 0};
     } catch (_) {
+      _inputSweepNeeded = true;
       await folder.delete(recursive: true);
       rethrow;
     }
@@ -273,33 +314,67 @@ final class OwnerBackupRoutes {
         return page;
       });
 
-  Future<WorkspaceBackupReceipt?> receipt(String id) => owner.exportLibrary(
-    () async {
-      final action = await backups.backupOperationAction(id);
-      if (action == null) {
-        final intent = await backups.ownerOperationIntent(id);
+  Future<WorkspaceBackupReceipt?> receipt(String id) =>
+      owner.exportLibrary(() => _storedReceipt(id));
+
+  Future<WorkspaceBackupReceipt?> _storedReceipt(String id) async {
+    final action = await backups.backupOperationAction(id);
+    final intent = await backups.ownerOperationIntent(id);
+    if (action == null) {
+      if (intent != null)
+        await backups.acknowledgeOwnerOperation(id, intent.digest);
+      return null;
+    }
+    late WorkspaceBackupReceipt result;
+    if (action == 'restore') {
+      result = _receipt((await backups.restoreOperationReceipt(id))!);
+    } else if (action == 'enableKey') {
+      final r = (await backups.recoveryKeyOperationReceipt(id))!;
+      result = WorkspaceBackupReceipt(
+        operationId: r.operationId,
+        commandDigest: r.commandDigest,
+        action: WorkspaceBackupAction.enableKey,
+        expectedVersion: r.expectedVersion,
+        version: r.version,
+      );
+    } else if (action == 'cleanup') {
+      final r = (await backups.cleanupOperationReceipt(id))!;
+      result = WorkspaceBackupReceipt(
+        operationId: r.operationId,
+        commandDigest: r.commandDigest,
+        action: WorkspaceBackupAction.cleanup,
+        expectedVersion: r.expectedVersion,
+        version: r.version,
+      );
+    } else if (action == 'remoteOutput') {
+      final r = (await backups.remoteOutputReceipt(id))!;
+      if (r.phase == BackupRemoteOutputPhase.prepared) {
+        throw const WorkspaceFailure('output_pending', '原备份已生成，本机文件是否保存还需核对。');
+      }
+      if (r.phase == BackupRemoteOutputPhase.abandoned) {
         if (intent != null)
           await backups.acknowledgeOwnerOperation(id, intent.digest);
-        return null;
+        throw const StorageFailure('backup_not_published');
       }
-      if (action != 'restore') throw const StorageFailure('operation_conflict');
-      final result = _receipt((await backups.restoreOperationReceipt(id))!);
-      final intent = await backups.ownerOperationIntent(id);
-      if (intent != null) {
-        final command = backupChangeFromJson({
-          'wireVersion': 1,
-          ...intent.command,
-        });
-        if (!result.matches(command) ||
-            intent.restoreCounts == null ||
-            !result.counts!.same(_counts(intent.restoreCounts!))) {
-          throw const StorageFailure('invalid_backup_operation_receipt');
-        }
-        await backups.acknowledgeOwnerOperation(id, intent.digest);
+      result = _remoteReceipt(r);
+    } else {
+      throw const StorageFailure('operation_conflict');
+    }
+    if (intent != null) {
+      final command = backupChangeFromJson({
+        'wireVersion': 1,
+        ...intent.command,
+      });
+      if (!result.matches(command) ||
+          action == 'restore' &&
+              (intent.restoreCounts == null ||
+                  !result.counts!.same(_counts(intent.restoreCounts!)))) {
+        throw const StorageFailure('invalid_backup_operation_receipt');
       }
-      return result;
-    },
-  );
+      await backups.acknowledgeOwnerOperation(id, intent.digest);
+    }
+    return result;
+  }
 
   Future<WorkspaceBackupReceipt> _restore(WorkspaceBackupChange c) async {
     if (c.action != WorkspaceBackupAction.restore) {
@@ -377,10 +452,46 @@ final class OwnerBackupRoutes {
       _previews.remove(backupId(tail.last))?.storage.release();
       return (200, {'status': 'released'});
     }
+    if (tail.length == 1 && tail.first == 'recovery-key' && method == 'GET') {
+      return (200, await _recoveryKey());
+    }
+    if (tail.length == 1 && tail.first == 'exports' && method == 'POST') {
+      return (
+        200,
+        backupTransferToJson(
+          _transfer(await _prepareExport(backupChangeFromJson(body))),
+        ),
+      );
+    }
+    if (tail.length == 2 && tail.first == 'exports' && method == 'GET') {
+      return (
+        200,
+        backupTransferToJson(_transfer(await _export(backupId(tail.last)))),
+      );
+    }
+    if (tail.length == 3 &&
+        tail.first == 'exports' &&
+        tail.last == 'chunks' &&
+        method == 'POST') {
+      return (200, await _download(backupId(tail[1]), body));
+    }
+    if (tail.length == 2 &&
+        tail.first == 'outputs' &&
+        tail.last == 'confirm' &&
+        method == 'POST') {
+      return (200, backupReceiptToJson(await _confirmOutput(body)));
+    }
+    if (tail.length == 2 &&
+        tail.first == 'outputs' &&
+        tail.last == 'abandon' &&
+        method == 'POST') {
+      await _abandonOutput(body);
+      return (200, {'status': 'abandoned'});
+    }
     if (tail.length == 1 && tail.first == 'changes' && method == 'POST') {
       return (
         200,
-        backupReceiptToJson(await _restore(backupChangeFromJson(body))),
+        backupReceiptToJson(await _change(backupChangeFromJson(body))),
       );
     }
     if (tail.length == 2 && tail.first == 'operations' && method == 'GET') {
