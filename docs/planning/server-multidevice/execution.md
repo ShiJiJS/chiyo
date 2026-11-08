@@ -299,3 +299,13 @@ Mac完整服务23项、Linux ARM64服务加在线存储33项通过（Mac本机�
 #97完成评论已发布并回读，关闭状态及Reopen issue入口已观察确认。当前#91–#97已完成并关闭；#98正文、评论与关系已读取（前置#96已完成，后续#99/#100），下一步接凭据录入。未生成统一候选、未替换日常App、未动真实资料/个人钥匙串/Windows CI，#103–#105不动。浏览器仍13/p1，当前停在#98，不finish整个工作空间。
 
 #98现状：共享OwnerWorkspaceProposals已保留原凭据预览/原子入库规则，但OwnerProposalRoutes缺内联密码补填路由，AgentGateway仍整体拒绝含credential提案。现有OwnerWorkspaceCredentials/OwnerCredentialStaging还在apps/desktop，除SelectedCredentialFile输入类型外主体为纯Dart，应抽到info_workspace并保留桌面包装，复用原OwnerAccess.saveCredentialRecord及幂等回执；服务端不启用本机执行或系统钥匙串。RemoteWorkspaceSource目前无凭据管理适配。需先接共享保存规则、受认证材料暂存/管理、提案内联密码及原UI，实际使用仍由#99接续。
+
+## #98已抽取原凭据管理/暂存，联网入口仍待接
+
+OwnerWorkspaceCredentials和OwnerCredentialStaging已抽到info_workspace，桌面原路径重新导出；SelectedCredentialFile成为共享纯输入，原生picker/readCredentialFile仍留桌面。原Unavailable继承中的4个不支持入口在共享适配中明确保持不支持，未新增演示或Owner申请功能。原保存、编辑、更换、停用、分类关联、回执和材料清理规则保持同一实现。
+
+原桌面凭据工作区26项通过；共享适配在真实OnlineRuntime/SQLCipher中Mac和Linux ARM64各1连续场景通过，核对原材料、重复原操作、说明编辑不改材料/代际、更换及停用、分类关联重开、取消和加密文件无明文。共享包和相关入口分析通过。详见#98阶段证据docs/development/evidence/server-a08/README.md。本轮所有测试终止、无遗留容器或看护。
+
+下一步应在Owner专用认证路由接共享source的材料暂存/管理及元数据编解码，复用原16份/1MiB文件/64KiB字符串限制和未知回执规则，处理上传去重、关闭/过期清理；临时材料只在私有内存及原SQLCipher，不给普通Workspace DTO加正文。OnlineServer的普通管理正文上限2MiB已经足够1MiB文件Base64，无需放宽普通上限。后接RemoteWorkspaceSource.credentials与Host输入，打开正常创建能力。随后接Agent凭据提案及提案内联密码，继续原整份入库事务，不先关闭#98。
+
+内联密码当前在apps/desktop/lib/workspace/owner_proposal_password_input.dart：OwnerProposalPasswords以私有TextEditingController保留输入、显示/隐藏，store调用OwnerAccess.fillImportCredentials一次修订整批密码，然后Controller重新核对整份提案保存。ProposalPasswords是Flutter Host接口，不是Workspace DTO。联网改造应复用同一输入组件并注入保存/初始输入边界，而非复制UI；保留失败输入、版本变化和密码不进入普通提案/目录/回执的约定。
