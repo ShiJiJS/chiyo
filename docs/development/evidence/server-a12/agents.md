@@ -33,3 +33,5 @@
 应用运行、窗口、通知和退出仍待接通。旧 DesktopRuntime 退出会关闭本机资料服务并结束会话，不能直接用于独立服务器模式。必须保留原 DesktopPlatform、页面和控制器，退出只处理当前 App 的资源，不停止服务器、不结束 CLI 中的聊天、不操作别台设备的进程或材料。
 
 随后仍须同一源码的 Linux 服务、Mac App、CLI 和 worker 候选、连续完整试用、全新客户端拉取及无上下文 Agent 验证，再清理构建副本。#103–#105 不推进。
+
+实现 `79f77da3` 已推送独立分支；[GitHub 接入状态评论](https://github.com/ShiJiJS/chiyo/issues/102#issuecomment-6726944844) 已发布并刷新回读，确认持久锚点、实现短号及说明，#102 仍 Open。
