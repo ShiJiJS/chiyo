@@ -29,8 +29,24 @@ class WorkspaceRecordsController extends ChangeNotifier {
   int revision = 0;
   int _queryGeneration = 0, _detailGeneration = 0;
   bool _disposed = false;
+  Future<void>? _latestRead;
 
-  Future<void> load(
+  Future<void> load(WorkspaceQuery next, {WorkspaceRecordRef? keepSelection}) {
+    if (_disposed) return Future.value();
+    final read = _load(next, keepSelection: keepSelection);
+    _latestRead = read;
+    return _settle(read);
+  }
+
+  Future<void> _settle(Future<void> read) async {
+    await read;
+    while (!_disposed && !identical(_latestRead, read)) {
+      read = _latestRead!;
+      await read;
+    }
+  }
+
+  Future<void> _load(
     WorkspaceQuery next, {
     WorkspaceRecordRef? keepSelection,
   }) async {

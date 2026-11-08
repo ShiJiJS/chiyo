@@ -13,11 +13,18 @@ final class RemoteFailure implements Exception {
 /// Owns a client connection only, never the server process or a local library.
 /// Management credentials belong to the user App, not the Agent CLI.
 final class OwnerClient {
-  OwnerClient._(this.address, this._token, this._http, this.serverId);
+  OwnerClient._(
+    this.address,
+    this._token,
+    this._http,
+    this.serverId, {
+    this.initialWorkspaceObservation,
+  });
   final Uri address;
   final String _token;
   final HttpClient _http;
   final String serverId;
+  final String? initialWorkspaceObservation;
 
   static Future<OwnerClient> connect({
     required Uri address,
@@ -50,7 +57,14 @@ final class OwnerClient {
       }
       if (expectedServerId != null && expectedServerId != id)
         throw const RemoteFailure('server_changed');
-      return OwnerClient._(address, token, http, id);
+      return OwnerClient._(
+        address,
+        token,
+        http,
+        id,
+        initialWorkspaceObservation:
+            identity['workspaceObservation'] as String?,
+      );
     } on Object {
       http.close(force: true);
       rethrow;

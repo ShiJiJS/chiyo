@@ -8,6 +8,10 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/information_transport.dart';
 import 'package:info_core/builtin_information_definitions.dart';
 import 'package:info_core/protocol_json.dart';
+import 'package:crypto/crypto.dart';
+import 'package:info_workspace/owner_workspace_approvals.dart';
+import 'package:info_workspace/workspace_records.dart';
+import 'package:info_workspace/approval_transport.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -18,7 +22,8 @@ final class OnlineServer {
     this._ownerToken,
     this.serverId,
     this._devices,
-  ) : _agents = AgentGateway(AgentProtocol(_runtime.service.agent), _devices) {
+  ) : _agents = AgentGateway(AgentProtocol(_runtime.service.agent), _devices),
+      _approvals = OwnerWorkspaceApprovals(owner: _runtime.service.owner) {
     _http.listen(
       _handle,
       onError: (Object error, StackTrace stack) {
@@ -39,6 +44,7 @@ final class OnlineServer {
   final String serverId;
   final AgentDeviceRegistry _devices;
   final AgentGateway _agents;
+  final OwnerWorkspaceApprovals _approvals;
   int get port => _http.port;
 
   static Future<OnlineServer> start({
@@ -86,6 +92,41 @@ final class OnlineServer {
       bytes.addAll(chunk);
     }
     return decodeProtocolObject(utf8.decode(bytes), maxBytes: 2 * 1024 * 1024);
+  }
+
+  Future<String> _observation() async {
+    final owner = _service.owner;
+    final requests = await owner.informationRequestInbox();
+    return sha256
+        .convert(
+          utf8.encode(
+            jsonEncode([
+              [
+                for (final i in owner.information) [i.id, i.version],
+              ],
+              [
+                for (final d in owner.directories) [d.id, d.name, d.parentId],
+              ],
+              [
+                for (final t in owner.tags) [t.id, t.name],
+              ],
+              [
+                for (final r in requests)
+                  [
+                    r.id,
+                    r.state.name,
+                    r.sessionEnded,
+                    r.applicationClosed,
+                    r.decisionPending,
+                    r.grantExpiresAt?.toIso8601String(),
+                    r.fields.map((f) => f.toJson()).toList(),
+                    r.approvedFields?.map((f) => f.toJson()).toList(),
+                  ],
+              ],
+            ]),
+          ),
+        )
+        .toString();
   }
 
   Future<void> _handle(HttpRequest request) async {
@@ -136,7 +177,52 @@ final class OnlineServer {
           return;
         }
         if (request.method == 'GET' && request.uri.path == '/v1/server') {
-          await reply(200, {'protocolVersion': 1, 'serverId': serverId});
+          await reply(200, {
+            'protocolVersion': 1,
+            'serverId': serverId,
+            'workspaceObservation': await _observation(),
+          });
+        } else if (path.length >= 4 &&
+            path.take(3).join('/') == 'v1/owner/approvals') {
+          if (path.length == 4 &&
+              path.last == 'query' &&
+              request.method == 'POST') {
+            await reply(
+              200,
+              approvalResultsToJson(
+                await _approvals.query(
+                  approvalQueryFromJson(parsedBody!),
+                  keepSelection: parsedBody['keepSelection'] as String?,
+                ),
+              ),
+            );
+          } else if (path.length == 4 &&
+              path.last == 'decisions' &&
+              request.method == 'POST') {
+            await reply(
+              200,
+              approvalReceiptToJson(
+                await _approvals.change(approvalChangeFromJson(parsedBody!)),
+              ),
+            );
+          } else if (path.length == 5 &&
+              path[3] == 'operations' &&
+              request.method == 'GET') {
+            final receipt = await _approvals.receipt(path.last);
+            await reply(
+              receipt == null ? 404 : 200,
+              receipt == null
+                  ? {'error': 'operation_not_found'}
+                  : approvalReceiptToJson(receipt),
+            );
+          } else if (path.length == 4 && request.method == 'GET') {
+            await reply(
+              200,
+              approvalDetailToJson(await _approvals.read(path.last)),
+            );
+          } else {
+            await reply(404, {'error': 'not_found'});
+          }
         } else if (request.uri.path == '/v1/owner/devices' &&
             request.method == 'GET') {
           await reply(200, {'devices': await _devices.metadata()});
@@ -242,6 +328,8 @@ final class OnlineServer {
         } else {
           await reply(404, {'error': 'not_found'});
         }
+      } on WorkspaceFailure catch (e) {
+        await reply(e.code == 'not_found' ? 404 : 409, {'error': e.code});
       } on AccessFailure catch (e) {
         await reply(e.status == 'unauthorized' ? 401 : 409, {
           'error': e.status,

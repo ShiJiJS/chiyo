@@ -5,13 +5,28 @@ import 'workspace_source.dart';
 import 'workspace_information_codec.dart';
 import 'workspace_order.dart';
 import 'unavailable_workspace_sources.dart';
+import 'remote_workspace_approvals.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
 class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     implements WorkspaceStorageLocation {
-  RemoteWorkspaceSource(this.client);
+  RemoteWorkspaceSource(this.client)
+    : _observation = client.initialWorkspaceObservation;
   final OwnerClient client;
+  @override
+  late final WorkspaceApprovalSource approvals = RemoteWorkspaceApprovals(
+    client,
+    onChanged: notifyConnectionChanged,
+  );
+  String? _observation;
+  void observeServer(String value) {
+    if (_observation != value) {
+      _observation = value;
+      notifyConnectionChanged();
+    }
+  }
+
   @override
   String get storageDescription => '资料保存在服务器';
   final _codec = WorkspaceInformationCodec();
