@@ -237,6 +237,8 @@ Mac/Linux ARM64 服务包各18项通过；最新关联保留加强场景在Mac�
 
 已重新读取#97正文、评论及关系，#96前置已完成。先为OwnerAccess补stageInformationBytes，让受认证的服务器上传直接进入原InformationFileDraft与加密暂存；原路径选择同样调用内部暂存实现，不增加明文临时文件，也不把客户端文件路径传给服务器。入队前冻结上传字节，保留10MiB上限、元数据校验、草稿/库代际及取消、关闭规则。
 
-Mac核心暂存11项、真实SQLCipher暂存9项通过；新检查覆盖调用者修改内存、其他Owner或过期草稿、坏文件名、超限及空文件，SQLCipher实际保管原字节，库文件中无合成明文，取消后清理。Linux复验及分析继续核对。当前还没有HTTP上传、App文件选择/预览/替换/另存接入，也未接Agent下载及本机受管副本，#97保持打开。
+Mac核心暂存11项、真实SQLCipher暂存9项通过；新检查覆盖调用者修改内存、其他Owner或过期草稿、坏文件名、超限及空文件，SQLCipher实际保管原字节，库文件中无合成明文，取消后清理。Linux ARM64同两组合计20项通过，原App文件历史、预览及另存规则回归14项通过，相关分析无问题。代码已推送e3c31b48。当前还没有HTTP上传、App文件选择/预览/替换/另存接入，也未接Agent下载及本机受管副本，#97保持打开。
+
+Linux两次启动因SQLCipher依赖下载结果哈希不符而拒绝，测试没有运行；官方原地址的宿主下载也返回504。为同一官方发布地址添加本轮查询参数后重新下载，SHA256准确匹配依赖源码固定值266af998cb9e119ef4f61414e7ae0b77c10144a8e45ba27eff3fc3cb9eb60e41，随后只读挂入hooks缓存，由原校验再次确认后运行通过；未改校验值或关闭TLS。日志owner-byte-intake-core-tests.log、owner-byte-intake-storage-tests.log、linux-owner-byte-intake-tests.log、linux-owner-byte-intake-retry.log、linux-owner-byte-intake-verified-cache.log、owner-byte-intake-ui-regression.log。临时依赖文件在忽略目录local/server-first-stage/sqlcipher-linux-arm64.download，最终清理时可移除，后续容器复验可继续使用已校验缓存。
 
 接续：上传与原文需要独立的受认证传输和容量限制，不能复用2MiB普通JSON限制冒充10MiB文件支持；Agent已有import-file/submit/status及加密上传去重可复用，必须绑定原设备及聊天。文件领取要在CLI所在设备用真实NativeInformationDeliveryFiles生成并跟踪副本，不返回服务器路径。服务器需要持久核对原文件许可，普通重启不取消有效许可、已结束或撤销不恢复。不要简单在服务器启用原本机文件驱动再把其路径交给CLI。
