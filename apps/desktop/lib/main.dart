@@ -1,3 +1,5 @@
+import 'online_desktop_launcher.dart';
+import 'package:info_remote/connection_profile.dart';
 import 'approvals.dart';
 import 'dart:async';
 import 'dart:io';
@@ -20,8 +22,6 @@ import 'desktop_shell.dart';
 import 'ui.dart';
 import 'window_frame.dart';
 import 'prototype_dialog.dart';
-import 'platform/windows_library.dart';
-import 'package:info_core/macos_desktop_control.dart';
 import 'workspace/owner_workspace_host.dart';
 import 'desktop_fonts.dart';
 
@@ -33,62 +33,15 @@ Future<void> main() async {
       'Noto Sans SC',
     ], await rootBundle.loadString('assets/fonts/OFL.txt'));
   });
+  final base = Platform.isMacOS
+      ? Platform.environment['HOME']
+      : Platform.environment['APPDATA'];
+  if (base == null || base.isEmpty) throw StateError('directory_unavailable');
+  final directory = Platform.isMacOS
+      ? '$base/Library/Application Support/Chiyo/online'
+      : '$base/Chiyo/online';
   runApp(
-    DesktopLauncher(
-      useWorkspace: Platform.isMacOS,
-      bootstrap: DesktopBootstrap(
-        openLibrary: _openLibrary,
-        openLibraryWithKeyAccess: Platform.isMacOS
-            ? () => _openLibrary(requestKeyAccess: true)
-            : null,
-        platform: NativeDesktopPlatform(),
-        openAppControl: Platform.isMacOS
-            ? (state, quit) {
-                final base = Platform.environment['HOME'];
-                if (base == null || base.isEmpty) {
-                  throw StateError('control_unavailable');
-                }
-                return MacDesktopControlHost.start(
-                  directory: Directory(
-                    '$base/Library/Application Support/AgentInfoManage/app-control',
-                  ),
-                  state: state,
-                  quit: quit,
-                );
-              }
-            : null,
-      ),
-    ),
-  );
-}
-
-Future<DesktopLibrary> _openLibrary({bool requestKeyAccess = false}) async {
-  if (Platform.isWindows) return openWindowsLibrary();
-  if (!Platform.isMacOS) {
-    throw const StorageFailure('platform_unsupported');
-  }
-  final base = Platform.environment['HOME'];
-  if (base == null || base.isEmpty) {
-    throw const StorageFailure('directory_unavailable');
-  }
-  final directory = '$base/Library/Application Support/AgentInfoManage';
-  const channel = MethodChannel('agent_info_manage/database_key');
-  final keys = MacOsDatabaseKeyStore((method, arguments) {
-    return channel.invokeMethod<Object?>(
-      requestKeyAccess && method == 'read' ? 'readWithInteraction' : method,
-      arguments,
-    );
-  });
-  final repository = await EncryptedInformationRepository.open(directory, keys);
-  return DesktopLibrary(
-    service: InformationService(
-      repository: repository,
-      informationDeliveryFiles: NativeInformationDeliveryFiles(),
-    ),
-    close: repository.close,
-    backups: repository.backups,
-    fileOutputs: repository.fileOutputs,
-    fileOpens: repository.fileOpens,
+    OnlineDesktopLauncher(profiles: PrivateConnectionProfileStore(directory)),
   );
 }
 

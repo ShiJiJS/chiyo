@@ -38,7 +38,10 @@ dart run bin/server.dart serve /absolute/private/server.json
 协议版本为 1，所有接口均为 HTTPS，禁止浏览器 Origin。管理接口要求 `Authorization: Bearer <用户接入 Token>`，身份不合法返回 401；当前没有为 Agent 开放管理接口。
 
 - `GET /v1/server`：协议与服务器身份。
-- `GET /v1/owner/information`：当前文字资料列表。
+- `GET /v1/owner/catalog`：目录层级、标签、共享内置模板及实际待办数量；完整动态插件由 #95 接续。
+- `GET /v1/owner/summaries`：不含正文字段的资料摘要，供列表与关联名称查询。
+- `GET /v1/owner/information/{id}`：指定资料的完整内容和冻结模板布局。
+- `GET /v1/owner/information`：当前完整文字资料列表，供独立客户端取回核对。
 - `POST /v1/owner/saves/{operationId}`：文字新增或修改。修改携带 itemId、baseVersion 及原字段身份；复用核心版本检查和原子保存。
 - `GET /v1/owner/operations/{operationId}`：已提交操作的原始回执。响应丢失后先查询，或用完全相同的请求重试；同编号不同内容返回 409，不产生新资料。
 

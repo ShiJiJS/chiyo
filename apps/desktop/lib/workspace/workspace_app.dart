@@ -38,8 +38,10 @@ class WorkspaceApp extends StatelessWidget {
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
+    this.onConnectionSettings,
   });
   final WorkspaceSource source;
+  final VoidCallback? onConnectionSettings;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -56,6 +58,7 @@ class WorkspaceApp extends StatelessWidget {
     pageBuilder: pageBuilder,
     desktop: desktop,
     inputsBuilder: inputsBuilder,
+    onConnectionSettings: onConnectionSettings,
   );
 }
 
@@ -71,8 +74,10 @@ class _WorkspaceSession extends StatefulWidget {
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
+    this.onConnectionSettings,
   });
   final WorkspaceSource source;
+  final VoidCallback? onConnectionSettings;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -412,26 +417,37 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     windowTitle: widget.windowTitle,
     // A resumed unknown operation may arrive while the initial page is the
     // library. Keep reconciliation reachable even while navigation is locked.
-    trailingBuilder: (_) => ListenableBuilder(
-      listenable: _backups,
-      builder: (context, _) => !_backups.uncertain
-          ? const SizedBox.shrink()
-          : Tooltip(
-              message: '上次备份操作结果未确认。只核对原操作，不重新导出或恢复。',
-              child: DesktopButton(
-                key: const ValueKey('backup-root-reconcile'),
-                onPressed: _backups.busy
-                    ? null
-                    : (_backups.needsAccess
-                          ? _backups.recoverAccess
-                          : _backups.reconcile),
-                child: Text(
-                  _backups.busy
-                      ? '正在核对备份…'
-                      : (_backups.needsAccess ? '重新选择原文件并核对' : '核对上次备份操作'),
+    trailingBuilder: (_) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.onConnectionSettings != null)
+          IconButton(
+            tooltip: '连接设置',
+            onPressed: widget.onConnectionSettings,
+            icon: const Icon(Icons.dns_outlined),
+          ),
+        ListenableBuilder(
+          listenable: _backups,
+          builder: (context, _) => !_backups.uncertain
+              ? const SizedBox.shrink()
+              : Tooltip(
+                  message: '上次备份操作结果未确认。只核对原操作，不重新导出或恢复。',
+                  child: DesktopButton(
+                    key: const ValueKey('backup-root-reconcile'),
+                    onPressed: _backups.busy
+                        ? null
+                        : (_backups.needsAccess
+                              ? _backups.recoverAccess
+                              : _backups.reconcile),
+                    child: Text(
+                      _backups.busy
+                          ? '正在核对备份…'
+                          : (_backups.needsAccess ? '重新选择原文件并核对' : '核对上次备份操作'),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+        ),
+      ],
     ),
     pageBuilder:
         widget.pageBuilder ??

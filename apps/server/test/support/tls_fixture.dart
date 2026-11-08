@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:test/test.dart';
 
 Future<({String certificate, String privateKey, String ca})> createTlsFixture(
   Directory root,
@@ -15,7 +14,9 @@ Future<({String certificate, String privateKey, String ca})> createTlsFixture(
   );
   Future<void> openssl(List<String> args) async {
     final result = await Process.run('openssl', args);
-    expect(result.exitCode, 0, reason: 'Synthetic TLS certificate generation');
+    if (result.exitCode != 0) {
+      throw StateError('Synthetic TLS certificate generation failed');
+    }
   }
 
   await openssl([
