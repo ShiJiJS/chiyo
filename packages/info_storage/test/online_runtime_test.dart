@@ -13,7 +13,7 @@ void main() {
   late DateTime now;
   late String libraryPath;
   Future<void> open() async {
-    repo = await EncryptedInformationRepository.open(libraryPath, keys);
+    repo = await EncryptedInformationRepository.openOnline(libraryPath, keys);
     runtime = await OnlineInformationRuntime.open(
       repository: repo,
       clock: () => now,

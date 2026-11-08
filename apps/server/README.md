@@ -134,6 +134,17 @@ Mac App通过正常“添加凭据”、更换材料、编辑和停用入口接�
 
 丢回复先查原操作，不换编号自动重填；查询失败保留私有输入并要求核对。核对成功只恢复审阅，不自动审批整份提案；确认未保存后才允许用户明确重试或修正输入。必填缺少、版本变化或实际存储失败都不能部分入库。受限Agent设备凭证不能访问这些用户私有接口。
 
+
+## 凭据设备申请（#99接续中）
+
+独立Host使用`EncryptedInformationRepository.openOnline`保留运行事实，再由`OnlineInformationRuntime`恢复私有原设备/聊天绑定；旧单机`open`行为不变。私有textRuntime格式3保留已批混合字段范围及原期限、未确认决定的禁用状态、观察到的到期。旧文本运行格式可读，但不能从缺少绑定的凭据历史生成许可；便携恢复也不带该绑定。
+
+内部Agent路径`/credential-use/device/request`接收原协议2的request-use正文、sessionSecret及deviceLaunch。DeviceCredentialLaunch在执行电脑做工具/工作目录预检，绑定准确原计划；身份取认证网关，不接受正文指定设备。服务器沿用原接收方式校验并保存申请，不探测设备路径，不启动程序；status/claim及正常用户审批继续共用。此阶段尚未提供联网执行，不宣告credential-use-reuse.v1。
+
+正常App读取审批详情使用显式v2路径`/v1/owner/approvals/details/<id>`，它完整携带原Workspace的凭据及执行元数据。原GET `/v1/owner/approvals/<id>`仍是v1，拒绝凭据详情以免旧客户端静默丢掉接收程序等审阅内容。两种路径均只接受用户管理身份；动作仍走原decisions及持久回执，不另写批准规则。
+
+实际SSH/Token/文件执行、App退出后的设备宿主、私有材料交付及设备清理仍由#99接续。阶段证据见`docs/development/evidence/server-a09/README.md`，不将预检或HTTP合成审批当成最终执行/原生界面验收。
+
 ## 自动检查
 
 ```sh

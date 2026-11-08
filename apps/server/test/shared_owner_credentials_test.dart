@@ -22,7 +22,7 @@ void main() {
       late OnlineInformationRuntime runtime;
       late OwnerWorkspaceCredentials source;
       Future<void> open() async {
-        repo = await EncryptedInformationRepository.open(
+        repo = await EncryptedInformationRepository.openOnline(
           '${root.path}/data',
           keys,
         );

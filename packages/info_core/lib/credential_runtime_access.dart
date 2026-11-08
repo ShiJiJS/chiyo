@@ -119,7 +119,9 @@ extension _CredentialRuntimeService on InformationService {
     }
     if (r.attemptConsumed) return 'consumed';
     if (!r.credentialApproved) return 'not_approved';
-    if (r.invalidatedCode != null) return 'revoked';
+    if (r.invalidatedCode != null) {
+      return r.invalidatedCode == 'grant_expired' ? 'expired' : 'revoked';
+    }
     if (r.credentialGrantExpired(_clock())) return 'expired';
     final session = _credentialUseSessions[r.id];
     if (session == null || !_sessionActive(session)) return 'revoked';
@@ -452,15 +454,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     CredentialUseInput input,
     ManagedCredential credential,
   ) async {
-    final CredentialLaunchPlan launch;
-    if (input.launch.receiver == 'aws_shared_credentials') {
-      launch = _service._validateAwsReceiver(input, credential);
-    } else if (input.launch.receiver == 'ssh_identity') {
-      launch = _service._validateSshReceiver(input, credential);
-    } else {
-      _validateTokenReceiver(input, credential);
-      launch = input.launch;
-    }
+    final launch = _validateCredentialReceiver(input, credential);
     final identity = await _service.credentialExecutableInspector(
       input.launch.path,
       input.launch.receiver,
@@ -477,9 +471,35 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     return launch.resolved(identity, cwd);
   }
 
+  CredentialLaunchPlan _validateCredentialReceiver(
+    CredentialUseInput input,
+    ManagedCredential credential,
+  ) {
+    final CredentialLaunchPlan launch;
+    if (input.launch.receiver == 'aws_shared_credentials') {
+      launch = _service._validateAwsReceiver(input, credential);
+    } else if (input.launch.receiver == 'ssh_identity') {
+      launch = _service._validateSshReceiver(input, credential);
+    } else {
+      _validateTokenReceiver(input, credential);
+      launch = input.launch;
+    }
+    return launch;
+  }
+
   Future<CredentialUseRequest> requestCredentialUse(
     String session,
     CredentialUseInput input,
+  ) => _requestCredentialUse(session, input, _resolveCredentialPlan);
+
+  Future<CredentialUseRequest> _requestCredentialUse(
+    String session,
+    CredentialUseInput input,
+    FutureOr<CredentialLaunchPlan> Function(
+      CredentialUseInput,
+      ManagedCredential,
+    )
+    resolve,
   ) => _service.owner._serialize(() async {
     if (!_service._sessionActive(session)) {
       throw const CredentialUseFailure('session_required');
@@ -497,7 +517,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         fieldPath: 'readFields',
       );
     }
-    final launch = await _resolveCredentialPlan(input, c);
+    final launch = await resolve(input, c);
     if (!_service._sessionActive(session)) {
       throw const CredentialUseFailure('session_required');
     }

@@ -41,7 +41,7 @@ final class RemoteWorkspaceApprovals implements WorkspaceApprovalSource {
     () async => approvalDetailFromJson(
       await client.request(
         'GET',
-        '/v1/owner/approvals/${Uri.encodeComponent(id)}',
+        '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
       ),
     ),
   );

@@ -38,6 +38,7 @@ final class OnlineServer {
           enableInformationFiles: true,
         ),
         _devices,
+        deviceCredentials: _runtime.service.agent,
       ),
       _approvals = OwnerWorkspaceApprovals(owner: _runtime.service.owner),
       _plugins = OwnerWorkspaceTemplatePackages(
@@ -423,6 +424,16 @@ final class OnlineServer {
                   ? {'error': 'operation_not_found'}
                   : approvalReceiptToJson(receipt),
             );
+          } else if (path.length == 5 &&
+              path[3] == 'details' &&
+              request.method == 'GET') {
+            await reply(
+              200,
+              approvalDetailToJson(
+                await _approvals.read(path.last),
+                version: 2,
+              ),
+            );
           } else if (path.length == 4 && request.method == 'GET') {
             await reply(
               200,
@@ -561,7 +572,12 @@ final class OnlineServer {
           'status': e.status,
         });
       } on CredentialUseFailure catch (e) {
-        await reply(400, e.toJson());
+        await reply(
+          request.uri.path.startsWith('/v1/agent/') ? 200 : 400,
+          e.toJson(
+            protocolVersion: parsedBody?['protocolVersion'] == 2 ? 2 : 1,
+          ),
+        );
       } on FormatException {
         await reply(400, {'error': 'invalid_request'});
       } on TypeError {

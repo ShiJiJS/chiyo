@@ -29,7 +29,7 @@ void main() {
       final owner = base64Url
           .encode(await File('${root.path}/secrets/owner.token').readAsBytes())
           .replaceAll('=', '');
-      final repo = await EncryptedInformationRepository.open(
+      final repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
       );

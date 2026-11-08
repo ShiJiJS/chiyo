@@ -30,7 +30,7 @@ void main() {
           .encode(await File('${root.path}/secrets/owner.token').readAsBytes())
           .replaceAll('=', '');
       final keys = MountedDatabaseKeyStore('${root.path}/secrets/database.key');
-      var repo = await EncryptedInformationRepository.open(
+      var repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         keys,
       );
@@ -255,7 +255,7 @@ void main() {
         await server.close();
         await runtime.close();
         await repo.close();
-        repo = await EncryptedInformationRepository.open(
+        repo = await EncryptedInformationRepository.openOnline(
           '${root.path}/data',
           keys,
         );

@@ -40,7 +40,7 @@ void main() {
       late OwnerClient owner;
       var now = DateTime.utc(2026, 11, 8);
       Future<void> open({int port = 0}) async {
-        repo = await EncryptedInformationRepository.open(
+        repo = await EncryptedInformationRepository.openOnline(
           '${root.path}/data',
           keys,
         );

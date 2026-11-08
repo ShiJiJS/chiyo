@@ -129,6 +129,7 @@ extension _CredentialHistoryService on InformationService {
         }
         for (final id in ids) {
           _credentialUseSessions.remove(id);
+          _deviceCredentialRequests.remove(id);
         }
         for (final id in executionIds) {
           _executionCapabilities.remove(id);

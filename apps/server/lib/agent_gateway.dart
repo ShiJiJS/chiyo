@@ -5,9 +5,11 @@ import 'agent_devices.dart';
 /// Authenticated online transport adapter. It reuses the Agent-only protocol;
 /// the loopback HTTP server and its Host/Origin protections remain unchanged.
 final class AgentGateway {
-  AgentGateway(this._protocol, this._devices);
+  AgentGateway(this._protocol, this._devices, {AgentAccess? deviceCredentials})
+    : _deviceCredentials = deviceCredentials;
   final AgentProtocol _protocol;
   final AgentDeviceRegistry _devices;
+  final AgentAccess? _deviceCredentials;
   Future<void> _commands = Future.value();
 
   static const _metadata = {
@@ -45,6 +47,7 @@ final class AgentGateway {
     '/information-file/download',
     '/information-file/complete',
     '/information-file/cleanup',
+    '/credential-use/device/request',
   };
 
   Future<Map<String, Object?>> dispatch(
@@ -88,7 +91,26 @@ final class AgentGateway {
       throw const AccessFailure('unsupported_capability');
     }
     final device = await _devices.authorize(bearer, capabilities: capabilities);
-    final result = await _protocol.dispatch(path, body);
+    final Map<String, Object?> result;
+    if (path == '/credential-use/device/request') {
+      final agent = _deviceCredentials;
+      if (agent == null) throw const AccessFailure('unsupported_capability');
+      final command = Map<String, dynamic>.from(body)..remove('sessionSecret');
+      final raw = command.remove('deviceLaunch');
+      if (raw is! Map<String, dynamic>) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
+      final input = CredentialUseInput.fromJson(command);
+      final request = await agent.requestDeviceCredentialUse(
+        device.id,
+        text('sessionSecret'),
+        input,
+        DeviceCredentialLaunch.fromPrivateJson(raw),
+      );
+      result = agent.credentialUseStatus(text('sessionSecret'), request.id);
+    } else {
+      result = await _protocol.dispatch(path, body);
+    }
     final minted = <AgentDeviceCapability>[
       if (_open.contains(path)) ...[
         AgentDeviceCapability('session', result['sessionSecret'] as String),
