@@ -7,7 +7,7 @@ final class OnlineInformationRuntime {
   OnlineInformationRuntime._(this.service, this._state, this._generation);
   final InformationService service;
   final ServerStateRepository _state;
-  final String _generation;
+  String _generation;
   Future<void> _queue = Future.value();
   bool _closing = false, _failed = false;
   Future<void>? _closeFuture;
@@ -54,9 +54,18 @@ final class OnlineInformationRuntime {
       if (_failed) throw const AccessFailure('service_unavailable');
       await _checkGeneration();
       await _resolveDeviceCredentialDecisions();
+      final libraryGeneration = service._libraryGeneration;
       try {
         return await action();
       } finally {
+        // Only the successful original Owner restore barrier changes this
+        // in-memory generation. A portable restore atomically deletes private
+        // server state; adopt that fresh, empty generation before checkpointing
+        // the now-cleared runtime. Never adopt an external generation change or
+        // a restore that failed before its storage commit.
+        if (service._libraryGeneration != libraryGeneration) {
+          await _afterOwnerRestore(libraryGeneration);
+        }
         // Failed commands can still expire/end/revoke a capability. Persist
         // those facts too; failure here overrides any content result.
         await _save();
@@ -64,6 +73,22 @@ final class OnlineInformationRuntime {
     });
     _queue = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
+  }
+
+  Future<void> _afterOwnerRestore(int previousLibraryGeneration) async {
+    try {
+      final fresh = await _state.openServerState();
+      if (service._libraryGeneration != previousLibraryGeneration + 1 ||
+          fresh.generation == _generation ||
+          fresh.revision != 0 ||
+          fresh.payload.isNotEmpty) {
+        throw const AccessFailure('library_changed');
+      }
+      _generation = fresh.generation;
+    } on Object {
+      _failed = true;
+      rethrow;
+    }
   }
 
   Future<void> _checkGeneration() async {

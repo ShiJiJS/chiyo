@@ -39,6 +39,8 @@ Future<void> main(List<String> args) async {
         serverId: config.serverId,
         address: config.address,
         port: config.port,
+        backups: repository.backups,
+        backupDirectory: Directory('${config.dataDirectory}/backup-transfers'),
       );
       final stopped = Completer<void>();
       void stop(ProcessSignal _) {
