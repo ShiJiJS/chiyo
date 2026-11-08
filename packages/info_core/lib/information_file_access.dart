@@ -74,11 +74,59 @@ extension OwnerInformationFileIntake on OwnerAccess {
       sha256: '0' * 64,
     );
     final bytes = await _readInformationFileSource(file);
+    return _stageInformationBytes(
+      draft,
+      originalName: name,
+      mediaType: mediaType,
+      bytes: bytes,
+    );
+  });
+
+  /// Authenticated owner transports can stage a bounded upload without
+  /// inventing a server-side source path or writing a plaintext temporary file.
+  /// This is the same form lifetime and encrypted intake as the native picker.
+  Future<InformationFileStage> stageInformationBytes(
+    InformationFileDraft draft, {
+    required String originalName,
+    String mediaType = 'application/octet-stream',
+    required Uint8List bytes,
+  }) {
+    if (bytes.length > informationFileByteLimit) {
+      return Future.error(const AccessFailure('attachment_too_large'));
+    }
+    // Freeze caller-owned memory before the queued write can yield.
+    final frozen = Uint8List.fromList(bytes);
+    return _serialize(() async {
+      _checkInformationFileDraft(draft);
+      await _purgeInformationAttachments();
+      return _stageInformationBytes(
+        draft,
+        originalName: originalName,
+        mediaType: mediaType,
+        bytes: frozen,
+      );
+    });
+  }
+
+  Future<InformationFileStage> _stageInformationBytes(
+    InformationFileDraft draft, {
+    required String originalName,
+    required String mediaType,
+    required Uint8List bytes,
+  }) async {
     _checkInformationFileDraft(draft);
+    InformationFileStage(
+      id: 'check',
+      draftId: draft.id,
+      originalName: originalName,
+      mediaType: mediaType,
+      byteLength: bytes.length,
+      sha256: '0' * 64,
+    );
     final stage = await _fileStages.stageInformationBytes(
       draftId: draft.id,
       stageId: _service._secret(),
-      originalName: name,
+      originalName: originalName,
       mediaType: mediaType,
       bytes: bytes,
     );
@@ -86,7 +134,7 @@ extension OwnerInformationFileIntake on OwnerAccess {
     // draft cleanup owns that row; do not return a usable stage after shutdown.
     _checkInformationFileDraft(draft);
     return stage;
-  });
+  }
 
   Future<void> releaseInformationStage(
     InformationFileDraft draft,
