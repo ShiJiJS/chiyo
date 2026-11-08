@@ -140,6 +140,11 @@ abstract interface class WorkspaceSource implements WorkspaceRelationSource {
   });
 }
 
+/// A display fact about the active source, not an information directory.
+abstract interface class WorkspaceStorageLocation {
+  String get storageDescription;
+}
+
 enum WorkspaceLoad { idle, loading, ready, empty, error }
 
 enum WorkspacePage {

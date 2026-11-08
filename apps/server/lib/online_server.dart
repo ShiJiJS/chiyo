@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/information_transport.dart';
+import 'package:info_core/builtin_information_definitions.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -101,6 +102,33 @@ final class OnlineServer {
       final path = request.uri.pathSegments;
       if (request.method == 'GET' && request.uri.path == '/v1/server') {
         await reply(200, {'protocolVersion': 1, 'serverId': serverId});
+      } else if (request.method == 'GET' &&
+          request.uri.path == '/v1/owner/catalog') {
+        final classification = await _service.owner
+            .informationClassificationSnapshot();
+        await reply(200, {
+          'version': classification.version,
+          'summary': {'records': _service.owner.information.length + _service.owner.credentials.length,
+            'pending': _service.owner.queryInbox(limit:1).pendingCount,
+            'proposals': _service.owner.queryProposals(limit:1).pendingCount},
+          'directories': [
+            for (final d in _service.owner.directories)
+              {'id': d.id, 'name': d.name, 'parentId': d.parentId},
+          ],
+          'tags': [
+            for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
+          ],
+          'templates': builtinWorkspaceDefinitions.values.toList(),
+        });
+      } else if (request.method == 'GET' && request.uri.path == '/v1/owner/summaries') {
+        await reply(200, {'items': [for (final item in _service.owner.information)
+          {...informationToJson(item), 'fields': [],
+           if (item.layout != null) 'layout': InformationLayout(typeId:item.layout!.typeId,
+             snapshot:{if (item.layout!.snapshot['type'] != null) 'type':item.layout!.snapshot['type']},
+             fieldIds:{}).toJson()}]});
+      } else if (request.method == 'GET' && path.length == 4 && path.take(3).join('/') == 'v1/owner/information') {
+        final item = _service.owner.information.where((i) => i.id == path.last).firstOrNull;
+        await reply(item == null ? 404 : 200, item == null ? {'error':'not_found'} : informationToJson(item));
       } else if (request.method == 'GET' &&
           request.uri.path == '/v1/owner/information') {
         await reply(200, {
