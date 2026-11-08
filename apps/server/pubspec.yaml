@@ -5,6 +5,8 @@ publish_to: none
 environment:
   sdk: '>=3.10.0 <4.0.0'
 dependencies:
+  info_workspace:
+    path: ../../packages/info_workspace
   crypto: ^3.0.6
   info_core:
     path: ../../packages/info_core

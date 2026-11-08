@@ -2,6 +2,7 @@ FROM dart:3.13.5 AS verify
 WORKDIR /workspace
 COPY packages/info_core packages/info_core
 COPY packages/info_storage packages/info_storage
+COPY packages/info_workspace packages/info_workspace
 COPY apps/server apps/server
 COPY packages/info_remote packages/info_remote
 WORKDIR /workspace/apps/server

@@ -184,6 +184,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  info_workspace:
+    dependency: "direct main"
+    description:
+      path: "../../packages/info_workspace"
+      relative: true
+    source: path
+    version: "0.1.0"
   integration_test:
     dependency: "direct dev"
     description: flutter
