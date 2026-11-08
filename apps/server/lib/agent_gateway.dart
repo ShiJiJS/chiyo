@@ -37,6 +37,8 @@ final class AgentGateway {
     '/organization/tasks',
     '/organization/metadata',
     '/organization/submit',
+    '/import-file/submit',
+    '/import-file/status',
   };
 
   Future<Map<String, Object?>> dispatch(
@@ -75,25 +77,16 @@ final class AgentGateway {
       throw const AccessFailure('unsupported_capability');
     }
     final device = await _devices.authorize(bearer, capabilities: capabilities);
-    // Files and credentials use dedicated delivery paths in #97/#98. Until
-    // connected, refuse the whole submission rather than omit these materials.
+    // Credential material follows its dedicated #98 path. Until connected,
+    // refuse the whole submission rather than omit required material.
     if (path == '/import/submit' || path == '/import/revise') {
       final items = body['items'];
       if (items is List) {
         for (final item in items.whereType<Map>()) {
-          if (item['credential'] != null ||
-              item['attachments'] is List &&
-                  (item['attachments'] as List).isNotEmpty) {
+          if (item['credential'] != null) {
             throw const AccessFailure('unsupported_capability');
           }
         }
-      }
-    } else if (path == '/update/submit' || path == '/update/revise') {
-      final input = body['update'];
-      if (input is Map &&
-          input['attachments'] is List &&
-          (input['attachments'] as List).isNotEmpty) {
-        throw const AccessFailure('unsupported_capability');
       }
     }
     final result = await _protocol.dispatch(path, body);
@@ -126,6 +119,12 @@ final class AgentGateway {
           'agent-device-binding.v1',
           'information-import-operations.v1',
           'information-update-operations.v1',
+          if ((result['capabilities'] as List).contains(
+            'information-file-upload.v1',
+          )) ...[
+            'information-file-upload.v1',
+            'information-file-update.v1',
+          ],
           if ((result['capabilities'] as List).contains(
             'information-import-admission.v1',
           ))

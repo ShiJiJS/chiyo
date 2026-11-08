@@ -1,6 +1,8 @@
 import 'package:info_workspace/owner_workspace_proposals.dart';
 import 'package:info_workspace/proposal_transport.dart';
 import 'package:info_workspace/workspace_transport.dart';
+import 'package:info_workspace/file_transport.dart';
+import 'package:info_workspace/workspace_source.dart';
 
 /// Authenticated by OnlineServer before entry. All validation and admission
 /// remain in the shared owner adapter; this only translates transport data.
@@ -12,6 +14,43 @@ final class OwnerProposalRoutes {
     List<String> path,
     Map<String, dynamic>? body,
   ) async {
+    if (path.length == 6 && path[4] == 'originals' && method == 'POST') {
+      final input = body!;
+      final review = input['review'] == null
+          ? null
+          : proposalReviewFromJson(input['review']);
+      if (path.last == 'pending') {
+        return (
+          200,
+          originalContentToJson(
+            await proposals.pendingOriginalContent(
+              path[3],
+              input['proposalVersion'] as int,
+              input['itemId'] as String,
+              input['attachmentKey'] as String,
+              input['version'] as int,
+              review: review,
+              originalProposalVersion: input['originalProposalVersion'] as int?,
+            ),
+          ),
+        );
+      }
+      if (path.last == 'stored') {
+        return (
+          200,
+          originalContentToJson(
+            await proposals.storedOriginalContent(
+              path[3],
+              input['proposalVersion'] as int,
+              recordRefFromJson(input['record']),
+              input['fieldKey'] as String,
+              WorkspaceFileRef.fromJson(input['file']),
+              review: review,
+            ),
+          ),
+        );
+      }
+    }
     if (path.length == 4 && path.last == 'query' && method == 'POST') {
       return (
         200,

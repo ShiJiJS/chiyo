@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:info_workspace/form_transport.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_remote/owner_client.dart';
 import 'workspace_source.dart';
@@ -12,14 +13,54 @@ import 'remote_workspace_relations.dart';
 import 'remote_workspace_library.dart';
 import 'package:info_workspace/workspace_transport.dart';
 import 'directory_tree.dart';
+import 'remote_workspace_files.dart';
+import 'remote_workspace_legacy_templates.dart';
+import '../information_files.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
 class RemoteWorkspaceSource extends UnavailableWorkspaceSource
-    implements WorkspaceStorageLocation, WorkspaceLibraryMove {
-  RemoteWorkspaceSource(this.client)
-    : _observation = client.initialWorkspaceObservation;
+    implements
+        WorkspaceStorageLocation,
+        WorkspaceLibraryMove,
+        WorkspaceFileSelectionReleaser {
+  RemoteWorkspaceSource(this.client, {InformationFilePicker? filePicker})
+    : _observation = client.initialWorkspaceObservation {
+    files = RemoteWorkspaceFiles(
+      client,
+      changed: notifyConnectionChanged,
+      picker: filePicker ?? const NativeInformationFilePicker(),
+    );
+  }
   final OwnerClient client;
+  late final RemoteWorkspaceFiles files;
+  @override
+  late final WorkspaceLegacyTemplateSource legacyTemplates =
+      RemoteWorkspaceLegacyTemplates(client);
+  @override
+  Future<void> releaseFileSelection(String id) => files.release(id);
+  @override
+  Future<WorkspaceFileHistory> loadFileHistory(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  ) => files.history(record, fieldKey);
+  @override
+  Future<WorkspaceFilePreview> readFilePreview(
+    WorkspaceRecordRef record,
+    String fieldKey, {
+    int? version,
+    int page = 0,
+  }) => files.preview(record, fieldKey, version: version, page: page);
+  @override
+  Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
+      files.importFile(input);
+  @override
+  Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change) =>
+      files.change(change);
+  @override
+  Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
+    String operationId,
+  ) => files.receipt(operationId);
   late final _library = RemoteWorkspaceLibrary(
     client,
     changed: notifyConnectionChanged,
@@ -103,6 +144,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   }
 
   Future<void> dispose() async {
+    await files.dispose();
     client.close();
     await _changes.close();
   }
@@ -122,6 +164,11 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
         ),
         'version_conflict' || 'information_conflict' || 'operation_conflict' =>
           const WorkspaceFailure('conflict', '资料已变化，请重新读取后再修改。'),
+        'conflict' || 'selection_expired' || 'validation' => WorkspaceFailure(
+          e.code,
+          e.code == 'selection_expired' ? '附件选择已失效，请重新选择。' : '资料或模板已变化，请重新核对。',
+          fieldErrors: e.fieldErrors,
+        ),
         'invalid_information' || 'invalid_request' => const WorkspaceFailure(
           'validation',
           '资料内容无效，请核对填写内容。',
@@ -316,11 +363,12 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
 
   Future<WorkspaceSaveResult> _save(
     String id,
-    core.InformationDraftInput input,
-  ) async {
+    core.InformationDraftInput? input, {
+    Future<core.InformationRecordReceipt> Function()? write,
+  }) async {
     late core.InformationRecordReceipt receipt;
     try {
-      receipt = await client.save(id, input);
+      receipt = await (write?.call() ?? client.save(id, input!));
     } on RemoteFailure catch (e) {
       if (const {
         'unauthorized',
@@ -330,6 +378,9 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
         'version_conflict',
         'information_conflict',
         'operation_conflict',
+        'conflict',
+        'selection_expired',
+        'validation',
       }.contains(e.code)) {
         rethrow;
       }
@@ -360,15 +411,33 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   @override
   Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft) =>
       _remote(() async {
-        if (draft.fileSelections.isNotEmpty || draft.legacyTemplateId != null) {
-          throw const WorkspaceFailure('unsupported', '此录入方式的联网接入尚未完成。');
+        if (draft.fileSelections.isEmpty && draft.legacyTemplateId == null) {
+          final definition = await loadTemplate(draft.typeId);
+          if (draft.expectedTemplateVersion != definition['templateVersion'] ||
+              draft.expectedTemplateDigest != definition['packageDigest']) {
+            throw const WorkspaceFailure('conflict', '模板已变化，请重新打开表单。');
+          }
+          return _save(draft.operationId, _codec.create(draft, definition));
         }
-        final definition = await loadTemplate(draft.typeId);
-        if (draft.expectedTemplateVersion != definition['templateVersion'] ||
-            draft.expectedTemplateDigest != definition['packageDigest']) {
-          throw const WorkspaceFailure('conflict', '模板已变化，请重新打开表单。');
-        }
-        return _save(draft.operationId, _codec.create(draft, definition));
+        return _save(
+          draft.operationId,
+          null,
+          write: () async {
+            final receipt = core.InformationRecordReceipt.fromJson(
+              await client.request(
+                'POST',
+                '/v1/owner/files/forms',
+                workspaceCreateToJson(draft),
+              ),
+            );
+            if (receipt.command?.digest != _codec.createCommand(draft).digest ||
+                receipt.baseVersion != null) {
+              throw const FormatException('Mismatched form receipt');
+            }
+            files.committed(draft.fileSelections.values);
+            return receipt;
+          },
+        );
       });
   @override
   Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit) => _remote(

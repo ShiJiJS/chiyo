@@ -174,6 +174,11 @@ extension OwnerInformationFileIntake on OwnerAccess {
   }
 }
 
+/// Device-side owner upload uses the same bounded, unchanged-file check as
+/// native encrypted staging. The caller retains no path in any wire payload.
+Future<Uint8List> readInformationFileSource(String path) =>
+    _readInformationFileSource(File(path));
+
 Future<Uint8List> _readInformationFileSource(File file) async {
   RandomAccessFile? reader;
   try {

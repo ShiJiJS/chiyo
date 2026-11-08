@@ -174,6 +174,10 @@ final class AgentConnection {
             'status': code is String && !const {'ok', 'ended'}.contains(code)
                 ? code
                 : 'service_unavailable',
+            if (result['fieldErrors'] != null)
+              'fieldErrors': Map<String, String>.unmodifiable(
+                (result['fieldErrors'] as Map).cast<String, String>(),
+              ),
           };
         }
         if (result['status'] is! String) throw const FormatException();

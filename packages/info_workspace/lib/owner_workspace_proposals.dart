@@ -1,3 +1,5 @@
+import 'file_transport.dart';
+import 'owner_proposal_original_contents.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
@@ -23,13 +25,10 @@ class OwnerWorkspaceProposals
   final void Function() changed;
   final core.OwnerLibraryScope _scope;
   final _codec = WorkspaceInformationCodec();
+  late final _contents = OwnerProposalOriginalContents(owner);
   final OwnerProposalFiles? originals;
   OwnerProposalFiles get _originals =>
-      originals ??
-      (throw const WorkspaceFailure(
-        'unsupported',
-        '暂时无法预览这份文件。',
-      ));
+      originals ?? (throw const WorkspaceFailure('unsupported', '暂时无法预览这份文件。'));
   List<WorkspaceProposalAttachment> _attachments(
     Iterable<core.ImportAttachmentInput> attachments, {
     core.UpdateInput? update,
@@ -1639,6 +1638,78 @@ class OwnerWorkspaceProposals
     int page = 0,
     WorkspaceProposalItemReview? review,
     int? originalProposalVersion,
+  }) => _pendingOriginal(
+    proposalId,
+    proposalVersion,
+    itemId,
+    attachmentKey,
+    version,
+    review: review,
+    originalProposalVersion: originalProposalVersion,
+    read: (p, pv, i, a, v) => _originals.pending(p, pv, i, a, v, page: page),
+  );
+  Future<WorkspaceFileOriginal> pendingOriginalContent(
+    String proposalId,
+    int proposalVersion,
+    String itemId,
+    String attachmentKey,
+    int version, {
+    WorkspaceProposalItemReview? review,
+    int? originalProposalVersion,
+  }) => _pendingOriginal(
+    proposalId,
+    proposalVersion,
+    itemId,
+    attachmentKey,
+    version,
+    review: review,
+    originalProposalVersion: originalProposalVersion,
+    read: _contents.pending,
+  );
+  @override
+  Future<WorkspaceFilePreview> storedOriginal(
+    String proposalId,
+    int proposalVersion,
+    WorkspaceRecordRef record,
+    String fieldKey,
+    WorkspaceFileRef file, {
+    int page = 0,
+    WorkspaceProposalItemReview? review,
+  }) => _storedOriginal(
+    proposalId,
+    proposalVersion,
+    record,
+    fieldKey,
+    file,
+    review: review,
+    read: (ref) => _originals.stored(ref, page: page),
+  );
+  Future<WorkspaceFileOriginal> storedOriginalContent(
+    String proposalId,
+    int proposalVersion,
+    WorkspaceRecordRef record,
+    String fieldKey,
+    WorkspaceFileRef file, {
+    WorkspaceProposalItemReview? review,
+  }) => _storedOriginal(
+    proposalId,
+    proposalVersion,
+    record,
+    fieldKey,
+    file,
+    review: review,
+    read: _contents.stored,
+  );
+
+  Future<T> _pendingOriginal<T>(
+    String proposalId,
+    int proposalVersion,
+    String itemId,
+    String attachmentKey,
+    int version, {
+    required Future<T> Function(String, int, String, String, int) read,
+    WorkspaceProposalItemReview? review,
+    int? originalProposalVersion,
   }) => _run(() async {
     final proposal = _detail(proposalId);
     if (proposal.summary.version != proposalVersion ||
@@ -1648,14 +1719,7 @@ class OwnerWorkspaceProposals
       throw const WorkspaceFailure('conflict', '提案已变化，请重新核对。');
     }
     if (proposal.items.any((i) => i.id == itemId)) {
-      return _originals.pending(
-        proposalId,
-        proposalVersion,
-        itemId,
-        attachmentKey,
-        version,
-        page: page,
-      );
+      return read(proposalId, proposalVersion, itemId, attachmentKey, version);
     }
     final ref = WorkspaceRecordRef(
       WorkspaceRecordKind.information,
@@ -1673,24 +1737,22 @@ class OwnerWorkspaceProposals
         originalProposalVersion != pending.proposal.version) {
       throw const WorkspaceFailure('not_found', '关联原文已不可用。');
     }
-    return _originals.pending(
+    return read(
       pending.proposal.id,
       pending.proposal.version,
       itemId,
       attachmentKey,
       version,
-      page: page,
     );
   });
 
-  @override
-  Future<WorkspaceFilePreview> storedOriginal(
+  Future<T> _storedOriginal<T>(
     String proposalId,
     int proposalVersion,
     WorkspaceRecordRef record,
     String fieldKey,
     WorkspaceFileRef file, {
-    int page = 0,
+    required Future<T> Function(core.InformationAttachmentRef) read,
     WorkspaceProposalItemReview? review,
   }) => _run(() async {
     final proposal = _detail(proposalId);
@@ -1732,10 +1794,7 @@ class OwnerWorkspaceProposals
       }
     });
     if (!allowed) throw const WorkspaceFailure('not_found', '这份内容没有引用所选文件版本。');
-    return _originals.stored(
-      core.InformationAttachmentRef(file.id, file.version),
-      page: page,
-    );
+    return read(core.InformationAttachmentRef(file.id, file.version));
   });
 
   @override
