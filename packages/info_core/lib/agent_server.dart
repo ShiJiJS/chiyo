@@ -395,6 +395,33 @@ class AgentProtocol {
         return path.endsWith('/status')
             ? _agent.informationFileStatus(session, input.deliveryId!)
             : _agent.releaseInformationFile(session, input.deliveryId!);
+      case '/information-file/download':
+      case '/information-file/complete':
+      case '/information-file/cleanup':
+        if (!_informationFilesEnabled) {
+          throw const InformationFileFailure('unsupported_capability');
+        }
+        final command = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        final input = InformationFileDeviceInput.fromJson(command);
+        if (input.command != 'file-${path.split('/').last}') {
+          throw const InformationFileFailure('invalid_request');
+        }
+        final session = _text(body, 'sessionSecret');
+        if (path.endsWith('/download')) {
+          return _agent.downloadDeviceInformationFile(
+            session,
+            input.deliveryId,
+          );
+        }
+        if (path.endsWith('/complete')) {
+          return _agent.completeDeviceInformationFile(
+            session,
+            input.deliveryId,
+            input.byteLength!,
+            input.sha256!,
+          );
+        }
+        return _agent.cleanupDeviceInformationFile(session, input.deliveryId);
       case '/credential-use/focus-target':
         if (!_focusedFillEnabled || !_agent.focusedFillDiscoveryAvailable) {
           throw const CredentialUseFailure('unsupported_capability');
