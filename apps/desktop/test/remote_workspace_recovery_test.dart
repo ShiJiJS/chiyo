@@ -38,10 +38,13 @@ void main() {
           '${root.path}/data',
           MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
         );
-        final service = core.InformationService(repository: repo);
+        final runtime = await core.OnlineInformationRuntime.open(
+          repository: repo,
+        );
+        final service = runtime.service;
         final server = await OnlineServer.start(
           devices: AgentDeviceRegistry(repo),
-          service: service,
+          runtime: runtime,
           tls: tls,
           ownerToken: token,
           serverId: 'response-loss-synthetic',
@@ -149,7 +152,7 @@ void main() {
           await proxy.close(force: true);
           upstream.close(force: true);
           await server.close();
-          await service.close();
+          await runtime.close();
           await repo.close();
           await root.delete(recursive: true);
         }

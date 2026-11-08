@@ -30,6 +30,7 @@ void main() {
       late Directory root;
       late EncryptedInformationRepository repo;
       late core.InformationService service;
+      late core.OnlineInformationRuntime runtime;
       late OnlineServer server;
       late SecurityContext serverTls;
       late String token, certificate;
@@ -48,7 +49,8 @@ void main() {
           '${root.path}/data',
           MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
         );
-        service = core.InformationService(repository: repo);
+        runtime = await core.OnlineInformationRuntime.open(repository: repo);
+        service = runtime.service;
         final parent = await service.owner.createDirectory('团队');
         directoryId = (await service.owner.createDirectory(
           '项目',
@@ -59,7 +61,7 @@ void main() {
           ..usePrivateKey(tls.privateKey);
         server = await OnlineServer.start(
           devices: AgentDeviceRegistry(repo),
-          service: service,
+          runtime: runtime,
           tls: serverTls,
           ownerToken: token,
           serverId: 'online-ui-synthetic-0001',
@@ -222,7 +224,7 @@ void main() {
           token = base64Url.encode(List.filled(32, 72)).replaceAll('=', '');
           server = await OnlineServer.start(
             devices: AgentDeviceRegistry(repo),
-            service: service,
+            runtime: runtime,
             tls: serverTls,
             ownerToken: token,
             serverId: 'online-ui-synthetic-0001',
@@ -249,7 +251,7 @@ void main() {
           await server.close();
           server = await OnlineServer.start(
             devices: AgentDeviceRegistry(repo),
-            service: service,
+            runtime: runtime,
             tls: serverTls,
             ownerToken: token,
             serverId: 'online-ui-replacement-0002',
@@ -280,7 +282,7 @@ void main() {
         await t.runAsync(() async {
           server = await OnlineServer.start(
             devices: AgentDeviceRegistry(repo),
-            service: service,
+            runtime: runtime,
             tls: serverTls,
             ownerToken: token,
             serverId: 'online-ui-replacement-0002',
@@ -300,7 +302,7 @@ void main() {
         await settle();
         await t.runAsync(() async {
           await server.close();
-          await service.close();
+          await runtime.close();
           await repo.close();
           await root.delete(recursive: true);
         });

@@ -27,6 +27,7 @@ import 'template_packages.dart';
 export 'template_packages.dart';
 import 'history.dart';
 export 'history.dart';
+import 'server_state.dart';
 import 'import_proposals.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
@@ -87,6 +88,7 @@ part 'information_template_catalog.dart';
 part 'template_import_access.dart';
 part 'import_admission_access.dart';
 part 'update_admission_access.dart';
+part 'online_information_runtime.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -238,6 +240,17 @@ class InformationService {
           ],
         ),
       ]);
+  // The online runtime reconciles live capabilities before finishing orphaned
+  // audit facts. Ordinary local construction retains its historical behavior.
+  InformationService._online({
+    required InformationRepository repository,
+    DateTime Function()? clock,
+  }) : _repository = repository,
+       _clock = clock ?? DateTime.now,
+       focusedFillDriver = null,
+       informationDeliveryFiles = null,
+       focusedFillApplicationInspector = inspectFocusedFillApplication,
+       credentialExecutableInspector = inspectCredentialExecutable;
   final InformationRepository _repository;
   final CredentialExecutableInspector credentialExecutableInspector;
   final FocusedFillDriver? focusedFillDriver;
@@ -295,9 +308,14 @@ class InformationService {
   final _auditPending = <Future<void> Function()>[];
   bool _auditFailed = false;
   AuditRetentionPreview? _retentionPreview;
-  Future<void> close() {
+  Future<void> close() => _close();
+
+  Future<void> _close({bool preserveOnlineAuthorizations = false}) {
     if (_backupBarrier case final barrier?) {
-      return barrier.future.then((_) => close());
+      return barrier.future.then(
+        (_) =>
+            _close(preserveOnlineAuthorizations: preserveOnlineAuthorizations),
+      );
     }
     if (_closed) {
       return Future.wait<void>([
@@ -308,7 +326,8 @@ class InformationService {
       ]).then((_) {});
     }
     _closed = true;
-    for (final request in _requests.values) {
+    for (final request
+        in preserveOnlineAuthorizations ? <_Request>[] : _requests.values) {
       _expire(request);
       if (request.state != AccessRequestState.pending &&
           request.state != AccessRequestState.approved) {

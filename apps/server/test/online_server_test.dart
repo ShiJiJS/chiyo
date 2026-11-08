@@ -32,10 +32,10 @@ void main() {
         '${root.path}/data',
         keys,
       );
-      var service = InformationService(repository: repo);
+      var runtime = await OnlineInformationRuntime.open(repository: repo);
       var server = await OnlineServer.start(
         devices: AgentDeviceRegistry(repo),
-        service: service,
+        runtime: runtime,
         tls: tls,
         ownerToken: token,
         serverId: 'synthetic-server-0001',
@@ -125,16 +125,16 @@ void main() {
         );
         client.close(force: true);
         await server.close();
-        await service.close();
+        await runtime.close();
         await repo.close();
         repo = await EncryptedInformationRepository.open(
           '${root.path}/data',
           keys,
         );
-        service = InformationService(repository: repo);
+        runtime = await OnlineInformationRuntime.open(repository: repo);
         server = await OnlineServer.start(
           devices: AgentDeviceRegistry(repo),
-          service: service,
+          runtime: runtime,
           tls: tls,
           ownerToken: token,
           serverId: 'synthetic-server-0001',
@@ -159,7 +159,7 @@ void main() {
       } finally {
         client.close(force: true);
         await server.close();
-        await service.close();
+        await runtime.close();
         await repo.close();
       }
     },

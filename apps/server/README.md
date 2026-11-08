@@ -50,7 +50,9 @@ dart run bin/server.dart serve /absolute/private/server.json
 
 Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，正文沿用 AgentProtocol。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
 
-**#93 尚未交付完成。** 正式 CLI 的远程配置、App 审批接入和有效聊天授权重启恢复仍在开发；当前设备接入身份及绑定索引可加密持久保存，不表示核心中的活跃聊天和资料授权已经能在重启后延续。不要将本段作为完成的使用流程交给日常 Agent。
+普通维护重启现在通过 OnlineInformationRuntime 保存和恢复文字聊天状态：待办、原会话与结束凭证、已批准字段、原读取凭证和固定到期时间。每个业务响应在加密状态保存成功后才发送；写入失败不交付已准备的内容。恢复先核对原审批记录，已撤销、结束、到期的许可不恢复；备份恢复会更换状态代际并清除有效接入与聊天关联。不要把普通授权历史当作可用许可导入。
+
+**#93 尚未交付完成。** 正式 CLI 的远程配置、App 审批接入及独立 Agent 试用仍在开发。文字授权已做加密库和HTTPS宿主整体重建测试；文件和凭据的重启、执行与清理仍由 #97/#99 接续。不要将本段作为完整日常使用流程交给 Agent。
 
 操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。目录、模板、完整文件与凭据协议由对应后续票接通，当前接口不代表这些能力已交付。
 

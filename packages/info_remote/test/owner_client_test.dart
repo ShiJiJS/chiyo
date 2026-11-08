@@ -33,10 +33,11 @@ void main() {
         '${root.path}/data',
         keys,
       );
-      final service = InformationService(repository: repo);
+      final runtime = await OnlineInformationRuntime.open(repository: repo);
+      final service = runtime.service;
       final server = await OnlineServer.start(
         devices: AgentDeviceRegistry(repo),
-        service: service,
+        runtime: runtime,
         tls: tls,
         ownerToken: token,
         serverId: 'client-test-server-0001',
@@ -126,7 +127,7 @@ void main() {
       } finally {
         client?.close();
         await server.close();
-        await service.close();
+        await runtime.close();
         await repo.close();
       }
     },

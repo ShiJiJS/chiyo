@@ -131,3 +131,23 @@ Mac 服务包10项通过；Linux ARM64服务包10项通过。私有状态专项�
 Mac 服务包12项通过，Linux ARM64服务包12项通过；包含真实HTTPS的两设备隔离、用户/Agent角色隔离、无授权不能领取、重复申请和批准、仅获批字段读取、结束后拒绝及读取过程中撤销的专项。静态分析通过。日志 agent-gateway-tests.log、server-gateway-suite.log、linux-gateway-tests.log；Docker仅更新验证镜像，没有安装日常App或触发钥匙串。
 
 **仍未完成 #93。** 本轮正常审批使用现有可信 OwnerAccess 的持久决定接口做合成驱动；App的远程审批适配、CLI连接配置及真正的核心会话/授权重启恢复仍需接续。设备索引的重开不等同授权重启，不关闭本票。
+
+## #93 文字会话与有效许可的普通重启恢复
+
+新增可信宿主 OnlineInformationRuntime，作为联网模式业务命令入口。它在回复内容、新会话凭证或审批结果之前，保存加密的会话、待办、领取凭证、原批准范围与固定到期时间。普通关闭先保存再释放内存，不写入旧单机的 applicationClosed 撤销事实；原 InformationService 的本机默认关闭规则保持。正式 server 入口与所有 HTTPS 测试装配均显式使用相同在线生命周期，不提供仅测试使用的恢复开关。
+
+启动时将私有状态与原持久审批事实核对。撤销和结束的事实优先于旧快照；原批准事务已提交但快照仍是待办时，仅恢复原批准范围和原期限，不重复授权。已过期或终止的不复活；普通历史或备份本身不创建许可。成功备份恢复清掉私有代际，旧运行对象随后拒绝操作且不能写回旧身份。损坏状态拒绝启动，不默默改成空状态。写入失败不返回暂存内容，后续命令停止；CAS重试保留设备登记等其他私有状态，不覆盖并发命名空间。
+
+HTTP处理现先认证并有界解析正文，再进入串行核心操作；回复先暂存，待在线状态保存成功后才真正发送。没有在持有业务队列时等待客户端传输正文。AgentGateway测试整体关闭并重建SQLCipher仓库、核心、设备注册、HTTPS宿主和通道，原session及read token仍可完成原批准读取，然后结束/撤销仍生效。
+
+### 本轮检查
+
+- Mac在线授权6项：待办/有效许可/原期限重开，结束/撤销/到期不恢复，审批与快照之间中断恢复，备份代际清除，损坏拒绝。
+- Linux ARM64在线授权与私有状态合计8项通过；Mac私有状态/审批事务相关回归21项通过。
+- Mac故障注入2项通过：保存失败不交付值且停止后续命令；并发状态CAS重试不丢其他状态。
+- 原本机传输/结束/审批/历史回归35项通过；原默认关闭规则没有改为保存许可。曾误写一个不存在的回归文件名，按实际transport_test.dart等文件重跑后35项通过。
+- Mac和Linux服务包各12项通过，含HTTPS宿主真实重建后原凭证复用；远程客户端2项通过；App正常联网编辑/重新连接及响应丢失恢复2项通过（68秒，Widget+真实HTTPS+SQLCipher，不称为实机系统面板验收）。相关改动静态分析通过。
+
+日志：online-runtime-tests.log、linux-runtime-storage-tests.log、online-runtime-failure-tests.log、storage-runtime-regression.log、local-auth-runtime-regression.log、server-runtime-suite.log、linux-runtime-server-tests.log、remote-runtime-regression.log、online-ui-runtime-regression.log。
+
+**#93 尚未完成。** 下一步接用户审批HTTP接口与原App审批适配，再接正式CLI远程配置及无开发上下文Agent试用。当前协议未接远程文件/凭据，在线持久化也尚未宣称这些能力完成。没有正式候选包、安装或真实迁移。#103–#105不动，目标保持active。
