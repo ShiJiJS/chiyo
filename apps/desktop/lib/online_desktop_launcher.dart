@@ -15,6 +15,8 @@ import 'package:info_storage/info_storage.dart';
 import 'workspace/owner_file_open_dispatcher.dart';
 import 'workspace/owner_credential_input.dart';
 import 'credential_files.dart';
+import 'desktop_runtime.dart';
+import 'online_desktop_runtime.dart';
 
 class OnlineDesktopLauncher extends StatefulWidget {
   const OnlineDesktopLauncher({
@@ -22,6 +24,7 @@ class OnlineDesktopLauncher extends StatefulWidget {
     required this.profiles,
     this.filePicker,
     this.deviceFilesDirectory,
+    this.desktopPlatform,
     this.outputPicker = const NativeBackupFilePicker(),
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
     this.credentialFiles = const NativeCredentialFilePicker(),
@@ -29,6 +32,7 @@ class OnlineDesktopLauncher extends StatefulWidget {
   final ConnectionProfileStore profiles;
   final InformationFilePicker? filePicker;
   final String? deviceFilesDirectory;
+  final DesktopPlatform? desktopPlatform;
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
   final CredentialFilePicker credentialFiles;
@@ -47,9 +51,16 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   bool _serverChanged = false;
   bool _offline = false, _probing = false;
   Timer? _connectionTimer;
+  late final OnlineDesktopRuntime _desktop;
   @override
   void initState() {
     super.initState();
+    _desktop = OnlineDesktopRuntime(
+      platform: widget.desktopPlatform ?? NativeDesktopPlatform(),
+      beforeExit: _closeForExit,
+      onResume: _checkConnection,
+    )..addListener(_desktopChanged);
+    unawaited(_desktop.start());
     unawaited(_restore());
   }
 
@@ -115,6 +126,8 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
         _source = RemoteWorkspaceSource(
           client!,
           filePicker: widget.filePicker,
+          onNotificationEnable: _desktop.enableNotifications,
+          onClosing: _desktop.release,
           deviceFilesDirectory:
               widget.deviceFilesDirectory ??
               (widget.profiles is PrivateConnectionProfileStore
@@ -126,6 +139,8 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
         _offline = false;
         _busy = false;
       });
+      await _desktop.bind(_source);
+      if (!mounted || _desktop.quitting) return;
       _connectionTimer?.cancel();
       _connectionTimer = Timer.periodic(
         const Duration(seconds: 2),
@@ -160,6 +175,9 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       if (observation is! String) throw const RemoteFailure('invalid_response');
       if (mounted && identical(source, _source)) {
         source.observeServer(observation);
+        // A slow OS notification delivery must not hold the health probe open
+        // and delay the offline screen. The App lifetime drains this work.
+        unawaited(_desktop.refresh());
       }
       if (mounted && identical(source, _source) && _offline) {
         source.notifyConnectionChanged();
@@ -176,14 +194,33 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   }
 
   void _settings() {
+    if (_desktop.quitting) return;
+    unawaited(_desktop.bind(null));
     _connectionTimer?.cancel();
     final old = _source;
     setState(() => _source = null);
     if (old != null) unawaited(old.dispose());
   }
 
+  void _desktopChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _closeForExit() async {
+    _connectionTimer?.cancel();
+    // Unmount data-backed widgets before their client and private device
+    // coordinators close. This callback has no server/session stop capability.
+    if (mounted) {
+      setState(() {});
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    await _source?.dispose();
+  }
+
   @override
   void dispose() {
+    _desktop.removeListener(_desktopChanged);
+    _desktop.dispose();
     _connectionTimer?.cancel();
     _source?.dispose();
     _address.dispose();
@@ -195,6 +232,33 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   @override
   Widget build(BuildContext context) {
     final source = _source;
+    if (_desktop.quitting) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: zhiyuTheme(Brightness.light),
+        home: Scaffold(
+          body: Center(
+            child: _desktop.shutdownFailed
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _desktop.resourcesClosed
+                            ? '应用未能退出，请重试。服务器和CLI会话不受影响。'
+                            : '本机资源尚未关闭，请重试退出。服务器和CLI会话不受影响。',
+                      ),
+                      TextButton(
+                        key: const ValueKey('online-retry-exit'),
+                        onPressed: _desktop.quit,
+                        child: const Text('重试退出'),
+                      ),
+                    ],
+                  )
+                : const Text('正在退出应用…'),
+          ),
+        ),
+      );
+    }
     if (source != null) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -209,6 +273,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                   absorbing: _offline,
                   child: WorkspaceApp(
                     source: source,
+                    desktop: _desktop,
                     windowTitle: '知予',
                     inputsBuilder: (context) => WorkspaceInputs(
                       plugin: source.plugins.pick,
