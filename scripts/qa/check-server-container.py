@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shutil
 import ssl
 import subprocess
 import tempfile
@@ -21,8 +22,10 @@ def run(*args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', default='chiyo-server-verification:a01')
+    parser.add_argument('--upgrade-image', help='Also rehearse upgrade and restoration of a stopped pre-upgrade volume')
     args = parser.parse_args()
     names = []
+    copies = []
     with tempfile.TemporaryDirectory(prefix='chiyo-container-') as directory:
         root = Path(directory)
         private = root / 'secrets'
@@ -63,12 +66,13 @@ def main():
                 data=None if body is None else json.dumps(body).encode())
             with urllib.request.urlopen(request, context=context, timeout=3) as response:
                 return json.load(response)
-        def start():
+        def start(image=None, fixture=None):
+            fixture = root if fixture is None else fixture
             name = 'chiyo-fixture-' + uuid.uuid4().hex[:12]
             names.append(name)
             run('docker', 'run', '-d', '--name', name, '--mount',
-                f'type=bind,source={root},target=/fixture', '-p', '127.0.0.1::47126',
-                args.image, 'dart', 'run', 'bin/server.dart', 'serve', '/fixture/server.json')
+                f'type=bind,source={fixture},target=/fixture', '-p', '127.0.0.1::47126',
+                image or args.image, 'dart', 'run', 'bin/server.dart', 'serve', '/fixture/server.json')
             port = run('docker', 'port', name, '47126/tcp').rsplit(':', 1)[1]
             deadline = time.monotonic() + 90
             while time.monotonic() < deadline:
@@ -87,19 +91,64 @@ def main():
             run('docker', 'stop', '--time', '15', first)
             assert run('docker', 'inspect', '--format', '{{.State.ExitCode}}', first) == '0'
             run('docker', 'rm', first)
-            second, port, reopened_identity = start()
-            assert identity == reopened_identity
+            # A rollback copy is coherent only while the service is stopped.
+            # Keep it outside the mounted tree so copying cannot recurse.
+            rollback = None
+            if args.upgrade_image:
+                rollback = Path(tempfile.mkdtemp(prefix='chiyo-stopped-rollback-'))
+                copies.append(rollback)
+                shutil.copytree(root, rollback, dirs_exist_ok=True)
+            second, port, reopened_identity = start(args.upgrade_image)
+            assert {k: identity[k] for k in ['protocolVersion', 'serverId']} == {
+                k: reopened_identity[k] for k in ['protocolVersion', 'serverId']}
             assert call(port, 'GET', '/v1/owner/operations/container-save') == receipt
             assert call(port, 'POST', '/v1/owner/saves/container-save', body) == receipt
             items = call(port, 'GET', '/v1/owner/information')['items']
             assert len(items) == 1 and items[0]['fields'][0]['value'] == 'container.synthetic.invalid'
+            if args.upgrade_image:
+                assert run('docker', 'image', 'inspect', '--format', '{{.Id}}', args.image) != run(
+                    'docker', 'image', 'inspect', '--format', '{{.Id}}', args.upgrade_image)
+                run('docker', 'stop', '--time', '15', second)
+                assert run('docker', 'inspect', '--format', '{{.State.ExitCode}}', second) == '0'
+                run('docker', 'rm', second)
+                # Simulate recovering both the persistent library and its
+                # matching private keys into a new directory/container. This
+                # remains a stopped upgrade rehearsal, not a real deployment.
+                recovered = Path(tempfile.mkdtemp(prefix='chiyo-recovered-volume-'))
+                copies.append(recovered)
+                shutil.copytree(rollback, recovered, dirs_exist_ok=True)
+                third, recovery_port, recovered_identity = start(args.upgrade_image, recovered)
+                assert {k: recovered_identity[k] for k in ['protocolVersion', 'serverId']} == {
+                    k: identity[k] for k in ['protocolVersion', 'serverId']}
+                assert call(recovery_port, 'GET', '/v1/owner/operations/container-save') == receipt
+                assert call(recovery_port, 'GET', '/v1/owner/information')['items'] == items
+                for secret in ['database.key', 'owner.token', 'server.id']:
+                    assert (recovered / 'secrets' / secret).read_bytes() == (rollback / 'secrets' / secret).read_bytes()
+                run('docker', 'stop', '--time', '15', third)
+                assert run('docker', 'inspect', '--format', '{{.State.ExitCode}}', third) == '0'
+                run('docker', 'rm', third)
+                # Return to the old image with the *unmodified old copy*,
+                # never ask an old program to open an upgraded database.
+                fourth, rollback_port, rollback_identity = start(args.image, rollback)
+                assert {k: rollback_identity[k] for k in ['protocolVersion', 'serverId']} == {
+                    k: identity[k] for k in ['protocolVersion', 'serverId']}
+                assert call(rollback_port, 'GET', '/v1/owner/information')['items'] == items
+                assert call(rollback_port, 'GET', '/v1/owner/operations/container-save') == receipt
+                run('docker', 'stop', '--time', '15', fourth)
+                assert run('docker', 'inspect', '--format', '{{.State.ExitCode}}', fourth) == '0'
+                run('docker', 'rm', fourth)
             print(json.dumps({'containerRecreated': True, 'dataPreserved': True,
                 'serverIdentityPreserved': True, 'retryDeduplicated': True,
-                'tlsVerified': True, 'syntheticOnly': True}))
+                'tlsVerified': True, 'syntheticOnly': True,
+                'distinctImageUpgrade': bool(args.upgrade_image),
+                'stoppedDataAndKeysRecovered': bool(args.upgrade_image),
+                'preUpgradeCopyRollback': bool(args.upgrade_image)}))
         finally:
             for name in names:
                 subprocess.run(['docker', 'rm', '-f', name], stdout=subprocess.DEVNULL,
                                stderr=subprocess.DEVNULL, check=False)
+            for copy in copies:
+                shutil.rmtree(copy)
 
 
 if __name__ == '__main__':
