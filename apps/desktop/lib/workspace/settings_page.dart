@@ -353,7 +353,11 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                       key: const ValueKey('settings-request-minutes'),
                       value: m.draft!.requestMinutes,
                       items: [
-                        for (final n in [5, 15, 30, 60, 120])
+                        for (final n in {
+                          ...[5, 15, 30, 60, 120],
+                          m.draft!.requestMinutes,
+                          if (m.value != null) m.value!.requestMinutes,
+                        }.toList()..sort())
                           DropdownMenuItem(value: n, child: Text('$n 分钟')),
                       ],
                       onChanged: !enabled

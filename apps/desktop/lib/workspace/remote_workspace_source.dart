@@ -26,6 +26,7 @@ import 'remote_workspace_file_actions.dart';
 import 'remote_workspace_hosts.dart';
 import 'remote_workspace_history.dart';
 import 'remote_workspace_backups.dart';
+import 'remote_workspace_settings.dart';
 import 'package:info_workspace/adoption_transport.dart';
 
 /// Live projections through the existing UI seam; no local library or body
@@ -57,6 +58,12 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  @override
+  late final RemoteWorkspaceSettings settings = RemoteWorkspaceSettings(
+    client,
+    directory: deviceFilesDirectory,
+    changed: notifyConnectionChanged,
+  );
   @override
   late final RemoteWorkspaceBackups backups = RemoteWorkspaceBackups(
     client,
@@ -286,6 +293,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
       await _fileActions.dispose();
     } finally {
       await backups.dispose();
+      await settings.dispose();
       await hosts.dispose();
       await credentials.dispose();
       await files.dispose();
