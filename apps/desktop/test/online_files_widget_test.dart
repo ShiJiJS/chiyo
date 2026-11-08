@@ -1,3 +1,6 @@
+import 'package:info_desktop/workspace/workspace_app.dart';
+import 'package:info_desktop/workspace/remote_workspace_source.dart';
+import 'support/native_file_actions_fixture.dart';
 import 'package:info_desktop/information_files.dart';
 import 'package:info_desktop/workspace/library_document.dart';
 import 'package:info_desktop/workspace/proposals_page.dart';
@@ -56,6 +59,8 @@ void main() {
       late AgentClient cli;
       late OwnerClient independent;
       final picker = _FilePicker();
+      final output = SyntheticOutputPicker();
+      final dispatcher = SyntheticOpenDispatcher();
       Future<void> until(bool Function() ready) async {
         for (var n = 0; n < 350; n++) {
           if (ready()) return;
@@ -107,8 +112,33 @@ void main() {
         await t.pump(const Duration(milliseconds: 250));
       }
 
+      Future<void> unmount() async {
+        final app = find.byType(WorkspaceApp);
+        final source = app.evaluate().isEmpty
+            ? null
+            : t.widget<WorkspaceApp>(app).source as RemoteWorkspaceSource;
+        await t.pumpWidget(const SizedBox());
+        if (source != null) {
+          var closed = false;
+          Object? failure;
+          await t.runAsync(() async {
+            source.dispose().then(
+              (_) => closed = true,
+              onError: (Object e) {
+                failure = e;
+                closed = true;
+              },
+            );
+          });
+          await until(() => closed);
+          expect(failure, isNull);
+        }
+        await t.pump();
+      }
+
       await t.runAsync(() async {
         root = await Directory.systemTemp.createTemp('chiyo-online-files-ui-');
+        root = Directory(await root.resolveSymbolicLinks());
         await initializeServerSecrets('${root.path}/secrets');
         final fixture = await createTlsFixture(root);
         final tls = SecurityContext()
@@ -179,7 +209,12 @@ void main() {
         LibraryController model() =>
             t.widget<LibraryPage>(find.byType(LibraryPage)).controller;
         await t.pumpWidget(
-          OnlineDesktopLauncher(profiles: profiles, filePicker: picker),
+          OnlineDesktopLauncher(
+            profiles: profiles,
+            filePicker: picker,
+            outputPicker: output,
+            openDispatcher: dispatcher,
+          ),
         );
         await until(
           () =>
@@ -257,13 +292,14 @@ void main() {
           }
           expect((await repo.informationFileStagingUsage()).files, 0);
         });
-        await t.pumpWidget(const SizedBox());
-        await t.pump();
+        await unmount();
         await t.pumpWidget(
           OnlineDesktopLauncher(
             key: const ValueKey('reopened-files'),
             profiles: profiles,
             filePicker: picker,
+            outputPicker: output,
+            openDispatcher: dispatcher,
           ),
         );
         await until(
@@ -279,6 +315,30 @@ void main() {
         expect(model().detail!.record.ref, record);
         expect(find.text('文件'), findsWidgets);
         expect(t.takeException(), isNull);
+        final ownerCopy = File('${root.path}/owner-copy.md');
+        output.output = ownerCopy.path;
+        await tap('library-file-actions-file');
+        await tap('library-file-save-file');
+        await until(() => find.text('已另存 owner-copy.md').evaluate().isNotEmpty);
+        await t.runAsync(() async {
+          expect(await ownerCopy.readAsBytes(), await original.readAsBytes());
+        });
+        await tap('library-file-actions-file');
+        await tap('library-file-open-file');
+        await until(() => find.text('结束使用并清理本机打开副本').evaluate().isNotEmpty);
+        expect(dispatcher.launches, 1);
+        await t.runAsync(() async {
+          expect(
+            await File(dispatcher.leases.single.filePath).readAsBytes(),
+            await original.readAsBytes(),
+          );
+        });
+        await t.runAsync(() => t.tap(find.text('结束使用并清理本机打开副本')));
+        await until(() => find.text('结束使用并清理本机打开副本').evaluate().isEmpty);
+        await t.runAsync(() async {
+          expect(await File(dispatcher.leases.single.filePath).exists(), false);
+          expect(await ownerCopy.readAsBytes(), await original.readAsBytes());
+        });
         late String proposalId, secondText;
         await t.runAsync(() async {
           secondText = await replacement.readAsString();
@@ -372,8 +432,7 @@ void main() {
         });
         expect(t.takeException(), isNull);
       } finally {
-        await t.pumpWidget(const SizedBox());
-        await t.pump();
+        await unmount();
         await t.runAsync(() async {
           cli.close();
           independent.close();

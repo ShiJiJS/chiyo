@@ -10,15 +10,24 @@ import 'workspace/zhiyu_theme.dart';
 import 'desktop_controls.dart';
 import 'online_agent_connection_dialog.dart';
 import 'information_files.dart';
+import 'backups.dart';
+import 'package:info_storage/info_storage.dart';
+import 'workspace/owner_file_open_dispatcher.dart';
 
 class OnlineDesktopLauncher extends StatefulWidget {
   const OnlineDesktopLauncher({
     super.key,
     required this.profiles,
     this.filePicker,
+    this.deviceFilesDirectory,
+    this.outputPicker = const NativeBackupFilePicker(),
+    this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
   });
   final ConnectionProfileStore profiles;
   final InformationFilePicker? filePicker;
+  final String? deviceFilesDirectory;
+  final BackupFilePicker outputPicker;
+  final OwnerFileOpenDispatcher openDispatcher;
   @override
   State<OnlineDesktopLauncher> createState() => _OnlineDesktopLauncherState();
 }
@@ -99,7 +108,17 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       }
       _previous = profile;
       setState(() {
-        _source = RemoteWorkspaceSource(client!, filePicker: widget.filePicker);
+        _source = RemoteWorkspaceSource(
+          client!,
+          filePicker: widget.filePicker,
+          deviceFilesDirectory:
+              widget.deviceFilesDirectory ??
+              (widget.profiles is PrivateConnectionProfileStore
+                  ? '${(widget.profiles as PrivateConnectionProfileStore).directory}/files'
+                  : null),
+          outputPicker: widget.outputPicker,
+          openDispatcher: widget.openDispatcher,
+        );
         _offline = false;
         _busy = false;
       });

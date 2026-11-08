@@ -257,3 +257,16 @@ AgentGateway开放原import-file上传、查询及普通附件新增/修改，�
 本轮证据见 [#97阶段记录](../../development/evidence/server-a07/README.md)。当前#97没有完成：App另存、本机打开及其本机持久操作记录、Agent获批下载、受管副本回收和文件许可重启恢复仍待接通。不能直接启用服务器本机文件驱动后将服务器路径交给CLI。后续应复用原_fileRequest授权校验和真实NativeInformationDeliveryFiles；服务器记录交付与原授权，本机才持有复制路径/清理证明。现有InformationFileOutputs/Opens与加密库私有操作日志耦合，需要抽出可供客户端使用的私有操作记录接口，不能在客户端建一份资料库冒充联网模式，也不要用假lease骗原交付状态。
 
 当前#91–#96已关闭，#97保持打开，#98–#102未完成；无统一候选、正式安装或真实迁移。#103–#105不动。本轮所有测试进程结束后临时目录/容器按各自teardown回收；开发日志及已校验SQLCipher缓存仍在忽略目录local/server-first-stage，最终统一清理。
+
+
+## #97 本机另存、打开和独立操作日志已接通
+
+InformationFileOutputs / Opens 抽出私有日志最小依赖，旧资料库适配保留原表和跨操作检查；DeviceFileOperations只建本机操作与服务器身份两张表，以独立密钥SQLCipher加密，不建立客户端资料库。默认密钥为本机私有目录700/文件600，不调用个人钥匙串，与服务器资料密钥和Token分开。锁、服务器身份、密钥丢失、宽权限和符号链接检查已验；不能把失效记录当作空白重置。
+
+原另存/打开协调器通过WorkspaceFileActionContext复用：旧Owner保持原屏障，远程客户端取实际原文、核对字段/版本，在本机使用原生发布与受管副本驱动。RemoteWorkspaceSource和正常OnlineDesktopLauncher接原菜单及恢复/清理入口，按服务器身份隔离本机日志；关闭Future可重复等待，清理打开副本但不删除用户另存文件。当前本机操作检查服务器文件和普通资料操作回执；#100接生命周期操作时仍需补相同操作编号的冲突核对。
+
+Mac设备日志2项、原动作加远程流程21项、加强服务器变更/面板竞态1项、正常联网界面完整流程1项通过；Linux ARM64服务两个文件场景加设备日志加密/锁/身份场景3项通过（Mac原生动作未在Linux运行）。相关静态分析通过。证据见[#97阶段记录](../../development/evidence/server-a07/README.md)。测试驱动曾在假时钟内直接等待关闭，定点终止后改为持续推进时钟观察真实退出，未跳过断言；具体合成残留已清理。所有本轮测试进程均已结束。
+
+下一步仍为#97的Agent获批文件领取和本机持久受管副本：复用原_fileRequest、字段版本、不可扩大的授权与原NativeInformationDeliveryFiles，不用服务器假路径或dummy lease。OnlineInformationRuntime目前仅恢复文字/原会话授权；原本机InformationFileDelivery模型把ready和本机lease绑定，需要显式区分远程准备、原文交付和本机完成结果，保留原操作编号及状态核对，不让网络重试或普通重启重复生成副本或复活已结束/撤销授权。CLI需跨进程保存私有本机交付/清理记录；不能仅修改servercapabilities声称已支持。
+
+#97仍未完成，#98–#102继续保留；没有统一候选包、日常安装或真实迁移。#103–#105不动。浏览器仍先复用11/p1。
