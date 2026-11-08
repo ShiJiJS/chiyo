@@ -22,6 +22,7 @@ import 'owner_library_routes.dart';
 import 'owner_file_routes.dart';
 import 'owner_credential_routes.dart';
 import 'owner_host_routes.dart';
+import 'owner_history_routes.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -96,6 +97,7 @@ final class OnlineServer {
   );
   late final _proposalRoutes = OwnerProposalRoutes(_proposals);
   late final _libraryRoutes = OwnerLibraryRoutes(_library);
+  late final _historyRoutes = OwnerHistoryRoutes(_library);
   OwnerFileRoutes? _files;
   OwnerCredentialRoutes? _credentials;
   OwnerHostRoutes? _hosts;
@@ -178,11 +180,32 @@ final class OnlineServer {
   Future<String> _observation() async {
     final owner = _service.owner;
     final requests = await owner.informationRequestInbox();
+    final audit = await owner.informationHistory(includeCredentialFields: true);
     return sha256
         .convert(
           utf8.encode(
             jsonEncode([
               owner.templatePackageVersion,
+              [
+                for (final e in owner.recycleEntries) [e.id, e.version],
+              ],
+              [
+                if (owner.libraryRecycleSupported)
+                  for (final b in owner.libraryRecycleBatches)
+                    [b.id, b.version],
+              ],
+              [
+                for (final c in owner.recycledCredentials) [c.id, c.revision],
+              ],
+              [for (final a in audit.history.accesses) a.id],
+              [
+                for (final g in audit.history.grants)
+                  [
+                    g.id,
+                    for (final e in g.events)
+                      [e.kind.name, e.at.toIso8601String()],
+                  ],
+              ],
               owner.sshKnownHosts?.id,
               [
                 for (final c in owner.credentials) [c.id, c.revision],
@@ -314,6 +337,15 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(2).join('/') == 'v1/owner' &&
+            const {'history', 'grant-history'}.contains(path[2])) {
+          final (code, value) = await _historyRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/ssh-hosts') {
           final (code, value) = await _hostRoutes.dispatch(

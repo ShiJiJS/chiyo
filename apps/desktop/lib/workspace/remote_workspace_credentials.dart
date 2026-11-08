@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_workspace/credential_transport.dart';
+import 'package:info_workspace/history_transport.dart';
 import '../credential_files.dart';
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
@@ -237,6 +238,18 @@ class RemoteWorkspaceCredentials extends UnavailableWorkspaceCredential
     }
   }
 
+  @override
+  Future<WorkspaceCredentialRecycled> readRecycled(String entryId) => _read(
+    () async => recycledCredentialFromJson(
+      await client.request(
+        'GET',
+        '$_prefix/recycled/${Uri.encodeComponent(entryId)}',
+      ),
+    ),
+  );
+  @override
+  Future<WorkspaceCredentialReceipt> change(WorkspaceCredentialChange change) =>
+      _write('changes', change, credentialLifecycleToJson(change));
   @override
   Future<WorkspaceCredentialReceipt> save(WorkspaceCredentialWrite write) =>
       _write('save', write, credentialWriteToJson(write));

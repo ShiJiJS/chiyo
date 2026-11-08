@@ -11,6 +11,7 @@ abstract class LibraryReviewedOperationController<P, C, R>
       needsReview = true;
       failure = const WorkspaceFailure('conflict', '目录或资料已变化，请重新读取并核对范围。');
       notifyListeners();
+      unawaited(_verifyUnchangedPreview());
     });
   }
   final WorkspaceSource source;
@@ -22,6 +23,47 @@ abstract class LibraryReviewedOperationController<P, C, R>
   String operationId(C command);
   bool matches(R receipt, C command);
   bool previewAllowsSave(P preview);
+
+  /// Only adapters with an exact scope token opt in. Broad connection/audit
+  /// refreshes must not force the user to approve an unchanged batch again.
+  bool get canVerifyUnchangedPreview => false;
+  bool previewsMatch(P previous, P current) => false;
+  Future<void> _verifyUnchangedPreview() async {
+    if (!canVerifyUnchangedPreview ||
+        _closed ||
+        frozen ||
+        reading ||
+        preview == null ||
+        !needsReview ||
+        receipt != null) {
+      return;
+    }
+    final previous = preview as P,
+        generation = _generation,
+        changeVersion = _changeVersion;
+    try {
+      final currentCatalog = await source.loadCatalog();
+      final current = await readPreview();
+      if (_closed ||
+          frozen ||
+          reading ||
+          generation != _generation ||
+          changeVersion != _changeVersion ||
+          !identical(preview, previous) ||
+          !previewsMatch(previous, current)) {
+        return;
+      }
+      catalog = currentCatalog;
+      preview = current;
+      needsReview = false;
+      if (failure?.code == 'conflict') failure = null;
+      notifyListeners();
+    } on Object {
+      // A failed verification is not an unchanged scope. Keep the original
+      // preview and require the normal explicit review before any mutation.
+    }
+  }
+
   WorkspaceCatalog? catalog;
   WorkspaceFailure? failure;
   R? receipt;
@@ -69,6 +111,7 @@ abstract class LibraryReviewedOperationController<P, C, R>
       if (!_closed && generation == _generation) {
         reading = false;
         notifyListeners();
+        if (needsReview) unawaited(_verifyUnchangedPreview());
       }
     }
   }
