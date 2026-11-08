@@ -1,5 +1,4 @@
-import 'package:info_workspace/owner_workspace_classification.dart'
-    show WorkspaceClassificationInformation;
+import 'package:info_workspace/owner_workspace_classification.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_workspace/owner_credential_type.dart';
 import 'package:info_workspace/owner_workspace_relation_queries.dart';
@@ -43,49 +42,16 @@ final class OnlineOwnerLibrary
     ];
   }
 
+  late final classification = OwnerWorkspaceClassification(
+    owner: owner,
+    information: this,
+    fileCreationEnabled: false,
+    credentialCreationEnabled: false,
+  );
   @override
   Future<WorkspaceCatalog> loadCatalog() async {
     _check();
-    final records = summaries(), definitions = plugins.templates;
-    final snapshot = await owner.informationClassificationSnapshot();
-    return WorkspaceCatalog(
-      version: snapshot.version,
-      directories: [
-        for (final d in owner.directories)
-          WorkspaceDirectory(d.id, d.name, parentId: d.parentId),
-      ],
-      tags: [for (final t in owner.tags) WorkspaceTag(t.id, t.name)],
-      types: {
-        ...{
-          for (final d in definitions.values)
-            d['id'] as String: WorkspaceType(
-              d['id'] as String,
-              d['name'] as String,
-              d['icon'] as String? ?? 'file',
-            ),
-          for (final r in records) r.type.id: r.type,
-        }.values,
-      },
-      creatableTypes: [
-        for (final d in definitions.values)
-          if (!const {'file', 'resume', 'credential'}.contains(d['id']))
-            WorkspaceType(
-              d['id'] as String,
-              d['name'] as String,
-              d['icon'] as String? ?? 'file',
-            ),
-      ],
-      directoryCounts: {
-        for (final d in owner.directories)
-          d.id: records.where((r) => r.directoryId == d.id).length,
-      },
-      tagCounts: {
-        for (final t in owner.tags)
-          t.id: records
-              .where((r) => r.tags.any((tag) => tag.id == t.id))
-              .length,
-      },
-    );
+    return classification.loadCatalog();
   }
 
   @override

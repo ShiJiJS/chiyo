@@ -1,3 +1,5 @@
+import 'package:info_workspace/owner_library_selection.dart';
+export 'package:info_workspace/owner_library_selection.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart' show StorageFailure;
 import 'workspace_source.dart';
@@ -148,36 +150,3 @@ class OwnerWorkspaceLibraryRecycle {
     return r == null ? null : _receipt(r);
   });
 }
-
-core.LibrarySelection coreLibrarySelection(
-  WorkspaceLibrarySelection selection,
-) => core.LibrarySelection(
-  directoryIds: selection.directoryIds,
-  informationIds: selection.records
-      .where((r) => r.kind == WorkspaceRecordKind.information)
-      .map((r) => r.id),
-  credentialIds: selection.records
-      .where((r) => r.kind == WorkspaceRecordKind.credential)
-      .map((r) => r.id),
-);
-
-List<WorkspaceLibraryRecycleRecord> workspaceLibraryRecords(
-  Iterable<core.LibraryRecycleRecord> records,
-  WorkspaceCatalog catalog,
-) => [
-  for (final r in records)
-    WorkspaceLibraryRecycleRecord(
-      ref: WorkspaceRecordRef(
-        r.kind == 'credential'
-            ? WorkspaceRecordKind.credential
-            : WorkspaceRecordKind.information,
-        r.id,
-      ),
-      name: r.name,
-      type:
-          catalog.types.where((t) => t.id == r.typeId).firstOrNull?.name ??
-          (r.kind == 'credential' ? '凭据' : '资料'),
-      directoryId: r.directoryId,
-      path: r.directoryPath,
-    ),
-];

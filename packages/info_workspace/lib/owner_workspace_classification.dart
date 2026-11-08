@@ -16,10 +16,15 @@ class OwnerWorkspaceClassification {
     required this.owner,
     required this.information,
     this.onChanged,
+    this.fileCreationEnabled = true,
+    this.credentialCreationEnabled = true,
   });
   final core.OwnerAccess owner;
   final WorkspaceClassificationInformation information;
   final void Function()? onChanged;
+  // Composition declares which creation transports are connected. Storage
+  // support alone does not mean the current client can provide their material.
+  final bool fileCreationEnabled, credentialCreationEnabled;
 
   Future<WorkspaceCatalog> loadCatalog() async {
     final snapshot = await owner.informationClassificationSnapshot();
@@ -57,9 +62,10 @@ class OwnerWorkspaceClassification {
       }
     }
     final creatable = [
-      if (owner.informationFileManagementSupported)
+      if (fileCreationEnabled && owner.informationFileManagementSupported)
         const WorkspaceType('file', '普通文件', 'file'),
-      if (owner.credentialRecordOperationsSupported)
+      if (credentialCreationEnabled &&
+          owner.credentialRecordOperationsSupported)
         const WorkspaceType('credential', '凭据', 'key'),
       for (final entry in information.templates.entries)
         if (!workspaceFileTypeIds.contains(entry.key) &&

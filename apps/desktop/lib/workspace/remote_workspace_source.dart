@@ -9,14 +9,62 @@ import 'remote_workspace_approvals.dart';
 import 'remote_workspace_plugins.dart';
 import 'remote_workspace_proposals.dart';
 import 'remote_workspace_relations.dart';
+import 'remote_workspace_library.dart';
+import 'package:info_workspace/workspace_transport.dart';
+import 'directory_tree.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
 class RemoteWorkspaceSource extends UnavailableWorkspaceSource
-    implements WorkspaceStorageLocation {
+    implements WorkspaceStorageLocation, WorkspaceLibraryMove {
   RemoteWorkspaceSource(this.client)
     : _observation = client.initialWorkspaceObservation;
   final OwnerClient client;
+  late final _library = RemoteWorkspaceLibrary(
+    client,
+    changed: notifyConnectionChanged,
+  );
+  @override
+  bool get libraryMoveSupported => _library.libraryMoveSupported;
+  @override
+  bool get libraryOrderSupported => _library.libraryOrderSupported;
+  @override
+  WorkspaceSort? get preferredLibrarySort => _library.preferredLibrarySort;
+  @override
+  Future<void> saveLibrarySort(WorkspaceSort sort) =>
+      _library.saveLibrarySort(sort);
+  @override
+  Future<WorkspaceClassificationReceipt> changeClassification(
+    WorkspaceClassificationChange change,
+  ) => _library.changeClassification(change);
+  @override
+  Future<WorkspaceDirectory?> changeDirectory(
+    WorkspaceDirectoryChange change,
+  ) async => (await changeClassification(change)).directory;
+  @override
+  Future<WorkspaceClassificationReceipt?> classificationOperationReceipt(
+    String operationId,
+  ) => _library.classificationReceipt(operationId);
+  @override
+  Future<WorkspaceTagRemovalPreview> previewTagRemoval(String tagId) =>
+      _library.previewTagRemoval(tagId);
+  @override
+  Future<List<WorkspaceLibraryPlacementTarget>> libraryPlacementTargets(
+    WorkspaceLibrarySelection selection,
+  ) => _library.libraryPlacementTargets(selection);
+  @override
+  Future<WorkspaceLibraryMovePreview> previewLibraryMove(
+    WorkspaceLibrarySelection selection,
+    String? targetId, {
+    WorkspaceLibraryPosition? position,
+  }) => _library.previewLibraryMove(selection, targetId, position: position);
+  @override
+  Future<WorkspaceLibraryMoveReceipt> moveLibrarySelection(
+    WorkspaceLibraryMoveCommand command,
+  ) => _library.moveLibrarySelection(command);
+  @override
+  Future<WorkspaceLibraryMoveReceipt?> libraryMoveOperationReceipt(String id) =>
+      _library.libraryMoveOperationReceipt(id);
   @override
   late final WorkspaceProposalSource proposals = RemoteWorkspaceProposals(
     client,
@@ -125,58 +173,9 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   });
 
   @override
-  Future<WorkspaceCatalog> loadCatalog() => _remote(() async {
-    final data = await _catalog();
-    final records = await _summaries();
-    final definitions = (data['templates'] as List).cast<Map>();
-    return WorkspaceCatalog(
-      version: data['version'] as int,
-      directories: [
-        for (final d in data['directories'] as List)
-          WorkspaceDirectory(
-            d['id'] as String,
-            d['name'] as String,
-            parentId: d['parentId'] as String?,
-          ),
-      ],
-      tags: [
-        for (final t in data['tags'] as List)
-          WorkspaceTag(t['id'] as String, t['name'] as String),
-      ],
-      types: [
-        ...{
-          for (final d in definitions)
-            d['id'] as String: WorkspaceType(
-              d['id'] as String,
-              d['name'] as String,
-              d['icon'] as String? ?? 'file',
-            ),
-          for (final record in records) record.type.id: record.type,
-        }.values,
-      ],
-      creatableTypes: [
-        for (final d in definitions)
-          if (!const {'file', 'resume', 'credential'}.contains(d['id']))
-            WorkspaceType(
-              d['id'] as String,
-              d['name'] as String,
-              d['icon'] as String? ?? 'file',
-            ),
-      ],
-      directoryCounts: {
-        for (final d in data['directories'] as List)
-          d['id'] as String: records
-              .where((r) => r.directoryId == d['id'])
-              .length,
-      },
-      tagCounts: {
-        for (final t in data['tags'] as List)
-          t['id'] as String: records
-              .where((r) => r.tags.any((tag) => tag.id == t['id']))
-              .length,
-      },
-    );
-  });
+  Future<WorkspaceCatalog> loadCatalog() => _remote(
+    () async => workspaceCatalogFromJson((await _catalog())['workspace']),
+  );
 
   @override
   Future<Map<String, Object?>> loadTemplate(String typeId) => _remote(() async {
@@ -268,7 +267,20 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
               ),
         )
         .toList();
-    sortWorkspaceSummaries(items, query.sort);
+    sortWorkspaceSummaries(
+      items,
+      query.sort,
+      manualRecords: (catalog['recordOrder'] as List)
+          .map(recordRefFromJson)
+          .toList(),
+      manualDirectories: [
+        for (final d in libraryDirectoryTree(
+          workspaceCatalogFromJson(catalog['workspace']),
+        ))
+          d.id,
+        null,
+      ],
+    );
     final groups = <String, List<WorkspaceRecordSummary>>{};
     for (final item in items) {
       final group = switch (query.grouping) {

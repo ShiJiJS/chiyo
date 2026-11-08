@@ -51,6 +51,107 @@ void main() {
       const FieldInput('Other', '', 'OTHER'),
     ]),
   );
+  test(
+    'organization scope survives restart and observed expiry never revives after clock rollback',
+    () async {
+      final item = await seed();
+      final other = await runtime.run(
+        () => runtime.service.owner.createInformation('Other scope', '', [
+          const FieldInput('Body', '', 'OUTSIDE_SCOPE'),
+        ]),
+      );
+      final session = await runtime.run(
+        () => runtime.service.agent.openSessionWithEndCapability(
+          'Organization root',
+        ),
+      );
+      final task = await runtime.run(
+        () => runtime.service.agent.requestOrganization(
+          session.sessionSecret,
+          'Organize synthetic records',
+          [item.id, other.id],
+        ),
+      );
+      await runtime.run(
+        () => runtime.service.owner.approveOrganization(task.id, [
+          item.id,
+        ], lifetime: const Duration(minutes: 10)),
+      );
+      final expires = runtime.service.owner.organizationTasks.single.expiresAt;
+      await reopen();
+      final metadata = await runtime.run(
+        () => runtime.service.agent.organizationMetadata(
+          session.sessionSecret,
+          task.id,
+        ),
+      );
+      expect((metadata['items'] as List).single['id'], item.id);
+      expect(runtime.service.owner.organizationTasks.single.expiresAt, expires);
+      now = expires.add(const Duration(seconds: 1));
+      expect(
+        (await runtime.run(
+          () => runtime.service.agent.organizationStatus(
+            session.sessionSecret,
+            task.id,
+          ),
+        ))['status'],
+        'expired',
+      );
+      now = expires.subtract(const Duration(minutes: 5));
+      await reopen();
+      expect(
+        (await runtime.run(
+          () => runtime.service.agent.organizationStatus(
+            session.sessionSecret,
+            task.id,
+          ),
+        ))['status'],
+        'expired',
+      );
+      await expectLater(
+        runtime.run(
+          () => runtime.service.agent.organizationMetadata(
+            session.sessionSecret,
+            task.id,
+          ),
+        ),
+        failure('expired'),
+      );
+      final newTask = await runtime.run(
+        () => runtime.service.agent.requestOrganization(
+          session.sessionSecret,
+          'New explicit request',
+          [item.id],
+        ),
+      );
+      await runtime.run(
+        () => runtime.service.owner.approveOrganization(newTask.id, [item.id]),
+      );
+      await runtime.run(
+        () => runtime.service.agent.endSessionWithCapability(
+          session.endCapability,
+        ),
+      );
+      await reopen();
+      expect(
+        runtime.service.owner.organizationState(
+          runtime.service.owner.organizationTasks.singleWhere(
+            (t) => t.id == newTask.id,
+          ),
+        ),
+        OrganizationTaskState.cancelled,
+      );
+      await expectLater(
+        runtime.run(
+          () => runtime.service.agent.organizationMetadata(
+            session.sessionSecret,
+            newTask.id,
+          ),
+        ),
+        failure(),
+      );
+    },
+  );
   InformationApprovalCommand command(
     String request,
     InformationItem item, {
