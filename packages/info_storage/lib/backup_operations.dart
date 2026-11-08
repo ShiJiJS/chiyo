@@ -21,18 +21,18 @@ final class BackupKeyOperationReceipt {
   };
 }
 
-extension BackupKeyOperations on InformationBackups {
-  void _validateKeyOperation(String id, String digest, int expectedVersion) {
-    if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(id) ||
-        !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest) ||
-        expectedVersion < 1) {
-      throw const StorageFailure('invalid_backup_operation');
-    }
+void _validateKeyOperation(String id, String digest, int expectedVersion) {
+  if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(id) ||
+      !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest) ||
+      expectedVersion < 1) {
+    throw const StorageFailure('invalid_backup_operation');
   }
+}
 
+extension BackupKeyOperations on InformationBackups {
   Future<int> operationVersion() async {
     _checkOpen();
-    final row = await _repository._db
+    final row = await _db
         .customSelect(
           'SELECT version FROM backup_operation_state WHERE singleton=1',
         )
@@ -40,7 +40,7 @@ extension BackupKeyOperations on InformationBackups {
     return row.read<int>('version');
   }
 
-  Future<void> _advanceOperationVersion() => _repository._db.customStatement(
+  Future<void> _advanceOperationVersion() => _db.customStatement(
     'UPDATE backup_operation_state SET version=version+1 WHERE singleton=1',
   );
 
@@ -53,7 +53,7 @@ extension BackupKeyOperations on InformationBackups {
     if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(id)) {
       throw const StorageFailure('invalid_backup_operation');
     }
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           'SELECT payload,invalidated FROM backup_operations WHERE operation_id=?',
           variables: [Variable(id)],
@@ -106,7 +106,7 @@ extension BackupKeyOperations on InformationBackups {
     _checkOpen();
     _validateKeyOperation(operationId, commandDigest, expectedVersion);
     try {
-      return await _repository._db.transaction(() async {
+      return await _db.transaction(() async {
         final previous = await recoveryKeyOperationReceipt(operationId);
         if (previous != null) {
           if (previous.commandDigest != commandDigest ||
@@ -129,7 +129,7 @@ extension BackupKeyOperations on InformationBackups {
           expectedVersion: expectedVersion,
           version: await operationVersion(),
         );
-        await _repository._db.customStatement(
+        await _db.customStatement(
           'INSERT INTO backup_operations(operation_id,payload) VALUES(?,?)',
           [operationId, jsonEncode(receipt.toJson())],
         );

@@ -42,6 +42,7 @@ part 'backup_owner_operations.dart';
 part 'information_purge_storage.dart';
 part 'information_file_outputs.dart';
 part 'device_file_operations.dart';
+part 'device_backup_operations.dart';
 part 'information_file_opens.dart';
 part 'desktop_preferences_storage.dart';
 part 'proposal_operations_storage.dart';

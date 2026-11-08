@@ -61,19 +61,19 @@ final class _BackupRestoreIntent {
   BackupRestoreReceipt? receipt;
 }
 
-extension BackupRestoreOperations on InformationBackups {
-  void _validateRestoreResource(String id, String name, int version) {
-    if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(id) ||
-        version < 1 ||
-        name.isEmpty ||
-        name == '.' ||
-        name == '..' ||
-        utf8.encode(name).length > 255 ||
-        RegExp(r'[/\\\x00-\x1f\x7f]').hasMatch(name)) {
-      throw const StorageFailure('invalid_backup_operation');
-    }
+void _validateRestoreResource(String id, String name, int version) {
+  if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(id) ||
+      version < 1 ||
+      name.isEmpty ||
+      name == '.' ||
+      name == '..' ||
+      utf8.encode(name).length > 255 ||
+      RegExp(r'[/\\\x00-\x1f\x7f]').hasMatch(name)) {
+    throw const StorageFailure('invalid_backup_operation');
   }
+}
 
+extension BackupRestoreOperations on InformationBackups {
   // Bounded hash of the encrypted archive, not plaintext or recovery material.
   Future<String> _restoreArchiveDigest(String path) async {
     if (await FileSystemEntity.type(path, followLinks: false) !=
@@ -275,7 +275,7 @@ extension BackupRestoreOperations on InformationBackups {
       archiveVersion: p.archiveVersion,
       counts: _outputCounts(contents),
     );
-    await _repository._db.customStatement(
+    await _db.customStatement(
       'INSERT INTO backup_operations(operation_id,payload) VALUES(?,?)',
       [intent.id, jsonEncode(receipt.toJson())],
     );

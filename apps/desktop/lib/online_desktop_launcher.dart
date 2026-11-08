@@ -214,6 +214,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                       plugin: source.plugins.pick,
                       file: source.files.pick,
                       hostFile: source.hosts.pick,
+                      backup: source.backups.pick,
                       proposalPassword: source.proposalPasswords,
                       credential: (form) => showOwnerCredentialInput(
                         context,

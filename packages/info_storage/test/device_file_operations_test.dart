@@ -68,7 +68,12 @@ void main() {
           db
               .select("SELECT name FROM sqlite_master WHERE type='table'")
               .map((r) => r['name']),
-          unorderedEquals(['backup_operations', 'device_file_scope']),
+          unorderedEquals([
+            'backup_operations',
+            'device_file_scope',
+            'backup_operation_state',
+            'device_backup_intents',
+          ]),
         );
       } finally {
         db.close();

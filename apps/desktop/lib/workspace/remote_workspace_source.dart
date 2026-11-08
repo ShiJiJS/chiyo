@@ -25,6 +25,7 @@ import 'owner_file_open_dispatcher.dart';
 import 'remote_workspace_file_actions.dart';
 import 'remote_workspace_hosts.dart';
 import 'remote_workspace_history.dart';
+import 'remote_workspace_backups.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -55,6 +56,13 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  @override
+  late final RemoteWorkspaceBackups backups = RemoteWorkspaceBackups(
+    client,
+    directory: deviceFilesDirectory,
+    changed: notifyConnectionChanged,
+    picker: outputPicker,
+  );
   late final _history = RemoteWorkspaceHistory(
     client,
     changed: notifyConnectionChanged,
@@ -98,7 +106,8 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     int limit = 25,
   }) => _history.queryRecycled(keyword: keyword, offset: offset, limit: limit);
   @override
-  Future<WorkspaceArchive> readRecycled(String entryId) => _history.readRecycled(entryId);
+  Future<WorkspaceArchive> readRecycled(String entryId) =>
+      _history.readRecycled(entryId);
   @override
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
       _history.changeRecord(change);
@@ -275,6 +284,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     try {
       await _fileActions.dispose();
     } finally {
+      await backups.dispose();
       await hosts.dispose();
       await credentials.dispose();
       await files.dispose();
