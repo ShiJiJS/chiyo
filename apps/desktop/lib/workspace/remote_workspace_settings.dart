@@ -80,10 +80,12 @@ class RemoteWorkspaceSettings
     this.client, {
     required this.directory,
     required this.changed,
+    this.onNotificationEnable,
   });
   final OwnerClient client;
   final String? directory;
   final void Function() changed;
+  final Future<void> Function()? onNotificationEnable;
   static final _queues = <String, Future<void>>{};
   final _attempts = <String, _Pending>{};
   bool _closed = false;
@@ -530,10 +532,20 @@ class RemoteWorkspaceSettings
       }
     }
     await _record(pending, 'ready', server: server);
-    return (await _finish(
+    final result = (await _finish(
       _withPending(s, pending),
       (await _readRecord(c.operationId))!,
     ))!;
+    // The setting is already durable. A system decision never rolls it back,
+    // and receipt replay/recovery must not cause a later permission prompt.
+    if (!s.preferences.notifications && result.preferences.notifications) {
+      try {
+        await onNotificationEnable?.call();
+      } on Object {
+        /* The native availability remains a separate observation. */
+      }
+    }
+    return result;
   });
   _State _withPending(_State s, _Pending p) =>
       _State(s.preferences, s.policy, p);

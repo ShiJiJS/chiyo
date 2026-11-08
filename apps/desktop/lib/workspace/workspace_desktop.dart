@@ -3,7 +3,8 @@ import '../desktop_scroll.dart';
 import 'workspace_source.dart';
 
 /// Owner window interaction only. A host supplies appearance/navigation and
-/// performs quit after its runtime confirms that services have stopped.
+/// closes the resources it owns before quitting. An independent server and
+/// the Agent's chat/execution lifetime are not owned by an online App window.
 abstract interface class WorkspaceDesktop {
   void Function(WorkspacePage page)? get onNavigate;
   set onNavigate(void Function(WorkspacePage page)? callback);

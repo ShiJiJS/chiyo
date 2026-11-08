@@ -44,6 +44,8 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     this.client, {
     InformationFilePicker? filePicker,
     this.deviceFilesDirectory,
+    this.onNotificationEnable,
+    this.onClosing,
     this.outputPicker = const NativeBackupFilePicker(),
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
   }) : _observation = client.initialWorkspaceObservation {
@@ -66,6 +68,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     client,
     directory: deviceFilesDirectory,
     changed: notifyConnectionChanged,
+    onNotificationEnable: onNotificationEnable,
   );
   @override
   late final RemoteWorkspaceBackups backups = RemoteWorkspaceBackups(
@@ -131,6 +134,8 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   late final OwnerProposalPasswords proposalPasswords =
       OwnerProposalPasswords.remote(client);
   final String? deviceFilesDirectory;
+  final Future<void> Function()? onNotificationEnable;
+  final Future<void> Function(RemoteWorkspaceSource)? onClosing;
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
   late final _fileActions = RemoteWorkspaceFileActions(
@@ -289,20 +294,41 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   }
 
   Future<void>? _closeFuture;
-  Future<void> dispose() => _closeFuture ??= _dispose();
+  bool _passwordsDisposed = false;
+  Future<void> dispose() =>
+      _closeFuture ??= _dispose().catchError((Object e, StackTrace stack) {
+        _closeFuture = null;
+        Error.throwWithStackTrace(e, stack);
+      });
   Future<void> _dispose() async {
-    proposalPasswords.dispose();
-    try {
-      await _fileActions.dispose();
-    } finally {
-      await backups.dispose();
-      await settings.dispose();
-      await hosts.dispose();
-      await credentials.dispose();
-      await files.dispose();
-      client.close();
-      await _changes.close();
+    await onClosing?.call(this);
+    if (!_passwordsDisposed) {
+      _passwordsDisposed = true;
+      proposalPasswords.dispose();
     }
+    Object? firstError;
+    StackTrace? firstStack;
+    Future<void> close(Future<void> Function() action) async {
+      try {
+        await action();
+      } on Object catch (e, stack) {
+        firstError ??= e;
+        firstStack ??= stack;
+      }
+    }
+
+    // Each coordinator drains its own original operations. A cleanup failure
+    // must not skip closing unrelated App handles or strand its HTTP client.
+    // Private pending cleanup records remain available to their own recovery.
+    await close(_fileActions.dispose);
+    await close(backups.dispose);
+    await close(settings.dispose);
+    await close(hosts.dispose);
+    await close(credentials.dispose);
+    await close(files.dispose);
+    client.close();
+    await close(_changes.close);
+    if (firstError != null) Error.throwWithStackTrace(firstError!, firstStack!);
   }
 
   Future<T> _remote<T>(Future<T> Function() action) async {
