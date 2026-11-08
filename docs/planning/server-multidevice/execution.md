@@ -105,3 +105,19 @@ AgentServer 已继承拆出的 AgentProtocol。旧回环 HTTP 的 Host/Origin/�
 此时 #93 仍未完成：尚未把协议挂到认证的远程 Agent 通道，尚未配置 CLI 远程身份、接审批界面或持久化有效授权。接下来先实现受限设备身份与会话/领取 token 的绑定，再为服务端核心增加可恢复文字会话的存储；不能单靠内存 Map，也不能直接导出普通备份中的历史作为可用授权。
 
 注意旧 /read 使用 grant token，没有 sessionSecret；设备门禁必须同时绑定会话、endCapability 和领取的 grant token，不能只检查带 sessionSecret 的请求，否则另一设备得到 token 后可能绕过设备归属。目录/模板等默认可发现元数据仍只需受限接入身份，不要求内容授权。
+
+## #93 私有状态与设备凭证（当前新增）
+
+- 新增 ServerStateRepository 可信宿主接口和同一 SQLCipher 中的私有状态表。状态代际与递增修订共同防止旧进程/恢复前的写入覆盖新状态；并发旧修订只能一个成功。载荷深度不可变，不进入目录、普通设置、Agent 结果或便携备份。
+- 只在启用服务器状态时标记库格式53。旧单机读者应拒绝；普通旧库不会因打开而升级到53。格式53要求相应状态表，伪造新格式而缺表仍拒绝。此前两处旧测试以53作为未知格式的情况仍因缺少必需结构被拒绝，没有放宽校验来迁就测试。
+- 正常重开保留状态；成功恢复在同一事务清掉目标旧状态，下次打开产生新代际。失败恢复保留原状态。源设备状态和目标旧状态均不会从备份恢复成有效接入。
+- AgentDeviceRegistry 提供设备登记、验证、只含元数据的清单和撤销。用户登记操作有稳定编号，重复返回同一结果，冲突不重复创建设备；撤销后重开仍拒绝旧凭证。管理 Token 不是设备凭证，设备凭证不能调用用户管理接口。
+- 所有 HTTPS 宿主现在显式注入同一真实仓库的设备注册能力，正式入口与测试装配一致。新增用户认证后的 /v1/owner/devices 查询/登记及 /v1/owner/devices/{id}/revoke；返回设备接入凭证仅限用户登记回复，不在清单中出现。普通 Agent 协议仍未挂到网络，尚不能使用远程资料。
+
+### 本轮证据
+
+Mac 服务包10项通过；Linux ARM64服务包10项通过。私有状态专项在Mac/Linux各2项通过；Mac状态/目录顺序/回收/备份相关回归16项通过、原有Windows条件跳过1项。设备登记/角色隔离/撤销/恢复专项均实际使用加密仓库和HTTPS。App相关修改仅是显式注入同一设备注册器，静态分析通过；未重新安装App。没有个人资料或真实密钥。
+
+日志：server-device-suite.log、agent-device-focused.log、server-state-tests.log、server-state-regression.log、linux-server-device-tests.log、linux-server-state-tests.log。曾误用不存在的 backups_test.dart 文件名，实际改用 backup_test.dart 后相关回归完成，不把该次失败计作通过。
+
+**#93 仍未完成。** 当前设备凭证只是连接身份，未授予资料访问。下一步：在共享HTTPS入口中先认证设备，再绑定 sessionSecret、endCapability、领取的grant token；私有状态的代际必须在操作前后核对。随后接正常审批界面，并实现文字会话/授权的真实重启恢复及对应独立Agent试用。不能把本轮状态表重开测试当成授权重启已经通过。

@@ -1,3 +1,4 @@
+import 'package:info_server/agent_devices.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -57,6 +58,7 @@ void main() {
           ..useCertificateChain(tls.certificate)
           ..usePrivateKey(tls.privateKey);
         server = await OnlineServer.start(
+          devices: AgentDeviceRegistry(repo),
           service: service,
           tls: serverTls,
           ownerToken: token,
@@ -219,6 +221,7 @@ void main() {
           await server.close();
           token = base64Url.encode(List.filled(32, 72)).replaceAll('=', '');
           server = await OnlineServer.start(
+            devices: AgentDeviceRegistry(repo),
             service: service,
             tls: serverTls,
             ownerToken: token,
@@ -245,6 +248,7 @@ void main() {
           final port = server.port;
           await server.close();
           server = await OnlineServer.start(
+            devices: AgentDeviceRegistry(repo),
             service: service,
             tls: serverTls,
             ownerToken: token,
@@ -266,7 +270,7 @@ void main() {
             'online-ui-replacement-0002',
           );
         });
-        final disconnectedPort=server.port;
+        final disconnectedPort = server.port;
         await t.runAsync(() => server.close());
         await settle();
         expect(
@@ -275,6 +279,7 @@ void main() {
         );
         await t.runAsync(() async {
           server = await OnlineServer.start(
+            devices: AgentDeviceRegistry(repo),
             service: service,
             tls: serverTls,
             ownerToken: token,
