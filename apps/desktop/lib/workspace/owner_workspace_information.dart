@@ -1,3 +1,5 @@
+import 'package:info_workspace/owner_workspace_classification.dart'
+    show WorkspaceClassificationInformation;
 import 'package:info_workspace/owner_workspace_relation_queries.dart';
 import 'owner_workspace_file_selections.dart';
 import 'dart:convert';
@@ -13,7 +15,8 @@ import 'owner_workspace_legacy_templates.dart';
 
 /// Ordinary-information part of the production source. The composition root
 /// owns OwnerAccess and supplies installed definitions; no sample data is used.
-class OwnerWorkspaceInformation implements WorkspaceRelationSource {
+class OwnerWorkspaceInformation
+    implements WorkspaceRelationSource, WorkspaceClassificationInformation {
   OwnerWorkspaceInformation({
     required this.owner,
     required Map<String, Map<String, Object?>> templates,
@@ -31,6 +34,7 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
   final Map<String, Map<String, Object?>> _initialTemplates;
   final Map<String, Map<String, Object?>> Function()? readTemplates;
   final WorkspaceTemplateState Function(String, String?)? templateState;
+  @override
   Map<String, Map<String, Object?>> get templates =>
       readTemplates?.call() ?? _initialTemplates;
   final void Function(WorkspaceRecordRef)? onChanged;
