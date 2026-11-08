@@ -35,6 +35,7 @@ part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
 part 'backup_operations.dart';
 part 'backup_output_operations.dart';
+part 'backup_remote_outputs.dart';
 part 'backup_restore_operations.dart';
 part 'backup_staging_operations.dart';
 part 'backup_owner_operations.dart';

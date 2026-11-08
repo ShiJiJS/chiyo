@@ -156,6 +156,10 @@ extension BackupOutputOperations on InformationBackups {
       _decodeCleanupReceipt(payload);
       return 'cleanup';
     }
+    if (payload['action'] == 'remoteOutput') {
+      _decodeRemoteOutput(payload);
+      return 'remoteOutput';
+    }
     return _decodeOutput(payload).action.name;
   }
 
@@ -534,6 +538,7 @@ extension BackupOutputOperations on InformationBackups {
           action == 'restore' ||
           action == 'staging' ||
           action == 'ownerIntent' ||
+          action == 'remoteOutput' ||
           action == 'cleanup')
         continue;
       if ((await _outputRecord(id))!.cleanupPending) pending.add(id);
