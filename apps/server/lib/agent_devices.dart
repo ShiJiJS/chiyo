@@ -15,7 +15,7 @@ final class AgentDeviceCapability {
   const AgentDeviceCapability(this.kind, this.value);
   final String kind, value;
   String get key {
-    if (!const {'session', 'end', 'grant'}.contains(kind) ||
+    if (!const {'session', 'end', 'grant', 'file-cleanup'}.contains(kind) ||
         value.isEmpty ||
         value.length > 2000) {
       throw const AccessFailure('invalid_request');

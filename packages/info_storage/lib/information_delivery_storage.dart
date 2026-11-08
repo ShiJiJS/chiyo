@@ -77,6 +77,10 @@ void _validateDeliveryTransition(
   InformationFileDelivery before,
   InformationFileDelivery after,
 ) {
+  if (before.cleanupCapability != null &&
+      before.cleanupCapability != after.cleanupCapability) {
+    throw const StorageFailure('delivery_conflict');
+  }
   if (jsonEncode(_deliveryImmutable(before)) !=
       jsonEncode(_deliveryImmutable(after)))
     throw const StorageFailure('delivery_conflict');
@@ -156,7 +160,11 @@ extension _EncryptedFileDeliveries on EncryptedInformationRepository {
               .isEmpty) {
             throw const StorageFailure('unsupported_schema');
           }
-          await _requireAdmissionFormat(_deviceDeliveryLibraryFormat);
+          await _requireAdmissionFormat(
+            record.cleanupCapability == null
+                ? _deviceDeliveryLibraryFormat
+                : _copyCleanupLibraryFormat,
+          );
         }
         final rows = await _db
             .customSelect(

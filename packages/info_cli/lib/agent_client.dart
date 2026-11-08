@@ -8,6 +8,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'credential_output_filter.dart';
+import 'device_information_files.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';
@@ -22,6 +23,7 @@ class AgentClient {
     this.hostedCredentialExecutions = false,
     String? runtimeWorkerExecutable,
     AgentConnectionProfile? connection,
+    this.deviceFileStateDirectory,
   }) : _session = sessionSecret,
        _remote = connection == null ? null : AgentConnection(connection),
        _runtimeWorkerExecutable = runtimeWorkerExecutable,
@@ -40,13 +42,26 @@ class AgentClient {
     String? sessionSecret,
     String sourceAgent = '通用 CLI',
     bool hostedCredentialExecutions = false,
+    Directory? deviceFileStateDirectory,
+    String? runtimeWorkerExecutable,
   }) => AgentClient(
     profile.address.port,
     sessionSecret: sessionSecret,
     sourceAgent: sourceAgent,
     hostedCredentialExecutions: hostedCredentialExecutions,
     connection: profile,
+    deviceFileStateDirectory: deviceFileStateDirectory,
+    runtimeWorkerExecutable: runtimeWorkerExecutable,
   );
+  final Directory? deviceFileStateDirectory;
+  late final Future<void> _deviceFileMaintenance =
+      _remote != null && deviceFileStateDirectory != null
+      ? DeviceInformationFiles(
+          _remote.profile,
+          deviceFileStateDirectory!,
+          workerExecutable: _runtimeWorkerExecutable,
+        ).maintain()
+      : Future<void>.value();
   final AgentConnection? _remote;
   final bool hostedCredentialExecutions;
   final String? _runtimeWorkerExecutable;
@@ -94,6 +109,12 @@ class AgentClient {
   }
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
+    try {
+      await _deviceFileMaintenance;
+    } on Object {
+      // Preserve failed cleanup journals. An unrelated catalog/proposal must
+      // still work; file fetch/release rechecks its own journal and fails closed.
+    }
     final command = input['command'];
     if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {
       return _executeInformationFileCommand(input);
