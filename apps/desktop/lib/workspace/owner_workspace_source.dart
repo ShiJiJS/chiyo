@@ -79,7 +79,11 @@ class OwnerWorkspaceSource
       templateState: templateState,
       onChanged: _changed,
     );
-    _adoption = OwnerWorkspaceAdoption(_information, plugins);
+    _adoption = OwnerWorkspaceAdoption(
+      _information,
+      plugins,
+      changed: _changed,
+    );
     _files = OwnerWorkspaceFiles(owner, _information, pdf: pdfPreview);
     _fileActions = fileOutputs == null
         ? null

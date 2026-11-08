@@ -2,7 +2,7 @@
 
 ## 当前范围与任务
 
-持续目标 #91–#102，#103–#105 后置。独立分支 codex/server-first-stage。#91–#101 已完成并关闭；#101 完整联合、Mac/Linux 实际进程中断和跨镜像维护演练已通过，代码 5be20a10 已推送。当前继续 #102 的全部正式入口核对、缺项接通、统一候选与无开发上下文 Agent 连续试用。没有正式安装或真实迁移。后文旧阶段仅作过程记录，以本节及末节为准。
+持续目标 #91–#102，#103–#105 后置。独立分支 codex/server-first-stage。#91–#101 已完成并关闭。当前 #102 已补资料切换模板（原逻辑共享、Owner HTTP、远程方法及正常 UI），相关 App 31 项、Mac/Linux 服务各 6 项通过；下一步继续设置、应用运行/桌面及 Agent 接入观察，然后统一候选和无上下文 Agent 连续试用。没有正式安装或真实迁移。后文旧阶段仅作过程记录，以本节和末节为准。
 
 浏览器持续目标工作空间20/p1。19已确认丢失（库存仅用户空间0），按用户既有明确授权重建同名空间20；#101正文、评论、标签和前置关系已重读，99/100均Completed，101仍Open。当前 #101 完成评论 6726014563 已发布并重新加载回读，#101 Closed/Completed；#102 正文、评论、标签和前置关系已读取，前置 #101 Completed。工作页现位于 #102；不操作用户空间0，不逐票finish整个目标。
 
@@ -502,3 +502,14 @@ RemoteWorkspaceBackups接原WorkspaceBackupSource、BackupController/Page与输�
 下一步先读 owner_workspace_settings.dart、owner_workspace_runtime.dart、owner_workspace_agents.dart、settings_page.dart、runtime_workspace_desktop.dart 和 OnlineDesktopLauncher 的现有接线；确定正式入口未接项的准确范围，补服务与设备适配及相应自动检查。随后才建立同源 Linux 服务、Mac App、CLI/native worker 的统一候选，用同一套候选连续试用；最后启动获准的 fork-none 独立 Agent，不透露分类/数量/关联/命令答案。#103–#105 不动，日常 App/资料/个人钥匙串不变。
 
 #102 的初始全入口核对已记录在 docs/development/evidence/server-a12/entry-audit.md，确认缺项包括资料切换模板；它与已接通的旧模板转插件不是同一入口。该记录只是实际缺项与交付计划，不宣称已实现。下一步按依赖补齐设置、运行/桌面、接入观察和模板转换。
+
+
+## #102 模板转换入口已接
+
+原 OwnerWorkspaceAdoption 和应用写入逻辑移入 info_workspace，App 原路径 re-export，共用相同字段、附件、关联和计划规则。OnlineOwnerLibrary 与 OwnerWorkspaceInformation 实现只读输入接口；原 Source changed 回调保留。新增严格 adoption_transport、OwnerAdoptionRoutes 及 RemoteWorkspaceSource 的三个正式方法。Owner 保存仍用原事务/持久命令，不增加资料表。
+
+修复远程 recordOperationReceipt 漏 adoptionPlanId/类型（原误标编辑）及写入失去回复时需保留 unknown_outcome 的接线。实际代理丢回复及失败查询，再重开整套服务，只查原回执，POST 仍一次。正文和关联不变、附件不兼容被拒、修正后保留原文件身份/版本和原文；取消与并发修改冲突均检查。正常 OnlineDesktopLauncher 的菜单/原转换对话框已真实跑通。
+
+最新相关 App 31 项通过，Mac 服务 6 项、Linux ARM64 同组 6 项通过且无跳过，相关分析无问题。所有测试会话结束。详见 docs/development/evidence/server-a12/adoption.md。新 server integration 组可用 local/server-first-stage/run-a12-adoption-linux.py 重跑；挂载当前 lib/test 到现有 a05 验证镜像及固定真实 SQLCipher，这不是最终候选镜像。
+
+下一步接设置：先读 core 的 desktop_preferences.dart、owner_workspace_settings.dart、settings_controller.dart 及原设置页面；复用原请求期限、历史保留和清理逻辑，但本机外观/通知/后台偏好不写入共享服务器。当前原 DesktopPreferences 把这些值放一个版本/保存事务里，联网需要明确的设备适配及原操作核对；不要用第二份本机资料库或只提供固定默认值。之后接运行/窗口/退出与设备/会话只读状态，不能把独立服务停掉或操作别台设备的进程。最后才做统一候选和获准的 fork-none Agent。

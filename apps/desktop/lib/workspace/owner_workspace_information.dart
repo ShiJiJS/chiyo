@@ -3,9 +3,7 @@ import 'package:info_workspace/owner_workspace_classification.dart'
     show WorkspaceClassificationInformation;
 import 'package:info_workspace/owner_workspace_relation_queries.dart';
 import 'owner_workspace_file_selections.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-import 'workspace_adoption.dart';
+import 'package:info_workspace/owner_workspace_adoption.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'workspace_history.dart';
 import 'workspace_information_codec.dart';
@@ -20,7 +18,8 @@ class OwnerWorkspaceInformation
     implements
         WorkspaceRelationSource,
         WorkspaceClassificationInformation,
-        OwnerFileInformation {
+        OwnerFileInformation,
+        WorkspaceAdoptionInformation {
   OwnerWorkspaceInformation({
     required this.owner,
     required Map<String, Map<String, Object?>> templates,
@@ -33,6 +32,7 @@ class OwnerWorkspaceInformation
            (key, value) => MapEntry(key, workspaceImmutableMap(value)),
          ),
        );
+  @override
   final core.OwnerAccess owner;
   final OwnerWorkspaceFileSelections? fileSelections;
   final Map<String, Map<String, Object?>> _initialTemplates;
@@ -358,27 +358,7 @@ class OwnerWorkspaceInformation
   }
 
   WorkspaceFailure _failure(core.AccessFailure failure) =>
-      switch (failure.status) {
-        'version_conflict' || 'information_conflict' || 'operation_conflict' =>
-          const WorkspaceFailure('conflict', '资料或操作已变化，请重新读取并核对修改。'),
-        'template_changed' || 'template_unavailable' => const WorkspaceFailure(
-          'conflict',
-          '模板已停用、移除或更新，请重新核对新建资料的模板。',
-        ),
-        'invalid_information' => const WorkspaceFailure(
-          'validation',
-          '资料内容或分类无效，请重新核对。',
-        ),
-        'library_changed' => const WorkspaceFailure(
-          'unknown_outcome',
-          '资料库已替换，不能将旧操作重放到新库。',
-        ),
-        'service_unavailable' => const WorkspaceFailure(
-          'unavailable',
-          '资料服务尚未就绪。',
-        ),
-        _ => const WorkspaceFailure('unknown_outcome', '操作结果无法确认，请核对原操作。'),
-      };
+      ownerWorkspaceRecordFailure(failure);
 
   Future<WorkspaceOperationReceipt?> recordOperationReceipt(
     String operationId,
@@ -412,53 +392,6 @@ class OwnerWorkspaceInformation
       ),
       result: WorkspaceRecordReceipt(ref: ref, version: receipt.version),
     );
-  }
-
-  Future<WorkspaceRecordReceipt> applyAdoption(
-    String operationId,
-    WorkspaceAdoptionPreview plan, {
-    void Function()? validate,
-  }) async {
-    _available();
-    final command = core.InformationRecordCommand(
-      typeId: plan.target.type.id,
-      digest: sha256
-          .convert(utf8.encode('adopt-template:${plan.planId}'))
-          .toString(),
-      adoptionPlanId: plan.planId,
-      templateCatalogVersion: plan.pluginVersion,
-    );
-    final prior = await owner.informationRecordReceipt(operationId);
-    if (prior != null) {
-      if (prior.command?.digest != command.digest) {
-        throw const WorkspaceFailure('conflict', '原操作不能用于另一份预览。');
-      }
-      return WorkspaceRecordReceipt(
-        ref: WorkspaceRecordRef(WorkspaceRecordKind.information, prior.itemId),
-        version: prior.version,
-      );
-    }
-    final current = _item(plan.current.record.ref);
-    if (current.version != plan.current.version ||
-        owner.templatePackageVersion != plan.pluginVersion) {
-      throw const WorkspaceFailure('conflict', '资料或模板已变化，请重新预览。');
-    }
-    final input = _codec.adopt(plan.result, current, command);
-    _checkRelations(input, current);
-    try {
-      final receipt = await owner.saveInformationRecord(
-        operationId,
-        input,
-        validate: validate,
-      );
-      onChanged?.call(plan.current.record.ref);
-      return WorkspaceRecordReceipt(
-        ref: plan.current.record.ref,
-        version: receipt.version,
-      );
-    } on core.AccessFailure catch (e) {
-      throw _failure(e);
-    }
   }
 
   void _checkRelations(
