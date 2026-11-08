@@ -62,10 +62,32 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
         );
       }
     }
+    for (final execution in service._runtimeRepository.credentialExecutions) {
+      if (!service._deviceCredentialRequests.containsKey(execution.requestId) ||
+          service._deviceCredentialExecutions.containsKey(execution.id) ||
+          !{'preparing', 'running'}.contains(execution.state)) {
+        continue;
+      }
+      if (execution.state == 'running') {
+        throw const FormatException('Missing device execution proof');
+      }
+      // A crash before publishing/checkpointing the first material response.
+      // Keep the operation consumed and uncertain, never reconstruct material.
+      await service._saveUse(
+        execution: execution.changed({
+          'executionState': 'unknown',
+          'errorCode': 'execution_unknown',
+        }),
+      );
+    }
   }
 
   Map<String, Object?> _encodeDeviceCredentialRequests() => {
-    'version': 1,
+    'version': 2,
+    'executions': {
+      for (final e in service._deviceCredentialExecutions.entries)
+        e.key: e.value.toJson(),
+    },
     'requests': [
       for (final entry in service._deviceCredentialRequests.entries)
         {
@@ -79,14 +101,21 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
 
   void _restoreDeviceCredentialRequests(Object? raw) {
     if (raw is! Map ||
-        raw.length != 2 ||
-        raw['version'] != 1 ||
+        (raw['version'] == 1
+            ? raw.length != 2
+            : raw['version'] != 2 || raw.length != 3) ||
         raw['requests'] is! List ||
         (raw['requests'] as List).length > 100000) {
       throw const FormatException('Invalid online credential state');
     }
     final rows = raw['requests'] as List;
-    if (rows.isEmpty) return;
+    final operations = raw['version'] == 1
+        ? <String, dynamic>{}
+        : raw['executions'];
+    if (operations is! Map || operations.length > 100000) {
+      throw const FormatException('Invalid device executions');
+    }
+    if (rows.isEmpty && operations.isEmpty) return;
     if (service._repository is! CredentialRuntimeRepository) {
       throw const FormatException('Missing online credential repository');
     }
@@ -121,6 +150,35 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
       if (value['inactive'] as bool) {
         service._inactiveCredentialApprovals.add(id);
       }
+    }
+    final executions = {
+      for (final e in service._runtimeRepository.credentialExecutions) e.id: e,
+    };
+    final proofs = <String>{};
+    for (final entry in operations.entries) {
+      if (entry.key is! String || entry.value is! Map) {
+        throw const FormatException('Invalid device execution');
+      }
+      final id = entry.key as String;
+      final proof = _DeviceCredentialExecution.fromJson(
+        Map<String, dynamic>.from(entry.value as Map),
+      );
+      final record = executions[id];
+      if (record == null ||
+          record.restoredAt != null ||
+          record.protocolVersion != 2 ||
+          record.materialLease != null ||
+          record.supervisorPid != null ||
+          record.workerPid != null ||
+          service._deviceCredentialRequests[record.requestId] !=
+              proof.deviceId ||
+          record.jobName == null ||
+          !_DeviceCredentialExecution.validJob(record.jobName!) ||
+          !proofs.add(proof.capability)) {
+        throw const FormatException('Inconsistent device execution');
+      }
+      service._deviceCredentialExecutions[id] = proof;
+      service._executionCapabilities[id] = proof.capability;
     }
   }
 

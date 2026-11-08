@@ -72,7 +72,7 @@
 | 文字录入/修改提案与预览 | 已接并通过整份保存、修正、重开、失败与丢失回复检查 | #96 |
 | 附件上传、版本、领取与本机操作 | 已接并通过正常App及独立CLI实际文件检查 | #97 |
 | 凭据管理、补填密码及关联 | 已接并通过正常App、CLI、整份事务及断线恢复检查 | #98 |
-| SSH、Token、凭据文件的本机使用 | 未接；显式不可用 | #99 |
+| SSH、Token、凭据文件的本机使用 | 长驻CLI已接并有原生执行证据；逐命令Codex宿主及SSH信任界面仍待接 | #99 |
 | 回收、历史和版本恢复 | 未接；显式不可用 | #100 |
 | 完整备份恢复与设置界面 | 宿主最小恢复已验；界面未接 | #101 |
 | 最终单一候选、运行程序和全流程自动试用 | 未开始 | #102 |
@@ -374,3 +374,14 @@ CLI当前packages/info_cli/lib/credential_runtime_client.dart的_claimCredential
 本机已验证可用预检工具在.tools/gh-2.102.0/gh_2.102.0_macOS_arm64/bin/gh、.tools/aws-cli-2.38.1-package/aws-cli.pkg/Payload/aws-cli/aws和/usr/bin/ssh；不表示它们已经用于真实凭据任务。Native预检默认实现三项通过记录在a09-native-device-preflight.log，脚本为忽略目录local/server-first-stage/device-preflight-probe.dart。后续实际使用仍只用合成接收程序/SSH服务和测试凭据。
 
 当前同一浏览器工作空间17/p1停在#99，未finish整体目标。工作树已提交，无测试容器、看护或活跃测试句柄；#99–#102未完成，无匹配候选、正式安装或真实迁移，#103–#105不动。
+
+
+## #99设备操作与长驻CLI实际执行已接
+
+本轮新增设备私有操作/材料/worker/报告/清理路由和credentialRuntime2执行证明，服务器不创建明文临时文件、不查设备PID。首次材料只经Host私有回复交付，后续原编号返回元数据；丢回复、存储事实与私有快照之间崩溃不会重发材料或第二次启动。CLI复用原原生执行器和输出过滤，DeviceCredentialJournal只持久保存原操作清理/控制能力及OS身份，不含sessionSecret、材料或输出；公共聊天ID和CodexEndIndex不承担恢复读取能力。
+
+Mac长驻CLI已用真实原生worker执行Token和文件合成接收程序，工作目录及输出过滤检查通过；杀死独立CLI进程后保留仍运行的材料，进程组结束后清理并如实记录未知。真实系统ssh连接新建Docker测试账号，不使用本机个人SSH文件/账号shell；原会话SSH许可跨服务重开，撤销/聊天结束阻止新操作、原操作正常退出并清理。所有材料仅合成。
+
+实际检查：设备HTTPS专项Mac/Linux各8通过；Mac原生Token/文件/崩溃/丢回复4通过，真实SSH2通过，严格登记校验后联合复验6通过；服务整组回归37通过（SSH测试新增前），核心27、存储20、CLI21通过（9项原平台条件跳过）。本轮服务端/CLI相关分析无问题，Core全lib只有未改builtin_information_definitions.dart:7旧提示。准确范围和日志见docs/development/evidence/server-a09/README.md。
+
+**#99仍未完成。** 下一步复用CredentialExecutionHost接逐命令Codex的独立设备宿主（目前hosted=true仍向旧服务路径请求，在线拒绝，没有本机fallback），保留全局16执行/30分钟已结束输出限制。通过私有loopback控制和内存bootstrap传session，不能写可读聊天证明进磁盘。随后接正常App的SSH信任管理、完整凭据审批连续试用及未确认审批重开原回执恢复。再接#100–#102；#103–#105不动。没有统一候选、正式安装或真实资料迁移。

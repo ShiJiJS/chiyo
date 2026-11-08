@@ -9,6 +9,7 @@ import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'credential_output_filter.dart';
 import 'device_information_files.dart';
+import 'device_credential_journal.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';
@@ -54,6 +55,15 @@ class AgentClient {
     runtimeWorkerExecutable: runtimeWorkerExecutable,
   );
   final Directory? deviceFileStateDirectory;
+  DeviceCredentialJournal? get _deviceCredentialJournal =>
+      _remote != null && deviceFileStateDirectory != null
+      ? DeviceCredentialJournal(
+          _remote.profile,
+          Directory(
+            '${deviceFileStateDirectory!.absolute.parent.path}/credential-executions',
+          ),
+        )
+      : null;
   late final Future<void> _deviceFileMaintenance =
       _remote != null && deviceFileStateDirectory != null
       ? DeviceInformationFiles(
@@ -114,6 +124,12 @@ class AgentClient {
     } on Object {
       // Preserve failed cleanup journals. An unrelated catalog/proposal must
       // still work; file fetch/release rechecks its own journal and fails closed.
+    }
+    try {
+      await _deviceCredentialJournal?.maintain();
+    } on Object {
+      // Failed/uncertain cleanup remains journaled; it cannot authorize a new
+      // launch or turn unrelated catalog queries into material delivery.
     }
     final command = input['command'];
     if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {

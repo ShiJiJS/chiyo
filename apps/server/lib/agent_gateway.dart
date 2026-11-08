@@ -1,15 +1,18 @@
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'agent_devices.dart';
+import 'device_credential_routes.dart';
 
 /// Authenticated online transport adapter. It reuses the Agent-only protocol;
 /// the loopback HTTP server and its Host/Origin protections remain unchanged.
 final class AgentGateway {
   AgentGateway(this._protocol, this._devices, {AgentAccess? deviceCredentials})
-    : _deviceCredentials = deviceCredentials;
+    : _deviceCredentials = deviceCredentials == null
+          ? null
+          : DeviceCredentialRoutes(deviceCredentials);
   final AgentProtocol _protocol;
   final AgentDeviceRegistry _devices;
-  final AgentAccess? _deviceCredentials;
+  final DeviceCredentialRoutes? _deviceCredentials;
   Future<void> _commands = Future.value();
 
   static const _metadata = {
@@ -47,7 +50,7 @@ final class AgentGateway {
     '/information-file/download',
     '/information-file/complete',
     '/information-file/cleanup',
-    '/credential-use/device/request',
+    ...DeviceCredentialRoutes.sessionPaths,
   };
 
   Future<Map<String, Object?>> dispatch(
@@ -83,6 +86,13 @@ final class AgentGateway {
       capabilities.add(
         AgentDeviceCapability('file-cleanup', text('cleanupCapability')),
       );
+    } else if (DeviceCredentialRoutes.proofPaths.contains(path)) {
+      capabilities.add(
+        AgentDeviceCapability(
+          'credential-execution',
+          text('executionCapability'),
+        ),
+      );
     } else if (path == '/session/end') {
       capabilities.add(AgentDeviceCapability('end', text('endCapability')));
     } else if (path == '/read') {
@@ -92,22 +102,10 @@ final class AgentGateway {
     }
     final device = await _devices.authorize(bearer, capabilities: capabilities);
     final Map<String, Object?> result;
-    if (path == '/credential-use/device/request') {
-      final agent = _deviceCredentials;
-      if (agent == null) throw const AccessFailure('unsupported_capability');
-      final command = Map<String, dynamic>.from(body)..remove('sessionSecret');
-      final raw = command.remove('deviceLaunch');
-      if (raw is! Map<String, dynamic>) {
-        throw const CredentialUseFailure('invalid_plan');
-      }
-      final input = CredentialUseInput.fromJson(command);
-      final request = await agent.requestDeviceCredentialUse(
-        device.id,
-        text('sessionSecret'),
-        input,
-        DeviceCredentialLaunch.fromPrivateJson(raw),
-      );
-      result = agent.credentialUseStatus(text('sessionSecret'), request.id);
+    if (DeviceCredentialRoutes.handles(path)) {
+      final routes = _deviceCredentials;
+      if (routes == null) throw const AccessFailure('unsupported_capability');
+      result = await routes.dispatch(device.id, path, body);
     } else {
       result = await _protocol.dispatch(path, body);
     }
@@ -123,6 +121,10 @@ final class AgentGateway {
         if (result['delivery'] case final Map delivery)
           if (delivery['cleanupCapability'] case final String proof)
             AgentDeviceCapability('file-cleanup', proof),
+      if (path == '/credential-use/device/operation')
+        if (result['material'] case final Map material)
+          if (material['executionCapability'] case final String proof)
+            AgentDeviceCapability('credential-execution', proof),
     ];
     if (minted.isNotEmpty) {
       await _devices.bindCapabilities(bearer, device.generation, minted);
@@ -142,6 +144,7 @@ final class AgentGateway {
           'information-request-operations.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
+          if (_deviceCredentials != null) 'credential-device-execution.v1',
           'information-import-operations.v1',
           'information-update-operations.v1',
           if ((result['capabilities'] as List).contains('credential-import.v1'))

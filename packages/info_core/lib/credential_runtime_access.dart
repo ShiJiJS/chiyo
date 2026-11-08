@@ -191,6 +191,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     int? supervisorPid,
     String? supervisorCreatedAt,
   }) => _service.owner._serialize(() async {
+    if (_service._deviceCredentialRequests.containsKey(input.requestId)) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
     final r = _service._sessionUseRequest(session, input.requestId);
     if (r.protocolVersion != 2) {
       throw const CredentialUseFailure('unsupported_protocol');
@@ -339,7 +342,17 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
 
   Future<CredentialExecution> reportCredentialExecution(
     CredentialExecutionReport report,
-  ) => _service.owner._serialize(() async {
+  ) {
+    if (_service._deviceCredentialExecutions.containsKey(report.executionId)) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
+    return _reportCredentialExecution(report);
+  }
+
+  Future<CredentialExecution> _reportCredentialExecution(
+    CredentialExecutionReport report, {
+    bool verifyLocalProcess = true,
+  }) => _service.owner._serialize(() async {
     if (_service._executionCapabilities[report.executionId] !=
         report.executionCapability) {
       throw const CredentialUseFailure('session_mismatch');
@@ -400,7 +413,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         }.contains(report.errorCode)) {
       throw const CredentialUseFailure('invalid_plan');
     }
-    if (next == 'running') {
+    if (next == 'running' && verifyLocalProcess) {
       if (old.supervisorPid != null && old.workerPid == null) {
         throw const CredentialUseFailure('invalid_plan');
       }
@@ -490,7 +503,12 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
   Future<CredentialUseRequest> requestCredentialUse(
     String session,
     CredentialUseInput input,
-  ) => _requestCredentialUse(session, input, _resolveCredentialPlan);
+  ) {
+    if (_service._deviceFileDelivery) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
+    return _requestCredentialUse(session, input, _resolveCredentialPlan);
+  }
 
   Future<CredentialUseRequest> _requestCredentialUse(
     String session,
