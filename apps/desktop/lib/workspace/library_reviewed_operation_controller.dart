@@ -114,7 +114,10 @@ abstract class LibraryReviewedOperationController<P, C, R>
       final result = await lookup(operationId(_command as C));
       if (result != null) {
         final checked = _check(result);
-        if (!_closed) receipt = checked;
+        if (!_closed) {
+          receipt = checked;
+          failure = null;
+        }
       } else {
         absent = true;
         if (!_closed) {

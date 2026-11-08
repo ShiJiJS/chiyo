@@ -32,6 +32,11 @@ final class AgentGateway {
     '/update/submit',
     '/update/revise',
     '/update/status',
+    '/organization/request',
+    '/organization/status',
+    '/organization/tasks',
+    '/organization/metadata',
+    '/organization/submit',
   };
 
   Future<Map<String, Object?>> dispatch(

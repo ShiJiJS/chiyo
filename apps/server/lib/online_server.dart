@@ -18,6 +18,7 @@ import 'package:info_workspace/owner_workspace_proposals.dart';
 import 'package:info_workspace/workspace_transport.dart';
 import 'owner_library.dart';
 import 'owner_proposal_routes.dart';
+import 'owner_library_routes.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -66,6 +67,7 @@ final class OnlineServer {
     changed: () {},
   );
   late final _proposalRoutes = OwnerProposalRoutes(_proposals);
+  late final _libraryRoutes = OwnerLibraryRoutes(_library);
   int get port => _http.port;
 
   static Future<OnlineServer> start({
@@ -126,6 +128,20 @@ final class OnlineServer {
           utf8.encode(
             jsonEncode([
               owner.templatePackageVersion,
+              owner.libraryOrderRevision,
+              owner.libraryDisplayOrder.name,
+              [
+                for (final t in owner.organizationTasks)
+                  [
+                    t.id,
+                    owner.organizationState(t).name,
+                    t.expiresAt.toIso8601String(),
+                    t.approvedAt?.toIso8601String(),
+                    t.completedAt?.toIso8601String(),
+                    t.itemVersions,
+                    t.changes.map((c) => c.toJson()).toList(),
+                  ],
+              ],
               [
                 for (final p in owner.importProposals)
                   [p.id, p.version, p.state.name],
@@ -215,7 +231,17 @@ final class OnlineServer {
             'protocolVersion': 1,
             'serverId': serverId,
             'workspaceObservation': await _observation(),
+            'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(2).join('/') == 'v1/owner' &&
+            const {'classification', 'library'}.contains(path[2])) {
+          final (code, value) = await _libraryRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/proposals') {
           final (code, value) = await _proposalRoutes.dispatch(
@@ -372,8 +398,7 @@ final class OnlineServer {
           await reply(200, {'status': 'revoked', 'deviceId': path[3]});
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/catalog') {
-          final classification = await _service.owner
-              .informationClassificationSnapshot();
+          final classification = await _library.loadCatalog();
           await reply(200, {
             'version': classification.version,
             'summary': {
@@ -391,6 +416,8 @@ final class OnlineServer {
               for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
             ],
             'templates': _plugins.templates.values.toList(),
+            'workspace': workspaceCatalogToJson(classification),
+            'recordOrder': _libraryRoutes.order()['records'],
           });
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/summaries') {

@@ -20,12 +20,14 @@ final class OwnerClient {
     this._http,
     this.serverId, {
     this.initialWorkspaceObservation,
+    this.initialLibrarySort,
   });
   final Uri address;
   final String _token;
   final HttpClient _http;
   final String serverId;
   final String? initialWorkspaceObservation;
+  final String? initialLibrarySort;
 
   static Future<OwnerClient> connect({
     required Uri address,
@@ -65,6 +67,7 @@ final class OwnerClient {
         id,
         initialWorkspaceObservation:
             identity['workspaceObservation'] as String?,
+        initialLibrarySort: identity['librarySort'] as String?,
       );
     } on Object {
       http.close(force: true);

@@ -82,6 +82,9 @@ final class OnlineInformationRuntime {
       for (final request in service._requests.values) {
         service._expire(request);
       }
+      for (final task in service.owner.organizationTasks) {
+        service.owner.organizationState(task);
+      }
       await service._auditWrites;
       if (service._auditFailed ||
           service._uncertainInformationDecisions.isNotEmpty) {
@@ -112,7 +115,11 @@ final class OnlineInformationRuntime {
   }
 
   Map<String, Object?> _encode() => {
-    'version': 1,
+    'version': 2,
+    'expiredOrganizations': [
+      for (final task in service.owner.organizationTasks)
+        if (service._expiredOrganizations.contains(task.id)) task.id,
+    ],
     'sessions': [
       for (final entry in service._sessions.entries)
         {
@@ -188,8 +195,17 @@ final class OnlineInformationRuntime {
     final ended = <String>{};
     if (raw != null) {
       final data = object(raw);
-      if (data['version'] != 1) {
+      if (data['version'] != 1 && data['version'] != 2) {
         throw const FormatException('Invalid online state version');
+      }
+      if (data['version'] == 2) {
+        final known = {
+          for (final task in service.owner.organizationTasks) task.id,
+        };
+        for (final value in list(data['expiredOrganizations'])) {
+          final id = text(value, 200);
+          if (known.contains(id)) service._expiredOrganizations.add(id);
+        }
       }
       for (final value in list(data['sessions'])) {
         final row = object(value), secret = text(object(value)['secret'], 200);
