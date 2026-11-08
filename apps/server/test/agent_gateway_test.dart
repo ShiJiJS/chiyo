@@ -38,7 +38,7 @@ void main() {
   setUp(() async {
     root = await Directory.systemTemp.createTemp('chiyo-agent-gateway-');
     await initializeServerSecrets('${root.path}/secrets');
-    repo = await EncryptedInformationRepository.open(
+    repo = await EncryptedInformationRepository.openOnline(
       '${root.path}/data',
       MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
     );
@@ -225,7 +225,7 @@ void main() {
       await server.close();
       await runtime.close();
       await repo.close();
-      repo = await EncryptedInformationRepository.open(
+      repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
       );

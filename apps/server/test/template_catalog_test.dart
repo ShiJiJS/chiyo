@@ -41,7 +41,7 @@ void main() {
       late AgentClient cli;
       late AgentConnectionProfile connection;
       Future<void> open({int port = 0}) async {
-        repo = await EncryptedInformationRepository.open(
+        repo = await EncryptedInformationRepository.openOnline(
           '${root.path}/data',
           MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
         );

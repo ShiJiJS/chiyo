@@ -4,7 +4,7 @@
 
 持续目标#91–#102，#103–#105后置。独立分支codex/server-first-stage。#91–#98已完成并关闭，#98完成评论已发布并回读，Closed及Reopen issue入口已确认；代码2d58379b和5cd1c379已推送。#99–#102仍未完成，没有统一候选、正式安装或真实迁移。后文旧阶段状态仅作过程记录，以本节及末节为准。
 
-浏览器使用同一持续目标的TaskSpace15/p1（此前13已确认消失后按用户既有授权重建）。已读取#98/#99正文、评论、标签及前置关系；#98为#99/#100前置。后续复用此工作空间，不操作用户空间，不因逐票完成而finish整个目标。
+浏览器使用同一持续目标的TaskSpace17/p1；15本轮已确认不存在，库存仅用户空间0，按用户既有明确授权重建同名目标空间（此前13同样已结束）。已读取#98/#99正文、评论、标签及前置关系；#98为#99/#100前置。后续复用此工作空间，不操作用户空间，不因逐票完成而finish整个目标。
 
 所有开发与检查仅使用隔离合成资料、私有测试密钥和TLS；未替换日常App、读取个人钥匙串或启动Windows CI。
 
@@ -344,9 +344,24 @@ Mac完整服务和密码/状态存储32项通过；Linux ARM64同组31项通过�
 
 #99正文、标签、评论和关系已读取；前置#98完成，后续#101依赖它。本机执行仍未接通，不能关闭#99。接续需先解决以下实际耦合，再开放能力：
 
-- OnlineInformationRuntime._encode当前version2明确省略_credentialUseSessions对应请求，也不保存该私有绑定及执行证明；credential混合普通字段的已批范围同样被跳过。需要恢复原聊天/设备/有效范围与原期限，不能只凭历史生成授权。恢复的备份记录有restoredAt，不能当活动许可。未知审批的_inactiveCredentialApprovals也不能因重开消失而复活。
+- 接续前OnlineInformationRuntime._encode的version2明确省略_credentialUseSessions对应请求，也不保存该私有绑定及执行证明；credential混合普通字段的已批范围同样被跳过。需要恢复原聊天/设备/有效范围与原期限，不能只凭历史生成授权。恢复的备份记录有restoredAt，不能当活动许可。未知审批的_inactiveCredentialApprovals也不能因重开消失而复活。
 - CredentialRuntimeAgentAccess._resolveCredentialPlan在服务进程里检查可执行文件和cwd，begin/register检查服务器本机PID/组；_claimUseExecutionMaterial对file在服务器创建ManagedCredentialFiles。联网模式必须把这些身份、路径和物理文件核查移到AI设备，服务器只核对原授权与逐次操作，不能将远程PID当本机PID。
 - CLI _claimCredentialOperation及_consumeCredentialMaterial对_remote直接拒绝；CredentialExecutionHost只能创建loopback AgentClient，Codex逐次调用依赖旧App宿主。需要复用同一执行器、进程组/先登记后启动和有界输出，实现App退出也可工作的设备宿主；仅清理/控制登记不能保存可读聊天证明或按公开聊天ID恢复。
 - 所有后续操作与私有材料交付都要绑定原Agent设备及原聊天，重试先查原操作，未知不能第二次启动。服务重启、设备断线、聊天结束必须区分；普通重启保留有效许可，撤销/停用/材料变化阻止后续使用。原已执行外部结果不承诺收回。
 
 下一步先实现和验证在线凭据许可的持久绑定与可信设备执行边界，再接App统一审批、正式CLI和独立合成接收程序/SSH服务；不要直接把旧AgentProtocol的credential-use路径全部加入Gateway白名单。Mac焦点填充仍按#51，其他平台/跨电脑实测仍后置，不扩大后置范围掩盖本轮所需SSH/Token/文件使用。
+
+
+## #99设备申请及持久绑定已接，实际执行仍待续
+
+新增DeviceCredentialLaunch私有Host快照及requestDeviceCredentialUse，共用原申请与接收方式规则，服务器不再为该入口检查设备路径/cwd。原认证网关从原设备身份进入内部credential-use/device/request，正文不能选择deviceId；不同设备不能借原会话或字段证明接入。正常status/claim及用户审批接口仍复用。未宣告credential-use-reuse.v1，正式CLI联网run-use仍未接，不关闭#99。
+
+独立服务和服务夹具改用EncryptedInformationRepository.openOnline保留事实，默认open保持旧本机行为。私有textRuntime3保存原设备/聊天绑定与未确认决定禁用状态；完整混合字段范围、原证明和期限可重开恢复；事务已提交而快照未发布时仅恢复准确已批范围。到期观察持久，时钟回调不复活，撤销/结束/停用/更换不恢复；SSH会话内不限时可跨天及普通重启，真实结束后失效。便携恢复不带绑定；损坏状态拒绝且不覆盖证据。历史清理/备份替换同时清绑定。
+
+审批元数据补完整v2 codec（凭据接收程序、工作目录、参数、方式、版本、聊天、期限及执行观察）。正常RemoteWorkspaceApprovals改用显式Owner details/<id>路径；旧v1继续拒绝凭据，避免旧客户端默默丢掉说明。版本未知、不完整或夹带私有证明拒绝，不把Core私有运行对象直接序列化。当前HTTP合成审批通过，凭据UI完整验收仍随执行链完成。
+
+阶段证据见docs/development/evidence/server-a09/README.md：设备申请HTTP前的服务/状态回归Mac52、Linux51通过（Mac驱动1项跳过）；新设备HTTPS、元数据及原网关/审批Mac/Linux各5通过；原正常App审批/丢回复2通过；核心27通过。原生默认DeviceCredentialLaunch.prepare实际对本Mac固定gh/aws及系统ssh三种预检通过，仅验证预检，不是实际凭据任务。相关静态分析通过。原探测目录规范路径清理已修正，全部测试/容器/看护结束，无真实资料、钥匙串或日常App操作。
+
+下一步#99剩余：设备常驻执行宿主（App关闭也工作）、逐次操作/私有材料交付、SSH信任设置、进程/文件身份留客户端、实际合成SSH/Token/文件接收与清理、原操作不重放、凭据UI连续试用，以及未确认审批重开后的原回执处理。当前device_credential_access只覆盖请求和绑定维护，不能把老credential-use/operation/material/register路径直接放行。执行证明/设备清理登记仍需设计/实现，不能将其写入CodexEndIndex或按公开聊天ID恢复能力。
+
+本轮GitHub工作空间已恢复为17/p1，#99最新正文、评论、标签及关系再次读过，前置#98已关闭；原15确认不存在，未操作用户空间0。所有本轮进程/容器/看护均已结束，阶段代码待本轮提交/同步及#99回填，不能结束整体目标。

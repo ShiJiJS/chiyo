@@ -32,7 +32,7 @@ void main() {
   test('missing key cannot create a library or a replacement secret', () async {
     final data = '${root.path}/data';
     await expectLater(
-      EncryptedInformationRepository.open(
+      EncryptedInformationRepository.openOnline(
         data,
         MountedDatabaseKeyStore(key.path),
       ),

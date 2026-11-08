@@ -41,7 +41,7 @@ void main() {
       final targetKeys = MountedDatabaseKeyStore(
         '${root.path}/new-secrets/database.key',
       );
-      var target = await EncryptedInformationRepository.open(
+      var target = await EncryptedInformationRepository.openOnline(
         '${root.path}/new-data',
         targetKeys,
       );
@@ -52,7 +52,7 @@ void main() {
       } finally {
         await target.close();
       }
-      target = await EncryptedInformationRepository.open(
+      target = await EncryptedInformationRepository.openOnline(
         '${root.path}/new-data',
         targetKeys,
       );

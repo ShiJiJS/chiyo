@@ -35,7 +35,7 @@ void main() {
       late OnlineServer server;
       late OwnerClient client;
       Future<void> open([int port = 0]) async {
-        repo = await EncryptedInformationRepository.open(
+        repo = await EncryptedInformationRepository.openOnline(
           '${root.path}/data',
           keys,
         );

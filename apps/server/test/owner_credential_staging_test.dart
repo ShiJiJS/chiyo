@@ -15,7 +15,7 @@ void main() {
         'credential-input-expiry-',
       );
       await initializeServerSecrets('${root.path}/secrets');
-      final repo = await EncryptedInformationRepository.open(
+      final repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
       );

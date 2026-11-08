@@ -23,7 +23,7 @@ Future<void> main(List<String> args) async {
       return;
     }
     final config = await ServerConfiguration.read(args.last);
-    final repository = await EncryptedInformationRepository.open(
+    final repository = await EncryptedInformationRepository.openOnline(
       config.dataDirectory,
       MountedDatabaseKeyStore(config.databaseKeyFile),
     );

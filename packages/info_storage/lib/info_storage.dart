@@ -435,6 +435,7 @@ class EncryptedInformationRepository
     this._lock,
     this.cipherVersion,
     this._clock,
+    this._preserveOnlineCredentialFacts,
   );
   final DateTime Function() _clock;
   final _InformationDatabase _db;
@@ -551,6 +552,7 @@ class EncryptedInformationRepository
   }
 
   bool _closed = false;
+  final bool _preserveOnlineCredentialFacts;
   static final _openDirectories = <String>{};
   late final String _directory;
   late final backups = InformationBackups._(this);
@@ -562,6 +564,28 @@ class EncryptedInformationRepository
     String directory,
     DatabaseKeyStore keys, {
     DateTime Function()? clock,
+  }) => _open(
+    directory,
+    keys,
+    clock: clock,
+    preserveOnlineCredentialFacts: false,
+  );
+
+  /// Trusted standalone Host. This preserves facts, never grants authority:
+  /// OnlineInformationRuntime must reconcile the private device/chat bindings
+  /// before serving requests. Portable restores still discard those bindings.
+  static Future<EncryptedInformationRepository> openOnline(
+    String directory,
+    DatabaseKeyStore keys, {
+    DateTime Function()? clock,
+  }) =>
+      _open(directory, keys, clock: clock, preserveOnlineCredentialFacts: true);
+
+  static Future<EncryptedInformationRepository> _open(
+    String directory,
+    DatabaseKeyStore keys, {
+    DateTime Function()? clock,
+    required bool preserveOnlineCredentialFacts,
   }) async {
     final folder = Directory(directory);
     await folder.create(recursive: true);
@@ -677,6 +701,7 @@ class EncryptedInformationRepository
         lock,
         version,
         clock ?? DateTime.now,
+        preserveOnlineCredentialFacts,
       ).._directory = canonical;
       await repository._load();
       return repository;

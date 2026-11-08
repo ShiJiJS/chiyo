@@ -1,6 +1,7 @@
 import 'workspace_approvals.dart';
 import 'workspace_records.dart';
 import 'workspace_files.dart';
+import 'credential_use_transport.dart';
 
 /// Versioned owner metadata transport. These projections contain no field
 /// values, session secrets, grant tokens or credential material.
@@ -94,13 +95,26 @@ WorkspaceApprovalResults approvalResultsFromJson(Map<String, dynamic> j) =>
       ),
     );
 
-Map<String, Object?> approvalDetailToJson(WorkspaceApprovalDetail d) {
-  // These modules are connected in later tickets. Refuse rather than silently
-  // dropping part of a mixed request or its recorded use operations.
-  if (d.credential != null || d.executions.isNotEmpty) {
+Map<String, Object?> approvalDetailToJson(
+  WorkspaceApprovalDetail d, {
+  int version = 1,
+}) {
+  // The original endpoint stays v1 and refuses credential details. Only the
+  // explicit v2 endpoint can deliver the complete mixed review to a new App.
+  if (version != 1 && version != 2) {
+    throw const FormatException('Invalid approval version');
+  }
+  if (version == 1 && (d.credential != null || d.executions.isNotEmpty)) {
     throw const WorkspaceFailure('unsupported', '此类申请的联网接入尚未完成。');
   }
   return {
+    if (version == 2) ...{
+      'version': 2,
+      'credential': d.credential == null
+          ? null
+          : credentialUseRequestToJson(d.credential!),
+      'executions': d.executions.map(approvalExecutionToJson).toList(),
+    },
     'request': _summary(d.request),
     'reviewToken': d.reviewToken,
     'scopes': [
@@ -146,9 +160,16 @@ Map<String, Object?> approvalDetailToJson(WorkspaceApprovalDetail d) {
 
 WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
     _parse(() {
+      final version = j['version'] ?? 1;
+      if (version != 1 && version != 2 ||
+          version == 2 && !j.containsKey('credential') ||
+          version == 1 &&
+              (j.containsKey('credential') || j.containsKey('executions'))) {
+        throw const FormatException();
+      }
       DateTime? date(String k) =>
           j[k] == null ? null : DateTime.parse(j[k] as String);
-      return WorkspaceApprovalDetail(
+      final result = WorkspaceApprovalDetail(
         request: _readSummary(Map<String, dynamic>.from(j['request'] as Map)),
         reviewToken: j['reviewToken'] as String,
         scopes: (j['scopes'] as List).map((raw) {
@@ -191,7 +212,28 @@ WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
         approveUnavailableReason: j['approveUnavailableReason'] as String?,
         fileVersionPolicy: j['fileVersionPolicy'] as String?,
         decisionUnavailableReason: j['decisionUnavailableReason'] as String?,
+        credential: version == 2 && j['credential'] != null
+            ? credentialUseRequestFromJson(j['credential'])
+            : null,
+        executions: version == 2
+            ? (j['executions'] as List).map(approvalExecutionFromJson)
+            : const [],
       );
+      if (({
+                WorkspaceApprovalKind.credential,
+                WorkspaceApprovalKind.focus,
+              }.contains(result.request.kind)) !=
+              (result.credential != null) ||
+          result.credential != null &&
+              result.credential!.id != result.request.id ||
+          result.executions.any(
+            (e) =>
+                e.requestId != result.request.id ||
+                e.credential.id != result.credential?.id,
+          )) {
+        throw const FormatException('Incomplete credential approval');
+      }
+      return result;
     });
 
 Map<String, Object?> approvalChangeToJson(WorkspaceApprovalChange c) => {

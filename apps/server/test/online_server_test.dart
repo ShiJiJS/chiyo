@@ -28,7 +28,7 @@ void main() {
       expect((await Process.run('chmod', ['600', key.path])).exitCode, 0);
       final keys = MountedDatabaseKeyStore(key.path);
       final token = base64Url.encode(List.filled(32, 19)).replaceAll('=', '');
-      var repo = await EncryptedInformationRepository.open(
+      var repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         keys,
       );
@@ -127,7 +127,7 @@ void main() {
         await server.close();
         await runtime.close();
         await repo.close();
-        repo = await EncryptedInformationRepository.open(
+        repo = await EncryptedInformationRepository.openOnline(
           '${root.path}/data',
           keys,
         );

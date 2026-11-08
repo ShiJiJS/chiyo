@@ -77,6 +77,8 @@ part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
 part 'focused_fill_access.dart';
 part 'credential_runtime_access.dart';
+part 'device_credential_launch.dart';
+part 'device_credential_access.dart';
 part 'credential_execution_audit.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
@@ -272,6 +274,9 @@ class InformationService {
   }
 
   final _credentialUseSessions = <String, String>{};
+  // Online host only: the original authenticated device for each use request.
+  // This private binding is not reconstructed from portable history.
+  final _deviceCredentialRequests = <String, String>{};
   final _executionCapabilities = <String, String>{};
   final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
   late Future<void> _runtimeWrites = Future.value();

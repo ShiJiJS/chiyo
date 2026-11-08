@@ -15,7 +15,7 @@ void main() {
       addTearDown(() => root.delete(recursive: true));
       await initializeServerSecrets('${root.path}/secrets');
       final keys = MountedDatabaseKeyStore('${root.path}/secrets/database.key');
-      var repo = await EncryptedInformationRepository.open(
+      var repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         keys,
       );
@@ -66,7 +66,7 @@ void main() {
       } finally {
         await repo.close();
       }
-      repo = await EncryptedInformationRepository.open(
+      repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         keys,
       );
@@ -98,7 +98,7 @@ void main() {
       } finally {
         await repo.close();
       }
-      repo = await EncryptedInformationRepository.open(
+      repo = await EncryptedInformationRepository.openOnline(
         '${root.path}/data',
         keys,
       );
@@ -134,7 +134,7 @@ void main() {
       addTearDown(() => root.delete(recursive: true));
       await initializeServerSecrets('${root.path}/secrets');
       final keys = MountedDatabaseKeyStore('${root.path}/secrets/database.key');
-      final source = await EncryptedInformationRepository.open(
+      final source = await EncryptedInformationRepository.openOnline(
         '${root.path}/source',
         keys,
       );
@@ -155,7 +155,7 @@ void main() {
         await service.close();
         await source.close();
       }
-      final target = await EncryptedInformationRepository.open(
+      final target = await EncryptedInformationRepository.openOnline(
         '${root.path}/target',
         keys,
       );

@@ -52,13 +52,17 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       var r = CredentialUseRequest.fromJson(
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
-      if (r.state == 'pending') {
+      if ((!_preserveOnlineCredentialFacts || r.isFocusedFill) &&
+          r.state == 'pending') {
         r = r.changed({
           'state': 'cancelled',
           'invalidatedCode': 'grant_revoked',
         });
-      } else if (r.credentialApproved && !r.attemptConsumed)
+      } else if ((!_preserveOnlineCredentialFacts || r.isFocusedFill) &&
+          r.credentialApproved &&
+          !r.attemptConsumed) {
         r = r.changed({'invalidatedCode': 'grant_revoked'});
+      }
       _credentialUseRequests.add(r);
     }
     if (_credentialUseRequests.any(
@@ -82,7 +86,8 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       var e = CredentialExecution.fromJson(
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
-      if (e.state == 'preparing' || e.state == 'running') {
+      if (!_preserveOnlineCredentialFacts &&
+          (e.state == 'preparing' || e.state == 'running')) {
         e = CredentialExecution.fromJson({
           ...e.toStorageJson(),
           'executionState': 'unknown',
@@ -101,7 +106,9 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       _focusedFillOperations,
       portableApplications: await _portableFocusedFillFormat(),
     );
-    // Loading only persists terminal facts; it never reconstructs capabilities.
+    // Ordinary local loading finishes orphaned facts. The online Host preserves
+    // command facts for private device/chat reconciliation; neither path creates
+    // an access capability from this table alone.
     if (_credentialUseRequests.isNotEmpty) {
       await _commitRuntime(
         List.of(_credentialUseRequests),

@@ -65,6 +65,7 @@ extension OwnerLibraryBackup on OwnerAccess {
         _service._uncertainCredentialDecisions.clear();
         _service._inactiveCredentialApprovals.clear();
         _service._credentialUseSessions.clear();
+        _service._deviceCredentialRequests.clear();
         _service._executionCapabilities.clear();
         _service._pendingExecutionReceipts.clear();
         _service._failedFillAudits.clear();

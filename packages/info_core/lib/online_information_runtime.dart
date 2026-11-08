@@ -85,6 +85,7 @@ final class OnlineInformationRuntime {
       for (final task in service.owner.organizationTasks) {
         service.owner.organizationState(task);
       }
+      await _maintainDeviceCredentialRequests();
       await service._auditWrites;
       if (service._auditFailed ||
           service._uncertainInformationDecisions.isNotEmpty) {
@@ -115,7 +116,8 @@ final class OnlineInformationRuntime {
   }
 
   Map<String, Object?> _encode() => {
-    'version': 2,
+    'version': 3,
+    'credentialRuntime': _encodeDeviceCredentialRequests(),
     'expiredOrganizations': [
       for (final task in service.owner.organizationTasks)
         if (service._expiredOrganizations.contains(task.id)) task.id,
@@ -132,9 +134,10 @@ final class OnlineInformationRuntime {
     'endCapabilities': {...service._endCapabilities},
     'requests': [
       for (final request in service._requests.values)
-        // Credential lifetimes and local execution are enabled in their own
-        // ticket. Never silently persist those as ordinary information grants.
-        if (!service._credentialUseSessions.containsKey(request.id))
+        // Mixed field scopes remain exact ordinary grants, but only for
+        // credential requests explicitly bound to an online device.
+        if (!service._credentialUseSessions.containsKey(request.id) ||
+            service._deviceCredentialRequests.containsKey(request.id))
           {
             'id': request.id,
             'session': request.session,
@@ -195,10 +198,12 @@ final class OnlineInformationRuntime {
     final ended = <String>{};
     if (raw != null) {
       final data = object(raw);
-      if (data['version'] != 1 && data['version'] != 2) {
+      if (data['version'] != 1 &&
+          data['version'] != 2 &&
+          data['version'] != 3) {
         throw const FormatException('Invalid online state version');
       }
-      if (data['version'] == 2) {
+      if (data['version'] != 1) {
         final known = {
           for (final task in service.owner.organizationTasks) task.id,
         };
@@ -216,6 +221,9 @@ final class OnlineInformationRuntime {
         service._sessionBindings[secret] = text(row['binding'], 200);
         if (row['ended'] as bool) ended.add(secret);
       }
+      if (data['version'] == 3) {
+        _restoreDeviceCredentialRequests(data['credentialRuntime']);
+      }
       for (final entry in object(data['endCapabilities']).entries) {
         if (!service._sessions.containsKey(entry.value)) {
           throw const FormatException('Invalid online state capability');
@@ -228,10 +236,25 @@ final class OnlineInformationRuntime {
       final grants = {
         for (final h in service._repository.grantHistory) h.id: h,
       };
+      final credentialRequestIds =
+          service._repository is CredentialRuntimeRepository
+          ? {
+              for (final r in service._runtimeRepository.credentialUseRequests)
+                r.id,
+            }
+          : <String>{};
       for (final value in list(data['requests'])) {
         final row = object(value),
             session = text(object(value)['session'], 200);
         final id = text(row['id'], 200), operation = row['operationId'];
+        if (credentialRequestIds.contains(id) &&
+            (!service._deviceCredentialRequests.containsKey(id) ||
+                service._credentialUseSessions[id] != session ||
+                service._inactiveCredentialApprovals.contains(id))) {
+          throw const FormatException(
+            'Inconsistent online credential field binding',
+          );
+        }
         if (!service._sessions.containsKey(session) ||
             service._requests.containsKey(id) ||
             operation != null &&
@@ -333,6 +356,7 @@ final class OnlineInformationRuntime {
         }
       }
     }
+    _restoreDeviceCredentialFieldGrants();
     for (final session in ended) {
       service._endSession(session);
     }

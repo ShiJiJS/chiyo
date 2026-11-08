@@ -19,7 +19,7 @@ void main() {
     utf8.encode('SYNTHETIC_APPROVED_FILE_ORIGINAL'),
   );
   Future<void> open() async {
-    repo = await EncryptedInformationRepository.open(root.path, keys);
+    repo = await EncryptedInformationRepository.openOnline(root.path, keys);
     runtime = await OnlineInformationRuntime.open(
       repository: repo,
       clock: () => now,

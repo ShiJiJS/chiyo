@@ -22,7 +22,7 @@ void main() {
           const InformationDraftField.text('地址', '', 'synthetic.invalid'),
         ],
       );
-      var repo = await EncryptedInformationRepository.open(data, keys);
+      var repo = await EncryptedInformationRepository.openOnline(data, keys);
       var service = InformationService(repository: repo);
       late InformationRecordReceipt receipt;
       try {
@@ -31,7 +31,7 @@ void main() {
         await service.close();
         await repo.close();
       }
-      repo = await EncryptedInformationRepository.open(data, keys);
+      repo = await EncryptedInformationRepository.openOnline(data, keys);
       service = InformationService(repository: repo);
       try {
         final retry = await service.owner.saveInformationRecord(
@@ -57,7 +57,7 @@ void main() {
       final original = await File('$data/library.db').readAsBytes();
       await key.delete();
       await expectLater(
-        EncryptedInformationRepository.open(data, keys),
+        EncryptedInformationRepository.openOnline(data, keys),
         throwsA(isA<StorageFailure>()),
       );
       expect(await File('$data/library.db').readAsBytes(), original);
@@ -65,7 +65,7 @@ void main() {
       await key.writeAsBytes(List.filled(32, 55));
       await Process.run('chmod', ['600', key.path]);
       await expectLater(
-        EncryptedInformationRepository.open(data, keys),
+        EncryptedInformationRepository.openOnline(data, keys),
         throwsA(isA<StorageFailure>()),
       );
       expect(await File('$data/library.db').readAsBytes(), original);
