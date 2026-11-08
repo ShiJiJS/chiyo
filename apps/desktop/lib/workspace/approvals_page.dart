@@ -359,7 +359,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            '显示的是首个启动计划。许可绑定本聊天、凭据版本和接收程序，每次操作独立记录。撤销、聊天结束或重启会阻止后续使用。撤销不会撤回已经完成的远端操作，也不会自动终止已运行的命令或SSH连接。',
+            '显示的是首个启动计划。许可绑定本聊天、凭据版本和接收程序，每次操作独立记录。撤销或聊天结束会阻止后续使用。撤销不会撤回已经完成的远端操作，也不会自动终止已运行的命令或SSH连接。',
             style: libraryText(context, 13, color: c.muted, height: 1.9),
           ),
         ],

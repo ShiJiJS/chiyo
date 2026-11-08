@@ -153,7 +153,7 @@ class _HostFileImportState extends State<_HostFileImport> {
                   ),
                 const SizedBox(height: 18),
                 Text(
-                  '现有逐台主机确认记录保持不变。导入不代表允许资料访问或凭据使用。',
+                  '确认后将使用这份文件中的主机公钥。导入不代表允许资料访问或凭据使用。',
                   style: libraryText(context, 13, color: c.muted, height: 1.8),
                 ),
               ],

@@ -23,6 +23,7 @@ import '../backups.dart';
 import 'package:info_storage/info_storage.dart';
 import 'owner_file_open_dispatcher.dart';
 import 'remote_workspace_file_actions.dart';
+import 'remote_workspace_hosts.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -45,8 +46,15 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
       changed: notifyConnectionChanged,
       picker: filePicker ?? const NativeInformationFilePicker(),
     );
+    hosts = RemoteWorkspaceHosts(
+      client,
+      changed: notifyConnectionChanged,
+      picker: filePicker ?? const NativeInformationFilePicker(),
+    );
   }
   final OwnerClient client;
+  @override
+  late final RemoteWorkspaceHosts hosts;
   @override
   late final RemoteWorkspaceCredentials credentials =
       RemoteWorkspaceCredentials(client, changed: notifyConnectionChanged);
@@ -217,6 +225,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     try {
       await _fileActions.dispose();
     } finally {
+      await hosts.dispose();
       await credentials.dispose();
       await files.dispose();
       client.close();

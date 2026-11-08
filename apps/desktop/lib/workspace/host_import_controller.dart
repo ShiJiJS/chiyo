@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import 'workspace_source.dart';
 
 class HostImportController extends ChangeNotifier {
@@ -147,7 +148,14 @@ class HostImportController extends ChangeNotifier {
     _closed = true;
     ++_generation;
     final selected = file;
-    if (selected != null) source.releaseImport(selected.selectionId);
+    if (selected != null) {
+      unawaited(
+        source.releaseImport(selected.selectionId).catchError((Object _) {
+          // A disconnected remote selection expires on the server; closing this
+          // window must not create an unhandled asynchronous network error.
+        }),
+      );
+    }
     super.dispose();
   }
 }

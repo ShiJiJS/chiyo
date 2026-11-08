@@ -72,7 +72,7 @@
 | 文字录入/修改提案与预览 | 已接并通过整份保存、修正、重开、失败与丢失回复检查 | #96 |
 | 附件上传、版本、领取与本机操作 | 已接并通过正常App及独立CLI实际文件检查 | #97 |
 | 凭据管理、补填密码及关联 | 已接并通过正常App、CLI、整份事务及断线恢复检查 | #98 |
-| SSH、Token、凭据文件的本机使用 | 长驻CLI已接并有原生执行证据；逐命令Codex宿主及SSH信任界面仍待接 | #99 |
+| SSH、Token、凭据文件的本机使用 | 长驻/逐命令CLI、SSH信任及正常App审批实际使用均已接；原审批结果不明的重开结算仍待接 | #99 |
 | 回收、历史和版本恢复 | 未接；显式不可用 | #100 |
 | 完整备份恢复与设置界面 | 宿主最小恢复已验；界面未接 | #101 |
 | 最终单一候选、运行程序和全流程自动试用 | 未开始 | #102 |
@@ -399,3 +399,14 @@ DeviceCredentialHost复用CredentialExecutionHost，独立CLI通过原聊天证�
 
 
 后台实现及证据已推送5391519e，GitHub #99阶段评论已发布并回读，仍Open/Close issue。补用同一独立客户端/worker验证文件命令完成时服务完全关闭：设备先物理清理并保留准确终态，原服务重开后正常状态查询补交原回执和清理确认，2个Codex场景通过且无重跑。日志a09-device-host-offline-standalone-tests.log。独立验证包manifest已记录源码提交与两文件摘要；没有替换日常App。所有本轮测试进程/后台/容器已结束，下一步仍为SSH信任管理和凭据App连续验收；#99–#102未完成，#103–#105不动。
+
+
+## #99正常App主机信任及SSH/Token审批连续流程已接
+
+原OwnerWorkspaceHosts共享到info_workspace，App仅负责原生文件选择/稳定读取，OwnerHostRoutes和RemoteWorkspaceHosts复用指纹、版本、确认/撤销及持久回执，原主机设置/导入界面接正常OnlineDesktopLauncher。预览与客户端本次所选文件的摘要/长度/名称对应，服务端重新核对完整预览；暂存32份、固定30分钟，不在服务器操作设备路径，不给Agent管理权限。普通HostFile导入/撤销丢回复经准确原回执恢复，未知不重复提交。
+
+真实界面测试发现server workspaceObservation遗漏凭据申请，App开着时看不到AI新申请；现将凭据元数据、申请/授权状态、执行和SSH信任事实加入原变化标记，正常App自动刷新。SSH材料显示为凭据文件、-i注入位置，主机指纹不误称只支持ED25519；导入提示和重启授权提示均改为准确描述。窗口销毁释放网络异常有处理，暂存仍按原期限清理。
+
+实际：正常App导入/预览/确认信任，撤销与再确认，AI的SSH申请出现在待办，选择会话内不限时并批准，关闭App后由当前源码编译的独立worker启动真实系统ssh连接独立Docker账号；重开App审批Token30分钟再关闭，接收程序实际执行、输出过滤与材料清理均通过。相关App/丢回复/原主机和插件回归35项通过；服务包Mac43项通过，Linux34通过9项Mac条件跳过；相关静态分析无问题。证据见server-a09 README，完整日志a09-owner-host-app-final-tests.log、a09-owner-host-mac-server-suite-fixed.log、a09-linux-owner-hosts-full.log。初次Mac整组2项默认30秒超时，明确连续场景3分钟后通过，逐步等待/原操作核对未放宽，不把首次失败算通过。
+
+**#99仍未完成。** 下一步处理原决定结果不明跨进程恢复：Core的_inactiveCredentialApprovals已持久，_uncertainCredentialDecisions闭包没有原operationId→request的持久结算对应；确认提交的旧批准仍禁用，混合撤销也要核对。建议在线模式记录准确原InformationApprovalReceipt命令意图，核对原回执而不是历史或新操作，验证原设备/聊天、批准范围、固定期限/会话状态及材料代际后结算，不改变旧单机诊断行为。approve未提交/已提交、混合字段、revoke、重开损坏状态分别检查；现有旧版无意图的inactive记录不能激活。完成后核对capabilities（当前仅credential-device-execution.v1，旧reuse及SSH期限能力尚未宣告）和当前平台说明，再关闭#99并推进#100–#102。没有统一候选、正式安装或真实资料迁移；#103–#105不动。

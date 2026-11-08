@@ -29,12 +29,8 @@ void main() {
           client.close();
           await f.dispose();
         });
+        await f.importHostTrust(await ssh.trust);
         final c = await f.runtime.run(() async {
-          // Host trust management UI/transport is separately pending in #99.
-          await f.runtime.service.owner.configureSshKnownHosts(
-            'Synthetic Docker SSH trust',
-            await ssh.trust,
-          );
           final raw = await f.runtime.service.owner.createFileCredential(
             name: 'Synthetic SSH identity',
             publicPurpose: '',

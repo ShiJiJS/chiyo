@@ -213,6 +213,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                     inputsBuilder: (context) => WorkspaceInputs(
                       plugin: source.plugins.pick,
                       file: source.files.pick,
+                      hostFile: source.hosts.pick,
                       proposalPassword: source.proposalPasswords,
                       credential: (form) => showOwnerCredentialInput(
                         context,

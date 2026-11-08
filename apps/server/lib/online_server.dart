@@ -21,6 +21,7 @@ import 'owner_proposal_routes.dart';
 import 'owner_library_routes.dart';
 import 'owner_file_routes.dart';
 import 'owner_credential_routes.dart';
+import 'owner_host_routes.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -50,12 +51,15 @@ final class OnlineServer {
     );
     _fileCleanupTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (_fileCleanup != null ||
-          (_files?.needsCleanup != true && _credentials?.needsCleanup != true))
+          (_files?.needsCleanup != true &&
+              _credentials?.needsCleanup != true &&
+              _hosts?.needsCleanup != true))
         return;
       _fileCleanup = _runtime
           .run(() async {
             await _files?.cleanup();
             await _credentials?.cleanup();
+            await _hosts?.cleanup();
           })
           .catchError((Object _) {
             /* Retry next sweep; shutdown also releases staging. */
@@ -94,6 +98,8 @@ final class OnlineServer {
   late final _libraryRoutes = OwnerLibraryRoutes(_library);
   OwnerFileRoutes? _files;
   OwnerCredentialRoutes? _credentials;
+  OwnerHostRoutes? _hosts;
+  OwnerHostRoutes get _hostRoutes => _hosts ??= OwnerHostRoutes(_service.owner);
   OwnerCredentialRoutes get _credentialRoutes =>
       _credentials ??= OwnerCredentialRoutes(_service.owner);
   late final Timer _fileCleanupTimer;
@@ -130,6 +136,7 @@ final class OnlineServer {
       await _files?.dispose();
     } finally {
       _credentials?.dispose();
+      _hosts?.dispose();
       _plugins.dispose();
     }
   }
@@ -150,11 +157,12 @@ final class OnlineServer {
     }
     // Only dedicated file upload routes accept the existing 10 MiB original
     // plus Base64 and bounded metadata. Ordinary management stays at 2 MiB.
-    final limit =
-        const {
-          '/v1/owner/files/uploads',
-          '/v1/agent/import-file/submit',
-        }.contains(request.uri.path)
+    final limit = request.uri.path == '/v1/owner/ssh-hosts/imports'
+        ? 16 * 1024 * 1024
+        : const {
+            '/v1/owner/files/uploads',
+            '/v1/agent/import-file/submit',
+          }.contains(request.uri.path)
         ? ((informationFileByteLimit + 2) ~/ 3) * 4 + 16384
         : 2 * 1024 * 1024;
     final bytes = <int>[];
@@ -175,6 +183,32 @@ final class OnlineServer {
           utf8.encode(
             jsonEncode([
               owner.templatePackageVersion,
+              owner.sshKnownHosts?.id,
+              [
+                for (final c in owner.credentials) [c.id, c.revision],
+              ],
+              [
+                for (final r in owner.credentialUseRequests)
+                  [
+                    r.id,
+                    r.toJson(),
+                    owner.credentialUseState(r),
+                    owner.credentialGrantState(r),
+                    owner.credentialFieldGrantState(r, forReview: true),
+                    owner.credentialUseDecisionUnconfirmed(r),
+                  ],
+              ],
+              [
+                for (final e in owner.credentialExecutions)
+                  [
+                    e.id,
+                    e.state,
+                    e.cleanupState,
+                    e.exitCode,
+                    e.finishedAt?.toIso8601String(),
+                    e.restoredAt?.toIso8601String(),
+                  ],
+              ],
               owner.libraryOrderRevision,
               owner.libraryDisplayOrder.name,
               [
@@ -280,6 +314,14 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/ssh-hosts') {
+          final (code, value) = await _hostRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/credentials') {
           final (code, value) = await _credentialRoutes.dispatch(

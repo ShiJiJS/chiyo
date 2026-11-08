@@ -145,7 +145,13 @@ Mac App通过正常“添加凭据”、更换材料、编辑和停用入口接�
 
 内部设备路径还包括`/credential-use/device/operation`、`operation/status`、`execution/status`及证明控制的`worker/register`、`materials/register`、`execution/report`、`cleanup/complete`。首次领取走私有材料DTO，不能透传普通CLI输出；以后同操作仅返回元数据。执行证明在发布前持久保存并绑定原设备，清理证明不能读取材料或启动另一操作。私有credentialRuntime2嵌在textRuntime3，旧inner1可读取。
 
-CLI在自己的电脑核对程序、工作目录、进程组和文件身份，先写私有清理登记再允许材料写入及worker启动。服务器不创建这些明文文件、不查设备PID。正常JSON-lines CLI已实际通过Token/文件合成接收、系统SSH连接独立容器、服务重开、撤销/聊天结束、崩溃清理和丢回复不重放检查。逐命令Codex适配器也已接仅回环的设备后台程序，共用原16条执行/输出限制及30分钟完成输出保存；连接记录只有控制证明与进程身份，不保存聊天读取证明。两个CLI竞争、连接记录丢失及接受回复丢失均不会第二次启动，并已用独立客户端/worker二进制验证。正常App的SSH信任管理和凭据界面连续试用仍待续；#99仍打开。阶段证据见`docs/development/evidence/server-a09/README.md`。
+CLI在自己的电脑核对程序、工作目录、进程组和文件身份，先写私有清理登记再允许材料写入及worker启动。服务器不创建这些明文文件、不查设备PID。正常JSON-lines CLI已实际通过Token/文件合成接收、系统SSH连接独立容器、服务重开、撤销/聊天结束、崩溃清理和丢回复不重放检查。逐命令Codex适配器也已接仅回环的设备后台程序，共用原16条执行/输出限制及30分钟完成输出保存；连接记录只有控制证明与进程身份，不保存聊天读取证明。两个CLI竞争、连接记录丢失及接受回复丢失均不会第二次启动，并已用独立客户端/worker二进制验证。正常App已接原SSH信任导入、预览及确认/撤销，并通过SSH会话内不限时、Token固定期限审批后关闭App继续实际使用的完整场景；未确认审批重开后准确核对原回执仍待续，#99仍打开。阶段证据见`docs/development/evidence/server-a09/README.md`。
+
+## SSH主机信任管理
+
+正常App在服务器插件设置中选择本机known_hosts文件，读取与原始文件1MiB限制在设备上核对，服务器不接受设备路径或探测网络。用户预览来源、指纹及替换范围后确认，保存仍由原OwnerWorkspaceHosts规则处理。文件暂存固定30分钟、最多32份选择，正常导入/撤销有持久原操作回执，重试不重复变更。预览与上传均不授予Agent使用凭据。
+
+`/v1/owner/ssh-hosts`仅供用户管理身份：GET清单及已导入文件；POST inputs上传公钥记录、GET inputs/<operationId>查原选择；GET previews/<selectionId>预览、DELETE selections/<selectionId>释放；POST imports确认整份导入、GET import-operations/<id>核对；POST read按原资料/身份读取；POST changes确认或撤销、GET operations/<id>核对原结果。清单、预览及回执DTO不含原文件字节、私有会话或使用证明。普通读取/审批与设备凭据执行仍各用原通道。
 
 ## 自动检查
 
