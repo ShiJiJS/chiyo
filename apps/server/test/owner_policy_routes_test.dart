@@ -279,6 +279,16 @@ void main() {
       addTearDown(f.dispose);
       final before = await read(f);
       final c = command(before, 'old-library-policy');
+      await expectLater(
+        f.owner.request('GET', query(command(before, 'old-known-absence'))),
+        fails('operation_not_found'),
+      );
+      expect(
+        (await f.repo.openServerState()).payload.containsKey(
+          'ownerPolicyAbsences',
+        ),
+        isTrue,
+      );
       final key = await f.runtime.run(() => f.repo.backups.enable());
       final archive = '${f.root.path}/empty-policy.aimbackup';
       await f.runtime.run(() async {
@@ -293,6 +303,12 @@ void main() {
         ),
       );
       final restored = await read(f);
+      expect(
+        (await f.repo.openServerState()).payload.containsKey(
+          'ownerPolicyAbsences',
+        ),
+        isFalse,
+      );
       expect(restored.generation, isNot(before.generation));
       expect(restored.version, before.version);
       await expectLater(save(f, c), fails('library_changed'));
