@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
@@ -10,6 +9,8 @@ import 'package:info_remote/agent_connection.dart';
 import 'credential_output_filter.dart';
 import 'device_information_files.dart';
 import 'device_credential_journal.dart';
+import 'runtime_worker_command.dart';
+import 'device_credential_host.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';

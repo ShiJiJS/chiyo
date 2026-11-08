@@ -387,3 +387,12 @@ Mac长驻CLI已用真实原生worker执行Token和文件合成接收程序，工
 **#99仍未完成。** 下一步复用CredentialExecutionHost接逐命令Codex的独立设备宿主（目前hosted=true仍向旧服务路径请求，在线拒绝，没有本机fallback），保留全局16执行/30分钟已结束输出限制。通过私有loopback控制和内存bootstrap传session，不能写可读聊天证明进磁盘。随后接正常App的SSH信任管理、完整凭据审批连续试用及未确认审批重开原回执恢复。再接#100–#102；#103–#105不动。没有统一候选、正式安装或真实资料迁移。
 
 本轮实现及证据已提交并推送902ab7f3。GitHub #99阶段评论已发布并回读，页面仍提供Close issue且本票Open；没有关闭。浏览器仍为17/p1，不结束整个持续目标。原生联合6项最后复验通过，所属所有测试进程、原生worker和SSH容器均已退出，无个人资料或日常App变更。下一轮从上段设备后台宿主接续，不重做已通过的私有操作层。
+
+
+## #99逐命令Codex后台已接
+
+DeviceCredentialHost复用CredentialExecutionHost，独立CLI通过原聊天证明和私有回环控制共享执行/有界输出。后台记录不含sessionSecret、材料、输出，原16条/30分钟限制不变，命令在AI设备执行。独立启动锁和生命周期锁阻止超时、状态丢失时重复启动；原配置摘要和进程身份均核对。共享RuntimeWorkerCommand同时服务凭据worker和普通文件看护，SDK与独立可执行文件正确选择。
+
+实际检查：Token及文件2个真实多进程Codex场景通过，包含竞争、共享输出、跨聊天拒绝、服务重开、丢接受回复和丢记录不重放、回环门禁与活动执行停止保护。相同场景用编译的info-codex/info-runtime-worker再次2项通过；后台ps核实为独立worker而非Dart SDK。原CLI18项通过（6项平台跳过），直接原生Token/文件/SSH6项通过，正式普通文件CLI及文字Codex2项通过。相关CLI与新增测试静态分析无问题。证据详见server-a09 README。
+
+**#99仍未完成。** 下一步提取原OwnerWorkspaceHosts的纯Dart信任/导入/版本和回执逻辑到info_workspace，App保留薄文件选择封装，服务端复用同一投影接Owner接口；RemoteWorkspaceSource接原主机设置和预览界面，避免另造最小信任界面或在服务器探测网络。随后完成凭据审批连续试用、未确认审批重开回执处理，再推进#100–#102。#103–#105未动。隔离二进制不是统一候选，尚无正式安装或真实迁移。
