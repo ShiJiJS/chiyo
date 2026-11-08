@@ -364,4 +364,13 @@ Mac完整服务和密码/状态存储32项通过；Linux ARM64同组31项通过�
 
 下一步#99剩余：设备常驻执行宿主（App关闭也工作）、逐次操作/私有材料交付、SSH信任设置、进程/文件身份留客户端、实际合成SSH/Token/文件接收与清理、原操作不重放、凭据UI连续试用，以及未确认审批重开后的原回执处理。当前device_credential_access只覆盖请求和绑定维护，不能把老credential-use/operation/material/register路径直接放行。执行证明/设备清理登记仍需设计/实现，不能将其写入CodexEndIndex或按公开聊天ID恢复能力。
 
-本轮GitHub工作空间已恢复为17/p1，#99最新正文、评论、标签及关系再次读过，前置#98已关闭；原15确认不存在，未操作用户空间0。所有本轮进程/容器/看护均已结束，阶段代码待本轮提交/同步及#99回填，不能结束整体目标。
+本轮GitHub工作空间已恢复为17/p1，#99最新正文、评论、标签及关系再次读过，前置#98已关闭；原15确认不存在，未操作用户空间0。所有本轮进程/容器/看护均已结束，阶段代码635a71c4已推送；#99阶段评论已发布并回读，Open/Close issue入口确认，不能结束整体目标。
+
+
+### 下一阶段的准确入口
+
+CLI当前packages/info_cli/lib/credential_runtime_client.dart的_claimCredentialOperation与_consumeCredentialMaterial仍对_remote直接拒绝，CredentialExecutionHost只创建loopback AgentClient；不要把本次申请接口当作执行接通。现有CredentialExecutionMaterial.file要求本机lease，Core旧_claimUseExecutionMaterial在服务机创建它，registerCredentialMaterials/report/cleanup及worker登记核查本机PID/组。设备执行实现应复用进程组、先登记后启动、原输出过滤和有界输出，明确把材料准备与进程身份检查留设备；服务端只核对逐操作许可与原设备，绝不能用旧server路径/本机PID验证远程设备。
+
+本机已验证可用预检工具在.tools/gh-2.102.0/gh_2.102.0_macOS_arm64/bin/gh、.tools/aws-cli-2.38.1-package/aws-cli.pkg/Payload/aws-cli/aws和/usr/bin/ssh；不表示它们已经用于真实凭据任务。Native预检默认实现三项通过记录在a09-native-device-preflight.log，脚本为忽略目录local/server-first-stage/device-preflight-probe.dart。后续实际使用仍只用合成接收程序/SSH服务和测试凭据。
+
+当前同一浏览器工作空间17/p1停在#99，未finish整体目标。工作树已提交，无测试容器、看护或活跃测试句柄；#99–#102未完成，无匹配候选、正式安装或真实迁移，#103–#105不动。
