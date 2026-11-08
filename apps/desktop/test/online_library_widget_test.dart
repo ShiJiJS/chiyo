@@ -7,6 +7,8 @@ import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/online_desktop_launcher.dart';
 import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/remote_workspace_source.dart';
+import 'support/online_ui_harness.dart';
 import 'package:info_desktop/workspace/classification_page.dart';
 import 'package:info_desktop/workspace/library_controller.dart';
 import 'package:info_desktop/workspace/library_move_controller.dart';
@@ -45,6 +47,8 @@ void main() {
       late PrivateConnectionProfileStore profiles;
       late AgentClient cli;
       late OwnerClient independent;
+      RemoteWorkspaceSource? source;
+      final ui = OnlineUiHarness(t);
       Future<void> until(bool Function() ready) async {
         for (var n = 0; n < 350; n++) {
           if (ready()) return;
@@ -199,6 +203,7 @@ void main() {
               find.byType(LibraryPage).evaluate().isNotEmpty &&
               model().results?.total == 2,
         );
+        source = model().source as RemoteWorkspaceSource;
         await tap('workspace-nav-settings');
         await tap('settings-section-classifications');
         await until(
@@ -316,7 +321,8 @@ void main() {
         );
         expect(key('library-move-confirm'), findsNothing);
         await t.pumpWidget(const SizedBox());
-        await t.pump();
+        await ui.resolve(() => source!.dispose());
+        source = null;
         await t.pumpWidget(
           OnlineDesktopLauncher(
             key: const ValueKey('reopened-library'),
@@ -328,6 +334,7 @@ void main() {
               find.byType(LibraryPage).evaluate().isNotEmpty &&
               model().results?.total == 2,
         );
+        source = model().source as RemoteWorkspaceSource;
         expect(model().query.sort, WorkspaceSort.manual);
         expect(model().results!.items.first.ref.id, two);
         expect(
@@ -397,7 +404,7 @@ void main() {
         expect(t.takeException(), isNull);
       } finally {
         await t.pumpWidget(const SizedBox());
-        await t.pump();
+        if (source != null) await ui.resolve(() => source!.dispose());
         await t.runAsync(() async {
           cli.close();
           independent.close();

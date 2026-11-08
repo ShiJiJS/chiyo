@@ -24,6 +24,7 @@ import 'package:info_storage/info_storage.dart';
 import 'owner_file_open_dispatcher.dart';
 import 'remote_workspace_file_actions.dart';
 import 'remote_workspace_hosts.dart';
+import 'remote_workspace_history.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -31,6 +32,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     implements
         WorkspaceStorageLocation,
         WorkspaceLibraryMove,
+        WorkspaceLibraryRecycle,
         WorkspaceFileSelectionReleaser,
         WorkspaceFileActionRecovery,
         WorkspaceFileOpenRecovery {
@@ -53,6 +55,54 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  late final _history = RemoteWorkspaceHistory(
+    client,
+    changed: notifyConnectionChanged,
+  );
+  @override
+  late final WorkspaceGrantHistorySource grantHistory =
+      RemoteWorkspaceGrantHistory(client);
+  @override
+  bool get libraryRecycleSupported => _history.libraryRecycleSupported;
+  @override
+  Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycle(
+    WorkspaceLibrarySelection selection,
+  ) => _history.previewLibraryRecycle(selection);
+  @override
+  Future<WorkspaceLibraryRecyclePreview> previewLibraryRecycleRestore(
+    String id,
+    WorkspaceLibraryRestoreOptions options,
+  ) => _history.previewLibraryRecycleRestore(id, options);
+  @override
+  Future<WorkspaceLibraryRecycleReceipt> changeLibraryRecycle(
+    WorkspaceLibraryRecycleCommand command,
+  ) => _history.changeLibraryRecycle(command);
+  @override
+  Future<WorkspaceLibraryRecycleReceipt?> libraryRecycleOperationReceipt(
+    String id,
+  ) => _history.libraryRecycleOperationReceipt(id);
+  @override
+  Future<List<WorkspaceRevision>> loadRevisions(WorkspaceRecordRef ref) =>
+      _history.loadRevisions(ref);
+  @override
+  Future<WorkspaceRevisionPreview> previewRevision(
+    WorkspaceRecordRef ref,
+    int version, {
+    required int expectedVersion,
+  }) =>
+      _history.previewRevision(ref, version, expectedVersion: expectedVersion);
+  @override
+  Future<WorkspaceRecycleResults> queryRecycled({
+    String keyword = '',
+    int offset = 0,
+    int limit = 25,
+  }) => _history.queryRecycled(keyword: keyword, offset: offset, limit: limit);
+  @override
+  Future<WorkspaceArchive> readRecycled(String entryId) => _history.readRecycled(entryId);
+  @override
+  Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
+      _history.changeRecord(change);
+
   @override
   late final RemoteWorkspaceHosts hosts;
   @override
@@ -541,6 +591,11 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     String operationId,
   ) => _remote(() async {
     final r = await client.receipt(operationId);
+    final lifecycle = await _history.receipt(operationId);
+    if (r != null && lifecycle != null) {
+      throw const WorkspaceFailure('unknown_outcome', '原操作编号对应多种结果，无法确认。');
+    }
+    if (lifecycle != null) return lifecycle;
     if (r == null) return null;
     final command = r.command;
     if (command == null) {

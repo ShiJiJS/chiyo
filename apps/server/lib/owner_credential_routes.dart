@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_workspace/credential_file_selection.dart';
 import 'package:info_workspace/credential_transport.dart';
+import 'package:info_workspace/history_transport.dart';
 import 'package:info_workspace/owner_workspace_credentials.dart';
 import 'package:info_workspace/workspace_source.dart';
 
@@ -147,6 +148,20 @@ final class OwnerCredentialRoutes {
     if (path.length == 5 && path[3] == 'candidates' && method == 'DELETE') {
       await source.releaseCandidate(path.last);
       return (200, {'status': 'ok'});
+    }
+    if (path.length == 4 && path.last == 'changes' && method == 'POST') {
+      return (
+        200,
+        credentialReceiptToJson(
+          await source.change(credentialLifecycleFromJson(body)),
+        ),
+      );
+    }
+    if (path.length == 5 && path[3] == 'recycled' && method == 'GET') {
+      return (
+        200,
+        recycledCredentialToJson(await source.readRecycled(path.last)),
+      );
     }
     if (path.length == 4 && path.last == 'save' && method == 'POST') {
       return (
