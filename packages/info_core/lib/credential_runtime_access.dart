@@ -29,7 +29,8 @@ extension _CredentialRuntimeService on InformationService {
   }
 
   ManagedCredential _useEligible(CredentialUseRequest r) {
-    if (_inactiveCredentialApprovals.contains(r.id)) {
+    if (_inactiveCredentialApprovals.contains(r.id) ||
+        _onlineCredentialDecisionPending(r.id)) {
       throw const CredentialUseFailure('grant_revoked');
     }
     final credential = _guardUseEligibility(
@@ -114,7 +115,8 @@ extension _CredentialRuntimeService on InformationService {
   }
 
   String _useGrantState(CredentialUseRequest r) {
-    if (_inactiveCredentialApprovals.contains(r.id)) {
+    if (_inactiveCredentialApprovals.contains(r.id) ||
+        _onlineCredentialDecisionPending(r.id)) {
       return 'revoked';
     }
     if (r.attemptConsumed) return 'consumed';
@@ -949,9 +951,11 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
 
   /// Current permission, independently from the immutable recorded decision.
   /// This reads the live authorization model without writing/pruning history.
-  /// Owner diagnostic only. Querying a receipt never activates this grant.
+  /// Online decisions remain blocked until their exact original receipt settles.
+  /// Legacy local diagnostic readback does not activate an unconfirmed grant.
   bool credentialUseDecisionUnconfirmed(CredentialUseRequest request) =>
-      _service._inactiveCredentialApprovals.contains(request.id);
+      _service._inactiveCredentialApprovals.contains(request.id) ||
+      _service._onlineCredentialDecisionPending(request.id);
 
   String credentialFieldGrantState(
     CredentialUseRequest request, {
@@ -1010,6 +1014,9 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     Map<FieldRef, int>? reviewedVersions,
   }) => _serialize(() async {
     final r = _service._useRequest(id);
+    if (_service._onlineCredentialDecisionPending(id)) {
+      throw const CredentialUseFailure('audit_unavailable');
+    }
     if (_service._useState(r) != 'pending') {
       throw const CredentialUseFailure('request_terminal');
     }
@@ -1158,12 +1165,14 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
             operation.command.operationId,
           );
           if (receipt != null) {
+            _checkAdditionalReceipt(receipt, operation.command);
             publishFields();
             return;
           }
         } on Object {
           // Original decision could not confirm commit. A later metadata query
           // may report its fact, but must never activate a new permission.
+          _service._rememberOnlineCredentialDecision(operation);
           _service._inactiveCredentialApprovals.add(id);
           _service._uncertainCredentialDecisions[operation
               .command

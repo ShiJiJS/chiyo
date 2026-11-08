@@ -405,6 +405,124 @@ void main() {
     },
   );
 
+  for (final revoke in [false, true]) {
+    test(
+      'exact original ${revoke ? 'revoke' : 'approval'} receipt settles encrypted unknown state after reopen',
+      () async {
+        final r = await request();
+        final field = FieldRef(item.id, item.fields.first.id);
+        if (revoke) await approve(r.id);
+        final before =
+            jsonDecode(
+                  jsonEncode(
+                    (await repo.openServerState()).payload['textRuntime'],
+                  ),
+                )
+                as Map<String, dynamic>;
+        final receipt = await runtime.run(
+          () => runtime.service.owner.performAdditionalApproval(
+            operationId: 'encrypted-original',
+            requestId: r.id,
+            kind: 'credential',
+            action: revoke
+                ? InformationApprovalAction.revoke
+                : InformationApprovalAction.approve,
+            reviewToken: 'a' * 64,
+            commandDigest: 'b' * 64,
+            validate: () {},
+            decide: revoke
+                ? () => runtime.service.owner.revokeCredentialRequest(r.id)
+                : () => runtime.service.owner.decideCredentialUse(
+                    r.id,
+                    approveCredential: true,
+                    fields: [field],
+                    fieldLifetime: const Duration(minutes: 30),
+                  ),
+          ),
+        );
+        await runtime.close();
+        var snapshot = await repo.openServerState();
+        final state =
+            jsonDecode(jsonEncode(snapshot.payload['textRuntime']))
+                as Map<String, dynamic>;
+        state['requests'] = before['requests'];
+        final private = state['credentialRuntime'] as Map;
+        (private['requests'] as List).single['inactive'] = !revoke;
+        private['decisions'] = {'encrypted-original': receipt.toJson()};
+        await repo.commitServerState(snapshot, {
+          ...snapshot.payload,
+          'textRuntime': state,
+        });
+        final original = (await repo.openServerState()).payload;
+        // A different command must not settle even when it names an existing
+        // receipt. Startup rejects it without replacing private state.
+        final forged = jsonDecode(jsonEncode(original)) as Map<String, dynamic>;
+        (((forged['textRuntime'] as Map)['credentialRuntime']
+                    as Map)['decisions']
+                as Map)['encrypted-original']['commandDigest'] =
+            'c' * 64;
+        snapshot = await repo.openServerState();
+        await repo.commitServerState(snapshot, forged);
+        await repo.close();
+        await expectLater(open(), throwsA(isA<AccessFailure>()));
+        expect((await repo.openServerState()).payload, forged);
+        snapshot = await repo.openServerState();
+        await repo.commitServerState(snapshot, original);
+        await repo.close();
+        now = now.add(const Duration(minutes: 2));
+        await open();
+        expect(
+          await runtime.run(
+            () => runtime.service.owner.additionalApprovalReceipt(
+              'encrypted-original',
+            ),
+          ),
+          isA<InformationApprovalReceipt>().having(
+            (r) => r.commandDigest,
+            'original digest',
+            receipt.commandDigest,
+          ),
+        );
+        expect(
+          runtime.service.owner.credentialUseDecisionUnconfirmed(
+            runtime.service.owner.credentialUseRequests.single,
+          ),
+          false,
+        );
+        final persisted =
+            (await repo.openServerState()).payload['textRuntime'] as Map;
+        expect((persisted['credentialRuntime'] as Map)['decisions'], isEmpty);
+        if (revoke) {
+          expect(decision(r.id)['state'], 'revoked');
+          await expectLater(
+            runtime.run(
+              () => runtime.service.agent.claim(chat.sessionSecret, r.id),
+            ),
+            throwsA(isA<AccessFailure>()),
+          );
+        } else {
+          expect(decision(r.id)['state'], 'available');
+          final grant = await runtime.run(
+            () => runtime.service.agent.claim(chat.sessionSecret, r.id),
+          );
+          expect(grant.fields, [field]);
+          expect(
+            grant.expiresAt,
+            DateTime.utc(2026, 11, 8).add(const Duration(minutes: 30)),
+          );
+          expect(
+            await runtime.run(
+              () => runtime.service.agent.read(grant.token, field),
+            ),
+            'SYNTHETIC_SELECTED',
+          );
+        }
+        await reopen();
+        expect(decision(r.id)['state'], revoke ? 'revoked' : 'available');
+      },
+    );
+  }
+
   test(
     'malformed private device binding rejects startup without overwriting the saved state',
     () async {

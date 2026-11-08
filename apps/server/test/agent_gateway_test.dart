@@ -145,7 +145,7 @@ void main() {
       );
       expect(
         capabilities.$2['capabilities'],
-        isNot(contains('credential-use-reuse.v1')),
+        contains('credential-use-reuse.v1'),
       );
       expect((await agent(a.bearer, '/approve', {})).$1, 409);
       expect(

@@ -317,6 +317,7 @@ class InformationService {
   final _uncertainInformationDecisions = <String, _InformationDecision>{};
   final _inactiveCredentialApprovals = <String>{};
   final _uncertainCredentialDecisions = <String, void Function(bool)>{};
+  final _onlineCredentialDecisions = <String, InformationApprovalReceipt>{};
   Future<void> _auditWrites = Future.value();
   final _auditPending = <Future<void> Function()>[];
   bool _auditFailed = false;

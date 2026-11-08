@@ -243,7 +243,18 @@ void main() {
       );
       expect(runtime.service.owner.credentialExecutions, isEmpty);
       final caps = await agent.call('/capabilities', {});
-      expect(caps['capabilities'], isNot(contains('credential-use-reuse.v1')));
+      expect(
+        caps['capabilities'],
+        containsAll([
+          'credential-use-reuse.v1',
+          'credential-device-execution.v1',
+          'credential-ssh-session-validity.v1',
+        ]),
+      );
+      expect(
+        caps['capabilities'],
+        isNot(contains('credential-focused-fill.v1')),
+      );
       expect(
         (await agent.call('/session/end', {
           'endCapability': chat['endCapability'],

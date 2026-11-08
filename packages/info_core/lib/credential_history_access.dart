@@ -53,7 +53,9 @@ extension _CredentialHistoryService on InformationService {
     CredentialExecution? e,
     DateTime cutoff,
   ) {
-    if (_useState(r) == 'pending' || _useGrantState(r) == 'available') {
+    if (_onlineCredentialDecisionPending(r.id) ||
+        _useState(r) == 'pending' ||
+        _useGrantState(r) == 'available') {
       return false;
     }
     if (_repository.grantHistory.any(
