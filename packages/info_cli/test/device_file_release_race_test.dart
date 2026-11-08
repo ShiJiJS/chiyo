@@ -99,8 +99,9 @@ void main() {
           await write();
           final result = await files.release(session, response);
           expect(result['status'], mode == 'cleaned' ? 'ok' : 'failed');
-          if (mode != 'cleaned')
+          if (mode != 'cleaned') {
             expect(result['errorCode'], 'delivery_unknown');
+          }
         }
         expect(controls, 3);
         record = {...record, 'scope': scope, 'phase': 'expired', 'lease': null};

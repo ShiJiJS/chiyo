@@ -165,7 +165,7 @@ void main() {
               as List;
       expect(caps, contains('information-template-discovery.v1'));
       expect(caps, contains('information-import-admission.v1'));
-      expect(caps, isNot(contains('credential-import.v1')));
+      expect(caps, contains('credential-import.v1'));
       final initial = await cli.execute({'command': 'template-list'});
       expect(
         (initial['templates'] as List).any((t) => t['id'] == 'file'),

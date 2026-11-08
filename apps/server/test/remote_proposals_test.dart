@@ -530,7 +530,7 @@ void main() {
         other.close();
       }
       final denied = await cli('import-submit', {
-        'operationId': 'not-connected-material',
+        'operationId': 'missing-credential-template-snapshot',
         'items': [
           {
             'name': 'No credential shortcut',
@@ -545,7 +545,9 @@ void main() {
           },
         ],
       });
-      expect(denied['status'], 'unsupported_capability');
+      // Credential imports are now connected, but a missing current template
+      // snapshot still cannot bypass the normal proposal validation.
+      expect(denied['status'], 'template_changed');
       expect(runtime.service.owner.credentials, isEmpty);
       await invoke(
         'codex_hook',

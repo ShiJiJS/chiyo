@@ -1,6 +1,6 @@
-# #98阶段证据：共用原凭据保存规则
+# #98 联网凭据保存与整份提案验收
 
-本票尚未完成。已将原OwnerWorkspaceCredentials、OwnerCredentialStaging及纯文件选择输入抽到info_workspace，桌面以原路径重新导出；原生选择器仍在桌面。没有复制第二套凭据业务规则，没有开放服务器本机执行或新Agent凭据能力。
+本票当前实现与验收见末节；下面按阶段保留开发记录。最初将原OwnerWorkspaceCredentials、OwnerCredentialStaging及纯文件选择输入抽到info_workspace，桌面以原路径重新导出；原生选择器仍在桌面。没有复制第二套凭据业务规则，没有开放服务器本机执行或新Agent凭据能力。
 
 原共享保存继续使用OwnerAccess.saveCredentialRecord、加密材料、版本核对、操作回执、关联和分类规则。仅改名称/备注不会改变材料版本或有效使用代际；更换材料才产生新版，停用保持原语义。原先不可用的直接申请/演示入口继续不可用。
 
@@ -33,3 +33,28 @@ App场景实际从正常新建入口填写合成值、替换成第二版、停�
 **#98仍未完成**：AgentGateway仍拒绝凭据提案，Remote提案内的私有密码输入尚未接通，未宣称整份凭据提案已可保存。下一步复用原fillImportCredentials和整体提案规则，保证补填、修订/失败、丢回复及重连行为；之后才接#99实际使用。未操作真实资料、个人钥匙串、日常App或#103–#105，尚无#102统一候选。
 
 本轮只用隔离合成资料和密钥；未操作个人钥匙串、真实资料、日常App、Windows CI或#103–#105。
+
+
+## AI提案、内联密码及整份保存完成
+
+AgentGateway现按实际能力宣告`credential-import.v1`，正式CLI使用服务器当前动态模板提交字符串、Token和凭据文件；沿用`relations`/`itemKey`建立同份关联。人设且未进入上下文的密码用owner占位；已读到的密码和Token由Agent填并保留contextExposed说明。文件仍用原filePath读取提交，没有配置文件字段提取协议。
+
+正常OnlineDesktopLauncher将OwnerProposalPasswords.remote接回原提案输入组件，没有第二套预览或新演示入口。专用Owner认证接口初始化和保存私有密码；普通Workspace DTO、提案回执、目录和Agent状态没有材料。显示/隐藏在原内联控件中；缺必填时不能整体确认。SQLCipher将整批密码修订与私有操作回执同事务写入；SQL故障回滚全部输入和修订。回执只在服务器私有状态，普通重启保留，便携备份不包含它或待处理提案输入，沿用原备份策略。
+
+丢失填写回复先核对准确操作；查询失败保留原操作与输入，不换编号重发。ProposalsController现在区分密码填写未知与整份审批未知；重新核对填写只恢复审阅，不自动批准。确认没保存才可明确重试或修正输入。迟到的私有初始化回复也不能更新已经清除/更换的控件状态。
+
+| 检查 | 实际结果 | 日志（local/server-first-stage） |
+|---|---|---|
+| 当前完整服务包、私有密码事务及原服务器状态存储 | Mac 32项通过 | credential-proposal-server-suite-complete.log |
+| 服务包、私有事务及状态存储 | Linux ARM64 31项通过、Mac本机文件驱动1项按平台跳过 | linux-credential-proposal-server-suite-final.log |
+| 正式CLI动态模板：服务+两个待填密码+已见密码+Token+密钥文件；未齐全不入库、Owner专用认证、重启、整体保存、正确关联与不泄露 | 含在上述服务包中；独立运行1项也通过 | remote-credential-proposal-http-tests.log |
+| 正常联网App手动保存/更换/停用/文件/重开，随后AI提案内两次输入、显示隐藏、一次整体保存与重开；原生整份规则、Mac输入私有边界、两种真TLS丢回复恢复 | Mac 5个连续场景通过 | credential-proposal-combined-ui-tests-final.log |
+| 真TLS丢填写回复且查询503、同原操作恢复、服务器重开后核对；确认未提交后修正重试，不自动入库 | 含在上述UI检查中；独立运行1项通过 | credential-proposal-recovery-focused.log |
+| 原核心凭据录入与整份提案规则 | 11项通过 | credential-proposal-core-regression.log |
+| 原临时副本释放关闭竞争：已确认清理返回原结果，未确认或不同身份不猜成功 | Mac 1项通过 | device-file-release-race-tests-verified.log |
+
+相关App、服务、核心、存储及本机交付代码/测试静态分析通过。Mac UI场景仍只将系统密码输入回调和文件选择替换为合成边界，其余正常UI、TLS及SQLCipher均是真实现；原生系统实测留#103。
+
+回归先发现旧测试仍断言credential-import未接通，已按新能力更新；缺少准确模板快照仍被拒绝。另一次完整Mac服务测试暴露原文件测试把“授权跨重启有效”误当作“网络中断期间副本路径必然保留”；已保留网络未知即清理规则，改查旧操作准确状态，并验证原有效许可可领取新副本。进一步定位到后台已确认清理并关控制端口与CLI释放之间的竞争，CLI仅在原身份/原manifest匹配、lease已清且终态已确认时接受原服务器结果；未知清理仍报未知。新增确定性专项及最终Mac完整32项均通过，不把此前失败记成通过。
+
+#98的保存范围已达到本票自动验收条件；凭据实际执行仍由#99完成，#99–#102尚未交付。未操作真实资料、个人钥匙串或日常App；#103–#105未推进。

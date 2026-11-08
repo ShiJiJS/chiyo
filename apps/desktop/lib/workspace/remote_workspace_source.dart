@@ -16,6 +16,7 @@ import 'directory_tree.dart';
 import 'remote_workspace_files.dart';
 import 'remote_workspace_legacy_templates.dart';
 import 'remote_workspace_credentials.dart';
+import 'owner_proposal_password_input.dart';
 import 'package:info_workspace/credential_transport.dart';
 import '../information_files.dart';
 import '../backups.dart';
@@ -49,6 +50,8 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   @override
   late final RemoteWorkspaceCredentials credentials =
       RemoteWorkspaceCredentials(client, changed: notifyConnectionChanged);
+  late final OwnerProposalPasswords proposalPasswords =
+      OwnerProposalPasswords.remote(client);
   final String? deviceFilesDirectory;
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
@@ -210,6 +213,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   Future<void>? _closeFuture;
   Future<void> dispose() => _closeFuture ??= _dispose();
   Future<void> _dispose() async {
+    proposalPasswords.dispose();
     try {
       await _fileActions.dispose();
     } finally {

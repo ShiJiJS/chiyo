@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'protocol_json.dart';
+import 'import_proposals.dart';
 
 /// Private online-host state. Never expose through catalogs, ordinary owner
 /// settings, Agent responses, or portable information backups.
@@ -22,10 +23,11 @@ final class ServerStateSnapshot {
     final json = jsonEncode(value);
     final decoded = decodeProtocolObject(json, maxBytes: maxBytes);
     Object? freeze(Object? v) {
-      if (v is Map)
+      if (v is Map) {
         return Map<String, Object?>.unmodifiable(
           v.map((k, v) => MapEntry(k as String, freeze(v))),
         );
+      }
       if (v is List) return List<Object?>.unmodifiable(v.map(freeze));
       return v;
     }
@@ -41,5 +43,17 @@ abstract interface class ServerStateRepository {
   Future<ServerStateSnapshot> commitServerState(
     ServerStateSnapshot expected,
     Map<String, Object?> payload,
+  );
+}
+
+/// Save a private owner input revision and its retry receipt in the same
+/// transaction. The receipt lives only in server state, never portable history.
+abstract interface class ServerProposalPasswordRepository
+    implements ServerStateRepository {
+  Future<void> commitServerProposalPasswords(
+    ServerStateSnapshot expected,
+    Map<String, Object?> payload,
+    ImportProposal revised,
+    int expectedProposalVersion,
   );
 }
