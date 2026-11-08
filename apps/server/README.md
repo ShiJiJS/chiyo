@@ -1,6 +1,6 @@
 # 独立服务宿主
 
-首轮使用同一用户的一台电脑连接服务。当前先实现 #91 的文字资料管理、HTTPS、独立启动及持久化；完整 App、Agent 接入与其他资料类型依后续票接续。当前 Dockerfile 是自动验收镜像，不是 #102 的最终发布镜像。
+首轮使用同一用户的一台电脑连接服务。当前已接文字资料管理、同机 AI 申请审批和动态插件模板；其余资料类型依后续票接续。当前 Dockerfile 是自动验收镜像，不是 #102 的最终发布镜像。
 
 ## 启动
 
@@ -38,7 +38,7 @@ dart run bin/server.dart serve /absolute/private/server.json
 协议版本为 1，所有接口均为 HTTPS，禁止浏览器 Origin。管理接口要求 `Authorization: Bearer <用户接入 Token>`，身份不合法返回 401；当前没有为 Agent 开放管理接口。
 
 - `GET /v1/server`：协议与服务器身份。
-- `GET /v1/owner/catalog`：目录层级、标签、共享内置模板及实际待办数量；完整动态插件由 #95 接续。
+- `GET /v1/owner/catalog`：目录层级、标签、当前启用的内置及插件模板，以及实际待办数量。
 - `GET /v1/owner/summaries`：不含正文字段的资料摘要，供列表与关联名称查询。
 - `GET /v1/owner/information/{id}`：指定资料的完整内容和冻结模板布局。
 - `GET /v1/owner/information`：当前完整文字资料列表，供独立客户端取回核对。
@@ -51,16 +51,20 @@ dart run bin/server.dart serve /absolute/private/server.json
 - `GET /v1/owner/approvals/{id}`：待核对的字段及版本等元数据和 reviewToken，不返回正文或读取凭证。
 - `POST /v1/owner/approvals/decisions`：按当前 reviewToken 提交整次批准、拒绝或撤销，使用共享 WorkspaceApprovalChange 格式；复用原审批事务和操作去重。
 - `GET /v1/owner/approvals/operations/{operationId}`：核对原决定的回执；只有明确的 operation_not_found 表示未提交，连接失败不等于没有保存。
+- `GET /v1/owner/plugins`：已安装插件、启停状态、模板定义及受影响资料数量。
+- `POST /v1/owner/plugins/stage`：上传本机选择的声明式 JSON（filename、bytes Base64），最多1 MiB；不接收文件路径或执行代码。
+- `GET /v1/owner/plugins/previews/{selectionId}`：沿用原插件校验与变更预览；`DELETE /v1/owner/plugins/selections/{selectionId}` 释放未安装的选择。
+- `POST /v1/owner/plugins/changes`：以稳定 operationId 安装、启用、停用或移除；`GET /v1/owner/plugins/operations/{operationId}` 查询原操作。更新保持原启停选择，旧资料保留模板快照。
 
 用户审批接口复用 packages/info_workspace 中从原 App 提取的纯 Dart 适配，不在 HTTP 层重写审批规则。`GET /v1/server` 额外返回不含正文的 workspaceObservation，App 用它发现新待办及状态变化；它不广播到其他电脑，也不代表后置的跨端提醒已经完成。
 
-Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，正文沿用 AgentProtocol。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
+Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、plugins/catalog、templates/catalog、templates/read、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，正文沿用 AgentProtocol。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
 
 普通维护重启现在通过 OnlineInformationRuntime 保存和恢复文字聊天状态：待办、原会话与结束凭证、已批准字段、原读取凭证和固定到期时间。每个业务响应在加密状态保存成功后才发送；写入失败不交付已准备的内容。恢复先核对原审批记录，已撤销、结束、到期的许可不恢复；备份恢复会更换状态代际并清除有效接入与聊天关联。不要把普通授权历史当作可用许可导入。
 
 **#93 文字流程已完成。** App 已接正常远程审批与待办刷新、受限设备配置生成；正式 CLI 和 Codex 关联已接 HTTPS，并通过无开发上下文 Agent 试用。接入步骤见 [正式远程说明](../../integrations/codex/REMOTE-INTEGRATION.md)。文字授权已做加密库和 HTTPS 宿主整体重建测试；文件和凭据的重启、执行与清理仍由 #97/#99 接续。本分支尚非 #102 的最终统一候选。
 
-操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。目录、模板、完整文件与凭据协议由对应后续票接通，当前接口不代表这些能力已交付。
+操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。目录修改、提案、完整文件与凭据协议由对应后续票接通，当前接口不代表这些能力已交付。
 
 ## 自动检查
 

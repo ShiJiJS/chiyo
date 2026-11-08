@@ -6,12 +6,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/information_transport.dart';
-import 'package:info_core/builtin_information_definitions.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:crypto/crypto.dart';
 import 'package:info_workspace/owner_workspace_approvals.dart';
 import 'package:info_workspace/workspace_records.dart';
 import 'package:info_workspace/approval_transport.dart';
+import 'package:info_workspace/owner_agent_templates.dart';
+import 'package:info_workspace/owner_workspace_template_packages.dart';
+import 'package:info_workspace/plugin_transport.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -23,7 +25,14 @@ final class OnlineServer {
     this.serverId,
     this._devices,
   ) : _agents = AgentGateway(AgentProtocol(_runtime.service.agent), _devices),
-      _approvals = OwnerWorkspaceApprovals(owner: _runtime.service.owner) {
+      _approvals = OwnerWorkspaceApprovals(owner: _runtime.service.owner),
+      _plugins = OwnerWorkspaceTemplatePackages(
+        owner: _runtime.service.owner,
+        changed: () {},
+      ) {
+    _service.owner.configureInformationTemplates(
+      () => currentAgentTemplates(_service.owner),
+    );
     _http.listen(
       _handle,
       onError: (Object error, StackTrace stack) {
@@ -45,6 +54,7 @@ final class OnlineServer {
   final AgentDeviceRegistry _devices;
   final AgentGateway _agents;
   final OwnerWorkspaceApprovals _approvals;
+  final OwnerWorkspaceTemplatePackages _plugins;
   int get port => _http.port;
 
   static Future<OnlineServer> start({
@@ -68,7 +78,10 @@ final class OnlineServer {
     return OnlineServer._(http, runtime, ownerToken, serverId, devices);
   }
 
-  Future<void> close() => _http.close(force: true);
+  Future<void> close() async {
+    await _http.close(force: true);
+    _plugins.dispose();
+  }
 
   bool _authenticated(String? value) {
     final expected = 'Bearer $_ownerToken'.codeUnits;
@@ -101,6 +114,7 @@ final class OnlineServer {
         .convert(
           utf8.encode(
             jsonEncode([
+              owner.templatePackageVersion,
               [
                 for (final i in owner.information) [i.id, i.version],
               ],
@@ -182,6 +196,63 @@ final class OnlineServer {
             'serverId': serverId,
             'workspaceObservation': await _observation(),
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/plugins') {
+          if (path.length == 3 && request.method == 'GET') {
+            await reply(200, pluginCatalogToJson(await _plugins.load()));
+          } else if (path.length == 4 &&
+              path.last == 'stage' &&
+              request.method == 'POST') {
+            final body = parsedBody!;
+            if (body.length != 2 ||
+                body['filename'] is! String ||
+                body['bytes'] is! String ||
+                (body['bytes'] as String).length > 1398104) {
+              throw const FormatException('Invalid package input');
+            }
+            final staged = _plugins.stageBytes(
+              body['filename'] as String,
+              base64Decode(body['bytes'] as String),
+            );
+            await reply(200, {
+              'selectionId': staged.selectionId,
+              'filename': staged.filename,
+              'byteLength': staged.byteLength,
+            });
+          } else if (path.length == 5 &&
+              path[3] == 'previews' &&
+              request.method == 'GET') {
+            await reply(
+              200,
+              pluginPreviewToJson(await _plugins.previewInstall(path.last)),
+            );
+          } else if (path.length == 5 &&
+              path[3] == 'selections' &&
+              request.method == 'DELETE') {
+            await _plugins.releaseCandidate(path.last);
+            await reply(200, {'status': 'released'});
+          } else if (path.length == 4 &&
+              path.last == 'changes' &&
+              request.method == 'POST') {
+            await reply(
+              200,
+              pluginReceiptToJson(
+                await _plugins.change(pluginChangeFromJson(parsedBody!)),
+              ),
+            );
+          } else if (path.length == 5 &&
+              path[3] == 'operations' &&
+              request.method == 'GET') {
+            final receipt = await _plugins.receipt(path.last);
+            await reply(
+              receipt == null ? 404 : 200,
+              receipt == null
+                  ? {'error': 'operation_not_found'}
+                  : pluginReceiptToJson(receipt),
+            );
+          } else {
+            await reply(404, {'error': 'not_found'});
+          }
         } else if (path.length >= 4 &&
             path.take(3).join('/') == 'v1/owner/approvals') {
           if (path.length == 4 &&
@@ -270,7 +341,7 @@ final class OnlineServer {
             'tags': [
               for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
             ],
-            'templates': builtinWorkspaceDefinitions.values.toList(),
+            'templates': _plugins.templates.values.toList(),
           });
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/summaries') {

@@ -6,6 +6,7 @@ import 'workspace_information_codec.dart';
 import 'workspace_order.dart';
 import 'unavailable_workspace_sources.dart';
 import 'remote_workspace_approvals.dart';
+import 'remote_workspace_plugins.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -14,6 +15,11 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   RemoteWorkspaceSource(this.client)
     : _observation = client.initialWorkspaceObservation;
   final OwnerClient client;
+  @override
+  late final RemoteWorkspacePlugins plugins = RemoteWorkspacePlugins(
+    client,
+    changed: notifyConnectionChanged,
+  );
   @override
   late final WorkspaceApprovalSource approvals = RemoteWorkspaceApprovals(
     client,
@@ -127,12 +133,15 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
           WorkspaceTag(t['id'] as String, t['name'] as String),
       ],
       types: [
-        for (final d in definitions)
-          WorkspaceType(
-            d['id'] as String,
-            d['name'] as String,
-            d['icon'] as String? ?? 'file',
-          ),
+        ...{
+          for (final d in definitions)
+            d['id'] as String: WorkspaceType(
+              d['id'] as String,
+              d['name'] as String,
+              d['icon'] as String? ?? 'file',
+            ),
+          for (final record in records) record.type.id: record.type,
+        }.values,
       ],
       creatableTypes: [
         for (final d in definitions)
@@ -173,8 +182,32 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
 
   @override
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) => _remote(
-    () async =>
-        _codec.decode(await _item(ref), tagNames: _tagNames(await _catalog())),
+    () async {
+      final detail = _codec.decode(
+        await _item(ref),
+        tagNames: _tagNames(await _catalog()),
+      );
+      final state = workspacePluginTemplateState(
+        (await plugins.load()).packages,
+        detail.record.type.id,
+        detail.definition['packageId'] as String?,
+      );
+      return WorkspaceDetail(
+        record: detail.record,
+        version: detail.version,
+        templateState: detail.templateState == WorkspaceTemplateState.available
+            ? state
+            : detail.templateState,
+        definition: detail.definition,
+        values: detail.values,
+        relations: detail.relations,
+        incomingRelations: detail.incomingRelations,
+        fieldIds: detail.fieldIds,
+        fieldOverrides: detail.fieldOverrides,
+        retainedFields: detail.retainedFields,
+        retainedRelations: detail.retainedRelations,
+      );
+    },
   );
 
   @override
