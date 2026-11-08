@@ -9,6 +9,21 @@ final class AgentDeviceIdentity {
   final String id, name, generation;
 }
 
+/// A private proof minted by the core (session, end capability or grant).
+/// Only a digest is stored in the device binding index.
+final class AgentDeviceCapability {
+  const AgentDeviceCapability(this.kind, this.value);
+  final String kind, value;
+  String get key {
+    if (!const {'session', 'end', 'grant'}.contains(kind) ||
+        value.isEmpty ||
+        value.length > 2000) {
+      throw const AccessFailure('invalid_request');
+    }
+    return '$kind:${sha256.convert(utf8.encode(value))}';
+  }
+}
+
 /// The raw secret is returned only by the authenticated owner enrollment path.
 /// Device catalog responses must use metadata(), never serialize this object.
 final class EnrolledAgentDevice {
@@ -105,13 +120,15 @@ final class AgentDeviceRegistry {
         );
       });
 
-  Future<AgentDeviceIdentity> authenticate(String bearer) async {
+  AgentDeviceIdentity _authenticate(
+    ServerStateSnapshot snapshot,
+    String bearer,
+  ) {
     final parts = bearer.split('.');
     if (parts.length != 2 ||
         !RegExp(r'^[A-Za-z0-9_-]{22}$').hasMatch(parts[0]) ||
         !RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(parts[1]))
       throw const AccessFailure('unauthorized');
-    final snapshot = await _repository.openServerState();
     final raw = _map(snapshot, 'agentDevices')[parts[0]];
     if (raw == null) throw const AccessFailure('unauthorized');
     final row = _row(raw);
@@ -130,6 +147,54 @@ final class AgentDeviceRegistry {
       snapshot.generation,
     );
   }
+
+  Future<AgentDeviceIdentity> authenticate(String bearer) async =>
+      _authenticate(await _repository.openServerState(), bearer);
+
+  /// Check every request against current encrypted state, including after
+  /// asynchronous reads. A restore changes generation and removes all bindings.
+  Future<AgentDeviceIdentity> authorize(
+    String bearer, {
+    String? generation,
+    Iterable<AgentDeviceCapability> capabilities = const [],
+  }) async {
+    final snapshot = await _repository.openServerState();
+    final device = _authenticate(snapshot, bearer);
+    if (generation != null && generation != snapshot.generation) {
+      throw const AccessFailure('unauthorized');
+    }
+    final bindings = _map(snapshot, 'agentCapabilityBindings');
+    for (final capability in capabilities) {
+      if (bindings[capability.key] != device.id) {
+        throw const AccessFailure('unauthorized');
+      }
+    }
+    return device;
+  }
+
+  Future<void> bindCapabilities(
+    String bearer,
+    String generation,
+    Iterable<AgentDeviceCapability> capabilities,
+  ) => _serialize(() async {
+    final snapshot = await _repository.openServerState();
+    final device = _authenticate(snapshot, bearer);
+    if (snapshot.generation != generation) {
+      throw const AccessFailure('unauthorized');
+    }
+    final bindings = _map(snapshot, 'agentCapabilityBindings');
+    for (final capability in capabilities) {
+      final key = capability.key;
+      if (bindings.containsKey(key) && bindings[key] != device.id) {
+        throw const AccessFailure('unauthorized');
+      }
+      bindings[key] = device.id;
+    }
+    await _repository.commitServerState(snapshot, {
+      ...snapshot.payload,
+      'agentCapabilityBindings': bindings,
+    });
+  });
 
   Future<List<Map<String, Object?>>> metadata() async {
     final snapshot = await _repository.openServerState();

@@ -26,6 +26,20 @@ void main() {
         final repeated = await devices.enroll('enroll-a', 'Mac synthetic');
         expect(repeated.bearer, a.bearer);
         b = await devices.enroll('enroll-b', 'Other synthetic');
+        await devices.bindCapabilities(a.bearer, a.identity.generation, const [
+          AgentDeviceCapability('session', 'synthetic-session-proof'),
+          AgentDeviceCapability('end', 'synthetic-end-proof'),
+          AgentDeviceCapability('grant', 'synthetic-read-proof'),
+        ]);
+        await expectLater(
+          devices.authorize(
+            b.bearer,
+            capabilities: const [
+              AgentDeviceCapability('session', 'synthetic-session-proof'),
+            ],
+          ),
+          throwsA(isA<AccessFailure>()),
+        );
         expect(b.bearer, isNot(a.bearer));
         expect((await devices.authenticate(a.bearer)).id, a.identity.id);
         expect((await devices.authenticate(b.bearer)).id, b.identity.id);
@@ -59,6 +73,18 @@ void main() {
       devices = AgentDeviceRegistry(repo);
       try {
         expect((await devices.authenticate(a.bearer)).id, a.identity.id);
+        expect(
+          (await devices.authorize(
+            a.bearer,
+            generation: a.identity.generation,
+            capabilities: const [
+              AgentDeviceCapability('session', 'synthetic-session-proof'),
+              AgentDeviceCapability('end', 'synthetic-end-proof'),
+              AgentDeviceCapability('grant', 'synthetic-read-proof'),
+            ],
+          )).id,
+          a.identity.id,
+        );
         expect(
           (await devices.enroll('enroll-a', 'Mac synthetic')).bearer,
           a.bearer,

@@ -121,3 +121,13 @@ Mac 服务包10项通过；Linux ARM64服务包10项通过。私有状态专项�
 日志：server-device-suite.log、agent-device-focused.log、server-state-tests.log、server-state-regression.log、linux-server-device-tests.log、linux-server-state-tests.log。曾误用不存在的 backups_test.dart 文件名，实际改用 backup_test.dart 后相关回归完成，不把该次失败计作通过。
 
 **#93 仍未完成。** 当前设备凭证只是连接身份，未授予资料访问。下一步：在共享HTTPS入口中先认证设备，再绑定 sessionSecret、endCapability、领取的grant token；私有状态的代际必须在操作前后核对。随后接正常审批界面，并实现文字会话/授权的真实重启恢复及对应独立Agent试用。不能把本轮状态表重开测试当成授权重启已经通过。
+
+## #93 已接认证的远程 Agent 通道
+
+新增 AgentGateway，复用 AgentProtocol，旧回环 HTTP 的 Host/Origin 防护保持不变。远程路径为 POST /v1/agent/...，正文在认证设备后按既有受限 JSON 解析；用户 Token 不能进入 Agent 通道，设备 Token 不能访问管理接口。当前仅接文字目录/会话/申请/状态/领取/读取，capabilities 明确不宣称尚未接通的模板、提案、文件或凭据能力。
+
+会话、结束凭证及获批读取 token 均保存原设备绑定（索引仅存摘要）。每次操作前后重新核对设备撤销、状态代际和绑定；读取期间撤销设备时，不向调用方交付已取得的值。核心仍控制批准范围、结束和期限，不用设备身份代替用户审批。绑定在加密库普通重开后保留，便携备份不携带这些绑定。
+
+Mac 服务包12项通过，Linux ARM64服务包12项通过；包含真实HTTPS的两设备隔离、用户/Agent角色隔离、无授权不能领取、重复申请和批准、仅获批字段读取、结束后拒绝及读取过程中撤销的专项。静态分析通过。日志 agent-gateway-tests.log、server-gateway-suite.log、linux-gateway-tests.log；Docker仅更新验证镜像，没有安装日常App或触发钥匙串。
+
+**仍未完成 #93。** 本轮正常审批使用现有可信 OwnerAccess 的持久决定接口做合成驱动；App的远程审批适配、CLI连接配置及真正的核心会话/授权重启恢复仍需接续。设备索引的重开不等同授权重启，不关闭本票。
