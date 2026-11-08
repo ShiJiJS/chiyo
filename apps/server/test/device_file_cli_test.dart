@@ -229,6 +229,8 @@ void main() {
         expect(result['status'], 'ok', reason: jsonEncode(result));
         final delivery = result['delivery'] as Map;
         expect(delivery, isNot(contains('cleanupCapability')));
+        expect(delivery['state'], 'ready', reason: jsonEncode(result));
+        expect(delivery['path'], isA<String>(), reason: jsonEncode(result));
         final path = delivery['path'] as String;
         paths.add(path);
         expect(await File(path).readAsBytes(), bytes);
@@ -300,7 +302,34 @@ void main() {
       final port = server.port;
       await close();
       await open(port);
-      expect(await received('first'), first);
+      final replay = await cli(fetch('first'));
+      expect(replay['status'], 'ok', reason: jsonEncode(replay));
+      final replayed = replay['delivery'] as Map;
+      expect(replayed['deliveryId'], first.$1);
+      if (replayed['path'] != null) {
+        expect(replayed['state'], 'ready');
+        expect(replayed['path'], first.$2);
+        expect(await File(first.$2).readAsBytes(), bytes);
+      } else {
+        // A guardian may observe the restart's connection gap and clean the
+        // copy. That must not recreate this operation or its original path.
+        expect(replayed['state'], anyOf('cleanup_pending', 'released'));
+        await removed(first.$2);
+      }
+      // The original approved session still permits a new delivery. Keeping
+      // the grant is distinct from keeping a copy across a network outage.
+      final afterRestart = await received('after-restart');
+      expect(afterRestart.$1, isNot(first.$1));
+      final releaseAfterRestart = await cli({
+        'command': 'file-release',
+        'deliveryId': afterRestart.$1,
+      });
+      expect(
+        releaseAfterRestart['status'],
+        'ok',
+        reason: jsonEncode(releaseAfterRestart),
+      );
+      await removed(afterRestart.$2);
       final release = await cli({
         'command': 'file-release',
         'deliveryId': first.$1,
