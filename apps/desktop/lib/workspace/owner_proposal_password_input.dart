@@ -1,20 +1,84 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:info_core/info_core.dart' as core;
 import '../desktop_controls.dart';
 import 'proposal_passwords.dart';
 import 'workspace_source.dart';
+import 'package:info_remote/owner_client.dart';
+import 'remote_proposal_password_store.dart';
 
 /// Controllers and strings belong to the trusted Host, scoped to one library
 /// and proposal revision. The workspace receives widgets and readiness only.
 class OwnerProposalPasswords extends ProposalPasswords {
-  OwnerProposalPasswords(this.owner) : _scope = owner.captureLibraryScope();
-  final core.OwnerAccess owner;
-  final core.OwnerLibraryScope _scope;
+  OwnerProposalPasswords(core.OwnerAccess owner)
+    : _owner = owner,
+      _scope = owner.captureLibraryScope(),
+      _remote = null;
+  OwnerProposalPasswords.remote(OwnerClient client)
+    : _owner = null,
+      _scope = null,
+      _remote = RemoteProposalPasswordStore(client);
+  final core.OwnerAccess? _owner;
+  core.OwnerAccess get owner => _owner!;
+  final core.OwnerLibraryScope? _scope;
+  final RemoteProposalPasswordStore? _remote;
   final _inputs = <(String, int, String), TextEditingController>{};
+  final _loads = <(String, int, String), Future<void>>{};
+  final _loading = <(String, int, String)>{};
+  final _errors = <(String, int, String), WorkspaceFailure>{};
+  bool _closed = false;
+
+  String _itemKey(String proposal, String item) {
+    final prefix = 'proposal:$proposal:';
+    if (!item.startsWith(prefix)) {
+      throw const WorkspaceFailure('conflict', '密码填写目标已变化，请重新核对。');
+    }
+    return item.substring(prefix.length);
+  }
+
+  void _load((String, int, String) key, TextEditingController controller) {
+    _loading.add(key);
+    _errors.remove(key);
+    _loads[key] = (() async {
+      try {
+        final value = await _remote!.read(
+          key.$1,
+          key.$2,
+          _itemKey(key.$1, key.$3),
+        );
+        if (!_closed && identical(_inputs[key], controller)) {
+          controller.text = value;
+        }
+      } catch (error) {
+        if (!_closed && identical(_inputs[key], controller)) {
+          _errors[key] = error is WorkspaceFailure
+              ? error
+              : const WorkspaceFailure('unavailable', '密码暂时无法读取，请重试。');
+        }
+      } finally {
+        if (!_closed && identical(_inputs[key], controller)) {
+          _loading.remove(key);
+          notifyListeners();
+        }
+      }
+    })();
+  }
 
   TextEditingController _controller(String id, int version, String item) =>
       _inputs.putIfAbsent((id, version, item), () {
+        if (_remote != null) {
+          final controller = TextEditingController();
+          // Defer until putIfAbsent has installed its ownership identity.
+          scheduleMicrotask(() {
+            if (!_closed &&
+                identical(_inputs[(id, version, item)], controller)) {
+              _load((id, version, item), controller);
+            }
+          });
+          _loading.add((id, version, item));
+          return controller;
+        }
         final proposal = owner.importProposals
             .where((p) => p.id == id && p.version == version)
             .firstOrNull;
@@ -31,7 +95,9 @@ class OwnerProposalPasswords extends ProposalPasswords {
 
   @override
   bool ready(String proposalId, int version, String itemId) =>
-      _inputs[(proposalId, version, itemId)]?.text.isNotEmpty ?? false;
+      !_loading.contains((proposalId, version, itemId)) &&
+      !_errors.containsKey((proposalId, version, itemId)) &&
+      (_inputs[(proposalId, version, itemId)]?.text.isNotEmpty ?? false);
 
   @override
   Widget input(
@@ -39,16 +105,49 @@ class OwnerProposalPasswords extends ProposalPasswords {
     int version,
     String itemId, {
     required bool enabled,
-  }) => _InlinePassword(
-    key: ValueKey((proposalId, version, itemId)),
-    controller: _controller(proposalId, version, itemId),
-    itemId: itemId,
-    enabled: enabled,
-    changed: notifyListeners,
-  );
+  }) {
+    final key = (proposalId, version, itemId);
+    final controller = _controller(proposalId, version, itemId);
+    final input = _InlinePassword(
+      key: ValueKey((proposalId, version, itemId)),
+      controller: controller,
+      itemId: itemId,
+      enabled: enabled && !_loading.contains(key) && !_errors.containsKey(key),
+      changed: notifyListeners,
+    );
+    if (_remote == null) return input;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        input,
+        if (_errors[key] case final failure?) ...[
+          Text(failure.message),
+          DesktopButton(
+            onPressed: enabled
+                ? () {
+                    _load(key, controller);
+                    notifyListeners();
+                  }
+                : null,
+            child: const Text('重新读取密码'),
+          ),
+        ],
+      ],
+    );
+  }
 
   @override
   Future<Set<String>> store(String proposalId, int version) async {
+    if (_remote != null) {
+      await Future.wait([
+        for (final e in _loads.entries)
+          if (e.key.$1 == proposalId && e.key.$2 == version) e.value,
+      ]);
+      final failure = _errors.entries
+          .where((e) => e.key.$1 == proposalId && e.key.$2 == version)
+          .firstOrNull;
+      if (failure != null) throw failure.value;
+    }
     final entries = _inputs.entries
         .where(
           (e) =>
@@ -59,7 +158,18 @@ class OwnerProposalPasswords extends ProposalPasswords {
         .toList();
     if (entries.isEmpty) return {};
     try {
-      await owner.inLibraryScope(_scope, () async {
+      if (_remote != null) {
+        final receipt = await _remote.fill(proposalId, version, {
+          for (final entry in entries)
+            _itemKey(proposalId, entry.key.$3): entry.value.text,
+        });
+        return _moveInputs(
+          proposalId,
+          version,
+          receipt.keys.map((k) => 'proposal:$proposalId:$k').toSet(),
+        );
+      }
+      await owner.inLibraryScope(_scope!, () async {
         final proposal = owner.importProposals
             .where((p) => p.id == proposalId)
             .firstOrNull;
@@ -80,11 +190,11 @@ class OwnerProposalPasswords extends ProposalPasswords {
       });
       // A failed admission must preserve both input and readiness. Move the
       // private controllers to the revision this exact batch just produced.
-      for (final entry in entries) {
-        _inputs.remove(entry.key);
-        _inputs[(proposalId, version + 1, entry.key.$3)] = entry.value;
-      }
-      return entries.map((e) => e.key.$3).toSet();
+      return _moveInputs(
+        proposalId,
+        version,
+        entries.map((e) => e.key.$3).toSet(),
+      );
     } on core.AccessFailure catch (error) {
       throw WorkspaceFailure(
         error.status == 'proposal_changed' ? 'conflict' : error.status,
@@ -92,13 +202,42 @@ class OwnerProposalPasswords extends ProposalPasswords {
             ? '密码不能为空，不能超过65536字节或包含空字符。输入仍保留。'
             : '提案已变化或密码暂时无法保存，输入仍保留，请重新核对。',
       );
+    } on WorkspaceFailure {
+      rethrow;
     } catch (_) {
       throw const WorkspaceFailure('unavailable', '密码暂时无法保存，输入仍保留，请重试。');
     }
   }
 
+  Set<String> _moveInputs(String proposalId, int version, Set<String> filled) {
+    for (final item in filled) {
+      final controller = _inputs.remove((proposalId, version, item));
+      if (controller != null) {
+        _inputs[(proposalId, version + 1, item)] = controller;
+      }
+    }
+    return filled;
+  }
+
+  @override
+  Future<Set<String>?> reconcile(String proposalId, int version) async {
+    if (_remote == null) return super.reconcile(proposalId, version);
+    final receipt = await _remote.reconcile(proposalId, version);
+    return receipt == null
+        ? null
+        : _moveInputs(
+            proposalId,
+            version,
+            receipt.keys.map((key) => 'proposal:$proposalId:$key').toSet(),
+          );
+  }
+
   @override
   void clear(String proposalId) {
+    _remote?.clear(proposalId);
+    _loads.removeWhere((key, _) => key.$1 == proposalId);
+    _loading.removeWhere((key) => key.$1 == proposalId);
+    _errors.removeWhere((key, _) => key.$1 == proposalId);
     final keys = _inputs.keys.where((k) => k.$1 == proposalId).toList();
     for (final key in keys) {
       final controller = _inputs.remove(key)!;
@@ -110,6 +249,11 @@ class OwnerProposalPasswords extends ProposalPasswords {
 
   @override
   void dispose() {
+    _closed = true;
+    _remote?.dispose();
+    _loads.clear();
+    _loading.clear();
+    _errors.clear();
     for (final controller in _inputs.values) {
       controller.clear();
       controller.dispose();

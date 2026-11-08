@@ -1,4 +1,5 @@
 import 'package:info_workspace/owner_workspace_proposals.dart';
+import 'package:info_core/info_core.dart';
 import 'package:info_workspace/proposal_transport.dart';
 import 'package:info_workspace/workspace_transport.dart';
 import 'package:info_workspace/file_transport.dart';
@@ -14,6 +15,49 @@ final class OwnerProposalRoutes {
     List<String> path,
     Map<String, dynamic>? body,
   ) async {
+    // Dedicated trusted-owner material channel; never part of proposal DTOs.
+    if (path.length == 6 && path[4] == 'passwords' && method == 'POST') {
+      final input = body!;
+      if (path.last == 'read') {
+        if (input.length != 2 ||
+            input.keys.any((k) => !{'version', 'itemKey'}.contains(k)))
+          throw const FormatException();
+        return (
+          200,
+          {
+            'value': await proposals.owner.readImportPasswordForOwner(
+              path[3],
+              input['version'] as int,
+              input['itemKey'] as String,
+            ),
+          },
+        );
+      }
+      if (path.last == 'fill') {
+        if (input.length != 3 ||
+            input.keys.any(
+              (k) => !{'version', 'operationId', 'values'}.contains(k),
+            ))
+          throw const FormatException();
+        final receipt = await proposals.owner.fillImportCredentialsOperation(
+          path[3],
+          input['version'] as int,
+          Map<String, String>.from(input['values'] as Map),
+          input['operationId'] as String,
+        );
+        return (200, {'operation': receipt.toPrivateJson()});
+      }
+    }
+    if (path.length == 5 &&
+        path[3] == 'password-operations' &&
+        method == 'GET') {
+      final receipt = await proposals.owner.importPasswordFillReceipt(
+        path.last,
+      );
+      return receipt == null
+          ? (404, {'error': 'operation_not_found'})
+          : (200, {'operation': receipt.toPrivateJson()});
+    }
     if (path.length == 6 && path[4] == 'originals' && method == 'POST') {
       final input = body!;
       final review = input['review'] == null

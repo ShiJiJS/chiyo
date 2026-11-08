@@ -65,25 +65,74 @@ extension _EncryptedServerState on EncryptedInformationRepository {
       revision: expected.revision + 1,
       payload: payload,
     );
-    return _db.transaction(() async {
-      if (!await _hasServerStateTable())
-        throw const AccessFailure('server_state_changed');
-      final rows = await _db
-          .customSelect(
-            'SELECT generation,revision,payload FROM server_runtime_state WHERE singleton=1',
-          )
-          .get();
-      if (rows.length != 1 ||
-          rows.single.read<String>('generation') != expected.generation ||
-          rows.single.read<int>('revision') != expected.revision) {
-        throw const AccessFailure('server_state_changed');
-      }
-      await _db.customStatement(
-        'UPDATE server_runtime_state SET revision=?,payload=? WHERE singleton=1',
-        [next.revision, jsonEncode(next.payload)],
-      );
-      return next;
-    });
+    return _db.transaction(() => _commitServerStateBody(expected, next));
+  }
+
+  Future<ServerStateSnapshot> _commitServerStateBody(
+    ServerStateSnapshot expected,
+    ServerStateSnapshot next,
+  ) async {
+    if (!await _hasServerStateTable())
+      throw const AccessFailure('server_state_changed');
+    final rows = await _db
+        .customSelect(
+          'SELECT generation,revision,payload FROM server_runtime_state WHERE singleton=1',
+        )
+        .get();
+    if (rows.length != 1 ||
+        rows.single.read<String>('generation') != expected.generation ||
+        rows.single.read<int>('revision') != expected.revision) {
+      throw const AccessFailure('server_state_changed');
+    }
+    await _db.customStatement(
+      'UPDATE server_runtime_state SET revision=?,payload=? WHERE singleton=1',
+      [next.revision, jsonEncode(next.payload)],
+    );
+    return next;
+  }
+
+  Future<void> _commitProposalPasswords(
+    ServerStateSnapshot expected,
+    Map<String, Object?> payload,
+    ImportProposal revised,
+    int expectedVersion,
+  ) async {
+    if (_closed) throw const StorageFailure('library_closed');
+    if (revised.state != ImportProposalState.pending ||
+        revised.version != expectedVersion + 1) {
+      throw const AccessFailure('proposal_changed');
+    }
+    final next = ServerStateSnapshot(
+      generation: expected.generation,
+      revision: expected.revision + 1,
+      payload: payload,
+    );
+    try {
+      await _writeMetadata(() async {
+        final rows = await _db
+            .customSelect(
+              'SELECT payload FROM import_proposals WHERE id=?',
+              variables: [Variable(revised.id)],
+            )
+            .get();
+        if (rows.length != 1) throw const AccessFailure('proposal_changed');
+        final old = ImportProposal.fromJson(
+          decodeProtocolObject(rows.single.read<String>('payload')),
+        );
+        if (old.id != revised.id ||
+            old.version != expectedVersion ||
+            old.state != ImportProposalState.pending) {
+          throw const AccessFailure('proposal_changed');
+        }
+        await _writeProposal(revised);
+        await _commitServerStateBody(expected, next);
+      });
+      _proposals[revised.id] = revised;
+    } on AccessFailure {
+      rethrow;
+    } on Object {
+      throw const StorageFailure('save_failed');
+    }
   }
 
   Future<void> _invalidateServerState() async {

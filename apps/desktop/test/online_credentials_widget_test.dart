@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
+import 'package:info_cli/agent_client.dart';
+import 'package:info_remote/agent_connection.dart';
+import 'package:info_desktop/mac_inline_password.dart';
+import 'package:info_desktop/workspace/proposals_page.dart';
 import 'package:info_desktop/credential_files.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/online_desktop_launcher.dart';
@@ -47,6 +51,19 @@ void main() {
       t.view.devicePixelRatio = 1;
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (_) async => null,
+      );
+      final inlineChannels = <MethodChannel>[];
+      addTearDown(() {
+        messenger.setMockMethodCallHandler(SystemChannels.platform_views, null);
+        for (final channel in inlineChannels) {
+          messenger.setMockMethodCallHandler(channel, null);
+        }
+      });
       const secret = 'SYNTHETIC_UI_PRIVATE_TOKEN';
       var nextSecret = secret;
       const channel = MethodChannel('agent_info_manage/secret_editor');
@@ -317,6 +334,229 @@ void main() {
         phase = 'independent ordinary catalog';
         expect(await resolve(independent.information), isEmpty);
         expect(runtime.service.owner.credentialUseRequests, isEmpty);
+        // A real restricted CLI submits production templates. The normal App
+        // supplies only the native password-input callback with synthetic text.
+        phase = 'submit linked AI credentials';
+        final device = await resolve(
+          () => independent.request('POST', '/v1/owner/devices', {
+            'operationId': 'proposal-device',
+            'name': 'Synthetic UI CLI',
+          }),
+        );
+        final connection = await resolve(profiles.read);
+        final cli = AgentClient.remote(
+          AgentConnectionProfile(
+            address: independent.address,
+            deviceToken: device['deviceToken'] as String,
+            serverId: independent.serverId,
+            certificate: connection!.certificate,
+          ),
+        );
+        addTearDown(cli.close);
+        await resolve(
+          () => cli.openLifecycleSession('Synthetic inline passwords'),
+        );
+        Future<Map<String, dynamic>> run(
+          String command, [
+          Map<String, dynamic> input = const {},
+        ]) => resolve(() => cli.execute({'command': command, ...input}));
+        Future<Map<String, dynamic>> example(String id) async {
+          final description =
+              (await run('template-read', {'templateId': id}))['template']
+                  as Map;
+          final item = Map<String, dynamic>.from(
+            ((description['submissionExample'] as Map)['items'] as List).single
+                as Map,
+          );
+          item.remove('relations');
+          return item;
+        }
+
+        final templates = (await run('template-list'))['templates'] as List;
+        final serviceTemplate = templates.cast<Map>().firstWhere(
+          (entry) => entry['name'] == '应用与服务',
+        );
+        final service = {
+          ...await example(serviceTemplate['id'] as String),
+          'key': 'service',
+          'name': '合成提案服务',
+        };
+        Future<Map<String, dynamic>> password(
+          String key,
+          String account,
+        ) async => {
+          ...await example('credential.accountPassword'),
+          'key': key,
+          'name': '合成登录 $key',
+          'credential': {
+            'source': 'owner',
+            'contextExposed': false,
+            'account': account,
+          },
+          'relations': {
+            'related': [
+              {'kind': 'information', 'itemKey': 'service'},
+            ],
+          },
+        };
+        const firstPassword = 'SYNTHETIC_INLINE_FIRST',
+            secondPassword = 'SYNTHETIC_INLINE_SECOND',
+            proposalToken = 'SYNTHETIC_INLINE_AGENT_TOKEN';
+        final submitted = await run('import-submit', {
+          'operationId': 'whole-ui-credential-proposal',
+          'items': [
+            service,
+            await password('first', 'first-user'),
+            await password('second', 'second-user'),
+            {
+              ...await example('credential.token'),
+              'key': 'token',
+              'name': '合成提案 Token',
+              'credential': {
+                'source': 'agentString',
+                'contextExposed': true,
+                'secret': proposalToken,
+              },
+              'relations': {
+                'related': [
+                  {'kind': 'information', 'itemKey': 'service'},
+                ],
+              },
+            },
+          ],
+        });
+        expect(submitted['status'], 'pending', reason: jsonEncode(submitted));
+        final proposalId = submitted['proposalId'] as String;
+        await tap('workspace-nav-proposals');
+        await until(
+          () =>
+              find.byType(ProposalsPage).evaluate().isNotEmpty &&
+              t
+                      .widget<ProposalsPage>(find.byType(ProposalsPage))
+                      .controller
+                      .detail
+                      ?.summary
+                      .id ==
+                  proposalId,
+        );
+        final proposal = t
+            .widget<ProposalsPage>(find.byType(ProposalsPage))
+            .controller;
+        await until(() => !proposal.loading && !proposal.reading);
+        expect(proposal.detail!.items, hasLength(4));
+        expect(proposal.canConfirm, false);
+        final firstItem = proposal.detail!.items.singleWhere(
+          (i) => i.credential?.account == 'first-user',
+        );
+        final secondItem = proposal.detail!.items.singleWhere(
+          (i) => i.credential?.account == 'second-user',
+        );
+        expect(firstItem.proposed.record.type.name, isNotEmpty);
+        expect(repo.items, isEmpty);
+        expect(repo.managedCredentials, hasLength(2));
+        Future<void> fill(String item, String value) async {
+          await tap('proposal-tab-$item');
+          final input = key('proposal-owner-password-$item');
+          await until(
+            () =>
+                input.evaluate().length == 1 &&
+                t.widget<DesktopTextField>(input).enabled == true,
+          );
+          await t.ensureVisible(input);
+          final view = t.widget<AppKitView>(
+            find.descendant(of: input, matching: find.byType(AppKitView)),
+          );
+          final id = 900 + inlineChannels.length;
+          final channel = MethodChannel(
+            'agent_info_manage/inline_password/$id',
+          );
+          inlineChannels.add(channel);
+          messenger.setMockMethodCallHandler(channel, (_) async => null);
+          view.onPlatformViewCreated!(id);
+          await t.pump();
+          final done = Completer<void>();
+          await messenger.handlePlatformMessage(
+            channel.name,
+            const StandardMethodCodec().encodeMethodCall(
+              MethodCall('changed', value),
+            ),
+            (_) => done.complete(),
+          );
+          await done.future;
+          await t.pump();
+          expect(t.widget<DesktopTextField>(input).controller!.text, value);
+          expect(find.text(value), findsNothing);
+        }
+
+        phase = 'first inline password';
+        await fill(firstItem.id, firstPassword);
+        expect(proposal.canConfirm, false);
+        expect(find.textContaining('first-user'), findsWidgets);
+        expect(repo.managedCredentials, hasLength(2));
+        phase = 'second inline password';
+        await fill(secondItem.id, secondPassword);
+        await until(() => proposal.canConfirm);
+        await tap('proposal-password-visible-${secondItem.id}');
+        expect(
+          t
+              .widget<MacInlinePassword>(find.byType(MacInlinePassword))
+              .obscureText,
+          false,
+        );
+        await tap('proposal-password-visible-${secondItem.id}');
+        expect(
+          t
+              .widget<MacInlinePassword>(find.byType(MacInlinePassword))
+              .obscureText,
+          true,
+        );
+        expect(
+          jsonEncode(
+            proposal.draft!.items.values.map((i) => i.toJson()).toList(),
+          ),
+          isNot(contains('SYNTHETIC_INLINE_')),
+        );
+        expect(
+          jsonEncode(await run('import-status', {'proposalId': proposalId})),
+          isNot(contains('SYNTHETIC_INLINE_')),
+        );
+        phase = 'whole proposal save';
+        await tap('proposal-confirm');
+        await until(
+          () =>
+              !proposal.busy &&
+              (proposal.writeFailure != null ||
+                  proposal.detail?.summary.status ==
+                      WorkspaceProposalStatus.completed),
+        );
+        expect(
+          proposal.writeFailure,
+          isNull,
+          reason: proposal.writeFailure?.code,
+        );
+        expect(repo.items, hasLength(1));
+        expect(repo.managedCredentials, hasLength(5));
+        final serviceId = repo.items.single.id;
+        final linked = repo.managedCredentials.where(
+          (c) => c.name.startsWith('合成登录') || c.name == '合成提案 Token',
+        );
+        expect(linked, hasLength(3));
+        expect(linked.every((c) => c.linkedItemIds.contains(serviceId)), true);
+        final stored = repo.credentialMaterials
+            .map((m) => utf8.decode(m.bytes))
+            .toSet();
+        expect(
+          stored,
+          containsAll([firstPassword, secondPassword, proposalToken]),
+        );
+        expect(runtime.service.owner.credentialUseRequests, isEmpty);
+        phase = 'reopen accepted proposal';
+        await closeApp();
+        await launch();
+        await until(() => model().results?.total == 6);
+        final refreshed = await resolve(independent.information);
+        expect(refreshed.single.id, serviceId);
+        await resolve(() => cli.endLifecycleSession(cli.endCapability!));
         expect(t.takeException(), isNull);
       } finally {
         phase = 'cleanup app';

@@ -88,18 +88,6 @@ final class AgentGateway {
       throw const AccessFailure('unsupported_capability');
     }
     final device = await _devices.authorize(bearer, capabilities: capabilities);
-    // Credential material follows its dedicated #98 path. Until connected,
-    // refuse the whole submission rather than omit required material.
-    if (path == '/import/submit' || path == '/import/revise') {
-      final items = body['items'];
-      if (items is List) {
-        for (final item in items.whereType<Map>()) {
-          if (item['credential'] != null) {
-            throw const AccessFailure('unsupported_capability');
-          }
-        }
-      }
-    }
     final result = await _protocol.dispatch(path, body);
     final minted = <AgentDeviceCapability>[
       if (_open.contains(path)) ...[
@@ -134,6 +122,8 @@ final class AgentGateway {
           'agent-device-binding.v1',
           'information-import-operations.v1',
           'information-update-operations.v1',
+          if ((result['capabilities'] as List).contains('credential-import.v1'))
+            'credential-import.v1',
           if ((result['capabilities'] as List).contains(
             'information-attachments.v1',
           )) ...[

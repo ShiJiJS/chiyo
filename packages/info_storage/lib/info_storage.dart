@@ -171,7 +171,7 @@ class EncryptedInformationRepository
         AdditionalApprovalRepository,
         TemplatePackageRepository,
         SshHostTrustRepository,
-        ServerStateRepository {
+        ServerProposalPasswordRepository {
   @override
   Future<ServerStateSnapshot> openServerState() => _openServerState();
   @override
@@ -179,6 +179,18 @@ class EncryptedInformationRepository
     ServerStateSnapshot expected,
     Map<String, Object?> payload,
   ) => _commitServerState(expected, payload);
+  @override
+  Future<void> commitServerProposalPasswords(
+    ServerStateSnapshot expected,
+    Map<String, Object?> payload,
+    ImportProposal revised,
+    int expectedProposalVersion,
+  ) => _commitProposalPasswords(
+    expected,
+    payload,
+    revised,
+    expectedProposalVersion,
+  );
   final _templatePackages = <String, InstalledTemplatePackage>{};
   @override
   List<InstalledTemplatePackage> get installedTemplatePackages {

@@ -277,13 +277,22 @@ extension OwnerImports on OwnerAccess {
     int version,
     Map<String, String> values,
   ) => _serialize(() async {
+    final revised = _filledImportCredentials(id, version, values);
+    if (revised != null) await _service._repository.saveImportProposal(revised);
+  });
+
+  ImportProposal? _filledImportCredentials(
+    String id,
+    int version,
+    Map<String, String> values,
+  ) {
     final proposal = importProposals.where((p) => p.id == id).firstOrNull;
     if (proposal == null ||
         proposal.state != ImportProposalState.pending ||
         proposal.version != version) {
       throw const AccessFailure('proposal_changed');
     }
-    if (values.isEmpty) return;
+    if (values.isEmpty) return null;
     final revised = <String, ImportItemInput>{};
     for (final entry in values.entries) {
       final input = proposal.items.where((i) => i.key == entry.key).firstOrNull;
@@ -301,15 +310,11 @@ extension OwnerImports on OwnerAccess {
         'credential': credential.toPrivateJson(),
       });
     }
-    await _service._repository.saveImportProposal(
-      proposal.revise(
-        items: [for (final old in proposal.items) revised[old.key] ?? old],
-        approvedKeys: proposal.approvedKeys.where(
-          (k) => !values.containsKey(k),
-        ),
-      ),
+    return proposal.revise(
+      items: [for (final old in proposal.items) revised[old.key] ?? old],
+      approvedKeys: proposal.approvedKeys.where((k) => !values.containsKey(k)),
     );
-  });
+  }
 
   ImportProposal _pendingImport(String id, int version) {
     if (_service._closed) throw const AccessFailure('service_unavailable');
