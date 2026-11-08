@@ -2,7 +2,7 @@
 
 ## 当前范围与任务
 
-持续目标 #91–#102，#103–#105 后置。独立分支 codex/server-first-stage。#91–#101 已完成并关闭。当前 #102 已补资料切换模板（原逻辑共享、Owner HTTP、远程方法及正常 UI），相关 App 31 项、Mac/Linux 服务各 6 项通过；下一步继续设置、应用运行/桌面及 Agent 接入观察，然后统一候选和无上下文 Agent 连续试用。没有正式安装或真实迁移。后文旧阶段仅作过程记录，以本节和末节为准。
+持续目标 #91–#102，#103–#105 后置。独立分支 codex/server-first-stage。#91–#101 已完成并关闭。#102 模板转换已接，服务器共享设置策略也已接（实现 121883ae，Mac 服务12、存储5，Linux相同组17，原App回归32均通过）；但 RemoteWorkspaceSource.settings 仍未接本机偏好和原控制器。下一步先完成该设备适配，再接运行/桌面和 Agent 观察，最后统一候选与无上下文 Agent 连续试用。没有正式安装或真实迁移。后文旧阶段仅作过程记录，以本节和末节为准。
 
 浏览器持续目标工作空间20/p1。19已确认丢失（库存仅用户空间0），按用户既有明确授权重建同名空间20；#101正文、评论、标签和前置关系已重读，99/100均Completed，101仍Open。当前 #101 完成评论 6726014563 已发布并重新加载回读，#101 Closed/Completed；#102 正文、评论、标签和前置关系已读取，前置 #101 Completed。工作页现位于 #102；不操作用户空间0，不逐票finish整个目标。
 
@@ -515,3 +515,21 @@ RemoteWorkspaceBackups接原WorkspaceBackupSource、BackupController/Page与输�
 下一步接设置：先读 core 的 desktop_preferences.dart、owner_workspace_settings.dart、settings_controller.dart 及原设置页面；复用原请求期限、历史保留和清理逻辑，但本机外观/通知/后台偏好不写入共享服务器。当前原 DesktopPreferences 把这些值放一个版本/保存事务里，联网需要明确的设备适配及原操作核对；不要用第二份本机资料库或只提供固定默认值。之后接运行/窗口/退出与设备/会话只读状态，不能把独立服务停掉或操作别台设备的进程。最后才做统一候选和获准的 fork-none Agent。
 
 模板转换阶段实现 7243f555 已推送；GitHub #102 评论 6726223028 已发布并重新加载核实正文/提交/持久评论锚点，#102 仍为 Open。工作页 20/p1 保持在 #102，未结束整个目标。测试/分析会话都已结束；当前没有等待用户或外部进程的阻塞。
+
+## #102 服务器设置已接，App 设置仍未接
+
+实现 121883ae 已推送。OwnerPolicyRoutes 接原 Owner.saveDesktopPreferences，只传请求分钟数、保留天数；服务器原外观/通知/后台字段原样保留。正式 bin/server.dart 和 DeviceCredentialFixture 已传入 policyState: repository。其他最小测试宿主可不配置，但不配置时明确拒绝，不回固定假数据。服务观察包含 desktopPreferences.version。
+
+settings_transport 提供 WorkspaceServerPolicy/Change/Receipt 及原清理预览。公开 generation 是私有 ServerStateSnapshot.generation 经带域前缀 SHA256/Base64URL 派生的比较标记，不是原私有代次/能力。恢复换库后，旧同版本命令也拒绝。GET 原操作不存在时，在原私有状态 ownerPolicyAbsences CAS 持久登记（上限10000），防止迟到旧POST；便携恢复不带走。
+
+Core DesktopPreferences 保留旧库有效非预设期限（如47分钟），不允许新设另一非预设值，旧准确回执仍可返回。读取范围保留旧有效分钟数；后续App不得静默改成30或60。实际保留默认90天，不能拿WorkspacePreferences旧UI默认180当服务器真实值。
+
+最终Mac服务12项、存储5项、Linux相同组17项无跳过，原App设置/运行/UI回归32项均通过。相关分析及diff检查通过。所有测试会话结束、所属Docker容器已移除。详情与日志名在 docs/development/evidence/server-a12/settings.md。早期默认期限测试前置错误已修正，原失败不计通过。
+
+下一步直接实现 RemoteWorkspaceSettings，接原 WorkspaceSettingsSource/Controller/Page。可复用 info_cli/private_device_state.dart 的 Mac私有目录700、文件600和同卷原子JSON写入，单文件128KiB。不存资料、Token或凭据，不另开本机资料库。建议状态文件只存已保存偏好、服务器策略快照及一个待核对原命令；每个操作各一份独立回执，避免历史塞满单个128KiB文件。需同目录进程锁+本进程队列，缺失或坏状态不得静默重置。
+
+保存前先登记准确原命令，再只发一次服务修改；结果不明时保留，重开通过窄 pendingChange 恢复口还原原控制器的命令/草稿/待核对状态。服务已保存但本机尚未保存，也不能说整个设置成功。若先写回执文件再提交最终偏好状态，回执查询必须确保该本机状态也已发布；下一操作只能在前操作完整结束后开始。明确未提交后清理该待核对，迟到原命令不能再写入。
+
+本机主题/通知/后台仅设备保存；请求期限/历史策略用新服务接口。合并结果继续按原 WorkspacePreferences 全值和版本核对。库替换时保留已保存本机外观，停止旧命令并提示重新读取，不能说“旧操作从未提交”。当前有效旧分钟数须在原选择控件可显示，不断言或默改；新选择仍给原预设。正常UI的OS通知/后台行为随后由设备运行适配连接，不能让服务器执行桌面操作。
+
+之后仍需运行/原生桌面（退出不停止服务或CLI）、Agent会话/当前包只读观察、正式同源候选、连续试用及获准的fork-none独立Agent。#103–#105不动。
