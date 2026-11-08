@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/information_transport.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -75,45 +76,12 @@ final class OnlineServer {
     return value;
   }
 
-  InformationDraftInput _draft(Map<String, dynamic> value) {
-    if (value.keys.any(
-      (k) => !const {
-        'name',
-        'description',
-        'fields',
-        'itemId',
-        'baseVersion',
-      }.contains(k),
-    ))
-      throw const FormatException('Unsupported draft member');
-    final fields = value['fields'] as List;
-    return InformationDraftInput(
-      name: value['name'] as String,
-      description: value['description'] as String,
-      itemId: value['itemId'] as String?,
-      baseVersion: value['baseVersion'] as int?,
-      fields: fields.map((raw) {
-        final f = raw as Map<String, dynamic>;
-        if (f.keys.any(
-          (k) => !const {'name', 'description', 'text', 'fieldId'}.contains(k),
-        )) {
-          throw const FormatException('Unsupported field member');
-        }
-        return InformationDraftField.text(
-          f['name'] as String,
-          f['description'] as String,
-          f['text'] as String,
-          fieldId: f['fieldId'] as String?,
-        );
-      }),
-    );
-  }
-
   Future<void> _handle(HttpRequest request) async {
     Future<void> reply(int status, Object value) async {
       request.response.statusCode = status;
       request.response.headers.contentType = ContentType.json;
       request.response.headers.set('cache-control', 'no-store');
+      request.response.headers.set('x-chiyo-server-id', serverId);
       request.response.write(jsonEncode(value));
       await request.response.close();
     }
@@ -125,34 +93,18 @@ final class OnlineServer {
         await reply(401, {'error': 'unauthorized'});
         return;
       }
+      final expectedServer = request.headers.value('x-chiyo-server-id');
+      if (expectedServer != null && expectedServer != serverId) {
+        await reply(409, {'error': 'server_changed'});
+        return;
+      }
       final path = request.uri.pathSegments;
       if (request.method == 'GET' && request.uri.path == '/v1/server') {
         await reply(200, {'protocolVersion': 1, 'serverId': serverId});
       } else if (request.method == 'GET' &&
           request.uri.path == '/v1/owner/information') {
         await reply(200, {
-          'items': [
-            for (final item in _service.owner.information)
-              {
-                'id': item.id,
-                'name': item.name,
-                'description': item.description,
-                'version': item.version,
-                'directoryId': item.directoryId,
-                'tagIds': item.tagIds.toList(),
-                'fields': [
-                  for (final f in item.fields)
-                    {
-                      'id': f.id,
-                      'name': f.name,
-                      'description': f.description,
-                      'kind': f.kind.name,
-                      'value': f.value,
-                      'version': f.version,
-                    },
-                ],
-              },
-          ],
+          'items': _service.owner.information.map(informationToJson).toList(),
         });
       } else if (path.length == 4 &&
           path.take(3).join('/') == 'v1/owner/operations' &&
@@ -169,7 +121,7 @@ final class OnlineServer {
           request.method == 'POST') {
         final receipt = await _service.owner.saveInformationRecord(
           path.last,
-          _draft(await _body(request)),
+          informationDraftFromJson(await _body(request)),
         );
         await reply(200, receipt.toJson());
       } else {

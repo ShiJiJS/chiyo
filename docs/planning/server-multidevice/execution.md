@@ -34,3 +34,15 @@
 ## 整体状态
 
 仅 #91 达到当前阶段条件。#92–#102 未完成，没有正式预览包、正式安装或真实迁移。完整目标保持 active。
+
+## #92 接续：远程客户端已补，界面未接
+
+新增 packages/info_remote（生产仅依赖 info_core），提供 TLS 用户连接、服务器身份核对、文字资料读取与保存回执查询。每次请求校验服务器身份，服务器在处理写入之前检查预期身份；客户端禁止把管理 Token 发送到其他 origin。关闭客户端只关闭自己的连接，不停止服务。
+
+新增核心普通资料传输解析，沿用既有 InformationDraftInput、InformationLayout、InformationRecordCommand；保留模板快照、字段身份、字段种类和目录标签，未知格式明确拒绝，文件继续等待 #97 的专用传输。服务器返回现有核心完整序列化结果，避免模板/布局在传输中丢失。
+
+当前证据：Mac 与 Linux ARM64 远程客户端各 1 个集成场景通过（实际 HTTPS + SQLCipher），覆盖新客户端重连、类型/格式保留、操作去重、错误身份/另一服务拒绝、断线失败、不向外部 origin 传 Token。协议变化后的服务包 7 项在 Mac 和 Linux 均通过，相关静态分析无问题。日志 remote-client-tests.log、linux-remote-client-tests.log。
+
+**#92 仍未完成。** 还没有把 OwnerClient 接到现有 WorkspaceApp，也没有地址/Token 配置界面和配置存储。下一步新增 RemoteWorkspaceSource，复用 WorkspaceInformationCodec 的展示/编辑转换，以及现有 WorkspaceApp、LibraryPage、LibraryEditDialog；补正常连接页面与隔离配置。不要用本地 MemoryInformationRepository 缓存冒充服务器数据源。
+
+现有 builtinWorkspaceDefinitions 是纯 Dart 声明，仅依赖 workspaceImmutableMap；后续可把定义放入共享纯 Dart 模块并保留原 App re-export，使服务器与 UI 使用相同定义。完整动态插件管理仍由 #95 接续。工作区每种未迁移入口需显式失败并记录，逐票接通，#102 前收口，不能直接照搬旧本地 bootstrap 当作联网完成。
