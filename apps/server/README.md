@@ -145,7 +145,7 @@ Mac App通过正常“添加凭据”、更换材料、编辑和停用入口接�
 
 内部设备路径还包括`/credential-use/device/operation`、`operation/status`、`execution/status`及证明控制的`worker/register`、`materials/register`、`execution/report`、`cleanup/complete`。首次领取走私有材料DTO，不能透传普通CLI输出；以后同操作仅返回元数据。执行证明在发布前持久保存并绑定原设备，清理证明不能读取材料或启动另一操作。私有credentialRuntime2嵌在textRuntime3，旧inner1可读取。
 
-CLI在自己的电脑核对程序、工作目录、进程组和文件身份，先写私有清理登记再允许材料写入及worker启动。服务器不创建这些明文文件、不查设备PID。正常JSON-lines CLI已实际通过Token/文件合成接收、系统SSH连接独立容器、服务重开、撤销/聊天结束、崩溃清理和丢回复不重放检查。逐命令Codex适配器的设备常驻宿主仍未接，正常App的SSH信任管理和凭据界面连续试用也待续；#99仍打开。阶段证据见`docs/development/evidence/server-a09/README.md`。
+CLI在自己的电脑核对程序、工作目录、进程组和文件身份，先写私有清理登记再允许材料写入及worker启动。服务器不创建这些明文文件、不查设备PID。正常JSON-lines CLI已实际通过Token/文件合成接收、系统SSH连接独立容器、服务重开、撤销/聊天结束、崩溃清理和丢回复不重放检查。逐命令Codex适配器也已接仅回环的设备后台程序，共用原16条执行/输出限制及30分钟完成输出保存；连接记录只有控制证明与进程身份，不保存聊天读取证明。两个CLI竞争、连接记录丢失及接受回复丢失均不会第二次启动，并已用独立客户端/worker二进制验证。正常App的SSH信任管理和凭据界面连续试用仍待续；#99仍打开。阶段证据见`docs/development/evidence/server-a09/README.md`。
 
 ## 自动检查
 

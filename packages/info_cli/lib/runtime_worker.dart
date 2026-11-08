@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'runtime_worker_macos.dart';
 import 'device_information_files.dart';
+import 'device_credential_host.dart';
 
 Future<void> _forwardOutput(
   Stream<List<int>> source,
@@ -32,6 +33,9 @@ Future<void> _forwardOutput(
 Future<void> main([List<String> args = const []]) async {
   if (args.length == 1 && args.single == '--information-file-guardian') {
     return runInformationFileGuardian();
+  }
+  if (args.length == 1 && args.single == '--credential-execution-host') {
+    return runDeviceCredentialHost();
   }
   if (args.isNotEmpty) {
     exitCode = 64;

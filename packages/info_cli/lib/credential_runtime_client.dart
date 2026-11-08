@@ -19,36 +19,9 @@ Future<Process> _startCredentialProcess(
   if (!Platform.isWindows && !Platform.isMacOS) {
     throw const CredentialUseFailure('unsupported_tool_version');
   }
-  final runtime = Platform.resolvedExecutable;
-  final interpreted =
-      workerExecutable == null &&
-      (Platform.isWindows
-          ? runtime.toLowerCase().endsWith('dart.exe')
-          : RegExp(r'/(dart|dartvm)$').hasMatch(runtime));
-  final worker =
-      workerExecutable ??
-      (interpreted
-          ? (await Isolate.resolvePackageUri(
-              Uri.parse('package:info_cli/runtime_worker.dart'),
-            ))!.toFilePath()
-          : '${File(runtime).parent.path}/info-runtime-worker${Platform.isWindows ? '.exe' : ''}');
-  if (!await File(worker).exists()) {
-    throw const CredentialUseFailure('process_start_failed');
-  }
-  final args = interpreted
-      ? ['--packages=${(await Isolate.packageConfig)!.toFilePath()}', worker]
-      : <String>[];
-  // In the local SDK, killing a VM launched through dart.exe also terminated
-  // its children. Use the VM directly for the development worker, matching the
-  // standalone worker executable used in packaged builds.
-  final path = interpreted
-      ? (Platform.isWindows
-            ? '${File(runtime).parent.path}/dartvm.exe'
-            : runtime)
-      : worker;
-  if (!await File(path).exists()) {
-    throw const CredentialUseFailure('process_start_failed');
-  }
+  final worker = await RuntimeWorkerCommand.resolve(
+    workerExecutable: workerExecutable,
+  );
   final state = File(
     '${environment[Platform.isMacOS ? 'TMPDIR' : 'TEMP']}/worker-state.json',
   );
@@ -57,8 +30,8 @@ Future<Process> _startCredentialProcess(
   );
   final jobName = plannedJobName ?? CredentialProcessJob.nameFor(nonce);
   final process = await Process.start(
-    path,
-    args,
+    worker.executable,
+    worker.arguments,
     workingDirectory: cwd,
     environment: environment,
     includeParentEnvironment: false,
@@ -428,10 +401,19 @@ extension _CredentialRuntimeClient on AgentClient {
         throw const CredentialUseFailure('invalid_reference');
       }
       if (hostedCredentialExecutions) {
-        final result = await _call('/credential-use/hosted', {
-          'sessionSecret': _session,
-          ...input,
-        });
+        if (_remote != null && deviceFileStateDirectory == null) {
+          throw const CredentialUseFailure('service_unavailable');
+        }
+        final result = _remote != null
+            ? await DeviceCredentialHost(
+                _remote.profile,
+                deviceFileStateDirectory!,
+                workerExecutable: _runtimeWorkerExecutable,
+              ).execute(_session!, input)
+            : await _call('/credential-use/hosted', {
+                'sessionSecret': _session,
+                ...input,
+              });
         if (command == 'run-use' &&
             result['status'] == 'service_unavailable' &&
             !result.containsKey(

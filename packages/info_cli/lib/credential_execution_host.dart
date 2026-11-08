@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'agent_client.dart';
+import 'package:info_remote/agent_connection.dart';
 
 /// A resident owner of CLI executions for one-command adapters. It stores only
 /// bounded process output in memory; Core still authorizes every operation.
@@ -11,11 +12,15 @@ class CredentialExecutionHost {
     this.workerExecutable,
     CredentialProcessStarter? processStarter,
     DateTime Function()? clock,
+    this.connection,
+    this.deviceFileStateDirectory,
   }) : _processStarter = processStarter,
        _clock = clock ?? DateTime.now {
     _timer = Timer.periodic(const Duration(minutes: 1), (_) => _prune());
   }
   final int port;
+  final AgentConnectionProfile? connection;
+  final Directory? deviceFileStateDirectory;
   final String? workerExecutable;
   final CredentialProcessStarter? _processStarter;
   final DateTime Function() _clock;
@@ -29,7 +34,18 @@ class CredentialExecutionHost {
     sessionSecret: session,
     credentialProcessStarter: _processStarter,
     runtimeWorkerExecutable: workerExecutable,
+    connection: connection,
+    deviceFileStateDirectory: deviceFileStateDirectory,
   );
+
+  /// Inspection does not cancel or forget an active operation.
+  bool get canStop =>
+      _reservations == 0 && _entries.values.every((e) => e.finishedAt != null);
+  bool get isIdle {
+    _prune();
+    return _reservations == 0 && _entries.isEmpty;
+  }
+
   void _remove(String id) {
     _entries.remove(id)?.client.close();
   }

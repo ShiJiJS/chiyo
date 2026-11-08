@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'private_device_state.dart';
+import 'runtime_worker_command.dart';
 
 String _digest(String value) => sha256.convert(utf8.encode(value)).toString();
 String _secret() => base64Url
@@ -310,30 +310,12 @@ final class DeviceInformationFiles {
     String session,
     Map<String, dynamic> input,
   ) async {
-    final runtime = Platform.resolvedExecutable;
-    final interpreted =
-        workerExecutable == null &&
-        RegExp(r'/(dart|dartvm)$').hasMatch(runtime);
-    final worker =
-        workerExecutable ??
-        (interpreted
-            ? (await Isolate.resolvePackageUri(
-                Uri.parse('package:info_cli/runtime_worker.dart'),
-              ))!.toFilePath()
-            : '${File(runtime).parent.path}/info-runtime-worker');
-    final args = [
-      if (interpreted) ...[
-        '--packages=${(await Isolate.packageConfig)!.toFilePath()}',
-        worker,
-      ],
-      '--information-file-guardian',
-    ];
-    if (!await File(worker).exists()) {
-      throw const InformationFileFailure('delivery_io_failed');
-    }
+    final worker = await RuntimeWorkerCommand.resolve(
+      workerExecutable: workerExecutable,
+    );
     final process = await Process.start(
-      interpreted ? runtime : worker,
-      args,
+      worker.executable,
+      [...worker.arguments, '--information-file-guardian'],
       mode: ProcessStartMode.detachedWithStdio,
       runInShell: false,
     );
