@@ -23,6 +23,8 @@ import 'owner_file_routes.dart';
 import 'owner_credential_routes.dart';
 import 'owner_host_routes.dart';
 import 'owner_history_routes.dart';
+import 'owner_backup_routes.dart';
+import 'package:info_storage/info_storage.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -33,6 +35,7 @@ final class OnlineServer {
     this._ownerToken,
     this.serverId,
     this._devices,
+    this._backups,
   ) : _agents = AgentGateway(
         AgentProtocol(
           _runtime.service.agent,
@@ -47,6 +50,7 @@ final class OnlineServer {
         owner: _runtime.service.owner,
         changed: () {},
       ) {
+    _ownerScope = _service.owner.captureLibraryScope();
     _service.owner.configureInformationTemplates(
       () => currentAgentTemplates(_service.owner),
     );
@@ -54,13 +58,15 @@ final class OnlineServer {
       if (_fileCleanup != null ||
           (_files?.needsCleanup != true &&
               _credentials?.needsCleanup != true &&
-              _hosts?.needsCleanup != true))
+              _hosts?.needsCleanup != true &&
+              _backups?.needsCleanup != true))
         return;
       _fileCleanup = _runtime
           .run(() async {
             await _files?.cleanup();
             await _credentials?.cleanup();
             await _hosts?.cleanup();
+            await _backups?.cleanup();
           })
           .catchError((Object _) {
             /* Retry next sweep; shutdown also releases staging. */
@@ -87,17 +93,29 @@ final class OnlineServer {
   final String serverId;
   final AgentDeviceRegistry _devices;
   final AgentGateway _agents;
-  final OwnerWorkspaceApprovals _approvals;
-  final OwnerWorkspaceTemplatePackages _plugins;
-  late final _library = OnlineOwnerLibrary(_service.owner, _plugins);
-  late final _proposals = OwnerWorkspaceProposals(
-    owner: _service.owner,
-    library: () => _library,
-    changed: () {},
-  );
-  late final _proposalRoutes = OwnerProposalRoutes(_proposals);
-  late final _libraryRoutes = OwnerLibraryRoutes(_library);
-  late final _historyRoutes = OwnerHistoryRoutes(_library);
+  final OwnerBackupRoutes? _backups;
+  OwnerWorkspaceApprovals _approvals;
+  OwnerWorkspaceTemplatePackages _plugins;
+  late OwnerLibraryScope _ownerScope;
+  OnlineOwnerLibrary? _libraryValue;
+  OnlineOwnerLibrary get _library =>
+      _libraryValue ??= OnlineOwnerLibrary(_service.owner, _plugins);
+  OwnerWorkspaceProposals? _proposalsValue;
+  OwnerWorkspaceProposals get _proposals =>
+      _proposalsValue ??= OwnerWorkspaceProposals(
+        owner: _service.owner,
+        library: () => _library,
+        changed: () {},
+      );
+  OwnerProposalRoutes? _proposalRoutesValue;
+  OwnerProposalRoutes get _proposalRoutes =>
+      _proposalRoutesValue ??= OwnerProposalRoutes(_proposals);
+  OwnerLibraryRoutes? _libraryRoutesValue;
+  OwnerLibraryRoutes get _libraryRoutes =>
+      _libraryRoutesValue ??= OwnerLibraryRoutes(_library);
+  OwnerHistoryRoutes? _historyRoutesValue;
+  OwnerHistoryRoutes get _historyRoutes =>
+      _historyRoutesValue ??= OwnerHistoryRoutes(_library);
   OwnerFileRoutes? _files;
   OwnerCredentialRoutes? _credentials;
   OwnerHostRoutes? _hosts;
@@ -109,6 +127,32 @@ final class OnlineServer {
   OwnerFileRoutes get _fileRoutes => _files ??= OwnerFileRoutes(_library);
   int get port => _http.port;
 
+  /// A successful original restore invalidates every Owner projection and
+  /// staged selection. Rebind in the serialized host queue before serving the
+  /// next request; keeping a stale projection would make a live server unusable
+  /// until restart. Device authentication reads the new generation directly.
+  Future<void> _refreshOwnerScope() async {
+    if (_ownerScope.isCurrent) return;
+    await _files?.dispose();
+    _credentials?.dispose();
+    _hosts?.dispose();
+    _plugins.dispose();
+    _files = null;
+    _credentials = null;
+    _hosts = null;
+    _libraryValue = null;
+    _proposalsValue = null;
+    _proposalRoutesValue = null;
+    _libraryRoutesValue = null;
+    _historyRoutesValue = null;
+    _approvals = OwnerWorkspaceApprovals(owner: _service.owner);
+    _plugins = OwnerWorkspaceTemplatePackages(
+      owner: _service.owner,
+      changed: () {},
+    );
+    _ownerScope = _service.owner.captureLibraryScope();
+  }
+
   static Future<OnlineServer> start({
     required OnlineInformationRuntime runtime,
     required AgentDeviceRegistry devices,
@@ -117,17 +161,53 @@ final class OnlineServer {
     required String serverId,
     InternetAddress? address,
     int port = 0,
+    InformationBackups? backups,
+    Directory? backupDirectory,
   }) async {
     if (!RegExp(r'^[A-Za-z0-9_-]{43,128}$').hasMatch(ownerToken) ||
         !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(serverId)) {
       throw const FormatException('Invalid server configuration');
+    }
+    if ((backups == null) != (backupDirectory == null)) {
+      throw const FormatException('Incomplete backup configuration');
+    }
+    if (backupDirectory != null) {
+      final type = await FileSystemEntity.type(
+        backupDirectory.path,
+        followLinks: false,
+      );
+      if (type != FileSystemEntityType.notFound &&
+          type != FileSystemEntityType.directory) {
+        throw const StorageFailure('backup_staging_failed');
+      }
+      await backupDirectory.create(recursive: true);
+      if ((await Process.run('/bin/chmod', [
+            '700',
+            backupDirectory.path,
+          ])).exitCode !=
+          0) {
+        throw const StorageFailure('backup_staging_failed');
+      }
     }
     final http = await HttpServer.bindSecure(
       address ?? InternetAddress.loopbackIPv4,
       port,
       tls,
     );
-    return OnlineServer._(http, runtime, ownerToken, serverId, devices);
+    return OnlineServer._(
+      http,
+      runtime,
+      ownerToken,
+      serverId,
+      devices,
+      backups == null
+          ? null
+          : OwnerBackupRoutes(
+              owner: runtime.service.owner,
+              backups: backups,
+              directory: backupDirectory!,
+            ),
+    );
   }
 
   Future<void> close() async {
@@ -136,6 +216,7 @@ final class OnlineServer {
     await _fileCleanup;
     try {
       await _files?.dispose();
+      await _backups?.dispose();
     } finally {
       _credentials?.dispose();
       _hosts?.dispose();
@@ -294,6 +375,7 @@ final class OnlineServer {
     Map<String, dynamic>? parsedBody;
     Future<void> route() async {
       try {
+        await _refreshOwnerScope();
         // No browser management surface is part of this version.
         if (request.headers.value('origin') != null) {
           await reply(401, {'error': 'unauthorized'});
@@ -337,6 +419,18 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/backups') {
+          final backups = _backups;
+          if (backups == null) {
+            throw const WorkspaceFailure('unavailable', '备份服务未配置。');
+          }
+          final (code, value) = await backups.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(2).join('/') == 'v1/owner' &&
             const {'history', 'grant-history'}.contains(path[2])) {
@@ -634,6 +728,8 @@ final class OnlineServer {
           'error': e.code,
           if (e.fieldErrors.isNotEmpty) 'fieldErrors': e.fieldErrors,
         });
+      } on StorageFailure catch (e) {
+        await reply(409, {'error': e.code});
       } on InformationTemplateInputFailure catch (e) {
         await reply(409, {
           'error': e.status,

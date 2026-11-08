@@ -241,6 +241,8 @@ class DeviceCredentialFixture {
       ownerToken: token,
       serverId: 'synthetic-device-credential-operations',
       port: port,
+      backups: repo.backups,
+      backupDirectory: Directory('${root.path}/backup-transfers'),
     );
     owner = await OwnerClient.connect(
       address: Uri.parse('https://127.0.0.1:${server.port}'),
