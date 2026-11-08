@@ -14,6 +14,10 @@ import 'package:info_workspace/approval_transport.dart';
 import 'package:info_workspace/owner_agent_templates.dart';
 import 'package:info_workspace/owner_workspace_template_packages.dart';
 import 'package:info_workspace/plugin_transport.dart';
+import 'package:info_workspace/owner_workspace_proposals.dart';
+import 'package:info_workspace/workspace_transport.dart';
+import 'owner_library.dart';
+import 'owner_proposal_routes.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -55,6 +59,13 @@ final class OnlineServer {
   final AgentGateway _agents;
   final OwnerWorkspaceApprovals _approvals;
   final OwnerWorkspaceTemplatePackages _plugins;
+  late final _library = OnlineOwnerLibrary(_service.owner, _plugins);
+  late final _proposals = OwnerWorkspaceProposals(
+    owner: _service.owner,
+    library: () => _library,
+    changed: () {},
+  );
+  late final _proposalRoutes = OwnerProposalRoutes(_proposals);
   int get port => _http.port;
 
   static Future<OnlineServer> start({
@@ -115,6 +126,15 @@ final class OnlineServer {
           utf8.encode(
             jsonEncode([
               owner.templatePackageVersion,
+              [
+                for (final p in owner.importProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+              [
+                for (final p in owner.updateProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+              owner.queryProposals(limit: 1).pendingCount,
               [
                 for (final i in owner.information) [i.id, i.version],
               ],
@@ -196,6 +216,35 @@ final class OnlineServer {
             'serverId': serverId,
             'workspaceObservation': await _observation(),
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/proposals') {
+          final (code, value) = await _proposalRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
+        } else if (path.length == 4 &&
+            path.take(3).join('/') == 'v1/owner/relations' &&
+            request.method == 'POST') {
+          if (path.last == 'query') {
+            await reply(
+              200,
+              workspaceResultsToJson(
+                await _library.queryRelationCandidates(
+                  relationQueryFromJson(parsedBody!['query']),
+                ),
+              ),
+            );
+          } else if (path.last == 'summaries') {
+            await reply(200, {
+              'items': (await _library.readSummaries(
+                (parsedBody!['records'] as List).map(recordRefFromJson),
+              )).map(recordSummaryToJson).toList(),
+            });
+          } else {
+            await reply(404, {'error': 'not_found'});
+          }
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/plugins') {
           if (path.length == 3 && request.method == 'GET') {
@@ -400,7 +449,16 @@ final class OnlineServer {
           await reply(404, {'error': 'not_found'});
         }
       } on WorkspaceFailure catch (e) {
-        await reply(e.code == 'not_found' ? 404 : 409, {'error': e.code});
+        await reply(e.code == 'not_found' ? 404 : 409, {
+          'error': e.code,
+          if (e.fieldErrors.isNotEmpty) 'fieldErrors': e.fieldErrors,
+        });
+      } on InformationTemplateInputFailure catch (e) {
+        await reply(409, {
+          'error': e.status,
+          'status': e.status,
+          'fieldErrors': e.fieldErrors,
+        });
       } on AccessFailure catch (e) {
         await reply(e.status == 'unauthorized' ? 401 : 409, {
           'error': e.status,
