@@ -327,7 +327,7 @@
       104,
       105
     ],
-    "currentIssue": 99,
+    "currentIssue": 100,
     "browserSpaceId": 18,
     "executionRecord": "execution.md",
     "completedIssues": [
@@ -338,10 +338,10 @@
       95,
       96,
       97,
-      98
+      98,
+      99
     ],
     "readyIssues": [
-      99,
       100
     ]
   }
