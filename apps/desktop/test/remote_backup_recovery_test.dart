@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/workspace/backup_controller.dart';
@@ -10,6 +11,7 @@ import 'package:info_storage/info_storage.dart';
 import '../../server/test/support/device_credential_fixture.dart';
 import '../../server/test/support/owner_reply_proxy.dart';
 import 'support/synthetic_backup_picker.dart';
+import 'support/complete_backup_library.dart';
 
 class _Http extends HttpOverrides {}
 
@@ -64,6 +66,184 @@ Future<void> _setupKey(_Client c) async {
 }
 
 void main() {
+  test(
+    'complete remote library survives App native encrypted backup and a differently keyed server restore, including large attachment versions and actual device execution history',
+    () async {
+      await HttpOverrides.runWithHttpOverrides(() async {
+        final f = await DeviceCredentialFixture.create();
+        addTearDown(f.dispose);
+        final root = await f.root.resolveSymbolicLinks();
+        final picker = SyntheticBackupPicker()
+          ..keyOutput = '$root/complete-recovery.key'
+          ..archiveOutput = '$root/complete.aimbackup';
+        final c = await _Client.open(f, picker, '$root/complete-device');
+        await prepareCompleteBackupLibrary(f, c.source);
+        final before = await completeBackupRows(f);
+        final originals = await completeBackupAttachmentBytes(f);
+        expect(originals, hasLength(2));
+        for (final rows in before.entries) {
+          expect(
+            rows.value,
+            isNotEmpty,
+            reason: 'Fixture must actually exercise ${rows.key}',
+          );
+        }
+        final originalCatalog = await c.source.loadCatalog();
+        final originalPlugins = await c.source.plugins.load();
+        final originalExecutions = f.repo.credentialExecutions
+            .map((e) => e.toArchiveJson())
+            .toList();
+        final originalRequests = f.repo.credentialUseRequests
+            .where((r) => r.decidedAt != null)
+            .map((r) => r.toJson())
+            .toList();
+        final history = await f.runtime.run(
+          () => f.runtime.service.owner.history(),
+        );
+        final originalTextRequests = f.repo.requestHistory
+            .map((r) => r.toJson())
+            .toList();
+        expect(originalExecutions, hasLength(1));
+        expect(history.accesses, isNotEmpty);
+        await _setupKey(c);
+        await c.pick(WorkspaceBackupPick.archiveOutput);
+        await c.model.write(WorkspaceBackupAction.export);
+        expect(c.model.failure, isNull);
+        final counts = c.model.result!.counts!;
+        expect(counts[WorkspaceBackupCategory.fileBytes], 14 * 1024 * 1024);
+        expect(
+          await File(picker.archiveOutput!).length(),
+          greaterThan(10 * 1024 * 1024),
+        );
+        await c.close();
+
+        final target = await DeviceCredentialFixture.create();
+        addTearDown(target.dispose);
+        final targetRoot = await target.root.resolveSymbolicLinks();
+        final inputs = SyntheticBackupPicker()
+          ..archiveInput = picker.archiveOutput
+          ..keyInput = picker.keyOutput;
+        final d = await _Client.open(
+          target,
+          inputs,
+          '$targetRoot/complete-device',
+        );
+        await d.pick(WorkspaceBackupPick.archiveInput);
+        await d.pick(WorkspaceBackupPick.keyInput);
+        await d.model.inspect();
+        expect(d.model.failure, isNull);
+        expect(d.model.preview!.counts.same(counts), isTrue);
+        await d.model.write(WorkspaceBackupAction.restore);
+        expect(d.model.failure, isNull);
+        expect(d.model.result!.counts!.same(counts), isTrue);
+        final after = await completeBackupRows(target);
+        for (final table in before.keys) {
+          expect(after[table], unorderedEquals(before[table]!), reason: table);
+        }
+        final restoredBytes = await completeBackupAttachmentBytes(target);
+        expect(restoredBytes.keys, unorderedEquals(originals.keys));
+        for (final entry in originals.entries) {
+          expect(
+            listEquals(restoredBytes[entry.key], entry.value),
+            isTrue,
+            reason: 'Exact bytes ${entry.key}',
+          );
+        }
+        final restoredCatalog = await d.source.loadCatalog();
+        expect(
+          restoredCatalog.directories.map((v) => v.id),
+          originalCatalog.directories.map((v) => v.id),
+        );
+        expect(
+          restoredCatalog.tags.map((v) => v.id),
+          originalCatalog.tags.map((v) => v.id),
+        );
+        final plugins = await d.source.plugins.load();
+        expect(
+          plugins.packages.map((p) => p.id),
+          originalPlugins.packages.map((p) => p.id),
+        );
+        expect(
+          restoredCatalog.types.map((p) => p.id),
+          originalCatalog.types.map((p) => p.id),
+        );
+        final restoredHistory = await target.runtime.run(
+          () => target.runtime.service.owner.history(),
+        );
+        expect(
+          restoredHistory.accesses.map((a) => a.toJson()),
+          history.accesses.map((a) => a.toJson()),
+        );
+        expect(
+          restoredHistory.grants.map((g) => g.id),
+          history.grants.map((g) => g.id),
+        );
+        for (final grant in restoredHistory.grants) {
+          expect(
+            Map<String, Object?>.from(grant.toJson())..remove('restoredAt'),
+            history.grants.singleWhere((g) => g.id == grant.id).toJson(),
+          );
+        }
+        expect(
+          target.repo.requestHistory.map(
+            (r) => Map<String, Object?>.from(r.toJson())..remove('restoredAt'),
+          ),
+          unorderedEquals(originalTextRequests),
+        );
+        expect(
+          restoredHistory.grants.every(
+            (g) => !g.active && g.restoredAt != null,
+          ),
+          isTrue,
+        );
+        expect(target.runtime.service.owner.requests, isEmpty);
+        expect(target.runtime.service.owner.importProposals, isEmpty);
+        expect(
+          target.repo.credentialUseRequests,
+          hasLength(originalRequests.length),
+        );
+        for (final request in target.repo.credentialUseRequests) {
+          final old = originalRequests.singleWhere(
+            (r) => r['id'] == request.id,
+          );
+          final restored = Map<String, Object?>.from(request.toJson())
+            ..remove('restoredAt')
+            ..['invalidatedCode'] = old['invalidatedCode'];
+          expect(restored, old);
+          expect(request.restoredAt, isNotNull);
+          expect(request.invalidatedCode, 'grant_revoked');
+        }
+        for (final execution in target.repo.credentialExecutions) {
+          final old = Map<String, Object?>.from(
+            originalExecutions.singleWhere(
+              (r) => r['executionId'] == execution.id,
+            ),
+          )..['cleanupState'] = 'not_needed';
+          expect(
+            Map<String, Object?>.from(execution.toArchiveJson())
+              ..remove('restoredAt'),
+            old,
+          );
+          expect(execution.restoredAt, isNotNull);
+          expect(execution.pid, isNull);
+          expect(execution.workerPid, isNull);
+          expect(execution.materialLease, isNull);
+        }
+        // A later reopen must preserve exactly the installed library as well.
+        await d.close();
+        await target.reopen();
+        final reopened = await completeBackupRows(target);
+        for (final table in after.keys) {
+          expect(
+            reopened[table],
+            unorderedEquals(after[table]!),
+            reason: 'reopen $table',
+          );
+        }
+      }, _Http());
+    },
+    timeout: const Timeout(Duration(minutes: 6)),
+  );
   test(
     'normal recovery control reselects the original saved key after lost native access, without a second publication',
     () async {
