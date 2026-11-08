@@ -17,12 +17,15 @@ class OwnerCredentialStage {
   void clear() => bytes.fillRange(0, bytes.length, 0);
 }
 
-class OwnerCredentialStaging {
+class OwnerCredentialStaging implements CredentialInputStaging {
   OwnerCredentialStaging(this.owner) : _scope = owner.captureLibraryScope();
   final core.OwnerAccess owner;
   final core.OwnerLibraryScope _scope;
   final _stages = <String, OwnerCredentialStage>{};
+  @override
+  void cancelPending() {} // Local inputs stage synchronously; no transport job.
   bool _closed = false;
+  @override
   void check() {
     if (!_scope.isCurrent) {
       dispose();
@@ -33,6 +36,7 @@ class OwnerCredentialStaging {
     }
   }
 
+  @override
   WorkspaceCredentialCandidate string(String secret) {
     final bytes = utf8.encode(secret);
     if (bytes.isEmpty || bytes.length > 65536 || secret.contains('\u0000')) {
@@ -41,6 +45,7 @@ class OwnerCredentialStaging {
     return _add(WorkspaceCredentialForm.string, bytes, null);
   }
 
+  @override
   WorkspaceCredentialCandidate file(SelectedCredentialFile file) {
     if (file.bytes.isEmpty ||
         file.bytes.length > 1048576 ||
@@ -95,6 +100,16 @@ class OwnerCredentialStaging {
     return stage;
   }
 
+  WorkspaceCredentialCandidate candidate(String id) {
+    check();
+    final stage = _stages[id];
+    if (stage == null || !stage.formOwned) {
+      throw const WorkspaceFailure('selection_expired', '凭据输入已失效，请重新输入或选择。');
+    }
+    return stage.metadata;
+  }
+
+  @override
   void release(String id) {
     final stage = _stages[id];
     if (stage == null) return;

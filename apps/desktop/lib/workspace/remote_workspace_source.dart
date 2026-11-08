@@ -15,6 +15,8 @@ import 'package:info_workspace/workspace_transport.dart';
 import 'directory_tree.dart';
 import 'remote_workspace_files.dart';
 import 'remote_workspace_legacy_templates.dart';
+import 'remote_workspace_credentials.dart';
+import 'package:info_workspace/credential_transport.dart';
 import '../information_files.dart';
 import '../backups.dart';
 import 'package:info_storage/info_storage.dart';
@@ -44,6 +46,9 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  @override
+  late final RemoteWorkspaceCredentials credentials =
+      RemoteWorkspaceCredentials(client, changed: notifyConnectionChanged);
   final String? deviceFilesDirectory;
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
@@ -208,6 +213,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     try {
       await _fileActions.dispose();
     } finally {
+      await credentials.dispose();
       await files.dispose();
       client.close();
       await _changes.close();
@@ -259,6 +265,8 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
           core.informationFromJson(raw as Map<String, dynamic>),
           tagNames: tags,
         ),
+      for (final raw in data['credentials'] as List? ?? const [])
+        recordSummaryFromJson(raw),
     ];
   }
 
@@ -305,6 +313,9 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   @override
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) => _remote(
     () async {
+      if (ref.kind == WorkspaceRecordKind.credential) {
+        return credentialWorkspaceDetail(await credentials.read(ref));
+      }
       final detail = _codec.decode(
         await _item(ref),
         tagNames: _tagNames(await _catalog()),

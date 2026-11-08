@@ -13,6 +13,8 @@ import 'information_files.dart';
 import 'backups.dart';
 import 'package:info_storage/info_storage.dart';
 import 'workspace/owner_file_open_dispatcher.dart';
+import 'workspace/owner_credential_input.dart';
+import 'credential_files.dart';
 
 class OnlineDesktopLauncher extends StatefulWidget {
   const OnlineDesktopLauncher({
@@ -22,12 +24,14 @@ class OnlineDesktopLauncher extends StatefulWidget {
     this.deviceFilesDirectory,
     this.outputPicker = const NativeBackupFilePicker(),
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
+    this.credentialFiles = const NativeCredentialFilePicker(),
   });
   final ConnectionProfileStore profiles;
   final InformationFilePicker? filePicker;
   final String? deviceFilesDirectory;
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
+  final CredentialFilePicker credentialFiles;
   @override
   State<OnlineDesktopLauncher> createState() => _OnlineDesktopLauncherState();
 }
@@ -206,9 +210,15 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                   child: WorkspaceApp(
                     source: source,
                     windowTitle: '知予',
-                    inputsBuilder: (_) => WorkspaceInputs(
+                    inputsBuilder: (context) => WorkspaceInputs(
                       plugin: source.plugins.pick,
                       file: source.files.pick,
+                      credential: (form) => showOwnerCredentialInput(
+                        context,
+                        source.credentials,
+                        form,
+                        files: widget.credentialFiles,
+                      ),
                     ),
                     onConnectionSettings: _settings,
                     onAgentConnectionSetup:

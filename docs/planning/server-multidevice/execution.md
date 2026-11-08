@@ -309,3 +309,13 @@ OwnerWorkspaceCredentials和OwnerCredentialStaging已抽到info_workspace，桌�
 下一步应在Owner专用认证路由接共享source的材料暂存/管理及元数据编解码，复用原16份/1MiB文件/64KiB字符串限制和未知回执规则，处理上传去重、关闭/过期清理；临时材料只在私有内存及原SQLCipher，不给普通Workspace DTO加正文。OnlineServer的普通管理正文上限2MiB已经足够1MiB文件Base64，无需放宽普通上限。后接RemoteWorkspaceSource.credentials与Host输入，打开正常创建能力。随后接Agent凭据提案及提案内联密码，继续原整份入库事务，不先关闭#98。
 
 内联密码当前在apps/desktop/lib/workspace/owner_proposal_password_input.dart：OwnerProposalPasswords以私有TextEditingController保留输入、显示/隐藏，store调用OwnerAccess.fillImportCredentials一次修订整批密码，然后Controller重新核对整份提案保存。ProposalPasswords是Flutter Host接口，不是Workspace DTO。联网改造应复用同一输入组件并注入保存/初始输入边界，而非复制UI；保留失败输入、版本变化和密码不进入普通提案/目录/回执的约定。
+
+## #98 用户凭据保存及正常App已接通，AI提案待续
+
+OwnerCredentialRoutes已在OnlineServer原Owner认证及运行队列中接inputs上传/原操作查询/取消、candidate释放、save/enabled、详情/材料历史和持久回执，普通Agent设备凭证不能管理。共用原OwnerWorkspaceCredentials；暂存限制16份/16MiB、输入元数据512份，单调30分钟释放、早于上传的取消和Host关闭清零。候选/详情/回执不含材料，字符串64KiB/文件1MiB，普通2MiB请求上限不变。Host周期清理现同时顾及文件和凭据暂存，文件关闭失败仍清除凭据暂存。
+
+新增CredentialInputStaging Host接口，原生/远程共用原密码/文件输入组件；异步输入关闭时取消准确操作，迟到结果释放。RemoteWorkspaceCredentials保持原上传/保存编号，未知结果先核对原回执，查询失败不重做。正常OnlineDesktopLauncher已接“添加凭据”、更换、编辑和停用，分类创建能力已开启；摘要补凭据元数据，原生/远程/服务器的凭据WorkspaceDetail共用投影。实际使用授权仍未接，AgentGateway继续拒绝尚未完成的凭据提案。
+
+Mac受认证HTTPS、共享保存、暂存清理3项通过；完整服务Mac26项、Linux ARM64 25项通过（Mac真实文件驱动1项平台跳过）。正常联网App加原凭据工作区及真TLS丢回复恢复28项通过；相关静态分析通过。UI场景从正常入口保存、替换、停用、文件保存、关闭重开并核对列表/版本/原字节；系统密码编辑和文件面板仅替代其合成边界，留#103原生验收。测试曾过早输入空名称、在假时钟里等待真实Future而停滞，均修正测试驱动而非放宽产品校验；两个定点中断进程已确认退出，合成目录已核对清理，生产临时诊断已移除。详见server-a08证据与日志。
+
+下一步#98剩余：接Agent字符串/Token/凭据文件提案（现有CLI credential_import_client已有1MiB文件读取及contextExposed规则，但Gateway未宣告credential-import.v1），保持生产动态模板；复用原整份保存和预览。内联密码应复用OwnerProposalPasswords的输入组件，将私有初始化/保存边界适配到Owner认证接口；不要把密码放进普通提案DTO、状态或Agent回执。特别处理fillImportCredentials会产生新提案修订：丢回复不能简单拿旧版本重填或猜已完成，需要按实际持久结果核对；必填缺少仍整份不入库。随后验证Agent提案→App补填/整体保存→加密重开→准确关联，才关闭#98。#99–#102未完成，#103–#105保持后置，无统一候选、正式安装或真实迁移。

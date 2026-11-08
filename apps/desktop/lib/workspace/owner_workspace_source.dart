@@ -13,6 +13,7 @@ import 'owner_workspace_classification.dart';
 import 'owner_workspace_library_recycle.dart';
 import 'owner_workspace_library_move.dart';
 import 'owner_workspace_credentials.dart';
+import 'package:info_workspace/credential_transport.dart';
 import 'owner_workspace_history.dart';
 import 'owner_workspace_grant_history.dart';
 import 'owner_workspace_information.dart';
@@ -452,19 +453,7 @@ class OwnerWorkspaceSource
       return _information.readDetail(ref);
     }
     final credential = await credentials.read(ref);
-    return WorkspaceDetail(
-      record: credential.record,
-      version: credential.recordVersion,
-      definition: const {
-        'fields': <Object?>[],
-        'sections': <Object?>[],
-        'relations': [
-          {'key': 'related', 'label': '关联资料', 'targetTemplates': <String>[]},
-        ],
-      },
-      relations: {'related': credential.linkedInformation},
-      incomingRelations: {'related': credential.referencingInformation},
-    );
+    return credentialWorkspaceDetail(credential);
   });
   @override
   Future<WorkspaceResults> queryRelationCandidates(
