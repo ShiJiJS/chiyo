@@ -123,7 +123,12 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     if (source == null || _probing) return;
     _probing = true;
     try {
-      await source.client.request('GET', '/v1/server');
+      final status = await source.client.request('GET', '/v1/server');
+      final observation = status['workspaceObservation'];
+      if (observation is! String) throw const RemoteFailure('invalid_response');
+      if (mounted && identical(source, _source)) {
+        source.observeServer(observation);
+      }
       if (mounted && identical(source, _source) && _offline) {
         source.notifyConnectionChanged();
         setState(() => _offline = false);

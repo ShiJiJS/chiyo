@@ -47,12 +47,18 @@ dart run bin/server.dart serve /absolute/private/server.json
 - `GET /v1/owner/devices`：设备名称、编号与撤销状态，不返回接入凭证。
 - `POST /v1/owner/devices`：传入 operationId、name，由用户身份登记受限 Agent 设备，回复 deviceToken。重复同一操作返回原结果，不能把用户 Token 交给 Agent。
 - `POST /v1/owner/devices/{id}/revoke`：传入 operationId，撤销该设备之后的接入和内容交付。
+- `POST /v1/owner/approvals/query`：按 keyword、filter、offset、limit 查询待办/已处理申请，可带 keepSelection。
+- `GET /v1/owner/approvals/{id}`：待核对的字段及版本等元数据和 reviewToken，不返回正文或读取凭证。
+- `POST /v1/owner/approvals/decisions`：按当前 reviewToken 提交整次批准、拒绝或撤销，使用共享 WorkspaceApprovalChange 格式；复用原审批事务和操作去重。
+- `GET /v1/owner/approvals/operations/{operationId}`：核对原决定的回执；只有明确的 operation_not_found 表示未提交，连接失败不等于没有保存。
+
+用户审批接口复用 packages/info_workspace 中从原 App 提取的纯 Dart 适配，不在 HTTP 层重写审批规则。`GET /v1/server` 额外返回不含正文的 workspaceObservation，App 用它发现新待办及状态变化；它不广播到其他电脑，也不代表后置的跨端提醒已经完成。
 
 Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，正文沿用 AgentProtocol。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
 
 普通维护重启现在通过 OnlineInformationRuntime 保存和恢复文字聊天状态：待办、原会话与结束凭证、已批准字段、原读取凭证和固定到期时间。每个业务响应在加密状态保存成功后才发送；写入失败不交付已准备的内容。恢复先核对原审批记录，已撤销、结束、到期的许可不恢复；备份恢复会更换状态代际并清除有效接入与聊天关联。不要把普通授权历史当作可用许可导入。
 
-**#93 尚未交付完成。** 正式 CLI 的远程配置、App 审批接入及独立 Agent 试用仍在开发。文字授权已做加密库和HTTPS宿主整体重建测试；文件和凭据的重启、执行与清理仍由 #97/#99 接续。不要将本段作为完整日常使用流程交给 Agent。
+**#93 尚未交付完成。** App 已接正常远程审批与待办刷新；正式 CLI 的远程配置及独立 Agent 试用仍在开发。文字授权已做加密库和HTTPS宿主整体重建测试；文件和凭据的重启、执行与清理仍由 #97/#99 接续。不要将本段作为完整日常使用流程交给 Agent。
 
 操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。目录、模板、完整文件与凭据协议由对应后续票接通，当前接口不代表这些能力已交付。
 

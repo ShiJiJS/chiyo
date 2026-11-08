@@ -76,6 +76,15 @@ void main() {
         }
       }
 
+      Future<void> waitFor(Finder target) async {
+        for (var i = 0; i < 300 && target.evaluate().isEmpty; i++) {
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await t.pump(const Duration(milliseconds: 40));
+        }
+      }
+
       Finder field(String label) => find.byWidgetPredicate(
         (w) => w is TextField && w.decoration?.labelText == label,
       );
@@ -150,6 +159,17 @@ void main() {
         );
         expect(service.owner.information.single.layout!.typeId, 'generic');
         expect(service.owner.information.single.directoryId, directoryId);
+        await waitFor(find.text('编辑信息'));
+        expect(
+          find.text('编辑信息'),
+          findsWidgets,
+          reason: find
+              .byType(Text)
+              .evaluate()
+              .map((e) => (e.widget as Text).data)
+              .whereType<String>()
+              .join(' | '),
+        );
         await t.runAsync(() => t.tap(find.text('编辑信息').first));
         await settle();
         await t.enterText(

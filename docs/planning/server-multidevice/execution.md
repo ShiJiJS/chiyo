@@ -151,3 +151,28 @@ HTTP处理现先认证并有界解析正文，再进入串行核心操作；回�
 日志：online-runtime-tests.log、linux-runtime-storage-tests.log、online-runtime-failure-tests.log、storage-runtime-regression.log、local-auth-runtime-regression.log、server-runtime-suite.log、linux-runtime-server-tests.log、remote-runtime-regression.log、online-ui-runtime-regression.log。
 
 **#93 尚未完成。** 下一步接用户审批HTTP接口与原App审批适配，再接正式CLI远程配置及无开发上下文Agent试用。当前协议未接远程文件/凭据，在线持久化也尚未宣称这些能力完成。没有正式候选包、安装或真实迁移。#103–#105不动，目标保持active。
+
+## #93 正常 App 远程审批已接通
+
+从原桌面 workspace 中抽出26个纯Dart契约和可信审批适配文件到 packages/info_workspace；旧路径保留re-export，原字段选择、复核标识、版本检查、操作摘要和持久审批规则没有在HTTP层复制。共享包不依赖Flutter，Docker验证镜像已纳入。提交 ebaee723 为该模块抽取。
+
+新增用户认证后的审批查询、详情、决定和原操作回执接口；设备身份不能访问。RemoteWorkspaceApprovals 接入原 WorkspaceApp/ApprovalsController/ApprovalsPage。回复丢失时保留原操作并冻结再次提交，只查询原回执；查询失败不会当作没保存。当前协议只交付元数据和范围，不交付正文、会话证明或读取token；凭据/执行结果尚未接通时明确拒绝，不默默丢字段。
+
+GET /v1/server 增加稳定元数据观察摘要，原App的连接检查据此刷新待办和处理结果。连接时保存首个观察摘要，避免首次轮询制造无变化刷新。集成回归发现了首轮刷新与目录选择、保存后定位的相互影响，已补初始基线；工作区load在被后台刷新替代时现在等待最新读取，避免过早显示“资料暂不可用”。网络UI验收按实际编辑控件出现等待，保留了目录归属、正文、类型、版本及独立客户端核对，不以固定等待结束冒充读完。
+
+### 当前实际检查
+
+- Mac服务包13项、Linux ARM64服务包13项通过。新增真实HTTPS用正常用户接口核对旧reviewToken冲突、仅选定字段批准、重复决定与原回执、拒绝和撤销；Agent身份无法审批，详情不含字段值或私密证明。
+- 原审批/文件审批/执行投影/OwnerSource回归36项通过，共享模块纯Dart分析和App全lib/test分析通过。
+- 新App审批与丢失回复恢复合计2项通过。正常OnlineDesktopLauncher已验证：App打开后新申请自动出现、字段减选、批准后受限读取、撤销、随后新申请刷新并拒绝、App关闭时继续提交以及重开后看到待办。另用实际HTTPS反向代理丢掉已提交的审批回复，原控制器核对原操作且不再发起第二次授权。
+- 原完整联网编辑/重连/换Token/换服务器/离线遮挡回归1项重新通过（74秒）；原保存丢失回复恢复此前独立通过，未把中途的失败算作最终通过。
+- 资料列表/选择/排序/录入/OwnerSource及刷新等待回归31项通过；新增可控并发刷新场景验证导航等待最新详情而非过早结束。
+- 远程OwnerClient2项通过。没有正式安装、个人钥匙串提示或真实资料改动。
+
+日志：server-approval-suite.log、owner-approval-http-tests.log、linux-owner-approval-tests.log、shared-workspace-regression.log、online-approval-final-tests.log、online-ui-approval-isolated.log、workspace-refresh-tests.log、library-refresh-regression.log、remote-owner-approval-regression.log、desktop-shared-analysis.log。online-ui-approval-regression.log保留了早期失败诊断，不用它充当全绿证据；以修复后的专项日志为准。
+
+### 下一步
+
+#93仍不关闭。接正式CLI远程配置与独立Agent试用；现有 packages/info_cli/lib/agent_client.dart 的 _call 仍固定回环HTTP。正常入口在bin/info.dart、bin/codex_info.dart、bin/codex_hook.dart，关联文件在lib/codex_association.dart（v2只存port与会话证明），结束索引在lib/codex_end_index.dart（仍向本机发结束请求）。必须一起处理HTTPS服务身份、受限设备配置、主/子聊天关联与根聊天结束，不能仅加一个旁路示例CLI或把用户Token交给Agent。开发配置和hook试用继续限定独立合成目录，不改全局安装/信任。
+
+当前目标active；#94–#102继续按依赖推进，#103–#105保持后置。尚无统一候选包，不进行正式安装或真实迁移。
