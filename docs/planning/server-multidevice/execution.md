@@ -423,3 +423,11 @@ DeviceCredentialHost复用CredentialExecutionHost，独立CLI通过原聊天证�
 #99本票实现和自动验收完成并已关闭，当前接#100：复用OwnerWorkspaceHistory、OwnerWorkspaceLibraryRecycle和原GrantHistory投影。当前这些App实现仍在Flutter目录，需移入纯Dart共享模块、保留薄re-export和正常UI，再接Owner受认证接口、严格DTO与RemoteWorkspaceSource，避免另造简化回收站。#100还需资料/文件版本、整批目录和凭据、审批/提案/管理历史、原操作回执及正常控件到独立客户端实际验证。已读ADR17/22，不改变长期文件版本保留或整批回收/恢复规则。#101–#102待续；#103–#105不动。没有统一候选、正式安装、真实迁移或个人钥匙串变更。
 
 本轮a027defe已推送origin/codex/server-first-stage；GitHub #99完成评论实际发布并回读，Closed和Reopen issue入口确认，未动后三票。工作树回填当前任务为#100；正常浏览器继续复用18/p1，不finish整体目标。最终各测试句柄均已终结，Docker无运行测试容器，ps无本轮worker/看护/Flutter测试进程。
+
+## #100已开始：复用原历史与整批回收
+
+OwnerWorkspaceHistory、OwnerWorkspaceLibraryRecycle、OwnerWorkspaceGrantHistory及其additional part已移入纯Dart info_workspace。App保留薄构造/重导出；OwnerWorkspaceHistory注入原Owner和现有WorkspaceClassificationInformation。授权历史共享准确文件范围解析，App注入原OwnerWorkspaceAttachmentPreview，原库作用域覆盖解析及渲染；不在服务器执行原生PDF或直接读客户端路径。没有另造回收/历史规则。
+
+原App历史/整批回收/授权/凭据/文件及控件回归30通过；新增纯Dart真实SQLCipher连续场景在Mac及Linux ARM64各1通过：正常用户审批和读取、历史事件、旧版本恢复、目录+资料+凭据批次回收、加密重开原回执去重、整体恢复、凭据停用及旧读取证明拒绝、再重开保持。相关共享/App/服务测试分析无问题。证据server-a10 README。初次语法/测试调用错误日志保留未计通过。
+
+#100仍未完成，下一步OwnerHistoryRoutes及严格DTO：资料/版本/回收批次/回执和GrantHistory查询/快照/历史文件。接RemoteWorkspaceSource当前未重写的历史/回收接口及grantHistory；recordOperationReceipt当前只有保存/文件/凭据回执，需要补原InformationLifecycle回执并保持多个存储查找失败不作缺失的旧规则。服务器统一在runtime.run内调用共享模块，用户接口不得放给Agent设备。历史文件只按共享resolveFile核对出的准确原附件读取，参考现有OwnerFileRoutes将字节交客户端原渲染器，不替换为当前文件。补正常UI、真实TLS丢回复、整套服务重开/独立客户端、失败批次及版本/关联核对后才关票。#101–#102待续，后三票不动。
