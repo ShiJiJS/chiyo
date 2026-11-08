@@ -1,3 +1,4 @@
+import 'package:info_server/agent_devices.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -31,6 +32,7 @@ Future<void> main(List<String> args) async {
     StreamSubscription<ProcessSignal>? interrupt, terminate;
     try {
       server = await OnlineServer.start(
+        devices: AgentDeviceRegistry(repository),
         service: service,
         tls: config.tls,
         ownerToken: config.ownerToken,

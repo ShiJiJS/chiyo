@@ -1,3 +1,4 @@
+import 'package:info_server/agent_devices.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
@@ -34,6 +35,7 @@ void main() {
       );
       final service = InformationService(repository: repo);
       final server = await OnlineServer.start(
+        devices: AgentDeviceRegistry(repo),
         service: service,
         tls: tls,
         ownerToken: token,

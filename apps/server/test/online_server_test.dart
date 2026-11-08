@@ -1,3 +1,4 @@
+import 'package:info_server/agent_devices.dart';
 import 'support/tls_fixture.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -33,6 +34,7 @@ void main() {
       );
       var service = InformationService(repository: repo);
       var server = await OnlineServer.start(
+        devices: AgentDeviceRegistry(repo),
         service: service,
         tls: tls,
         ownerToken: token,
@@ -131,6 +133,7 @@ void main() {
         );
         service = InformationService(repository: repo);
         server = await OnlineServer.start(
+          devices: AgentDeviceRegistry(repo),
           service: service,
           tls: tls,
           ownerToken: token,

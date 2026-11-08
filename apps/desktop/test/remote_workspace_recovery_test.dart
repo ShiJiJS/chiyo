@@ -1,3 +1,4 @@
+import 'package:info_server/agent_devices.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +40,7 @@ void main() {
         );
         final service = core.InformationService(repository: repo);
         final server = await OnlineServer.start(
+          devices: AgentDeviceRegistry(repo),
           service: service,
           tls: tls,
           ownerToken: token,

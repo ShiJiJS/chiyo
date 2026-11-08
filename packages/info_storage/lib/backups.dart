@@ -614,6 +614,7 @@ class InformationBackups {
                 'additional_approval_operations',
                 'backup_operations',
                 'backup_operation_state',
+                'server_runtime_state',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -879,6 +880,7 @@ class InformationBackups {
                     'additional_approval_operations',
                     'backup_operations',
                     'backup_operation_state',
+                    'server_runtime_state',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -893,6 +895,7 @@ class InformationBackups {
         // invalidated by a successful restore. A failed restore keeps them.
         // Ordering alone is not recipient content. Replace it even when an
         // older archive has no ordering table; never retain the previous IDs.
+        await _repository._invalidateServerState();
         await _repository._db.customStatement(
           'DELETE FROM library_order_state',
         );
