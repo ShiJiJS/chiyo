@@ -1,0 +1,8 @@
+.git
+**/.dart_tool
+**/build
+.tools
+local
+.scratch
+.worktrees
+docs/development/evidence
