@@ -4,9 +4,11 @@ import 'dart:io';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'codex_association.dart';
+import 'package:info_remote/agent_connection.dart';
 
-/// Index contains only independent end capabilities, never a read-capable
-/// association locator or secret. Public-ID callbacks can cause termination only.
+/// Index contains independent end capabilities and device connection profiles,
+/// never read-capable session proofs, grants or association locators.
+/// Public-ID callbacks can cause termination only.
 class CodexEndIndex {
   CodexEndIndex(Directory root)
     : _directory = Directory('${root.path}/end-only');
@@ -18,10 +20,19 @@ class CodexEndIndex {
     return sha256.convert(utf8.encode(chat)).toString();
   }
 
-  Future<void> register(String chat, int port, String endCapability) async {
+  Future<void> register(
+    String chat,
+    int port,
+    String endCapability, {
+    AgentConnectionProfile? connection,
+  }) async {
     _key(chat);
     _validateCapability(endCapability);
-    if (port < 1 || port > 65535) throw const FormatException();
+    if (port < 1 ||
+        port > 65535 ||
+        connection != null && connection.address.port != port) {
+      throw const FormatException();
+    }
     await _directory
         .create(); // Parent was protected when association was saved.
     await _checkDirectory();
@@ -35,7 +46,7 @@ class CodexEndIndex {
         16,
         (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
       ).join();
-      records.add(_EndRecord(generation, port, endCapability));
+      records.add(_EndRecord(generation, port, endCapability, connection));
       await _write(chat, records);
     }, create: true);
   }
@@ -55,6 +66,7 @@ class CodexEndIndex {
     }
 
     final client = HttpClient()..connectionTimeout = timeout;
+    final remoteClients = <AgentConnection>[];
     try {
       return await (() async {
         if (!await _directory.exists()) return 'no_active_session';
@@ -69,6 +81,17 @@ class CodexEndIndex {
         await Future.wait(
           snapshot.map((record) async {
             try {
+              if (record.connection != null) {
+                final remote = AgentConnection(record.connection!);
+                remoteClients.add(remote);
+                final result = await remote.call('/session/end', {
+                  'endCapability': record.capability,
+                }, timeout: remaining());
+                if (result['status'] == 'ended') {
+                  confirmed.add(record.generation);
+                }
+                return;
+              }
               final request = await client.post(
                 '127.0.0.1',
                 record.port,
@@ -111,6 +134,9 @@ class CodexEndIndex {
       return 'end_unavailable';
     } finally {
       client.close(force: true);
+      for (final remote in remoteClients) {
+        remote.close();
+      }
       watch.stop();
     }
   }
@@ -172,7 +198,8 @@ class CodexEndIndex {
     final file = File('${_directory.path}/${_key(chat)}.json');
     final type = await FileSystemEntity.type(file.path, followLinks: false);
     if (type == FileSystemEntityType.notFound) return [];
-    if (type != FileSystemEntityType.file || await file.length() > 32768) {
+    if (type != FileSystemEntityType.file ||
+        await file.length() > 8 * 1024 * 1024) {
       throw const FormatException();
     }
     final data = jsonDecode(await file.readAsString());
@@ -180,7 +207,8 @@ class CodexEndIndex {
         data.keys.any(
           (key) => !['version', 'chatId', 'records'].contains(key),
         ) ||
-        data['version'] != 1 ||
+        !const [1, 2].contains(data['version']) ||
+        data['version'] == 1 && await file.length() > 32768 ||
         data['chatId'] != chat ||
         data['records'] is! List) {
       throw const FormatException();
@@ -188,6 +216,9 @@ class CodexEndIndex {
     final records = data['records'] as List;
     if (records.length > _maxGenerations) throw const FormatException();
     final result = records.map((raw) => _EndRecord.parse(raw)).toList();
+    if (data['version'] == 1 && result.any((r) => r.connection != null)) {
+      throw const FormatException();
+    }
     if (result.map((r) => r.generation).toSet().length != result.length) {
       throw const FormatException();
     }
@@ -205,7 +236,7 @@ class CodexEndIndex {
     try {
       await temp.writeAsString(
         jsonEncode({
-          'version': 1,
+          'version': records.any((r) => r.connection != null) ? 2 : 1,
           'chatId': chat,
           'records': records.map((r) => r.toJson()).toList(),
         }),
@@ -225,18 +256,30 @@ void _validateCapability(String value) {
 }
 
 class _EndRecord {
-  const _EndRecord(this.generation, this.port, this.capability);
+  const _EndRecord(
+    this.generation,
+    this.port,
+    this.capability,
+    this.connection,
+  );
   final String generation, capability;
   final int port;
+  final AgentConnectionProfile? connection;
   Map<String, Object> toJson() => {
     'generation': generation,
     'port': port,
     'endCapability': capability,
+    if (connection != null) 'connection': connection!.toPrivateJson(),
   };
   factory _EndRecord.parse(dynamic data) {
     if (data is! Map ||
         data.keys.any(
-          (k) => !['generation', 'port', 'endCapability'].contains(k),
+          (k) => ![
+            'generation',
+            'port',
+            'endCapability',
+            'connection',
+          ].contains(k),
         ) ||
         data['generation'] is! String ||
         !RegExp(r'^[0-9a-f]{32}$').hasMatch(data['generation'] as String) ||
@@ -247,10 +290,19 @@ class _EndRecord {
       throw const FormatException();
     }
     _validateCapability(data['endCapability'] as String);
+    final connection = data.containsKey('connection')
+        ? AgentConnectionProfile.fromPrivateJson(
+            Map<String, dynamic>.from(data['connection'] as Map),
+          )
+        : null;
+    if (connection != null && connection.address.port != data['port']) {
+      throw const FormatException();
+    }
     return _EndRecord(
       data['generation'] as String,
       data['port'] as int,
       data['endCapability'] as String,
+      connection,
     );
   }
 }

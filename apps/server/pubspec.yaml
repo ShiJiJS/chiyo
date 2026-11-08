@@ -13,6 +13,10 @@ dependencies:
   info_storage:
     path: ../../packages/info_storage
 dev_dependencies:
+  info_cli:
+    path: ../../packages/info_cli
+  info_remote:
+    path: ../../packages/info_remote
   test: ^1.26.3
   lints: ^6.0.0
 hooks:

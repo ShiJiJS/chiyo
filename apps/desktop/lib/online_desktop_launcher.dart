@@ -6,6 +6,8 @@ import 'package:info_remote/owner_client.dart';
 import 'workspace/remote_workspace_source.dart';
 import 'workspace/workspace_app.dart';
 import 'workspace/zhiyu_theme.dart';
+import 'desktop_controls.dart';
+import 'online_agent_connection_dialog.dart';
 
 class OnlineDesktopLauncher extends StatefulWidget {
   const OnlineDesktopLauncher({super.key, required this.profiles});
@@ -179,6 +181,22 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                     source: source,
                     windowTitle: '知予',
                     onConnectionSettings: _settings,
+                    onAgentConnectionSetup:
+                        widget.profiles is PrivateConnectionProfileStore
+                        ? (context) async {
+                            await showDesktopDialog<void>(
+                              context,
+                              barrierDismissible: false,
+                              builder: (_) => OnlineAgentConnectionDialog(
+                                client: source.client,
+                                certificate: _previous!.certificate,
+                                directory: Directory(
+                                  '${(widget.profiles as PrivateConnectionProfileStore).directory}/agent',
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                   ),
                 ),
               ),

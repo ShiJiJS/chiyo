@@ -532,6 +532,9 @@ extension _CredentialRuntimeClient on AgentClient {
   Future<CredentialOperationClaim> _claimCredentialOperation(
     CredentialOperationInput input,
   ) async {
+    if (_remote != null) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
     var mayBeClaimed = false, explicitFailure = false;
     try {
       final request = await _http.post(
@@ -609,6 +612,9 @@ extension _CredentialRuntimeClient on AgentClient {
   Future<CredentialExecutionMaterial> _consumeCredentialMaterial(
     String id,
   ) async {
+    if (_remote != null) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
     var mayBeConsumed = false;
     try {
       final request = await _http.post(
