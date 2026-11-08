@@ -239,7 +239,8 @@ extension OwnerPersistentDesktopPreferences on OwnerAccess {
   }) => _serialize(() async {
     if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$').hasMatch(operationId) ||
         !RegExp(r'^[0-9a-f]{64}$').hasMatch(commandDigest) ||
-        ![5, 15, 30, 60, 120].contains(desired.requestMinutes) ||
+        desired.requestMinutes < 1 ||
+        desired.requestMinutes > 10080 ||
         ![30, 90, 180, 365].contains(desired.retentionDays) ||
         desired.version != expectedVersion + 1) {
       throw const AccessFailure('invalid_preferences');
@@ -265,6 +266,13 @@ extension OwnerPersistentDesktopPreferences on OwnerAccess {
         if (!serviceAvailable) throw const AccessFailure('service_unavailable');
         if (desktopPreferences.version != expectedVersion) {
           throw const AccessFailure('conflict');
+        }
+        // Imported/older libraries can contain another valid duration. Keep
+        // it when changing unrelated settings; only new duration choices use
+        // the existing presets. Exact old receipts still replay unchanged.
+        if (![5, 15, 30, 60, 120].contains(desired.requestMinutes) &&
+            desired.requestMinutes != desktopPreferences.requestMinutes) {
+          throw const AccessFailure('invalid_preferences');
         }
         if (shrinking &&
             (retention == null ||

@@ -19,10 +19,12 @@ class DeviceCredentialFixture {
     this.trust,
     this.token,
     this.certificate,
+    this.clock,
   );
   final Directory root;
   final SecurityContext tls, trust;
   final String token, certificate;
+  final DateTime Function()? clock;
   late EncryptedInformationRepository repo;
   late OnlineInformationRuntime runtime;
   late OnlineServer server;
@@ -61,6 +63,7 @@ class DeviceCredentialFixture {
 
   static Future<DeviceCredentialFixture> create({
     bool loseFirstClaim = false,
+    DateTime Function()? clock,
   }) async {
     final root = await Directory.systemTemp.createTemp(
       'device-credential-operation-',
@@ -81,6 +84,7 @@ class DeviceCredentialFixture {
       trust,
       token,
       await File(files.ca).readAsString(),
+      clock,
     );
     await f.open();
     if (loseFirstClaim) await f._proxy();
@@ -232,8 +236,12 @@ class DeviceCredentialFixture {
     repo = await EncryptedInformationRepository.openOnline(
       '${root.path}/data',
       MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
+      clock: clock,
     );
-    runtime = await OnlineInformationRuntime.open(repository: repo);
+    runtime = await OnlineInformationRuntime.open(
+      repository: repo,
+      clock: clock,
+    );
     server = await OnlineServer.start(
       runtime: runtime,
       devices: AgentDeviceRegistry(repo),
@@ -243,6 +251,7 @@ class DeviceCredentialFixture {
       port: port,
       backups: repo.backups,
       backupDirectory: Directory('${root.path}/backup-transfers'),
+      policyState: repo,
     );
     owner = await OwnerClient.connect(
       address: Uri.parse('https://127.0.0.1:${server.port}'),

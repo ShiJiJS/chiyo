@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/server_state.dart';
 import 'package:info_core/information_transport.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:crypto/crypto.dart';
@@ -25,6 +26,7 @@ import 'owner_host_routes.dart';
 import 'owner_history_routes.dart';
 import 'owner_backup_routes.dart';
 import 'owner_adoption_routes.dart';
+import 'owner_policy_routes.dart';
 import 'package:info_storage/info_storage.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
@@ -37,6 +39,7 @@ final class OnlineServer {
     this.serverId,
     this._devices,
     this._backups,
+    this._policyState,
   ) : _agents = AgentGateway(
         AgentProtocol(
           _runtime.service.agent,
@@ -95,6 +98,17 @@ final class OnlineServer {
   final AgentDeviceRegistry _devices;
   final AgentGateway _agents;
   final OwnerBackupRoutes? _backups;
+  final ServerStateRepository? _policyState;
+  OwnerPolicyRoutes? _policyRoutesValue;
+  OwnerPolicyRoutes get _policyRoutes {
+    if (_policyState == null)
+      throw const WorkspaceFailure('unavailable', '服务设置未配置。');
+    return _policyRoutesValue ??= OwnerPolicyRoutes(
+      _service.owner,
+      _policyState,
+    );
+  }
+
   OwnerWorkspaceApprovals _approvals;
   OwnerWorkspaceTemplatePackages _plugins;
   late OwnerLibraryScope _ownerScope;
@@ -143,6 +157,8 @@ final class OnlineServer {
     _plugins.dispose();
     _adoptionRoutesValue?.dispose();
     _adoptionRoutesValue = null;
+    _policyRoutesValue?.dispose();
+    _policyRoutesValue = null;
     _files = null;
     _credentials = null;
     _hosts = null;
@@ -169,6 +185,7 @@ final class OnlineServer {
     int port = 0,
     InformationBackups? backups,
     Directory? backupDirectory,
+    ServerStateRepository? policyState,
   }) async {
     if (!RegExp(r'^[A-Za-z0-9_-]{43,128}$').hasMatch(ownerToken) ||
         !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(serverId)) {
@@ -213,6 +230,7 @@ final class OnlineServer {
               backups: backups,
               directory: backupDirectory!,
             ),
+      policyState,
     );
   }
 
@@ -228,6 +246,7 @@ final class OnlineServer {
       _hosts?.dispose();
       _plugins.dispose();
       _adoptionRoutesValue?.dispose();
+      _policyRoutesValue?.dispose();
     }
   }
 
@@ -274,6 +293,7 @@ final class OnlineServer {
           utf8.encode(
             jsonEncode([
               owner.templatePackageVersion,
+              owner.desktopPreferences.version,
               [
                 for (final e in owner.recycleEntries) [e.id, e.version],
               ],
@@ -426,6 +446,14 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/settings') {
+          final (code, value) = await _policyRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/adoption') {
           final (code, value) = await _adoptionRoutes.dispatch(
