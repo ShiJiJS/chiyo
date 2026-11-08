@@ -393,7 +393,48 @@ void main() {
           record['workerPid'],
         );
         expect(f.repo.credentialExecutions, hasLength(2));
+        int? offlinePort;
+        final journals = Directory('${folder.path}/credential-executions');
+        if (file) {
+          offlinePort = f.server.port;
+          await f.close();
+        }
         await release.writeAsString('release');
+        if (offlinePort != null) {
+          // Finishing an admitted process must physically remove material even
+          // while the information service is down. Preserve the exact terminal
+          // report and cleanup proof until the original server returns.
+          await _until(() async {
+            final pending = await journals
+                .list()
+                .where((e) => e.path.endsWith('.json'))
+                .toList();
+            if (pending.length != 2) return false;
+            for (final entry in pending) {
+              final saved =
+                  jsonDecode(await File(entry.path).readAsString()) as Map;
+              if (saved['cleaned'] != true) return false;
+              final lease = saved['lease'] as Map?;
+              if (lease != null &&
+                  await Directory(lease['path'] as String).exists())
+                return false;
+              expect((saved['report'] as Map)['executionState'], 'exited');
+            }
+            return true;
+          });
+          await f.open(offlinePort);
+          // A normal adapter query also maintains these exact private receipts.
+          final recovered = await _codex(association, chat, {
+            'command': 'execution-status',
+            'executionId': id,
+          }, children);
+          expect(
+            recovered['executionState'],
+            'exited',
+            reason: jsonEncode(recovered),
+          );
+          expect(recovered['cleanupState'], 'complete');
+        }
         await _until(
           () async => f.repo.credentialExecutions.every(
             (e) =>
@@ -425,7 +466,6 @@ void main() {
         expect(repeated['duplicate'], true);
         expect(await counter.readAsLines(), ['started', 'started']);
         expect(f.runtime.service.owner.credentialUseRequests, hasLength(1));
-        final journals = Directory('${folder.path}/credential-executions');
         expect(
           await journals.list().where((e) => e.path.endsWith('.json')).toList(),
           isEmpty,
