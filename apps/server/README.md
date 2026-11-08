@@ -1,6 +1,6 @@
 # 独立服务宿主
 
-首轮使用同一用户的一台电脑连接服务。当前已接文字资料管理、同机 AI 申请审批、动态插件模板和文字录入提案；其余资料类型依后续票接续。当前 Dockerfile 是自动验收镜像，不是 #102 的最终发布镜像。
+首轮使用同一用户的一台电脑连接服务。当前已接资料管理、同机 AI 申请审批、动态插件模板、文字与普通文件提案，以及用户文件预览/另存/打开。Agent文件授权和传输已接，CLI本机副本执行仍在#97开发；凭据由后续票接续。当前 Dockerfile 是自动验收镜像，不是 #102 的最终发布镜像。
 
 ## 启动
 
@@ -67,15 +67,34 @@ dart run bin/server.dart serve /absolute/private/server.json
 
 用户审批接口复用 packages/info_workspace 中从原 App 提取的纯 Dart 适配，不在 HTTP 层重写审批规则。`GET /v1/server` 额外返回不含正文的 workspaceObservation，App 用它发现新待办及状态变化；它不广播到其他电脑，也不代表后置的跨端提醒已经完成。
 
-Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、plugins/catalog、templates/catalog、templates/read、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，以及 import/submit、import/revise、import/status、update/submit、update/revise、update/status、organization/request、organization/status、organization/tasks、organization/metadata、organization/submit，正文沿用 AgentProtocol。新增、修改和状态查询仍核对原设备及聊天身份；Agent 没有确认或修改正式资料的管理入口。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
+Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、plugins/catalog、templates/catalog、templates/read、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，以及 import/submit、import/revise、import/status、update/submit、update/revise、update/status、organization/request、organization/status、organization/tasks、organization/metadata、organization/submit，以及 import-file/submit、import-file/status 和下方普通文件交付接口，正文沿用 AgentProtocol。新增、修改和状态查询仍核对原设备及聊天身份；Agent 没有确认或修改正式资料的管理入口。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
 
 整理申请仍须在正常 App 批准，Agent 只得到获批资料的分类元数据，不得到正文。提交只能调整原批准范围的目录和标签，结果在原提案界面只读展示；查询完整目录本身不能写入。普通重启保留原获批范围与固定到期时间，已观察的到期结果也持久保存，系统时间回拨或重启不能重新启用；结束聊天同样不能恢复整理能力。
 
 普通维护重启现在通过 OnlineInformationRuntime 保存和恢复文字聊天状态：待办、原会话与结束凭证、已批准字段、原读取凭证和固定到期时间。每个业务响应在加密状态保存成功后才发送；写入失败不交付已准备的内容。恢复先核对原审批记录，已撤销、结束、到期的许可不恢复；备份恢复会更换状态代际并清除有效接入与聊天关联。不要把普通授权历史当作可用许可导入。
 
-**#93 文字流程已完成。** App 已接正常远程审批与待办刷新、受限设备配置生成；正式 CLI 和 Codex 关联已接 HTTPS，并通过无开发上下文 Agent 试用。接入步骤见 [正式远程说明](../../integrations/codex/REMOTE-INTEGRATION.md)。文字授权已做加密库和 HTTPS 宿主整体重建测试；文件和凭据的重启、执行与清理仍由 #97/#99 接续。本分支尚非 #102 的最终统一候选。
+**#93 文字流程已完成。** App 已接正常远程审批与待办刷新、受限设备配置生成；正式 CLI 和 Codex 关联已接 HTTPS，并通过无开发上下文 Agent 试用。接入步骤见 [正式远程说明](../../integrations/codex/REMOTE-INTEGRATION.md)。文字授权已做加密库和 HTTPS 宿主整体重建测试；普通文件的服务端授权及重启已由#97接通，本机领取/清理与凭据仍由#97/#99接续。本分支尚非 #102 的最终统一候选。
 
-操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。提案中的文件或凭据材料在对应功能接通前整体拒绝，不丢掉材料后仅保存文字。目录、标签、移动、排序和整理任务已接通；完整文件与凭据协议由对应后续票接通，当前接口不代表这些能力已交付。
+操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。普通文件提案已经接通；含尚未接通的凭据材料仍整体拒绝，不丢掉材料后仅保存文字。目录、标签、移动、排序和整理任务已接通；文件CLI本机执行与凭据仍在开发，当前接口不代表这些完整能力已交付。
+
+## 普通文件的当前阶段
+
+用户侧`/v1/owner/files`已经连接上传、导入、替换/恢复、历史、原文读取及旧模板多附件表单；文件最大10MiB，原文回复含长度、SHA256与Base64字节，不含服务器路径。App本机另存/打开使用原发布和清理驱动，操作记录留在本机独立私有日志。上传暂存和正式资料、访问许可分别处理。
+
+Agent的文件传输使用`POST /v1/agent/information-file/<action>`，同时核对受限设备与原会话。正文须含`protocolVersion:2`、对应`command:file-<action>`和`sessionSecret`，只允许规定字段：
+
+| action | 额外输入 | 结果 |
+|---|---|---|
+| fetch | requestId、itemId、fieldId、operationId | 固定原操作和附件版本，先返回preparing元数据；重试不会改成新版本。 |
+| status | deliveryId或operationId | 查询原结果，不新建交付。 |
+| download | deliveryId | 原许可仍有效时返回该记录的不可变原文字节。 |
+| complete | deliveryId、byteLength、sha256 | 设备核对副本后确认，成功才记ready。 |
+| release | deliveryId | 停止使用，先记cleanup_pending。 |
+| cleanup | deliveryId | 设备实际清理后确认，才结束该交付；原已结束会话可确认自己的清理，但不能领取原文。 |
+
+`information-attachments.v1`和`information-device-delivery.v1`表示这些服务端接口已接通。**当前CLI本机执行桥接仍未完成**，不能把服务端ready元数据当成本机文件，也不能将download回复直接打印给Agent。完整CLI需要用真实本机文件驱动登记、写入、验证、重新核对许可，再返回其本机受管路径，并实现到期/结束/撤销及崩溃后的清理。#97仍打开，#102统一匹配候选还未交付。
+
+服务器本身没有文件副本lease。普通重启保留仍有效的原会话、操作和期限，结束/撤销/观察到期不恢复；未确认物理清理的设备副本继续记待清理。服务器私有设备交付记录启用库格式54，旧程序应拒绝；便携历史仍不包含运行证明、设备路径或活动许可。文件协议错误使用现有协议2结果包返回，HTTP 200不表示其status为ok；认证层失败仍返回401等HTTP错误。
 
 ## 自动检查
 

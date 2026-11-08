@@ -270,3 +270,18 @@ Mac设备日志2项、原动作加远程流程21项、加强服务器变更/面�
 下一步仍为#97的Agent获批文件领取和本机持久受管副本：复用原_fileRequest、字段版本、不可扩大的授权与原NativeInformationDeliveryFiles，不用服务器假路径或dummy lease。OnlineInformationRuntime目前仅恢复文字/原会话授权；原本机InformationFileDelivery模型把ready和本机lease绑定，需要显式区分远程准备、原文交付和本机完成结果，保留原操作编号及状态核对，不让网络重试或普通重启重复生成副本或复活已结束/撤销授权。CLI需跨进程保存私有本机交付/清理记录；不能仅修改servercapabilities声称已支持。
 
 #97仍未完成，#98–#102继续保留；没有统一候选包、日常安装或真实迁移。#103–#105不动。浏览器仍先复用11/p1。
+
+
+## #97 服务端设备交付和重启授权已接通，CLI本机桥接待完成
+
+InformationFileDelivery增加可选deviceDelivery=true，仅服务端记录使用，lease始终为空；本机模式仍要求真实lease。服务器先保存preparing及固定附件版本，专用download复用原授权检查和与本机共享的原文验证；设备complete核对长度/摘要后ready。release/撤销/结束/到期进入cleanup_pending，设备cleanup确认后才终止。cleanup允许原已结束会话确认自身清理，但不授予原文读取能力；AgentGateway仍按原设备绑定会话证明核对，另一设备或聊天不能确认/读取。普通回复无服务器路径或原文，专用下载可返回10MiB原始字节。
+
+普通重启保留原操作、准备/成功状态、批准字段和原期限；OnlineRuntime关闭前排完现有文件核对队列，不在关闭时把远程副本标成已清理。设备记录写入时把真实服务库标记升到54，旧读者拒绝；已有server_runtime_state存在才能写设备记录。原便携历史白名单不带设备标记或证明，恢复后runtime=false。没有新增服务器本机文件驱动或dummy lease。
+
+Mac在线存储10项、原交付/审批29项、真实HTTPS设备场景1项、完整服务22项通过；Linux ARM64完整服务+在线存储32项通过，相关分析通过。HTTP场景真实走用户审批接口，明确协议2及文件版本选择。一次新增当前字段版本检查破坏了原“旧操作保留旧字节，新操作读取获批字段当前版本”规则，已修正并新增远程替换/重开测试，未放宽原测试。证据见[#97阶段记录](../../development/evidence/server-a07/README.md)。
+
+下一步具体入口：packages/info_cli/lib/information_file_client.dart目前直接返回服务回复，缺实际本机文件桥接；info.dart --connection和codex_info.dart需提供隔离持久本机状态目录。不能因服务端metadata说ready就输出路径。需真实NativeInformationDeliveryFiles、按服务器/设备/原会话及操作记录的私有副本登记、跨CLI进程核对、只有校验完成且原许可仍有效时返回本机路径。JSON-lines进程退出及一次命令的Codex封装退出不应立即删除仍在聊天中使用的副本；CLI之外的到期/撤销/根结束清理需要本机执行程序看护，App不必开着。可研究复用runtime_worker和原本机材料看护，不靠只在下一次命令才清理来声称自动回收完成。
+
+CodexEndIndex的现有安全约定必须保持：end-only索引不能保存可读会话证明、grant或association定位；不能按公开聊天ID恢复读取能力。现有cleanup接口需要原sessionSecret，活着的执行程序可在内存中持有它核对和清理；若根结束/崩溃恢复需要独立清理确认，应使用仅能结束/清理的证明或经原endCapability的专用清理路径，不把sessionSecret偷偷写进end-only索引。关联文件只通过原准确私有引用读取。#102还需SDK-free候选和无上下文Agent真实试用。
+
+当前#91–#96已关闭；#97仍打开；#98–#102未完成，#103–#105不动。最新统一候选尚不存在，未动真实资料、个人钥匙串、日常App或Windows CI。浏览器先复用11/p1。

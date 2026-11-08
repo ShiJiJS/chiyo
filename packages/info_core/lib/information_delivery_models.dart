@@ -137,6 +137,49 @@ final class InformationFileDeliveryInput {
   }
 }
 
+/// Internal device executor messages, separate from the user-facing CLI input.
+final class InformationFileDeviceInput {
+  InformationFileDeviceInput._(
+    this.command,
+    this.deliveryId,
+    this.byteLength,
+    this.sha256,
+  );
+  final String command, deliveryId;
+  final int? byteLength;
+  final String? sha256;
+  factory InformationFileDeviceInput.fromJson(Map<String, dynamic> j) {
+    final complete = j['command'] == 'file-complete';
+    _deliveryShape(j, {
+      'protocolVersion',
+      'command',
+      'deliveryId',
+      if (complete) ...['byteLength', 'sha256'],
+    });
+    if (j['protocolVersion'] != 2 ||
+        j['protocolVersion'] is! int ||
+        !{
+          'file-download',
+          'file-complete',
+          'file-cleanup',
+        }.contains(j['command']) ||
+        complete &&
+            (j['byteLength'] is! int ||
+                (j['byteLength'] as int) < 0 ||
+                (j['byteLength'] as int) > informationFileByteLimit ||
+                j['sha256'] is! String ||
+                !RegExp(r'^[0-9a-f]{64}$').hasMatch(j['sha256'] as String))) {
+      throw const InformationFileFailure('invalid_request');
+    }
+    return InformationFileDeviceInput._(
+      j['command'] as String,
+      _deliveryId(j['deliveryId']),
+      complete ? j['byteLength'] as int : null,
+      complete ? j['sha256'] as String : null,
+    );
+  }
+}
+
 /// Durable operation and cleanup facts. Private registry/session association
 /// never appear in status/history projections or portable archives.
 final class InformationFileDelivery {
@@ -196,9 +239,16 @@ final class InformationFileDelivery {
           Map<String, dynamic>.from(_json['lease'] as Map),
         );
   bool get runtime => _json['runtime'] as bool;
+
+  /// The server tracks delivery to a device; it owns no local file lease.
+  bool get deviceDelivery => _json['deviceDelivery'] == true;
   DateTime? get restoredAt =>
       _json['restoredAt'] == null ? null : _deliveryDate(_json['restoredAt']);
-  bool get holdsCopy => runtime && (lease != null || state == 'preparing');
+  bool get holdsCopy =>
+      runtime &&
+      (deviceDelivery
+          ? !terminals.contains(state)
+          : lease != null || state == 'preparing');
   factory InformationFileDelivery.preparing({
     required String id,
     required String sessionBinding,
@@ -210,6 +260,7 @@ final class InformationFileDelivery {
     required InformationAttachmentVersion version,
     required DateTime createdAt,
     required DateTime expiresAt,
+    bool deviceDelivery = false,
   }) => InformationFileDelivery.fromPrivateJson({
     'id': id,
     'sessionBinding': sessionBinding,
@@ -233,6 +284,7 @@ final class InformationFileDelivery {
     'runtime': true,
     'restoredAt': null,
     'finishedAt': null,
+    if (deviceDelivery) 'deviceDelivery': true,
   });
   factory InformationFileDelivery.fromPrivateJson(Map<String, dynamic> j) {
     _deliveryShape(j, {
@@ -258,11 +310,17 @@ final class InformationFileDelivery {
       'runtime',
       'restoredAt',
       'finishedAt',
+      if (j.containsKey('deviceDelivery')) 'deviceDelivery',
     });
     for (final k in ['id', 'operationId', 'requestId', 'grantId']) {
       _deliveryId(j[k]);
     }
-    if (j['runtime'] is! bool ||
+    final device = j.containsKey('deviceDelivery');
+    if (device &&
+            (j['deviceDelivery'] != true ||
+                j['runtime'] != true ||
+                j['lease'] != null) ||
+        j['runtime'] is! bool ||
         !states.contains(j['state']) ||
         j['field'] is! Map<String, dynamic> ||
         j['attachment'] is! Map<String, dynamic> ||
@@ -340,10 +398,11 @@ final class InformationFileDelivery {
     if (j['runtime'] == true) {
       _deliveryId(j['sessionBinding']);
       if (j['restoredAt'] != null ||
-          j['state'] == 'ready' && (lease == null || j['finishedAt'] != null) ||
+          j['state'] == 'ready' &&
+              (!device && lease == null || j['finishedAt'] != null) ||
           j['state'] == 'preparing' && j['finishedAt'] != null ||
           j['state'] == 'cleanup_pending' &&
-              (lease == null ||
+              (!device && lease == null ||
                   j['targetState'] == null ||
                   j['finishedAt'] == null) ||
           terminals.contains(j['state']) &&
@@ -382,12 +441,28 @@ final class InformationFileDelivery {
     'expiresAt': expiresAt.toIso8601String(),
     'errorCode': ?cleanupError ?? reason,
   };
-  Map<String, Object?> readyJson() => {
+  Map<String, Object?> readyJson() => deviceDelivery
+      ? deviceManifestJson()
+      : {
+          ...statusJson(),
+          'fileName': fileName,
+          'mediaType': mediaType,
+          'byteLength': byteLength,
+          'path': lease!.filePath,
+        };
+
+  /// Dedicated device transport metadata. No host path or native capability is
+  /// fabricated; ready is recorded only after the device confirms its copy.
+  Map<String, Object?> deviceManifestJson() => {
     ...statusJson(),
+    'deviceDelivery': true,
+    'operationId': operationId,
+    'requestId': requestId,
+    'attachmentId': attachment.attachmentId,
     'fileName': fileName,
     'mediaType': mediaType,
     'byteLength': byteLength,
-    'path': lease!.filePath,
+    'sha256': sha256,
   };
   Map<String, Object?> historyJson() => {
     ...statusJson(),

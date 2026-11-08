@@ -30,7 +30,14 @@ final class OnlineServer {
     this._ownerToken,
     this.serverId,
     this._devices,
-  ) : _agents = AgentGateway(AgentProtocol(_runtime.service.agent), _devices),
+  ) : _agents = AgentGateway(
+        AgentProtocol(
+          _runtime.service.agent,
+          enableReusableCredentialUse: true,
+          enableInformationFiles: true,
+        ),
+        _devices,
+      ),
       _approvals = OwnerWorkspaceApprovals(owner: _runtime.service.owner),
       _plugins = OwnerWorkspaceTemplatePackages(
         owner: _runtime.service.owner,
@@ -509,6 +516,8 @@ final class OnlineServer {
         } else {
           await reply(404, {'error': 'not_found'});
         }
+      } on InformationFileFailure catch (e) {
+        await reply(200, e.toJson());
       } on WorkspaceFailure catch (e) {
         await reply(e.code == 'not_found' ? 404 : 409, {
           'error': e.code,

@@ -68,6 +68,7 @@ part 'information_purge.dart';
 part 'information_attachment_access.dart';
 part 'information_delivery_models.dart';
 part 'information_delivery_access.dart';
+part 'information_device_delivery_access.dart';
 part 'credential_access.dart';
 part 'credential_record_operations.dart';
 part 'credential_field_migration.dart';
@@ -202,7 +203,8 @@ class InformationService {
     this.focusedFillDriver,
     this.informationDeliveryFiles,
     FocusedFillApplicationInspector? focusedFillApplicationInspector,
-  }) : _repository = repository,
+  }) : _deviceFileDelivery = false,
+       _repository = repository,
        focusedFillApplicationInspector =
            focusedFillApplicationInspector ?? inspectFocusedFillApplication,
        credentialExecutableInspector =
@@ -211,7 +213,8 @@ class InformationService {
     _recoverAudit();
   }
   InformationService.fictional({DateTime Function()? clock})
-    : focusedFillDriver = null,
+    : _deviceFileDelivery = false,
+      focusedFillDriver = null,
       informationDeliveryFiles = null,
       focusedFillApplicationInspector = inspectFocusedFillApplication,
       credentialExecutableInspector = inspectCredentialExecutable,
@@ -245,13 +248,15 @@ class InformationService {
   InformationService._online({
     required InformationRepository repository,
     DateTime Function()? clock,
-  }) : _repository = repository,
+  }) : _deviceFileDelivery = true,
+       _repository = repository,
        _clock = clock ?? DateTime.now,
        focusedFillDriver = null,
        informationDeliveryFiles = null,
        focusedFillApplicationInspector = inspectFocusedFillApplication,
        credentialExecutableInspector = inspectCredentialExecutable;
   final InformationRepository _repository;
+  final bool _deviceFileDelivery;
   final CredentialExecutableInspector credentialExecutableInspector;
   final FocusedFillDriver? focusedFillDriver;
   final FocusedFillApplicationInspector focusedFillApplicationInspector;

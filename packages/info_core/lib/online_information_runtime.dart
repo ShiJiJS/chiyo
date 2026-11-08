@@ -366,6 +366,7 @@ final class OnlineInformationRuntime {
     _closing = true;
     return _closeFuture = _queue.then((_) async {
       try {
+        await service.agent.drainInformationFileDeliveries();
         if (!_failed) await _save();
       } finally {
         await service._close(preserveOnlineAuthorizations: true);

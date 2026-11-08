@@ -109,7 +109,7 @@ void main() {
       );
       expect(
         capabilities['capabilities'],
-        isNot(contains('information-attachments.v1')),
+        contains('information-attachments.v1'),
       );
       final first = File('${root.path}/version-one.txt');
       await first.writeAsString('FIRST_SYNTHETIC_FILE');

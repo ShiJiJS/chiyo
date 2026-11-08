@@ -39,6 +39,12 @@ final class AgentGateway {
     '/organization/submit',
     '/import-file/submit',
     '/import-file/status',
+    '/information-file/fetch',
+    '/information-file/status',
+    '/information-file/release',
+    '/information-file/download',
+    '/information-file/complete',
+    '/information-file/cleanup',
   };
 
   Future<Map<String, Object?>> dispatch(
@@ -119,6 +125,12 @@ final class AgentGateway {
           'agent-device-binding.v1',
           'information-import-operations.v1',
           'information-update-operations.v1',
+          if ((result['capabilities'] as List).contains(
+            'information-attachments.v1',
+          )) ...[
+            'information-attachments.v1',
+            'information-device-delivery.v1',
+          ],
           if ((result['capabilities'] as List).contains(
             'information-file-upload.v1',
           )) ...[
