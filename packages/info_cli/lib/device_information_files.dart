@@ -7,65 +7,12 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'private_device_state.dart';
 
 String _digest(String value) => sha256.convert(utf8.encode(value)).toString();
 String _secret() => base64Url
     .encode(List.generate(32, (_) => Random.secure().nextInt(256)))
     .replaceAll('=', '');
-
-Future<Directory> _privateDirectory(Directory folder) async {
-  if (!Platform.isMacOS) {
-    throw const InformationFileFailure('unsupported_capability');
-  }
-  final type = await FileSystemEntity.type(folder.path, followLinks: false);
-  if (type != FileSystemEntityType.notFound &&
-      type != FileSystemEntityType.directory) {
-    throw const InformationFileFailure('delivery_io_failed');
-  }
-  await folder.create(recursive: true);
-  if ((await Process.run('/bin/chmod', ['700', folder.path])).exitCode != 0) {
-    throw const InformationFileFailure('delivery_io_failed');
-  }
-  // macOS system temporary roots use /var -> /private/var. Resolve that
-  // ancestor alias once; the supplied journal directory itself cannot be a link.
-  return Directory(await folder.resolveSymbolicLinks());
-}
-
-Future<void> _privateFile(File file) async {
-  final type = await FileSystemEntity.type(file.path, followLinks: false);
-  if (type != FileSystemEntityType.notFound &&
-      type != FileSystemEntityType.file) {
-    throw const InformationFileFailure('delivery_io_failed');
-  }
-  if (type == FileSystemEntityType.notFound) await file.create(exclusive: true);
-  if ((await Process.run('/bin/chmod', ['600', file.path])).exitCode != 0) {
-    throw const InformationFileFailure('delivery_io_failed');
-  }
-}
-
-Future<Map<String, dynamic>?> _read(File file) async {
-  final type = await FileSystemEntity.type(file.path, followLinks: false);
-  if (type == FileSystemEntityType.notFound) return null;
-  if (type != FileSystemEntityType.file ||
-      (await file.stat()).mode & 0xE3F != 0 ||
-      await file.length() > 131072) {
-    throw const InformationFileFailure('delivery_io_failed');
-  }
-  return decodeProtocolObject(await file.readAsString(), maxBytes: 131072);
-}
-
-Future<void> _write(File file, Map<String, dynamic> value) async {
-  final staging = await file.parent.createTemp('.copy-state-');
-  try {
-    await _privateDirectory(staging);
-    final next = File('${staging.path}/state');
-    await _privateFile(next);
-    await next.writeAsString(jsonEncode(value), flush: true);
-    await next.rename(file.path);
-  } finally {
-    await staging.delete(recursive: true);
-  }
-}
 
 Map<String, dynamic> _manifest(Map<String, dynamic> reply) {
   if (reply['status'] != 'ok' || reply['delivery'] is! Map) {
@@ -179,7 +126,7 @@ final class DeviceInformationFiles {
       followLinks: false,
     );
     if (type == FileSystemEntityType.notFound) return;
-    final folder = await _privateDirectory(directory.absolute);
+    final folder = await privateDeviceDirectory(directory.absolute);
     var count = 0;
     await for (final entry in folder.list(followLinks: false)) {
       if (entry is! File ||
@@ -190,7 +137,7 @@ final class DeviceInformationFiles {
         throw const InformationFileFailure('delivery_capacity');
       }
       await _serialize(entry.path, () async {
-        final record = await _read(entry);
+        final record = await readPrivateDeviceState(entry);
         if (record == null ||
             record['deviceScope'] != _deviceScope ||
             {'released', 'expired', 'failed'}.contains(record['phase'])) {
@@ -218,7 +165,7 @@ final class DeviceInformationFiles {
     if (!{'preparing', 'ready'}.contains(manifest['state'])) {
       return _public(response);
     }
-    final folder = await _privateDirectory(directory.absolute);
+    final folder = await privateDeviceDirectory(directory.absolute);
     final scope = _digest(
       '${profile.serverId}\n${profile.deviceToken}\n$session',
     );
@@ -239,11 +186,11 @@ final class DeviceInformationFiles {
     Map<String, dynamic> input,
   ) async {
     final launch = File('${file.path}.launch');
-    await _privateFile(launch);
+    await privateDeviceFile(launch);
     final lock = await launch.open(mode: FileMode.append);
     try {
       await lock.lock(FileLock.blockingExclusive);
-      var record = await _read(file);
+      var record = await readPrivateDeviceState(file);
       if (record != null &&
           (record['scope'] != scope ||
               record['manifest'] is! Map ||
@@ -266,7 +213,7 @@ final class DeviceInformationFiles {
       }
       final wait = Stopwatch()..start();
       while (wait.elapsed < const Duration(seconds: 35)) {
-        final current = await _read(file);
+        final current = await readPrivateDeviceState(file);
         if (current == null) break;
         if ({'released', 'expired', 'failed'}.contains(current['phase'])) {
           return Map<String, dynamic>.from(
@@ -318,7 +265,7 @@ final class DeviceInformationFiles {
     final file = File(
       '${directory.absolute.path}/${_digest(delivery['deliveryId'] as String)}.json',
     );
-    final record = await _read(file);
+    final record = await readPrivateDeviceState(file);
     if (record == null ||
         record['scope'] !=
             _digest('${profile.serverId}\n${profile.deviceToken}\n$session')) {
@@ -343,7 +290,7 @@ final class DeviceInformationFiles {
       // The periodic guardian may finish cleanup and close its control socket
       // between the server release and this request. Only its original,
       // acknowledged terminal journal can resolve that race as successful.
-      final latest = await _read(file);
+      final latest = await readPrivateDeviceState(file);
       if (latest != null &&
           latest['scope'] == record['scope'] &&
           latest['manifest'] is Map &&
@@ -414,7 +361,7 @@ final class DeviceInformationFiles {
     };
     identity.close();
     try {
-      await _write(file, record);
+      await writePrivateDeviceState(file, record);
       process.stdin.writeln(
         jsonEncode({
           'statePath': file.path,
@@ -434,7 +381,7 @@ final class DeviceInformationFiles {
 
   Future<void> _recoverDead(File file, Map<String, dynamic> record) async {
     final guard = File('${file.path}.guard');
-    await _privateFile(guard);
+    await privateDeviceFile(guard);
     final handle = await guard.open(mode: FileMode.append);
     try {
       // A replacement or still active worker owns this lock; don't race it.
@@ -456,7 +403,7 @@ final class DeviceInformationFiles {
           'deliveryId': manifest['deliveryId'],
           'cleanupCapability': manifest['cleanupCapability'],
         });
-        await _write(file, {
+        await writePrivateDeviceState(file, {
           ...record,
           'lease': null,
           'phase': result['status'] == 'ok' ? 'released' : 'cleanup_pending',
@@ -527,8 +474,8 @@ Future<void> runInformationFileGuardian() async {
     }
     final plan = decodeProtocolObject(input.current);
     final file = File(plan['statePath'] as String);
-    await _privateDirectory(file.parent);
-    final record = await _read(file);
+    await privateDeviceDirectory(file.parent);
+    final record = await readPrivateDeviceState(file);
     if (record == null ||
         record['workerPid'] != pid ||
         record['workerIdentity'] is! String ||
@@ -540,7 +487,7 @@ Future<void> runInformationFileGuardian() async {
       throw const FormatException();
     }
     final guardFile = File('${file.path}.guard');
-    await _privateFile(guardFile);
+    await privateDeviceFile(guardFile);
     guard = await guardFile.open(mode: FileMode.append);
     await guard.lock(FileLock.exclusive);
     if (!await input.moveNext() || input.current != 'start') {
@@ -589,7 +536,7 @@ final class _Guardian {
       : null;
   Future<void> save(Map<String, dynamic> changes) async {
     record = {...record, ...changes};
-    await _write(file, record);
+    await writePrivateDeviceState(file, record);
   }
 
   Future<T> serialize<T>(Future<T> Function() action) {

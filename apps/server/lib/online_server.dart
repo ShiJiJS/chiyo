@@ -575,7 +575,13 @@ final class OnlineServer {
         await reply(
           request.uri.path.startsWith('/v1/agent/') ? 200 : 400,
           e.toJson(
-            protocolVersion: parsedBody?['protocolVersion'] == 2 ? 2 : 1,
+            protocolVersion:
+                parsedBody?['protocolVersion'] == 2 ||
+                    request.uri.path.startsWith(
+                      '/v1/agent/credential-use/device/',
+                    )
+                ? 2
+                : 1,
           ),
         );
       } on FormatException {

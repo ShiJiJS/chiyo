@@ -65,6 +65,12 @@ extension _CredentialMaterialService on InformationService {
     CredentialExecution record,
   ) async {
     _requireSettledExecutionReceipt(record.id);
+    if (_deviceCredentialRequests.containsKey(record.requestId)) {
+      if ({'not_needed', 'complete'}.contains(record.cleanupState)) {
+        return record;
+      }
+      throw const CredentialUseFailure('cleanup_busy', attemptConsumed: true);
+    }
     if (record.materialLease == null || record.cleanupState == 'complete') {
       return record;
     }
@@ -136,6 +142,9 @@ extension CredentialMaterialOwnerAccess on OwnerAccess {
     // supervisor can still start the worker. Preserve that launch/report path.
     for (final record
         in _service._runtimeRepository.credentialExecutions.toList()) {
+      if (_service._deviceCredentialRequests.containsKey(record.requestId)) {
+        continue;
+      }
       if (_service._pendingExecutionReceipts.containsKey(record.id)) continue;
       if ({'preparing', 'running'}.contains(record.state) &&
           record.supervisorPid != null &&

@@ -335,6 +335,9 @@ extension _CredentialRuntimeClient on AgentClient {
       if (_session == null) {
         throw const CredentialUseFailure('session_required');
       }
+      if (_remote != null && input['protocolVersion'] == 1) {
+        throw const CredentialUseFailure('unsupported_protocol');
+      }
       final filling =
           command == 'fill-use' ||
           command == 'fill-status' ||
@@ -367,10 +370,21 @@ extension _CredentialRuntimeClient on AgentClient {
         } else {
           CredentialUseInput.fromJson(input);
         }
-        return await _call('/credential-use/request', {
-          'sessionSecret': _session,
-          ...input,
-        });
+        final prepared = _remote != null && !filling
+            ? await DeviceCredentialLaunch.prepare(
+                CredentialUseInput.fromJson(input).launch,
+              )
+            : null;
+        return await _call(
+          prepared == null
+              ? '/credential-use/request'
+              : '/credential-use/device/request',
+          {
+            'sessionSecret': _session,
+            ...input,
+            if (prepared != null) 'deviceLaunch': prepared.toPrivateJson(),
+          },
+        );
       }
       if (command == 'fill-use' || command == 'fill-status') {
         FocusedFillOperationInput.fromJson(input);
@@ -439,10 +453,12 @@ extension _CredentialRuntimeClient on AgentClient {
             operation: operation,
           );
         case 'execution-status':
-          final status = await _call('/credential-use/execution/status', {
-            'sessionSecret': _session,
-            'executionId': identity,
-          });
+          final status = await _call(
+            _remote == null
+                ? '/credential-use/execution/status'
+                : '/credential-use/device/execution/status',
+            {'sessionSecret': _session, 'executionId': identity},
+          );
           if (status['status'] == 'ok') {
             final local = _credentialExecutions.outputs[identity];
             status['outputAvailable'] = local != null;
@@ -455,10 +471,12 @@ extension _CredentialRuntimeClient on AgentClient {
             throw const CredentialUseFailure('invalid_type');
           }
           // Authorization is checked even for a local memory buffer.
-          final status = await _call('/credential-use/execution/status', {
-            'sessionSecret': _session,
-            'executionId': identity,
-          });
+          final status = await _call(
+            _remote == null
+                ? '/credential-use/execution/status'
+                : '/credential-use/device/execution/status',
+            {'sessionSecret': _session, 'executionId': identity},
+          );
           if (status['status'] != 'ok') return status;
           return {
             ..._credentialExecutions.output(
@@ -469,6 +487,13 @@ extension _CredentialRuntimeClient on AgentClient {
             'protocolVersion': status['protocolVersion'] ?? 1,
           };
         case 'cleanup-use':
+          if (_remote != null) {
+            await _deviceCredentialJournal?.maintain();
+            return await _call('/credential-use/device/execution/status', {
+              'sessionSecret': _session,
+              'executionId': identity,
+            });
+          }
           return await _call('/credential-use/cleanup', {
             'sessionSecret': _session,
             'executionId': identity,
@@ -500,7 +525,11 @@ extension _CredentialRuntimeClient on AgentClient {
         result['protocolVersions'] is! List ||
         !(result['protocolVersions'] as List).contains(2) ||
         result['capabilities'] is! List ||
-        !(result['capabilities'] as List).contains('credential-use-reuse.v1') ||
+        !(result['capabilities'] as List).contains(
+          _remote == null
+              ? 'credential-use-reuse.v1'
+              : 'credential-device-execution.v1',
+        ) ||
         focusedFill &&
             !(result['capabilities'] as List).contains(
               'credential-focused-fill.v1',
@@ -516,10 +545,12 @@ extension _CredentialRuntimeClient on AgentClient {
   Future<Map<String, dynamic>> _lookupCredentialOperation(
     CredentialOperationInput input,
   ) async {
-    final result = await _call('/credential-use/operation/status', {
-      'sessionSecret': _session,
-      ...input.toJson(),
-    });
+    final result = await _call(
+      _remote == null
+          ? '/credential-use/operation/status'
+          : '/credential-use/device/operation/status',
+      {'sessionSecret': _session, ...input.toJson()},
+    );
     return result.containsKey('protocolVersion')
         ? result
         : Map<String, dynamic>.from(
@@ -533,7 +564,48 @@ extension _CredentialRuntimeClient on AgentClient {
     CredentialOperationInput input,
   ) async {
     if (_remote != null) {
-      throw const CredentialUseFailure('unsupported_capability');
+      if (_deviceCredentialJournal == null) {
+        throw const CredentialUseFailure('service_unavailable');
+      }
+      final prepared = await DeviceCredentialLaunch.prepare(input.launch);
+      final jobName = CredentialProcessJob.nameFor(
+        base64Url.encode(
+          List.generate(24, (_) => Random.secure().nextInt(256)),
+        ),
+      );
+      final decoded = await _call('/credential-use/device/operation', {
+        'sessionSecret': _session,
+        ...input.toJson(),
+        'deviceLaunch': prepared.toPrivateJson(),
+        'deviceJob': jobName,
+      });
+      if (decoded['status'] != 'ok') {
+        final explicit = decoded['errorCode'] is String;
+        throw CredentialUseFailure(
+          explicit ? decoded['errorCode'] as String : 'material_claim_failed',
+          attemptConsumed: !explicit || decoded['operationClaimed'] == true,
+          executionId: decoded['executionId'] as String?,
+        );
+      }
+      try {
+        final claim = CredentialOperationClaim.fromPrivateJson(
+          Map<String, dynamic>.from(decoded)..remove('status'),
+        );
+        if (claim.execution.requestId != input.requestId ||
+            claim.execution.operationId != input.operationId ||
+            claim.execution.operationFingerprint != input.fingerprint ||
+            claim.material != null &&
+                (claim.material!.materialLease != null ||
+                    claim.material!.jobName != jobName)) {
+          throw const FormatException();
+        }
+        return claim;
+      } on Object {
+        throw const CredentialUseFailure(
+          'material_claim_failed',
+          attemptConsumed: true,
+        );
+      }
     }
     var mayBeClaimed = false, explicitFailure = false;
     try {
@@ -681,7 +753,9 @@ extension _CredentialRuntimeClient on AgentClient {
     CredentialExecutionReport report,
   ) async {
     final result = await _call(
-      '/credential-use/execution/report',
+      _remote == null
+          ? '/credential-use/execution/report'
+          : '/credential-use/device/execution/report',
       report.toPrivateJson(),
     );
     if (result['status'] != 'ok') {
@@ -901,6 +975,7 @@ class _CredentialRuntimeExecutor {
     String? created;
     Future<void>? stdoutDone, stderrDone;
     File? journal;
+    DeviceCredentialJournalEntry? deviceJournal;
     var materialLease = m.materialLease;
     var registeredFiles = false;
     var preparing = true;
@@ -917,27 +992,36 @@ class _CredentialRuntimeExecutor {
         }),
         flush: true,
       );
-      await client._reportCredentialExecution(
-        CredentialExecutionReport(
-          executionId: m.executionId,
-          executionCapability: m.executionCapability,
-          state: state,
-          pid: process?.pid,
-          processCreatedAt: created,
-          exitCode: exit,
-          errorCode: code,
-          startedAt: started,
-          finishedAt: {'running', 'unknown'}.contains(state)
-              ? null
-              : DateTime.now().toUtc(),
-          jobName:
-              m.jobName ??
-              (process is _RuntimeWorkerProcess ? process.jobName : null),
-        ),
+      var value = CredentialExecutionReport(
+        executionId: m.executionId,
+        executionCapability: m.executionCapability,
+        state: state,
+        pid: process?.pid,
+        processCreatedAt: created,
+        exitCode: exit,
+        errorCode: code,
+        startedAt: started,
+        finishedAt: {'running', 'unknown'}.contains(state)
+            ? null
+            : DateTime.now().toUtc(),
+        jobName:
+            m.jobName ??
+            (process is _RuntimeWorkerProcess ? process.jobName : null),
       );
+      if (deviceJournal != null) {
+        value = await deviceJournal.rememberReport(value);
+      }
+      await client._reportCredentialExecution(value);
     }
 
     try {
+      if (client._remote != null) {
+        final store = client._deviceCredentialJournal;
+        if (store == null) {
+          throw const CredentialUseFailure('material_prepare_failed');
+        }
+        deviceJournal = await store.begin(m);
+      }
       final plan = m.approvedPlan;
       final tokenReceiver = plan.receiver == 'gh_token';
       final awsReceiver = plan.receiver == 'aws_shared_credentials';
@@ -953,6 +1037,10 @@ class _CredentialRuntimeExecutor {
         throw const CredentialUseFailure('material_prepare_failed');
       }
       if (!tokenReceiver) {
+        if (client._remote != null && materialLease == null) {
+          materialLease = ManagedCredentialFiles.create();
+          await deviceJournal!.rememberLease(materialLease);
+        }
         if ((!awsReceiver && !sshReceiver) ||
             m.credentialMaterial.form != CredentialForm.file ||
             materialLease == null ||
@@ -996,12 +1084,17 @@ class _CredentialRuntimeExecutor {
                   'global-known-hosts',
                 ],
         );
-        final registration = await client
-            ._call('/credential-use/materials/register', {
-              'executionId': m.executionId,
-              'executionCapability': m.executionCapability,
-              'lease': materialLease.toPrivateJson(),
-            });
+        await deviceJournal?.rememberLease(materialLease);
+        final registration = await client._call(
+          client._remote == null
+              ? '/credential-use/materials/register'
+              : '/credential-use/device/materials/register',
+          {
+            'executionId': m.executionId,
+            'executionCapability': m.executionCapability,
+            'lease': materialLease.toPrivateJson(),
+          },
+        );
         if (registration['status'] != 'ok') {
           throw const CredentialUseFailure(
             'audit_unavailable',
@@ -1140,13 +1233,21 @@ class _CredentialRuntimeExecutor {
                   throw const CredentialUseFailure('process_start_failed');
                 }
                 try {
-                  final result = await client
-                      ._call('/credential-use/worker/register', {
-                        'executionId': m.executionId,
-                        'executionCapability': m.executionCapability,
-                        'workerPid': workerPid,
-                        'workerCreatedAt': identity.value,
-                      });
+                  await deviceJournal?.rememberWorker(
+                    workerPid,
+                    identity.value,
+                  );
+                  final result = await client._call(
+                    client._remote == null
+                        ? '/credential-use/worker/register'
+                        : '/credential-use/device/worker/register',
+                    {
+                      'executionId': m.executionId,
+                      'executionCapability': m.executionCapability,
+                      'workerPid': workerPid,
+                      'workerCreatedAt': identity.value,
+                    },
+                  );
                   if (result['status'] != 'ok') {
                     throw const CredentialUseFailure(
                       'audit_unavailable',
@@ -1247,7 +1348,16 @@ class _CredentialRuntimeExecutor {
       output.active = false;
       output.finishedAt = DateTime.now();
       output.finish();
-      if (materialLease != null) {
+      final treeEnded =
+          (uncertainLaunch == null || uncertainLaunch.treeEnded) &&
+          (process is! _RuntimeWorkerProcess || process.treeEnded);
+      if (client._remote != null) {
+        try {
+          await deviceJournal?.finish(treeEnded: treeEnded);
+        } on Object {
+          // Retain proof and exact OS identities for later maintenance.
+        }
+      } else if (materialLease != null) {
         if (!registeredFiles && process == null) {
           try {
             ManagedCredentialFiles.cleanup(materialLease);
@@ -1264,9 +1374,7 @@ class _CredentialRuntimeExecutor {
           /* Persisted pending facts remain for recovery. */
         }
       }
-      if (folder != null &&
-          (uncertainLaunch == null || uncertainLaunch.treeEnded) &&
-          (process is! _RuntimeWorkerProcess || process.treeEnded)) {
+      if (folder != null && treeEnded) {
         try {
           await folder.delete(recursive: true);
         } on Object {
