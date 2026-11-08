@@ -40,6 +40,7 @@ part 'backup_staging_operations.dart';
 part 'backup_owner_operations.dart';
 part 'information_purge_storage.dart';
 part 'information_file_outputs.dart';
+part 'device_file_operations.dart';
 part 'information_file_opens.dart';
 part 'desktop_preferences_storage.dart';
 part 'proposal_operations_storage.dart';
@@ -538,8 +539,9 @@ class EncryptedInformationRepository
   static final _openDirectories = <String>{};
   late final String _directory;
   late final backups = InformationBackups._(this);
-  late final fileOutputs = InformationFileOutputs._(this);
-  late final fileOpens = InformationFileOpens._(this);
+  late final _fileOperationContext = _RepositoryFileOperationContext(this);
+  late final fileOutputs = InformationFileOutputs._(_fileOperationContext);
+  late final fileOpens = InformationFileOpens._(_fileOperationContext);
 
   static Future<EncryptedInformationRepository> open(
     String directory,

@@ -16,6 +16,10 @@ import 'directory_tree.dart';
 import 'remote_workspace_files.dart';
 import 'remote_workspace_legacy_templates.dart';
 import '../information_files.dart';
+import '../backups.dart';
+import 'package:info_storage/info_storage.dart';
+import 'owner_file_open_dispatcher.dart';
+import 'remote_workspace_file_actions.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
@@ -23,9 +27,16 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     implements
         WorkspaceStorageLocation,
         WorkspaceLibraryMove,
-        WorkspaceFileSelectionReleaser {
-  RemoteWorkspaceSource(this.client, {InformationFilePicker? filePicker})
-    : _observation = client.initialWorkspaceObservation {
+        WorkspaceFileSelectionReleaser,
+        WorkspaceFileActionRecovery,
+        WorkspaceFileOpenRecovery {
+  RemoteWorkspaceSource(
+    this.client, {
+    InformationFilePicker? filePicker,
+    this.deviceFilesDirectory,
+    this.outputPicker = const NativeBackupFilePicker(),
+    this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
+  }) : _observation = client.initialWorkspaceObservation {
     files = RemoteWorkspaceFiles(
       client,
       changed: notifyConnectionChanged,
@@ -33,6 +44,17 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  final String? deviceFilesDirectory;
+  final BackupFilePicker outputPicker;
+  final OwnerFileOpenDispatcher openDispatcher;
+  late final _fileActions = RemoteWorkspaceFileActions(
+    client,
+    files,
+    readDetail,
+    directory: deviceFilesDirectory,
+    picker: outputPicker,
+    dispatcher: openDispatcher,
+  );
   late final RemoteWorkspaceFiles files;
   @override
   late final WorkspaceLegacyTemplateSource legacyTemplates =
@@ -60,7 +82,44 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   @override
   Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
     String operationId,
-  ) => files.receipt(operationId);
+  ) async {
+    final mutation = await files.receipt(operationId);
+    final local = deviceFilesDirectory == null
+        ? null
+        : await _fileActions.receipt(operationId);
+    if (mutation != null && local != null) {
+      throw const WorkspaceFailure('unknown_outcome', '操作编号对应多种结果，无法确认。');
+    }
+    return local ?? mutation;
+  }
+
+  @override
+  Future<WorkspaceFileActionResult> fileAction(
+    WorkspaceRecordRef record,
+    String fieldKey,
+    int version,
+    WorkspaceFileAction action, {
+    required String operationId,
+  }) => _fileActions.action(record, fieldKey, version, action, operationId);
+  @override
+  Future<WorkspaceFileActionState> fileActionState(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  ) => _fileActions.state(record, fieldKey);
+  @override
+  Future<void> recoverFileActionAccess(String operationId) =>
+      _fileActions.recoverAccess(operationId);
+  @override
+  Future<void> cleanupFileActions(WorkspaceRecordRef record, String fieldKey) =>
+      _fileActions.cleanup(record, fieldKey);
+  @override
+  Future<void> finishFileOpen(String operationId) =>
+      _fileActions.finish(operationId);
+  @override
+  Future<void> closeOpenFileCopies(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  ) => _fileActions.closeCopies(record, fieldKey);
   late final _library = RemoteWorkspaceLibrary(
     client,
     changed: notifyConnectionChanged,
@@ -143,10 +202,16 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     if (!_changes.isClosed) _changes.add(null);
   }
 
-  Future<void> dispose() async {
-    await files.dispose();
-    client.close();
-    await _changes.close();
+  Future<void>? _closeFuture;
+  Future<void> dispose() => _closeFuture ??= _dispose();
+  Future<void> _dispose() async {
+    try {
+      await _fileActions.dispose();
+    } finally {
+      await files.dispose();
+      client.close();
+      await _changes.close();
+    }
   }
 
   Future<T> _remote<T>(Future<T> Function() action) async {

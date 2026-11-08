@@ -1,22 +1,13 @@
+import 'workspace_file_action_context.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'owner_workspace_files.dart';
 import 'owner_workspace_information.dart';
 import 'workspace_source.dart';
 
-class OwnerWorkspaceFileOpens {
-  OwnerWorkspaceFileOpens(
-    this.owner,
-    this.information,
-    this.files,
-    this.opens,
-    this.dispatcher, {
-    this.outputs,
-  }) : scope = owner.captureLibraryScope();
-  final core.OwnerAccess owner;
-  final core.OwnerLibraryScope scope;
-  final OwnerWorkspaceInformation information;
-  final OwnerWorkspaceFiles files;
+class WorkspaceFileOpens {
+  WorkspaceFileOpens(this.context, this.opens, this.dispatcher, {this.outputs});
+  final WorkspaceFileActionContext context;
   final InformationFileOpens opens;
   final OwnerFileOpenDispatcher dispatcher;
   final InformationFileOutputs? outputs;
@@ -26,7 +17,7 @@ class OwnerWorkspaceFileOpens {
   }
 
   void _current() {
-    if (_disposed || !scope.isCurrent || !owner.serviceAvailable) {
+    if (_disposed || !context.isCurrent) {
       throw const WorkspaceFailure('library_changed', '资料窗口已关闭或资料库已更换。');
     }
   }
@@ -82,7 +73,7 @@ class OwnerWorkspaceFileOpens {
       );
   Future<WorkspaceFileOperationReceipt?> receipt(String id) async {
     try {
-      return await owner.exportLibrary(() async {
+      return await context.run(() async {
         _current();
         final s = await opens.reconcile(id, dispatcher);
         return s == null ? null : _receipt(s);
@@ -97,7 +88,7 @@ class OwnerWorkspaceFileOpens {
     String key,
   ) async {
     try {
-      return await owner.exportLibrary(() async {
+      return await context.run(() async {
         _current();
         final all = (await opens.copies(
           includeInvalidated: true,
@@ -137,7 +128,7 @@ class OwnerWorkspaceFileOpens {
 
   Future<void> finish(String id) async {
     try {
-      await owner.exportLibrary(() async {
+      await context.run(() async {
         _current();
         await opens.close(id);
       });
@@ -151,7 +142,7 @@ class OwnerWorkspaceFileOpens {
 
   Future<void> closeCopies(WorkspaceRecordRef record, String key) async {
     try {
-      await owner.exportLibrary(() async {
+      await context.run(() async {
         _current();
         for (final s in await opens.copies(includeInvalidated: true)) {
           if (s.itemId == record.id && s.fieldKey == key) {
@@ -191,7 +182,7 @@ class OwnerWorkspaceFileOpens {
     try {
       _current();
       final old = await opens.status(id);
-      final history = await files.history(record, key);
+      final history = await context.history(record, key);
       if (history.current.ref.version != version ||
           old != null &&
               (old.reference.attachmentId != history.current.ref.id ||
@@ -212,23 +203,15 @@ class OwnerWorkspaceFileOpens {
         throw const WorkspaceFailure('previous_pending', '原打开操作尚未确认，请先核对。');
       }
       final name = _safeName(history.current.mediaType);
-      final fieldId = (await information.readDetail(record)).fieldIds[key];
+      final fieldId = (await context.detail(record)).fieldIds[key];
       final ref = core.InformationAttachmentRef(
         history.current.ref.id,
         version,
       );
-      final body = await owner.readInformationAttachment(ref);
-      return await owner.exportLibrary(() async {
+      final body = await context.original(record, key, ref);
+      return await context.run(() async {
         _current();
-        final field = owner.information
-            .where((i) => i.id == record.id)
-            .firstOrNull
-            ?.fields
-            .where((f) => f.id == fieldId)
-            .firstOrNull;
-        if (field?.attachment != ref) {
-          throw const WorkspaceFailure('conflict', '文件已变化，请重新核对。');
-        }
+        await context.assertCurrent(record, key, fieldId, ref);
         final oldOpen = (await opens.copies()).any(
           (s) =>
               s.itemId == record.id &&
@@ -249,10 +232,10 @@ class OwnerWorkspaceFileOpens {
           itemId: record.id,
           fieldKey: key,
           reference: ref,
-          fileName: body.version.originalName,
+          fileName: body.file.filename,
           safeName: name,
           bytes: body.bytes,
-          sha256: body.version.sha256,
+          sha256: body.sha256,
         );
         registered = true;
         _current();
@@ -263,16 +246,16 @@ class OwnerWorkspaceFileOpens {
         return WorkspaceFileActionResult(completed: true, filename: s.fileName);
       });
     } catch (e) {
-      if (registered && (_disposed || !scope.isCurrent)) {
+      if (registered && (_disposed || !context.isCurrent)) {
         try {
-          await owner.exportLibrary(() => opens.close(id));
+          await context.run(() => opens.close(id));
         } catch (_) {
           /* Runtime still owns durable cleanup. */
         }
       }
       if (registered) {
         try {
-          final s = await owner.exportLibrary(() async {
+          final s = await context.run(() async {
             _current();
             return opens.reconcile(id, dispatcher);
           });
@@ -294,4 +277,20 @@ class OwnerWorkspaceFileOpens {
       throw _failure(e);
     }
   }
+}
+
+/// Compatibility composition for the local owner runtime.
+class OwnerWorkspaceFileOpens extends WorkspaceFileOpens {
+  OwnerWorkspaceFileOpens(
+    core.OwnerAccess owner,
+    OwnerWorkspaceInformation information,
+    OwnerWorkspaceFiles files,
+    InformationFileOpens opens,
+    OwnerFileOpenDispatcher dispatcher, {
+    super.outputs,
+  }) : super(
+         OwnerFileActionContext(owner, information, files),
+         opens,
+         dispatcher,
+       );
 }

@@ -1,3 +1,4 @@
+import 'workspace_file_action_context.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_storage/macos_backup_publication.dart';
@@ -7,19 +8,9 @@ import 'owner_workspace_information.dart';
 import 'workspace_source.dart';
 
 /// Trusted Owner adapter. Only this layer sees native output paths/bookmarks.
-class OwnerWorkspaceFileActions {
-  OwnerWorkspaceFileActions(
-    this.owner,
-    this.information,
-    this.files,
-    this.outputs,
-    this.picker, {
-    this.opens,
-  }) : scope = owner.captureLibraryScope();
-  final core.OwnerAccess owner;
-  final core.OwnerLibraryScope scope;
-  final OwnerWorkspaceInformation information;
-  final OwnerWorkspaceFiles files;
+class WorkspaceFileActions {
+  WorkspaceFileActions(this.context, this.outputs, this.picker, {this.opens});
+  final WorkspaceFileActionContext context;
   final InformationFileOutputs outputs;
   final BackupFilePicker picker;
   final InformationFileOpens? opens;
@@ -28,8 +19,24 @@ class OwnerWorkspaceFileActions {
     _disposed = true;
   }
 
+  /// Runtime maintenance uses only the private journal and recorded native
+  /// capabilities. It can clean completed outputs while the server is offline;
+  /// an uncertain publication retains its anchor and is never republished.
+  Future<int> maintain() async {
+    var failed = 0;
+    for (final s in await outputs.pending(includeInvalidated: true)) {
+      try {
+        if (s.uncertain) continue;
+        await _cleanup(s.operationId);
+      } catch (_) {
+        failed++;
+      }
+    }
+    return failed;
+  }
+
   void _current() {
-    if (_disposed || !scope.isCurrent || !owner.serviceAvailable) {
+    if (_disposed || !context.isCurrent) {
       throw const WorkspaceFailure('library_changed', '资料库已关闭或更换，请重新打开文件。');
     }
   }
@@ -128,7 +135,7 @@ class OwnerWorkspaceFileActions {
 
   Future<WorkspaceFileOperationReceipt?> receipt(String id) async {
     try {
-      return await owner.exportLibrary(() async {
+      return await context.run(() async {
         _current();
         final s = await _reconcile(id);
         if (s == null) return null;
@@ -149,7 +156,7 @@ class OwnerWorkspaceFileActions {
     String key,
   ) async {
     try {
-      return await owner.exportLibrary(() async {
+      return await context.run(() async {
         _current();
         final all = (await outputs.pending())
             .where((s) => s.itemId == record.id && s.fieldKey == key)
@@ -193,7 +200,7 @@ class OwnerWorkspaceFileActions {
 
   Future<void> cleanup(WorkspaceRecordRef record, String key) async {
     try {
-      await owner.exportLibrary(() async {
+      await context.run(() async {
         _current();
         for (final s in await outputs.pending(includeInvalidated: true)) {
           if (s.itemId != record.id || s.fieldKey != key || s.uncertain) {
@@ -219,7 +226,7 @@ class OwnerWorkspaceFileActions {
       final args = await outputs.access(id);
       final bookmark = await picker.reselectOutput(args['destination']!);
       if (bookmark == null) return;
-      await owner.exportLibrary(() async {
+      await context.run(() async {
         _current();
         final now = await outputs.status(id);
         if (now == null ||
@@ -256,7 +263,7 @@ class OwnerWorkspaceFileActions {
         if (old.commandDigest != digest) {
           throw const StorageFailure('operation_conflict');
         }
-        final current = (await files.history(record, key)).current.ref;
+        final current = (await context.history(record, key)).current.ref;
         if (current.id != old.reference.attachmentId ||
             current.version != version) {
           throw const WorkspaceFailure('conflict', '文件绑定已变化，请核对原操作结果。');
@@ -273,11 +280,11 @@ class OwnerWorkspaceFileActions {
       if (state.pending != null) {
         throw const WorkspaceFailure('previous_pending', '原另存操作尚未确认，请先核对。');
       }
-      final history = await files.history(record, key);
+      final history = await context.history(record, key);
       if (history.current.ref.version != version) {
         throw const WorkspaceFailure('conflict', '文件版本已变化，请重新核对。');
       }
-      final detail = await information.readDetail(record);
+      final detail = await context.detail(record);
       final fieldId = detail.fieldIds[key];
       final path = await picker.ownerFileOutput(history.current.filename);
       if (path == null) {
@@ -291,18 +298,10 @@ class OwnerWorkspaceFileActions {
         history.current.ref.id,
         version,
       );
-      final body = await owner.readInformationAttachment(ref);
-      return await owner.exportLibrary(() async {
+      final body = await context.original(record, key, ref);
+      return await context.run(() async {
         _current();
-        final current = owner.information
-            .where((i) => i.id == record.id)
-            .firstOrNull
-            ?.fields
-            .where((f) => f.id == fieldId)
-            .firstOrNull;
-        if (current?.attachment != ref) {
-          throw const WorkspaceFailure('conflict', '文件已变化，请重新打开后另存。');
-        }
+        await context.assertCurrent(record, key, fieldId, ref);
         final oldSave = (await outputs.pending()).any(
           (s) => s.itemId == record.id && s.fieldKey == key && s.uncertain,
         );
@@ -331,8 +330,8 @@ class OwnerWorkspaceFileActions {
           reference: ref,
           root: root!,
           destination: path,
-          length: body.version.byteLength,
-          contentDigest: body.version.sha256,
+          length: body.file.byteLength,
+          contentDigest: body.sha256,
           stagingBookmark: staging!.stagingBookmark ?? '',
         );
         registered = true;
@@ -370,7 +369,7 @@ class OwnerWorkspaceFileActions {
     } catch (e) {
       if (registered) {
         try {
-          final done = await owner.exportLibrary(() async {
+          final done = await context.run(() async {
             _current();
             final result = await _reconcile(id, live: true);
             if (result != null && !result.uncertain) {
@@ -410,4 +409,20 @@ class OwnerWorkspaceFileActions {
       throw _failure(e);
     }
   }
+}
+
+/// Compatibility composition for the local owner runtime.
+class OwnerWorkspaceFileActions extends WorkspaceFileActions {
+  OwnerWorkspaceFileActions(
+    core.OwnerAccess owner,
+    OwnerWorkspaceInformation information,
+    OwnerWorkspaceFiles files,
+    InformationFileOutputs outputs,
+    BackupFilePicker picker, {
+    super.opens,
+  }) : super(
+         OwnerFileActionContext(owner, information, files),
+         outputs,
+         picker,
+       );
 }
