@@ -58,6 +58,8 @@
 
 ## App 原控件与原生另存接入（最新进展）
 
+实现 `521b7843` 已推送；[GitHub App 接入阶段评论](https://github.com/ShiJiJS/chiyo/issues/101#issuecomment-6725688772) 已发布并回读，工单仍为 Open。
+
 `RemoteWorkspaceBackups` 已接原 `BackupController`、备份页面和 NativeBackupFilePicker；原文件选择登记也由同一实现服务本地/联网宿主，路径不进入页面资源或网络命令。输入按原备份上限分块上传，恢复密钥仅在明确选择后的请求/预览内存内使用。
 
 新 `DeviceBackupOperations` 只保存原命令、统计、摘要及设备保存事实，复用原 SQLCipher 私有设备记录。设备库只含 4 张操作/绑定表，没有资料、附件、凭据或恢复密钥表。版本 1 可增加这两张操作表而保留原文件回执；旧库先核对服务器绑定再迁移，错误服务器连旧版本文件也不能改变。密钥缺失不重新生成替代密钥。
