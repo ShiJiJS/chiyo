@@ -20,6 +20,7 @@ import 'owner_library.dart';
 import 'owner_proposal_routes.dart';
 import 'owner_library_routes.dart';
 import 'owner_file_routes.dart';
+import 'owner_credential_routes.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -47,9 +48,14 @@ final class OnlineServer {
       () => currentAgentTemplates(_service.owner),
     );
     _fileCleanupTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_fileCleanup != null || _files?.needsCleanup != true) return;
+      if (_fileCleanup != null ||
+          (_files?.needsCleanup != true && _credentials?.needsCleanup != true))
+        return;
       _fileCleanup = _runtime
-          .run(() => _files!.cleanup())
+          .run(() async {
+            await _files?.cleanup();
+            await _credentials?.cleanup();
+          })
           .catchError((Object _) {
             /* Retry next sweep; shutdown also releases staging. */
           })
@@ -86,6 +92,9 @@ final class OnlineServer {
   late final _proposalRoutes = OwnerProposalRoutes(_proposals);
   late final _libraryRoutes = OwnerLibraryRoutes(_library);
   OwnerFileRoutes? _files;
+  OwnerCredentialRoutes? _credentials;
+  OwnerCredentialRoutes get _credentialRoutes =>
+      _credentials ??= OwnerCredentialRoutes(_service.owner);
   late final Timer _fileCleanupTimer;
   Future<void>? _fileCleanup;
   OwnerFileRoutes get _fileRoutes => _files ??= OwnerFileRoutes(_library);
@@ -116,8 +125,12 @@ final class OnlineServer {
     _fileCleanupTimer.cancel();
     await _http.close(force: true);
     await _fileCleanup;
-    await _files?.dispose();
-    _plugins.dispose();
+    try {
+      await _files?.dispose();
+    } finally {
+      _credentials?.dispose();
+      _plugins.dispose();
+    }
   }
 
   bool _authenticated(String? value) {
@@ -266,6 +279,14 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/credentials') {
+          final (code, value) = await _credentialRoutes.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/files') {
           final (code, value) = await _fileRoutes.dispatch(
@@ -463,6 +484,11 @@ final class OnlineServer {
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/summaries') {
           await reply(200, {
+            'credentials': [
+              for (final summary in _library.summaries())
+                if (summary.ref.kind == WorkspaceRecordKind.credential)
+                  recordSummaryToJson(summary),
+            ],
             'items': [
               for (final item in _service.owner.information)
                 {

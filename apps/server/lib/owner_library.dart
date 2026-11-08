@@ -1,7 +1,8 @@
 import 'package:info_workspace/owner_file_stages.dart';
+import 'package:info_workspace/owner_workspace_credentials.dart';
+import 'package:info_workspace/credential_transport.dart';
 import 'package:info_workspace/owner_workspace_classification.dart';
 import 'package:info_core/info_core.dart' as core;
-import 'package:info_workspace/owner_credential_type.dart';
 import 'package:info_workspace/owner_workspace_relation_queries.dart';
 import 'package:info_workspace/owner_workspace_template_packages.dart';
 import 'package:info_workspace/workspace_information_codec.dart';
@@ -50,7 +51,7 @@ final class OnlineOwnerLibrary
     owner: owner,
     information: this,
     fileCreationEnabled: true,
-    credentialCreationEnabled: false,
+    credentialCreationEnabled: true,
   );
   @override
   Future<WorkspaceCatalog> loadCatalog() async {
@@ -62,7 +63,12 @@ final class OnlineOwnerLibrary
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) async {
     _check();
     if (ref.kind != WorkspaceRecordKind.information) {
-      throw const WorkspaceFailure('unsupported', '请使用凭据管理入口。');
+      final credentials = OwnerWorkspaceCredentials(owner);
+      try {
+        return credentialWorkspaceDetail(await credentials.read(ref));
+      } finally {
+        credentials.dispose();
+      }
     }
     final item = owner.information.where((i) => i.id == ref.id).firstOrNull;
     if (item == null) throw const WorkspaceFailure('not_found', '资料已不存在。');
