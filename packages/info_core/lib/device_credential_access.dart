@@ -82,8 +82,36 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
     }
   }
 
+  Future<void> _resolveDeviceCredentialDecisions() async {
+    if (service._onlineCredentialDecisions.isEmpty) return;
+    final repository = service._repository;
+    if (repository is! AdditionalApprovalRepository) {
+      throw const FormatException('Missing credential approval repository');
+    }
+    for (final id in service._onlineCredentialDecisions.keys.toList()) {
+      InformationApprovalReceipt? receipt;
+      try {
+        receipt = await (repository as AdditionalApprovalRepository)
+            .additionalApprovalReceipt(id);
+      } on Object {
+        // A failed read is not proof of absence. Retain the exact intent and
+        // both read barriers, while allowing unrelated commands to continue.
+        continue;
+      }
+      service._settleOnlineCredentialDecision(id, receipt);
+    }
+    _restoreDeviceCredentialFieldGrants();
+    for (final intent in service._onlineCredentialDecisions.values) {
+      service._requests[intent.requestId]?.informationDecisionPending = true;
+    }
+  }
+
   Map<String, Object?> _encodeDeviceCredentialRequests() => {
-    'version': 2,
+    'version': 3,
+    'decisions': {
+      for (final entry in service._onlineCredentialDecisions.entries)
+        entry.key: entry.value.toJson(),
+    },
     'executions': {
       for (final e in service._deviceCredentialExecutions.entries)
         e.key: e.value.toJson(),
@@ -103,7 +131,9 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
     if (raw is! Map ||
         (raw['version'] == 1
             ? raw.length != 2
-            : raw['version'] != 2 || raw.length != 3) ||
+            : raw['version'] == 2
+            ? raw.length != 3
+            : raw['version'] != 3 || raw.length != 4) ||
         raw['requests'] is! List ||
         (raw['requests'] as List).length > 100000) {
       throw const FormatException('Invalid online credential state');
@@ -115,7 +145,13 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
     if (operations is! Map || operations.length > 100000) {
       throw const FormatException('Invalid device executions');
     }
-    if (rows.isEmpty && operations.isEmpty) return;
+    final decisions = raw['version'] == 3
+        ? raw['decisions']
+        : <String, dynamic>{};
+    if (decisions is! Map || decisions.length > 100000) {
+      throw const FormatException('Invalid online credential decisions');
+    }
+    if (rows.isEmpty && operations.isEmpty && decisions.isEmpty) return;
     if (service._repository is! CredentialRuntimeRepository) {
       throw const FormatException('Missing online credential repository');
     }
@@ -150,6 +186,25 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
       if (value['inactive'] as bool) {
         service._inactiveCredentialApprovals.add(id);
       }
+    }
+    final pendingRequests = <String>{};
+    for (final entry in decisions.entries) {
+      if (entry.key is! String || entry.value is! Map) {
+        throw const FormatException('Invalid online credential decision');
+      }
+      final command = InformationApprovalReceipt.fromJson(
+        Map<String, dynamic>.from(entry.value as Map),
+      );
+      if (command.operationId != entry.key ||
+          !service._deviceCredentialRequests.containsKey(command.requestId) ||
+          !pendingRequests.add(command.requestId) ||
+          (command.action != InformationApprovalAction.revoke &&
+              !service._inactiveCredentialApprovals.contains(
+                command.requestId,
+              ))) {
+        throw const FormatException('Inconsistent online credential decision');
+      }
+      service._onlineCredentialDecisions[command.operationId] = command;
     }
     final executions = {
       for (final e in service._runtimeRepository.credentialExecutions) e.id: e,
@@ -250,6 +305,108 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
             ..grant = proof;
       service._requests[r.id] = request;
       service._grants[proof.token] = request;
+      if (service._endedSessions.contains(session)) {
+        // The scope may settle only after the chat ended while its decision
+        // was unknown. Preserve the exact decision as history, never revive it.
+        request.state = AccessRequestState.revoked;
+        service._finishHistory(request, GrantEventKind.ended);
+        service._recordRequest(request, sessionEnded: true);
+      }
+    }
+  }
+}
+
+/// Only the online host persists uncertain owner decisions. Local adapters keep
+/// their existing conservative diagnostic behavior.
+extension _OnlineCredentialDecisionService on InformationService {
+  bool _onlineCredentialDecisionPending(String requestId) =>
+      _onlineCredentialDecisions.values.any((v) => v.requestId == requestId);
+
+  void _rememberOnlineCredentialDecision(
+    AdditionalApprovalOperation operation,
+  ) {
+    if (!_deviceFileDelivery ||
+        !_deviceCredentialRequests.containsKey(operation.command.requestId)) {
+      return;
+    }
+    final command = operation.command;
+    if (_onlineCredentialDecisionPending(command.requestId) &&
+        !_onlineCredentialDecisions.containsKey(command.operationId)) {
+      throw const AccessFailure('operation_conflict');
+    }
+    _onlineCredentialDecisions[command.operationId] = command;
+  }
+
+  void _settleOnlineCredentialDecision(
+    String id,
+    InformationApprovalReceipt? receipt,
+  ) {
+    final intent = _onlineCredentialDecisions[id];
+    if (intent == null) return;
+    if (receipt != null) {
+      _checkAdditionalReceipt(receipt, intent);
+      if (receipt.operationId != id ||
+          receipt.recordedAt != intent.recordedAt ||
+          jsonEncode(receipt.metadata) != jsonEncode(intent.metadata)) {
+        throw const FormatException('Inconsistent credential decision receipt');
+      }
+      final fact = _useRequest(intent.requestId);
+      final matches = switch (intent.action) {
+        InformationApprovalAction.approve => {
+          'approved',
+          'partially_approved',
+        }.contains(fact.state),
+        InformationApprovalAction.deny => fact.state == 'denied',
+        InformationApprovalAction.revoke =>
+          fact.invalidatedCode == 'grant_revoked',
+      };
+      if (!matches || fact.restoredAt != null) {
+        throw const FormatException('Inconsistent credential decision fact');
+      }
+    } else {
+      final fact = _useRequest(intent.requestId);
+      // An absent receipt cannot contradict an already committed terminal fact.
+      // Do not reactivate permission merely because a receipt was lost/pruned.
+      if (intent.action == InformationApprovalAction.revoke
+          ? fact.invalidatedCode == 'grant_revoked'
+          : {'approved', 'partially_approved', 'denied'}.contains(fact.state)) {
+        throw const FormatException('Missing credential decision receipt');
+      }
+    }
+    // Online recovery uses durable facts, not the old process's closure. The
+    // latter can overwrite a chat end/expiry latched while readback was down.
+    _uncertainCredentialDecisions.remove(id);
+    _inactiveCredentialApprovals.remove(intent.requestId);
+    _onlineCredentialDecisions.remove(id);
+    final request = _requests[intent.requestId];
+    if (receipt != null && intent.action == InformationApprovalAction.revoke) {
+      _scheduleInformationDeliveryCleanup();
+    }
+    if (request != null) {
+      final deferred = request.deferredDecisionRequest != null;
+      request.deferredDecisionRequest = null;
+      request.informationDecisionPending = false;
+      // Durable terminal facts still win after reopen or delayed readback.
+      final history = _repository.requestHistory
+          .where((r) => r.id == intent.requestId)
+          .firstOrNull;
+      if (history != null) {
+        request.state = history.state;
+        request.history = _repository.grantHistory
+            .where((g) => g.id == history.grantId)
+            .firstOrNull;
+      }
+      final ended =
+          request.decisionSessionEnded ||
+          _endedSessions.contains(request.session);
+      if (ended) {
+        if (request.state == AccessRequestState.approved) {
+          request.state = AccessRequestState.revoked;
+        }
+        _finishHistory(request, GrantEventKind.ended);
+      }
+      _expire(request);
+      if (deferred || ended) _recordRequest(request, sessionEnded: ended);
     }
   }
 }

@@ -204,6 +204,9 @@ extension _InformationDecisionService on InformationService {
     }
     if (_repository is AdditionalApprovalRepository) {
       for (final id in _uncertainCredentialDecisions.keys.toList()) {
+        // Online host resolves these exact intents and checkpoints unresolved
+        // barriers even when receipt storage is temporarily unavailable.
+        if (_onlineCredentialDecisions.containsKey(id)) continue;
         final receipt = await (_repository as AdditionalApprovalRepository)
             .additionalApprovalReceipt(id);
         _uncertainCredentialDecisions.remove(id)?.call(receipt != null);

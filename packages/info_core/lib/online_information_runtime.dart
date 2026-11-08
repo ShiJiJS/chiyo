@@ -53,6 +53,7 @@ final class OnlineInformationRuntime {
     final result = _queue.then((_) async {
       if (_failed) throw const AccessFailure('service_unavailable');
       await _checkGeneration();
+      await _resolveDeviceCredentialDecisions();
       try {
         return await action();
       } finally {
@@ -79,6 +80,8 @@ final class OnlineInformationRuntime {
   Future<void> _save() async {
     try {
       await service._drainInformationDecisions();
+      await _resolveDeviceCredentialDecisions();
+      _restoreDeviceCredentialFieldGrants();
       for (final request in service._requests.values) {
         service._expire(request);
       }
@@ -357,6 +360,9 @@ final class OnlineInformationRuntime {
       }
     }
     _restoreDeviceCredentialFieldGrants();
+    for (final intent in service._onlineCredentialDecisions.values) {
+      service._requests[intent.requestId]?.informationDecisionPending = true;
+    }
     for (final session in ended) {
       service._endSession(session);
     }
@@ -369,7 +375,10 @@ final class OnlineInformationRuntime {
         if (r.history != null) r.history!.id,
     };
     for (final history in service._repository.grantHistory.where(
-      (g) => g.active && !reconciled.contains(g.id),
+      (g) =>
+          g.active &&
+          !reconciled.contains(g.id) &&
+          !service._onlineCredentialDecisionPending(g.requestId),
     )) {
       final expired = !service._clock().isBefore(history.expiresAt);
       final finished = history.finish(

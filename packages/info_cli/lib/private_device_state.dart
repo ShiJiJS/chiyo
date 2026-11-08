@@ -28,7 +28,20 @@ Future<void> privateDeviceFile(File file) async {
       type != FileSystemEntityType.file) {
     throw const InformationFileFailure('delivery_io_failed');
   }
-  if (type == FileSystemEntityType.notFound) await file.create(exclusive: true);
+  if (type == FileSystemEntityType.notFound) {
+    try {
+      await file.create(exclusive: true);
+    } on FileSystemException catch (e) {
+      // Separate CLI processes can both observe the first launch lock absent.
+      // Only accept the other creator's regular file; links and all other I/O
+      // errors retain the original failure. Never truncate an existing lock.
+      if (e.osError?.errorCode != 17 ||
+          await FileSystemEntity.type(file.path, followLinks: false) !=
+              FileSystemEntityType.file) {
+        rethrow;
+      }
+    }
+  }
   if ((await Process.run('/bin/chmod', ['600', file.path])).exitCode != 0) {
     throw const InformationFileFailure('delivery_io_failed');
   }

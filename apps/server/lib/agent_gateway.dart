@@ -144,7 +144,17 @@ final class AgentGateway {
           'information-request-operations.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
-          if (_deviceCredentials != null) 'credential-device-execution.v1',
+          if (_deviceCredentials != null) ...[
+            'credential-device-execution.v1',
+            if ((result['capabilities'] as List).contains(
+              'credential-use-reuse.v1',
+            ))
+              'credential-use-reuse.v1',
+            if ((result['capabilities'] as List).contains(
+              'credential-ssh-session-validity.v1',
+            ))
+              'credential-ssh-session-validity.v1',
+          ],
           'information-import-operations.v1',
           'information-update-operations.v1',
           if ((result['capabilities'] as List).contains('credential-import.v1'))
