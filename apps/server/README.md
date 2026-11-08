@@ -44,6 +44,13 @@ dart run bin/server.dart serve /absolute/private/server.json
 - `GET /v1/owner/information`：当前完整文字资料列表，供独立客户端取回核对。
 - `POST /v1/owner/saves/{operationId}`：文字新增或修改。修改携带 itemId、baseVersion 及原字段身份；复用核心版本检查和原子保存。
 - `GET /v1/owner/operations/{operationId}`：已提交操作的原始回执。响应丢失后先查询，或用完全相同的请求重试；同编号不同内容返回 409，不产生新资料。
+- `GET /v1/owner/devices`：设备名称、编号与撤销状态，不返回接入凭证。
+- `POST /v1/owner/devices`：传入 operationId、name，由用户身份登记受限 Agent 设备，回复 deviceToken。重复同一操作返回原结果，不能把用户 Token 交给 Agent。
+- `POST /v1/owner/devices/{id}/revoke`：传入 operationId，撤销该设备之后的接入和内容交付。
+
+Agent 使用设备登记回复中的 deviceToken，通过独立的 `Authorization: Bearer <deviceToken>` 调用 `POST /v1/agent/...`。当前已接 catalog、directories/catalog、capabilities、session、session/lifecycle、session/check、session/end、request、request/status、status、cancel、claim、read，正文沿用 AgentProtocol。sessionSecret、endCapability 和领取的读取 token 均绑定原设备；其他设备持有同一凭证也不能使用。用户管理 Token 不能调用 Agent 入口，设备 Token 不能调用用户管理入口。`capabilities` 只声明已接通的远程能力。
+
+**#93 尚未交付完成。** 正式 CLI 的远程配置、App 审批接入和有效聊天授权重启恢复仍在开发；当前设备接入身份及绑定索引可加密持久保存，不表示核心中的活跃聊天和资料授权已经能在重启后延续。不要将本段作为完成的使用流程交给日常 Agent。
 
 操作编号在重启后保留；客户端切换服务器时必须核对服务器身份，不能把前一服务的编号/许可直接迁用。请求格式错误返回 400，未知接口/未找到操作返回 404，核心冲突返回 409；内部错误只返回固定代码，不回显 Token、正文、密钥和本机路径。目录、模板、完整文件与凭据协议由对应后续票接通，当前接口不代表这些能力已交付。
 

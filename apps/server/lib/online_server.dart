@@ -1,10 +1,13 @@
 import 'agent_devices.dart';
+import 'agent_gateway.dart';
+import 'package:info_core/agent_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/information_transport.dart';
 import 'package:info_core/builtin_information_definitions.dart';
+import 'package:info_core/protocol_json.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
 /// This host never starts a local credential executor or owns a desktop.
@@ -15,7 +18,7 @@ final class OnlineServer {
     this._ownerToken,
     this.serverId,
     this._devices,
-  ) {
+  ) : _agents = AgentGateway(AgentProtocol(_service.agent), _devices) {
     _http.listen(
       _handle,
       onError: (Object error, StackTrace stack) {
@@ -34,6 +37,7 @@ final class OnlineServer {
   final String _ownerToken;
   final String serverId;
   final AgentDeviceRegistry _devices;
+  final AgentGateway _agents;
   int get port => _http.port;
 
   static Future<OnlineServer> start({
@@ -80,10 +84,7 @@ final class OnlineServer {
       }
       bytes.addAll(chunk);
     }
-    final value = jsonDecode(utf8.decode(bytes));
-    if (value is! Map<String, dynamic>)
-      throw const FormatException('Expected object');
-    return value;
+    return decodeProtocolObject(utf8.decode(bytes), maxBytes: 2 * 1024 * 1024);
   }
 
   Future<void> _handle(HttpRequest request) async {
@@ -98,8 +99,7 @@ final class OnlineServer {
 
     try {
       // No browser management surface is part of this version.
-      if (request.headers.value('origin') != null ||
-          !_authenticated(request.headers.value('authorization'))) {
+      if (request.headers.value('origin') != null) {
         await reply(401, {'error': 'unauthorized'});
         return;
       }
@@ -109,6 +109,31 @@ final class OnlineServer {
         return;
       }
       final path = request.uri.pathSegments;
+      if (path.length >= 3 && path.take(2).join('/') == 'v1/agent') {
+        final authorization = request.headers.value('authorization') ?? '';
+        if (!authorization.startsWith('Bearer ')) {
+          await reply(401, {'error': 'unauthorized'});
+          return;
+        }
+        final bearer = authorization.substring(7);
+        // Authenticate before parsing body or consulting the shared protocol.
+        await _devices.authenticate(bearer);
+        if (request.method != 'POST') {
+          await reply(405, {'error': 'method_not_allowed'});
+          return;
+        }
+        final result = await _agents.dispatch(
+          bearer,
+          '/${path.skip(2).join('/')}',
+          await _body(request),
+        );
+        await reply(200, result);
+        return;
+      }
+      if (!_authenticated(request.headers.value('authorization'))) {
+        await reply(401, {'error': 'unauthorized'});
+        return;
+      }
       if (request.method == 'GET' && request.uri.path == '/v1/server') {
         await reply(200, {'protocolVersion': 1, 'serverId': serverId});
       } else if (request.uri.path == '/v1/owner/devices' &&
@@ -217,7 +242,12 @@ final class OnlineServer {
         await reply(404, {'error': 'not_found'});
       }
     } on AccessFailure catch (e) {
-      await reply(409, {'error': e.status});
+      await reply(e.status == 'unauthorized' ? 401 : 409, {
+        'error': e.status,
+        'status': e.status,
+      });
+    } on CredentialUseFailure catch (e) {
+      await reply(400, e.toJson());
     } on FormatException {
       await reply(400, {'error': 'invalid_request'});
     } on TypeError {
