@@ -27,6 +27,8 @@ import 'owner_history_routes.dart';
 import 'owner_backup_routes.dart';
 import 'owner_adoption_routes.dart';
 import 'owner_policy_routes.dart';
+import 'package:info_workspace/owner_agent_sessions.dart';
+import 'package:info_workspace/agent_sessions_transport.dart';
 import 'package:info_storage/info_storage.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
@@ -109,6 +111,9 @@ final class OnlineServer {
     );
   }
 
+  OwnerAgentSessions? _agentSessionsValue;
+  OwnerAgentSessions get _agentSessions =>
+      _agentSessionsValue ??= OwnerAgentSessions(_service.owner);
   OwnerWorkspaceApprovals _approvals;
   OwnerWorkspaceTemplatePackages _plugins;
   late OwnerLibraryScope _ownerScope;
@@ -159,6 +164,7 @@ final class OnlineServer {
     _adoptionRoutesValue = null;
     _policyRoutesValue?.dispose();
     _policyRoutesValue = null;
+    _agentSessionsValue = null;
     _files = null;
     _credentials = null;
     _hosts = null;
@@ -294,6 +300,9 @@ final class OnlineServer {
             jsonEncode([
               owner.templatePackageVersion,
               owner.desktopPreferences.version,
+              [
+                for (final s in owner.sessions) [s.id, s.chatLabel, s.ended],
+              ],
               [
                 for (final e in owner.recycleEntries) [e.id, e.version],
               ],
@@ -446,6 +455,10 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (request.method == 'GET' &&
+            request.uri.path == '/v1/owner/agent-sessions') {
+          if (request.uri.hasQuery) throw const FormatException();
+          await reply(200, agentSessionsToJson(await _agentSessions.read()));
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/settings') {
           final (code, value) = await _policyRoutes.dispatch(

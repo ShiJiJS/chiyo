@@ -48,7 +48,7 @@ WorkspaceApprovalQuery approvalQueryFromJson(Map<String, dynamic> j) =>
       );
     });
 
-Map<String, Object?> _summary(WorkspaceApprovalSummary r) => {
+Map<String, Object?> approvalSummaryToJson(WorkspaceApprovalSummary r) => {
   'id': r.id,
   'title': r.title,
   'kind': r.kind.name,
@@ -74,7 +74,7 @@ WorkspaceApprovalSummary _readSummary(Map<String, dynamic> j) =>
       state: WorkspaceApprovalState.values.byName(j['state'] as String),
     );
 Map<String, Object?> approvalResultsToJson(WorkspaceApprovalResults r) => {
-  'items': r.items.map(_summary).toList(),
+  'items': r.items.map(approvalSummaryToJson).toList(),
   'total': r.total,
   'pending': r.pending,
   'offset': r.offset,
@@ -115,7 +115,7 @@ Map<String, Object?> approvalDetailToJson(
           : credentialUseRequestToJson(d.credential!),
       'executions': d.executions.map(approvalExecutionToJson).toList(),
     },
-    'request': _summary(d.request),
+    'request': approvalSummaryToJson(d.request),
     'reviewToken': d.reviewToken,
     'scopes': [
       for (final s in d.scopes)
