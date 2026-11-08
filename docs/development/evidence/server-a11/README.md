@@ -2,6 +2,8 @@
 
 2026-11-09。**#101 尚未完成**。当前完成服务器接收加密备份、检查及原事务恢复；联网 App 的导出/另存/恢复流程、全部类型联合核对、进程中断及升级/回退说明仍待接续。#102 统一候选尚未交付；#103–#105 未动。
 
+阶段实现 `479498c3` 已推送 `codex/server-first-stage`；[GitHub 阶段评论](https://github.com/ShiJiJS/chiyo/issues/101#issuecomment-6724815251) 已发布并回读，工单仍为 Open。评论中 GitHub 自动将提交显示为七位短号，最初按八位文字等待超时；回读确认实际已发布，没有重复提交。
+
 ## 当前实现
 
 - `OwnerBackupRoutes` 使用正常用户身份，支持分块上传加密备份、检查恢复预览、原恢复操作及查询原回执。复用 `InformationBackups.inspectRestore/restoreWithReceipt` 和 `OwnerAccess.restoreLibraryOnce`，未修改备份格式、原件校验或非空目标拒绝规则。Agent 设备凭证不能访问用户备份接口。
