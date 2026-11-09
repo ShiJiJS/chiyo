@@ -5,7 +5,7 @@
 - 日期：2026-11-10（Asia/Shanghai）。持续目标已恢复为 active。
 - 范围：#108–#116，父任务 #104；#105 后置。#108–#112 和 #114 已完成；#113 待批准更新现有 NAS 运行版本，独立推进 #115/#116。
 - 分支：codex/windows-online。基线 ac8960c；环境与九票发布归档提交 35690cf。
-- 当前票：#113，Windows 本机凭据使用。#112 实现 fe37707、证据 docs/development/evidence/windows-online/w112.md；#111 完整实现 620bcbe（PDF 初段 871a83f）；#110 实现 c42f7d7；#109 实现 2e86359；#108 实现 f454927。
+- 当前票：#113（NAS换版本待授权）、#115（运行中worker/App联合退出）、#116（可靠Ctrl K与同包连续凭据）。中文鼠标粘贴、保存与取消已有最新完整包真实窗口证据。#112 实现 fe37707、证据 docs/development/evidence/windows-online/w112.md；#111 完整实现 620bcbe（PDF 初段 871a83f）；#110 实现 c42f7d7；#109 实现 2e86359；#108 实现 f454927。
 - 最新授权：直接使用现有 NAS；computer-use 必要时可用；可用现有实际资料验证；允许正常重启知予服务。正式安装和需要用户认证的操作仍最后集中。
 - 不扩入 WSL、新服务、密码填充、SSH 密码登录或跨电脑审批。保持旧 Windows 库独立；实际资料验证不等于可永久删除或恢复覆盖原库。
 
@@ -65,3 +65,6 @@
 - #116 最新完整候选55d83404998492fd46a21816a9791a72c8419189已通过完整 -Offline -PackageOnly 和新解包守卫；build/development/w116-package-55d8340/，ZIP123298669字节、7699项，SHA256 de934ca5a129dcb42c391d75c18ad1e84bd001af97a679b60d682e48a58cd599。默认2062项非hidden适用测试通过，另有明确平台跳过和POSIX整文件排除；实际解包CLI/hooks16项、混合生命周期7项及SQLCipher/DPAPI通过。受限PATH的实际App显示62项并正常退出；三工具当前设备观察通过。旧两份w116完整包及旧QA已清理，保留日志/manifest/摘要，原策略拒绝项未动。启动脚本local/development/start-windows-online-candidate.ps1已备妥，正式安装/hooks未改。
 - 接续位置：build/development/w116-qa-55d8340，原私人local/private/w113-credential-check/flow.dpapi仍requesting-gh/3凭据/0申请，不重建；NAS兼容修补a9候选在Mac保留。只有用户明确同意换版本后才部署并接续#113真实执行、#115正在运行worker/App联合退出，再完成#116同包连续核对。Ctrl K/中文保存取消需可靠原生输入，最小窗口已证明Sky组合键到达时Ctrl不在按下状态，不改业务代码掩盖。
 - 外部阻点审计1：当前唯一连续目标turn 01a1c116-0552-72a2-a858-5df2c7d60729，独立工作在本turn末才耗尽；换版本问题尚未答复。goal保持active、不提前complete或blocked。后续不同自动续作turn如仍无新授权/可靠输入，记录同一阻点审计2、3；达到三次且无独立工作再按goal工具置blocked，避免重复全量检查或重复询问。新授权到达时立即接续其允许范围。
+
+- 本次续作新增实际证据：Control_R+k同样在K到达时ctrl=false；改用自有记事本样本的鼠标复制/Flutter右键Paste，55d8340真实App完成中文名称/正文输入、保存与取消。仅新增一条明确开发文档，正常回收后界面恢复62项/回收站40；44条原资料SHA和原w113信息基线一致，App正常退出。首次GET超时仅重试读取，没有重复保存。事实local/private/w116-native-record-check/facts.dpapi已completed，本机辅助代码local/development/w116_native_record_check.dart；详见w116证据最后一节。包与源码未变，无须重跑已通过整套检查。
+- 外部阻点审计2（turn 01a1c28a-d9be-7352-b4be-665c98d289e7）：上一goal turn属于progress，本turn也新增了中文真实窗口证据，原先“中文保存需用户回来”的范围已收窄；Ctrl K仍无法由Sky可靠发送，NAS换版本问题仍未答。现在已做完当前可执行独立工作，goal继续active；下一不同续作turn若仍无新授权/可靠输入且无安全独立动作，按第三次同阻点审计置blocked，不重复整套测试或重复询问。
