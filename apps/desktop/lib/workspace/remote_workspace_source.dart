@@ -803,13 +803,17 @@ class RemoteWorkspaceSource
     if (r != null && lifecycle != null) {
       throw const WorkspaceFailure('unknown_outcome', '原操作编号对应多种结果，无法确认。');
     }
-    if (lifecycle != null) return lifecycle;
+    if (lifecycle != null) {
+      await _refreshResolvedRecord(lifecycle.result.ref);
+      return lifecycle;
+    }
     if (r == null) return null;
     final command = r.command;
     if (command == null) {
       throw const WorkspaceFailure('unknown_outcome', '此旧操作缺少原表单标识，请核对操作结果。');
     }
     final ref = WorkspaceRecordRef(WorkspaceRecordKind.information, r.itemId);
+    await _refreshResolvedRecord(ref);
     return WorkspaceOperationReceipt(
       operationId: r.operationId,
       intent: WorkspaceOperationIntent(
@@ -828,4 +832,13 @@ class RemoteWorkspaceSource
       result: WorkspaceRecordReceipt(ref: ref, version: r.version),
     );
   });
+
+  Future<void> _refreshResolvedRecord(WorkspaceRecordRef ref) async {
+    // A lost save reply bypasses _save's normal cache publication. Resolving
+    // its receipt must refresh that same projection before closing the frozen
+    // editor, including when the record moved out of its previous directory.
+    // Failure remains an unknown outcome; this never submits another write.
+    if (cache.resources != null) await cache.synchronize(requireFresh: true);
+    if (!_changes.isClosed) _changes.add(ref);
+  }
 }
