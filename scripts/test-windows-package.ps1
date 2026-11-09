@@ -26,6 +26,14 @@ try {
     Expand-Archive -LiteralPath $archive -DestinationPath $testRoot
     $payload = Join-Path $testRoot 'AgentInfoManage'
     $manifest = Get-Content -LiteralPath (Join-Path $payload 'manifest.json') -Raw | ConvertFrom-Json
+    if (Test-Path -LiteralPath (Join-Path $payload 'app/native_assets.json')) {
+        throw 'The test-only absolute native asset cache must not be shipped.'
+    }
+    $nativeAssets = Get-Content -LiteralPath (Join-Path $payload 'app/data/flutter_assets/NativeAssetsManifest.json') -Raw | ConvertFrom-Json
+    $cipherLoader = @($nativeAssets.'native-assets'.windows_x64.'package:sqlite3/src/ffi/libsqlite3.g.dart')
+    if ($cipherLoader.Count -ne 2 -or $cipherLoader[0] -ne 'absolute' -or $cipherLoader[1] -ne 'sqlcipher.dll') {
+        throw 'The extracted release SQLCipher loader is not portable.'
+    }
     if ($manifest.architecture -ne 'windows-x64' -or $manifest.sourceDirty) { throw 'Invalid preview identity.' }
     if ($manifest.format -notin @(1, 2)) { throw 'Unsupported preview manifest.' }
     if ($manifest.format -eq 2) {
