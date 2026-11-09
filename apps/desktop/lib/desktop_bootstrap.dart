@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:info_cli/credential_execution_host.dart';
 import 'package:info_cli/macos_bundled_tools.dart';
+import 'package:info_cli/windows_bundled_tools.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/macos_desktop_control.dart';
@@ -150,7 +151,7 @@ class DesktopBootstrap extends ChangeNotifier {
         enableReusableCredentialUse: Platform.isWindows || Platform.isMacOS,
         enableFocusedFill: Platform.isWindows,
         enableInformationFiles: Platform.isWindows || Platform.isMacOS,
-        credentialTools: Platform.isMacOS ? MacBundledTools().read : null,
+        credentialTools: Platform.isWindows ? WindowsBundledTools().read : Platform.isMacOS ? MacBundledTools().read : null,
         credentialExecutionHandler: (session, input) {
           final host = _credentialExecutions;
           return host == null

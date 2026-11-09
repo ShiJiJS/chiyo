@@ -57,7 +57,8 @@ class WindowsAgentBundle {
         return const AgentBundleObservation(status: 'manifest_missing');
       }
       final manifestFile = await _file(root, 'manifest.json');
-      const maxManifest = 4 * 1024 * 1024;
+      // The fixed AWS distribution contains ~7,600 regular files.
+      const maxManifest = 8 * 1024 * 1024;
       if (await manifestFile.length() > maxManifest) {
         throw const FormatException('Manifest size');
       }
@@ -81,10 +82,11 @@ class WindowsAgentBundle {
         throw const FormatException('Manifest identity');
       }
       final rows = manifest['files'] as List;
-      if (rows.isEmpty || rows.length > 2048) {
+      if (rows.isEmpty || rows.length > 12000) {
         throw const FormatException('Manifest entry count');
       }
       final declared = <String, Map>{};
+      final normalized = <String>{};
       for (final row in rows) {
         if (row is! Map ||
             row['path'] is! String ||
@@ -111,7 +113,7 @@ class WindowsAgentBundle {
                       segment.endsWith(' '),
                 ) ||
             !RegExp(r'^[A-Za-z0-9_./+ -]+$').hasMatch(relative) ||
-            declared.keys.any((path) => _path(path) == _path(relative))) {
+            !normalized.add(_path(relative))) {
           throw const FormatException('Unsafe or duplicate package path');
         }
         declared[relative] = row;
