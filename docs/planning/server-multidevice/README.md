@@ -117,4 +117,3 @@ L01 切换前必须以当前候选通过必要原生检查，导出真实资料�
 - [沿用 Dart 与加密 SQLite](../../adr/0026-reuse-dart-for-server.md)
 - [整份提案一次保存](../../adr/0020-save-whole-import-proposal.md)
 - [工单依赖数据](tickets.json)
-
