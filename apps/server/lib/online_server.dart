@@ -546,6 +546,13 @@ final class OnlineServer {
             request.uri.path == '/v1/owner/updates') {
           await reply(200, {
             'workspaceObservation': await _requestObservation(),
+            'summary': {
+              'records':
+                  _service.owner.information.length +
+                  _service.owner.credentials.length,
+              'pending': _service.owner.queryInbox(limit: 1).pendingCount,
+              'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
+            },
           });
         } else if (request.method == 'POST' &&
             request.uri.path == '/v1/owner/sync') {
