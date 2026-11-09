@@ -112,6 +112,10 @@ void main() {
           ]),
         );
         await source.cache.synchronize();
+        expect(
+          (await client.request('GET', '/v1/owner/updates'))['summary'],
+          containsPair('records', 1),
+        );
         final version = (await repo.openServerState()).revision;
         await source.cache.synchronize();
         expect((await repo.openServerState()).revision, version);
