@@ -40,6 +40,7 @@ void main() {
       late OnlineServer server;
       late PrivateConnectionProfileStore profiles;
       late File package;
+      RemoteWorkspaceSource? live;
       var chooserCalls = 0;
       const channel = MethodChannel('agent_info_manage/backup_files');
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -154,6 +155,7 @@ void main() {
         final source =
             t.widget<LibraryPage>(find.byType(LibraryPage)).controller.source
                 as RemoteWorkspaceSource;
+        live = source;
         await tap('workspace-nav-settings');
         await tap('settings-section-plugins');
         await until(() => find.byType(PluginsPage).evaluate().isNotEmpty);
@@ -248,7 +250,7 @@ void main() {
         expect(t.takeException(), isNull);
       } finally {
         await t.pumpWidget(const SizedBox());
-        await t.pump();
+        if (live != null) await connected(live.dispose);
         await t.runAsync(() async {
           await server.close();
           await runtime.close();

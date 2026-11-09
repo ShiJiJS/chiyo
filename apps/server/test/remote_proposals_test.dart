@@ -318,7 +318,9 @@ void main() {
           proposalChangeToJson(change),
         ),
         throwsA(
-          isA<RemoteFailure>().having((e) => e.code, 'code', 'service_failure'),
+          // The shared Owner transaction reports a typed save failure. The
+          // rollback and absent receipt checks below still prove no admission.
+          isA<RemoteFailure>().having((e) => e.code, 'code', 'save_failed'),
         ),
       );
       expect(await owner.information(), isEmpty);

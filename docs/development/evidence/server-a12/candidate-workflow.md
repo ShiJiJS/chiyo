@@ -1,6 +1,6 @@
 # #102：配套候选连续业务与独立 Agent 试用
 
-2026-11-09。本页记录真实阶段结果；不表示首轮已结束。当前仍需用试用修复后的最终候选复验、清理并关闭 #102。正式安装及真实迁移仍留 #103。
+2026-11-09。最终有效候选为f0f9e24a，其连续流程、第二次独立试用和清理已完成，见文末及 [最终核对](completion-audit.md)。前文保留旧候选及修复过程，不把旧包当最终交付。正式安装及真实迁移仍留 #103。
 
 ## 7a056395 候选的连续流程
 
@@ -50,3 +50,25 @@ Agent如实指出公开接口不能独立查全部关联和旧附件历史；这
 补丁的Mac和Linux服务相关各4项通过，无跳过；核心模板传输1项通过。初期测试漏导入核心扩展导致编译失败，已修正，失败未计通过。日志 `a12-trial-discovery-final.log`、`a12-trial-discovery-linux.log`、`a12-trial-candidate-key.log`。
 
 下一步必须以补丁后的同一最终候选再做连续检查及新的无上下文试用，不能以第一次试用的部分成功或旧候选代替修复后的验证。
+
+## 修复后最终候选 f0f9e24a 的实际结果
+
+配套候选 `build/macos-adaptation/server-first-stage-f0f9e24a` 已完整构建，源码为 `f0f9e24a8f99d2e8a46b3cc7a6710da575e2627a`，Linux ARM64 镜像 `chiyo-server:candidate-f0f9e24a8f99`，镜像 ID `sha256:fbfc6a264637199858b1d88c0cc4331740d0b84b7f4f4bf049b523a72796af43`，Mac 版本 `0.4.4+18-mac-dev.f0f9e24a8f99`。Mac签名、提取字节/权限/链接、诊断、实际准备程序和worker、DMG，以及同源编译服务的初始化与容器重建全部通过。
+
+版本化 QA 工具在这套候选上实际运行，两组均通过，日志 `local/server-first-stage/a12-final-candidate-workflow-f0.log`，事实 `a12-final-candidate-workflow-f0/workflow-facts.json`。十二项检查全部为true，包含上述完整业务、全新客户端、正常联网启动器，以及新增的领取副本物理移除和凭据执行cleanupState=complete核对。实际随包AWS只向隔离合成HTTP端点发出一次签名请求，未连接真实AWS账号。工具同时检查候选镜像ID和当前产品源码与该提交相同。
+
+同一套真实签名App又以新空配置 `a12-native-f0f9e24a` 实际启动，同包CLI观察同一PID进入running，正常quit后确认进程结束。未配置服务器或读取日常配置，未访问个人钥匙串。日志及结果 `a12-native-package-f0.log`、`a12-native-package-f0-result.json`。退出后再次确认not_running，只删除这个测试配置的控制登记，记录 `a12-native-f0-cleanup.json`。这不替代原生文件面板、通知点击或睡眠唤醒验收。
+
+## 第二次无上下文试用：最终候选
+
+`a12_final_fresh_usage_trial` 使用 fork-none，实际子聊天 `01a1be04-e6e1-79d1-ba22-fa01cd166a96`。只给最终候选生成的正式Skill、隔离接入位置和合成来源，没有给分类、条数、关联、版本或命令答案。子Agent按正式说明要求父聊天先办理委托；协调者用自己的既有证明调用正式delegate，将准确子聊天私有关联交接给它，没有把用户管理Token或父聊天证明给它，也没有修改个人hooks。
+
+Agent独立提交整份11项：主机、应用、两份独立配置、三个凭据、个人档案、技能项目正文、同一简历两版本和证明。不同于第一次的组织方式，但内容与来源相符；没有保留环境汇总原件或临时导出说明。协调者只通过正常用户私有输入补一项合成网页密码，再由原提案控制器整份保存；原提案回读completed、11条admitted。密码没有返回子Agent。
+
+Agent自行申请22个范围，批准后实际核对20个文字或结构字段；简历当前附件为第二版、213字节，证明为第一版、177字节，均与来源逐字节一致。两份副本均file-release并回读released，没有待批申请。修复后的凭据目录入口可用，没有再遇到提交key或unsupported_capability问题；未申请凭据材料、未执行服务器操作。
+
+Agent明确没有声称公开目录能核对关联或读取历史附件。协调者另用正常用户接口核对应用/主机、Mac配置、个人资料/原件及三项凭据关联；简历确有两版，当前第二版，一月旧原文与来源逐字节一致。这些是用户侧验证，不冒称由Agent独立读取。独立结果、审批与关系日志：`a12-final-independent-owner-admission.log`、`a12-final-independent-read-approval.log`、`a12-final-independent-owner-relations.log`；结构化事实在 `a12-independent-trial-2/owner-admission-result.json` 和 `owner-relations-history-result.json`。
+
+试用结束通过同包SessionEnd结束原合成根会话；所属编译服务容器正常退出0并移除，`a12-independent-trial-2/shutdown-result.json`。没有重连原聊天、重放保存、安装Skill或将测试批准能力交给Agent。
+
+全量检查、失败定位及定向复验、交付摘要和冗余产物清理现已完成，准确结果及限制见 [最终核对](completion-audit.md)。原先两轮试用的临时库、密钥、运行包、关联及旧候选已移除，保留普通合成源文档、小型结果和日志；不再保留可继续接入的测试身份。

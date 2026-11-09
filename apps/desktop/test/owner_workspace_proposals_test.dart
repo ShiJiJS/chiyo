@@ -259,8 +259,15 @@ void main() {
       }
 
       final servers = await service.agent.submitImport(session, [
-        for (final name in ['合成服务器A', '合成服务器B'])
-          core.ImportItemInput.fromJson({...example('server'), 'name': name}),
+        for (final entry in [
+          (key: 'server-a', name: '合成服务器A'),
+          (key: 'server-b', name: '合成服务器B'),
+        ])
+          core.ImportItemInput.fromJson({
+            ...example('server'),
+            'key': entry.key,
+            'name': entry.name,
+          }),
       ]);
       await source.change(decision(await source.read(servers)));
       final refs = (await source.read(
