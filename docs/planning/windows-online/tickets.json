@@ -104,7 +104,8 @@
       "issueNumber": 114,
       "issueId": 6289282814,
       "url": "https://github.com/ShiJiJS/chiyo/issues/114",
-      "state": "published"
+      "state": "completed",
+      "sourceCommit": "c75b964"
     },
     {
       "id": "W10",
@@ -119,7 +120,7 @@
       "issueNumber": 115,
       "issueId": 6289284877,
       "url": "https://github.com/ShiJiJS/chiyo/issues/115",
-      "state": "published"
+      "state": "in_progress"
     },
     {
       "id": "W11",

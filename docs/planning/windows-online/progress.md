@@ -3,7 +3,7 @@
 ## 当前快照
 
 - 日期：2026-11-10（Asia/Shanghai）。持续目标已恢复为 active。
-- 范围：#108–#116，父任务 #104；#105 后置。#108–#112 已完成，#113 进行中。
+- 范围：#108–#116，父任务 #104；#105 后置。#108–#112 和 #114 已完成；#113 待批准更新现有 NAS 运行版本，独立推进 #115/#116。
 - 分支：codex/windows-online。基线 ac8960c；环境与九票发布归档提交 35690cf。
 - 当前票：#113，Windows 本机凭据使用。#112 实现 fe37707、证据 docs/development/evidence/windows-online/w112.md；#111 完整实现 620bcbe（PDF 初段 871a83f）；#110 实现 c42f7d7；#109 实现 2e86359；#108 实现 f454927。
 - 最新授权：直接使用现有 NAS；computer-use 必要时可用；可用现有实际资料验证；允许正常重启知予服务。正式安装和需要用户认证的操作仍最后集中。
@@ -50,3 +50,6 @@
 - #113 阶段进度：本机 host 显式 Windows 环境、DPAPI 清理日志扫描、Windows 随包 GH/AWS + 系统 SSH 发现、准备 CLI 的匹配包公开指针及固定官方工具组装已实现。15 项 CLI 定向检查（含三种实际工具版本/身份）、2 项 Core、1 项设置控件、2 项 MSI/CAB 负例和相应分析通过。官方 AWS MSI 仅只读提取 7,566 文件；没有系统安装、全局 PATH 或全局 hooks 改动。证据 docs/development/evidence/windows-online/w113.md。
 - #113 实际 NAS 阻点：新建隔离验证聊天和三份本轮开发凭据后，Windows C:\... 启动计划被当前 NAS invalid_plan 拒绝。已定位 device 接口误用服务端本机平台的路径解析；修补限定在已认证 device transport 显式 portable-path，普通本机默认不变。尚未批准或实际执行，不冒认 GH/AWS/SSH AOT 流程通过。原 local/private/w113-credential-check/flow.dpapi 保留，不重新创建聊天/凭据；原资料及 SSH 信任不变。
 - #113 下一步：Mac 先只读核对当前镜像/现有检查流程；扩展的跨平台真实服务请求/操作/加密重开检查需在 Mac/Linux 验证。NAS 运行版本未替换，正常重启授权不等于替换镜像授权；服务端修补/构建准备可审阅后再集中说明具体所需动作。该等待期间继续 #114/#115 的独立实现与检查，九票不提前报完成。
+- #113 服务候选已准备：固定 a9eccb3c5746e8aaa932debdfa2e1af27e86d90e，Mac 核心 68 通过/1 Windows 专用跳过、服务端全套 81 通过；Linux AMD64 核心 2、服务选定 21 通过；实际 AOT 的合成升级/重开/旧副本回退和增量接续通过。Mac 候选目录 build/macos-adaptation/windows-device-path-a9eccb3c-amd64/，镜像 chiyo-server:windows-path-a9eccb3c-amd64；tar.gz 36,520,334 字节，SHA256 05441a43115d63b84853a1553b33e5740d2ec09c1eaf2d4e114f70dc8f656847。只准备候选，NAS 原镜像/StartedAt 未变。已向用户发出具体换版本问题，答复前不替换，不把正常重启授权当成更新授权。
+- #114 独立完成并关闭，提交 c75b96424fc430579b79ef0e1c0162b0757b2002，GitHub 回读 CLOSED。Windows 暂存路径边界先红后绿；设备备份日志/占用/大文件/重开、发布、完整备份/凭据/恢复、目录顺序/回收及恢复进程中断共 44 项定向检查通过。真实 NAS 导出/独立新 DPAPI 空目标恢复最终 48 秒通过；丢失确认并断线后重开原操作，实际仅导出一次。44 条资料、30 个含回收凭据对象、37 个附件版本及历史恢复，原 NAS 资料/SSH 信任不变，没有调用 NAS 恢复接口。最终私人证据 local/private/w114-backup-check/w114-backup-9384c1c8/result.json；公开证据 docs/development/evidence/windows-online/w114.md。最终完整包/原生连续核对仍 #116。
+- #115 当前：发现 Windows 原生窗口未转发唤醒事件。真实 native integration 向自身窗口发送受控 WM_POWERBROADCAST/PBT_APMRESUMEAUTOMATIC，先复现回调 0 次；修补后触发在线重连回调 1 次，后续用户活动消息不重复触发，不退出或实际休眠电脑。待补 NAS 桌面生命周期与本机设置/通知路由、同包 Release 和最后原生连续检查。
