@@ -86,7 +86,9 @@ class WorkspaceFileActions {
   ) async {
     final args = await outputs.access(id);
     if (args['stagingBookmark']!.isEmpty) {
-      return action(); // Non-native fixtures only.
+      // Windows has no sandbox bookmarks. Its pinned native identities and
+      // private operation journal remain mandatory; fixtures may omit them too.
+      return action();
     }
     final token = await picker.acquireAccess(args, needsOutput: output);
     try {
