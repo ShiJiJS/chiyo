@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
+import '../bundled_tool_settings.dart';
 import '../ui_palette.dart';
 import 'agents_controller.dart';
 import 'library_widgets.dart';
@@ -233,7 +234,7 @@ class WorkspaceAgentsPage extends StatelessWidget {
                 ),
               ),
               SettingsPreferenceRow(
-                title: 'Mac 本机焦点填充',
+                title: '本机焦点填充',
                 divider: false,
                 description: '当前默认关闭，独立于会话接入。连接成功不代表可以向前台应用填入凭据。',
                 control: Text(
@@ -248,6 +249,10 @@ class WorkspaceAgentsPage extends StatelessWidget {
             '连接成功不会自动获得资料权限。聊天名称为 Agent 自述；聊天 ID 不能作为访问证明。私密关联由受控接入传递，本页不展示或复制。',
             style: libraryText(context, 14, color: c.muted, height: 1.9),
           ),
+          if (Theme.of(context).platform == TargetPlatform.windows) ...[
+            const SizedBox(height: 22),
+            const SettingsCard(children: [BundledToolSettings()]),
+          ],
         ],
       );
     },
@@ -429,7 +434,7 @@ class _AgentFlowState extends State<_AgentFlow> {
       _text(context, _sessionExplanation(report.session.state)),
       _text(
         context,
-        '接入观察、申请发起方自述和实际资料授权分别核对。Mac 焦点填充保持不可用；诊断通过也不会启用它。',
+        '接入观察、申请发起方自述和实际资料授权分别核对。本机焦点填充保持不可用；诊断通过也不会启用它。',
         muted: true,
       ),
     ];

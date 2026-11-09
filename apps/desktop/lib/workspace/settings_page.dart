@@ -463,7 +463,9 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
       ),
       const SizedBox(height: 20),
       Text(
-        '系统通知由macOS管理，通知权限与专注模式会影响提醒显示。可先预览申请概况及点击去向。',
+        Theme.of(context).platform == TargetPlatform.windows
+            ? '系统通知由 Windows 管理，通知设置与勿扰模式会影响提醒显示。可先预览申请概况及点击去向。'
+            : '系统通知由macOS管理，通知权限与专注模式会影响提醒显示。可先预览申请概况及点击去向。',
         style: libraryText(
           context,
           13,
