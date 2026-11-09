@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'remote_workspace_source.dart';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
 import '../desktop_controls.dart';
@@ -425,6 +426,36 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     trailingBuilder: (context) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (_source is RemoteWorkspaceSource)
+          ListenableBuilder(
+            listenable: _source.cache,
+            builder: (context, _) {
+              final cache = _source.cache;
+              final at = cache.updatedAt;
+              return TextButton.icon(
+                key: const ValueKey('workspace-sync'),
+                onPressed: cache.busy
+                    ? null
+                    : () async {
+                        try {
+                          await cache.synchronize();
+                        } catch (_) {
+                          /* shown below */
+                        }
+                      },
+                icon: const Icon(Icons.sync, size: 18),
+                label: Text(
+                  cache.busy
+                      ? '同步中…'
+                      : cache.failure != null
+                      ? '同步失败，重试'
+                      : at == null
+                      ? '同步'
+                      : '同步 · 更新于 ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
+                ),
+              );
+            },
+          ),
         if (widget.onAgentConnectionSetup != null)
           IconButton(
             tooltip: 'AI 接入',

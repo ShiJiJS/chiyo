@@ -5,14 +5,21 @@ import 'workspace_source.dart';
 abstract class LibraryReviewedOperationController<P, C, R>
     extends ChangeNotifier {
   LibraryReviewedOperationController(this.source) {
-    _changes = source.changes.listen((_) {
-      if (_closed || frozen) return;
-      _changeVersion++;
-      needsReview = true;
-      failure = const WorkspaceFailure('conflict', '目录或资料已变化，请重新读取并核对范围。');
-      notifyListeners();
-      unawaited(_verifyUnchangedPreview());
-    });
+    _changes =
+        (source is WorkspaceLibraryNotifications
+                ? (source as WorkspaceLibraryNotifications).libraryChanges
+                : source.changes)
+            .listen((_) {
+              if (_closed || frozen) return;
+              _changeVersion++;
+              needsReview = true;
+              failure = const WorkspaceFailure(
+                'conflict',
+                '目录或资料已变化，请重新读取并核对范围。',
+              );
+              notifyListeners();
+              unawaited(_verifyUnchangedPreview());
+            });
   }
   final WorkspaceSource source;
   P? preview;

@@ -82,43 +82,61 @@ final class OwnerClient {
     String path, [
     Object? body,
   ]) async {
+    HttpClientRequest? active;
+    var expired = false;
     try {
-      final target = address.resolve(path);
-      if (target.origin != address.origin)
-        throw const RemoteFailure('invalid_request');
-      final request = await _http.openUrl(method, target);
-      request.headers.set('authorization', 'Bearer $_token');
-      if (serverId.isNotEmpty)
-        request.headers.set('x-chiyo-server-id', serverId);
-      if (body != null) {
-        request.headers.contentType = ContentType.json;
-        request.write(jsonEncode(body));
-      }
-      final response = await request.close().timeout(
-        const Duration(seconds: 15),
-      );
-      if (serverId.isNotEmpty &&
-          response.headers.value('x-chiyo-server-id') != serverId) {
-        throw const RemoteFailure('server_changed');
-      }
-      final bytes = <int>[];
-      await for (final chunk in response.timeout(const Duration(seconds: 15))) {
-        if (bytes.length + chunk.length > 32 * 1024 * 1024)
-          throw const RemoteFailure('response_too_large');
-        bytes.addAll(chunk);
-      }
-      final value = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-      if (response.statusCode != 200) {
-        throw RemoteFailure(
-          value['error'] as String? ?? 'service_failure',
-          fieldErrors: value['fieldErrors'] == null
-              ? const {}
-              : Map<String, String>.unmodifiable(
-                  (value['fieldErrors'] as Map).cast<String, String>(),
-                ),
+      return await (() async {
+        final target = address.resolve(path);
+        if (target.origin != address.origin)
+          throw const RemoteFailure('invalid_request');
+        final request = active = await _http.openUrl(method, target);
+        request.followRedirects = false;
+        if (expired) {
+          request.abort();
+          throw TimeoutException('Request expired');
+        }
+        request.headers.set('authorization', 'Bearer $_token');
+        if (serverId.isNotEmpty)
+          request.headers.set('x-chiyo-server-id', serverId);
+        if (body != null) {
+          request.headers.contentType = ContentType.json;
+          request.write(jsonEncode(body));
+        }
+        final response = await request.close().timeout(
+          const Duration(seconds: 15),
         );
-      }
-      return value;
+        if (serverId.isNotEmpty &&
+            response.headers.value('x-chiyo-server-id') != serverId) {
+          throw const RemoteFailure('server_changed');
+        }
+        final bytes = <int>[];
+        await for (final chunk in response.timeout(
+          const Duration(seconds: 15),
+        )) {
+          if (bytes.length + chunk.length > 32 * 1024 * 1024)
+            throw const RemoteFailure('response_too_large');
+          bytes.addAll(chunk);
+        }
+        final value = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+        if (response.statusCode != 200) {
+          throw RemoteFailure(
+            value['error'] as String? ?? 'service_failure',
+            fieldErrors: value['fieldErrors'] == null
+                ? const {}
+                : Map<String, String>.unmodifiable(
+                    (value['fieldErrors'] as Map).cast<String, String>(),
+                  ),
+          );
+        }
+        return value;
+      })().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          expired = true;
+          active?.abort();
+          throw TimeoutException('Request expired');
+        },
+      );
     } on HandshakeException {
       throw const RemoteFailure('untrusted_server');
     } on SocketException {

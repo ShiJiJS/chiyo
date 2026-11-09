@@ -8,11 +8,15 @@ enum WorkspaceSaveState { idle, saving, saved, rejected }
 /// their drafts; a failed or stale save never writes back into those drafts.
 class WorkspaceRecordsController extends ChangeNotifier {
   WorkspaceRecordsController(this.source) {
-    _subscription = source.changes.listen((_) {
-      if (!_disposed && saveState != WorkspaceSaveState.saving) {
-        unawaited(load(query, keepSelection: selection));
-      }
-    });
+    _subscription =
+        (source is WorkspaceLibraryNotifications
+                ? (source as WorkspaceLibraryNotifications).libraryChanges
+                : source.changes)
+            .listen((_) {
+              if (!_disposed && saveState != WorkspaceSaveState.saving) {
+                unawaited(load(query, keepSelection: selection));
+              }
+            });
   }
   final WorkspaceSource source;
   late final StreamSubscription<WorkspaceRecordRef?> _subscription;

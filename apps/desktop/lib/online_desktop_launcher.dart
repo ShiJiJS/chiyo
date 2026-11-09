@@ -53,7 +53,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   bool _busy = true;
   bool _serverChanged = false;
   bool _offline = false, _probing = false;
-  Timer? _connectionTimer;
+  Timer? _connectionTimer, _syncTimer;
   late final OnlineDesktopRuntime _desktop;
   String? _desktopObservation;
   DateTime? _lastOwnerMaintenance;
@@ -156,6 +156,15 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
         _offline = false;
         _busy = false;
       });
+      await _source!.cache.synchronize();
+      if (mounted) setState(() {});
+      _syncTimer?.cancel();
+      _syncTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+        final source = _source;
+        if (source != null && !_offline) {
+          unawaited(source.cache.synchronize().catchError((Object _) {}));
+        }
+      });
       await _desktop.bind(_source);
       if (!mounted || _desktop.quitting) return;
       _connectionTimer?.cancel();
@@ -165,6 +174,11 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       );
     } on Object catch (e) {
       client?.close();
+      final failedSource = _source;
+      _source = null;
+      if (failedSource != null) {
+        unawaited(failedSource.dispose().catchError((Object _) {}));
+      }
       if (mounted) {
         setState(() {
           _busy = false;
@@ -177,10 +191,9 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
               '请填写完整的 HTTPS 服务器地址和 Token。',
             RemoteFailure(code: 'server_unavailable') =>
               '无法连接服务器，请检查网络、服务器是否运行，以及系统是否允许知予访问本地网络。',
-            RemoteFailure(code: 'server_timeout') =>
-              '连接服务器超时，请检查网络和服务器状态后重试。',
-            FileSystemException() || ProcessException() =>
-              '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
+            RemoteFailure(code: 'server_timeout') => '连接服务器超时，请检查网络和服务器状态后重试。',
+            FileSystemException() ||
+            ProcessException() => '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
             _ => '连接失败，请检查服务器地址、Token 和网络后重试。',
           };
         });
@@ -193,14 +206,19 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     if (source == null || _probing) return;
     _probing = true;
     try {
-      final status = await source.client.request('GET', '/v1/server');
+      final status = await source.client.request('GET', '/v1/owner/updates');
       final observation = status['workspaceObservation'];
       if (observation is! String) throw const RemoteFailure('invalid_response');
       if (mounted && identical(source, _source)) {
-        source.observeServer(observation);
+        source.observeServer(
+          observation,
+          summary: status['summary'] == null
+              ? null
+              : Map<String, dynamic>.from(status['summary'] as Map),
+        );
         // A slow OS notification delivery must not hold the health probe open
         // and delay the offline screen. The App lifetime drains this work.
-        unawaited(_desktop.refresh());
+
         final now = DateTime.now();
         if (_lastOwnerMaintenance == null ||
             now.difference(_lastOwnerMaintenance!) >=
@@ -227,6 +245,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     if (_desktop.quitting) return;
     unawaited(_desktop.bind(null));
     _connectionTimer?.cancel();
+    _syncTimer?.cancel();
     final old = _source;
     setState(() => _source = null);
     if (old != null) unawaited(old.dispose());
@@ -272,6 +291,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
 
   Future<void> _closeForExit() async {
     _connectionTimer?.cancel();
+    _syncTimer?.cancel();
     // Unmount data-backed widgets before their client and private device
     // coordinators close. This callback has no server/session stop capability.
     if (mounted) {
@@ -287,6 +307,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     _desktop.removeListener(_desktopChanged);
     _desktop.dispose();
     _connectionTimer?.cancel();
+    _syncTimer?.cancel();
     _source?.dispose();
     _address.dispose();
     _token.dispose();
@@ -322,6 +343,11 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                 : const Text('正在退出应用…'),
           ),
         ),
+      );
+    }
+    if (source != null && source.cache.resources == null) {
+      return MaterialApp(
+        home: Scaffold(body: Center(child: Text(_error ?? '正在同步资料…'))),
       );
     }
     if (source != null) {

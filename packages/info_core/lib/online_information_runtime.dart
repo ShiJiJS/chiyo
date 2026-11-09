@@ -7,6 +7,9 @@ final class OnlineInformationRuntime {
   OnlineInformationRuntime._(this.service, this._state, this._generation);
   final InformationService service;
   final ServerStateRepository _state;
+
+  /// Trusted server infrastructure only; never expose through AgentAccess.
+  ServerStateRepository get hostState => _state;
   String _generation;
   Future<void> _queue = Future.value();
   bool _closing = false, _failed = false;
@@ -46,7 +49,10 @@ final class OnlineInformationRuntime {
     }
   }
 
-  Future<T> run<T>(FutureOr<T> Function() action) {
+  Future<T> run<T>(
+    FutureOr<T> Function() action, {
+    bool skipUnchangedCheckpoint = false,
+  }) {
     if (_closing || _failed) {
       return Future.error(const AccessFailure('service_unavailable'));
     }
@@ -68,7 +74,7 @@ final class OnlineInformationRuntime {
         }
         // Failed commands can still expire/end/revoke a capability. Persist
         // those facts too; failure here overrides any content result.
-        await _save();
+        await _save(skipUnchanged: skipUnchangedCheckpoint);
       }
     });
     _queue = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
@@ -102,7 +108,7 @@ final class OnlineInformationRuntime {
     }
   }
 
-  Future<void> _save() async {
+  Future<void> _save({bool skipUnchanged = false}) async {
     try {
       await service._drainInformationDecisions();
       await _resolveDeviceCredentialDecisions();
@@ -124,6 +130,12 @@ final class OnlineInformationRuntime {
         final snapshot = await _state.openServerState();
         if (snapshot.generation != _generation) {
           throw const AccessFailure('library_changed');
+        }
+        // Read-only commands need no new durable checkpoint when all runtime
+        // facts are unchanged. Expiry, audit and decision work above still runs.
+        if (skipUnchanged &&
+            jsonEncode(snapshot.payload['textRuntime']) == jsonEncode(value)) {
+          return;
         }
         try {
           await _state.commitServerState(snapshot, {
