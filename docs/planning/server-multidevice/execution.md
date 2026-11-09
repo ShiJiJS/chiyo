@@ -2,9 +2,9 @@
 
 ## 当前范围与任务
 
-持续目标 #91–#102，#103–#105 后置，独立分支 codex/server-first-stage。#91–#101 已完成并关闭。#102 本机开发、同源候选、自动完整流程、第二次fork-none Agent试用及清理均完成，正在同步最终记录和GitHub关闭状态。最终候选f0f9e24a；App/CLI/worker与Linux ARM64编译服务匹配。Agent独立11项入库、20字段和2附件读回，用户侧核对关联与旧附件。全量检查中发现的失败已定位，修正测试夹具并定向复验，原失败及跳过如实保留。完整证据见evidence/server-a12/completion-audit.md与final-facts.json。没有正式安装或真实迁移；后文旧阶段仅是过程记录，以本节和末节为准。
+目标 #91–#102 已完成，十二张工单均已从GitHub列表核对为Completed；#103–#105仍Open且未推进。独立分支codex/server-first-stage。#102 本机开发、同源候选、自动完整流程、第二次fork-none Agent试用及清理均完成，完成评论6730830444已发布并刷新回读，八项验收勾选全部保留，关闭为Completed及Reopen issue入口均已确认。最终候选f0f9e24a；App/CLI/worker与Linux ARM64编译服务匹配。Agent独立11项入库、20字段和2附件读回，用户侧核对关联与旧附件。全量检查中发现的失败已定位，修正测试夹具并定向复验，原失败及跳过如实保留。完整证据见evidence/server-a12/completion-audit.md与final-facts.json。没有正式安装或真实迁移；后文旧阶段仅是过程记录，以本节和末节为准。
 
-当前GitHub工作页23/p1。原22/p1已确认不存在，库存只余用户空间0，依用户已有“此类直接新建”的授权重建同名任务空间23，不操作用户空间。#102正文、ready-for-agent标签、前置#101 Completed及评论已重读；回填最终完成评论与关闭状态后再结束此任务空间。产品实现f0f9e24a已推送，后续只有测试与证据变动，不为此反复改交付程序。
+GitHub最终核对使用23/p1；原22已丢失并核对库存后按已有授权重建，没有操作用户空间。#102正文、ready-for-agent标签、前置#101 Completed及评论已重读。八项勾选、完成评论和Closed/Completed刷新回读后，又核对十二张已完成及后三张仍Open，随后结束任务空间。产品实现f0f9e24a、验证与测试修正ee249602已推送；后续只写远端完成记录，不反复改交付程序。
 
 所有开发与检查仅使用隔离合成资料、私有测试密钥和TLS；未替换日常App、读取个人钥匙串或启动Windows CI。
 
@@ -622,4 +622,10 @@ f0f9e24a配套候选已完整构建、同一候选连续业务两组通过、十
 
 最终交付8个声明文件摘要、字节数与镜像ID/源码标签再次一致。仅保留f0f9e24a一套候选，一个App、零dSYM，一个当前镜像；本任务零运行容器及App/worker。两套试用的库、密钥、关联与复制程序已移除；旧候选释放约2.3GB，测试构建约300MB及旧工具和镜像也已清理，无全局Docker清理。完整核对与结构化证据在evidence/server-a12/completion-audit.md、final-facts.json。
 
-当前功能代码仍固定f0f9e24a，后续仅测试/记录；构建归档准确对应原提交，未将旧归档测试冒称更新。下一步只同步验证提交、更新GitHub并回读关闭。#103–#105不动，正式安装、真实数据、个人钥匙串、Windows CI、个人Skill/hooks均未操作。
+当前功能代码仍固定f0f9e24a，后续仅测试/记录；构建归档准确对应原提交，未将旧归档测试冒称更新。验证ee249602已推送。#103–#105不动，正式安装、真实数据、个人钥匙串、Windows CI、个人Skill/hooks均未操作。
+
+## #91–#102 已全部完成，停在正式安装前
+
+最终完成评论：https://github.com/ShiJiJS/chiyo/issues/102#issuecomment-6730830444 。正文八项验收逐项勾选并重新加载确认；评论、七位实现短号、Closed/Reopen issue及“closed this as completed”均回读。GitHub已关闭列表再次实际核对#91–#102十二项均Completed；打开列表确认#103/#104/#105仍Open。库存工作页的观察等待曾因不存在的“Search results”文案、相对href选择器超时；均检查原页面真实DOM后得到结果，没有重复发布、关闭或新开工作页绕过。
+
+交付候选 `build/macos-adaptation/server-first-stage-f0f9e24a`，`candidate.json` 的buildComplete/acceptanceComplete均true。增加验收说明后再次核对13个交付文件摘要和字节数。仅有产品源码f0f9e24a与后续测试/证据验证ee249602两种明确身份，没有假称旧归档已含后续测试修正。全目标到此结束，不开始#103–#105。

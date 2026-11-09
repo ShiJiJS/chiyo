@@ -293,5 +293,31 @@
       "path": "local/server-first-stage/a12-final-independent-owner-relations.log",
       "sha256": "90c36060d7beb0f70db938c32e5bfd144ac4230d48b05721e29c5704bf169391"
     }
-  ]
+  ],
+  "tracker": {
+    "completedIssues": [
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102
+    ],
+    "deferredOpenIssues": [
+      103,
+      104,
+      105
+    ],
+    "issue102AcceptanceChecks": 8,
+    "closedAs": "completed",
+    "completionComment": "https://github.com/ShiJiJS/chiyo/issues/102#issuecomment-6730830444",
+    "reloadedAndVerified": true,
+    "browserTaskFinished": true
+  }
 }

@@ -316,7 +316,7 @@
   "publishedAt": "2026-11-08T03:10:02.752161+00:00",
   "publicationVerification": "publication.json",
   "implementation": {
-    "status": "active",
+    "status": "complete",
     "branch": "codex/server-first-stage",
     "scope": [
       91,
@@ -327,7 +327,7 @@
       104,
       105
     ],
-    "currentIssue": 102,
+    "currentIssue": null,
     "browserSpaceId": 23,
     "executionRecord": "execution.md",
     "completedIssues": [
@@ -341,11 +341,14 @@
       98,
       99,
       100,
-      101
-    ],
-    "readyIssues": [
+      101,
       102
     ],
-    "localAcceptance": "complete"
+    "readyIssues": [],
+    "localAcceptance": "complete",
+    "trackerVerifiedComplete": true,
+    "browserTaskFinished": true,
+    "completionComment": "https://github.com/ShiJiJS/chiyo/issues/102#issuecomment-6730830444",
+    "candidate": "build/macos-adaptation/server-first-stage-f0f9e24a"
   }
 }
