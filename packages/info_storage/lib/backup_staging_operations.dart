@@ -126,13 +126,12 @@ extension BackupStagingOperations on InformationBackups {
           : null;
       if (stagingBookmark != null) _validateNativeBookmark(stagingBookmark);
       if (outputBookmark != null) _validateNativeBookmark(outputBookmark);
-      if (!File(destination).isAbsolute ||
-          destination.contains('\x00') ||
-          destination == root.path ||
-          destination.startsWith('${root.path}/') ||
-          child != null &&
-              (Directory(child.path).parent.path != root.path ||
-                  child.parentIdentity != root.identity)) {
+      // Use the same native path boundary as ordinary file publication.
+      // Windows separators/case aliases must not put an output in staging.
+      MacBackupPublicationFiles.validateOutputPath(destination, root);
+      if (child != null &&
+          (Directory(child.path).parent.path != root.path ||
+              child.parentIdentity != root.identity)) {
         throw const FormatException();
       }
       return _BackupStagingRecord(
