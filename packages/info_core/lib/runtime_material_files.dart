@@ -575,6 +575,7 @@ class _WindowsMaterialFiles {
     int handle, {
     bool directory = false,
     bool checkPermissions = true,
+    bool allowPublicationLink = false,
   }) {
     final info = calloc<Uint8>(52);
     try {
@@ -584,7 +585,10 @@ class _WindowsMaterialFiles {
       final attributes = info.cast<Uint32>().value;
       if (attributes & 0x400 != 0 ||
           (attributes & 0x10 != 0) != directory ||
-          !directory && (info + 40).cast<Uint32>().value != 1) {
+          !directory &&
+              ((info + 40).cast<Uint32>().value < 1 ||
+                  (info + 40).cast<Uint32>().value >
+                      (allowPublicationLink ? 2 : 1))) {
         throw const RuntimeMaterialFailure('identity_mismatch');
       }
       if (checkPermissions) _privateAcl(handle);

@@ -78,7 +78,7 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
                                              : L"Export encrypted backup to a new file");
         dialog.lpstrDefExt = information || credential || known_hosts || template_package ? nullptr : recovery ? L"txt" : L"aimbackup";
         dialog.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR |
-                       OFN_DONTADDTORECENT | (input ? OFN_FILEMUSTEXIST : OFN_OVERWRITEPROMPT);
+                       OFN_DONTADDTORECENT | (input ? OFN_FILEMUSTEXIST : OFN_OVERWRITEPROMPT | OFN_NOTESTFILECREATE);
         const BOOL chosen = input ? GetOpenFileNameW(&dialog) : GetSaveFileNameW(&dialog);
         if (!chosen) {
           if (CommDlgExtendedError() == 0) result->Success();

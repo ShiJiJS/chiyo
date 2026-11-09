@@ -206,6 +206,7 @@ class RemoteWorkspaceSource
     if (mutation != null && local != null) {
       throw const WorkspaceFailure('unknown_outcome', '操作编号对应多种结果，无法确认。');
     }
+    if (mutation != null) await _refreshResolvedRecord(mutation.record);
     return local ?? mutation;
   }
 
@@ -834,9 +835,9 @@ class RemoteWorkspaceSource
   });
 
   Future<void> _refreshResolvedRecord(WorkspaceRecordRef ref) async {
-    // A lost save reply bypasses _save's normal cache publication. Resolving
-    // its receipt must refresh that same projection before closing the frozen
-    // editor, including when the record moved out of its previous directory.
+    // Resolved file/save receipts must publish their updated projection
+    // before the caller closes the editor or reads the new file.
+    // This also covers records moved out of their previous directory.
     // Failure remains an unknown outcome; this never submits another write.
     if (cache.resources != null) await cache.synchronize(requireFresh: true);
     if (!_changes.isClosed) _changes.add(ref);

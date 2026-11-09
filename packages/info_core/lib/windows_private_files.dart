@@ -93,6 +93,21 @@ final class WindowsPrivateFiles {
     }
   }
 
+  /// A publisher may retain the private original plus one publication link.
+  /// This keeps the same protected current-user/SYSTEM descriptor checks;
+  /// ordinary state/material reads still reject every hard-linked file.
+  static void verifyPublicationHandle(int handle, {bool directory = false}) {
+    _supported();
+    // The publisher owns/pins this handle and checks its canonical binding.
+    // Validate that exact object, including a directory pending deletion,
+    // without reopening its name or changing Windows sharing guarantees.
+    _files.identity(
+      handle,
+      directory: directory,
+      allowPublicationLink: !directory,
+    );
+  }
+
   /// Reserve a private regular file without truncating an existing one.
   static void reserve(File file) {
     _supported();

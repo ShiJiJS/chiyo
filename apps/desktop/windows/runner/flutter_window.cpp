@@ -179,6 +179,8 @@ bool FlutterWindow::OnCreate() {
       flutter_controller_->engine()->messenger(), GetHandle());
   pdf_previews_ = std::make_unique<OwnerPdfPreviews>(
       flutter_controller_->engine()->messenger(), GetHandle());
+  owner_file_open_ = std::make_unique<OwnerFileOpenChannel>(
+      flutter_controller_->engine()->messenger(), GetHandle());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   window_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
       flutter_controller_->engine()->messenger(), "agent_info_manage/window",
@@ -304,6 +306,7 @@ void FlutterWindow::OnDestroy() {
   RemoveNotificationIcon();
   notifications_.Reset();
   pdf_previews_.reset();
+  owner_file_open_.reset();
   backup_files_.reset();
   RemoveTrayIcon();
   desktop_ready_ = false;

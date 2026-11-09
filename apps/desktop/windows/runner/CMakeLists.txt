@@ -11,6 +11,8 @@ add_executable(${BINARY_NAME} WIN32
   "backup_files.cpp"
   "owner_pdf_renderer.cpp"
   "owner_pdf_previews.cpp"
+  "owner_file_opener.cpp"
+  "owner_file_open_channel.cpp"
   "main.cpp"
   "utils.cpp"
   "win32_window.cpp"
@@ -41,6 +43,7 @@ target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "comdlg32.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "shell32.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "windowsapp.lib")
+target_link_libraries(${BINARY_NAME} PRIVATE "bcrypt.lib" "advapi32.lib")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
@@ -58,6 +61,14 @@ target_compile_options(owner_pdf_renderer_test PRIVATE /utf-8)
 target_link_libraries(owner_pdf_renderer_test PRIVATE windowsapp.lib)
 set_target_properties(owner_pdf_renderer_test PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/owner-pdf-check")
+
+add_executable(owner_file_opener_test EXCLUDE_FROM_ALL "owner_file_opener_test.cpp" "owner_file_opener.cpp")
+apply_standard_settings(owner_file_opener_test)
+target_compile_definitions(owner_file_opener_test PRIVATE NOMINMAX)
+target_compile_options(owner_file_opener_test PRIVATE /utf-8)
+target_link_libraries(owner_file_opener_test PRIVATE bcrypt.lib advapi32.lib)
+set_target_properties(owner_file_opener_test PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/owner-file-check")
 
 add_executable(desktop_control_fixture EXCLUDE_FROM_ALL "desktop_control_fixture.cpp")
 apply_standard_settings(desktop_control_fixture)
