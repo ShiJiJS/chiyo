@@ -13,9 +13,9 @@ import 'package:info_desktop/workspace/zhiyu_theme.dart';
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
   setUpAll(() async {
-    // Geometry assertions use the same Mac faces as production, even when no
+    // Geometry assertions use the same system faces as production, even when no
     // screenshot export is requested; Ahem has different text-line metrics.
-    if (Platform.isMacOS) await loadDesktopFonts();
+    if (Platform.isMacOS || Platform.isWindows) await loadDesktopFonts();
     if (evidence.isEmpty) return;
     await Directory(evidence).create(recursive: true);
     await File(

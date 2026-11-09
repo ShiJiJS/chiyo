@@ -1,3 +1,4 @@
+import 'support/encrypted_artifacts.dart';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -324,11 +325,11 @@ void main() {
       );
       for (final file in root.listSync().whereType<File>()) {
         expect(
-          String.fromCharCodes(file.readAsBytesSync()),
+          String.fromCharCodes(encryptedArtifactBytes(file)),
           isNot(contains('PRIVATE-ADMISSION')),
         );
         expect(
-          String.fromCharCodes(file.readAsBytesSync()),
+          String.fromCharCodes(encryptedArtifactBytes(file)),
           isNot(contains('PRIVATE-UPDATE')),
         );
       }

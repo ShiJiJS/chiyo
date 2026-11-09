@@ -1,4 +1,8 @@
-# Windows 开发预览交付（Issue #18）
+# Windows 交付
+
+当前 NAS 联网开发包使用 [联网交付说明](windows-online-delivery.md)、[Codex 接入](windows-codex-integration.md) 和[连续核对范围](windows-online-acceptance.md)。下方“本机安装与清理”的既有约定继续适用；其余 Round05 安装版本/路径和测试数为旧单机版历史，不能作为当前包状态。
+
+## 旧开发预览（Issue #18）
 
 交付物是未签名的 Windows x64 ZIP，包含完整 Flutter release 目录、独立 AOT
 CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。

@@ -1,3 +1,4 @@
+import 'support/encrypted_artifacts.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -87,7 +88,7 @@ void main() {
         for (final file in Directory(
           '${root.path}/vault',
         ).listSync().whereType<File>()) {
-          final disk = latin1.decode(await file.readAsBytes());
+          final disk = latin1.decode(encryptedArtifactBytes(file));
           expect(disk, isNot(contains('SYNTHETIC-OWNER-UPLOAD-694207')));
           expect(disk, isNot(contains('synthetic-owner-upload.txt')));
         }
@@ -155,7 +156,7 @@ void main() {
           .toList();
       expect(encryptedFiles, isNotEmpty);
       for (final file in encryptedFiles) {
-        final disk = latin1.decode(await file.readAsBytes());
+        final disk = latin1.decode(encryptedArtifactBytes(file));
         expect(disk, isNot(contains('SYNTHETIC-BLOB-PRIVATE-482179')));
         expect(disk, isNot(contains('fictional resume.pdf')));
       }
