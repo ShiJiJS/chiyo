@@ -486,9 +486,15 @@ class AgentClient {
   Future<Map<String, dynamic>> _call(
     String path,
     Map<String, dynamic> data, {
-    Duration timeout = const Duration(seconds: 5),
+    Duration? timeout,
   }) async {
-    if (_remote != null) return _remote.call(path, data, timeout: timeout);
+    if (_remote != null) {
+      return _remote.call(
+        path,
+        data,
+        timeout: timeout ?? AgentConnection.defaultRequestTimeout,
+      );
+    }
     try {
       return await (() async {
         final request = await _http.post('127.0.0.1', port, path);
@@ -498,7 +504,7 @@ class AgentClient {
         final response = await request.close();
         final text = await utf8.decoder.bind(response).join();
         return jsonDecode(text) as Map<String, dynamic>;
-      })().timeout(timeout);
+      })().timeout(timeout ?? const Duration(seconds: 5));
     } on Object {
       return {'status': 'service_unavailable'};
     }

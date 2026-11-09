@@ -122,6 +122,9 @@ final class AgentConnectionProfile {
 
 /// Agent-only HTTPS. Paths cannot escape to user management or another origin.
 final class AgentConnection {
+  // A durable NAS request may queue behind writes; this is a response deadline,
+  // independent of approval expiry and explicitly bounded lifecycle calls.
+  static const defaultRequestTimeout = Duration(seconds: 15);
   AgentConnection(this.profile)
     : _http = HttpClient(context: profile.trust)
         ..connectionTimeout = const Duration(seconds: 5);
@@ -136,7 +139,7 @@ final class AgentConnection {
   Future<Map<String, dynamic>> call(
     String path,
     Map<String, dynamic> body, {
-    Duration timeout = const Duration(seconds: 5),
+    Duration timeout = defaultRequestTimeout,
   }) async {
     if (_serverChanged) return {'status': 'server_changed'};
     if (_closed) return {'status': 'service_unavailable'};
