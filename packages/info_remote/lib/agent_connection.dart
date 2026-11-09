@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 
 /// Private device connection, not the user's management identity. Pin the
@@ -71,6 +72,18 @@ final class AgentConnectionProfile {
           ..setTrustedCertificatesBytes(utf8.encode(certificate)));
 
   static Future<AgentConnectionProfile> read(File file) async {
+    if (Platform.isWindows) {
+      try {
+        if (!file.isAbsolute) throw const FormatException();
+        final value = WindowsPrivateFiles.readSecret(file);
+        if (value == null) throw const FormatException();
+        return AgentConnectionProfile.fromPrivateJson(
+          decodeProtocolObject(value, maxBytes: 131072),
+        );
+      } on Object {
+        throw const FormatException('Invalid private Agent connection');
+      }
+    }
     if (!Platform.isMacOS && !Platform.isLinux)
       throw const FormatException('Unsupported private storage');
     final parent = file.parent;
@@ -93,6 +106,15 @@ final class AgentConnectionProfile {
   /// Only a dedicated private directory is supplied by the trusted owner setup.
   /// The file is replaced atomically; no Keychain or global trust is involved.
   Future<File> saveIn(Directory directory) async {
+    if (Platform.isWindows) {
+      try {
+        final file = File('${directory.absolute.path}/agent-connection.json');
+        WindowsPrivateFiles.writeSecret(file, jsonEncode(toPrivateJson()));
+        return file;
+      } on Object {
+        throw const FormatException('Private storage unavailable');
+      }
+    }
     if (!Platform.isMacOS && !Platform.isLinux)
       throw const FormatException('Unsupported private storage');
     final folder = directory.absolute;

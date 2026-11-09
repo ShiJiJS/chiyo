@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:info_core/info_core.dart';
+import 'package:info_core/protocol_json.dart';
 import 'owner_client.dart';
 
 final class ConnectionProfile {
@@ -32,13 +34,13 @@ abstract interface class ConnectionProfileStore {
 
 /// Dedicated private configuration, distinct from user information and shared
 /// preferences. Same-user processes remain trusted, as on the existing host.
-/// Windows protection is supplied by its separate delivery work; no permissive
-/// cross-platform fallback writes a Token to a world-readable file.
+/// Windows uses current-user DPAPI and private handle-verified files. POSIX
+/// keeps its existing private JSON format.
 final class PrivateConnectionProfileStore implements ConnectionProfileStore {
   const PrivateConnectionProfileStore(this.directory);
   final String directory;
   Future<void> _supported() async {
-    if (!Platform.isMacOS && !Platform.isLinux)
+    if (!Platform.isMacOS && !Platform.isLinux && !Platform.isWindows)
       throw const RemoteFailure('profile_store_unavailable');
   }
 
@@ -46,6 +48,17 @@ final class PrivateConnectionProfileStore implements ConnectionProfileStore {
   Future<ConnectionProfile?> read() async {
     await _supported();
     final file = File('$directory/connection.json');
+    if (Platform.isWindows) {
+      try {
+        final value = WindowsPrivateFiles.readSecret(file);
+        if (value == null) return null;
+        return ConnectionProfile.fromJson(
+          decodeProtocolObject(value, maxBytes: 131072),
+        );
+      } on Object {
+        throw const RemoteFailure('invalid_profile');
+      }
+    }
     final type = await FileSystemEntity.type(file.path, followLinks: false);
     if (type == FileSystemEntityType.notFound) return null;
     final stat = await file.stat();
@@ -62,6 +75,17 @@ final class PrivateConnectionProfileStore implements ConnectionProfileStore {
   @override
   Future<void> save(ConnectionProfile profile) async {
     await _supported();
+    if (Platform.isWindows) {
+      try {
+        WindowsPrivateFiles.writeSecret(
+          File('$directory/connection.json'),
+          jsonEncode(profile.toJson()),
+        );
+        return;
+      } on Object {
+        throw const RemoteFailure('profile_store_unavailable');
+      }
+    }
     final folder = Directory(directory).absolute;
     final type = await FileSystemEntity.type(folder.path, followLinks: false);
     if (type != FileSystemEntityType.notFound &&

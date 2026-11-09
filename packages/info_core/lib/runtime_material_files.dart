@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:ffi/ffi.dart';
 
 part 'runtime_material_files_macos.dart';
+part 'windows_private_files.dart';
 
 /// Private registry data. Never include this object in a public protocol DTO.
 class CredentialMaterialLease {
@@ -570,7 +571,11 @@ class _WindowsMaterialFiles {
     }
   }
 
-  String identity(int handle, {bool directory = false}) {
+  String identity(
+    int handle, {
+    bool directory = false,
+    bool checkPermissions = true,
+  }) {
     final info = calloc<Uint8>(52);
     try {
       if (_fileInfo(handle, info) == 0) {
@@ -582,7 +587,7 @@ class _WindowsMaterialFiles {
           !directory && (info + 40).cast<Uint32>().value != 1) {
         throw const RuntimeMaterialFailure('identity_mismatch');
       }
-      _privateAcl(handle);
+      if (checkPermissions) _privateAcl(handle);
       return '${(info + 28).cast<Uint32>().value}:${(info + 44).cast<Uint32>().value}:${(info + 48).cast<Uint32>().value}';
     } finally {
       calloc.free(info);
