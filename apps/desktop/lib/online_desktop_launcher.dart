@@ -52,13 +52,16 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   bool _offline = false, _probing = false;
   Timer? _connectionTimer;
   late final OnlineDesktopRuntime _desktop;
+  String? _desktopObservation;
+  DateTime? _lastOwnerMaintenance;
+  Future<void>? _ownerMaintenance;
   @override
   void initState() {
     super.initState();
     _desktop = OnlineDesktopRuntime(
       platform: widget.desktopPlatform ?? NativeDesktopPlatform(),
       beforeExit: _closeForExit,
-      onResume: _checkConnection,
+      onResume: _resumeConnection,
     )..addListener(_desktopChanged);
     unawaited(_desktop.start());
     unawaited(_restore());
@@ -128,6 +131,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           filePicker: widget.filePicker,
           onNotificationEnable: _desktop.enableNotifications,
           onClosing: _desktop.release,
+          desktopRuntime: _desktop,
           deviceFilesDirectory:
               widget.deviceFilesDirectory ??
               (widget.profiles is PrivateConnectionProfileStore
@@ -178,6 +182,13 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
         // A slow OS notification delivery must not hold the health probe open
         // and delay the offline screen. The App lifetime drains this work.
         unawaited(_desktop.refresh());
+        final now = DateTime.now();
+        if (_lastOwnerMaintenance == null ||
+            now.difference(_lastOwnerMaintenance!) >=
+                const Duration(minutes: 1)) {
+          _lastOwnerMaintenance = now;
+          unawaited(_maintainOwnerFiles(source));
+        }
       }
       if (mounted && identical(source, _source) && _offline) {
         source.notifyConnectionChanged();
@@ -202,7 +213,41 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     if (old != null) unawaited(old.dispose());
   }
 
+  Future<void> _resumeConnection() async {
+    await _checkConnection();
+    final source = _source;
+    if (source != null && !_offline) await _maintainOwnerFiles(source);
+  }
+
+  Future<void> _maintainOwnerFiles(RemoteWorkspaceSource source) =>
+      _ownerMaintenance ??= (() async {
+        if (!mounted ||
+            _desktop.quitting ||
+            !_desktop.navigationEnabled ||
+            !identical(source, _source)) {
+          return;
+        }
+        try {
+          final changed = await source.maintainOwnerFiles();
+          if (changed &&
+              mounted &&
+              !_desktop.quitting &&
+              identical(source, _source)) {
+            source.notifyConnectionChanged();
+          }
+        } on Object {
+          // Original private cleanup records remain pending for next sweep.
+          // An unavailable check never means files were removed.
+        }
+      })().whenComplete(() => _ownerMaintenance = null);
+
   void _desktopChanged() {
+    final observation =
+        '${_desktop.availability.tray}|${_desktop.availability.notifications.name}|${_desktop.windowHidden}|${_desktop.quitting}|${_desktop.closed}|${_desktop.resourcesClosed}|${_desktop.shutdownFailed}';
+    if (observation != _desktopObservation) {
+      _desktopObservation = observation;
+      _source?.notifyConnectionChanged();
+    }
     if (mounted) setState(() {});
   }
 
@@ -214,6 +259,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       setState(() {});
       await WidgetsBinding.instance.endOfFrame;
     }
+    await _ownerMaintenance;
     await _source?.dispose();
   }
 

@@ -64,6 +64,33 @@ class WorkspaceCopyMaintenance {
   );
 }
 
+enum WorkspaceOwnerCopyKind { open, save }
+
+/// Only this App's private file coordination metadata. Ordinary user-saved
+/// output is not a disposable copy; only its temporary staging is maintained.
+class WorkspaceOwnerCopyMaintenance {
+  const WorkspaceOwnerCopyMaintenance({
+    required this.id,
+    required this.name,
+    required this.fileVersion,
+    required this.kind,
+    required this.active,
+    required this.uncertain,
+  });
+  final String id, name;
+  final int fileVersion;
+  final WorkspaceOwnerCopyKind kind;
+  final bool active, uncertain;
+  Map<String, Object?> get json => {
+    'id': id,
+    'name': name,
+    'fileVersion': fileVersion,
+    'kind': kind.name,
+    'active': active,
+    'uncertain': uncertain,
+  };
+}
+
 class WorkspaceRuntimeStatus {
   WorkspaceRuntimeStatus({
     required this.version,
@@ -74,12 +101,17 @@ class WorkspaceRuntimeStatus {
     required Iterable<WorkspaceApprovalExecution> materials,
     required Iterable<WorkspaceCopyMaintenance> copies,
     this.serviceReason,
-  }) : materials = List.unmodifiable(materials),
+    this.independentServer = false,
+    Iterable<WorkspaceOwnerCopyMaintenance> ownerCopies = const [],
+  }) : ownerCopies = List.unmodifiable(ownerCopies),
+       materials = List.unmodifiable(materials),
        copies = List.unmodifiable(copies);
   final int version;
   final WorkspaceRuntimePhase phase;
   final bool serviceAvailable, menuBarAvailable, windowHidden;
   final String? serviceReason;
+  final bool independentServer;
+  final List<WorkspaceOwnerCopyMaintenance> ownerCopies;
   final List<WorkspaceApprovalExecution> materials;
   final List<WorkspaceCopyMaintenance> copies;
   bool get closed =>
@@ -97,8 +129,10 @@ class WorkspaceQuitPreview {
     required this.materials,
     required this.copies,
     required this.unconfirmedProcesses,
+    this.ownerCopies = 0,
   });
   final String token;
+  final int ownerCopies;
   final int version,
       sessions,
       grants,
@@ -113,6 +147,7 @@ class WorkspaceQuitPreview {
     'materials': materials,
     'copies': copies,
     'unconfirmedProcesses': unconfirmedProcesses,
+    'ownerCopies': ownerCopies,
   };
   bool get valid =>
       token.isNotEmpty &&
@@ -124,6 +159,7 @@ class WorkspaceQuitPreview {
         materials,
         copies,
         unconfirmedProcesses,
+        ownerCopies,
       ].every((n) => n >= 0);
 }
 

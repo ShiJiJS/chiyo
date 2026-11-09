@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:info_workspace/form_transport.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_remote/owner_client.dart';
@@ -28,12 +29,15 @@ import 'remote_workspace_history.dart';
 import 'remote_workspace_backups.dart';
 import 'remote_workspace_settings.dart';
 import 'remote_workspace_agents.dart';
+import 'remote_workspace_runtime.dart';
+import '../online_desktop_runtime.dart';
 import 'package:info_workspace/adoption_transport.dart';
 
 /// Live projections through the existing UI seam; no local library or body
 /// cache. Shared codecs preserve the exact ordinary owner display/edit rules.
-class RemoteWorkspaceSource extends UnavailableWorkspaceSource
+class RemoteWorkspaceSource
     implements
+        WorkspaceSource,
         WorkspaceStorageLocation,
         WorkspaceLibraryMove,
         WorkspaceLibraryRecycle,
@@ -46,6 +50,7 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     this.deviceFilesDirectory,
     this.onNotificationEnable,
     this.onClosing,
+    this.desktopRuntime,
     this.outputPicker = const NativeBackupFilePicker(),
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
   }) : _observation = client.initialWorkspaceObservation {
@@ -61,6 +66,18 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
     );
   }
   final OwnerClient client;
+  final OnlineDesktopRuntime? desktopRuntime;
+  @override
+  late final WorkspaceRuntimeSource runtime = desktopRuntime == null
+      ? const UnavailableWorkspaceRuntime()
+      : RemoteWorkspaceRuntime(
+          client,
+          desktopRuntime!,
+          directory: deviceFilesDirectory,
+          copies: _fileActions.runtimeCopies,
+          preferences: settings.read,
+          changed: notifyConnectionChanged,
+        );
   @override
   late final WorkspaceAgentsSource agents = RemoteWorkspaceAgents(client);
   @override
@@ -206,6 +223,16 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
   @override
   Future<void> finishFileOpen(String operationId) =>
       _fileActions.finish(operationId);
+
+  /// Automatic maintenance concerns only this App's registered temporary
+  /// files. CLI journals and worker lifetimes belong to their own executors.
+  Future<bool> maintainOwnerFiles() async {
+    final before = await _fileActions.runtimeCopies();
+    final after = await _fileActions.runtimeCopies(maintain: true);
+    return jsonEncode(before.map((c) => c.json).toList()) !=
+        jsonEncode(after.map((c) => c.json).toList());
+  }
+
   @override
   Future<void> closeOpenFileCopies(
     WorkspaceRecordRef record,
@@ -302,6 +329,9 @@ class RemoteWorkspaceSource extends UnavailableWorkspaceSource
       });
   Future<void> _dispose() async {
     await onClosing?.call(this);
+    if (runtime case final RemoteWorkspaceRuntime current) {
+      await current.release();
+    }
     if (!_passwordsDisposed) {
       _passwordsDisposed = true;
       proposalPasswords.dispose();
