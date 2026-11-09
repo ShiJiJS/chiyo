@@ -53,6 +53,8 @@ add_dependencies(${BINARY_NAME} flutter_assemble)
 add_executable(notification_queue_test EXCLUDE_FROM_ALL "notification_queue_test.cpp")
 apply_standard_settings(notification_queue_test)
 target_compile_options(notification_queue_test PRIVATE /utf-8)
+set_target_properties(notification_queue_test PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/notification-check")
 
 add_executable(owner_pdf_renderer_test EXCLUDE_FROM_ALL "owner_pdf_renderer_test.cpp" "owner_pdf_renderer.cpp")
 apply_standard_settings(owner_pdf_renderer_test)
