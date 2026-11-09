@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/codex_association.dart';
 import 'package:info_cli/codex_end_index.dart';
+import 'package:info_remote/agent_connection.dart';
 
 /// Receives documented SessionStart JSON on stdin. Never reads transcripts.
 Future<void> main(List<String> args) async {
@@ -13,20 +14,27 @@ Future<void> main(List<String> args) async {
   AgentClient? client;
   try {
     var port = 47125;
+    String? connectionFile;
+    var explicitPort = false;
     var root = CodexAssociation.defaultRoot();
     final connect = args.isNotEmpty && args.first == '--connect';
     if (connect) args = args.sublist(1);
     for (var i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) throw const FormatException();
       if (args[i] == '--port') {
+        explicitPort = true;
         port = int.parse(args[i + 1]);
+      } else if (args[i] == '--connection') {
+        connectionFile = args[i + 1];
       } else if (args[i] == '--state-root') {
         root = Directory(args[i + 1]);
       } else {
         throw const FormatException();
       }
     }
-    if (port < 1 || port > 65535) throw const FormatException();
+    if (port < 1 || port > 65535 || explicitPort && connectionFile != null) {
+      throw const FormatException();
+    }
     final input = connect
         ? <String, dynamic>{
             'hook_event_name': 'SessionStart',
@@ -86,24 +94,36 @@ Future<void> main(List<String> args) async {
     if (chat is! String || !validChatId(chat)) {
       throw const FormatException();
     }
-    client = AgentClient(port);
+    final connection = connectionFile == null
+        ? null
+        : await AgentConnectionProfile.read(File(connectionFile));
+    client = connection == null
+        ? AgentClient(port)
+        : AgentClient.remote(connection);
     final result = await client.openLifecycleSession('Codex $chat');
     if (result['status'] != 'ok') {
       stdout.writeln(
         jsonEncode({
-          'systemMessage':
-              'Agent Info: service_unavailable; no association was created. Start the information app and reconnect.',
+          'systemMessage': connection == null
+              ? 'Agent Info: service_unavailable; no association was created. Start the information app and reconnect.'
+              : 'Agent Info: service_unavailable; no association was created. Check the information server connection and retry.',
         }),
       );
       return;
     }
     final reference = await CodexAssociation(
       chat,
-      port,
+      connection?.address.port ?? port,
       client.sessionSecret!,
+      connection: connection,
     ).save(root);
     try {
-      await CodexEndIndex(root).register(chat, port, client.endCapability!);
+      await CodexEndIndex(root).register(
+        chat,
+        connection?.address.port ?? port,
+        client.endCapability!,
+        connection: connection,
+      );
     } on Object {
       // This new session was never approved or delivered. Preserve other files.
       await File(reference).delete();

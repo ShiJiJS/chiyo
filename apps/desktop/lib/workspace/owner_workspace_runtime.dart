@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
 import '../desktop_runtime.dart';
-import 'owner_credential_use_projection.dart';
+import 'package:info_workspace/owner_runtime_materials.dart';
 import 'workspace_source.dart';
 
 /// Actual runtime observations and explicit maintenance. No arbitrary paths,
@@ -10,11 +10,11 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
   OwnerWorkspaceRuntime({required this.runtime, required this.changed})
     : owner = runtime.service.owner,
       _scope = runtime.service.owner.captureLibraryScope(),
-      _credentials = OwnerCredentialUseProjection(runtime.service.owner);
+      _materials = OwnerRuntimeMaterials(runtime.service.owner);
   final DesktopRuntime runtime;
   final core.OwnerAccess owner;
   final core.OwnerLibraryScope _scope;
-  final OwnerCredentialUseProjection _credentials;
+  final OwnerRuntimeMaterials _materials;
   final void Function() changed;
   final _receipts = <String, WorkspaceRuntimeReceipt>{};
   final _attempts = <String, String>{};
@@ -42,43 +42,14 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
   WorkspaceRuntimeStatus _observe() {
     _check();
     final available = !runtime.stopped && owner.serviceAvailable;
-    final requests = available
-        ? owner.credentialUseRequests
-              .where((r) => !r.isFocusedFill && r.restoredAt == null)
-              .toList()
-        : <core.CredentialUseRequest>[];
     final executions = available
         ? owner.credentialExecutions.where((e) => e.restoredAt == null).toList()
         : <core.CredentialExecution>[];
     final materials = available
-        ? <WorkspaceApprovalExecution>[
-            for (final e in executions)
-              for (final r in requests.where((r) => r.id == e.requestId))
-                if (r.plan.receiver != 'gh_token') _credentials.execution(r, e),
-          ]
+        ? _materials.materials()
         : _last?.materials ?? <WorkspaceApprovalExecution>[];
     final copies = available
-        ? <WorkspaceCopyMaintenance>[
-            for (final d in owner.informationFileDeliveries)
-              if (d.runtime && d.restoredAt == null)
-                WorkspaceCopyMaintenance(
-                  id: d.id,
-                  requestId: d.requestId,
-                  record: WorkspaceRecordRef(
-                    WorkspaceRecordKind.information,
-                    d.field.itemId,
-                  ),
-                  name: d.fileName,
-                  fileVersion: d.attachment.attachmentVersion,
-                  expiresAt: d.expiresAt,
-                  state: !d.holdsCopy
-                      ? WorkspaceCopyState.released
-                      : d.state == 'ready'
-                      ? WorkspaceCopyState.active
-                      : WorkspaceCopyState.pending,
-                  reason: d.cleanupError == null ? null : '登记路径尚未安全移除，请重新核对。',
-                ),
-          ]
+        ? _materials.copies()
         : _last?.copies ?? <WorkspaceCopyMaintenance>[];
     final signature = jsonEncode([
       _phase.name,

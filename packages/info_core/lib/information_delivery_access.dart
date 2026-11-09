@@ -10,7 +10,8 @@ extension InformationFileAgentAccess on AgentAccess {
   }
 
   bool get informationFileDeliveryAvailable =>
-      _service.informationDeliveryFiles != null &&
+      (_service.informationDeliveryFiles != null ||
+          _service._deviceFileDelivery) &&
       _service._repository is InformationAttachmentRepository &&
       _service._repository is InformationFileDeliveryRepository;
 
@@ -23,6 +24,9 @@ extension InformationFileAgentAccess on AgentAccess {
       throw const InformationFileFailure('unsupported_capability');
     }
     await _service._reconcileInformationDeliveries();
+    if (_service._deviceFileDelivery) {
+      return _prepareDeviceInformationFile(session, input);
+    }
     final binding = _service._sessionBindings[session]!;
     final existing = _service._informationDeliveries
         .where(
@@ -121,40 +125,14 @@ extension InformationFileAgentAccess on AgentAccess {
       record = record.changed({'lease': reserved.toPrivateJson()});
       await _service._saveInformationDelivery(record);
       _service._fileRequest(session, input.requestId, input.field);
-      await repo.withInformationAttachment(record.attachment, (
-        actual,
-        chunks,
-      ) async {
-        if (actual.sha256 != record.sha256 ||
-            actual.byteLength != record.byteLength) {
-          throw const InformationFileFailure('attachment_integrity_failed');
-        }
-        final body = BytesBuilder(copy: false),
-            result = _InformationFileDigest();
-        final hash = sha256.startChunkedConversion(result);
-        var length = 0;
-        try {
-          await for (final bytes in chunks) {
-            length += bytes.length;
-            if (bytes.length > 1024 * 1024 || length > record.byteLength) {
-              throw const InformationFileFailure('attachment_integrity_failed');
-            }
-            hash.add(bytes);
-            body.add(bytes);
-          }
-        } finally {
-          hash.close();
-        }
-        if (length != record.byteLength ||
-            result.value?.toString() != record.sha256) {
-          throw const InformationFileFailure('attachment_integrity_failed');
-        }
-        _service._fileRequest(session, input.requestId, input.field);
-        await _service.informationDeliveryFiles!.write(
-          reserved!,
-          body.takeBytes(),
-        );
-      });
+      final bytes = await _readDeliveryOriginal(
+        repo,
+        record,
+        validate: () {
+          _service._fileRequest(session, input.requestId, input.field);
+        },
+      );
+      await _service.informationDeliveryFiles!.write(reserved, bytes);
       await _service.informationDeliveryFiles!.verify(
         reserved,
         record.byteLength,
@@ -270,10 +248,15 @@ extension InformationFileAgentAccess on AgentAccess {
 Map<String, Object?> _fileReply(
   InformationFileDelivery record, {
   bool ready = false,
+  bool deviceProof = false,
 }) => {
   'protocolVersion': 2,
   'status': 'ok',
-  'delivery': ready ? record.readyJson() : record.statusJson(),
+  'delivery': record.deviceDelivery
+      ? record.deviceManifestJson(includeCleanupCapability: deviceProof)
+      : ready
+      ? record.readyJson()
+      : record.statusJson(),
 };
 
 extension _InformationFileDeliveryService on InformationService {
@@ -404,9 +387,10 @@ extension _InformationFileDeliveryService on InformationService {
     String reason,
   ) async {
     final now = _clock().toUtc().toIso8601String();
+    final needsCleanup = record.lease != null || record.deviceDelivery;
     final finished = record.changed({
-      'state': record.lease == null ? target : 'cleanup_pending',
-      'targetState': record.lease == null ? null : target,
+      'state': needsCleanup ? 'cleanup_pending' : target,
+      'targetState': needsCleanup ? target : null,
       'finishedAt': now,
       'reason': reason,
       'cleanupError': null,
@@ -427,7 +411,7 @@ extension _InformationFileDeliveryService on InformationService {
   Future<InformationFileDelivery> _cleanupInformationDelivery(
     InformationFileDelivery record,
   ) async {
-    if (record.lease == null) return record;
+    if (record.deviceDelivery || record.lease == null) return record;
     var result = record;
     try {
       if (informationDeliveryFiles == null) {
@@ -482,6 +466,11 @@ extension _InformationFileDeliveryService on InformationService {
 
   Future<int> _reconcileInformationDeliveries() async {
     if (_repository is! InformationFileDeliveryRepository) return 0;
+    if (_deviceFileDelivery && _closed) {
+      return _informationDeliveries
+          .where((r) => r.state == 'cleanup_pending')
+          .length;
+    }
     for (final record in _informationDeliveries.toList()) {
       if (!record.runtime ||
           _inFlightInformationDeliveries.contains(record.id)) {
@@ -493,10 +482,13 @@ extension _InformationFileDeliveryService on InformationService {
       }
       if (record.state != 'ready' && record.state != 'preparing') continue;
       final reason = _informationDeliveryInvalid(record);
-      if (reason != null || record.state == 'preparing') {
+      if (reason != null ||
+          record.state == 'preparing' && !record.deviceDelivery) {
         await _finishInformationDelivery(
           record,
-          record.state == 'preparing' ? 'unknown' : 'expired',
+          record.state == 'preparing' && !record.deviceDelivery
+              ? 'unknown'
+              : 'expired',
           reason ?? 'delivery_unknown',
         );
       }
@@ -526,7 +518,10 @@ extension _InformationFileDeliveryService on InformationService {
   }
 
   void _scheduleInformationDeliveryCleanup() {
-    if (informationDeliveryFiles == null) return;
+    if (informationDeliveryFiles == null && !_deviceFileDelivery ||
+        _deviceFileDelivery && _closed) {
+      return;
+    }
     if (!_informationDeliveries.any((r) => r.runtime && r.holdsCopy)) {
       return;
     }
@@ -558,6 +553,9 @@ extension InformationFileDeliveryOwnerAccess on OwnerAccess {
     return _service._reconcileInformationDeliveries();
   });
   Future<void> _closeInformationFileDeliveries() {
+    // Online maintenance preserves valid delivery facts. This host owns no
+    // device lease; the device executor separately confirms actual cleanup.
+    if (_service._deviceFileDelivery) return Future.value();
     // A disabled optional feature must not touch a closed repository during
     // existing callers' repeated shutdown. No copy can be created without it.
     if (_service.informationDeliveryFiles == null) return Future.value();

@@ -162,7 +162,7 @@ extension BackupStagingOperations on InformationBackups {
     bool invalidated = false,
   }) async {
     if (!invalidated) return _backupOperationPayload(id);
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           'SELECT payload FROM backup_operations WHERE operation_id=?',
           variables: [Variable(id)],
@@ -192,7 +192,7 @@ extension BackupStagingOperations on InformationBackups {
   }
 
   Future<void> _writeStaging(_BackupStagingRecord record) =>
-      _repository._db.customStatement(
+      _db.customStatement(
         'UPDATE backup_operations SET payload=? WHERE operation_id=?',
         [jsonEncode(record.toPrivateJson()), record.operationId],
       );
@@ -214,17 +214,19 @@ extension BackupStagingOperations on InformationBackups {
     _checkOpen();
     _validateKeyOperation(operationId, commandDigest, expectedVersion);
     try {
-      await _repository._db.transaction(() async {
+      await _db.transaction(() async {
         if (await _backupOperationPayload(operationId) != null ||
             await _stagingFor(operationId) != null) {
           throw const StorageFailure('operation_conflict');
         }
         if (await operationVersion() != expectedVersion)
           throw const StorageFailure('backup_version_conflict');
-        if (await recoveryKey() == null)
-          throw const StorageFailure('backup_not_enabled');
-        if (action == BackupOutputAction.export && !await recoveryKeySaved())
-          throw const StorageFailure('recovery_key_not_saved');
+        if (_preparedVerifier == null) {
+          if (await recoveryKey() == null)
+            throw const StorageFailure('backup_not_enabled');
+          if (action == BackupOutputAction.export && !await recoveryKeySaved())
+            throw const StorageFailure('recovery_key_not_saved');
+        }
         final record = _BackupStagingRecord(
           operationId: _stagingId(operationId),
           outputId: operationId,
@@ -236,7 +238,7 @@ extension BackupStagingOperations on InformationBackups {
           stagingBookmark: stagingBookmark,
         );
         _decodeStaging(record.toPrivateJson().cast<String, dynamic>());
-        await _repository._db.customStatement(
+        await _db.customStatement(
           'INSERT INTO backup_operations(operation_id,payload) VALUES(?,?)',
           [record.operationId, jsonEncode(record.toPrivateJson())],
         );
@@ -268,7 +270,7 @@ extension BackupStagingOperations on InformationBackups {
   Future<void> recordOutputBookmark(String id, String bookmark) async {
     _checkOpen();
     _validateNativeBookmark(bookmark);
-    await _repository._db.transaction(() async {
+    await _db.transaction(() async {
       final record = await _stagingFor(id);
       final output = await _outputRecord(id);
       if (record == null ||
@@ -293,7 +295,7 @@ extension BackupStagingOperations on InformationBackups {
   ) async {
     _checkOpen();
     try {
-      await _repository._db.transaction(() async {
+      await _db.transaction(() async {
         final record = await _stagingFor(operationId);
         if (record == null ||
             !record.cleanupPending ||
@@ -341,7 +343,7 @@ extension BackupStagingOperations on InformationBackups {
   /// Owner-only recovery/cleanup queue, including old-library tombstones.
   Future<List<String>> pendingOutputStaging() async {
     _checkOpen();
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect('SELECT payload FROM backup_operations')
         .get();
     final result = <String>[];
@@ -389,13 +391,13 @@ extension BackupStagingOperations on InformationBackups {
         throw const StorageFailure('backup_outcome_unknown');
       if (output?.phase == BackupOutputPhase.prepared) {
         _preparedBackupOutputs.remove(operationId);
-        await _repository._db.transaction(() async {
+        await _db.transaction(() async {
           await _advanceOperationVersion();
           output = output!.change(
             phase: BackupOutputPhase.notPublished,
             version: await operationVersion(),
           );
-          await _repository._db.customStatement(
+          await _db.customStatement(
             'UPDATE backup_operations SET payload=? WHERE operation_id=?',
             [jsonEncode(output!.toPrivateJson()), operationId],
           );
@@ -420,12 +422,12 @@ extension BackupStagingOperations on InformationBackups {
         );
       }
       await releaseNative?.call();
-      await _repository._db.transaction(() async {
+      await _db.transaction(() async {
         await _writeStaging(
           record.change(cleanupPending: false, clearAccess: true),
         );
         if (output != null) {
-          await _repository._db.customStatement(
+          await _db.customStatement(
             'UPDATE backup_operations SET payload=? WHERE operation_id=?',
             [
               jsonEncode(output!.change(cleanupPending: false).toPrivateJson()),

@@ -204,6 +204,7 @@ class ProposalsController extends ChangeNotifier {
       );
   final _drafts = <String, ProposalDraft>{};
   WorkspaceProposalChange? _command;
+  WorkspaceProposalDetail? _passwordFillBefore;
   ProposalDraft? get draft => _drafts[selection];
   String get _positionKey => '$selection/$activeItemId';
   double get detailScroll => _positions[_positionKey] ?? 0;
@@ -547,6 +548,7 @@ class ProposalsController extends ChangeNotifier {
   Future<void> _finished(WorkspaceProposalReceipt r) async {
     busy = false;
     _command = null;
+    _passwordFillBefore = null;
     writeFailure = null;
     _drafts.remove(r.proposalId);
     passwords?.clear(r.proposalId);
@@ -577,11 +579,13 @@ class ProposalsController extends ChangeNotifier {
     try {
       if (action == WorkspaceProposalAction.confirm && passwords != null) {
         final previous = detail!;
+        _passwordFillBefore = previous;
         final filled = await passwords!.store(
           previous.summary.id,
           previous.summary.version,
         );
         if (filled.isNotEmpty) await _reloadFilledPasswords(previous, filled);
+        _passwordFillBefore = null;
       }
       _command = _reviewedCommand(action);
       final receipt = await source.change(_command!);
@@ -592,6 +596,18 @@ class ProposalsController extends ChangeNotifier {
         writeFailure = error is WorkspaceFailure
             ? error
             : const WorkspaceFailure('unknown_outcome', '提案结果暂时无法确认，请先核对原操作。');
+        if (_passwordFillBefore != null &&
+            !{
+              'validation',
+              'conflict',
+              'library_changed',
+            }.contains(writeFailure!.code)) {
+          writeFailure = const WorkspaceFailure(
+            'unknown_outcome',
+            '密码填写结果尚未确认，输入仍保留，请核对原操作。',
+          );
+        }
+        if (!uncertain) _passwordFillBefore = null;
         if (!uncertain) _command = null;
         _notify();
       }
@@ -599,10 +615,34 @@ class ProposalsController extends ChangeNotifier {
   }
 
   Future<void> reconcile() async {
-    if (_closed || !uncertain || busy || _command == null) return;
+    if (_closed ||
+        !uncertain ||
+        busy ||
+        (_command == null && _passwordFillBefore == null)) {
+      return;
+    }
     busy = true;
     _notify();
     try {
+      final before = _passwordFillBefore;
+      if (_command == null && before != null) {
+        final filled = await passwords!.reconcile(
+          before.summary.id,
+          before.summary.version,
+        );
+        if (_closed) return;
+        if (filled != null && filled.isNotEmpty) {
+          await _reloadFilledPasswords(before, filled);
+        }
+        _passwordFillBefore = null;
+        busy = false;
+        writeFailure = null;
+        notice = filled == null
+            ? '已确认密码尚未保存，输入仍保留；请核对后重试。'
+            : '密码填写已核对，资料尚未入库；请核对后保存整份提案。';
+        _notify();
+        return;
+      }
       final r = await source.receipt(_command!.operationId);
       if (_closed) return;
       if (r != null) {
@@ -615,9 +655,21 @@ class ProposalsController extends ChangeNotifier {
         _notify();
         await load();
       }
-    } catch (_) {
+    } catch (error) {
       if (!_closed) {
         busy = false;
+        if (_passwordFillBefore != null &&
+            error is WorkspaceFailure &&
+            {
+              'conflict',
+              'library_changed',
+              'validation',
+            }.contains(error.code)) {
+          _passwordFillBefore = null;
+          writeFailure = error;
+          _notify();
+          return;
+        }
         writeFailure = const WorkspaceFailure(
           'unknown_outcome',
           '仍无法确认本次提案结果，请稍后核对原操作。',
@@ -631,6 +683,7 @@ class ProposalsController extends ChangeNotifier {
     if (frozen || _closed) return;
     _generation++;
     _drafts.clear();
+    _passwordFillBefore = null;
     _positions.clear();
     batch.clear();
     _batchLocation = null;
@@ -662,6 +715,7 @@ class ProposalsController extends ChangeNotifier {
     _drafts.clear();
     _positions.clear();
     _command = null;
+    _passwordFillBefore = null;
     detail = null;
     results = null;
     catalog = null;

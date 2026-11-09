@@ -102,7 +102,7 @@ final class _FileOpen {
 /// the repository is closed and must not overlap Owner work.
 class InformationFileOpens {
   InformationFileOpens._(this._repository);
-  final EncryptedInformationRepository _repository;
+  final _FileOperationContext _repository;
   final InformationDeliveryFiles _files = NativeInformationDeliveryFiles();
   final _fresh = <String>{}, _owned = <String>{}, _active = <String>{};
   void _check(String id) {
@@ -284,20 +284,7 @@ class InformationFileOpens {
       );
       _decode(Map<String, dynamic>.from(r.json()), operationId);
       await _repository._db.transaction(() async {
-        for (final table in [
-          'information_record_operations',
-          'information_lifecycle_operations',
-        ]) {
-          if ((await _repository._db
-                  .customSelect(
-                    'SELECT 1 FROM $table WHERE operation_id=?',
-                    variables: [Variable(operationId)],
-                  )
-                  .get())
-              .isNotEmpty) {
-            throw const StorageFailure('operation_conflict');
-          }
-        }
+        await _repository.checkOtherOperation(operationId);
         if (await _repository.fileOutputs.status(operationId) != null) {
           throw const StorageFailure('operation_conflict');
         }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:info_remote/agent_connection.dart';
 
 bool validChatId(String value) =>
     RegExp(r'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,149}$').hasMatch(value);
@@ -8,15 +9,23 @@ bool validChatId(String value) =>
 /// Immutable private association. The random file reference is a bearer
 /// capability, not an identity lookup. Never index or discover it by chat ID.
 class CodexAssociation {
-  CodexAssociation(this.chatId, this.port, this.secret, {String? rootChatId})
-    : rootChatId = rootChatId ?? chatId;
+  CodexAssociation(
+    this.chatId,
+    this.port,
+    this.secret, {
+    String? rootChatId,
+    this.connection,
+  }) : rootChatId = rootChatId ?? chatId;
   final String chatId;
   final int port;
   final String secret;
   final String rootChatId;
+  final AgentConnectionProfile? connection;
 
   Future<String> save(Directory root) async {
-    if (!validChatId(chatId) || !validChatId(rootChatId)) {
+    if (!validChatId(chatId) ||
+        !validChatId(rootChatId) ||
+        connection != null && connection!.address.port != port) {
       throw const FormatException();
     }
     await root.create(recursive: true);
@@ -36,11 +45,12 @@ class CodexAssociation {
     await file.create(exclusive: true);
     await file.writeAsString(
       jsonEncode({
-        'version': 2,
+        'version': connection == null ? 2 : 3,
         'chatId': chatId,
         'rootChatId': rootChatId,
         'port': port,
         'secret': secret,
+        if (connection != null) 'connection': connection!.toPrivateJson(),
       }),
       flush: true,
     );
@@ -54,20 +64,34 @@ class CodexAssociation {
         !RegExp(r'[/\\][0-9a-f]{64}\.json$').hasMatch(reference) ||
         await FileSystemEntity.type(reference, followLinks: false) !=
             FileSystemEntityType.file ||
-        await file.length() > 4096) {
+        await file.length() > 131072) {
       throw const FormatException();
     }
     final data = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-    if ((data['version'] != 1 && data['version'] != 2) ||
+    if ((data['version'] != 1 &&
+            data['version'] != 2 &&
+            data['version'] != 3) ||
+        data['version'] != 3 && await file.length() > 4096 ||
         data['chatId'] != chatId ||
-        (data['version'] == 2 &&
+        (data['version'] != 1 &&
             (data['rootChatId'] is! String ||
                 !validChatId(data['rootChatId'] as String))) ||
         data['port'] is! int ||
         data['port'] < 1 ||
         data['port'] > 65535 ||
         data['secret'] is! String ||
-        (data['secret'] as String).length < 40) {
+        (data['secret'] as String).length < 40 ||
+        (data['secret'] as String).length > 2000 ||
+        data['version'] == 3 && data['connection'] is! Map ||
+        data['version'] != 3 && data.containsKey('connection')) {
+      throw const FormatException();
+    }
+    final connection = data['version'] == 3
+        ? AgentConnectionProfile.fromPrivateJson(
+            Map<String, dynamic>.from(data['connection'] as Map),
+          )
+        : null;
+    if (connection != null && connection.address.port != data['port']) {
       throw const FormatException();
     }
     return CodexAssociation(
@@ -75,6 +99,7 @@ class CodexAssociation {
       data['port'] as int,
       data['secret'] as String,
       rootChatId: data['rootChatId'] as String? ?? chatId,
+      connection: connection,
     );
   }
 

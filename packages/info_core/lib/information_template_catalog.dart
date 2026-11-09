@@ -98,6 +98,12 @@ class InformationTemplateDescription {
         'credentialTransportUtf8Bytes': 6000000,
       },
     },
+    'candidateIdentity': {
+      'field': 'items[].key',
+      'description':
+          'Give each item a stable key unique within this proposal. The candidate property is key; a pending relation uses itemKey to reference that key. Do not put itemKey on the candidate itself.',
+      'pendingReference': {'kind': 'information', 'itemKey': 'example-item'},
+    },
     'classificationInput': {
       'directoryId': 'Use an existing directory id when known.',
       'suggestedDirectory':
@@ -140,10 +146,10 @@ class InformationTemplateDescription {
     if (hasGuidance && recordKind == 'information')
       'submissionExample': {
         'command': 'import-submit',
-        if (_exampleAttachments.isNotEmpty)
-          'operationId': 'replace-with-unique-intake-id',
+        'operationId': 'replace-with-unique-intake-id',
         'items': [
           {
+            'key': 'example-item',
             'name': (definition['example'] as Map)['name'],
             'description': (definition['example'] as Map)['summary'] ?? '',
             'templateId': id,
@@ -265,6 +271,7 @@ class InformationTemplateDescription {
       'operationId': 'replace-with-unique-intake-id',
       'items': [
         {
+          'key': 'example-item',
           'name': (definition['example'] as Map)['name'],
           'description': (definition['example'] as Map)['summary'] ?? '',
           'templateId': id,

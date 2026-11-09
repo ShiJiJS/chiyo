@@ -1,7 +1,9 @@
+import 'package:info_workspace/owner_workspace_form_save.dart';
+import 'package:info_workspace/owner_workspace_classification.dart'
+    show WorkspaceClassificationInformation;
+import 'package:info_workspace/owner_workspace_relation_queries.dart';
 import 'owner_workspace_file_selections.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-import 'workspace_adoption.dart';
+import 'package:info_workspace/owner_workspace_adoption.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'workspace_history.dart';
 import 'workspace_information_codec.dart';
@@ -12,7 +14,12 @@ import 'owner_workspace_legacy_templates.dart';
 
 /// Ordinary-information part of the production source. The composition root
 /// owns OwnerAccess and supplies installed definitions; no sample data is used.
-class OwnerWorkspaceInformation implements WorkspaceRelationSource {
+class OwnerWorkspaceInformation
+    implements
+        WorkspaceRelationSource,
+        WorkspaceClassificationInformation,
+        OwnerFileInformation,
+        WorkspaceAdoptionInformation {
   OwnerWorkspaceInformation({
     required this.owner,
     required Map<String, Map<String, Object?>> templates,
@@ -25,11 +32,13 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
            (key, value) => MapEntry(key, workspaceImmutableMap(value)),
          ),
        );
+  @override
   final core.OwnerAccess owner;
   final OwnerWorkspaceFileSelections? fileSelections;
   final Map<String, Map<String, Object?>> _initialTemplates;
   final Map<String, Map<String, Object?>> Function()? readTemplates;
   final WorkspaceTemplateState Function(String, String?)? templateState;
+  @override
   Map<String, Map<String, Object?>> get templates =>
       readTemplates?.call() ?? _initialTemplates;
   final void Function(WorkspaceRecordRef)? onChanged;
@@ -177,78 +186,12 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
   @override
   Future<WorkspaceResults> queryRelationCandidates(
     WorkspaceRelationQuery query,
-  ) async {
-    if (query.typeId == 'credential') {
-      _available();
-      if (query.key != 'related' ||
-          (query.source != null &&
-              (query.source!.kind != WorkspaceRecordKind.credential ||
-                  !owner.credentials.any((c) => c.id == query.source!.id)))) {
-        throw const WorkspaceFailure('conflict', '凭据关联来源已变化，请重新打开。');
-      }
-      final items = _summaries()
-          .where(
-            (r) =>
-                r.ref.kind == WorkspaceRecordKind.information &&
-                _keyword(r, query.keyword),
-          )
-          .toList();
-      sortWorkspaceSummaries(items, WorkspaceSort.name);
-      final offset = _offset(query.offset, query.limit, items.length);
-      return WorkspaceResults(
-        items: items.skip(offset).take(query.limit),
-        total: items.length,
-        offset: offset,
-      );
-    }
-    final item = query.source == null ? null : _item(query.source!);
-    if (item != null && (item.layout?.typeId ?? 'generic') != query.typeId) {
-      throw const WorkspaceFailure('conflict', '来源资料类型已变化。');
-    }
-    // Only the owner's relation descriptors are needed. Do not decode source
-    // field values just to find eligible target metadata.
-    final snapshot = item?.layout?.snapshot;
-    if (item?.layout != null &&
-        snapshot?['codec'] != 'workspace-information-v1') {
-      throw const WorkspaceFailure('unsupported', '此资料布局尚不支持修改关联。');
-    }
-    final definition = item == null
-        ? await loadTemplate(query.typeId)
-        : {
-            'relations': [
-              ...((snapshot?['definition'] as Map?)?['relations'] as List? ??
-                  []),
-              ...(snapshot?['retainedRelations'] as List? ?? []),
-            ],
-          };
-    final rule = (definition['relations'] as List? ?? [])
-        .where((r) => r['key'] == query.key)
-        .lastOrNull;
-    if (rule == null) {
-      throw const WorkspaceFailure('unsupported', '此资料没有该关联类型。');
-    }
-    final types = rule['targetTemplates'] as List? ?? [];
-    final items = _summaries()
-        .where(
-          (r) =>
-              r.ref != query.source &&
-              (query.key != 'credentials' ||
-                  r.ref.kind == WorkspaceRecordKind.credential) &&
-              (types.isEmpty ||
-                  types.any(
-                    (t) => workspaceTypeMatches(r.type.id, t as String),
-                  )) &&
-              _keyword(r, query.keyword),
-        )
-        .toList();
-    sortWorkspaceSummaries(items, WorkspaceSort.name);
-    final offset = _offset(query.offset, query.limit, items.length);
-    return WorkspaceResults(
-      items: items.skip(offset).take(query.limit),
-      total: items.length,
-      offset: offset,
-    );
-  }
+  ) => OwnerWorkspaceRelationQueries(
+    owner: owner,
+    readSummaries: _summaries,
+    readTemplate: loadTemplate,
+    sort: (items) => sortWorkspaceSummaries(items, WorkspaceSort.name),
+  ).queryRelationCandidates(query);
 
   void _available() {
     if (!owner.serviceAvailable) {
@@ -266,6 +209,7 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
     return item;
   }
 
+  @override
   Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) async {
     final detail = _codec.decode(
       _item(ref),
@@ -308,65 +252,41 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
     return definition;
   }
 
-  Future<WorkspaceSaveResult> createRecord(
-    WorkspaceCreate draft,
-  ) => _write(() async {
-    _available();
-    final command = _codec.createCommand(draft);
-    await _checkReplay(draft.operationId, command);
-    if (draft.typeId == 'credential') {
-      throw const WorkspaceFailure('unsupported', '托管凭据请使用凭据管理入口。');
-    }
-    final Map<String, Object?> definition;
-    if (draft.legacyTemplateId != null) {
-      final t = owner.templates
-          .where((t) => t.id == draft.legacyTemplateId)
-          .firstOrNull;
-      if (t == null ||
-          t.version != draft.expectedLegacyVersion ||
-          draft.typeId != 'generic') {
-        throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新打开表单。');
-      }
-      definition = OwnerWorkspaceLegacyTemplates.project(t).definition;
-    } else {
-      if (draft.expectedLegacyVersion != null) {
-        throw const WorkspaceFailure('validation', '旧版模板身份无效。');
-      }
-      definition = await loadTemplate(draft.typeId);
-      if (draft.expectedTemplateVersion != definition['templateVersion'] ||
-          draft.expectedTemplateDigest != definition['packageDigest']) {
-        throw const WorkspaceFailure('conflict', '资料模板已更新，请重新打开表单。');
-      }
-    }
-    final selected = {
-      for (final e in draft.fileSelections.entries)
-        e.key:
-            fileSelections?.selection(e.value) ??
-            (throw const WorkspaceFailure('selection_expired', '附件选择已失效。')),
-    };
-    if (selected.values.map((s) => s.draft.id).toSet().length > 1 ||
-        selected.values.map((s) => s.stage.id).toSet().length !=
-            selected.length) {
-      throw const WorkspaceFailure('selection_expired', '请为各字段分别选择同一表单中的附件。');
-    }
-    final input = _codec.create(
-      draft,
-      definition,
-      stagedFiles: {for (final e in selected.entries) e.key: e.value.stage.id},
-    );
-    _checkRelations(input, null);
-    final receipt = selected.isEmpty
-        ? await owner.saveInformationRecord(draft.operationId, input)
-        : await owner.saveInformationFormRecord(
-            selected.values.first.draft,
-            draft.operationId,
-            input,
-          );
-    for (final selected in selected.values) {
-      await fileSelections!.committed(selected.resource.selectionId);
-    }
-    return _saved(receipt);
-  });
+  Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft) =>
+      _write(() async {
+        _available();
+        final command = _codec.createCommand(draft);
+        await _checkReplay(draft.operationId, command);
+        if (draft.typeId == 'credential') {
+          throw const WorkspaceFailure('unsupported', '托管凭据请使用凭据管理入口。');
+        }
+        final Map<String, Object?> definition;
+        if (draft.legacyTemplateId != null) {
+          final t = owner.templates
+              .where((t) => t.id == draft.legacyTemplateId)
+              .firstOrNull;
+          if (t == null ||
+              t.version != draft.expectedLegacyVersion ||
+              draft.typeId != 'generic') {
+            throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新打开表单。');
+          }
+          definition = OwnerWorkspaceLegacyTemplates.project(t).definition;
+        } else {
+          if (draft.expectedLegacyVersion != null) {
+            throw const WorkspaceFailure('validation', '旧版模板身份无效。');
+          }
+          definition = await loadTemplate(draft.typeId);
+          if (draft.expectedTemplateVersion != definition['templateVersion'] ||
+              draft.expectedTemplateDigest != definition['packageDigest']) {
+            throw const WorkspaceFailure('conflict', '资料模板已更新，请重新打开表单。');
+          }
+        }
+        final receipt = await OwnerWorkspaceFormSave(
+          owner,
+          fileSelections,
+        ).create(draft, definition);
+        return _saved(receipt);
+      });
 
   Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit) =>
       _write(() async {
@@ -438,27 +358,7 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
   }
 
   WorkspaceFailure _failure(core.AccessFailure failure) =>
-      switch (failure.status) {
-        'version_conflict' || 'information_conflict' || 'operation_conflict' =>
-          const WorkspaceFailure('conflict', '资料或操作已变化，请重新读取并核对修改。'),
-        'template_changed' || 'template_unavailable' => const WorkspaceFailure(
-          'conflict',
-          '模板已停用、移除或更新，请重新核对新建资料的模板。',
-        ),
-        'invalid_information' => const WorkspaceFailure(
-          'validation',
-          '资料内容或分类无效，请重新核对。',
-        ),
-        'library_changed' => const WorkspaceFailure(
-          'unknown_outcome',
-          '资料库已替换，不能将旧操作重放到新库。',
-        ),
-        'service_unavailable' => const WorkspaceFailure(
-          'unavailable',
-          '资料服务尚未就绪。',
-        ),
-        _ => const WorkspaceFailure('unknown_outcome', '操作结果无法确认，请核对原操作。'),
-      };
+      ownerWorkspaceRecordFailure(failure);
 
   Future<WorkspaceOperationReceipt?> recordOperationReceipt(
     String operationId,
@@ -494,99 +394,8 @@ class OwnerWorkspaceInformation implements WorkspaceRelationSource {
     );
   }
 
-  Future<WorkspaceRecordReceipt> applyAdoption(
-    String operationId,
-    WorkspaceAdoptionPreview plan, {
-    void Function()? validate,
-  }) async {
-    _available();
-    final command = core.InformationRecordCommand(
-      typeId: plan.target.type.id,
-      digest: sha256
-          .convert(utf8.encode('adopt-template:${plan.planId}'))
-          .toString(),
-      adoptionPlanId: plan.planId,
-      templateCatalogVersion: plan.pluginVersion,
-    );
-    final prior = await owner.informationRecordReceipt(operationId);
-    if (prior != null) {
-      if (prior.command?.digest != command.digest) {
-        throw const WorkspaceFailure('conflict', '原操作不能用于另一份预览。');
-      }
-      return WorkspaceRecordReceipt(
-        ref: WorkspaceRecordRef(WorkspaceRecordKind.information, prior.itemId),
-        version: prior.version,
-      );
-    }
-    final current = _item(plan.current.record.ref);
-    if (current.version != plan.current.version ||
-        owner.templatePackageVersion != plan.pluginVersion) {
-      throw const WorkspaceFailure('conflict', '资料或模板已变化，请重新预览。');
-    }
-    final input = _codec.adopt(plan.result, current, command);
-    _checkRelations(input, current);
-    try {
-      final receipt = await owner.saveInformationRecord(
-        operationId,
-        input,
-        validate: validate,
-      );
-      onChanged?.call(plan.current.record.ref);
-      return WorkspaceRecordReceipt(
-        ref: plan.current.record.ref,
-        version: receipt.version,
-      );
-    } on core.AccessFailure catch (e) {
-      throw _failure(e);
-    }
-  }
-
   void _checkRelations(
     core.InformationDraftInput input,
     core.InformationItem? before,
-  ) {
-    final layout = input.layout!.layout;
-    final definition = layout.snapshot['definition'] as Map;
-    final rules = <String, Map>{
-      for (final raw in definition['relations'] as List? ?? [])
-        (raw as Map)['key'] as String: raw,
-      for (final raw in layout.snapshot['retainedRelations'] as List? ?? [])
-        (raw as Map)['key'] as String: raw,
-    };
-    for (final group in layout.relations.entries) {
-      final rule = rules[group.key];
-      for (final target in group.value) {
-        // Existing dangling links are part of the saved record and survive
-        // unrelated edits. New links must resolve to an eligible live target.
-        if (before?.layout?.relations[group.key]?.contains(target) == true) {
-          continue;
-        }
-        String? type;
-        if (target.kind == 'information') {
-          final item = owner.information
-              .where((i) => i.id == target.id)
-              .firstOrNull;
-          if (item != null && item.id != before?.id) {
-            type = item.layout?.typeId ?? 'generic';
-          }
-        } else if (owner.credentials.any((c) => c.id == target.id)) {
-          type = 'credential';
-        }
-        final allowed = rule?['targetTemplates'] as List? ?? [];
-        if (rule == null ||
-            type == null ||
-            (group.key == 'credentials' && target.kind != 'credential') ||
-            (allowed.isNotEmpty &&
-                !allowed.any(
-                  (t) => workspaceTypeMatches(type!, t as String),
-                ))) {
-          throw WorkspaceFailure(
-            'validation',
-            '关联目标已不可用或不符合资料类型。',
-            fieldErrors: {'relation:${group.key}': '请重新选择关联资料。'},
-          );
-        }
-      }
-    }
-  }
+  ) => checkWorkspaceInformationRelations(owner, input, before);
 }

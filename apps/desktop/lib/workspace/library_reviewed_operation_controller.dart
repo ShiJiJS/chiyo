@@ -5,13 +5,21 @@ import 'workspace_source.dart';
 abstract class LibraryReviewedOperationController<P, C, R>
     extends ChangeNotifier {
   LibraryReviewedOperationController(this.source) {
-    _changes = source.changes.listen((_) {
-      if (_closed || frozen) return;
-      _changeVersion++;
-      needsReview = true;
-      failure = const WorkspaceFailure('conflict', '目录或资料已变化，请重新读取并核对范围。');
-      notifyListeners();
-    });
+    _changes =
+        (source is WorkspaceLibraryNotifications
+                ? (source as WorkspaceLibraryNotifications).libraryChanges
+                : source.changes)
+            .listen((_) {
+              if (_closed || frozen) return;
+              _changeVersion++;
+              needsReview = true;
+              failure = const WorkspaceFailure(
+                'conflict',
+                '目录或资料已变化，请重新读取并核对范围。',
+              );
+              notifyListeners();
+              unawaited(_verifyUnchangedPreview());
+            });
   }
   final WorkspaceSource source;
   P? preview;
@@ -22,6 +30,47 @@ abstract class LibraryReviewedOperationController<P, C, R>
   String operationId(C command);
   bool matches(R receipt, C command);
   bool previewAllowsSave(P preview);
+
+  /// Only adapters with an exact scope token opt in. Broad connection/audit
+  /// refreshes must not force the user to approve an unchanged batch again.
+  bool get canVerifyUnchangedPreview => false;
+  bool previewsMatch(P previous, P current) => false;
+  Future<void> _verifyUnchangedPreview() async {
+    if (!canVerifyUnchangedPreview ||
+        _closed ||
+        frozen ||
+        reading ||
+        preview == null ||
+        !needsReview ||
+        receipt != null) {
+      return;
+    }
+    final previous = preview as P,
+        generation = _generation,
+        changeVersion = _changeVersion;
+    try {
+      final currentCatalog = await source.loadCatalog();
+      final current = await readPreview();
+      if (_closed ||
+          frozen ||
+          reading ||
+          generation != _generation ||
+          changeVersion != _changeVersion ||
+          !identical(preview, previous) ||
+          !previewsMatch(previous, current)) {
+        return;
+      }
+      catalog = currentCatalog;
+      preview = current;
+      needsReview = false;
+      if (failure?.code == 'conflict') failure = null;
+      notifyListeners();
+    } on Object {
+      // A failed verification is not an unchanged scope. Keep the original
+      // preview and require the normal explicit review before any mutation.
+    }
+  }
+
   WorkspaceCatalog? catalog;
   WorkspaceFailure? failure;
   R? receipt;
@@ -69,6 +118,7 @@ abstract class LibraryReviewedOperationController<P, C, R>
       if (!_closed && generation == _generation) {
         reading = false;
         notifyListeners();
+        if (needsReview) unawaited(_verifyUnchangedPreview());
       }
     }
   }
@@ -114,7 +164,10 @@ abstract class LibraryReviewedOperationController<P, C, R>
       final result = await lookup(operationId(_command as C));
       if (result != null) {
         final checked = _check(result);
-        if (!_closed) receipt = checked;
+        if (!_closed) {
+          receipt = checked;
+          failure = null;
+        }
       } else {
         absent = true;
         if (!_closed) {

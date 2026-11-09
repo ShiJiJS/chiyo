@@ -144,6 +144,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  info_remote:
+    dependency: "direct main"
+    description:
+      path: "../info_remote"
+      relative: true
+    source: path
+    version: "0.1.0"
   io:
     dependency: transitive
     description:

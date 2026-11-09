@@ -50,6 +50,9 @@ Future<Map<String, Object?>> registerCodexRuntime(
     throw const FormatException('Redirected Skill');
   }
   final files = <String>[...binaries];
+  if (await File('${root.path}/macos-tools-source.json').exists()) {
+    files.add('macos-tools-source.json');
+  }
   final prefix = '${root.path}${Platform.pathSeparator}';
   await for (final entry in skill.list(recursive: true, followLinks: false)) {
     final type = await FileSystemEntity.type(entry.path, followLinks: false);

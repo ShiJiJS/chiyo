@@ -1,10 +1,12 @@
 name: info_cli
-description: Agent-only JSON-lines client for the local desktop service.
+description: Agent-only JSON-lines and Codex clients for the information service.
 version: 0.1.0
 publish_to: none
 environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
+  info_remote:
+    path: ../info_remote
   crypto: ^3.0.6
   info_core:
     path: ../info_core

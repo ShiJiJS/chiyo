@@ -44,94 +44,94 @@ final class BackupCleanupReceipt {
   };
 }
 
+BackupOwnerIntent _checkedOwnerCommand(
+  Map<String, Object?> input,
+  Map<String, int>? counts,
+  bool pending,
+) {
+  try {
+    if (input.length != 5 ||
+        !input.keys.toSet().containsAll({
+          'operationId',
+          'action',
+          'expectedVersion',
+          'selection',
+          'previewToken',
+        }))
+      throw const FormatException();
+    final id = input['operationId'] as String,
+        action = input['action'] as String;
+    final version = input['expectedVersion'] as int;
+    if (!{
+      'enableKey',
+      'saveKey',
+      'export',
+      'restore',
+      'cleanup',
+    }.contains(action))
+      throw const FormatException();
+    Map<String, Object?>? selection;
+    if ({'saveKey', 'export', 'restore'}.contains(action)) {
+      selection = (input['selection'] as Map).cast<String, Object?>();
+      if (selection.length != 4 ||
+          !selection.keys.toSet().containsAll({
+            'id',
+            'name',
+            'kind',
+            'version',
+          }))
+        throw const FormatException();
+      _validateRestoreResource(
+        selection['id'] as String,
+        selection['name'] as String,
+        selection['version'] as int,
+      );
+      if (selection['kind'] !=
+          switch (action) {
+            'saveKey' => 'keyOutput',
+            'export' => 'archiveOutput',
+            _ => 'archiveInput',
+          })
+        throw const FormatException();
+      selection = {
+        'id': selection['id'],
+        'name': selection['name'],
+        'kind': selection['kind'],
+        'version': selection['version'],
+      };
+    } else if (input['selection'] != null) {
+      throw const FormatException();
+    }
+    final token = input['previewToken'];
+    if (action == 'restore') {
+      if (token is! String ||
+          !RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(token) ||
+          counts == null ||
+          !_validBackupCounts(counts))
+        throw const FormatException();
+    } else if (token != null || counts != null) {
+      throw const FormatException();
+    }
+    final command = <String, Object?>{
+      'operationId': id,
+      'action': action,
+      'expectedVersion': version,
+      'selection': selection,
+      'previewToken': token,
+    };
+    final digest = crypto.sha256
+        .convert(utf8.encode(jsonEncode(command)))
+        .toString();
+    _validateKeyOperation(id, digest, version);
+    return BackupOwnerIntent._(command, digest, counts, pending);
+  } on Object {
+    throw const StorageFailure('invalid_backup_operation');
+  }
+}
+
 extension BackupOwnerOperations on InformationBackups {
   String _ownerIntentId(String id) =>
       'backup_owner_${crypto.sha256.convert(utf8.encode(id))}';
-
-  BackupOwnerIntent _checkedOwnerCommand(
-    Map<String, Object?> input,
-    Map<String, int>? counts,
-    bool pending,
-  ) {
-    try {
-      if (input.length != 5 ||
-          !input.keys.toSet().containsAll({
-            'operationId',
-            'action',
-            'expectedVersion',
-            'selection',
-            'previewToken',
-          }))
-        throw const FormatException();
-      final id = input['operationId'] as String,
-          action = input['action'] as String;
-      final version = input['expectedVersion'] as int;
-      if (!{
-        'enableKey',
-        'saveKey',
-        'export',
-        'restore',
-        'cleanup',
-      }.contains(action))
-        throw const FormatException();
-      Map<String, Object?>? selection;
-      if ({'saveKey', 'export', 'restore'}.contains(action)) {
-        selection = (input['selection'] as Map).cast<String, Object?>();
-        if (selection.length != 4 ||
-            !selection.keys.toSet().containsAll({
-              'id',
-              'name',
-              'kind',
-              'version',
-            }))
-          throw const FormatException();
-        _validateRestoreResource(
-          selection['id'] as String,
-          selection['name'] as String,
-          selection['version'] as int,
-        );
-        if (selection['kind'] !=
-            switch (action) {
-              'saveKey' => 'keyOutput',
-              'export' => 'archiveOutput',
-              _ => 'archiveInput',
-            })
-          throw const FormatException();
-        selection = {
-          'id': selection['id'],
-          'name': selection['name'],
-          'kind': selection['kind'],
-          'version': selection['version'],
-        };
-      } else if (input['selection'] != null) {
-        throw const FormatException();
-      }
-      final token = input['previewToken'];
-      if (action == 'restore') {
-        if (token is! String ||
-            !RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(token) ||
-            counts == null ||
-            !_validBackupCounts(counts))
-          throw const FormatException();
-      } else if (token != null || counts != null) {
-        throw const FormatException();
-      }
-      final command = <String, Object?>{
-        'operationId': id,
-        'action': action,
-        'expectedVersion': version,
-        'selection': selection,
-        'previewToken': token,
-      };
-      final digest = crypto.sha256
-          .convert(utf8.encode(jsonEncode(command)))
-          .toString();
-      _validateKeyOperation(id, digest, version);
-      return BackupOwnerIntent._(command, digest, counts, pending);
-    } on Object {
-      throw const StorageFailure('invalid_backup_operation');
-    }
-  }
 
   Map<String, Object?> _ownerIntentPayload(
     BackupOwnerIntent intent, {
@@ -188,7 +188,7 @@ extension BackupOwnerOperations on InformationBackups {
 
   Future<BackupOwnerIntent?> ownerOperationIntent(String id) async {
     _checkOpen();
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           'SELECT payload,invalidated FROM backup_operations WHERE operation_id=?',
           variables: [Variable(_ownerIntentId(id))],
@@ -216,7 +216,7 @@ extension BackupOwnerOperations on InformationBackups {
 
   Future<List<BackupOwnerIntent>> pendingOwnerOperations() async {
     _checkOpen();
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           'SELECT operation_id,payload,invalidated FROM backup_operations',
         )
@@ -252,7 +252,7 @@ extension BackupOwnerOperations on InformationBackups {
     _checkOpen();
     final intent = _checkedOwnerCommand(command, restoreCounts, true);
     try {
-      return await _repository._db.transaction(() async {
+      return await _db.transaction(() async {
         final previous = await ownerOperationIntent(intent.operationId);
         if (previous != null) {
           if (previous.digest != intent.digest ||
@@ -270,7 +270,7 @@ extension BackupOwnerOperations on InformationBackups {
           throw const StorageFailure('backup_outcome_unknown');
         if (await operationVersion() != intent.expectedVersion)
           throw const StorageFailure('backup_version_conflict');
-        await _repository._db.customStatement(
+        await _db.customStatement(
           'INSERT INTO backup_operations(operation_id,payload) VALUES(?,?)',
           [
             _ownerIntentId(intent.operationId),
@@ -288,12 +288,12 @@ extension BackupOwnerOperations on InformationBackups {
 
   Future<void> acknowledgeOwnerOperation(String id, String digest) async {
     _checkOpen();
-    await _repository._db.transaction(() async {
+    await _db.transaction(() async {
       final intent = await ownerOperationIntent(id);
       if (intent == null || intent.digest != digest)
         throw const StorageFailure('operation_conflict');
       if (!intent.pending) return;
-      await _repository._db.customStatement(
+      await _db.customStatement(
         'UPDATE backup_operations SET payload=? WHERE operation_id=?',
         [
           jsonEncode(_ownerIntentPayload(intent, pending: false)),
@@ -331,7 +331,7 @@ extension BackupOwnerOperations on InformationBackups {
 
   Future<BackupCleanupReceipt> finishOwnerCleanup(String id) async {
     _checkOpen();
-    return _repository._db.transaction(() async {
+    return _db.transaction(() async {
       final intent = await ownerOperationIntent(id);
       if (intent == null || intent.action != 'cleanup')
         throw const StorageFailure('operation_conflict');
@@ -353,7 +353,7 @@ extension BackupOwnerOperations on InformationBackups {
         intent.expectedVersion,
         await operationVersion(),
       );
-      await _repository._db.customStatement(
+      await _db.customStatement(
         'INSERT INTO backup_operations(operation_id,payload) VALUES(?,?)',
         [id, jsonEncode(receipt.toJson())],
       );
@@ -363,7 +363,7 @@ extension BackupOwnerOperations on InformationBackups {
 
   Future<List<String>> pendingOutputOperationIds() async {
     _checkOpen();
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           "SELECT operation_id FROM backup_operations WHERE invalidated=0 AND operation_id NOT LIKE 'file-output:%' AND operation_id NOT LIKE 'file-open:%'",
         )
@@ -388,7 +388,7 @@ extension BackupOwnerOperations on InformationBackups {
 
   Future<BackupOutputReceipt?> latestExportOperation() async {
     _checkOpen();
-    final rows = await _repository._db
+    final rows = await _db
         .customSelect(
           "SELECT operation_id FROM backup_operations WHERE invalidated=0 AND operation_id NOT LIKE 'file-output:%' AND operation_id NOT LIKE 'file-open:%'",
         )

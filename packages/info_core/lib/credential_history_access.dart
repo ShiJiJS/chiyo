@@ -53,7 +53,9 @@ extension _CredentialHistoryService on InformationService {
     CredentialExecution? e,
     DateTime cutoff,
   ) {
-    if (_useState(r) == 'pending' || _useGrantState(r) == 'available') {
+    if (_onlineCredentialDecisionPending(r.id) ||
+        _useState(r) == 'pending' ||
+        _useGrantState(r) == 'available') {
       return false;
     }
     if (_repository.grantHistory.any(
@@ -72,12 +74,19 @@ extension _CredentialHistoryService on InformationService {
     ];
     if (times.any((t) => !t.isBefore(cutoff))) return false;
     if (e == null) return true;
+    if (_deviceCredentialRequests.containsKey(r.id) &&
+        (!{'not_needed', 'complete'}.contains(e.cleanupState) ||
+            e.state == 'unknown' &&
+                _deviceCredentialExecutions[e.id]?.treeEnded != true)) {
+      return false;
+    }
     if (_pendingExecutionReceipts.containsKey(e.id)) return false;
     if ({'preparing', 'running'}.contains(e.state)) return false;
     if (e.materialLease != null && e.cleanupState != 'complete') return false;
     // A legacy unknown record without a registered process group cannot prove
     // its descendants ended. Preserve its identity and any recovery evidence.
-    if (e.state == 'unknown' &&
+    if (!_deviceCredentialRequests.containsKey(r.id) &&
+        e.state == 'unknown' &&
         e.restoredAt == null &&
         (e.jobName == null ||
             CredentialProcessJob.isActive(
@@ -129,9 +138,11 @@ extension _CredentialHistoryService on InformationService {
         }
         for (final id in ids) {
           _credentialUseSessions.remove(id);
+          _deviceCredentialRequests.remove(id);
         }
         for (final id in executionIds) {
           _executionCapabilities.remove(id);
+          _deviceCredentialExecutions.remove(id);
         }
       });
 }

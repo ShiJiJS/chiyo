@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'remote_workspace_source.dart';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
 import '../desktop_controls.dart';
@@ -38,8 +39,12 @@ class WorkspaceApp extends StatelessWidget {
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
+    this.onConnectionSettings,
+    this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
+  final VoidCallback? onConnectionSettings;
+  final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -56,6 +61,8 @@ class WorkspaceApp extends StatelessWidget {
     pageBuilder: pageBuilder,
     desktop: desktop,
     inputsBuilder: inputsBuilder,
+    onConnectionSettings: onConnectionSettings,
+    onAgentConnectionSetup: onAgentConnectionSetup,
   );
 }
 
@@ -71,8 +78,12 @@ class _WorkspaceSession extends StatefulWidget {
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
+    this.onConnectionSettings,
+    this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
+  final VoidCallback? onConnectionSettings;
+  final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -412,26 +423,82 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     windowTitle: widget.windowTitle,
     // A resumed unknown operation may arrive while the initial page is the
     // library. Keep reconciliation reachable even while navigation is locked.
-    trailingBuilder: (_) => ListenableBuilder(
-      listenable: _backups,
-      builder: (context, _) => !_backups.uncertain
-          ? const SizedBox.shrink()
-          : Tooltip(
-              message: '上次备份操作结果未确认。只核对原操作，不重新导出或恢复。',
-              child: DesktopButton(
-                key: const ValueKey('backup-root-reconcile'),
-                onPressed: _backups.busy
+    trailingBuilder: (context) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_source is RemoteWorkspaceSource)
+          ListenableBuilder(
+            listenable: _source.cache,
+            builder: (context, _) {
+              final cache = _source.cache;
+              final at = cache.updatedAt;
+              return TextButton.icon(
+                key: const ValueKey('workspace-sync'),
+                onPressed: cache.busy
                     ? null
-                    : (_backups.needsAccess
-                          ? _backups.recoverAccess
-                          : _backups.reconcile),
-                child: Text(
-                  _backups.busy
-                      ? '正在核对备份…'
-                      : (_backups.needsAccess ? '重新选择原文件并核对' : '核对上次备份操作'),
+                    : () async {
+                        try {
+                          await cache.synchronize();
+                        } catch (_) {
+                          /* shown below */
+                        }
+                      },
+                icon: const Icon(Icons.sync, size: 18),
+                label: Text(
+                  cache.busy
+                      ? '同步中…'
+                      : cache.failure != null
+                      ? '同步失败，重试'
+                      : at == null
+                      ? '同步'
+                      : '同步 · 更新于 ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
                 ),
-              ),
-            ),
+              );
+            },
+          ),
+        if (widget.onAgentConnectionSetup != null)
+          IconButton(
+            tooltip: 'AI 接入',
+            icon: const Icon(Icons.smart_toy_outlined),
+            onPressed: _controller.navigationLocked
+                ? null
+                : () async {
+                    _modalChanged(true);
+                    try {
+                      await widget.onAgentConnectionSetup!(context);
+                    } finally {
+                      _modalChanged(false);
+                    }
+                  },
+          ),
+        if (widget.onConnectionSettings != null)
+          IconButton(
+            tooltip: '连接设置',
+            onPressed: widget.onConnectionSettings,
+            icon: const Icon(Icons.dns_outlined),
+          ),
+        ListenableBuilder(
+          listenable: _backups,
+          builder: (context, _) => !_backups.uncertain
+              ? const SizedBox.shrink()
+              : Tooltip(
+                  message: '上次备份操作结果未确认。只核对原操作，不重新导出或恢复。',
+                  child: DesktopButton(
+                    key: const ValueKey('backup-root-reconcile'),
+                    onPressed: _backups.busy
+                        ? null
+                        : (_backups.needsAccess
+                              ? _backups.recoverAccess
+                              : _backups.reconcile),
+                    child: Text(
+                      _backups.busy
+                          ? '正在核对备份…'
+                          : (_backups.needsAccess ? '重新选择原文件并核对' : '核对上次备份操作'),
+                    ),
+                  ),
+                ),
+        ),
+      ],
     ),
     pageBuilder:
         widget.pageBuilder ??

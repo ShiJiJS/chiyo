@@ -44,6 +44,24 @@ void publishNewFile(String source, String destination) {
       calloc.free(from);
       calloc.free(to);
     }
+  } else if (Platform.isLinux) {
+    // Linux renameat2(AT_FDCWD, ..., RENAME_NOREPLACE) provides the same
+    // no-clobber contract for both files and directories. Unsupported kernels
+    // or filesystems fail closed; an overwriting rename is never a fallback.
+    final rename = DynamicLibrary.process()
+        .lookupFunction<
+          Int32 Function(Int32, Pointer<Utf8>, Int32, Pointer<Utf8>, Uint32),
+          int Function(int, Pointer<Utf8>, int, Pointer<Utf8>, int)
+        >('renameat2');
+    final from = source.toNativeUtf8(), to = destination.toNativeUtf8();
+    try {
+      if (rename(-100, from, -100, to, 1) != 0) {
+        throw const FileSystemException('File publication failed');
+      }
+    } finally {
+      calloc.free(from);
+      calloc.free(to);
+    }
   } else {
     throw const FileSystemException('File publication unsupported');
   }

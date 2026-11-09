@@ -358,6 +358,9 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       throw const CredentialUseFailure('unsupported_tool_version');
     }
     probe = await Directory.systemTemp.createTemp('info-tool-probe-');
+    // macOS /var is an ancestor alias. Keep the created directory's canonical
+    // identity so the cleanup check below recognizes our own probe directory.
+    probe = Directory(await probe.resolveSymbolicLinks());
     final environment = <String, String>{
       'HOME': probe.path,
       'USERPROFILE': probe.path,

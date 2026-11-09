@@ -106,7 +106,7 @@ final class _InformationFileOutput {
 /// Reopen/reconciliation observes only; no path can republish an old intent.
 class InformationFileOutputs {
   InformationFileOutputs._(this._repository);
-  final EncryptedInformationRepository _repository;
+  final _FileOperationContext _repository;
   final _fresh = <String>{}, _reserved = <String>{}, _active = <String>{};
   void _check(String id) {
     if (_repository._closed) throw const StorageFailure('library_closed');
@@ -305,20 +305,7 @@ class InformationFileOutputs {
           await _read(operationId, invalidated: true) != null) {
         throw const StorageFailure('operation_conflict');
       }
-      for (final table in [
-        'information_record_operations',
-        'information_lifecycle_operations',
-      ]) {
-        if ((await _repository._db
-                .customSelect(
-                  'SELECT 1 FROM $table WHERE operation_id=?',
-                  variables: [Variable(operationId)],
-                )
-                .get())
-            .isNotEmpty) {
-          throw const StorageFailure('operation_conflict');
-        }
-      }
+      await _repository.checkOtherOperation(operationId);
       if (!MacBackupPublicationFiles.stagingExists(root) ||
           Directory(root.path).listSync(followLinks: false).isNotEmpty) {
         throw const StorageFailure('file_staging_changed');

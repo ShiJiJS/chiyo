@@ -31,6 +31,14 @@ extension _InformationFileClient on AgentClient {
         throw const InformationFileFailure('unsupported_capability');
       }
       final action = (input['command'] as String).substring('file-'.length);
+      if (fetching &&
+          _remote != null &&
+          deviceFileStateDirectory == null &&
+          (capabilities['capabilities'] as List).contains(
+            'information-device-delivery.v1',
+          )) {
+        throw const InformationFileFailure('unsupported_capability');
+      }
       final result = await _call('/information-file/$action', {
         'sessionSecret': _session,
         ...input,
@@ -48,9 +56,39 @@ extension _InformationFileClient on AgentClient {
           if (!fetching) 'deliveryId': input['deliveryId'],
         };
       }
+      if (_remote != null &&
+          result['status'] == 'ok' &&
+          result['delivery'] is Map &&
+          (result['delivery'] as Map)['deviceDelivery'] == true) {
+        final directory = deviceFileStateDirectory;
+        if (directory == null && fetching) {
+          throw const InformationFileFailure(
+            'unsupported_capability',
+            operationClaimed: true,
+          );
+        }
+        if (directory != null) {
+          final files = DeviceInformationFiles(
+            _remote.profile,
+            directory,
+            workerExecutable: _runtimeWorkerExecutable,
+          );
+          if (fetching) return await files.fetch(_session!, input, result);
+          if (action == 'release') {
+            return await files.release(_session!, result);
+          }
+        }
+      }
       return result;
     } on InformationFileFailure catch (error) {
       return Map<String, dynamic>.from(error.toJson());
+    } on Object {
+      return Map<String, dynamic>.from(
+        const InformationFileFailure(
+          'delivery_io_failed',
+          operationClaimed: true,
+        ).toJson(),
+      );
     }
   }
 }

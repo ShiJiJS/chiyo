@@ -14,5 +14,12 @@ abstract class ProposalPasswords extends ChangeNotifier {
   /// Store this proposal's edited inputs in one encrypted proposal revision.
   /// Returns the filled item identities, without values. No record is admitted.
   Future<Set<String>> store(String proposalId, int version);
+
+  /// Null means confirmed absence; errors preserve an uncertain private write.
+  /// This must not replay a whole-proposal approval.
+  Future<Set<String>?> reconcile(String proposalId, int version) =>
+      Future.error(
+        StateError('Private password operation cannot be confirmed'),
+      );
   void clear(String proposalId);
 }

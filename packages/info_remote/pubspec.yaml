@@ -1,0 +1,21 @@
+name: info_remote
+description: Authenticated online transports shared by desktop clients.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  info_core:
+    path: ../info_core
+dev_dependencies:
+  crypto: ^3.0.6
+  info_server:
+    path: ../../apps/server
+  info_storage:
+    path: ../info_storage
+  test: ^1.26.3
+  lints: ^6.0.0
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher

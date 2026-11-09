@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
+import 'package:info_remote/agent_connection.dart';
+import 'macos_bundled_tools.dart';
 import 'credential_output_filter.dart';
+import 'device_information_files.dart';
+import 'device_credential_journal.dart';
+import 'runtime_worker_command.dart';
+import 'device_credential_host.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';
@@ -20,7 +25,10 @@ class AgentClient {
     CredentialProcessStarter? credentialProcessStarter,
     this.hostedCredentialExecutions = false,
     String? runtimeWorkerExecutable,
+    AgentConnectionProfile? connection,
+    this.deviceFileStateDirectory,
   }) : _session = sessionSecret,
+       _remote = connection == null ? null : AgentConnection(connection),
        _runtimeWorkerExecutable = runtimeWorkerExecutable,
        _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
@@ -32,6 +40,41 @@ class AgentClient {
              env,
              workerExecutable: runtimeWorkerExecutable,
            ));
+  factory AgentClient.remote(
+    AgentConnectionProfile profile, {
+    String? sessionSecret,
+    String sourceAgent = '通用 CLI',
+    bool hostedCredentialExecutions = false,
+    Directory? deviceFileStateDirectory,
+    String? runtimeWorkerExecutable,
+  }) => AgentClient(
+    profile.address.port,
+    sessionSecret: sessionSecret,
+    sourceAgent: sourceAgent,
+    hostedCredentialExecutions: hostedCredentialExecutions,
+    connection: profile,
+    deviceFileStateDirectory: deviceFileStateDirectory,
+    runtimeWorkerExecutable: runtimeWorkerExecutable,
+  );
+  final Directory? deviceFileStateDirectory;
+  DeviceCredentialJournal? get _deviceCredentialJournal =>
+      _remote != null && deviceFileStateDirectory != null
+      ? DeviceCredentialJournal(
+          _remote.profile,
+          Directory(
+            '${deviceFileStateDirectory!.absolute.parent.path}/credential-executions',
+          ),
+        )
+      : null;
+  late final Future<void> _deviceFileMaintenance =
+      _remote != null && deviceFileStateDirectory != null
+      ? DeviceInformationFiles(
+          _remote.profile,
+          deviceFileStateDirectory!,
+          workerExecutable: _runtimeWorkerExecutable,
+        ).maintain()
+      : Future<void>.value();
+  final AgentConnection? _remote;
   final bool hostedCredentialExecutions;
   final String? _runtimeWorkerExecutable;
   final CredentialProcessStarter _credentialProcessStarter;
@@ -47,6 +90,10 @@ class AgentClient {
   /// Private capability, for trusted adapters only. Never include in diagnostics.
   String? get sessionSecret => _session;
   String? get endCapability => _endCapability;
+  Future<Map<String, dynamic>> endLifecycleSession(
+    String capability, {
+    Duration timeout = const Duration(seconds: 5),
+  }) => _call('/session/end', {'endCapability': capability}, timeout: timeout);
   final _tokens = <String, String>{};
 
   /// Trusted hook bootstrap only; creates a fresh, unapproved session.
@@ -70,9 +117,22 @@ class AgentClient {
     _session = null;
     _endCapability = null;
     _http.close(force: true);
+    _remote?.close();
   }
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
+    try {
+      await _deviceFileMaintenance;
+    } on Object {
+      // Preserve failed cleanup journals. An unrelated catalog/proposal must
+      // still work; file fetch/release rechecks its own journal and fails closed.
+    }
+    try {
+      await _deviceCredentialJournal?.maintain();
+    } on Object {
+      // Failed/uncertain cleanup remains journaled; it cannot authorize a new
+      // launch or turn unrelated catalog queries into material delivery.
+    }
     final command = input['command'];
     if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {
       return _executeInformationFileCommand(input);
@@ -115,7 +175,20 @@ class AgentClient {
             const CredentialUseFailure('unknown_field').toJson(),
           );
         }
-        return _call('/capabilities', {});
+        final result = await _call('/capabilities', {});
+        if (_remote != null && Platform.isMacOS && result['status'] == 'ok') {
+          final tools = await MacBundledTools().read();
+          return {
+            ...result,
+            'capabilities': [
+              ...result['capabilities'] as List,
+              'credential-tools.v1',
+            ],
+            'credentialToolScope': 'current_device',
+            'credentialTools': tools.map((t) => t.toJson()).toList(),
+          };
+        }
+        return result;
       case 'import-file-status':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/import-file/status', {
@@ -413,8 +486,15 @@ class AgentClient {
   Future<Map<String, dynamic>> _call(
     String path,
     Map<String, dynamic> data, {
-    Duration timeout = const Duration(seconds: 5),
+    Duration? timeout,
   }) async {
+    if (_remote != null) {
+      return _remote.call(
+        path,
+        data,
+        timeout: timeout ?? AgentConnection.defaultRequestTimeout,
+      );
+    }
     try {
       return await (() async {
         final request = await _http.post('127.0.0.1', port, path);
@@ -424,7 +504,7 @@ class AgentClient {
         final response = await request.close();
         final text = await utf8.decoder.bind(response).join();
         return jsonDecode(text) as Map<String, dynamic>;
-      })().timeout(timeout);
+      })().timeout(timeout ?? const Duration(seconds: 5));
     } on Object {
       return {'status': 'service_unavailable'};
     }

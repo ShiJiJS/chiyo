@@ -255,3 +255,141 @@ class UnavailableWorkspaceLegacyTemplate
     int expectedVersion,
   ) => _unavailable();
 }
+
+/// Explicit typed boundaries while a remote module is being connected.
+/// Unsupported reads never masquerade as empty successful results.
+class UnavailableWorkspaceSource implements WorkspaceSource {
+  @override
+  WorkspaceSettingsSource get settings => const UnavailableWorkspaceSettings();
+  @override
+  WorkspaceBackupSource get backups => const UnavailableWorkspaceBackup();
+  @override
+  WorkspaceRuntimeSource get runtime => const UnavailableWorkspaceRuntime();
+  @override
+  WorkspaceAgentsSource get agents => const UnavailableWorkspaceAgents();
+  @override
+  WorkspaceCredentialSource get credentials =>
+      const UnavailableWorkspaceCredential();
+  @override
+  WorkspaceApprovalSource get approvals => const UnavailableWorkspaceApproval();
+  @override
+  WorkspaceGrantHistorySource get grantHistory =>
+      const UnavailableWorkspaceGrantHistory();
+  @override
+  WorkspaceProposalSource get proposals => const UnavailableWorkspaceProposal();
+  @override
+  WorkspacePluginSource get plugins => const UnavailableWorkspacePlugin();
+  @override
+  WorkspaceHostSource get hosts => const UnavailableWorkspaceHost();
+  @override
+  WorkspaceLegacyTemplateSource get legacyTemplates =>
+      const UnavailableWorkspaceLegacyTemplate();
+  @override
+  Stream<WorkspaceRecordRef?> get changes => const Stream.empty();
+  @override
+  Future<WorkspaceSummary> loadSummary() => _unavailable();
+  @override
+  Future<WorkspaceCatalog> loadCatalog() => _unavailable();
+  @override
+  Future<WorkspaceDirectory?> changeDirectory(
+    WorkspaceDirectoryChange change,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceClassificationReceipt> changeClassification(
+    WorkspaceClassificationChange change,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceClassificationReceipt?> classificationOperationReceipt(
+    String operationId,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceTagRemovalPreview> previewTagRemoval(String tagId) =>
+      _unavailable();
+  @override
+  Future<Map<String, Object?>> loadTemplate(String typeId) => _unavailable();
+  @override
+  Future<WorkspaceAdoptionPreview> previewAdoption(
+    WorkspaceAdoptionDraft draft,
+  ) => _unavailable();
+  @override
+  Future<void> releaseAdoption(String planId) => _unavailable();
+  @override
+  Future<WorkspaceRecordReceipt> applyAdoption(
+    String operationId,
+    String planId,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceResults> queryRecords(
+    WorkspaceQuery query, {
+    WorkspaceRecordRef? keepSelection,
+  }) => _unavailable();
+  @override
+  Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) => _unavailable();
+  @override
+  Future<WorkspaceResults> queryRelationCandidates(
+    WorkspaceRelationQuery query,
+  ) => _unavailable();
+  @override
+  Future<List<WorkspaceRecordSummary>> readSummaries(
+    Iterable<WorkspaceRecordRef> refs,
+  ) => _unavailable();
+  @override
+  Future<List<WorkspaceRevision>> loadRevisions(WorkspaceRecordRef ref) =>
+      _unavailable();
+  @override
+  Future<WorkspaceRevisionPreview> previewRevision(
+    WorkspaceRecordRef ref,
+    int version, {
+    required int expectedVersion,
+  }) => _unavailable();
+  @override
+  Future<WorkspaceRecycleResults> queryRecycled({
+    String keyword = '',
+    int offset = 0,
+    int limit = 25,
+  }) => _unavailable();
+  @override
+  Future<WorkspaceArchive> readRecycled(String entryId) => _unavailable();
+  @override
+  Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
+      _unavailable();
+  @override
+  Future<WorkspaceSaveResult> saveRecord(WorkspaceEdit edit) => _unavailable();
+  @override
+  Future<WorkspaceSaveResult> createRecord(WorkspaceCreate draft) =>
+      _unavailable();
+  @override
+  Future<WorkspaceOperationReceipt?> recordOperationReceipt(
+    String operationId,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceFileHistory> loadFileHistory(
+    WorkspaceRecordRef record,
+    String fieldKey,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceFilePreview> readFilePreview(
+    WorkspaceRecordRef record,
+    String fieldKey, {
+    int? version,
+    int page = 0,
+  }) => _unavailable();
+  @override
+  Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
+      _unavailable();
+  @override
+  Future<WorkspaceFileRef> changeFile(WorkspaceFileChange change) =>
+      _unavailable();
+  @override
+  Future<WorkspaceFileOperationReceipt?> fileOperationReceipt(
+    String operationId,
+  ) => _unavailable();
+  @override
+  Future<WorkspaceFileActionResult> fileAction(
+    WorkspaceRecordRef record,
+    String fieldKey,
+    int version,
+    WorkspaceFileAction action, {
+    required String operationId,
+  }) => _unavailable();
+}
