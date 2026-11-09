@@ -177,6 +177,8 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   backup_files_ = std::make_unique<BackupFileDialogs>(
       flutter_controller_->engine()->messenger(), GetHandle());
+  pdf_previews_ = std::make_unique<OwnerPdfPreviews>(
+      flutter_controller_->engine()->messenger(), GetHandle());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   window_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
       flutter_controller_->engine()->messenger(), "agent_info_manage/window",
@@ -301,6 +303,7 @@ bool FlutterWindow::OnCreate() {
 void FlutterWindow::OnDestroy() {
   RemoveNotificationIcon();
   notifications_.Reset();
+  pdf_previews_.reset();
   backup_files_.reset();
   RemoveTrayIcon();
   desktop_ready_ = false;
@@ -317,6 +320,7 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (pdf_previews_ && pdf_previews_->HandleMessage(message)) return 0;
   if (control_message_ != 0 && message == control_message_) {
     if (wparam != GetCurrentProcessId() || (lparam != 0 && lparam != 1)) return 0;
     if (lparam == 1) RequestQuit();

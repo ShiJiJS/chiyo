@@ -23,7 +23,8 @@ class NativeOwnerPdfPreview implements OwnerPdfPreviewRenderer {
     if (page < 0 || bytes.isEmpty || bytes.length > 10 * 1024 * 1024) {
       throw const WorkspaceFailure('invalid_request', '页码或PDF原文无效。');
     }
-    if (defaultTargetPlatform != TargetPlatform.macOS) {
+    if (defaultTargetPlatform != TargetPlatform.macOS &&
+        defaultTargetPlatform != TargetPlatform.windows) {
       throw const WorkspaceFailure('pdf_unsupported', '此平台尚未接入PDF预览。');
     }
     try {

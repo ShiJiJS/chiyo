@@ -35,6 +35,9 @@
 - #110 真实 NAS：全新隔离验证身份完成申请、等待原编号、仅批准字段读取、未批准字段/无关聊天拒绝、子身份共享范围、主人能力隔离；原 NAS 正常重启一次后根/子继续读取且截止时间不变；撤销与根结束后拒绝。首次结束未及时确认，只沿原 end-only 凭证接续，最终 completed。见 docs/development/evidence/windows-online/w110.md。
 - #110 已完成：干净 c42f7d7 重建的实际 App/CLI 运行载荷共 40 个文件，目录 build/development/w110-matched-c42f7d7；生产观察器识别、实际引用损坏/缺 hook 拒绝及恢复检查通过；由该载荷正常生成的最新审查材料再次通过 9 项 AOT 检查。此运行载荷不是 #116 完整发行 ZIP。旧两份临时接入材料、准备目录和已结束的本票私有验证引用已清理；保留最新匹配载荷、审查材料和摘要。未改全局 hooks 或本聊天 association。
 - 下一步 #111：补 Windows ownerFileOutput、templatePackageInput、owner_file_open 及 PDF 通道；沿用正式文件协调器与受管副本规则。先读现有原生实现/相关 ADR，再针对文件发布、历史原文与预览边界检查，必要时用真实文件面板验证。
+- #111 已接 PDF 原生通道：Windows.Data.Pdf 内存渲染、共享 15 秒期限、UI 线程回送，修复真实通道发现的 DIP/物理像素差异；原生两页颜色/真实 PNG 尺寸/越界/损坏/密码文件检查通过，28 项适配器检查、实际 Windows Flutter 通道与正式翻页控件检查通过，桌面分析通过。见 docs/development/evidence/windows-online/w111.md。本票仍开放。
+- #111 新定位：正式另存流程仍依赖 MacBackupPublicationFiles，Windows prepareStaging 返回 null，不能只补文件面板就宣称可另存。接下来实现 Windows 身份绑定/同卷/拒绝覆盖发布与回执恢复，补原生系统打开，再核对 NAS 文件与版本。
+- 过程清理限制：删除 PDF 样本生成依赖目录及旧 Release 内原生检查 exe/pdb 的命令被自动审批以 blocked by policy 拒绝，未执行，不重试/绕过。新检查目标已移至 runner/owner-pdf-check，旧文件仍保留；最终包不得混入旧检查程序。
 - 辅助测试尝试：现有 remote_settings_test 的本机服务器夹具受 POSIX secrets 和 /bin/chmod 限制。临时 Windows 测试夹具改动已撤回；没有修改生产服务平台边界，失败不计通过。测试失败时创建的隔离 Temp 合成夹具未做宽泛前缀清理。
 - 旧 POSIX 权限用例在 Windows 按平台跳过；未冒充已在 Mac/Linux 机器重跑其原生检查。此前 UI 服务器集成夹具依赖 POSIX 服务密钥，后续要适配测试装配而不放宽生产服务密钥边界。
 - 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #111–#116 仍开放。
