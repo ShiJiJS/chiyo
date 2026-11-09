@@ -57,3 +57,5 @@
 
 - #116 阶段：修复 Windows 整体检查的 POSIX 路径/权限/字体夹具、CRLF JSON 围栏、独立崩溃进程依赖锁；不可变示例附件按原字节检出，修复 Git CRLF 导致的哈希失败。CLI 120/27跳过、core 443/26、storage 379/47、remote 2/2、desktop 1118/64 全部非 hidden 用例通过，POSIX 整文件排除不计通过；相应分析通过。更新当前 NAS 随包说明，准备干净固定提交 -PackageOnly 归档。证据 docs/development/evidence/windows-online/w116.md；工单仍开放。
 - #116 原生输入定位：最小无 NAS 窗口记录到 Sky 的 Ctrl K 在 K 到达时 ctrl=false，type_text 的 V 同样 ctrl=false，解释组合键/粘贴未成立；普通按键及 IME 候选能出现。未据此改产品快捷键、未冒认真实物理输入已过；正常主入口与诊断 App 已分别正常退出。最终连续检查及 NAS 版本授权仍待接续。
+
+- #116 第一完整候选 1351a74 已经全部产包/解包/SDK-free/加密存储检查通过，ZIP 123278838 字节、7699项载荷，SHA256 3ea59f8a86d84e489b7b4dd8064795dd11fa54de076563a8d56605d48d02771f。实际 AOT 能力查询证实同包 GH/AWS 与系统 SSH；原生主入口连接62项、同包CLI正常退出。原生页面另发现Mac专用说明与当前联网Agent页遗漏工具状态组件，已修补并通过四文件回归/桌面分析，准备新提交重建。第一包是故障定位候选，不冒认为最终完成。原w113只读核对仍requesting-gh/3凭据/0申请，原关联保留，NAS更新授权未取得。
