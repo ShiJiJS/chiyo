@@ -152,6 +152,42 @@ class RemoteWorkspaceFileActions {
   Future<void> closeCopies(WorkspaceRecordRef r, String k) =>
       _run((d) => d.opened.closeCopies(r, k));
 
+  Future<List<WorkspaceOwnerCopyMaintenance>> runtimeCopies({
+    bool maintain = false,
+  }) => _run(
+    (d) => d.context.run(() async {
+      if (maintain) {
+        await d.store.fileOpens.maintain();
+        await d.saved.maintain();
+      }
+      return [
+        for (final s in await d.store.fileOpens.copies(
+          includeInvalidated: true,
+        ))
+          WorkspaceOwnerCopyMaintenance(
+            id: s.operationId,
+            name: s.fileName,
+            fileVersion: s.reference.attachmentVersion,
+            kind: WorkspaceOwnerCopyKind.open,
+            active: !s.closed && !s.invalidated,
+            uncertain: s.uncertain,
+          ),
+        for (final s in await d.store.fileOutputs.pending(
+          includeInvalidated: true,
+        ))
+          if (s.cleanupPending)
+            WorkspaceOwnerCopyMaintenance(
+              id: s.operationId,
+              name: s.fileName,
+              fileVersion: s.reference.attachmentVersion,
+              kind: WorkspaceOwnerCopyKind.save,
+              active: false,
+              uncertain: s.uncertain,
+            ),
+      ];
+    }),
+  );
+
   Future<void> dispose() async {
     if (_closed) return;
     _closed = true;

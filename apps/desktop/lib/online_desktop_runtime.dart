@@ -29,6 +29,7 @@ class OnlineDesktopRuntime extends ChangeNotifier
   bool windowHidden = false, quitting = false, closed = false;
   bool shutdownFailed = false, notificationReadFailed = false;
   bool resourcesClosed = false;
+  bool get navigationEnabled => _enabled;
   int _binding = 0, _navigationIntent = 0;
   final _seen = <String>{};
   WorkspacePreferences? preferences;
@@ -274,7 +275,17 @@ class OnlineDesktopRuntime extends ChangeNotifier
       if (shutdownFailed) throw StateError('app_exit_failed');
       return;
     }
-    if (quitting) return;
+    if (quitting) {
+      if (shutdownFailed &&
+          const {
+            DesktopEvent.openApprovals,
+            DesktopEvent.openSettings,
+            DesktopEvent.searchApprovals,
+          }.contains(event)) {
+        await showWindow();
+      }
+      return;
+    }
     switch (event) {
       case DesktopEvent.closeWindow:
         if (preferences?.background == false) {
@@ -341,6 +352,11 @@ class OnlineDesktopRuntime extends ChangeNotifier
       // Retain the same lifetime and already closed resource facts for retry.
       // No server stop, session end, process signal or command replay exists.
       shutdownFailed = true;
+      try {
+        await showWindow();
+      } on Object {
+        /* Retain the actual hidden state. */
+      }
     }
     _changed();
   }

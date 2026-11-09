@@ -28,6 +28,8 @@ import 'owner_backup_routes.dart';
 import 'owner_adoption_routes.dart';
 import 'owner_policy_routes.dart';
 import 'package:info_workspace/owner_agent_sessions.dart';
+import 'package:info_workspace/owner_runtime_observation.dart';
+import 'package:info_workspace/runtime_transport.dart';
 import 'package:info_workspace/agent_sessions_transport.dart';
 import 'package:info_storage/info_storage.dart';
 
@@ -111,6 +113,7 @@ final class OnlineServer {
     );
   }
 
+  OwnerRuntimeObservation? _runtimeObservation;
   OwnerAgentSessions? _agentSessionsValue;
   OwnerAgentSessions get _agentSessions =>
       _agentSessionsValue ??= OwnerAgentSessions(_service.owner);
@@ -165,6 +168,7 @@ final class OnlineServer {
     _policyRoutesValue?.dispose();
     _policyRoutesValue = null;
     _agentSessionsValue = null;
+    _runtimeObservation = null;
     _files = null;
     _credentials = null;
     _hosts = null;
@@ -455,6 +459,17 @@ final class OnlineServer {
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
           });
+        } else if (request.method == 'GET' &&
+            request.uri.path == '/v1/owner/runtime') {
+          if (request.uri.hasQuery) throw const FormatException();
+          await reply(
+            200,
+            serverRuntimeToJson(
+              await (_runtimeObservation ??= OwnerRuntimeObservation(
+                _service.owner,
+              )).read(),
+            ),
+          );
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/agent-sessions') {
           if (request.uri.hasQuery) throw const FormatException();
