@@ -2,7 +2,8 @@ param(
     [Parameter(Mandatory = $true)][string]$FlutterBin,
     [Parameter(Mandatory = $true)][string]$OutputDirectory,
     [switch]$Offline,
-    [switch]$PackageOnly
+    [switch]$PackageOnly,
+    [string]$Python = ''
 )
 
 # Developer build only. The resulting ZIP needs neither Dart nor Flutter.
@@ -100,6 +101,16 @@ try {
         Copy-Item -LiteralPath $reference.FullName -Destination (Join-Path $cli "template/references/$($reference.Name)")
     }
 
+    # Fixed official tools are copied from verified archives, never a user's
+    # installation. The MSI is read as tables/cabinets; no install action runs.
+    if (-not $Python) {
+        $Python = Join-Path $projectRoot '.tools/python/cpython-3.13-windows-x86_64-none/python.exe'
+    }
+    if (-not (Test-Path -LiteralPath $Python -PathType Leaf)) {
+        throw 'Pass -Python with a Python 3.13+ executable for tool assembly.'
+    }
+    Invoke-Checked $Python @((Join-Path $PSScriptRoot 'bundle-windows-tools.py'), (Join-Path $payload 'tools'))
+
     # This console probe uses only synthetic data in a newly created temp
     # directory and current-user DPAPI. It never opens the application database.
     $diagnostics = Join-Path $payload 'diagnostics'
@@ -115,6 +126,7 @@ try {
     $notices = Join-Path $payload 'notices'
     $provenance = Join-Path $payload 'provenance'
     New-Item -ItemType Directory -Path $notices, $provenance | Out-Null
+    Copy-Item -LiteralPath 'third_party/windows-tools.json' -Destination $provenance
     $flutterRoot = Split-Path -Parent (Get-Item -LiteralPath $FlutterBin).FullName
     Copy-Item -LiteralPath (Join-Path $flutterRoot 'LICENSE') -Destination (Join-Path $notices 'Flutter-LICENSE')
     Copy-Item -LiteralPath (Join-Path $flutterRoot 'bin/cache/dart-sdk/LICENSE') -Destination (Join-Path $notices 'Dart-LICENSE')

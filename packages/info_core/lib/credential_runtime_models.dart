@@ -182,7 +182,10 @@ class CredentialOperationInput {
     'operationId': operationId,
     'launch': launch.toJson(),
   };
-  factory CredentialOperationInput.fromJson(Map<String, dynamic> json) {
+  factory CredentialOperationInput.fromJson(
+    Map<String, dynamic> json, {
+    bool allowPortableLaunchPaths = false,
+  }) {
     if (_useProtocol(json) != 2) {
       throw const CredentialUseFailure('unsupported_protocol');
     }
@@ -203,7 +206,10 @@ class CredentialOperationInput {
     return CredentialOperationInput._(
       _useId(json['requestId'], 'requestId'),
       _useId(json['operationId'], 'operationId'),
-      CredentialLaunchPlan.parse(launch),
+      CredentialLaunchPlan.parse(
+        launch,
+        allowPortablePaths: allowPortableLaunchPaths,
+      ),
     );
   }
   String get fingerprint =>
@@ -225,7 +231,10 @@ class CredentialUseInput {
   final int protocolVersion;
   final CredentialLaunchPlan launch;
   final List<FieldRef> readFields;
-  factory CredentialUseInput.fromJson(Map<String, dynamic> j) {
+  factory CredentialUseInput.fromJson(
+    Map<String, dynamic> j, {
+    bool allowPortableLaunchPaths = false,
+  }) {
     final protocolVersion = _useProtocol(j);
     _useShape(
       j,
@@ -298,7 +307,10 @@ class CredentialUseInput {
       _useAlias(c['alias'], 'credentials[0].alias'),
       _useId(c['credentialId'], 'credentials[0].credentialId'),
       version,
-      CredentialLaunchPlan.parse(launch),
+      CredentialLaunchPlan.parse(
+        launch,
+        allowPortablePaths: allowPortableLaunchPaths,
+      ),
       List.unmodifiable(fields),
       protocolVersion,
     );

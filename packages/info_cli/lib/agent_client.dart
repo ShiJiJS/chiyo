@@ -7,6 +7,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'macos_bundled_tools.dart';
+import 'windows_bundled_tools.dart';
 import 'credential_output_filter.dart';
 import 'device_information_files.dart';
 import 'device_credential_journal.dart';
@@ -176,8 +177,12 @@ class AgentClient {
           );
         }
         final result = await _call('/capabilities', {});
-        if (_remote != null && Platform.isMacOS && result['status'] == 'ok') {
-          final tools = await MacBundledTools().read();
+        if (_remote != null &&
+            (Platform.isMacOS || Platform.isWindows) &&
+            result['status'] == 'ok') {
+          final tools = Platform.isWindows
+              ? await WindowsBundledTools().read()
+              : await MacBundledTools().read();
           return {
             ...result,
             'capabilities': [

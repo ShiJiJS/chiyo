@@ -47,3 +47,6 @@
 - #112 结束限制：实际两秒 hook 未确认，原请求仍 approved、原副本 ready，保留 end_pending；随后使用原 CodexEndIndex end-only 索引，在回调外以显式 20 秒预算恢复，并重核原副本/占用、结束状态与新领取拒绝。没有按聊天 ID 恢复读取关联、没有修改 hook 时限，也未把回调外恢复冒认为真实宿主结束事件两秒成功；#116 连续流程仍需核对。
 - 下一步 #113：修正 DeviceCredentialJournal 的同类斜杠过滤及本机 host 的 Windows 环境，复用 Job/原 worker/私有材料/输出过滤；接 Windows 当前设备的 gh/SSH/AWS 观察与身份版本要求，缺工具准确报告并在工作目录准备必要工具。使用明确验证凭据/接收器或已获准目标，不做 SSH 密码登录或前台密码填充。
 - 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #113–#116 仍开放。
+- #113 阶段进度：本机 host 显式 Windows 环境、DPAPI 清理日志扫描、Windows 随包 GH/AWS + 系统 SSH 发现、准备 CLI 的匹配包公开指针及固定官方工具组装已实现。15 项 CLI 定向检查（含三种实际工具版本/身份）、2 项 Core、1 项设置控件、2 项 MSI/CAB 负例和相应分析通过。官方 AWS MSI 仅只读提取 7,566 文件；没有系统安装、全局 PATH 或全局 hooks 改动。证据 docs/development/evidence/windows-online/w113.md。
+- #113 实际 NAS 阻点：新建隔离验证聊天和三份本轮开发凭据后，Windows C:\... 启动计划被当前 NAS invalid_plan 拒绝。已定位 device 接口误用服务端本机平台的路径解析；修补限定在已认证 device transport 显式 portable-path，普通本机默认不变。尚未批准或实际执行，不冒认 GH/AWS/SSH AOT 流程通过。原 local/private/w113-credential-check/flow.dpapi 保留，不重新创建聊天/凭据；原资料及 SSH 信任不变。
+- #113 下一步：Mac 先只读核对当前镜像/现有检查流程；扩展的跨平台真实服务请求/操作/加密重开检查需在 Mac/Linux 验证。NAS 运行版本未替换，正常重启授权不等于替换镜像授权；服务端修补/构建准备可审阅后再集中说明具体所需动作。该等待期间继续 #114/#115 的独立实现与检查，九票不提前报完成。
