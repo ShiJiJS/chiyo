@@ -2,7 +2,7 @@
 
 ## 当前快照
 
-- 日期：2026-11-10（Asia/Shanghai）。持续目标已恢复为 active。
+- 日期：2026-11-10（Asia/Shanghai）。独立工作已完成，目标在第三次同阻点审计后待标记 blocked；实际状态以 goal 工具为准。
 - 范围：#108–#116，父任务 #104；#105 后置。#108–#112 和 #114 已完成；#113 待批准更新现有 NAS 运行版本，独立推进 #115/#116。
 - 分支：codex/windows-online。基线 ac8960c；环境与九票发布归档提交 35690cf。
 - 当前票：#113（NAS换版本待授权）、#115（运行中worker/App联合退出）、#116（可靠Ctrl K与同包连续凭据）。中文鼠标粘贴、保存与取消已有最新完整包真实窗口证据。#112 实现 fe37707、证据 docs/development/evidence/windows-online/w112.md；#111 完整实现 620bcbe（PDF 初段 871a83f）；#110 实现 c42f7d7；#109 实现 2e86359；#108 实现 f454927。
@@ -68,3 +68,6 @@
 
 - 本次续作新增实际证据：Control_R+k同样在K到达时ctrl=false；改用自有记事本样本的鼠标复制/Flutter右键Paste，55d8340真实App完成中文名称/正文输入、保存与取消。仅新增一条明确开发文档，正常回收后界面恢复62项/回收站40；44条原资料SHA和原w113信息基线一致，App正常退出。首次GET超时仅重试读取，没有重复保存。事实local/private/w116-native-record-check/facts.dpapi已completed，本机辅助代码local/development/w116_native_record_check.dart；详见w116证据最后一节。包与源码未变，无须重跑已通过整套检查。
 - 外部阻点审计2（turn 01a1c28a-d9be-7352-b4be-665c98d289e7）：上一goal turn属于progress，本turn也新增了中文真实窗口证据，原先“中文保存需用户回来”的范围已收窄；Ctrl K仍无法由Sky可靠发送，NAS换版本问题仍未答。现在已做完当前可执行独立工作，goal继续active；下一不同续作turn若仍无新授权/可靠输入且无安全独立动作，按第三次同阻点审计置blocked，不重复整套测试或重复询问。
+
+- 外部阻点审计3（turn 01a1c29d-213b-7691-bf99-7e8fcef2e079）：已重读三票剩余条件、当前GitHub状态、完整候选验证和先前两次审计。上一goal turn是progress（新增真实中文粘贴/保存/取消证据）；本turn是no progress，不是verified wait：没有活跃构建或App进程，Mac任务已completed/idle，不能把静止会话当运行任务。NAS升级同意仍未收到，仍不能部署a9；Sky左右Ctrl均在K到达前丢失状态，可靠Ctrl K仍需外部输入/工具变化。当前无可执行的独立产品改动或必要检查，满足三次同阻点条件，接下来调用goal置blocked，#113/#115/#116保留OPEN，目标范围不缩小、不提前complete。
+- 恢复首步：用户明确同意既有NAS升级到a9eccb3后，协调原Mac会话保留现有数据/配置/挂载/旧镜像更新唯一知予服务；沿build/development/w116-qa-55d8340和原w113 flow接续，不新建重复聊天/凭据。完成真实凭据/进程树/到期/重启/退出联合检查后，收口#115/#116；中文鼠标粘贴/保存取消已通过，Ctrl K仍独立核对。用户恢复受阻目标后，若再遇阻按新一轮审计计数。
