@@ -61,3 +61,7 @@
 - #116 第一完整候选 1351a74 已经全部产包/解包/SDK-free/加密存储检查通过，ZIP 123278838 字节、7699项载荷，SHA256 3ea59f8a86d84e489b7b4dd8064795dd11fa54de076563a8d56605d48d02771f。实际 AOT 能力查询证实同包 GH/AWS 与系统 SSH；原生主入口连接62项、同包CLI正常退出。原生页面另发现Mac专用说明与当前联网Agent页遗漏工具状态组件，已修补并通过四文件回归/桌面分析，准备新提交重建。第一包是故障定位候选，不冒认为最终完成。原w113只读核对仍requesting-gh/3凭据/0申请，原关联保留，NAS更新授权未取得。
 
 - #116 335445f再通过全包检查，实际页面工具三项/Windows通知/系统托盘说明已确认，关窗后running及同包CLI正常退出。对比发现增量Release根多带Flutter test专用native_assets.json（绝对构建路径），正式NativeAssetsManifest原本正确。已修打包只排除此测试缓存，补正式SQLCipher映射及解包拒绝检查；335445f作为负例，不作为最终交付，待新提交再产包。Mac在22:29Z只读确认NAS原镜像/StartedAt/四挂载/其他11容器均未变，a9候选SHA复核一致，换版本仍未授权。
+
+- #116 最新完整候选55d83404998492fd46a21816a9791a72c8419189已通过完整 -Offline -PackageOnly 和新解包守卫；build/development/w116-package-55d8340/，ZIP123298669字节、7699项，SHA256 de934ca5a129dcb42c391d75c18ad1e84bd001af97a679b60d682e48a58cd599。默认2062项非hidden适用测试通过，另有明确平台跳过和POSIX整文件排除；实际解包CLI/hooks16项、混合生命周期7项及SQLCipher/DPAPI通过。受限PATH的实际App显示62项并正常退出；三工具当前设备观察通过。旧两份w116完整包及旧QA已清理，保留日志/manifest/摘要，原策略拒绝项未动。启动脚本local/development/start-windows-online-candidate.ps1已备妥，正式安装/hooks未改。
+- 接续位置：build/development/w116-qa-55d8340，原私人local/private/w113-credential-check/flow.dpapi仍requesting-gh/3凭据/0申请，不重建；NAS兼容修补a9候选在Mac保留。只有用户明确同意换版本后才部署并接续#113真实执行、#115正在运行worker/App联合退出，再完成#116同包连续核对。Ctrl K/中文保存取消需可靠原生输入，最小窗口已证明Sky组合键到达时Ctrl不在按下状态，不改业务代码掩盖。
+- 外部阻点审计1：当前唯一连续目标turn 01a1c116-0552-72a2-a858-5df2c7d60729，独立工作在本turn末才耗尽；换版本问题尚未答复。goal保持active、不提前complete或blocked。后续不同自动续作turn如仍无新授权/可靠输入，记录同一阻点审计2、3；达到三次且无独立工作再按goal工具置blocked，避免重复全量检查或重复询问。新授权到达时立即接续其允许范围。
