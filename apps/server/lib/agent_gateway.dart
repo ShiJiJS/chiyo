@@ -18,6 +18,7 @@ final class AgentGateway {
   static const _metadata = {
     '/capabilities',
     '/catalog',
+    '/credentials/catalog',
     '/directories/catalog',
     '/plugins/catalog',
     '/templates/catalog',

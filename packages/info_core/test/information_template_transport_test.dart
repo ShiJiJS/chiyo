@@ -69,6 +69,15 @@ void main() {
         'templateId': 'local.forms/note',
       });
       expect(definition['status'], 'ok');
+      final description = definition['template'] as Map;
+      final example = description['submissionExample'] as Map;
+      expect(example['operationId'], isA<String>());
+      expect((example['items'] as List).single['key'], 'example-item');
+      expect((description['candidateIdentity'] as Map)['field'], 'items[].key');
+      expect((description['candidateIdentity'] as Map)['pendingReference'], {
+        'kind': 'information',
+        'itemKey': 'example-item',
+      });
       expect(
         (definition['template'] as Map)['definition'],
         contains('example'),
