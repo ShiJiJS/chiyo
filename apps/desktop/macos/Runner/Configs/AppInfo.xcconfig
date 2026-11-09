@@ -9,6 +9,9 @@ PRODUCT_NAME = info_desktop
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.example.infoDesktop
+// Distinct QA/preview bundle IDs must compile distinct native executable UUIDs.
+// Shared UUIDs confuse macOS local-network privacy (Apple TN3178/TN3179).
+PRODUCT_MODULE_NAME = $(PRODUCT_BUNDLE_IDENTIFIER:c99extidentifier)
 AGENT_INFO_INTERFACE_PREVIEW = NO
 
 // The copyright displayed in application information
