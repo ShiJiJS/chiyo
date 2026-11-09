@@ -351,6 +351,14 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     window_channel_->InvokeMethod("state",
         std::make_unique<flutter::EncodableValue>(IsZoomed(hwnd) != FALSE));
   }
+  if (message == WM_POWERBROADCAST &&
+      wparam == PBT_APMRESUMEAUTOMATIC && desktop_ready_) {
+    // The automatic event is delivered for unattended wake as well. The later
+    // user-activity RESUMESUSPEND event must not trigger a second reconnect.
+    // Dart owns connection/identity checks and local registered-copy recovery.
+    SendDesktopEvent("resume");
+    return TRUE;
+  }
   if (taskbar_created_ != 0 && message == taskbar_created_ && desktop_ready_) {
     // Explorer restarts lose the old icon. Restore a visible entry or window.
     tray_available_ = false;
