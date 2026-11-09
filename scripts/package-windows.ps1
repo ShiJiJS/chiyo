@@ -68,7 +68,19 @@ try {
     $payload = Join-Path $output 'AgentInfoManage'
     New-Item -ItemType Directory -Path $payload | Out-Null
     $app = Join-Path $payload 'app'
-    Copy-Item -LiteralPath (Join-Path $projectRoot 'apps/desktop/build/windows/x64/runner/Release') -Destination $app -Recurse
+    New-Item -ItemType Directory -Path $app | Out-Null
+    # Flutter tests can leave this absolute-path VM loader cache in an existing
+    # runner directory. The release engine uses data/flutter_assets/
+    # NativeAssetsManifest.json instead. Do not ship the test-only root cache.
+    foreach ($entry in Get-ChildItem -LiteralPath (Join-Path $projectRoot 'apps/desktop/build/windows/x64/runner/Release') -Force) {
+        if ($entry.Name -eq 'native_assets.json') { continue }
+        Copy-Item -LiteralPath $entry.FullName -Destination $app -Recurse
+    }
+    $nativeAssets = Get-Content -LiteralPath (Join-Path $app 'data/flutter_assets/NativeAssetsManifest.json') -Raw | ConvertFrom-Json
+    $cipherLoader = @($nativeAssets.'native-assets'.windows_x64.'package:sqlite3/src/ffi/libsqlite3.g.dart')
+    if ($cipherLoader.Count -ne 2 -or $cipherLoader[0] -ne 'absolute' -or $cipherLoader[1] -ne 'sqlcipher.dll') {
+        throw 'The release SQLCipher loader must resolve the bundled DLL, without a build-machine path.'
+    }
     foreach ($required in @('info_desktop.exe', 'info-focus-broker.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
         if (-not (Test-Path -LiteralPath (Join-Path $app $required))) { throw "Missing desktop payload: $required" }
     }
