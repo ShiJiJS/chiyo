@@ -77,9 +77,12 @@ void main() {
       'command': 'template-read',
       'templateId': templateId,
     });
+    // Each example becomes a separate submission in these fixtures. Retain its
+    // operation ID for retries, but never reuse the example's literal ID for
+    // another proposal with different content.
     return Map<String, dynamic>.from(
       (response['template'] as Map)['submissionExample'] as Map,
-    );
+    )..['operationId'] = workspaceOperationId();
   }
 
   Future<WorkspaceProposalReceipt> approve(
@@ -537,6 +540,9 @@ void main() {
       ((invalid['items'] as List).single as Map)['relations'] = {
         'PRIVATE-RELATION': [],
       };
+      // Changed content is a new attempted submission, not a retry of the
+      // preceding proposal with its original operation ID.
+      invalid['operationId'] = workspaceOperationId();
       final error = await cli.execute(invalid);
       expect(error['status'], 'validation_failed');
       expect(jsonEncode(error), isNot(contains('PRIVATE')));

@@ -223,13 +223,19 @@ class MacDesktopControlHost {
 /// The Mac CLI only controls the exact sibling application's canonical image,
 /// including with --pid. No name-only matching or arbitrary process control.
 class MacDesktopControl {
-  static Directory? defaultDirectory() {
+  static bool validProfileName(String name) =>
+      RegExp(r'^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$').hasMatch(name);
+  static Directory? defaultDirectory({String? profile}) {
+    if (profile != null && !validProfileName(profile)) {
+      throw const FormatException('invalid_connection_profile');
+    }
     final home = Platform.environment['HOME'];
     if (home == null || !home.startsWith('/')) return null;
     const container = '/Library/Containers/com.example.infoDesktop/Data';
     final base = home.endsWith(container) ? home : '$home$container';
     return Directory(
-      '$base/Library/Application Support/AgentInfoManage/app-control',
+      '$base/Library/Application Support/AgentInfoManage/app-control'
+      '${profile == null ? '' : '/profiles/$profile'}',
     );
   }
 

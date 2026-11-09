@@ -21,8 +21,8 @@ reference in that same stdin JSON object, never in shell arguments.
    use and classification approvals are separate capabilities.
 3. After approval, inspect `claim` for the owner's final fields and expiry.
    Fetch only an approved file field using `file-fetch` with requestId, itemId,
-   fieldId and a unique logical operationId. Ordinary information defaults to
-   8hours, as selected by the owner; fetches and process exits do not renew it.
+   fieldId and a unique logical operationId. Use the actual deadline returned
+   after user approval; fetches and process exits do not renew it.
 
 ```json
 {"protocolVersion":2,"command":"file-fetch","requestId":"REQUEST_ID","itemId":"ITEM_ID","fieldId":"FILE_FIELD_ID","operationId":"resume-copy-01"}
@@ -54,6 +54,9 @@ File input selection alone is not upload success: check the consuming tool or
 website's actual result. After it has finished and closed its file input or
 reader, call `file-release` using deliveryId, including on task cancellation.
 Release concerns this managed copy, not files the user independently saved.
+With a server connection, the CLI's device guardian manages this copy even when
+the App is closed. The server records device reports; a server path is not a
+path to a file on the consuming device.
 
 ## Reuse and uncertain operations
 
@@ -78,18 +81,21 @@ are an operation conflict.
   alone does not prove the first fetch cannot still arrive. Resolve the original
   operation before deciding whether a new logical use is needed.
 
-Revocation, expiry, deleted fields, session end or app restart stop new fetches.
+Revocation, expiry, deleted fields or session end stop new fetches. With a server
+connection, App exit/reopen and ordinary server maintenance keep the original
+still-valid grant and deadline; they do not revive ended or expired permission.
 Keep successful operation facts distinct from current permission; no automatic
 reapproval, session recovery from public IDs, or retry under a new ID to hide an
 uncertain result. Restored backup history is not an active grant or live copy.
 
-## Unsupported changes and errors
+## File proposals and errors
 
-The owner imports/replaces original files in the information library. Agent
-import/update proposals accept text changes, preserve existing files and may
-propose supported removals; they do not upload new file bytes. On
-`unsupported_file_write`, explain that the owner must choose the file in the app.
-Do not convert a file field to an empty text value or write Base64 into it.
+For user-supplied file ingestion or new versions, read
+[source intake and file proposals](information-file-intake.md). Query current
+upload/update capabilities and dynamic file examples, then give the supplied
+path to the CLI for submission. This is a proposal, not admission or reading
+permission. On an old service without that capability, defer the affected
+proposal and explain what is missing. Preserve file fields as files.
 
 For permission/integrity/capacity/service errors, retain the original public
 operation IDs and explain the error. Let the owner check the current field,

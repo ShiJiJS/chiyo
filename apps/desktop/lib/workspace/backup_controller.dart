@@ -21,6 +21,8 @@ class BackupController extends ChangeNotifier {
   String? revealedKey, cleanupNotice;
   bool loading = false, busy = false, choosing = false, _closed = false;
   int _generation = 0;
+  Future<void>? _loadingTask;
+  bool _reloadRequested = false;
   WorkspaceBackupChange? _command;
   WorkspaceBackupCounts? _expectedRestore;
   bool get uncertain =>
@@ -45,7 +47,33 @@ class BackupController extends ChangeNotifier {
       e is WorkspaceFailure && e.code != 'unknown_outcome'
       ? e
       : WorkspaceFailure('unavailable', message);
-  Future<void> load() async {
+  Future<void> load() {
+    if (_closed || frozen) return Future.value();
+    _reloadRequested = true;
+    final running = _loadingTask;
+    if (running != null) return running;
+    // Connection/source notifications can arrive while a write's final refresh
+    // is in flight. Coalesce them and let every caller await the whole refresh,
+    // rather than return with the old key/recipient state still displayed.
+    final done = Completer<void>();
+    _loadingTask = done.future;
+    unawaited(() async {
+      try {
+        while (_reloadRequested && !_closed && !frozen) {
+          _reloadRequested = false;
+          await _loadOnce();
+        }
+        _loadingTask = null;
+        done.complete();
+      } catch (e, stack) {
+        _loadingTask = null;
+        done.completeError(e, stack);
+      }
+    }());
+    return done.future;
+  }
+
+  Future<void> _loadOnce() async {
     if (_closed || frozen) return;
     final generation = ++_generation;
     loading = true;

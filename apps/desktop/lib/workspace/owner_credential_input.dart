@@ -3,14 +3,14 @@ import '../credential_files.dart';
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
-import 'owner_credential_staging.dart';
+import 'dart:async';
 import 'workspace_source.dart';
 
 /// The Host owns this editor and its plaintext controller. Only staged opaque
 /// metadata leaves the dialog for the generic credential form.
 Future<WorkspaceCredentialCandidate?> showOwnerCredentialInput(
   BuildContext context,
-  OwnerCredentialStaging staging,
+  CredentialInputStaging staging,
   WorkspaceCredentialForm? requiredForm, {
   CredentialFilePicker files = const NativeCredentialFilePicker(),
 }) => showDesktopDialog<WorkspaceCredentialCandidate>(
@@ -25,7 +25,7 @@ class _Input extends StatefulWidget {
     required this.requiredForm,
     required this.files,
   });
-  final OwnerCredentialStaging staging;
+  final CredentialInputStaging staging;
   final WorkspaceCredentialForm? requiredForm;
   final CredentialFilePicker files;
   @override
@@ -39,8 +39,16 @@ class _InputState extends State<_Input> {
   SelectedCredentialFile? _file;
   String? _error;
   bool _picking = false;
+  bool _completed = false;
   @override
   void dispose() {
+    if (!_completed) {
+      unawaited(
+        Future<void>.sync(
+          widget.staging.cancelPending,
+        ).catchError((Object _) {}),
+      );
+    }
     _secret.clear();
     _secret.dispose();
     super.dispose();
@@ -65,20 +73,32 @@ class _InputState extends State<_Input> {
     }
   }
 
-  void _complete() {
+  Future<void> _complete() async {
     if (_picking) return;
+    setState(() {
+      _picking = true;
+      _error = null;
+    });
     try {
       final result = _form == WorkspaceCredentialForm.string
-          ? widget.staging.string(_secret.text)
+          ? await widget.staging.string(_secret.text)
           : _file == null
           ? throw const WorkspaceFailure('validation', '请先选择凭据文件。')
-          : widget.staging.file(_file!);
+          : await widget.staging.file(_file!);
+      if (!mounted) {
+        await widget.staging.release(result.id);
+        return;
+      }
+      _completed = true;
       Navigator.pop(context, result);
     } catch (error) {
+      if (!mounted) return;
       setState(
         () =>
             _error = error is WorkspaceFailure ? error.message : '输入未能保留，请重试。',
       );
+    } finally {
+      if (mounted) setState(() => _picking = false);
     }
   }
 
@@ -120,7 +140,7 @@ class _InputState extends State<_Input> {
             enableSuggestions: false,
             autocorrect: false,
             maxLength: 65536,
-            decoration: const InputDecoration(labelText: '秘密内容'),
+            decoration: const InputDecoration(labelText: '密码或凭据内容'),
           )
         else ...[
           DesktopButton(

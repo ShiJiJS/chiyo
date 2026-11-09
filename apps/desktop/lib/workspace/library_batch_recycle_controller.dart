@@ -13,6 +13,13 @@ class LibraryBatchRecycleController
   final String? batchId;
   WorkspaceLibraryRecycle get port => source as WorkspaceLibraryRecycle;
   bool get restoring => batchId != null;
+  @override
+  bool get canVerifyUnchangedPreview => true;
+  @override
+  bool previewsMatch(
+    WorkspaceLibraryRecyclePreview previous,
+    WorkspaceLibraryRecyclePreview current,
+  ) => previous.token == current.token;
   WorkspaceLibraryRestoreOptions options = WorkspaceLibraryRestoreOptions();
   void rename(String id, String name) {
     if (frozen || reading) return;

@@ -1155,7 +1155,10 @@ class _LibraryPageState extends State<LibraryPage> {
                         const SizedBox(width: 7),
                         Expanded(
                           child: Text(
-                            '资料保存在本机',
+                            model.source is WorkspaceStorageLocation
+                                ? (model.source as WorkspaceStorageLocation)
+                                      .storageDescription
+                                : '资料保存在本机',
                             key: const ValueKey('library-local-storage-note'),
                             style: libraryText(context, 12, color: c.muted),
                           ),

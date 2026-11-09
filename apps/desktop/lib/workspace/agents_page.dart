@@ -142,8 +142,8 @@ class WorkspaceAgentsPage extends StatelessWidget {
               SettingsPreferenceRow(
                 title: '连接诊断',
                 description: v == null
-                    ? '正在核对本机服务、CLI、Skill 与 hooks…'
-                    : '本机服务${v.serviceAvailable ? '可用' : '不可用'} · CLI ${v.cliLabel} · Skill ${v.skill.label}。连接状态与资料权限分开核对。',
+                    ? '正在核对资料服务、CLI、Skill 与 hooks…'
+                    : '资料服务${v.serviceAvailable ? '可用' : '不可用'} · CLI ${v.cliLabel} · Skill ${v.skill.label}。连接状态与资料权限分开核对。',
                 control: Wrap(
                   spacing: 10,
                   runSpacing: 10,
@@ -369,7 +369,7 @@ class _AgentFlowState extends State<_AgentFlow> {
         muted: true,
       ),
       SettingsPreferenceRow(
-        title: '本机服务',
+        title: '资料服务',
         description: report.serviceReason ?? '可以接收访问申请；批准范围仍由你决定。',
         control: Text(
           report.serviceAvailable ? '可用' : '不可用',

@@ -3,7 +3,7 @@
 Use the same private association and stdin-only `info-codex` transport as the
 main Skill. Choose command injection below for a CLI tool, or
 [Focused password input](#focused-password-input) for a visible local password
-box. The app's resident host handles the secret; your own shell does not receive
+box. The device's resident executor handles the credential; your own shell does not receive
 the secret or a secret-file path. Approval alone performs neither operation.
 
 ## Command injection: request once, reuse within the approved validity
@@ -14,10 +14,12 @@ the secret or a secret-file path. Approval alone performs neither operation.
    downgrade or create a replacement single-use request.
    On Mac, also require `credential-tools.v1`. Select the matching receiver in
    `credentialTools` with `available:true` and use its exact absolute
-   `executable`. The running app discovers its bundled GH/AWS paths after a
-   move; query again after moving or upgrading it. A missing or invalid entry
-   requires a complete Mac Release build. Directory selection supplies file
-   access only and does not make an external program executable in App Sandbox.
+   `executable`. In server mode these are current-device CLI observations, not
+   paths on the server. A prepared bundle refers to its matching App's tools;
+   keep that App at its stable path and prepare again after moving/upgrading it.
+   Missing or invalid entries require restoring the matching package, not
+   guessing another executable. App Sandbox directory access does not make an
+   arbitrary external program executable.
    Tool discovery is public metadata; the owner still approves credential use,
    and each operation independently checks executable identity and version.
 2. Query `credential-catalog` for public metadata, form, current version and
@@ -39,7 +41,7 @@ the secret or a secret-file path. Approval alone performs neither operation.
    validity, approved scope and `available` state. The Agent submits the normal
    request; it does not self-approve session validity or send a huge duration.
    This option applies only to SSH, not ordinary reads or other receivers.
-   Ordinary fields independently default to8hours and use claim/read.
+   Ordinary fields have their own user-approved deadline and use claim/read.
 4. For each logical command, choose a new unique `operationId` and send
    `run-use` with the same `requestId` and that command's complete `launch`.
    The alias, credential version and receiver remain in the approved scope.
@@ -90,11 +92,12 @@ The request's approval-wait deadline, a timed grant's expiry, a command timeout
 and an already-open SSH connection are separate. Revocation, session end,
 credential disable/change or host-trust change blocks **new uses**. Revocation
 neither terminates a running command/connection nor undoes remote changes.
-Application restart does not restore the old permission, even if its history
-remains visible. If the actual root end callback was not delivered, do not claim
-switching or archiving a chat ended permission; the user can revoke it or exit
-the App. Keep ordinary reads, other credential types and older timed grants on
-their existing rules.
+For server connections, closing/reopening the App or ordinary server maintenance
+does not end an otherwise valid grant, restore an ended grant or extend its
+deadline. Legacy local-only hosts have their own restart rules. If the actual
+root end callback was not delivered, do not claim switching or archiving a chat
+ended permission; the user can revoke it in the App. Keep ordinary reads, other
+credential types and older timed grants on their existing rules.
 
 ## Retry identity and uncertain results
 
@@ -113,7 +116,8 @@ cause before deliberately submitting a new logical operation with a new ID.
 
 A typed unavailable/capacity result with operationClaimed:false allows retrying
 that same unclaimed operation while eligible. Denial, expiry, revocation,
-credential rotation/disable/delete, session end and app restart block new uses.
+credential rotation/disable/delete and session end block new uses. App exit is
+not revocation in server mode.
 Report that reason; never silently recreate the request. Scope expansion needs
 new owner approval. Old protocol1 records retain one attempt: only when
 continuing such a returned record, legacy run-use explicitly sends protocolVersion1

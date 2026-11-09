@@ -44,7 +44,8 @@ def main():
 
     try:
         run('clone', ['git', 'clone', '--shared', '--no-checkout', '--quiet', str(ROOT), str(source)])
-        run('sparse', ['git', 'sparse-checkout', 'set', 'apps/desktop', 'packages', 'scripts', 'integrations', 'third_party'], source)
+        run('sparse', ['git', 'sparse-checkout', 'set', 'apps/desktop', 'apps/server',
+                       'packages', 'scripts', 'integrations', 'third_party'], source)
         run('checkout', ['git', 'checkout', '--detach', commit], source)
         with (source / '.git/info/exclude').open('a') as excluded:
             excluded.write('\n/.tools\n/.cache/\n/.downloads\n')

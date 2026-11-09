@@ -21,12 +21,22 @@ Future<void> main(List<String> args) async {
       input['association'] as String,
       Platform.environment['CODEX_THREAD_ID'] ?? '',
     );
-    client = AgentClient(
-      association.port,
-      sessionSecret: association.secret,
-      sourceAgent: 'Codex',
-      hostedCredentialExecutions: true,
-    );
+    client = association.connection != null
+        ? AgentClient.remote(
+            association.connection!,
+            sessionSecret: association.secret,
+            sourceAgent: 'Codex',
+            hostedCredentialExecutions: true,
+            deviceFileStateDirectory: Directory(
+              '${File(input['association'] as String).absolute.parent.path}/device-files',
+            ),
+          )
+        : AgentClient(
+            association.port,
+            sessionSecret: association.secret,
+            sourceAgent: 'Codex',
+            hostedCredentialExecutions: true,
+          );
     if (input['command'] == 'delegate') {
       final child = input['childChatId'];
       if (child is! String ||
@@ -43,6 +53,7 @@ Future<void> main(List<String> args) async {
           association.port,
           association.secret,
           rootChatId: association.rootChatId,
+          connection: association.connection,
         ).save(File(input['association'] as String).parent);
         result = {'status': 'ok', 'privateAssociation': reference};
       }

@@ -8,6 +8,7 @@ import 'package:info_core/info_core.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:info_core/protocol_json.dart';
+import 'package:info_core/server_state.dart';
 import 'backup_publish.dart';
 import 'macos_backup_publication.dart';
 export 'platform_keys.dart';
@@ -34,16 +35,20 @@ part 'lifecycle_storage.dart';
 part 'approval_operations_storage.dart';
 part 'backup_operations.dart';
 part 'backup_output_operations.dart';
+part 'backup_remote_outputs.dart';
 part 'backup_restore_operations.dart';
 part 'backup_staging_operations.dart';
 part 'backup_owner_operations.dart';
 part 'information_purge_storage.dart';
 part 'information_file_outputs.dart';
+part 'device_file_operations.dart';
+part 'device_backup_operations.dart';
 part 'information_file_opens.dart';
 part 'desktop_preferences_storage.dart';
 part 'proposal_operations_storage.dart';
 part 'additional_approval_storage.dart';
 part 'template_packages_storage.dart';
+part 'server_state_storage.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -65,6 +70,10 @@ const _credentialProposalPreviewLibraryFormat = 49;
 const _libraryRecycleLibraryFormat = 50;
 const _libraryOrderLibraryFormat = 51;
 const _sshSessionUseLibraryFormat = 52;
+const _serverRuntimeLibraryFormat = 53;
+// Server deliveries have device-side copies instead of a host-native lease.
+const _deviceDeliveryLibraryFormat = 54;
+const _copyCleanupLibraryFormat = 55;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -139,7 +148,7 @@ InformationItem _informationFromRows(
       .map((l) => l['tag_id'] as String),
 );
 
-/// A desktop-only capability. The CLI depends on info_core, never this package.
+/// A trusted owner/server capability. The Agent CLI never opens this store.
 class EncryptedInformationRepository
     implements
         InformationRepository,
@@ -163,7 +172,27 @@ class EncryptedInformationRepository
         OwnerProposalOperationRepository,
         AdditionalApprovalRepository,
         TemplatePackageRepository,
-        SshHostTrustRepository {
+        SshHostTrustRepository,
+        ServerProposalPasswordRepository {
+  @override
+  Future<ServerStateSnapshot> openServerState() => _openServerState();
+  @override
+  Future<ServerStateSnapshot> commitServerState(
+    ServerStateSnapshot expected,
+    Map<String, Object?> payload,
+  ) => _commitServerState(expected, payload);
+  @override
+  Future<void> commitServerProposalPasswords(
+    ServerStateSnapshot expected,
+    Map<String, Object?> payload,
+    ImportProposal revised,
+    int expectedProposalVersion,
+  ) => _commitProposalPasswords(
+    expected,
+    payload,
+    revised,
+    expectedProposalVersion,
+  );
   final _templatePackages = <String, InstalledTemplatePackage>{};
   @override
   List<InstalledTemplatePackage> get installedTemplatePackages {
@@ -408,6 +437,7 @@ class EncryptedInformationRepository
     this._lock,
     this.cipherVersion,
     this._clock,
+    this._preserveOnlineCredentialFacts,
   );
   final DateTime Function() _clock;
   final _InformationDatabase _db;
@@ -524,16 +554,40 @@ class EncryptedInformationRepository
   }
 
   bool _closed = false;
+  final bool _preserveOnlineCredentialFacts;
   static final _openDirectories = <String>{};
   late final String _directory;
   late final backups = InformationBackups._(this);
-  late final fileOutputs = InformationFileOutputs._(this);
-  late final fileOpens = InformationFileOpens._(this);
+  late final _fileOperationContext = _RepositoryFileOperationContext(this);
+  late final fileOutputs = InformationFileOutputs._(_fileOperationContext);
+  late final fileOpens = InformationFileOpens._(_fileOperationContext);
 
   static Future<EncryptedInformationRepository> open(
     String directory,
     DatabaseKeyStore keys, {
     DateTime Function()? clock,
+  }) => _open(
+    directory,
+    keys,
+    clock: clock,
+    preserveOnlineCredentialFacts: false,
+  );
+
+  /// Trusted standalone Host. This preserves facts, never grants authority:
+  /// OnlineInformationRuntime must reconcile the private device/chat bindings
+  /// before serving requests. Portable restores still discard those bindings.
+  static Future<EncryptedInformationRepository> openOnline(
+    String directory,
+    DatabaseKeyStore keys, {
+    DateTime Function()? clock,
+  }) =>
+      _open(directory, keys, clock: clock, preserveOnlineCredentialFacts: true);
+
+  static Future<EncryptedInformationRepository> _open(
+    String directory,
+    DatabaseKeyStore keys, {
+    DateTime Function()? clock,
+    required bool preserveOnlineCredentialFacts,
   }) async {
     final folder = Directory(directory);
     await folder.create(recursive: true);
@@ -592,7 +646,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _sshSessionUseLibraryFormat) {
+      if (headerVersion > _copyCleanupLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -607,11 +661,19 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _sshSessionUseLibraryFormat ||
+            (marker.single['version'] as int) > _copyCleanupLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
         final storedFormat = marker.single['version'] as int;
+        final hasServerState = native
+            .select(
+              "SELECT name FROM sqlite_master WHERE type='table' AND name='server_runtime_state'",
+            )
+            .isNotEmpty;
+        if (hasServerState != (storedFormat >= _serverRuntimeLibraryFormat)) {
+          throw const StorageFailure('unsupported_schema');
+        }
         // Preserve the portable-fill boundary across older receipt/layout
         // formats. Format38 adds local recovery-key operation receipts.
         openingFormat =
@@ -641,6 +703,7 @@ class EncryptedInformationRepository
         lock,
         version,
         clock ?? DateTime.now,
+        preserveOnlineCredentialFacts,
       ).._directory = canonical;
       await repository._load();
       return repository;

@@ -1,0 +1,14 @@
+name: info_workspace
+description: Shared pure Dart workspace contracts and trusted owner projections.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  info_storage:
+    path: ../info_storage
+  crypto: ^3.0.6
+  info_core:
+    path: ../info_core
+dev_dependencies:
+  lints: ^6.0.0

@@ -5,6 +5,8 @@ version: 0.4.4+18
 environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
+  info_workspace:
+    path: ../../packages/info_workspace
   crypto: 3.0.7
   ffi: 2.2.0
   markdown: 7.3.1
@@ -14,9 +16,13 @@ dependencies:
     path: ../../packages/info_core
   info_storage:
     path: ../../packages/info_storage
+  info_remote:
+    path: ../../packages/info_remote
   info_cli:
     path: ../../packages/info_cli
 dev_dependencies:
+  info_server:
+    path: ../server
   flutter_test:
     sdk: flutter
   integration_test:

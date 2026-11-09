@@ -104,6 +104,7 @@ extension OwnerAdditionalApprovals on OwnerAccess {
     // these receipts. Keep ordinary-only memory adapters usable.
     if (_service._repository is! AdditionalApprovalRepository) return null;
     final receipt = await _additionalApprovals.additionalApprovalReceipt(id);
+    _service._settleOnlineCredentialDecision(id, receipt);
     _service._uncertainCredentialDecisions.remove(id)?.call(receipt != null);
     return receipt;
   });
@@ -117,6 +118,9 @@ extension OwnerAdditionalApprovals on OwnerAccess {
         operation.command.requestId != id ||
         operation.command.action != InformationApprovalAction.revoke) {
       throw const AccessFailure('invalid_operation');
+    }
+    if (_service._onlineCredentialDecisionPending(id)) {
+      throw const CredentialUseFailure('audit_unavailable');
     }
     final r = _service._useRequest(id), request = _service._requests[id];
     if (r.invalidatedCode == 'grant_revoked' ||
@@ -175,11 +179,16 @@ extension OwnerAdditionalApprovals on OwnerAccess {
     } on Object {
       // Block reads while commit outcome is unknown. Resolve only by the same
       // durable receipt; a failed query must keep the barrier in place.
+      _service._rememberOnlineCredentialDecision(operation);
       _service._uncertainCredentialDecisions[operation.command.operationId] =
           settle;
       try {
         final receipt = await _additionalApprovals.additionalApprovalReceipt(
           operation.command.operationId,
+        );
+        _service._settleOnlineCredentialDecision(
+          operation.command.operationId,
+          receipt,
         );
         _service._uncertainCredentialDecisions
             .remove(operation.command.operationId)

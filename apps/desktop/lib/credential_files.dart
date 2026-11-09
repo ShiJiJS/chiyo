@@ -1,12 +1,8 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
 
-class SelectedCredentialFile {
-  SelectedCredentialFile(this.name, Iterable<int> bytes)
-    : bytes = List.unmodifiable(bytes);
-  final String name;
-  final List<int> bytes;
-}
+import 'package:info_workspace/credential_file_selection.dart';
+export 'package:info_workspace/credential_file_selection.dart';
 
 abstract interface class CredentialFilePicker {
   Future<SelectedCredentialFile?> choose();

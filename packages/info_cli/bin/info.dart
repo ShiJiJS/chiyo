@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/desktop_control.dart';
 import 'package:info_core/protocol_json.dart';
+import 'package:info_remote/agent_connection.dart';
 
 /// JSON-lines commands never carry or print session/grant credentials.
 Future<void> main(List<String> args) async {
@@ -14,19 +15,44 @@ Future<void> main(List<String> args) async {
     return;
   }
   var port = 47125;
+  AgentConnectionProfile? connection;
   if (args.isNotEmpty) {
-    if (args.length != 2 ||
-        args.first != '--port' ||
-        int.tryParse(args.last) == null ||
-        int.parse(args.last) < 1 ||
-        int.parse(args.last) > 65535) {
-      stdout.writeln(jsonEncode({'status': 'invalid_request'}));
-      exitCode = 64;
-      return;
+    if (args.length == 2 && args.first == '--connection') {
+      try {
+        connection = await AgentConnectionProfile.read(File(args.last));
+      } on Object {
+        stdout.writeln(jsonEncode({'status': 'connection_unavailable'}));
+        exitCode = 64;
+        return;
+      }
+    } else {
+      if (args.length != 2 ||
+          args.first != '--port' ||
+          int.tryParse(args.last) == null ||
+          int.parse(args.last) < 1 ||
+          int.parse(args.last) > 65535) {
+        stdout.writeln(jsonEncode({'status': 'invalid_request'}));
+        exitCode = 64;
+        return;
+      }
+      port = int.parse(args.last);
     }
-    port = int.parse(args.last);
   }
-  final client = AgentClient(port);
+  AgentClient client;
+  try {
+    client = connection == null
+        ? AgentClient(port)
+        : AgentClient.remote(
+            connection,
+            deviceFileStateDirectory: Directory(
+              '${File(args.last).absolute.parent.path}/device-files',
+            ),
+          );
+  } on Object {
+    stdout.writeln(jsonEncode({'status': 'connection_unavailable'}));
+    exitCode = 64;
+    return;
+  }
   try {
     await for (final record in _boundedLines(stdin)) {
       if (record.error != null) {

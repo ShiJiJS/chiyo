@@ -57,6 +57,58 @@ void main() {
   });
 
   test(
+    'owner uploaded bytes use encrypted staging without a plaintext source file',
+    () async {
+      final service = InformationService(repository: repository);
+      try {
+        final draft = await service.owner.beginInformationFileDraft();
+        final bytes = Uint8List.fromList(
+          utf8.encode('SYNTHETIC-OWNER-UPLOAD-694207'),
+        );
+        final staged = await service.owner.stageInformationBytes(
+          draft,
+          originalName: 'synthetic-owner-upload.txt',
+          mediaType: 'text/plain',
+          bytes: bytes,
+        );
+        expect(staged.sha256, sha256.convert(bytes).toString());
+        final db = inspect();
+        try {
+          expect(
+            db
+                .select('SELECT body FROM information_file_stages')
+                .single['body'],
+            bytes,
+          );
+        } finally {
+          db.close();
+        }
+        expect(service.owner.information, isEmpty);
+        for (final file in Directory(
+          '${root.path}/vault',
+        ).listSync().whereType<File>()) {
+          final disk = latin1.decode(await file.readAsBytes());
+          expect(disk, isNot(contains('SYNTHETIC-OWNER-UPLOAD-694207')));
+          expect(disk, isNot(contains('synthetic-owner-upload.txt')));
+        }
+        await expectLater(
+          service.owner.stageInformationBytes(
+            draft,
+            originalName: '../bad.txt',
+            bytes: bytes,
+          ),
+          fails('invalid_information_file'),
+        );
+        expect((await repository.informationFileStagingUsage()).files, 1);
+        await service.owner.releaseInformationFileDraft(draft);
+        expect((await repository.informationFileStagingUsage()).files, 0);
+      } finally {
+        await service.close();
+      }
+    },
+  );
+
+  test(
     'SQLCipher owns exact BLOB bytes and metadata without loading them into items',
     () async {
       final original = Uint8List.fromList([

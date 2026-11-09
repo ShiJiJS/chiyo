@@ -49,39 +49,26 @@ class CredentialToolLocation {
   };
 }
 
-class AgentServer {
+class AgentServer extends AgentProtocol {
   AgentServer._(
     this._server,
-    this._agent,
-    this._credentialExecutionHandler,
-    this.enableReusableCredentialUse,
-    this.enableFocusedFill,
-    this.enableInformationFiles,
-    this._credentialTools,
-  ) {
+    AgentAccess agent,
+    CredentialExecutionHandler? credentialExecutionHandler,
+    bool reusable,
+    bool focused,
+    bool files,
+    Future<List<CredentialToolLocation>> Function()? credentialTools,
+  ) : super(
+        agent,
+        credentialExecutionHandler: credentialExecutionHandler,
+        enableReusableCredentialUse: reusable,
+        enableFocusedFill: focused,
+        enableInformationFiles: files,
+        credentialTools: credentialTools,
+      ) {
     _server.listen(_handle);
   }
   final HttpServer _server;
-  final AgentAccess _agent;
-  final CredentialExecutionHandler? _credentialExecutionHandler;
-  final Future<List<CredentialToolLocation>> Function()? _credentialTools;
-
-  /// Enable only after the caller's storage and executor support v2 semantics.
-  final bool enableReusableCredentialUse;
-
-  /// Kept off until the repository, native host, and owner UI support fills.
-  final bool enableFocusedFill;
-
-  /// Off until storage, file driver and owner UI are connected by the host.
-  final bool enableInformationFiles;
-  bool get _informationFilesEnabled =>
-      enableReusableCredentialUse &&
-      enableInformationFiles &&
-      _agent.informationFileDeliveryAvailable;
-  bool get _focusedFillEnabled =>
-      enableReusableCredentialUse &&
-      enableFocusedFill &&
-      _agent.focusedFillAvailable;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
@@ -231,6 +218,46 @@ class AgentServer {
       /* A disconnected caller must not terminate the desktop. */
     }
   }
+}
+
+/// Agent-only command processing shared by local and authenticated remote
+/// transports. Callers must enforce their own origin, identity and body limits.
+/// It receives no OwnerAccess, so cannot approve or manage information.
+class AgentProtocol {
+  AgentProtocol(
+    this._agent, {
+    CredentialExecutionHandler? credentialExecutionHandler,
+    this.enableReusableCredentialUse = false,
+    this.enableFocusedFill = false,
+    this.enableInformationFiles = false,
+    Future<List<CredentialToolLocation>> Function()? credentialTools,
+  }) : _credentialExecutionHandler = credentialExecutionHandler,
+       _credentialTools = credentialTools;
+  final AgentAccess _agent;
+  final CredentialExecutionHandler? _credentialExecutionHandler;
+  final Future<List<CredentialToolLocation>> Function()? _credentialTools;
+
+  /// Enable only after the caller's storage and executor support v2 semantics.
+  final bool enableReusableCredentialUse;
+
+  /// Kept off until the repository, native host, and owner UI support fills.
+  final bool enableFocusedFill;
+
+  /// Off until storage, file driver and owner UI are connected by the host.
+  final bool enableInformationFiles;
+  bool get _informationFilesEnabled =>
+      enableReusableCredentialUse &&
+      enableInformationFiles &&
+      _agent.informationFileDeliveryAvailable;
+  bool get _focusedFillEnabled =>
+      enableReusableCredentialUse &&
+      enableFocusedFill &&
+      _agent.focusedFillAvailable;
+
+  Future<Map<String, Object?>> dispatch(
+    String path,
+    Map<String, dynamic> body,
+  ) => _dispatch(path, body);
 
   Future<Map<String, Object?>> _dispatch(
     String path,
@@ -368,6 +395,45 @@ class AgentServer {
         return path.endsWith('/status')
             ? _agent.informationFileStatus(session, input.deliveryId!)
             : _agent.releaseInformationFile(session, input.deliveryId!);
+      case '/information-file/watch':
+      case '/information-file/discard':
+        if (!_informationFilesEnabled) {
+          throw const InformationFileFailure('unsupported_capability');
+        }
+        final input = InformationFileCleanupInput.fromJson(body);
+        if (input.command != 'file-${path.split('/').last}') {
+          throw const InformationFileFailure('invalid_request');
+        }
+        return path.endsWith('/watch')
+            ? _agent.watchDeviceInformationFile(input)
+            : _agent.discardDeviceInformationFile(input);
+      case '/information-file/download':
+      case '/information-file/complete':
+      case '/information-file/cleanup':
+        if (!_informationFilesEnabled) {
+          throw const InformationFileFailure('unsupported_capability');
+        }
+        final command = Map<String, dynamic>.of(body)..remove('sessionSecret');
+        final input = InformationFileDeviceInput.fromJson(command);
+        if (input.command != 'file-${path.split('/').last}') {
+          throw const InformationFileFailure('invalid_request');
+        }
+        final session = _text(body, 'sessionSecret');
+        if (path.endsWith('/download')) {
+          return _agent.downloadDeviceInformationFile(
+            session,
+            input.deliveryId,
+          );
+        }
+        if (path.endsWith('/complete')) {
+          return _agent.completeDeviceInformationFile(
+            session,
+            input.deliveryId,
+            input.byteLength!,
+            input.sha256!,
+          );
+        }
+        return _agent.cleanupDeviceInformationFile(session, input.deliveryId);
       case '/credential-use/focus-target':
         if (!_focusedFillEnabled || !_agent.focusedFillDiscoveryAvailable) {
           throw const CredentialUseFailure('unsupported_capability');

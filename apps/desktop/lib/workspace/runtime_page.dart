@@ -59,6 +59,7 @@ class WorkspaceRuntimePage extends StatelessWidget {
           v = m.value,
           p = preferences,
           c = UiPalette.of(context);
+      final remote = v?.independentServer == true;
       final exitFailed = v?.phase == WorkspaceRuntimePhase.terminationFailed;
       final active = m.available && !p.frozen,
           canOperate = m.canMaintain && !p.frozen;
@@ -74,7 +75,9 @@ class WorkspaceRuntimePage extends StatelessWidget {
       return SettingsPageContent(
         scrollKey: const ValueKey('runtime-page-scroll'),
         title: '应用运行',
-        description: '查看本机服务、登记材料和关闭方式。材料回收与外部进程是否结束分别核对。',
+        description: remote
+            ? '查看资料服务器、CLI执行报告及此App的临时文件和关闭方式。'
+            : '查看本机服务、登记材料和关闭方式。材料回收与外部进程是否结束分别核对。',
         children: [
           if (m.loading) const LinearProgressIndicator(),
           if (m.readFailure != null)
@@ -85,8 +88,12 @@ class WorkspaceRuntimePage extends StatelessWidget {
           SettingsCard(
             children: [
               SettingsPreferenceRow(
-                title: v == null
-                    ? '正在核对本机服务…'
+                title: remote
+                    ? v!.phase == WorkspaceRuntimePhase.running
+                          ? '资料服务器${v.serviceAvailable ? '已连接' : '暂不可用'}'
+                          : 'App退出尚未完成'
+                    : v == null
+                    ? '正在核对资料服务…'
                     : v.serviceAvailable
                     ? '本机服务运行中'
                     : v.phase == WorkspaceRuntimePhase.saveFailed
@@ -101,8 +108,10 @@ class WorkspaceRuntimePage extends StatelessWidget {
                 ),
               ),
               SettingsPreferenceRow(
-                title: '临时凭据材料',
-                description: v == null
+                title: remote ? '凭据临时文件' : '临时凭据材料',
+                description: remote
+                    ? '这里显示使用凭据文件的任务状态，临时文件的回收结果由运行任务的电脑提供。'
+                    : v == null
                     ? '正在核对已登记的执行…'
                     : v.materials.isEmpty
                     ? '暂无已登记材料。活动任务使用的文件保留至进程组结束。'
@@ -115,7 +124,9 @@ class WorkspaceRuntimePage extends StatelessWidget {
               ),
               SettingsPreferenceRow(
                 title: '普通附件维护',
-                description: v == null
+                description: remote
+                    ? 'CLI副本按设备报告展示；本机只核查此App创建的临时文件，另存的正式文件保留。'
+                    : v == null
                     ? '正在核对已登记副本…'
                     : '撤销、到期或范围失效后回收已登记副本；活动授权的副本保留。当前原文和保留版本不因副本核查被删除。',
                 control: DesktopButton(
@@ -204,7 +215,9 @@ class WorkspaceRuntimePage extends StatelessWidget {
               SettingsPreferenceRow(
                 title: '完全退出应用',
                 divider: false,
-                description: exitFailed
+                description: remote
+                    ? '只关闭此App的窗口和连接。资料服务器、CLI聊天和执行任务不因退出App而停止。'
+                    : exitFailed
                     ? '服务已停止，系统退出尚未完成。重试只完成退出，不恢复会话授权或重新执行外部程序。'
                     : '先保存退出事实，再停止本机服务并结束会话授权。已启动的外部程序可能继续运行；使用中的材料和未确认副本不保证立即回收。',
                 control: DesktopButton(
@@ -291,6 +304,7 @@ class _QuitFlowState extends State<_QuitFlow> {
     listenable: m,
     builder: (context, _) {
       final c = UiPalette.of(context), p = m.quitPreview, r = m.result;
+      final remote = m.value?.independentServer == true;
       return PopScope(
         canPop: _mayPop,
         onPopInvokedWithResult: (didPop, _) {
@@ -306,20 +320,26 @@ class _QuitFlowState extends State<_QuitFlow> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '保存退出事实、停止本机服务并结束会话授权。退出不等于终止已启动的外部程序，也不保证收回已读取的副本。',
+                remote
+                    ? '只退出当前App。资料服务器继续独立运行，CLI聊天、授权和执行任务仍按各自的期限及结束条件管理。'
+                    : '保存退出事实、停止本机服务并结束会话授权。退出不等于终止已启动的外部程序，也不保证收回已读取的副本。',
                 style: libraryText(context, 15, height: 1.9),
               ),
               const SizedBox(height: 18),
               if (m.preparing || m.busy) const LinearProgressIndicator(),
               if (p != null) ...[
                 Text(
-                  '将结束 ${p.sessions} 个会话中的 ${p.grants} 项有效授权；${p.pendingRequests} 条待处理申请失效。',
+                  remote
+                      ? '服务器目前有${p.sessions}个会话、${p.grants}项有效授权和${p.pendingRequests}条待处理申请；本次退出不会使它们失效。'
+                      : '将结束 ${p.sessions} 个会话中的 ${p.grants} 项有效授权；${p.pendingRequests} 条待处理申请失效。',
                   key: const ValueKey('runtime-quit-scope'),
                   style: libraryText(context, 15, height: 1.9),
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  '${p.materials} 项材料、${p.copies} 份副本仍登记保留；${p.unconfirmedProcesses} 个外部进程尚未确认结束。',
+                  remote
+                      ? '执行设备仍回报${p.materials}项材料、${p.copies}份CLI副本保留，${p.unconfirmedProcesses}个进程尚未回报结束。此App另有${p.ownerCopies}项临时文件登记待安全关闭。'
+                      : '${p.materials} 项材料、${p.copies} 份副本仍登记保留；${p.unconfirmedProcesses} 个外部进程尚未确认结束。',
                   style: libraryText(
                     context,
                     14,
@@ -329,7 +349,9 @@ class _QuitFlowState extends State<_QuitFlow> {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  '身份未知或使用中的文件保持登记。下次启动继续核查，不重新执行命令、不恢复旧授权。',
+                  remote
+                      ? 'CLI自己的执行程序继续核对其材料。此App不终止这些进程，也不把另存的正式文件当临时副本删除。'
+                      : '身份未知或使用中的文件保持登记。下次启动继续核查，不重新执行命令、不恢复旧授权。',
                   style: libraryText(context, 14, color: c.muted, height: 1.9),
                 ),
               ],
@@ -344,15 +366,25 @@ class _QuitFlowState extends State<_QuitFlow> {
               if (r?.action == WorkspaceRuntimeAction.quit) ...[
                 const SizedBox(height: 18),
                 Text(
-                  switch (r!.phase) {
-                    WorkspaceRuntimePhase.saveFailed =>
-                      '退出审计尚未保存，资料库仍保持打开；新申请已停止，已结束的授权不会恢复。请重新核对后重试保存。',
-                    WorkspaceRuntimePhase.terminationFailed =>
-                      '退出事实已保存，本机服务已停止；应用进程退出未完成，可以重试退出应用。',
-                    WorkspaceRuntimePhase.stopped =>
-                      '退出事实已保存，本机服务已停止，当前会话授权已结束。',
-                    WorkspaceRuntimePhase.running => '运行状态需要重新核对。',
-                  },
+                  remote
+                      ? switch (r!.phase) {
+                          WorkspaceRuntimePhase.saveFailed =>
+                            '当前App的资源关闭尚未完成，请重试；资料服务器和CLI未被停止。',
+                          WorkspaceRuntimePhase.terminationFailed =>
+                            'App连接已关闭，但系统退出尚未完成，可以重试退出。服务器和CLI未被停止。',
+                          WorkspaceRuntimePhase.stopped =>
+                            '已完成App退出；服务器和CLI未被此App停止。',
+                          WorkspaceRuntimePhase.running => 'App退出状态需要重新核对。',
+                        }
+                      : switch (r!.phase) {
+                          WorkspaceRuntimePhase.saveFailed =>
+                            '退出审计尚未保存，资料库仍保持打开；新申请已停止，已结束的授权不会恢复。请重新核对后重试保存。',
+                          WorkspaceRuntimePhase.terminationFailed =>
+                            '退出事实已保存，本机服务已停止；应用进程退出未完成，可以重试退出应用。',
+                          WorkspaceRuntimePhase.stopped =>
+                            '退出事实已保存，本机服务已停止，当前会话授权已结束。',
+                          WorkspaceRuntimePhase.running => '运行状态需要重新核对。',
+                        },
                   key: const ValueKey('runtime-quit-result'),
                   style: libraryText(
                     context,
@@ -389,7 +421,7 @@ class _QuitFlowState extends State<_QuitFlow> {
                 onPressed: m.canQuit
                     ? () => m.write(WorkspaceRuntimeAction.quit)
                     : null,
-                child: const Text('保存并完全退出'),
+                child: Text(remote ? '退出App' : '保存并完全退出'),
               ),
             DesktopButton(
               key: const ValueKey('runtime-quit-cancel'),
@@ -436,9 +468,9 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
       final c = UiPalette.of(context),
           materials = widget.materials,
           v = m.value;
-      final count = materials
-              ? v?.materials.length ?? 0
-              : v?.copies.length ?? 0,
+      final remote = v?.independentServer == true;
+      final allCopies = <Object>[...?v?.copies, ...?v?.ownerCopies];
+      final count = materials ? v?.materials.length ?? 0 : allCopies.length,
           pages = ((count + 4) ~/ 5).clamp(1, 1 << 30),
           page = _page.clamp(0, pages - 1);
       final action = materials
@@ -460,7 +492,11 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                materials
+                remote
+                    ? materials
+                          ? '这里读取执行设备上报的状态，不在此App检查这些进程或清理其材料。CLI执行程序负责核对和回收，不会因刷新而重新执行命令。'
+                          : 'CLI副本按服务器收到的报告显示；重新核查只清理此App已登记且可以安全移除的临时文件，使用中或结果未确认的保留。'
+                    : materials
                     ? '只核查已登记的材料；活动进程或身份未确认时保留。回收不重跑命令、不终止进程，也不改变授权期限。'
                     : '只处理已登记副本；有效授权继续保留，撤销、到期或范围失效后再回收。登记路径移除不承诺收回已读取内容。',
                 style: libraryText(context, 14, color: c.muted, height: 1.9),
@@ -478,7 +514,7 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
                   SettingsPreferenceRow(
                     title: e.plan.label,
                     description:
-                        '${libraryLocalDateTime(e.createdAt)} · ${e.resultLabel} · ${!e.processStarted
+                        '${remote ? '设备报告 · ' : ''}${libraryLocalDateTime(e.createdAt)} · ${e.resultLabel} · ${!e.processStarted
                             ? '目标程序未启动'
                             : e.processEnded
                             ? '进程组已确认结束'
@@ -494,19 +530,33 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
                     ),
                   ),
               if (!materials && v != null)
-                for (final e in v.copies.skip(page * 5).take(5))
-                  SettingsPreferenceRow(
-                    title: '${e.name} · v${e.fileVersion}',
-                    description:
-                        '${e.state.label} · 副本期限 ${libraryLocalDateTime(e.expiresAt)}${e.reason == null ? '' : ' · ${e.reason}'}',
-                    control: DesktopButton(
-                      key: ValueKey('runtime-copy-request-${e.id}'),
-                      onPressed: m.frozen || m.shutdownGate
-                          ? null
-                          : () => _close(e.requestId),
-                      child: const Text('查看原申请'),
+                for (final entry in allCopies.skip(page * 5).take(5))
+                  if (entry is WorkspaceCopyMaintenance)
+                    SettingsPreferenceRow(
+                      title:
+                          '${remote ? 'CLI副本 · ' : ''}${entry.name} · v${entry.fileVersion}',
+                      description:
+                          '${remote ? '设备报告 · ' : ''}${entry.state.label} · 副本期限 ${libraryLocalDateTime(entry.expiresAt)}${entry.reason == null ? '' : ' · ${entry.reason}'}',
+                      control: DesktopButton(
+                        key: ValueKey('runtime-copy-request-${entry.id}'),
+                        onPressed: m.frozen || m.shutdownGate
+                            ? null
+                            : () => _close(entry.requestId),
+                        child: const Text('查看原申请'),
+                      ),
+                    )
+                  else if (entry is WorkspaceOwnerCopyMaintenance)
+                    SettingsPreferenceRow(
+                      title: '此App · ${entry.name} · v${entry.fileVersion}',
+                      description: entry.uncertain
+                          ? '原文件操作结果待确认，保留登记，不重复打开或另存。'
+                          : entry.active
+                          ? '当前App正在使用，保留临时副本。'
+                          : entry.kind == WorkspaceOwnerCopyKind.save
+                          ? '仅清理另存过程的临时材料，已经保存的正式文件不会删除。'
+                          : '临时副本待安全清理。',
+                      control: const SizedBox.shrink(),
                     ),
-                  ),
               if (v != null && !v.serviceAvailable)
                 Text(
                   v.serviceReason ?? '本机服务不可用，核查暂不可用。',
@@ -530,7 +580,11 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
                 ),
               if (r?.action == action)
                 Text(
-                  '已核查 ${r!.checked} 项，释放 ${r.released} 项登记，仍保留 ${r.retained} 项。',
+                  remote
+                      ? materials
+                            ? '已刷新${r!.checked}项执行报告，其中${r.retained}项仍待设备完成清理；此App没有处理这些进程或文件。'
+                            : '已核查此App临时文件${r!.checked}项，清理${r.released}项，仍保留${r.retained}项。CLI副本以执行设备的报告为准。'
+                      : '已核查 ${r!.checked} 项，释放 ${r.released} 项登记，仍保留 ${r.retained} 项。',
                   key: const ValueKey('runtime-maintenance-result'),
                   style: libraryText(
                     context,

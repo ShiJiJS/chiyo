@@ -27,6 +27,7 @@ import 'template_packages.dart';
 export 'template_packages.dart';
 import 'history.dart';
 export 'history.dart';
+import 'server_state.dart';
 import 'import_proposals.dart';
 import 'update_proposals.dart';
 import 'recycle.dart';
@@ -41,6 +42,7 @@ part 'organization_access.dart';
 part 'organization_task_access.dart';
 part 'history_access.dart';
 part 'import_access.dart';
+part 'proposal_password_operations.dart';
 part 'information_import_file_access.dart';
 part 'update_access.dart';
 part 'recycle_access.dart';
@@ -67,6 +69,7 @@ part 'information_purge.dart';
 part 'information_attachment_access.dart';
 part 'information_delivery_models.dart';
 part 'information_delivery_access.dart';
+part 'information_device_delivery_access.dart';
 part 'credential_access.dart';
 part 'credential_record_operations.dart';
 part 'credential_field_migration.dart';
@@ -74,6 +77,9 @@ part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
 part 'focused_fill_access.dart';
 part 'credential_runtime_access.dart';
+part 'device_credential_launch.dart';
+part 'device_credential_access.dart';
+part 'device_credential_execution.dart';
 part 'credential_execution_audit.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
@@ -87,6 +93,7 @@ part 'information_template_catalog.dart';
 part 'template_import_access.dart';
 part 'import_admission_access.dart';
 part 'update_admission_access.dart';
+part 'online_information_runtime.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -200,7 +207,8 @@ class InformationService {
     this.focusedFillDriver,
     this.informationDeliveryFiles,
     FocusedFillApplicationInspector? focusedFillApplicationInspector,
-  }) : _repository = repository,
+  }) : _deviceFileDelivery = false,
+       _repository = repository,
        focusedFillApplicationInspector =
            focusedFillApplicationInspector ?? inspectFocusedFillApplication,
        credentialExecutableInspector =
@@ -209,7 +217,8 @@ class InformationService {
     _recoverAudit();
   }
   InformationService.fictional({DateTime Function()? clock})
-    : focusedFillDriver = null,
+    : _deviceFileDelivery = false,
+      focusedFillDriver = null,
       informationDeliveryFiles = null,
       focusedFillApplicationInspector = inspectFocusedFillApplication,
       credentialExecutableInspector = inspectCredentialExecutable,
@@ -238,7 +247,20 @@ class InformationService {
           ],
         ),
       ]);
+  // The online runtime reconciles live capabilities before finishing orphaned
+  // audit facts. Ordinary local construction retains its historical behavior.
+  InformationService._online({
+    required InformationRepository repository,
+    DateTime Function()? clock,
+  }) : _deviceFileDelivery = true,
+       _repository = repository,
+       _clock = clock ?? DateTime.now,
+       focusedFillDriver = null,
+       informationDeliveryFiles = null,
+       focusedFillApplicationInspector = inspectFocusedFillApplication,
+       credentialExecutableInspector = inspectCredentialExecutable;
   final InformationRepository _repository;
+  final bool _deviceFileDelivery;
   final CredentialExecutableInspector credentialExecutableInspector;
   final FocusedFillDriver? focusedFillDriver;
   final FocusedFillApplicationInspector focusedFillApplicationInspector;
@@ -253,6 +275,10 @@ class InformationService {
   }
 
   final _credentialUseSessions = <String, String>{};
+  // Online host only: the original authenticated device for each use request.
+  // This private binding is not reconstructed from portable history.
+  final _deviceCredentialRequests = <String, String>{};
+  final _deviceCredentialExecutions = <String, _DeviceCredentialExecution>{};
   final _executionCapabilities = <String, String>{};
   final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
   late Future<void> _runtimeWrites = Future.value();
@@ -291,13 +317,19 @@ class InformationService {
   final _uncertainInformationDecisions = <String, _InformationDecision>{};
   final _inactiveCredentialApprovals = <String>{};
   final _uncertainCredentialDecisions = <String, void Function(bool)>{};
+  final _onlineCredentialDecisions = <String, InformationApprovalReceipt>{};
   Future<void> _auditWrites = Future.value();
   final _auditPending = <Future<void> Function()>[];
   bool _auditFailed = false;
   AuditRetentionPreview? _retentionPreview;
-  Future<void> close() {
+  Future<void> close() => _close();
+
+  Future<void> _close({bool preserveOnlineAuthorizations = false}) {
     if (_backupBarrier case final barrier?) {
-      return barrier.future.then((_) => close());
+      return barrier.future.then(
+        (_) =>
+            _close(preserveOnlineAuthorizations: preserveOnlineAuthorizations),
+      );
     }
     if (_closed) {
       return Future.wait<void>([
@@ -308,7 +340,8 @@ class InformationService {
       ]).then((_) {});
     }
     _closed = true;
-    for (final request in _requests.values) {
+    for (final request
+        in preserveOnlineAuthorizations ? <_Request>[] : _requests.values) {
       _expire(request);
       if (request.state != AccessRequestState.pending &&
           request.state != AccessRequestState.approved) {
