@@ -99,7 +99,7 @@ void main() {
         '../../docs/design/macos-focused-fill-contract.md',
       ).readAsString();
       final json = RegExp(
-        r'```json\n([\s\S]*?)\n```',
+        r'```json\r?\n([\s\S]*?)\r?\n```',
       ).firstMatch(doc)!.group(1)!;
       final input = FocusedFillInput.fromJson(
         jsonDecode(json) as Map<String, dynamic>,

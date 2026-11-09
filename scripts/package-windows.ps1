@@ -162,9 +162,9 @@ try {
             throw 'Diagnostic and desktop SQLCipher DLLs differ.'
         }
     }
-    Copy-Item -LiteralPath 'docs/development/windows-delivery.md' -Destination (Join-Path $payload 'README.md')
-    Copy-Item -LiteralPath 'integrations/codex/README.md' -Destination (Join-Path $payload 'CODEX-INTEGRATION.md')
-    Copy-Item -LiteralPath 'docs/development/windows-acceptance.md' -Destination (Join-Path $payload 'ACCEPTANCE.md')
+    Copy-Item -LiteralPath 'docs/development/windows-online-delivery.md' -Destination (Join-Path $payload 'README.md')
+    Copy-Item -LiteralPath 'docs/development/windows-codex-integration.md' -Destination (Join-Path $payload 'CODEX-INTEGRATION.md')
+    Copy-Item -LiteralPath 'docs/development/windows-online-acceptance.md' -Destination (Join-Path $payload 'ACCEPTANCE.md')
     $flutterVersion = (& $flutter --version --machine | Out-String | ConvertFrom-Json)
     if ($LASTEXITCODE -ne 0) { throw 'Cannot record Flutter SDK version.' }
     # Record revisions and versions without publishing the builder's username

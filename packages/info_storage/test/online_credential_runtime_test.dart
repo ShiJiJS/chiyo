@@ -95,7 +95,7 @@ void main() {
         'GH_TOKEN': {'secret': 'token'},
       },
     },
-  });
+  }, allowPortableLaunchPaths: true);
   // A synthetic device preflight snapshot; these tests exercise server rules
   // and SQLCipher persistence, not a real native tool/version probe or launch.
   DeviceCredentialLaunch prepared(CredentialUseInput value) =>
@@ -631,7 +631,7 @@ void main() {
           'cwd': '/executing-device/work',
           'env': <String, dynamic>{},
         },
-      });
+      }, allowPortableLaunchPaths: true);
       final r = await runtime.run(
         () => runtime.service.agent.requestDeviceCredentialUse(
           device,

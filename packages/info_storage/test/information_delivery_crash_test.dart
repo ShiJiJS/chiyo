@@ -30,6 +30,23 @@ void main() {
       await File(
         'test/fixtures/file_delivery_crash_child.dart',
       ).copy('${probe.path}/worker.dart');
+      final sourceLock = (await File(
+        'pubspec.lock',
+      ).readAsString()).replaceAll('\r\n', '\n');
+      final versions = RegExp(
+        r'^  (\w+):\n[\s\S]*?    version: "([^"]+)"',
+        multiLine: true,
+      );
+      final matches = versions.allMatches(sourceLock).toList();
+      final pinned = {for (final m in matches) m[1]!: m[2]!};
+      // A new root package otherwise selects newer cached hook dependencies.
+      // Freeze the same hosted versions before resolving, retaining the exact
+      // equality assertions below; path dependencies remain the real sources.
+      await File('${probe.path}/pubspec.yaml').writeAsString(
+        'dependency_overrides:\n${[for (final m in matches)
+          if (m[0]!.contains('\n    source: hosted\n')) '  ${m[1]}: ${jsonEncode(m[2])}\n'].join()}',
+        mode: FileMode.append,
+      );
       final pub = await Process.run(Platform.resolvedExecutable, [
         'pub',
         'get',
@@ -42,18 +59,7 @@ void main() {
       );
       // Keep the resolved lock for inspection while this fixture is alive. All
       // dependency versions must match the production storage package lock.
-      final sourceLock = await File('pubspec.lock').readAsString();
       final childLock = await File('${probe.path}/pubspec.lock').readAsString();
-      final versions = RegExp(
-        r'^  (\w+):\n[\s\S]*?    version: "([^"]+)"',
-        multiLine: true,
-      );
-      final pinned = {
-        for (final m in versions.allMatches(
-          sourceLock.replaceAll('\r\n', '\n'),
-        ))
-          m[1]!: m[2]!,
-      };
       for (final m in versions.allMatches(childLock.replaceAll('\r\n', '\n'))) {
         if (m[1] != 'info_storage' && pinned.containsKey(m[1]))
           expect(

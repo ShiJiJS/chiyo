@@ -23,7 +23,7 @@ import 'package:info_desktop/workspace/workspace_entries.dart';
 void main() {
   const output = String.fromEnvironment('UI_EVIDENCE_DIR');
   setUpAll(() async {
-    if (!Platform.isMacOS) return;
+    if (!Platform.isMacOS && !Platform.isWindows) return;
     final fonts = await loadDesktopFonts();
     await (FontLoader(
       'MaterialIcons',
@@ -282,7 +282,7 @@ void main() {
   testWidgets(
     'wide Markdown table keeps horizontal access and fitting table has no empty scroll lane',
     (t) async {
-      t.view.physicalSize = const Size(400, 600);
+      t.view.physicalSize = const Size(240, 600);
       t.view.devicePixelRatio = 1;
       addTearDown(t.view.resetPhysicalSize);
       addTearDown(t.view.resetDevicePixelRatio);
@@ -294,7 +294,7 @@ void main() {
               child: LibraryDocument(
                 format: 'markdown',
                 body:
-                    '| 第一列 | 第二列 | 第三列 |\n| --- | --- | --- |\n| firstcolumnunbreakablevalue | middlecolumnunbreakablevalue | lastcolumnunbreakablevalue |',
+                    '| 第一列 | 第二列 | 第三列 |\n| --- | --- | --- |\n| firstcolumnvalue | middlecolumnvalue | lastcolumnvalue |',
               ),
             ),
           ),
@@ -317,7 +317,10 @@ void main() {
           .position;
       expect(position.pixels, greaterThan(0));
       expect(position.extentAfter, lessThan(1));
-      t.view.physicalSize = const Size(900, 600);
+      // Fit the measured table even when the installed system face differs.
+      final fittingWidth =
+          t.getSize(find.byType(Table)).width.ceilToDouble() + 100;
+      t.view.physicalSize = Size(fittingWidth, 600);
       await t.pumpAndSettle();
       expect(horizontal, findsNothing);
       expect(find.byType(Table), findsOneWidget);

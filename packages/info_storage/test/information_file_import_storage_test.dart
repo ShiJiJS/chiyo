@@ -1,3 +1,4 @@
+import 'support/encrypted_artifacts.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -197,7 +198,7 @@ void main() {
         await restored.close();
       }
       for (final file in root.listSync(recursive: true).whereType<File>()) {
-        final text = latin1.decode(await file.readAsBytes());
+        final text = latin1.decode(encryptedArtifactBytes(file));
         expect(text, isNot(contains('PRIVATE-ORIGINAL-A')));
         expect(
           text,

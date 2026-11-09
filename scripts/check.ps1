@@ -32,7 +32,7 @@ function Invoke-LockedGet {
 }
 
 $lockSnapshots = @{}
-foreach ($relative in @('packages/info_cli', 'packages/info_core', 'packages/info_storage', 'apps/desktop')) {
+foreach ($relative in @('packages/info_cli', 'packages/info_core', 'packages/info_remote', 'packages/info_storage', 'packages/info_workspace', 'apps/desktop')) {
     $lockPath = Join-Path $projectRoot "$relative/pubspec.lock"
     $lockSnapshots[$lockPath] = [IO.File]::ReadAllBytes($lockPath)
 }
@@ -52,7 +52,11 @@ foreach ($package in Get-ChildItem (Join-Path $projectRoot 'packages') -Director
         Write-Host "Checking $($package.Name)"
         Invoke-LockedGet $dartCommand
         Invoke-Checked $dartCommand @('analyze', '--fatal-infos')
-        Invoke-Checked $dartCommand @('test')
+        if (Test-Path -LiteralPath 'test' -PathType Container) {
+            Invoke-Checked $dartCommand @('test')
+        } else {
+            Write-Host 'No standalone test directory; analysis completed. Contract consumers have their own tests.'
+        }
     } finally { Pop-Location }
 }
 
