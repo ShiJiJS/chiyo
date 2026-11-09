@@ -1,3 +1,4 @@
+import 'remote_library_cache.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:info_workspace/form_transport.dart';
@@ -38,6 +39,7 @@ import 'package:info_workspace/adoption_transport.dart';
 class RemoteWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceLibraryNotifications,
         WorkspaceStorageLocation,
         WorkspaceLibraryMove,
         WorkspaceLibraryRecycle,
@@ -66,6 +68,12 @@ class RemoteWorkspaceSource
     );
   }
   final OwnerClient client;
+  late final cache = RemoteLibraryCache(client, () {
+    if (!_libraryChanges.isClosed) _libraryChanges.add(null);
+  });
+  final _libraryChanges = StreamController<WorkspaceRecordRef?>.broadcast();
+  @override
+  Stream<WorkspaceRecordRef?> get libraryChanges => _libraryChanges.stream;
   final OnlineDesktopRuntime? desktopRuntime;
   @override
   late final WorkspaceRuntimeSource runtime = desktopRuntime == null
@@ -295,6 +303,11 @@ class RemoteWorkspaceSource
   @override
   late final RemoteWorkspacePlugins plugins = RemoteWorkspacePlugins(
     client,
+    cached: () async {
+      if (_mutationGeneration != _refreshedMutation) await _refreshMutations();
+      final raw = cache.resources?['plugins'];
+      return raw == null ? null : Map<String, dynamic>.from(raw as Map);
+    },
     changed: notifyConnectionChanged,
   );
   @override
@@ -303,10 +316,15 @@ class RemoteWorkspaceSource
     onChanged: notifyConnectionChanged,
   );
   String? _observation;
-  void observeServer(String value) {
+  Map<String, dynamic>? _liveSummary;
+  void observeServer(String value, {Map<String, dynamic>? summary}) {
+    _liveSummary = summary;
     if (_observation != value) {
       _observation = value;
-      notifyConnectionChanged();
+      if (cache.resources == null && !_libraryChanges.isClosed) {
+        _libraryChanges.add(null);
+      }
+      if (!_changes.isClosed) _changes.add(null);
     }
   }
 
@@ -316,7 +334,22 @@ class RemoteWorkspaceSource
   final _changes = StreamController<WorkspaceRecordRef?>.broadcast();
   @override
   Stream<WorkspaceRecordRef?> get changes => _changes.stream;
+  int _mutationGeneration = 0, _refreshedMutation = 0;
+  Future<void>? _mutationRefresh;
+  Future<void> _refreshMutations() => _mutationRefresh ??= (() async {
+    while (_refreshedMutation != _mutationGeneration) {
+      final generation = _mutationGeneration;
+      await cache.synchronize(requireFresh: true);
+      _refreshedMutation = generation;
+    }
+  })().whenComplete(() => _mutationRefresh = null);
   void notifyConnectionChanged() {
+    if (cache.resources != null) {
+      _mutationGeneration++;
+      unawaited(_refreshMutations().catchError((Object _) {}));
+    } else if (!_libraryChanges.isClosed) {
+      _libraryChanges.add(null);
+    }
     if (!_changes.isClosed) _changes.add(null);
   }
 
@@ -356,7 +389,9 @@ class RemoteWorkspaceSource
     await close(hosts.dispose);
     await close(credentials.dispose);
     await close(files.dispose);
+    cache.dispose();
     client.close();
+    await close(_libraryChanges.close);
     await close(_changes.close);
     if (firstError != null) Error.throwWithStackTrace(firstError!, firstStack!);
   }
@@ -408,13 +443,26 @@ class RemoteWorkspaceSource
     }
   }
 
-  Future<Map<String, dynamic>> _catalog() =>
-      client.request('GET', '/v1/owner/catalog');
+  Future<Map<String, dynamic>> _catalog() async {
+    if (cache.resources == null) {
+      return client.request('GET', '/v1/owner/catalog');
+    }
+    if (_mutationGeneration != _refreshedMutation) await _refreshMutations();
+    return Map<String, dynamic>.from(cache.resources!['catalog'] as Map);
+  }
+
   Map<String, String> _tagNames(Map<String, dynamic> catalog) => {
     for (final t in catalog['tags'] as List)
       t['id'] as String: t['name'] as String,
   };
   Future<List<WorkspaceRecordSummary>> _summaries() async {
+    if (cache.resources != null) {
+      return [
+        for (final e in cache.resources!.entries)
+          if (e.key.startsWith('record:'))
+            workspaceDetailFromJson(e.value).record,
+      ];
+    }
     final data = await client.request('GET', '/v1/owner/summaries');
     final tags = _tagNames(await _catalog());
     return [
@@ -442,7 +490,7 @@ class RemoteWorkspaceSource
 
   @override
   Future<WorkspaceSummary> loadSummary() => _remote(() async {
-    final summary = (await _catalog())['summary'] as Map;
+    final summary = _liveSummary ?? (await _catalog())['summary'] as Map;
     return WorkspaceSummary(
       records: summary['records'] as int,
       pending: summary['pending'] as int,
@@ -520,42 +568,48 @@ class RemoteWorkspaceSource
     } on Object {
       throw const WorkspaceFailure('unknown_outcome', '模板切换结果暂时无法确认，请核对原操作。');
     }
-    if (!_changes.isClosed) _changes.add(receipt.ref);
+    notifyConnectionChanged();
     return receipt;
   });
 
   @override
-  Future<WorkspaceDetail> readDetail(WorkspaceRecordRef ref) => _remote(
-    () async {
-      if (ref.kind == WorkspaceRecordKind.credential) {
-        return credentialWorkspaceDetail(await credentials.read(ref));
-      }
-      final detail = _codec.decode(
-        await _item(ref),
-        tagNames: _tagNames(await _catalog()),
-      );
-      final state = workspacePluginTemplateState(
-        (await plugins.load()).packages,
-        detail.record.type.id,
-        detail.definition['packageId'] as String?,
-      );
-      return WorkspaceDetail(
-        record: detail.record,
-        version: detail.version,
-        templateState: detail.templateState == WorkspaceTemplateState.available
-            ? state
-            : detail.templateState,
-        definition: detail.definition,
-        values: detail.values,
-        relations: detail.relations,
-        incomingRelations: detail.incomingRelations,
-        fieldIds: detail.fieldIds,
-        fieldOverrides: detail.fieldOverrides,
-        retainedFields: detail.retainedFields,
-        retainedRelations: detail.retainedRelations,
-      );
-    },
-  );
+  Future<WorkspaceDetail> readDetail(
+    WorkspaceRecordRef ref,
+  ) => _remote(() async {
+    if (cache.resources != null) {
+      if (_mutationGeneration != _refreshedMutation) await _refreshMutations();
+      final value = cache.resources!['record:${ref.kind.name}:${ref.id}'];
+      if (value == null) throw const WorkspaceFailure('not_found', '资料已不存在。');
+      return workspaceDetailFromJson(value);
+    }
+    if (ref.kind == WorkspaceRecordKind.credential) {
+      return credentialWorkspaceDetail(await credentials.read(ref));
+    }
+    final detail = _codec.decode(
+      await _item(ref),
+      tagNames: _tagNames(await _catalog()),
+    );
+    final state = workspacePluginTemplateState(
+      (await plugins.load()).packages,
+      detail.record.type.id,
+      detail.definition['packageId'] as String?,
+    );
+    return WorkspaceDetail(
+      record: detail.record,
+      version: detail.version,
+      templateState: detail.templateState == WorkspaceTemplateState.available
+          ? state
+          : detail.templateState,
+      definition: detail.definition,
+      values: detail.values,
+      relations: detail.relations,
+      incomingRelations: detail.incomingRelations,
+      fieldIds: detail.fieldIds,
+      fieldOverrides: detail.fieldOverrides,
+      retainedFields: detail.retainedFields,
+      retainedRelations: detail.retainedRelations,
+    );
+  });
 
   @override
   Future<List<WorkspaceRecordSummary>> readSummaries(
@@ -683,6 +737,7 @@ class RemoteWorkspaceSource
       WorkspaceRecordKind.information,
       receipt.itemId,
     );
+    if (cache.resources != null) await cache.synchronize(requireFresh: true);
     if (!_changes.isClosed) _changes.add(ref);
     try {
       final detail = await readDetail(ref);

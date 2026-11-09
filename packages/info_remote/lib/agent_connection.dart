@@ -145,11 +145,17 @@ final class AgentConnection {
     if (_closed) return {'status': 'service_unavailable'};
     if (!RegExp(r'^/[a-z0-9-]+(?:/[a-z0-9-]+)*$').hasMatch(path))
       return {'status': 'invalid_request'};
+    HttpClientRequest? active;
+    var expired = false;
     try {
       return await (() async {
-        final request = await _http.postUrl(
+        final request = active = await _http.postUrl(
           profile.address.resolve('/v1/agent$path'),
         );
+        if (expired) {
+          request.abort();
+          throw TimeoutException('Request expired');
+        }
         request.followRedirects = false;
         request.headers.contentType = ContentType.json;
         request.headers.set('authorization', 'Bearer ${profile.deviceToken}');
@@ -185,7 +191,14 @@ final class AgentConnection {
         }
         if (result['status'] is! String) throw const FormatException();
         return result;
-      })().timeout(timeout);
+      })().timeout(
+        timeout,
+        onTimeout: () {
+          expired = true;
+          active?.abort();
+          return <String, dynamic>{'status': 'service_unavailable'};
+        },
+      );
     } on Object {
       return {'status': 'service_unavailable'};
     }

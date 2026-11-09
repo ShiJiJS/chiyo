@@ -1,3 +1,4 @@
+import 'owner_sync_routes.dart';
 import 'agent_devices.dart';
 import 'agent_gateway.dart';
 import 'package:info_core/agent_server.dart';
@@ -44,6 +45,7 @@ final class OnlineServer {
     this._devices,
     this._backups,
     this._policyState,
+    this._onRequestTiming,
   ) : _agents = AgentGateway(
         AgentProtocol(
           _runtime.service.agent,
@@ -94,6 +96,7 @@ final class OnlineServer {
       },
     );
   }
+  final void Function(Map<String, Object?>)? _onRequestTiming;
   final HttpServer _http;
   final OnlineInformationRuntime _runtime;
   InformationService get _service => _runtime.service;
@@ -199,6 +202,7 @@ final class OnlineServer {
     InformationBackups? backups,
     Directory? backupDirectory,
     ServerStateRepository? policyState,
+    void Function(Map<String, Object?>)? onRequestTiming,
   }) async {
     if (!RegExp(r'^[A-Za-z0-9_-]{43,128}$').hasMatch(ownerToken) ||
         !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(serverId)) {
@@ -244,6 +248,10 @@ final class OnlineServer {
               directory: backupDirectory!,
             ),
       policyState,
+      onRequestTiming ??
+          (Platform.environment['CHIYO_REQUEST_TIMINGS'] == '1'
+              ? (value) => stderr.writeln(jsonEncode(value))
+              : null),
     );
   }
 
@@ -295,6 +303,83 @@ final class OnlineServer {
       bytes.addAll(chunk);
     }
     return decodeProtocolObject(utf8.decode(bytes), maxBytes: limit);
+  }
+
+  Future<Map<String, Object?>> _catalogProjection() async {
+    final classification = await _library.loadCatalog();
+    return {
+      'version': classification.version,
+      'summary': {
+        'records':
+            _service.owner.information.length +
+            _service.owner.credentials.length,
+        'pending': _service.owner.queryInbox(limit: 1).pendingCount,
+        'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
+      },
+      'directories': [
+        for (final d in _service.owner.directories)
+          {'id': d.id, 'name': d.name, 'parentId': d.parentId},
+      ],
+      'tags': [
+        for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
+      ],
+      'templates': _plugins.templates.values.toList(),
+      'workspace': workspaceCatalogToJson(classification),
+      'recordOrder': _libraryRoutes.order()['records'],
+    };
+  }
+
+  late final _sync = OwnerSyncRoutes(
+    _runtime.hostState,
+    () async => {
+      'catalog': await _catalogProjection(),
+      'plugins': pluginCatalogToJson(await _plugins.load()),
+      for (final summary in _library.summaries())
+        'record:${summary.ref.kind.name}:${summary.ref.id}':
+            workspaceDetailToJson(await _library.readDetail(summary.ref)),
+    },
+  );
+
+  Future<String> _requestObservation() async {
+    final owner = _service.owner;
+    return sha256
+        .convert(
+          utf8.encode(
+            jsonEncode([
+              [
+                for (final r in await owner.informationRequestInbox())
+                  [
+                    r.id,
+                    r.state.name,
+                    r.sessionEnded,
+                    r.decisionPending,
+                    r.grantExpiresAt?.toIso8601String(),
+                  ],
+              ],
+              [
+                for (final r in owner.credentialUseRequests)
+                  [
+                    r.id,
+                    owner.credentialUseState(r),
+                    owner.credentialGrantState(r),
+                  ],
+              ],
+              [
+                for (final e in owner.credentialExecutions)
+                  [e.id, e.state, e.cleanupState, e.exitCode],
+              ],
+              [
+                for (final p in owner.importProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+              [
+                for (final p in owner.updateProposals)
+                  [p.id, p.version, p.state.name],
+              ],
+            ]),
+          ),
+        )
+        .toString();
   }
 
   Future<String> _observation() async {
@@ -408,6 +493,8 @@ final class OnlineServer {
   }
 
   Future<void> _handle(HttpRequest request) async {
+    final timing = Stopwatch()..start();
+    Duration? routeStarted, routeFinished;
     int status = 500;
     Object result = {'error': 'service_failure'};
     Future<void> reply(int code, Object value) async {
@@ -455,7 +542,16 @@ final class OnlineServer {
           await reply(401, {'error': 'unauthorized'});
           return;
         }
-        if (request.method == 'GET' && request.uri.path == '/v1/server') {
+        if (request.method == 'GET' &&
+            request.uri.path == '/v1/owner/updates') {
+          await reply(200, {
+            'workspaceObservation': await _requestObservation(),
+          });
+        } else if (request.method == 'POST' &&
+            request.uri.path == '/v1/owner/sync') {
+          await reply(200, await _sync.read(parsedBody!));
+        } else if (request.method == 'GET' &&
+            request.uri.path == '/v1/server') {
           await reply(200, {
             'protocolVersion': 1,
             'serverId': serverId,
@@ -713,27 +809,7 @@ final class OnlineServer {
           await reply(200, {'status': 'revoked', 'deviceId': path[3]});
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/catalog') {
-          final classification = await _library.loadCatalog();
-          await reply(200, {
-            'version': classification.version,
-            'summary': {
-              'records':
-                  _service.owner.information.length +
-                  _service.owner.credentials.length,
-              'pending': _service.owner.queryInbox(limit: 1).pendingCount,
-              'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
-            },
-            'directories': [
-              for (final d in _service.owner.directories)
-                {'id': d.id, 'name': d.name, 'parentId': d.parentId},
-            ],
-            'tags': [
-              for (final t in _service.owner.tags) {'id': t.id, 'name': t.name},
-            ],
-            'templates': _plugins.templates.values.toList(),
-            'workspace': workspaceCatalogToJson(classification),
-            'recordOrder': _libraryRoutes.order()['records'],
-          });
+          await reply(200, await _catalogProjection());
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/summaries') {
           await reply(200, {
@@ -858,7 +934,29 @@ final class OnlineServer {
         throw const AccessFailure('unauthorized');
       }
       if (request.method == 'POST') parsedBody = await _body(request);
-      await _runtime.run(route);
+      final pureOwnerRead =
+          request.method == 'GET' &&
+          (const {
+                '/v1/owner/updates',
+                '/v1/owner/catalog',
+                '/v1/owner/summaries',
+                '/v1/owner/plugins',
+              }.contains(request.uri.path) ||
+              (path.length == 4 &&
+                  path.take(3).join('/') == 'v1/owner/information'));
+      await _runtime.run(
+        () async {
+          routeStarted = timing.elapsed;
+          try {
+            await route();
+          } finally {
+            routeFinished = timing.elapsed;
+          }
+        },
+        skipUnchangedCheckpoint:
+            pureOwnerRead ||
+            (request.method == 'POST' && request.uri.path == '/v1/owner/sync'),
+      );
     } on AccessFailure catch (e) {
       status = e.status == 'unauthorized' ? 401 : 409;
       result = {'error': e.status, 'status': e.status};
@@ -868,6 +966,24 @@ final class OnlineServer {
     } on Object {
       status = 500;
       result = {'error': 'service_failure'};
+    }
+    try {
+      _onRequestTiming?.call({
+        'event': 'request_timing',
+        'method': request.method,
+        'surface': request.uri.pathSegments.take(3).join('/'),
+        'status': status,
+        'totalMicros': timing.elapsedMicroseconds,
+        'beforeRouteMicros': routeStarted?.inMicroseconds,
+        'routeMicros': routeStarted == null || routeFinished == null
+            ? null
+            : (routeFinished! - routeStarted!).inMicroseconds,
+        'checkpointMicros': routeFinished == null
+            ? null
+            : (timing.elapsed - routeFinished!).inMicroseconds,
+      });
+    } on Object {
+      /* Diagnostics cannot change request outcomes. */
     }
     // Never publish content, new session proofs or approval success before the
     // encrypted runtime checkpoint has committed. A failed checkpoint replaces

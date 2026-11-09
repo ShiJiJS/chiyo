@@ -12,9 +12,11 @@ class RemoteWorkspacePlugins implements WorkspacePluginSource {
   RemoteWorkspacePlugins(
     this.client, {
     required this.changed,
+    this.cached,
     this.picker = const NativeTemplatePackagePicker(),
   });
   final OwnerClient client;
+  final Future<Map<String, dynamic>?> Function()? cached;
   final void Function() changed;
   final InformationFilePicker picker;
 
@@ -97,8 +99,9 @@ class RemoteWorkspacePlugins implements WorkspacePluginSource {
 
   @override
   Future<WorkspacePluginCatalog> load() => _run(
-    () async =>
-        pluginCatalogFromJson(await client.request('GET', '/v1/owner/plugins')),
+    () async => pluginCatalogFromJson(
+      await cached?.call() ?? await client.request('GET', '/v1/owner/plugins'),
+    ),
   );
 
   @override
