@@ -3,9 +3,9 @@
 ## 当前快照
 
 - 日期：2026-11-10（Asia/Shanghai）。持续目标已恢复为 active。
-- 范围：#108–#116，父任务 #104；#105 后置。#108、#109 已完成并关闭，#110 进行中。
+- 范围：#108–#116，父任务 #104；#105 后置。#108、#109、#110 已完成并关闭，#111 进行中。
 - 分支：codex/windows-online。基线 ac8960c；环境与九票发布归档提交 35690cf。
-- 当前票：#110，Windows AI 申请、审批和读取。#109 实现 2e86359 已推送并回填/关闭；证据 docs/development/evidence/windows-online/w109.md。#108 实现 f454927。
+- 当前票：#111，附件/系统打开/PDF。#110 实现 c42f7d7 和结果 2923a54 已推送回填/关闭；证据 docs/development/evidence/windows-online/w110.md。#109 实现 2e86359；#108 实现 f454927。
 - 最新授权：直接使用现有 NAS；computer-use 必要时可用；可用现有实际资料验证；允许正常重启知予服务。正式安装和需要用户认证的操作仍最后集中。
 - 不扩入 WSL、新服务、密码填充、SSH 密码登录或跨电脑审批。保持旧 Windows 库独立；实际资料验证不等于可永久删除或恢复覆盖原库。
 
@@ -33,7 +33,8 @@
 - 下一步 #110：按 Windows manifest 识别同包 CLI/Skill，补齐引用并构建最新 AOT 工具；使用新建、隔离的验证聊天身份对现有 NAS 检查申请/审批/限定读取及失效，不搜索本聊天丢失的 association、不改全局 hooks。
 - #110 当前：Windows 同包观察器与四份引用打包已实现，6 项包检查和两包分析通过；真实 AOT 会话/hook 9 项、桌面观察/状态回归 27 项通过。当前 App 已退出。
 - #110 真实 NAS：全新隔离验证身份完成申请、等待原编号、仅批准字段读取、未批准字段/无关聊天拒绝、子身份共享范围、主人能力隔离；原 NAS 正常重启一次后根/子继续读取且截止时间不变；撤销与根结束后拒绝。首次结束未及时确认，只沿原 end-only 凭证接续，最终 completed。见 docs/development/evidence/windows-online/w110.md。
-- #110 待办：同提交实际 App/CLI 载荷包识别与损坏负向检查；尚未关闭，不把合成文件检查替代实际载荷。私有验证流程已完成，资料引用仅保存在本票私有检查目录，未改全局 hooks 或本聊天 association。
+- #110 已完成：干净 c42f7d7 重建的实际 App/CLI 运行载荷共 40 个文件，目录 build/development/w110-matched-c42f7d7；生产观察器识别、实际引用损坏/缺 hook 拒绝及恢复检查通过；由该载荷正常生成的最新审查材料再次通过 9 项 AOT 检查。此运行载荷不是 #116 完整发行 ZIP。旧两份临时接入材料、准备目录和已结束的本票私有验证引用已清理；保留最新匹配载荷、审查材料和摘要。未改全局 hooks 或本聊天 association。
+- 下一步 #111：补 Windows ownerFileOutput、templatePackageInput、owner_file_open 及 PDF 通道；沿用正式文件协调器与受管副本规则。先读现有原生实现/相关 ADR，再针对文件发布、历史原文与预览边界检查，必要时用真实文件面板验证。
 - 辅助测试尝试：现有 remote_settings_test 的本机服务器夹具受 POSIX secrets 和 /bin/chmod 限制。临时 Windows 测试夹具改动已撤回；没有修改生产服务平台边界，失败不计通过。测试失败时创建的隔离 Temp 合成夹具未做宽泛前缀清理。
 - 旧 POSIX 权限用例在 Windows 按平台跳过；未冒充已在 Mac/Linux 机器重跑其原生检查。此前 UI 服务器集成夹具依赖 POSIX 服务密钥，后续要适配测试装配而不放宽生产服务密钥边界。
-- 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #110–#116 仍开放。
+- 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #111–#116 仍开放。
