@@ -329,10 +329,16 @@ final class OnlineServer {
     };
   }
 
+  Future<Map<String, Object?>> _syncCatalogProjection() async {
+    final catalog = await _catalogProjection();
+    catalog.remove('summary'); // Pending approvals are not library content.
+    return catalog;
+  }
+
   late final _sync = OwnerSyncRoutes(
     _runtime.hostState,
     () async => {
-      'catalog': await _catalogProjection(),
+      'catalog': await _syncCatalogProjection(),
       'plugins': pluginCatalogToJson(await _plugins.load()),
       for (final summary in _library.summaries())
         'record:${summary.ref.kind.name}:${summary.ref.id}':
@@ -347,11 +353,20 @@ final class OnlineServer {
           utf8.encode(
             jsonEncode([
               [
-                for (final r in await owner.informationRequestInbox())
+                for (final i in owner.information) [i.id, i.version],
+              ],
+              [
+                for (final r in owner.informationRequests)
                   [
                     r.id,
                     r.state.name,
                     r.sessionEnded,
+                    r.applicationClosed,
+                    [for (final f in r.fields) f.toJson()],
+                    [
+                      for (final f in r.approvedFields ?? <FieldRef>[])
+                        f.toJson(),
+                    ],
                     r.decisionPending,
                     r.grantExpiresAt?.toIso8601String(),
                   ],
@@ -490,6 +505,43 @@ final class OnlineServer {
           ),
         )
         .toString();
+  }
+
+  static String _timingSurface(Uri uri) {
+    final path = uri.pathSegments;
+    if (path.length < 2 || path.first != 'v1') return 'other';
+    if (path[1] == 'server') return 'v1/server';
+    if (!{'owner', 'agent'}.contains(path[1])) return 'other';
+    const categories = {
+      'sync',
+      'updates',
+      'catalog',
+      'summaries',
+      'information',
+      'settings',
+      'runtime',
+      'agent-sessions',
+      'approvals',
+      'proposals',
+      'history',
+      'backups',
+      'plugins',
+      'files',
+      'ssh-hosts',
+      'credentials',
+      'devices',
+      'saves',
+      'operations',
+      'classification',
+      'library',
+      'sessions',
+      'request',
+      'read',
+      'claim',
+      'status',
+      'capabilities',
+    };
+    return 'v1/${path[1]}/${path.length > 2 && categories.contains(path[2]) ? path[2] : 'other'}';
   }
 
   Future<void> _handle(HttpRequest request) async {
@@ -978,7 +1030,7 @@ final class OnlineServer {
       _onRequestTiming?.call({
         'event': 'request_timing',
         'method': request.method,
-        'surface': request.uri.pathSegments.take(3).join('/'),
+        'surface': _timingSurface(request.uri),
         'status': status,
         'totalMicros': timing.elapsedMicroseconds,
         'beforeRouteMicros': routeStarted?.inMicroseconds,

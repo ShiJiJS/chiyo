@@ -75,6 +75,26 @@ void main() {
   });
 
   test(
+    'background list refresh does not swallow a decision or replay stale detail',
+    () async {
+      await m.load();
+      await m.select('server');
+      final pending = Completer<WorkspaceApprovalResults>();
+      port.queryOverride = (q, keep) => pending.future;
+      final refreshing = m.load(background: true);
+      expect(m.canDecide, isTrue);
+      port.queryOverride = null;
+      await m.decide(WorkspaceApprovalAction.deny);
+      expect(port.writes, 1);
+      final committed = m.detail;
+      pending.complete(await port.inner.query(const WorkspaceApprovalQuery()));
+      await refreshing;
+      expect(m.detail, same(committed));
+      expect(m.detail!.request.state, WorkspaceApprovalState.denied);
+    },
+  );
+
+  test(
     'automatic selection of another request clears the prior decision feedback',
     () async {
       await m.select('server');

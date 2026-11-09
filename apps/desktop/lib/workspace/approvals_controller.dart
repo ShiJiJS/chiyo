@@ -37,7 +37,7 @@ class ApprovalsController extends ChangeNotifier {
       if (frozen) {
         _refreshPending = true;
       } else {
-        unawaited(load());
+        unawaited(load(background: true));
       }
     });
   }
@@ -129,13 +129,13 @@ class ApprovalsController extends ChangeNotifier {
     if (!_closed) notifyListeners();
   }
 
-  Future<void> load({bool accepted = false}) async {
+  Future<void> load({bool accepted = false, bool background = false}) async {
     if (_closed || frozen) {
       _refreshPending = true;
       return;
     }
     final generation = ++_generation;
-    loading = true;
+    loading = !background || results == null;
     readFailure = null;
     _notify();
     try {
@@ -215,7 +215,7 @@ class ApprovalsController extends ChangeNotifier {
         detail = null;
         return;
       }
-      reading = true;
+      reading = !background || detail == null;
       _notify();
       final current = await source.read(selection!);
       if (_closed || generation != _generation) return;
@@ -441,6 +441,8 @@ class ApprovalsController extends ChangeNotifier {
       fieldMinutes: d.fieldMinutes,
       credentialMinutes: d.credentialMinutes,
     );
+    ++_generation; // A pending background read must not overwrite this decision.
+    loading = reading = false;
     busy = true;
     writeFailure = null;
     notice = null;

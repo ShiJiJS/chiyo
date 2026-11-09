@@ -490,7 +490,9 @@ class RemoteWorkspaceSource
 
   @override
   Future<WorkspaceSummary> loadSummary() => _remote(() async {
-    final summary = _liveSummary ?? (await _catalog())['summary'] as Map;
+    final summary =
+        _liveSummary ??
+        (await client.request('GET', '/v1/owner/updates'))['summary'] as Map;
     return WorkspaceSummary(
       records: summary['records'] as int,
       pending: summary['pending'] as int,
