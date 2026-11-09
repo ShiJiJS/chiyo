@@ -175,6 +175,12 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
             RemoteFailure(code: 'untrusted_server') => '无法验证服务器证书，请检查证书或连接地址。',
             RemoteFailure(code: 'invalid_connection') =>
               '请填写完整的 HTTPS 服务器地址和 Token。',
+            RemoteFailure(code: 'server_unavailable') =>
+              '无法连接服务器，请检查网络、服务器是否运行，以及系统是否允许知予访问本地网络。',
+            RemoteFailure(code: 'server_timeout') =>
+              '连接服务器超时，请检查网络和服务器状态后重试。',
+            FileSystemException() || ProcessException() =>
+              '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
             _ => '连接失败，请检查服务器地址、Token 和网络后重试。',
           };
         });
