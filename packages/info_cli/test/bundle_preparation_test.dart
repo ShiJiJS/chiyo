@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_remote/agent_connection.dart';
+import 'package:info_cli/macos_bundled_tools.dart';
 
 import 'package:test/test.dart';
 
@@ -43,7 +44,10 @@ void main() {
       await for (final file in Directory('$sourceTemplate/references').list()) {
         if (file is! File || !file.path.endsWith('.md')) continue;
         final name = file.uri.pathSegments.last;
-        if (const {'credential-use.md', 'information-files.md'}.contains(name)) {
+        if (const {
+          'credential-use.md',
+          'information-files.md',
+        }.contains(name)) {
           continue;
         }
         await file.copy('${template.path}/references/$name');
@@ -202,6 +206,34 @@ void main() {
         expect(remoteSkill, contains(profileFile.path));
         expect(remoteSkill, contains(stateRoot));
         expect(remoteSkill.contains(profile.deviceToken), isFalse);
+        if (delivered != null) {
+          final directOutput = '${root.path}/matching prepared cli';
+          final directPrepared = await Process.run(
+            '$delivered/cli/info-prepare-codex',
+            ['--connection', profileFile.path, directOutput],
+            environment: {'PATH': restrictedPath},
+          );
+          expect(
+            directPrepared.exitCode,
+            0,
+            reason: '${directPrepared.stderr}',
+          );
+          final reference = jsonDecode(
+            await File(
+              '$directOutput/${MacBundledTools.sourceFile}',
+            ).readAsString(),
+          );
+          final manifest = jsonDecode(
+            await File('$delivered/manifest.json').readAsString(),
+          );
+          expect(reference['sourceCommit'], manifest['sourceCommit']);
+          expect(
+            (await MacBundledTools(
+              executable: '$directOutput/info-codex',
+            ).read()).every((tool) => tool.available),
+            true,
+          );
+        }
       }
       for (final name in extraReferences) {
         expect(

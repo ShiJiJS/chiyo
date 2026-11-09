@@ -130,7 +130,7 @@ class MacAgentBundle {
           throw const FormatException('app source differs');
         }
       }
-      final required = embedded
+      final minimumRequired = embedded
           ? embeddedFiles
           : legacy
           ? requiredFiles
@@ -142,9 +142,25 @@ class MacAgentBundle {
                 )
                 .toList(growable: false)
           : requiredFiles;
-      final expectedTemplate = required
+      final expectedTemplate = minimumRequired
           .where((p) => p.startsWith('cli/template/'))
           .toSet();
+      // All same-source declared references are part of the shipped Skill.
+      // Require the core files and hash every additional reference; unknown or
+      // undeclared files still fail, rather than rejecting legitimate branches.
+      for (final row in rows) {
+        if (row is! Map || row['path'] is! String) continue;
+        final path = row['path'] as String;
+        if (!path.startsWith('cli/template/')) continue;
+        if (path != 'cli/template/SKILL.md' &&
+            !RegExp(
+              r'^cli/template/references/[A-Za-z0-9._-]+\.md$',
+            ).hasMatch(path)) {
+          throw const FormatException('invalid template declaration');
+        }
+        expectedTemplate.add(path);
+      }
+      final required = {...minimumRequired, ...expectedTemplate};
       final actualTemplate = <String>{};
       final template = Directory('$root/cli/template');
       if (await template.resolveSymbolicLinks() != template.path) {

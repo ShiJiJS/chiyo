@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/agent_server.dart';
+import 'macos_agent_bundle.dart';
 
 /// Discovers this running app's tools, independent of its installation path.
 /// Entry hashes are checked without executing tools or reading user settings.
@@ -14,10 +15,87 @@ class MacBundledTools {
     'gh_token': ('gh/bin/gh', '2.102.0'),
     'aws_shared_credentials': ('aws-cli/aws', '2.38.1'),
   };
+  static const sourceFile = 'macos-tools-source.json';
+
+  /// Prepared CLI bundles retain a public pointer to their matching App, not
+  /// another copy of its large tools or any user's connection credentials.
+  Future<Map<String, Object?>?> sourceReference() async {
+    final app = await _application();
+    if (app == null) return null;
+    final observed = await MacAgentBundle(executable: app).read(rehash: true);
+    if (!observed.verified) return null;
+    return {
+      'version': 1,
+      'application': app,
+      'sourceCommit': observed.sourceCommit,
+    };
+  }
+
+  Future<String?> _application() async {
+    final binary = File(_executable).absolute;
+    if (binary.parent.path.endsWith('.app/Contents/MacOS')) return binary.path;
+    try {
+      String app;
+      String? expectedCommit;
+      const embedded = '/Contents/Resources/AgentIntegration/cli';
+      if (binary.parent.path.endsWith(embedded)) {
+        app =
+            '${binary.parent.path.substring(0, binary.parent.path.length - embedded.length)}/Contents/MacOS/info_desktop';
+      } else if (binary.parent.uri.pathSegments
+                  .where((s) => s.isNotEmpty)
+                  .last ==
+              'cli' &&
+          await File(
+            '${binary.parent.parent.path}/${MacAgentBundle.appExecutable}',
+          ).exists()) {
+        app = '${binary.parent.parent.path}/${MacAgentBundle.appExecutable}';
+      } else {
+        final file = File('${binary.parent.path}/$sourceFile');
+        if (await FileSystemEntity.type(file.path, followLinks: false) !=
+                FileSystemEntityType.file ||
+            await file.length() > 2048) {
+          return null;
+        }
+        final raw = jsonDecode(await file.readAsString());
+        if (raw is! Map ||
+            raw.length != 3 ||
+            raw['version'] != 1 ||
+            raw['application'] is! String ||
+            raw['sourceCommit'] is! String) {
+          return null;
+        }
+        app = raw['application'] as String;
+        expectedCommit = raw['sourceCommit'] as String;
+      }
+      if (!File(app).isAbsolute) return null;
+      final observed = await MacAgentBundle(executable: app).read(rehash: true);
+      if (!observed.verified ||
+          expectedCommit != null && observed.sourceCommit != expectedCommit) {
+        return null;
+      }
+      final name = binary.uri.pathSegments.last;
+      if (!const {
+        'info',
+        'info-codex',
+        'info-codex-hook',
+        'info-runtime-worker',
+      }.contains(name)) {
+        return null;
+      }
+      final matching = File('${observed.directory}/cli/$name');
+      if ((await sha256.bind(binary.openRead()).first).toString() !=
+          (await sha256.bind(matching.openRead()).first).toString()) {
+        return null;
+      }
+      return app;
+    } on Object {
+      return null;
+    }
+  }
 
   Future<List<CredentialToolLocation>> read() async {
     final rows = <CredentialToolLocation>[];
-    final binary = File(_executable).absolute;
+    final binary = File(await _application() ?? _executable).absolute;
     final macos = binary.parent;
     final contents = macos.parent;
     final bundled = macos.path.endsWith('.app/Contents/MacOS');

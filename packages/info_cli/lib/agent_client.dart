@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'macos_bundled_tools.dart';
 import 'credential_output_filter.dart';
 import 'device_information_files.dart';
 import 'device_credential_journal.dart';
@@ -174,7 +175,20 @@ class AgentClient {
             const CredentialUseFailure('unknown_field').toJson(),
           );
         }
-        return _call('/capabilities', {});
+        final result = await _call('/capabilities', {});
+        if (_remote != null && Platform.isMacOS && result['status'] == 'ok') {
+          final tools = await MacBundledTools().read();
+          return {
+            ...result,
+            'capabilities': [
+              ...result['capabilities'] as List,
+              'credential-tools.v1',
+            ],
+            'credentialToolScope': 'current_device',
+            'credentialTools': tools.map((t) => t.toJson()).toList(),
+          };
+        }
+        return result;
       case 'import-file-status':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/import-file/status', {
