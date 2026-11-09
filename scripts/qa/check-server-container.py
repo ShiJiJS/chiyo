@@ -23,18 +23,32 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', default='chiyo-server-verification:a01')
     parser.add_argument('--upgrade-image', help='Also rehearse upgrade and restoration of a stopped pre-upgrade volume')
+    parser.add_argument('--compiled', action='store_true',
+                        help='Images use the compiled server entrypoint instead of the verification SDK stage')
     args = parser.parse_args()
     names = []
     copies = []
     with tempfile.TemporaryDirectory(prefix='chiyo-container-') as directory:
         root = Path(directory)
         private = root / 'secrets'
-        private.mkdir(mode=0o700)
-        for name in ['database.key', 'owner.token', 'server.id']:
-            path = private / name
-            with path.open('xb') as stream:
-                os.chmod(path, 0o600)
-                stream.write(secrets.token_bytes(32))
+        if args.compiled:
+            initialized = run('docker', 'run', '--rm', '--user', f'{os.getuid()}:{os.getgid()}',
+                '--mount', f'type=bind,source={root},target=/fixture',
+                args.image, 'init-secrets', '/fixture/secrets')
+            assert json.loads(initialized) == {'state': 'initialized'}
+            before_keys = {p.name: p.read_bytes() for p in private.iterdir()}
+            duplicate = subprocess.run(['docker', 'run', '--rm', '--user', f'{os.getuid()}:{os.getgid()}',
+                '--mount', f'type=bind,source={root},target=/fixture',
+                args.image, 'init-secrets', '/fixture/secrets'], capture_output=True)
+            assert duplicate.returncode != 0
+            assert {p.name: p.read_bytes() for p in private.iterdir()} == before_keys
+        else:
+            private.mkdir(mode=0o700)
+            for name in ['database.key', 'owner.token', 'server.id']:
+                path = private / name
+                with path.open('xb') as stream:
+                    os.chmod(path, 0o600)
+                    stream.write(secrets.token_bytes(32))
         token = base64.urlsafe_b64encode((private / 'owner.token').read_bytes()).decode().rstrip('=')
         def openssl(*params):
             run('openssl', *map(str, params))
@@ -70,9 +84,12 @@ def main():
             fixture = root if fixture is None else fixture
             name = 'chiyo-fixture-' + uuid.uuid4().hex[:12]
             names.append(name)
-            run('docker', 'run', '-d', '--name', name, '--mount',
+            run('docker', 'run', '-d', '--name', name,
+                *(['--user', f'{os.getuid()}:{os.getgid()}'] if args.compiled else []), '--mount',
                 f'type=bind,source={fixture},target=/fixture', '-p', '127.0.0.1::47126',
-                image or args.image, 'dart', 'run', 'bin/server.dart', 'serve', '/fixture/server.json')
+                image or args.image,
+                *([] if args.compiled else ['dart', 'run', 'bin/server.dart']),
+                'serve', '/fixture/server.json')
             port = run('docker', 'port', name, '47126/tcp').rsplit(':', 1)[1]
             deadline = time.monotonic() + 90
             while time.monotonic() < deadline:
@@ -140,6 +157,8 @@ def main():
             print(json.dumps({'containerRecreated': True, 'dataPreserved': True,
                 'serverIdentityPreserved': True, 'retryDeduplicated': True,
                 'tlsVerified': True, 'syntheticOnly': True,
+                'compiledRuntime': args.compiled,
+                'runtimeInitializationRefusesReplacement': args.compiled,
                 'distinctImageUpgrade': bool(args.upgrade_image),
                 'stoppedDataAndKeysRecovered': bool(args.upgrade_image),
                 'preUpgradeCopyRollback': bool(args.upgrade_image)}))

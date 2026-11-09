@@ -2,9 +2,55 @@
 
 备份、停止后升级、数据及运行密钥恢复步骤见 [维护说明](OPERATIONS.md)。
 
-首轮使用同一用户的一台电脑连接服务。当前已接资料管理、同机 AI 申请审批、动态插件模板、文字与普通文件提案，以及用户文件预览/另存/打开。Agent文件授权和传输已接，CLI本机副本执行仍在#97开发；凭据由后续票接续。当前 Dockerfile 是自动验收镜像，不是 #102 的最终发布镜像。
+首轮使用同一用户的一台 Mac 连接独立服务器。资料、审批、提案、动态模板、附件、凭据、目录、历史及备份均已接入；统一候选与完整试用继续由 #102 验证。Dockerfile 的 `verify` 阶段供源码测试，默认 `runtime` 阶段是 AOT 服务，不含 SDK、源码、资料或私有密钥。生产运行使用方法见下节；真实部署及资料迁移留 #103。
 
-## 启动
+## Docker 运行
+
+从仓库根目录构建默认 AOT 运行镜像；`--target verify` 才是源码测试阶段。以下是部署说明，不表示本轮已经替换日常服务。
+
+```sh
+docker build -f apps/server/Dockerfile --target runtime \
+  --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -t chiyo-server:local .
+```
+
+在选定的独立私有目录中准备 `data`、`config` 和 `tls` 三个子目录，目录权限700；TLS 证书及私钥放在 `tls`，私钥权限600。证书须覆盖实际局域网连接地址。使用运行镜像一次性初始化尚不存在的 `secrets` 子目录：
+
+```sh
+docker run --rm --user "$(id -u):$(id -g)" \
+  --mount "type=bind,source=<私有目录绝对路径>,target=/setup" \
+  chiyo-server:local init-secrets /setup/secrets
+```
+
+`config/server.json` 内容如下。路径是容器里的路径，不是电脑路径；端口也可按实际部署调整。
+
+```json
+{
+  "dataDirectory": "/data",
+  "secretsDirectory": "/secrets",
+  "tlsCertificate": "/tls/server.pem",
+  "tlsPrivateKey": "/tls/server.key",
+  "address": "0.0.0.0",
+  "port": 47126
+}
+```
+
+启动时只给资料目录写入权限，配置、密钥和证书只读挂载：
+
+```sh
+docker run -d --name chiyo-server --user "$(id -u):$(id -g)" \
+  -p "<局域网监听地址>:47126:47126" \
+  --mount "type=bind,source=<私有目录>/data,target=/data" \
+  --mount "type=bind,source=<私有目录>/config,target=/config,readonly" \
+  --mount "type=bind,source=<私有目录>/secrets,target=/secrets,readonly" \
+  --mount "type=bind,source=<私有目录>/tls,target=/tls,readonly" \
+  chiyo-server:local
+```
+
+以上占位路径需替换为绝对路径，运行身份须能读取这些私有文件。App 使用的 Token 是 `owner.token` 原始32字节的无填充 Base64URL 表示，可在可信终端用 `openssl base64 -A -in <私有目录>/secrets/owner.token | tr '/+' '_-' | tr -d '='` 获取后直接填入 App，不放进聊天、截图或普通日志。私人 CA 填入 App 连接页，不能把服务器私钥交给客户端。AI 的设备配置通过 App「AI 接入」另行生成。
+
+正常停止用 `docker stop --time 30 chiyo-server`，检查退出码0后再维护。后续重开使用原密钥和持久目录，不再次初始化。完整备份、迁移及失败回退见 [维护说明](OPERATIONS.md)。镜像不包含任何用户资料、私有密钥或预置 Token。
+
+## 源码启动
 
 在本目录运行 `dart pub get`。在私有工作目录显式运行一次：
 
@@ -63,7 +109,7 @@ dart run bin/server.dart serve /absolute/private/server.json
 - `POST /v1/owner/proposals/{id}/related`、`saved`、`snapshot` 及 `GET .../current`：在提案内读取关联内容、此次保存的快照或当前目标，不把待入库项当作信息库记录。
 - `POST /v1/owner/proposals/{id}/relations/query`、`summaries`：以 itemId、version 绑定当前提案中的关联查询。普通资料的关联查询用 `POST /v1/owner/relations/query`、`summaries`；均只返回名称、类型等元数据。
 
-- `POST /v1/owner/classification/changes`：复用原目录和标签的新建、更名、版本核查及原操作回执；`GET .../operations/{operationId}` 核对原结果，`GET .../tag-removal/{tagId}` 先核对移除标签的影响范围。目录删除由 #100 接续，目前明确拒绝。
+- `POST /v1/owner/classification/changes`：复用原目录和标签的新建、更名、版本核查及原操作回执；`GET .../operations/{operationId}` 核对原结果，`GET .../tag-removal/{tagId}` 先核对移除标签的影响范围。目录回收及批次恢复已由 #100 接通。
 - `POST /v1/owner/library/preview`、`targets`、`moves`：完整选择、后代目录和资料、目标路径与前后位置经原移动规则核查；`GET .../operations/{operationId}` 核对丢失回复，不能自动换编号重做。`GET/POST .../order` 读取或保存原手动、名称、更新时间排序方式。
 - `/v1/owner/catalog` 的 `workspace` 使用共用分类投影，包含后代目录计数和当前模板；`recordOrder` 是服务器的资料顺序。没有接通的文件或凭据创建入口不会因存储支持而提前开放。
 

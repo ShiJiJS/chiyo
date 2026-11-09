@@ -1,4 +1,5 @@
 import 'online_desktop_launcher.dart';
+import 'online_connection_location.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'approvals.dart';
 import 'dart:async';
@@ -25,7 +26,7 @@ import 'prototype_dialog.dart';
 import 'workspace/owner_workspace_host.dart';
 import 'desktop_fonts.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isMacOS) await loadDesktopFonts(requiredFiles: false);
   LicenseRegistry.addLicense(() async* {
@@ -37,9 +38,10 @@ Future<void> main() async {
       ? Platform.environment['HOME']
       : Platform.environment['APPDATA'];
   if (base == null || base.isEmpty) throw StateError('directory_unavailable');
-  final directory = Platform.isMacOS
+  final defaultDirectory = Platform.isMacOS
       ? '$base/Library/Application Support/Chiyo/online'
       : '$base/Chiyo/online';
+  final directory = onlineConnectionDirectory(defaultDirectory, arguments);
   runApp(
     OnlineDesktopLauncher(profiles: PrivateConnectionProfileStore(directory)),
   );

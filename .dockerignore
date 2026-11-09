@@ -2,6 +2,8 @@
 **/.dart_tool
 **/build
 .tools
+.cache
+.downloads
 local
 .scratch
 .worktrees
