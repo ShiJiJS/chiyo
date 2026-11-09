@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/owner_client.dart';
+import 'package:info_remote/agent_connection.dart';
 import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/server_configuration.dart';
 import 'package:info_storage/info_storage.dart';
@@ -347,10 +348,33 @@ void main() {
       expect(inbox.pending, 0);
       expect(inbox.items, isEmpty);
       // An exact retry reads the old receipt without invalidating a new identity.
-      await f.owner.request('POST', '/v1/owner/devices', {
+      final newDevice = await f.owner.request('POST', '/v1/owner/devices', {
         'operationId': 'after-restore-device',
         'name': 'New target device',
       });
+      final newAgent = AgentConnection(
+        AgentConnectionProfile(
+          address: f.owner.address,
+          serverId: f.owner.serverId,
+          deviceToken: newDevice['deviceToken'] as String,
+          certificate: f.certificate,
+        ),
+      );
+      try {
+        expect((await newAgent.call('/plugins/catalog', {}))['status'], 'ok');
+        final templates = await newAgent.call('/templates/catalog', {});
+        expect(templates['status'], 'ok');
+        expect(templates['templates'], isNotEmpty);
+        final first = (templates['templates'] as List).first as Map;
+        expect(
+          (await newAgent.call('/templates/read', {
+            'templateId': first['id'],
+          }))['status'],
+          'ok',
+        );
+      } finally {
+        newAgent.close();
+      }
       final after = (await f.repo.openServerState()).generation;
       final duplicate = backupReceiptFromJson(
         await f.owner.request(

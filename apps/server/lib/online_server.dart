@@ -183,6 +183,9 @@ final class OnlineServer {
       changed: () {},
     );
     _ownerScope = _service.owner.captureLibraryScope();
+    _service.owner.configureInformationTemplates(
+      () => currentAgentTemplates(_service.owner),
+    );
   }
 
   static Future<OnlineServer> start({
