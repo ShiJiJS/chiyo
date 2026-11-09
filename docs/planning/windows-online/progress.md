@@ -3,9 +3,9 @@
 ## 当前快照
 
 - 日期：2026-11-10（Asia/Shanghai）。持续目标已恢复为 active。
-- 范围：#108–#116，父任务 #104；#105 后置。没有已完成开发票。
+- 范围：#108–#116，父任务 #104；#105 后置。#108 已完成并关闭，#109 进行中。
 - 分支：codex/windows-online。基线 ac8960c；环境与九票发布归档提交 35690cf。
-- 当前票：#108，本机安全保存。已有 WindowsPrivateFiles/DPAPI 草稿，尚未接入调用点、分析或测试，不能报完成。
+- 当前票：#109，Windows App 正常连接和资料管理。#108 实现 f454927 已推送并回填/关闭；逐项证据 docs/development/evidence/windows-online/w108.md。
 - 最新授权：直接使用现有 NAS；computer-use 必要时可用；可用现有实际资料验证；允许正常重启知予服务。正式安装和需要用户认证的操作仍最后集中。
 - 不扩入 WSL、新服务、密码填充、SSH 密码登录或跨电脑审批。保持旧 Windows 库独立；实际资料验证不等于可永久删除或恢复覆盖原库。
 
@@ -21,7 +21,9 @@
 
 ## 当前代码与下一步
 
-- 已保留 #108 的核心私有文件草稿：packages/info_core/lib/windows_private_files.dart 及 runtime_material_files.dart 中的 part/句柄校验复用。草稿未验证，不能先发布产品包。
-- 下一步先分析并测试 ACL、DPAPI、原子替换和文件占用行为，再接 connection_profile、agent_connection、private_device_state 和 DeviceFileOperations；保留 Mac/Linux 格式及原状态失败规则。
-- #108 所有完成条件满足后提交并回填 GitHub，再按依赖继续 #109；当前没有任何开发票可以关闭。
-- 九张工单正文、父关系和 13 条前置发布结果见 publication.json；该文件是发布时审计，不代表开发完成。SDK/C++ 与开发入口见 windows-local-setup.md。
+- #108：管理/Agent 配置、控制事实、SQLCipher 设备库已接入 Windows ACL + DPAPI；四包 fatal-infos 分析、定向检查、AOT 并发及 NAS 独立进程重开通过。
+- 正式产品配置已另存到 local/private/windows-online/，含独立 Windows Agent 设备、设置及注册原操作记录；全部是生产存储格式。不要重新登记设备或抹除原事实。交接用配置仍保留在 nas-handoff/owner-profile.dpapi；一次性交接密文、公私钥已清理。
+- #108 对 NAS 只读及正常登记 Windows 设备，没有改资料正文、NAS 设置或重启服务。全包/原生 UI 未由本票声明完成。
+- 当前 #109：读取 GitHub 正文及评论完成。下一步用当前源码构建 Windows Release，启动工作目录内隔离配置，使用 computer-use 检查正常 App 入口与现有资料、保存及重开。
+- 旧 POSIX 权限用例在 Windows 按平台跳过；未冒充已在 Mac/Linux 机器重跑其原生检查。此前 UI 服务器集成夹具依赖 POSIX 服务密钥，后续要适配测试装配而不放宽生产服务密钥边界。
+- 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #109–#116 仍开放。
