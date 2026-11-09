@@ -3,9 +3,9 @@
 ## 当前快照
 
 - 日期：2026-11-10（Asia/Shanghai）。持续目标已恢复为 active。
-- 范围：#108–#116，父任务 #104；#105 后置。#108、#109、#110 已完成并关闭，#111 进行中。
+- 范围：#108–#116，父任务 #104；#105 后置。#108–#111 已完成，#112 进行中。
 - 分支：codex/windows-online。基线 ac8960c；环境与九票发布归档提交 35690cf。
-- 当前票：#111，附件/系统打开/PDF。#110 实现 c42f7d7 和结果 2923a54 已推送回填/关闭；证据 docs/development/evidence/windows-online/w110.md。#109 实现 2e86359；#108 实现 f454927。
+- 当前票：#112，AI 附件领取与副本释放。#111 完整实现 620bcbe（PDF 初段 871a83f）已推送；证据 docs/development/evidence/windows-online/w111.md。#110 实现 c42f7d7；#109 实现 2e86359；#108 实现 f454927。
 - 最新授权：直接使用现有 NAS；computer-use 必要时可用；可用现有实际资料验证；允许正常重启知予服务。正式安装和需要用户认证的操作仍最后集中。
 - 不扩入 WSL、新服务、密码填充、SSH 密码登录或跨电脑审批。保持旧 Windows 库独立；实际资料验证不等于可永久删除或恢复覆盖原库。
 
@@ -40,4 +40,7 @@
 - 过程清理限制：删除 PDF 样本生成依赖目录及旧 Release 内原生检查 exe/pdb 的命令被自动审批以 blocked by policy 拒绝，未执行，不重试/绕过。新检查目标已移至 runner/owner-pdf-check，旧文件仍保留；最终包不得混入旧检查程序。
 - 辅助测试尝试：现有 remote_settings_test 的本机服务器夹具受 POSIX secrets 和 /bin/chmod 限制。临时 Windows 测试夹具改动已撤回；没有修改生产服务平台边界，失败不计通过。测试失败时创建的隔离 Temp 合成夹具未做宽泛前缀清理。
 - 旧 POSIX 权限用例在 Windows 按平台跳过；未冒充已在 Mac/Linux 机器重跑其原生检查。此前 UI 服务器集成夹具依赖 POSIX 服务密钥，后续要适配测试装配而不放宽生产服务密钥边界。
-- 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #111–#116 仍开放。
+- #111 已完成：Windows 同卷、拒绝覆盖、保留原件发布，SQLCipher 结果和重开恢复；Windows 系统打开接收器核对身份/ACL/哈希，同编号不重复启动。实际原生面板发现 NTFS 同名缓存会改变创建时间，先复现失败，再改用仍有原件链接的稳定文件 ID，回归通过；普通配置/材料仍拒绝硬链接。真实 NAS 文件上传/替换/历史/恢复/丢失回执/另存重开/副本清理最终通过，原有记录版本未变；只新增《Windows 知予附件说明》，当前共 59 项。实际另存/模板面板、生产解析器、真实系统记事本原文与副本清理通过。6 项 core、20 项 storage、43 项桌面检查、分析及最终 Release/worker 构建通过。完整包/主入口连续验收仍 #116。
+- #111 过程限制：另一次删除旧失败面板夹具 build/development/w111-native-files-20261110 也被自动审批以 blocked by policy 拒绝，保留，不重试。最新通过目录为 w111-native-files-fixed-20261110。自动化可访问性焦点/元素坐标不可靠，需激活面板 Raise 并按最新截图确认；本票未据此冒认 #116 原生表单输入/Ctrl K 已通过。
+- 下一步 #112：先修正 DeviceInformationFiles.maintain 的 POSIX 斜杠日志过滤，核对 Windows worker/锁/进程身份；从实际 AOT CLI 在 App 关闭时领取现有 NAS 上本轮文件，验证并发、失效、占用、异常退出和仅凭清理能力恢复。使用全新隔离验证身份，不搜索本聊天丢失的 association，不改全局 hooks。
+- 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #112–#116 仍开放。
