@@ -1,0 +1,297 @@
+{
+  "productSourceCommit": "f0f9e24a8f99d2e8a46b3cc7a6710da575e2627a",
+  "candidateDirectory": "build/macos-adaptation/server-first-stage-f0f9e24a",
+  "matchedArchitecture": "macos-arm64 + linux-arm64",
+  "workflow": {
+    "sourceCommit": "f0f9e24a8f99d2e8a46b3cc7a6710da575e2627a",
+    "complete": true,
+    "checks": {
+      "matchedToolsAndPreparedBundle": true,
+      "saveEditApprovalReadAndServerRestart": true,
+      "dynamicTemplateAndWholeProposal": true,
+      "managedAttachmentPhysicalCleanup": true,
+      "attachmentVersionsSaveAndActualCliDelivery": true,
+      "credentialCleanupReportedComplete": true,
+      "actualBundledAwsAndWorkerCredentialExecution": true,
+      "directoryTagsMoveAndOrder": true,
+      "recycleRestore": true,
+      "completeEncryptedBackupIntoFreshCompiledServer": true,
+      "freshClientFetch": true,
+      "normalOnlineLauncherAgainstCompiledServer": true
+    }
+  },
+  "nativeAppSmoke": {
+    "profile": "a12-native-f0f9e24a",
+    "syntheticOnly": true,
+    "steps": [
+      {
+        "command": "status",
+        "exit": 0,
+        "result": {
+          "controlVersion": 1,
+          "status": "not_running"
+        }
+      },
+      {
+        "command": "status",
+        "exit": 69,
+        "result": {
+          "controlVersion": 1,
+          "status": "unsupported_version",
+          "processId": 94377
+        }
+      },
+      {
+        "command": "status",
+        "exit": 69,
+        "result": {
+          "controlVersion": 1,
+          "status": "unsupported_version",
+          "processId": 94377
+        }
+      },
+      {
+        "command": "status",
+        "exit": 69,
+        "result": {
+          "controlVersion": 1,
+          "status": "unsupported_version",
+          "processId": 94377
+        }
+      },
+      {
+        "command": "status",
+        "exit": 69,
+        "result": {
+          "controlVersion": 1,
+          "status": "unsupported_version",
+          "processId": 94377
+        }
+      },
+      {
+        "command": "status",
+        "exit": 0,
+        "result": {
+          "controlVersion": 1,
+          "status": "running",
+          "processId": 94377
+        }
+      },
+      {
+        "command": "status",
+        "exit": 0,
+        "result": {
+          "controlVersion": 1,
+          "status": "running",
+          "processId": 94377
+        }
+      },
+      {
+        "command": "quit",
+        "exit": 0,
+        "result": {
+          "controlVersion": 1,
+          "status": "exited",
+          "processId": 94377,
+          "exitCode": null
+        }
+      }
+    ],
+    "nativeStarted": true,
+    "samePackageNormalQuit": true,
+    "observedProcessEnded": true,
+    "serverConnectionNotConfigured": true
+  },
+  "independentTrial": {
+    "forkedDevelopmentContext": false,
+    "answersProvided": false,
+    "delegatedChildIdentity": true,
+    "admission": {
+      "proposal": "ueCDikfG4-VRlzUDn82C-6Odl-V_Q1AxvxyHzUy4l7U=",
+      "completed": true,
+      "records": 11,
+      "passwordNotReturnedToChild": true
+    },
+    "agentReadBack": {
+      "ordinaryFields": 20,
+      "attachments": 2,
+      "allBytesEqualToSources": true,
+      "allCopiesReleased": true
+    },
+    "ownerHistoryAndRelations": {
+      "ownerRelationsVerified": true,
+      "januaryOriginalBytesVerified": true,
+      "resumeHistoryCount": 2,
+      "currentAttachmentVersion": 2,
+      "credentialRelationsVerified": true
+    }
+  },
+  "sourceTests": {
+    "core": {
+      "passed": 457,
+      "skipped": 6
+    },
+    "cli": {
+      "passed": 103,
+      "skipped": 40
+    },
+    "storage": {
+      "passed": 421,
+      "skipped": 19
+    },
+    "remote": {
+      "passed": 4,
+      "skipped": 0
+    },
+    "server": {
+      "fullRunPassed": 70,
+      "fullRunFailed": 3,
+      "failedCasesIndividuallyPassed": 3,
+      "failureLogsRetained": true
+    },
+    "desktop": {
+      "fullRunPassed": 1258,
+      "fullRunSkipped": 6,
+      "fullRunFailed": 10,
+      "allFailedCasesResolvedAndRetested": true,
+      "failureLogsRetained": true,
+      "overlappingRetestCountsNotAdded": true
+    }
+  },
+  "staticAnalysis": {
+    "errors": 0,
+    "warnings": 0,
+    "styleInfos": 3,
+    "fullFlutterAnalysisExitCode": 1,
+    "changedTestFilesAnalysisClean": true
+  },
+  "onlyTestsAndEvidenceChangedAfterProductFreeze": true,
+  "postFreezeChangedFiles": [
+    "apps/desktop/test/agent_template_import_test.dart",
+    "apps/desktop/test/online_history_widget_test.dart",
+    "apps/desktop/test/online_plugins_widget_test.dart",
+    "apps/desktop/test/online_proposals_widget_test.dart",
+    "apps/desktop/test/owner_workspace_proposals_test.dart",
+    "apps/server/test/remote_proposals_test.dart",
+    "docs/development/evidence/server-a12/candidate-workflow.md",
+    "docs/development/evidence/server-a12/entry-audit.md"
+  ],
+  "hashVerification": {
+    "sourceCommit": "f0f9e24a8f99d2e8a46b3cc7a6710da575e2627a",
+    "allDeclaredFilesVerified": true,
+    "imageIdAndRevisionVerified": true,
+    "files": [
+      {
+        "path": "README.md",
+        "verified": true
+      },
+      {
+        "path": "server/image.tar.gz",
+        "verified": true
+      },
+      {
+        "path": "server/source.tar.gz",
+        "verified": true
+      },
+      {
+        "path": "server/README.md",
+        "verified": true
+      },
+      {
+        "path": "server/OPERATIONS.md",
+        "verified": true
+      },
+      {
+        "path": "macos/chiyo/manifest.json",
+        "verified": true
+      },
+      {
+        "path": "macos/chiyo-0.4.4+18-mac-dev.f0f9e24a8f99-macos-arm64.zip",
+        "verified": true
+      },
+      {
+        "path": "macos/chiyo-0.4.4+18-mac-dev.f0f9e24a8f99-macos-arm64.dmg",
+        "verified": true
+      }
+    ]
+  },
+  "resourceAudit": {
+    "retainedCandidate": "server-first-stage-f0f9e24a",
+    "appBundles": 1,
+    "dSYMDirectories": 0,
+    "ownRemainingImages": [
+      "chiyo-server:candidate-f0f9e24a8f99"
+    ],
+    "ownTestContainers": 0,
+    "ownAppOrWorkerProcesses": 0,
+    "trialRuntimeDataKeysAssociationsRemoved": true,
+    "ownNativeControlRegistrationRemoved": true,
+    "unrelatedContainersAndImagesPreserved": true,
+    "dailyApplicationAndRealDataUntouched": true
+  },
+  "explicitlyUnverified": [
+    "native file chooser and Save As panels",
+    "personal Keychain authorization",
+    "real notification clicks and sleep/wake",
+    "actual deployment machine architecture",
+    "Windows native functionality",
+    "second physical computer",
+    "cross-computer approval",
+    "Mac focused password fill (#51)"
+  ],
+  "deferredIssues": [
+    103,
+    104,
+    105
+  ],
+  "passingLogs": [
+    {
+      "path": "local/server-first-stage/a12-final-core-suite.log",
+      "sha256": "2f3154efebd49a4d5a0d92847f089d637784a942a316001004ab05626ccb5655"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-cli-suite.log",
+      "sha256": "90facd679af51568af53b058b75de4cd08f1238381fbd92cde6884e94faf6c1d"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-storage-suite.log",
+      "sha256": "71ba763aafe908a30b33d1646712a6a03723f0ef85cbd929f6c4a3ed29b1a8ec"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-remote-suite.log",
+      "sha256": "7899e48792e277e1ee9f5d3ecfa6012357f4c2825093b7cecd49aceee1563cd5"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-server-proposal-regression.log",
+      "sha256": "2373aa554f65c8d1935a486e7823e251af805024b1df3baa7f5306390ae64ad8"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-server-failed-isolated.log",
+      "sha256": "e2237a93d4ca5069335d412e21d7eb05045ca717b521e770a8d3c509c9a2b13d"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-template-fixtures-fixed.log",
+      "sha256": "0ddcc07e72bb34bb48991009b3383dd4918c060a3be50750fcde5ff932c42631"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-credential-ui-isolated.log",
+      "sha256": "b5dddf5b9510f4078c552c765a607d675256143d126cc24ca53f6d96b1ee4ce8"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-candidate-workflow-f0.log",
+      "sha256": "2baba7dd91eb0d151748f15dc7d45b821d48aff8fdbe19375e44ccf08c40103c"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-independent-owner-admission.log",
+      "sha256": "f2bd474d8affbef81a49aa892a94ec068837b56ea792b5dbd613542eba498798"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-independent-read-approval.log",
+      "sha256": "654bee33a78b2589598d360f10ee77a64b580f610990a551c8e5970e554263f8"
+    },
+    {
+      "path": "local/server-first-stage/a12-final-independent-owner-relations.log",
+      "sha256": "90c36060d7beb0f70db938c32e5bfd144ac4230d48b05721e29c5704bf169391"
+    }
+  ]
+}

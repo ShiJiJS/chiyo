@@ -6,6 +6,8 @@ import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/online_desktop_launcher.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/grant_history_page.dart';
+import 'package:info_desktop/workspace/remote_workspace_source.dart';
+import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_remote/connection_profile.dart';
 import '../../server/test/support/device_credential_fixture.dart';
@@ -28,6 +30,7 @@ void main() {
       addTearDown(t.view.resetDevicePixelRatio);
       final ui = OnlineUiHarness(t);
       DeviceCredentialFixture? f;
+      RemoteWorkspaceSource? live;
       late PrivateConnectionProfileStore profiles;
       late core.InformationItem item;
       late core.InformationDirectory directory;
@@ -70,6 +73,9 @@ void main() {
         });
         await t.pumpWidget(OnlineDesktopLauncher(profiles: profiles));
         await ui.until(() => find.byType(LibraryPage).evaluate().isNotEmpty);
+        live =
+            t.widget<WorkspaceApp>(find.byType(WorkspaceApp)).source
+                as RemoteWorkspaceSource;
         final ref = WorkspaceRecordRef(
           WorkspaceRecordKind.information,
           item.id,
@@ -171,6 +177,9 @@ void main() {
         expect(t.takeException(), isNull);
       } finally {
         await t.pumpWidget(const SizedBox());
+        // The widget starts async disposal. Drain the same source before
+        // shutting down its HTTPS fixture or checking fake-clock timers.
+        if (live != null) await ui.resolve(live.dispose);
         if (f != null) await ui.resolve(() => f!.dispose());
         debugDefaultTargetPlatformOverride = null;
       }

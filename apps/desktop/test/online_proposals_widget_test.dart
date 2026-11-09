@@ -10,6 +10,8 @@ import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/library_document.dart';
 import 'package:info_desktop/workspace/proposals_page.dart';
 import 'package:info_desktop/workspace/template_record_content.dart';
+import 'package:info_desktop/workspace/remote_workspace_source.dart';
+import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/connection_profile.dart';
@@ -20,6 +22,7 @@ import 'package:info_server/online_server.dart';
 import 'package:info_server/server_configuration.dart';
 import 'package:info_storage/info_storage.dart';
 import '../../server/test/support/tls_fixture.dart';
+import 'support/online_ui_harness.dart';
 
 class _RealHttp extends HttpOverrides {}
 
@@ -43,6 +46,16 @@ void main() {
       late AgentClient cli;
       late OwnerClient independent;
       late Map<String, Map<String, dynamic>> templates;
+      final ui = OnlineUiHarness(t);
+      Future<void> closeApp() async {
+        final app = find.byType(WorkspaceApp);
+        final source = app.evaluate().isEmpty
+            ? null
+            : t.widget<WorkspaceApp>(app).source as RemoteWorkspaceSource;
+        await t.pumpWidget(const SizedBox());
+        if (source != null) await ui.resolve(source.dispose);
+      }
+
       Future<void> until(bool Function() ready) async {
         for (var n = 0; n < 350; n++) {
           if (ready()) return;
@@ -293,8 +306,7 @@ void main() {
           );
         });
         // Ordinary App exit does not stop the host or CLI session.
-        await t.pumpWidget(const SizedBox());
-        await t.pump();
+        await closeApp();
         late String updateId;
         await t.runAsync(() async {
           final record = (await independent.information()).singleWhere(
@@ -371,8 +383,7 @@ void main() {
         });
         expect(t.takeException(), isNull);
       } finally {
-        await t.pumpWidget(const SizedBox());
-        await t.pump();
+        await closeApp();
         await t.runAsync(() async {
           cli.close();
           independent.close();
