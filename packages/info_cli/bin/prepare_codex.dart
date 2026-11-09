@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:info_cli/codex_bundle.dart';
 import 'package:info_cli/codex_registration.dart';
 import 'package:info_core/new_file_publish.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'package:info_cli/macos_bundled_tools.dart';
 
 /// SDK-free preparation from the delivered CLI folder. No user configuration
 /// or state directory is touched: all output goes into a new chosen directory.
@@ -100,6 +102,16 @@ Future<void> main(List<String> args) async {
     try {
       for (final name in binaries) {
         await File('${source.path}/$name').copy('${staging.path}/$name');
+      }
+      if (Platform.isMacOS) {
+        final reference = await MacBundledTools(
+          executable: '${source.path}/info-codex',
+        ).sourceReference();
+        if (reference != null) {
+          await File(
+            '${staging.path}/${MacBundledTools.sourceFile}',
+          ).writeAsString(jsonEncode(reference));
+        }
       }
       // Render using the final directory, not the temporary staging directory.
       await writeCodexConfiguration(

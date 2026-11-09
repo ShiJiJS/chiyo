@@ -64,6 +64,27 @@ void main() {
     },
   );
 
+  test(
+    'declared extra Skill references are verified and undeclared or changed references are rejected',
+    () async {
+      final added = await file(
+        'cli/template/references/remote-connection.md',
+      ).create();
+      await added.writeAsString('synthetic remote connection instructions');
+      expect((await probe.read()).verified, false);
+      (manifest['files'] as List).add({
+        'path': 'cli/template/references/remote-connection.md',
+        'bytes': await added.length(),
+        'mode': (await added.stat()).mode & 0xfff,
+        'sha256': sha256.convert(await added.readAsBytes()).toString(),
+      });
+      await writeManifest();
+      expect((await probe.read()).verified, true);
+      await added.writeAsString('modified remote connection instructions');
+      expect((await probe.read()).verified, false);
+    },
+  );
+
   test('older Mac packages still resolve using their original paths', () async {
     await Directory(
       '${root.path}/app/chiyo.app',

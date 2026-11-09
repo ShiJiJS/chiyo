@@ -18,6 +18,8 @@ App 和 CLI 使用同一个独立服务器，审批由用户在 App 完成。AI 
 
 生成器只准备同版本程序、`hooks.json` 和 `skills/agent-info-access`，不改个人 Codex 配置、不安装或信任 hooks。把生成 Skill 交给对应 Agent，说明末尾带准确程序和连接位置，可以按说明手动关联。要启用 hooks 时，保留已有项目配置，按当前 Codex 的正式入口审查并信任准确的 SessionStart、SubagentStart、SessionEnd 定义；材料存在、项目受信任或当前能连接都不能替代具体 hook 的安装和信任。
 
+Mac 运行目录还保存一份公开的配套 App 工具引用，不复制整套大型工具。CLI 的 capabilities 会核对该 App 与自己的版本，再返回当前设备可用的工具位置。保留原 App 的稳定位置；移动或更换版本后重新准备运行目录。该引用没有连接 Token 或凭据内容。
+
 ## 使用与核对
 
 - Agent 先查目录和动态模板、说明用途并发申请；用户在 App 核对批准。受限设备 Token 不能审批，也不自动授予正文读取。
