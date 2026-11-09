@@ -1,23 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'agent_bundle_observation.dart';
 
-/// Package consistency, not code signing, host trust or CLI connectivity.
-class MacAgentBundleObservation {
-  const MacAgentBundleObservation({
-    required this.status,
-    this.directory,
-    this.sourceCommit,
-    this.manifestDigest,
-    this.embedded = false,
-  });
-  final String status;
-  final String? directory, sourceCommit, manifestDigest;
-
-  /// Checks the signed app's integration resources, not its external siblings.
-  final bool embedded;
-  bool get verified => status == 'verified';
-}
+// Keep the existing Mac API source compatible with platform-neutral callers.
+typedef MacAgentBundleObservation = AgentBundleObservation;
 
 /// Reads only known siblings of this running app; never searches personal
 /// settings, associations, PATH or another installed application.
