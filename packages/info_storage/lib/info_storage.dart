@@ -11,6 +11,7 @@ import 'package:info_core/protocol_json.dart';
 import 'package:info_core/server_state.dart';
 import 'backup_publish.dart';
 import 'macos_backup_publication.dart';
+import 'platform_keys.dart';
 export 'platform_keys.dart';
 part 'backups.dart';
 part 'backup_history.dart';

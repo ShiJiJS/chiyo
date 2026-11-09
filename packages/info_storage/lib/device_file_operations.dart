@@ -68,7 +68,7 @@ final class DeviceFileOperations implements _FileOperationContext {
     required String serverId,
     DatabaseKeyStore? keys,
   }) async {
-    if ((!Platform.isMacOS && !Platform.isLinux) ||
+    if ((!Platform.isMacOS && !Platform.isLinux && !Platform.isWindows) ||
         serverId.isEmpty ||
         serverId.length > 128) {
       throw const StorageFailure('device_journal_unavailable');
@@ -79,8 +79,16 @@ final class DeviceFileOperations implements _FileOperationContext {
         type != FileSystemEntityType.directory) {
       throw const StorageFailure('device_journal_unavailable');
     }
-    await folder.create(recursive: true);
-    await _privateMode(folder.path, '700');
+    if (Platform.isWindows) {
+      try {
+        WindowsPrivateFiles.directory(folder);
+      } on Object {
+        throw const StorageFailure('device_journal_unavailable');
+      }
+    } else {
+      await folder.create(recursive: true);
+      await _privateMode(folder.path, '700');
+    }
     final canonical = await folder.resolveSymbolicLinks();
     if (!_open.add(canonical))
       throw const StorageFailure('device_journal_in_use');
@@ -90,15 +98,50 @@ final class DeviceFileOperations implements _FileOperationContext {
     try {
       final lockFile = File('$canonical/operations.lock');
       await _regularOrAbsent(lockFile.path);
-      if (!await lockFile.exists()) await lockFile.create(exclusive: true);
+      if (Platform.isWindows) {
+        WindowsPrivateFiles.reserve(lockFile);
+      } else if (!await lockFile.exists()) {
+        await lockFile.create(exclusive: true);
+      }
       await _privateMode(lockFile.path, '600');
       lock = await lockFile.open(mode: FileMode.append);
       await lock.lock(FileLock.exclusive);
       final file = File('$canonical/operations.db');
       final exists = await _regularOrAbsent(file.path);
+      final identityFile = File('$canonical/operations.identity');
+      final identity = Platform.isWindows
+          ? WindowsPrivateFiles.readSecret(identityFile)
+          : null;
       final keyStore =
-          keys ?? _PrivateDeviceFileKey('$canonical/operations.key');
+          keys ??
+          (Platform.isWindows
+              ? WindowsDatabaseKeyStore(
+                  '$canonical/operations.key',
+                  privateFile: true,
+                )
+              : _PrivateDeviceFileKey('$canonical/operations.key'));
       var key = await keyStore.read();
+      if (Platform.isWindows) {
+        if (identity == null) {
+          if (exists || key != null) {
+            throw const StorageFailure('device_journal_missing');
+          }
+        } else {
+          final binding = decodeProtocolObject(identity, maxBytes: 131072);
+          if (binding.length != 2 ||
+              binding['format'] != 1 ||
+              binding['serverId'] is! String) {
+            throw const StorageFailure('device_journal_unavailable');
+          }
+          if (binding['serverId'] != serverId) {
+            throw const StorageFailure('device_journal_scope_changed');
+          }
+          if (!exists) throw const StorageFailure('device_journal_missing');
+        }
+      }
+      if (!exists && key != null) {
+        throw const StorageFailure('device_journal_missing');
+      }
       if (key == null) {
         if (exists) throw const StorageFailure('key_unavailable');
         final random = Random.secure();
@@ -112,6 +155,9 @@ final class DeviceFileOperations implements _FileOperationContext {
       if (key.length != 32 || key.any((b) => b < 0 || b > 255)) {
         throw const StorageFailure('invalid_key');
       }
+      if (exists && await file.length() == 0) {
+        throw const StorageFailure('device_journal_unavailable');
+      }
       final probe = sqlite.sqlite3.openInMemory();
       try {
         final version = probe.select('PRAGMA cipher_version');
@@ -122,6 +168,7 @@ final class DeviceFileOperations implements _FileOperationContext {
       } finally {
         probe.close();
       }
+      if (Platform.isWindows) WindowsPrivateFiles.reserve(file);
       native = sqlite.sqlite3.open(file.path);
       final hex = key.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
       native.execute('PRAGMA key = "x\'$hex\'"');
@@ -131,7 +178,8 @@ final class DeviceFileOperations implements _FileOperationContext {
       );
       final version =
           native.select('PRAGMA user_version').single.values.single as int;
-      if (version > 2 ||
+      if ((exists && version == 0) ||
+          version > 2 ||
           tables.any(
             (r) => !const {
               'backup_operations',
@@ -167,6 +215,13 @@ final class DeviceFileOperations implements _FileOperationContext {
         }
       });
       await _privateMode(file.path, '600');
+      if (Platform.isWindows && identity == null) {
+        WindowsPrivateFiles.writeSecret(
+          identityFile,
+          jsonEncode({'format': 1, 'serverId': serverId}),
+          replace: false,
+        );
+      }
       return DeviceFileOperations._(db, lock, canonical);
     } catch (e) {
       await db?.close();
@@ -191,6 +246,14 @@ final class DeviceFileOperations implements _FileOperationContext {
 }
 
 Future<void> _privateMode(String path, String mode) async {
+  if (Platform.isWindows) {
+    try {
+      WindowsPrivateFiles.verify(path, directory: mode == '700');
+      return;
+    } on Object {
+      throw const StorageFailure('device_journal_unavailable');
+    }
+  }
   if ((await Process.run('chmod', [mode, path])).exitCode != 0) {
     throw const StorageFailure('device_journal_unavailable');
   }
@@ -201,6 +264,13 @@ Future<bool> _regularOrAbsent(String path) async {
   if (type != FileSystemEntityType.file &&
       type != FileSystemEntityType.notFound) {
     throw const StorageFailure('device_journal_unavailable');
+  }
+  if (Platform.isWindows && type == FileSystemEntityType.file) {
+    try {
+      WindowsPrivateFiles.verify(path);
+    } on Object {
+      throw const StorageFailure('device_journal_unavailable');
+    }
   }
   return type == FileSystemEntityType.file;
 }
