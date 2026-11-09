@@ -18,13 +18,22 @@ Future<({Map<String, Object?> output, int exitCode})> desktopControlCommand(
     return invalid();
   }
   int? processId;
+  String? profile;
   var timeoutMs = 15000;
   final seen = <String>{};
   for (var i = 2; i < args.length; i += 2) {
     if (i + 1 == args.length ||
-        !{'--pid', '--timeout-ms'}.contains(args[i]) ||
+        !{'--pid', '--timeout-ms', '--connection-profile'}.contains(args[i]) ||
         !seen.add(args[i])) {
       return invalid();
+    }
+    if (args[i] == '--connection-profile') {
+      if (!Platform.isMacOS ||
+          !MacDesktopControl.validProfileName(args[i + 1])) {
+        return invalid();
+      }
+      profile = args[i + 1];
+      continue;
     }
     final value = int.tryParse(args[i + 1]);
     if (value == null) return invalid();
@@ -48,15 +57,22 @@ Future<({Map<String, Object?> output, int exitCode})> desktopControlCommand(
   final executable = Platform.isMacOS && root.endsWith(embeddedRoot)
       ? '${root.substring(0, root.length - embeddedRoot.length)}/Contents/MacOS/info_desktop'
       : File('$root/$relative').absolute.path;
-  final execute = Platform.isMacOS
-      ? MacDesktopControl.execute
-      : WindowsDesktopControl.execute;
-  final result = await execute(
-    quit: args[1] == 'quit',
-    executable: executable,
-    processId: processId,
-    timeout: Duration(milliseconds: timeoutMs),
-  );
+  final result = Platform.isMacOS
+      ? await MacDesktopControl.execute(
+          quit: args[1] == 'quit',
+          executable: executable,
+          processId: processId,
+          timeout: Duration(milliseconds: timeoutMs),
+          directory: profile == null
+              ? null
+              : MacDesktopControl.defaultDirectory(profile: profile),
+        )
+      : await WindowsDesktopControl.execute(
+          quit: args[1] == 'quit',
+          executable: executable,
+          processId: processId,
+          timeout: Duration(milliseconds: timeoutMs),
+        );
   return (
     output: result,
     exitCode: switch (result['status']) {

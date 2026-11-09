@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:info_core/macos_desktop_control.dart';
 import 'package:flutter/material.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/owner_client.dart';
@@ -25,6 +26,7 @@ class OnlineDesktopLauncher extends StatefulWidget {
     this.filePicker,
     this.deviceFilesDirectory,
     this.desktopPlatform,
+    this.appControlDirectory,
     this.outputPicker = const NativeBackupFilePicker(),
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
     this.credentialFiles = const NativeCredentialFilePicker(),
@@ -33,6 +35,7 @@ class OnlineDesktopLauncher extends StatefulWidget {
   final InformationFilePicker? filePicker;
   final String? deviceFilesDirectory;
   final DesktopPlatform? desktopPlatform;
+  final Directory? appControlDirectory;
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
   final CredentialFilePicker credentialFiles;
@@ -58,10 +61,20 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   @override
   void initState() {
     super.initState();
+    final platform = widget.desktopPlatform ?? NativeDesktopPlatform();
     _desktop = OnlineDesktopRuntime(
-      platform: widget.desktopPlatform ?? NativeDesktopPlatform(),
+      platform: platform,
       beforeExit: _closeForExit,
       onResume: _resumeConnection,
+      openAppControl: Platform.isMacOS && platform is NativeDesktopPlatform
+          ? (state, quit) => MacDesktopControlHost.start(
+              directory:
+                  widget.appControlDirectory ??
+                  MacDesktopControl.defaultDirectory()!,
+              state: state,
+              quit: quit,
+            )
+          : null,
     )..addListener(_desktopChanged);
     unawaited(_desktop.start());
     unawaited(_restore());
