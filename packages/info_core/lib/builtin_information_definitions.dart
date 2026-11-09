@@ -3,10 +3,11 @@ import 'package:crypto/crypto.dart';
 
 Map<String, Object?> _immutableDefinition(Map<String, Object?> value) {
   Object? freeze(Object? v) {
-    if (v is Map)
+    if (v is Map) {
       return Map<String, Object?>.unmodifiable(
         v.map((k, v) => MapEntry(k as String, freeze(v))),
       );
+    }
     if (v is List) return List<Object?>.unmodifiable(v.map(freeze));
     if (v == null || v is String || v is num || v is bool) return v;
     throw ArgumentError('Only JSON-compatible definitions are supported');

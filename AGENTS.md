@@ -12,3 +12,7 @@
 ### Windows delivery
 
 Windows交付与构建清理按 `docs/development/windows-delivery.md` 的“本机安装与清理”执行。
+
+### Windows online adaptation
+
+规划或接续 Windows 联网适配时，先读 `docs/planning/windows-online/README.md` 和其中的当前进度入口；草案本身不授权发布或开发，执行范围以当前用户指令为准。
