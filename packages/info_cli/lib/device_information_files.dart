@@ -130,7 +130,9 @@ final class DeviceInformationFiles {
     var count = 0;
     await for (final entry in folder.list(followLinks: false)) {
       if (entry is! File ||
-          !RegExp(r'/[0-9a-f]{64}\.json$').hasMatch(entry.path)) {
+          !RegExp(
+            r'^[0-9a-f]{64}\.json$',
+          ).hasMatch(entry.uri.pathSegments.last)) {
         continue;
       }
       if (++count > informationDeliveryHistoryLimit) {
@@ -615,6 +617,18 @@ final class _Guardian {
   }
 
   Future<Map<String, dynamic>> cleanup() async {
+    // Periodic maintenance and an explicit release share this queue. If the
+    // first cleanup has already persisted the server's acknowledgement, a
+    // later queued release must not regress it to cleanup_pending while run()
+    // is closing the guardian's connection. Physical absence alone is never
+    // sufficient: both the original terminal receipt and no lease are needed.
+    if (lease == null && {'released', 'expired'}.contains(record['phase'])) {
+      return {
+        'protocolVersion': 2,
+        'status': 'ok',
+        'delivery': {...manifest, 'state': record['phase']},
+      };
+    }
     await save({'phase': 'cleanup_pending'});
     final copy = lease;
     if (copy != null) await files.cleanup(copy);
