@@ -24,10 +24,12 @@
 - #108：管理/Agent 配置、控制事实、SQLCipher 设备库已接入 Windows ACL + DPAPI；四包 fatal-infos 分析、定向检查、AOT 并发及 NAS 独立进程重开通过。
 - 正式产品配置已另存到 local/private/windows-appdata/Chiyo/online/，含独立 Windows Agent 设备、设置及注册原操作记录；全部是生产存储格式。不要重新登记设备或抹除原事实。交接用配置仍保留在 nas-handoff/owner-profile.dpapi；一次性交接密文、公私钥已清理。
 - #108 对 NAS 只读及正常登记 Windows 设备，没有改资料正文、NAS 设置或重启服务。全包/原生 UI 未由本票声明完成。
-- 当前 #109：正式 Windows Release 已在工作目录隔离 APPDATA 下打开并自动连接 NAS，正常界面显示 57 项、真实目录和资料详情。进程 15320 已经同包控制协议正常退出，未强杀；未提交任何资料写入。
+- 当前 #109：正式 Windows Release 已在工作目录隔离 APPDATA 下打开并自动连接 NAS，正常界面显示原 57 项、真实目录和资料详情。进程 15320 已经同包控制协议正常退出，未强杀。
 - 发现并修复：Windows 搜索仍绑定/显示 Mac Cmd K；阅读模式移除原焦点后快捷键丢失。现在按平台使用 Ctrl K / Cmd K，并在阅读切换后恢复工作区焦点。macOS/Windows、保存/取消的四个快捷键场景和其余同文件回归共 7 项通过；桌面 fatal-infos 分析通过。
 - CU 输入诊断：普通按键可进入输入法候选，sky.type_text 未产生可确认的完整文字；Flutter UIA SetValue 返回 E_FAIL。未据此断言软件不能输入，也未把真实表单保存算通过。未保存诊断表单已正常关闭，无 NAS 资料变化。
-- 下一步：已启动第二次 Windows build，用修复版真实窗口核对 Ctrl K；然后通过正式 WorkspaceSource + 真实 NAS 验证中文资料保存、目录标签关联和原操作回执，继续定位原生输入与工具的差异。
+- #109 真实资料检查：仅新增并修改有用的《Windows 知予接入说明》，原资料未改。当前是 43 条普通资料和 15 项凭据，共 58 项。正式 OnlineDesktopLauncher/RemoteWorkspaceSource 对实际 NAS 的中文表单、搜索、维护说明目录、NAS 标签、飞牛 NAS 关联和重开读取已通过一次；丢失已提交的保存回复后，核对原编号且只有一次保存 POST。仍在复验及运行相关回归，尚未关闭本票。
+- #109 恢复修补：原回执查询未刷新内存资料投影，已补与正常保存相同的只读同步；查询失败继续保留未知结果，不重放保存。连接页错误 Token、陌生 CA、错误固定服务器身份、不可达端点及改回原地址重连已通过一次。新增显式真实 NAS 检查不在默认测试中自动接入私人资料。
+- 下一步：完成当前串行真实 NAS/表单回归，构建修复版并用真实窗口复核 Ctrl K，归档精确证据后提交和回填 #109，接续 #110。
 - 辅助测试尝试：现有 remote_settings_test 的本机服务器夹具受 POSIX secrets 和 /bin/chmod 限制。临时 Windows 测试夹具改动已撤回；没有修改生产服务平台边界，失败不计通过。测试失败时创建的隔离 Temp 合成夹具未做宽泛前缀清理。
 - 旧 POSIX 权限用例在 Windows 按平台跳过；未冒充已在 Mac/Linux 机器重跑其原生检查。此前 UI 服务器集成夹具依赖 POSIX 服务密钥，后续要适配测试装配而不放宽生产服务密钥边界。
 - 九张工单父关系和 13 条前置的发布核对见 publication.json；SDK/C++ 与开发入口见 windows-local-setup.md。#104 和 #109–#116 仍开放。
