@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/online_connection_location.dart';
+import 'package:info_core/macos_desktop_control.dart';
 
 void main() {
   test('named connections keep all state in a separate private profile', () {
@@ -12,6 +13,13 @@ void main() {
       ]),
       '$base/profiles/a12-candidate',
     );
+    final control = MacDesktopControl.defaultDirectory();
+    final namedControl = MacDesktopControl.defaultDirectory(
+      profile: 'a12-candidate',
+    );
+    if (control != null) {
+      expect(namedControl!.path, '${control.path}/profiles/a12-candidate');
+    }
     for (final args in [
       ['--connection-profile'],
       ['--connection-profile', '../daily'],

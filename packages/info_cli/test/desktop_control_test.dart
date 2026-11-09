@@ -17,6 +17,17 @@ void main() {
         ['app', 'quit', '--pid', '1', '--pid', '2'],
         ['app', 'quit', '--timeout-ms', '99'],
         ['app', 'quit', '--timeout-ms', '60001'],
+        ['app', 'quit', '--connection-profile', '../daily'],
+        ['app', 'quit', '--connection-profile', '/daily'],
+        ['app', 'quit', '--connection-profile', ''],
+        [
+          'app',
+          'quit',
+          '--connection-profile',
+          'a',
+          '--connection-profile',
+          'b',
+        ],
       ]) {
         final result = await desktopControlCommand(args);
         expect(result.exitCode, 64, reason: '$args');

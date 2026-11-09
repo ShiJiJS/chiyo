@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:info_core/macos_desktop_control.dart';
 import 'package:flutter/foundation.dart';
 import 'desktop_runtime.dart';
 import 'desktop_scroll.dart';
@@ -14,9 +15,25 @@ class OnlineDesktopRuntime extends ChangeNotifier
     required this.platform,
     required this.beforeExit,
     required this.onResume,
+    this.openAppControl,
   });
   final DesktopPlatform platform;
   final Future<void> Function() beforeExit, onResume;
+  final Future<MacDesktopControlHost> Function(
+    String Function() state,
+    Future<void> Function() quit,
+  )?
+  openAppControl;
+  MacDesktopControlHost? _appControl;
+  Future<void> Function()? _commitControlExit;
+  bool _controlStarted = false;
+  String get _controlState => shutdownFailed
+      ? 'shutdown_failed'
+      : quitting
+      ? 'exiting'
+      : _controlStarted
+      ? 'running'
+      : 'starting';
   DesktopAvailability availability = DesktopAvailability.unavailable;
   @override
   final ValueNotifier<DesktopScrollbarStyle> scrollbarStyle = ValueNotifier(
@@ -74,6 +91,26 @@ class OnlineDesktopRuntime extends ChangeNotifier
     } on Object {
       if (!_disposed) _availability(DesktopAvailability.unavailable);
     }
+    if (!_disposed && openAppControl != null) {
+      try {
+        final control = await openAppControl!(
+          () => _controlState,
+          () => handleEvent(DesktopEvent.quit),
+        );
+        if (_disposed) {
+          await control.close();
+          return;
+        }
+        _appControl = control;
+        if (platform case final NativeDesktopPlatform native) {
+          native.commitAppControlExit = _commitControlExit = control.commitExit;
+        }
+      } on Object {
+        // Control is optional. Never overwrite an existing private registry or
+        // stop connection/normal menu quit because another instance owns it.
+      }
+    }
+    _controlStarted = true;
   }
 
   Future<void> bind(RemoteWorkspaceSource? source) async {
@@ -340,6 +377,7 @@ class OnlineDesktopRuntime extends ChangeNotifier
     _pendingRequest = null;
     _changed();
     try {
+      await start();
       await _refreshing;
       if (!resourcesClosed) {
         await beforeExit();
@@ -370,6 +408,12 @@ class OnlineDesktopRuntime extends ChangeNotifier
     unawaited(_changes?.cancel());
     _navigate = null;
     _openRequest = null;
+    if (platform case final NativeDesktopPlatform native) {
+      if (identical(native.commitAppControlExit, _commitControlExit)) {
+        native.commitAppControlExit = null;
+      }
+    }
+    unawaited(_appControl?.close());
     scrollbarStyle.dispose();
     super.dispose();
   }

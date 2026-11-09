@@ -1,5 +1,6 @@
 import 'online_desktop_launcher.dart';
 import 'online_connection_location.dart';
+import 'package:info_core/macos_desktop_control.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'approvals.dart';
 import 'dart:async';
@@ -43,7 +44,14 @@ Future<void> main(List<String> arguments) async {
       : '$base/Chiyo/online';
   final directory = onlineConnectionDirectory(defaultDirectory, arguments);
   runApp(
-    OnlineDesktopLauncher(profiles: PrivateConnectionProfileStore(directory)),
+    OnlineDesktopLauncher(
+      profiles: PrivateConnectionProfileStore(directory),
+      appControlDirectory: Platform.isMacOS
+          ? MacDesktopControl.defaultDirectory(
+              profile: arguments.isEmpty ? null : arguments.last,
+            )
+          : null,
+    ),
   );
 }
 
