@@ -6,7 +6,7 @@
 
 用户本次明确要求：有新的完整已验证版本时，安装到`C:\Software\AgentInfoManage`并保留桌面“知予”快捷方式；后续本项目同类更新沿用此偏好，无需每次重新询问安装位置。沿用下方“本机安装与清理”的校验、正常退出和保留数据规则；未验证候选不自动覆盖正式安装。
 
-当前已安装`0.4.4+18-dev.5845d3cb7ba1`，源码`5845d3cb7ba1641370beb32ccd92df73dfdafc68`。桌面“信息授权”指向`C:\Software\AgentInfoManage\current\app\info_desktop.exe`。同版本ZIP、SHA及验收记录保存在安装目录`package`，全部7699项载荷和归档哈希再次核对通过。安装回执为安装目录`installation.json`；本轮事实见[evidence/windows-online/w116-installed-5845d3c.json](evidence/windows-online/w116-installed-5845d3c.json)。
+当前已安装`0.4.4+18-dev.3d2d6c6713fd`，源码`3d2d6c6713fddc7b717375cc767be5d2fbfcb7cf`。桌面“知予”指向`C:\Software\AgentInfoManage\current\app\info_desktop.exe`。同版本ZIP、SHA及验收记录保存在安装目录`package`，全部7700项载荷和归档哈希再次核对通过。安装回执为安装目录`installation.json`；本轮事实见[evidence/windows-online/w104-branding-installed-3d2d6c67.json](evidence/windows-online/w104-branding-installed-3d2d6c67.json)。
 
 已把本机已验证的NAS管理连接用正式存储格式保存到正常用户`%APPDATA%/Chiyo/online`：当前用户DPAPI、私有ACL、固定服务器身份及原44条资料只读核对通过。不新建Agent身份、不恢复本聊天关联、不改全局hooks/信任、不打开App或改NAS资料。旧Windows离线资料库没有迁移或覆盖。
 
@@ -159,10 +159,14 @@ SQLCipher 使用 sqlite3 包锁定的原生资产，其预期哈希及 Dart 依�
 `provenance/`；SQLCipher 4.19.0 许可来源为
 [上游 LICENSE](https://github.com/sqlcipher/sqlcipher/blob/v4.19.0/LICENSE.md)。
 
-## Windows名称与图标同步修正（进行中，2026-11-10）
+## Windows名称与图标同步修正（已完成，2026-11-10）
 
 用户指出新安装仍叫“信息授权”。已确认当前源码包含既定知予/Chiyo名称及原始图标，但Windows runner标题、托盘/通知、PE版本资源、ICO与安装快捷方式仍旧。不是重新设计图标，也不需要NAS更新。修正使用既有Mac的16/32/64/128/256 PNG帧直接封装为Windows ICO，原PNG字节保持；`scripts/sync-windows-app-icon.py`可重新生成。
 
 Windows产品显示名/窗口/托盘/通知/残留旧CLI文案改为“知予”，新包ZIP命名chiyo，保留原安装位置、程序文件名和协议身份兼容既有连接与工具。新快捷方式用随包chiyo.ico；确认旧“信息授权”快捷方式属于本安装且无自定义参数后，先保存新快捷方式再移除旧快捷方式，不改其他快捷方式。
 
-新增`test-windows-branding.ps1`直接读取编译后PE资源，检查真实产品名、五尺寸图标与随包ICO、原批准PNG帧一致，不启动App；打包、实际解包和安装阶段均核对。旧安装负例已正确拒绝、PowerShell解析与PE读取器检查通过；新完整包与实际替换尚待执行。
+新增`test-windows-branding.ps1`直接读取编译后PE资源，检查真实产品名、五尺寸图标与随包ICO、原批准PNG帧一致，不启动App；打包、实际解包和安装阶段均核对。旧安装负例已正确拒绝、PowerShell解析与PE读取器检查通过；实际Windows release、完整同源ZIP、解包和安装阶段的编译资源检查全部通过，已完成实际替换。
+
+新包`chiyo-0.4.4+18-dev.3d2d6c6713fd-windows-x64.zip`为123507372字节，SHA256 `5a83e46e530e1d4a6bbc22ddcf00486bb14034ed94e1a62b76bf7bba9100da70`，保存在`C:/Software/AgentInfoManage/package`；源构建目录为`build/development/w104-branding-3d2d6c67`。固定同源2071项全套、解包CLI/hooks16项、加密生命周期7项、SQLCipher/DPAPI通过。7700项载荷与安装ZIP再校验通过，实际PE产品名/描述均为“知予”，五个图标帧与原批准PNG字节相同。
+
+更新通过正常控制协议退出原安装进程，未强杀或启动新App。桌面`知予.lnk`的目标/描述/图标位置已读回核对，原受管`信息授权.lnk`已移除；实际图标为新独立路径`current/app/chiyo.ico`，避免继续引用旧EXE图标位置。正常用户NAS连接、DPAPI、私有ACL、固定服务器身份及原44资料只读检查再次通过；NAS/旧离线库/全局hooks和信任未变，人工GUI/通知/睡眠等条件仍留#104。原先被拒绝的项目构建清理没有重试。
