@@ -2,6 +2,18 @@
 
 当前 NAS 联网开发包使用 [联网交付说明](windows-online-delivery.md)、[Codex 接入](windows-codex-integration.md) 和[连续核对范围](windows-online-acceptance.md)。下方“本机安装与清理”的既有约定继续适用；其余 Round05 安装版本/路径和测试数为旧单机版历史，不能作为当前包状态。
 
+## 当前联网版安装（2026-11-10）
+
+用户本次明确要求：有新的完整已验证版本时，安装到`C:\Software\AgentInfoManage`并保留桌面快捷方式；后续本项目同类更新沿用此偏好，无需每次重新询问安装位置。沿用下方“本机安装与清理”的校验、正常退出和保留数据规则；未验证候选不自动覆盖正式安装。
+
+当前已安装`0.4.4+18-dev.5845d3cb7ba1`，源码`5845d3cb7ba1641370beb32ccd92df73dfdafc68`。桌面“信息授权”指向`C:\Software\AgentInfoManage\current\app\info_desktop.exe`。同版本ZIP、SHA及验收记录保存在安装目录`package`，全部7699项载荷和归档哈希再次核对通过。安装回执为安装目录`installation.json`；本轮事实见[evidence/windows-online/w116-installed-5845d3c.json](evidence/windows-online/w116-installed-5845d3c.json)。
+
+已把本机已验证的NAS管理连接用正式存储格式保存到正常用户`%APPDATA%/Chiyo/online`：当前用户DPAPI、私有ACL、固定服务器身份及原44条资料只读核对通过。不新建Agent身份、不恢复本聊天关联、不改全局hooks/信任、不打开App或改NAS资料。旧Windows离线资料库没有迁移或覆盖。
+
+本聊天运行于MSIX宿主，直接子进程的AppData会被重定向到宿主LocalCache；严格规范路径检查正确拒绝写入该别名。配置由正常桌面Shell代理启动的无窗口辅助进程保存并回读验证，没有放宽路径或权限检查。原理见[Microsoft的文件系统虚拟化说明](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes)。这只是安装辅助环境处理，没有改动已验证产品包。
+
+本次未重试此前被自动审批拒绝的旧包/临时构建清理；旧产物仍保留。#104的真实桌面/宿主/通知/睡眠等人工核对仍开放，安装不等于这些事项已完成。
+
 ## 旧开发预览（Issue #18）
 
 交付物是未签名的 Windows x64 ZIP，包含完整 Flutter release 目录、独立 AOT
