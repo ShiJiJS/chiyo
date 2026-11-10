@@ -46,10 +46,14 @@ class FaultingServerRepository extends MemoryInformationRepository
 
 void main() {
   test(
-    'a failed private commit withholds a read and blocks later commands',
+    'a failed required expiry checkpoint withholds a read and blocks later commands',
     () async {
       final repo = FaultingServerRepository();
-      final runtime = await OnlineInformationRuntime.open(repository: repo);
+      var now = DateTime.utc(2026, 1, 1);
+      final runtime = await OnlineInformationRuntime.open(
+        repository: repo,
+        clock: () => now,
+      );
       addTearDown(runtime.close);
       final service = runtime.service;
       final item = await runtime.run(
@@ -86,6 +90,9 @@ void main() {
           grant.token,
           FieldRef(item.id, item.fields.single.id),
         );
+        // Reads no longer force an unchanged private checkpoint. Expiry at
+        // the reply boundary is a real state change and must still be saved.
+        now = grant.expiresAt.add(const Duration(seconds: 1));
         repo.failCommit = true;
         return value;
       });
