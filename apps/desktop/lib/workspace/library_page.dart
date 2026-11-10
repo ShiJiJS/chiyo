@@ -451,9 +451,15 @@ class _LibraryPageState extends State<LibraryPage> {
             else ...[
               Semantics(
                 liveRegion: true,
-                child: Text(
-                  '已选 ${model.selectedCount} 项',
-                  key: const ValueKey('library-selection-count'),
+                label:
+                    '${model.selectedBatch.directoryIds.length} 个目录，${model.selectedBatch.records.length} 条资料',
+                child: Tooltip(
+                  message:
+                      '${model.selectedBatch.directoryIds.length} 个目录，${model.selectedBatch.records.length} 条资料',
+                  child: Text(
+                    '已选 ${model.selectedCount} 项',
+                    key: const ValueKey('library-selection-count'),
+                  ),
                 ),
               ),
               DesktopButton(
@@ -1662,14 +1668,20 @@ class _LibraryPageState extends State<LibraryPage> {
               children: [
                 Expanded(
                   child: Text(
-                    '${_groupName(model.query.grouping)} · ${_sortName(model.query.sort)}',
+                    '${_groupName(model.query.grouping)} · ${_sortName(model.query.sort)}${model.query.sort == WorkspaceSort.manual ? ' · 当前目录内的排列顺序' : ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: libraryText(context, 12, color: c.muted),
                   ),
                 ),
                 if (results != null && results.total > model.query.limit) ...[
-                  Text(
-                    '${model.query.offset + 1}–${(model.query.offset + model.query.limit).clamp(0, results.total)} / ${results.total}',
-                    style: libraryText(context, 12, color: c.muted),
+                  Flexible(
+                    child: Text(
+                      '${model.query.offset + 1}–${(model.query.offset + model.query.limit).clamp(0, results.total)} / ${results.total}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: libraryText(context, 12, color: c.muted),
+                    ),
                   ),
                   DesktopButton(
                     tooltip: '上一页',

@@ -331,7 +331,7 @@ void main() {
       expect(pending.materialVersion, before.materialVersion);
       expect(pending.receiver.executable, '/usr/bin/ssh');
       expect(pending.receiver.arguments, contains('{{SSH_KEY_FILE}}'));
-      expect(pending.session.agentClaim, contains('自述'));
+      expect(pending.session.agentClaim, isNot(contains('自述')));
       expect(pending.minutes, 15);
       final history = await source.credentials.history(ssh);
       expect(history.single.operations, hasLength(2));

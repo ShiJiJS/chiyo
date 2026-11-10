@@ -141,6 +141,7 @@ class RemoteWorkspaceBackups
   Future<WorkspaceBackupStatus> status() => _run(() async {
     final remote = backupStatusFromJson(await client.request('GET', _base));
     final store = await _store();
+    final latest = await store.publication.latestExportOperation();
     final pending = await store.pending();
     final local = pending.firstOrNull;
     if (local != null &&
@@ -157,7 +158,15 @@ class RemoteWorkspaceBackups
       cleanupCount:
           remote.cleanupCount +
           await store.publication.pendingOutputCleanupCount(),
-      latestArchive: remote.latestArchive,
+      latestArchiveAt: latest?.completedAt,
+      latestArchiveLocation: latest?.destination,
+      latestArchive: latest == null
+          ? remote.latestArchive
+          : WorkspaceBackupResource(
+              id: 'output_${latest.operationId}',
+              name: latest.fileName,
+              kind: WorkspaceBackupPick.archiveInput,
+            ),
       pending: local == null
           ? remote.pending
           : WorkspaceBackupPending(

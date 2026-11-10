@@ -84,7 +84,13 @@ class WorkspaceBackupPage extends StatelessWidget {
                 title: '导出完整备份',
                 description: v?.latestArchive == null
                     ? '保存当前信息、文件版本、分类、模板、设置及历史事实。'
-                    : '最近生成：${v!.latestArchive!.name}',
+                    : [
+                        '最近备份：${v!.latestArchive!.name}',
+                        if (v.latestArchiveAt != null)
+                          '时间：${libraryLocalDateTime(v.latestArchiveAt!)}',
+                        if (v.latestArchiveLocation != null)
+                          '位置：${v.latestArchiveLocation}',
+                      ].join('\n'),
                 control: DesktopButton(
                   key: const ValueKey('backup-open-export'),
                   kind: DesktopButtonKind.primary,

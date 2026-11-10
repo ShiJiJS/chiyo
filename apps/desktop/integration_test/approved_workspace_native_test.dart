@@ -5,6 +5,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
+import 'package:info_desktop/connection_view.dart';
+import 'package:info_desktop/workspace/zhiyu_theme.dart';
+import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import '../test/support/workspace_fixtures.dart';
@@ -74,9 +78,89 @@ void main() {
           await tap(find.byKey(ValueKey('workspace-nav-$page')));
           expect(find.byKey(const ValueKey('workspace-back')), findsNothing);
           await capture('${width.toInt()}-${dark ? 'dark' : 'light'}-$page');
+          if (page == 'library') {
+            await t
+                .widget<LibraryPage>(find.byType(LibraryPage))
+                .controller
+                .openRelated(
+                  const WorkspaceRecordRef(
+                    WorkspaceRecordKind.credential,
+                    'sshkey',
+                  ),
+                );
+            await t.pumpAndSettle();
+            await capture(
+              '${width.toInt()}-${dark ? 'dark' : 'light'}-credential',
+            );
+          }
         }
       }
     }
     await t.pumpWidget(const SizedBox());
+  });
+  testWidgets('connection presentation uses the native approved theme', (
+    t,
+  ) async {
+    final desktop = MacPreviewDesktop();
+    await desktop.initialize();
+    final output = (await MacPreviewDesktop.channel.invokeMethod<String>(
+      'createEvidenceDirectory',
+    ))!;
+    // ignore: avoid_print
+    print('APPROVED_CONNECTION_EVIDENCE=$output');
+    final address = TextEditingController(
+      text: 'https://nas.example.local:47126',
+    );
+    final token = TextEditingController(text: 'SYNTHETIC_TEST_TOKEN');
+    final cert = TextEditingController();
+    final boundary = GlobalKey();
+    await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
+      'width': 1000.0,
+      'height': 900.0,
+    });
+    for (final dark in [false, true]) {
+      for (final state in ['form', 'loading', 'disconnected']) {
+        await t.pumpWidget(
+          RepaintBoundary(
+            key: boundary,
+            child: MaterialApp(
+              theme: zhiyuTheme(dark ? Brightness.dark : Brightness.light),
+              home: Scaffold(
+                body: state == 'form'
+                    ? ConnectionForm(
+                        address: address,
+                        token: token,
+                        certificate: cert,
+                        busy: false,
+                        onConnect: () {},
+                      )
+                    : ConnectionSurface(
+                        title: state == 'loading' ? '正在同步资料' : '连接已断开',
+                        description: '合成界面验收',
+                        loading: state == 'loading',
+                        children: const [],
+                      ),
+              ),
+            ),
+          ),
+        );
+        await t.pump(const Duration(milliseconds: 400));
+        expect(t.takeException(), isNull);
+        final render =
+            boundary.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final image = await render.toImage(pixelRatio: 1);
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        await File(
+          '$output/${dark ? 'dark' : 'light'}-$state.png',
+        ).writeAsBytes(bytes!.buffer.asUint8List());
+        image.dispose();
+      }
+    }
+    await t.pumpWidget(const SizedBox());
+    address.dispose();
+    token.dispose();
+    cert.dispose();
+    desktop.dispose();
   });
 }

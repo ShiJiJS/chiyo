@@ -17,6 +17,7 @@ void main() {
     repo = await EncryptedInformationRepository.open(
       '${root.path}/library',
       keys,
+      clock: () => DateTime.utc(2026, 11, 10, 12),
     );
     service = InformationService(repository: repo);
     opened = true;
@@ -105,6 +106,8 @@ void main() {
         expect(receipt.expectedVersion, 2);
         expect(receipt.action, BackupOutputAction.saveKey);
         expect(receipt.fileName, 'save.txt');
+        expect(receipt.completedAt, DateTime.utc(2026, 11, 10, 12));
+        expect(receipt.destination, publication.destination);
         expect(receipt.counts, isEmpty);
         expect(jsonEncode(receipt.toJson()), isNot(contains(root.path)));
         expect(
@@ -124,6 +127,10 @@ void main() {
           (await repo.backups.publishOutputOperation('save')).toJson(),
           receipt.toJson(),
         );
+        expect(
+          (await repo.backups.reconcileOutputOperation('save'))!.completedAt,
+          receipt.completedAt,
+        );
         expect(File(publication.destination).statSync().modified, modified);
         await repo.backups.cleanupOutputOperation('save');
         expect(await repo.backups.pendingOutputCleanupCount(), 0);
@@ -139,6 +146,25 @@ void main() {
           receipt.toJson(),
         );
         expect(File(publication.destination).existsSync(), isFalse);
+      },
+    );
+
+    test(
+      'legacy publication keeps unknown time without replaying or guessing',
+      () async {
+        final publication = await prepareKey('legacy-time');
+        await repo.backups.publishOutputOperation('legacy-time');
+        await close();
+        sql(
+          r"UPDATE backup_operations SET payload=json_remove(json_set(payload,'$.format',2),'$.completedAt') WHERE operation_id='legacy-time'",
+        );
+        await open();
+        final receipt = (await repo.backups.reconcileOutputOperation(
+          'legacy-time',
+        ))!;
+        expect(receipt.completedAt, isNull);
+        expect(receipt.destination, publication.destination);
+        expect(await repo.backups.operationVersion(), 4);
       },
     );
 

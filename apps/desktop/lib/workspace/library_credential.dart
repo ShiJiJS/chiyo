@@ -280,10 +280,11 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                         spacing: 10,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text(
-                            '${detail.format} · 材料v${detail.materialVersion}',
-                            style: libraryText(context, 13, color: c.warning),
-                          ),
+                          if (detail.filename != null)
+                            Text(
+                              detail.format,
+                              style: libraryText(context, 13, color: c.warning),
+                            ),
                           SelectableText(
                             detail.mask,
                             key: const ValueKey('credential-mask'),
@@ -342,111 +343,143 @@ class _LibraryCredentialState extends State<LibraryCredential> {
           ),
           id: 'purpose',
         ),
-        _section(
-          '使用方式',
-          detail.delivery == WorkspaceCredentialDelivery.storage
-              ? Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 13,
-                  ),
-                  decoration: BoxDecoration(
-                    color: c.credentialSurface,
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                  child: Text(
-                    detail.unavailableReason!,
-                    style: libraryText(
-                      context,
-                      13,
-                      color: c.warning,
-                      height: 1.8,
-                    ),
-                  ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    LayoutBuilder(
-                      builder: (context, bounds) {
-                        final columns =
-                            bounds.maxWidth >= 480 &&
-                                MediaQuery.textScalerOf(context).scale(1) < 1.6
-                            ? 2
-                            : 1;
-                        return Wrap(
-                          spacing: 34,
-                          runSpacing: 22,
-                          children: [
-                            for (final (id, label, value) in [
-                              if (detail.account.isNotEmpty)
-                                ('account', '账号', detail.account),
-                              ('delivery', '注入方式', detail.delivery.label),
-                              if (detail.binding.isNotEmpty)
-                                ('binding', '引用名称', detail.binding),
-                            ])
-                              SizedBox(
-                                width:
-                                    (bounds.maxWidth - 34 * (columns - 1)) /
-                                    columns,
-                                child: Column(
-                                  key: ValueKey('credential-$id-fact'),
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    LibraryReadingText(
-                                      key: ValueKey('credential-$id-label'),
-                                      span: TextSpan(text: label),
-                                      style: libraryText(
-                                        context,
-                                        13,
-                                        color: c.muted,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    LibraryReadingText(
-                                      key: ValueKey('credential-$id-value'),
-                                      lineFontSize: 14,
-                                      span: TextSpan(text: value),
-                                      style: id == 'binding'
-                                          ? libraryText(
-                                              context,
-                                              13,
-                                              weight: FontWeight.w500,
-                                            ).copyWith(fontFamily: 'Menlo')
-                                          : libraryText(
-                                              context,
-                                              14,
-                                              weight: FontWeight.w500,
-                                            ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    LibraryReadingText(
-                      key: const ValueKey('credential-use-note'),
-                      span: TextSpan(
-                        text:
-                            detail.unavailableReason ??
-                            '凭据使用单独审批；在授权期内可按批准方式重复使用。',
+        if (detail.account.isNotEmpty)
+          _section(
+            '账号',
+            LibraryReadingText(
+              key: const ValueKey('credential-account-value'),
+              span: TextSpan(text: detail.account),
+              style: libraryText(context, 14),
+            ),
+            id: 'account',
+          ),
+        if (detail.unavailableReason != null)
+          Text(
+            detail.unavailableReason!,
+            style: libraryText(context, 14, color: c.warning),
+          ),
+        ExpansionTile(
+          key: const ValueKey('credential-advanced'),
+          tilePadding: EdgeInsets.zero,
+          shape: const Border(),
+          collapsedShape: const Border(),
+          title: Text('高级详情', style: libraryText(context, 14, color: c.muted)),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '凭据版本 ${detail.materialVersion}',
+                style: libraryText(context, 13, color: c.muted),
+              ),
+            ),
+            _section(
+              '使用方式',
+              detail.delivery == WorkspaceCredentialDelivery.storage
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 13,
                       ),
-                      style: libraryText(
-                        context,
-                        14,
-                        color: detail.unavailableReason == null
-                            ? c.muted
-                            : c.warning,
+                      decoration: BoxDecoration(
+                        color: c.credentialSurface,
+                        borderRadius: BorderRadius.circular(7),
                       ),
+                      child: Text(
+                        detail.unavailableReason!,
+                        style: libraryText(
+                          context,
+                          13,
+                          color: c.warning,
+                          height: 1.8,
+                        ),
+                      ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, bounds) {
+                            final columns =
+                                bounds.maxWidth >= 480 &&
+                                    MediaQuery.textScalerOf(context).scale(1) <
+                                        1.6
+                                ? 2
+                                : 1;
+                            return Wrap(
+                              spacing: 34,
+                              runSpacing: 22,
+                              children: [
+                                for (final (id, label, value) in [
+                                  ('delivery', '注入方式', detail.delivery.label),
+                                  if (detail.binding.isNotEmpty)
+                                    ('binding', '引用名称', detail.binding),
+                                ])
+                                  SizedBox(
+                                    width:
+                                        (bounds.maxWidth - 34 * (columns - 1)) /
+                                        columns,
+                                    child: Column(
+                                      key: ValueKey('credential-$id-fact'),
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        LibraryReadingText(
+                                          key: ValueKey('credential-$id-label'),
+                                          span: TextSpan(text: label),
+                                          style: libraryText(
+                                            context,
+                                            13,
+                                            color: c.muted,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        LibraryReadingText(
+                                          key: ValueKey('credential-$id-value'),
+                                          lineFontSize: 14,
+                                          span: TextSpan(text: value),
+                                          style: id == 'binding'
+                                              ? libraryText(
+                                                  context,
+                                                  13,
+                                                  weight: FontWeight.w500,
+                                                ).copyWith(fontFamily: 'Menlo')
+                                              : libraryText(
+                                                  context,
+                                                  14,
+                                                  weight: FontWeight.w500,
+                                                ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        LibraryReadingText(
+                          key: const ValueKey('credential-use-note'),
+                          span: TextSpan(
+                            text:
+                                detail.unavailableReason ??
+                                '凭据使用单独审批；在授权期内可按批准方式重复使用。',
+                          ),
+                          style: libraryText(
+                            context,
+                            14,
+                            color: detail.unavailableReason == null
+                                ? c.muted
+                                : c.warning,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-          id: 'use',
-          gap: detail.delivery == WorkspaceCredentialDelivery.storage ? 18 : 13,
+              id: 'use',
+              gap: detail.delivery == WorkspaceCredentialDelivery.storage
+                  ? 18
+                  : 13,
+            ),
+          ],
         ),
         _section(
           '关联资料',

@@ -762,6 +762,7 @@ class _EditorState extends State<_Editor> {
             const SizedBox(height: 18),
             Text('标签', style: libraryText(context, 13, color: c.muted)),
             TextField(
+              key: const ValueKey('library-edit-tag-search'),
               decoration: const InputDecoration(
                 hintText: '查找标签',
                 prefixIcon: Icon(Icons.search, size: 16),

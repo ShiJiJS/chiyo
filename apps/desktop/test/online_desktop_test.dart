@@ -92,7 +92,7 @@ void main() {
       }
 
       Finder field(String label) => find.byWidgetPredicate(
-        (w) => w is TextField && w.decoration?.labelText == label,
+        (w) => w is DesktopTextField && w.decoration.labelText == label,
       );
       Future<void> connect(String profile) async {
         await t.pumpWidget(
