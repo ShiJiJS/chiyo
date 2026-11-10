@@ -296,14 +296,16 @@ class OwnerWorkspaceProposals
     final task = owner.organizationTasks.where((p) => p.id == e.id).firstOrNull;
     return WorkspaceProposalSummary(
       id: e.id,
-      title: switch (e.kind) {
-        core.ProposalKind.addition => '${e.count}项新增资料',
-        core.ProposalKind.modification =>
-          '修改${e.itemIds.map((id) => _current(id)?.name ?? '原资料').join('、')}',
-        core.ProposalKind.deletion =>
-          '删除${e.itemIds.map((id) => _current(id)?.name ?? '原资料').join('、')}',
-        core.ProposalKind.organization => '${e.count}项资料整理结果',
-      },
+      title: e.title.isNotEmpty
+          ? e.title
+          : switch (e.kind) {
+              core.ProposalKind.addition => '${e.count}项新增资料',
+              core.ProposalKind.modification =>
+                '修改${e.itemIds.map((id) => _current(id)?.name ?? '原资料').join('、')}',
+              core.ProposalKind.deletion =>
+                '删除${e.itemIds.map((id) => _current(id)?.name ?? '原资料').join('、')}',
+              core.ProposalKind.organization => '${e.count}项资料整理结果',
+            },
       kind: WorkspaceProposalKind.values.byName(e.kind.name),
       status: WorkspaceProposalStatus.values.byName(e.status.name),
       pending: e.pending,

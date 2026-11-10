@@ -324,6 +324,7 @@ class ImportProposal {
     Iterable<int> createdItemVersions = const [],
     int? itemCount,
     this.agentName = '',
+    this.title = '',
     this.purpose = '',
     this.operationId,
     this.submissionDigest,
@@ -381,6 +382,9 @@ class ImportProposal {
              ? createdItemIds.map((_) => 1)
              : createdItemVersions,
        ) {
+    if (title.length > 200 || title.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+      throw const FormatException('Invalid proposal title');
+    }
     for (final entry in this.credentialSnapshots.entries) {
       final receipt = receiptFor(entry.key), snapshot = entry.value;
       if (receipt == null ||
@@ -394,7 +398,7 @@ class ImportProposal {
     }
   }
   final String id, sessionBinding, chatLabel;
-  final String agentName, purpose;
+  final String agentName, purpose, title;
   final String? operationId, submissionDigest;
   final DateTime createdAt;
   final List<ImportItemInput> items;
@@ -468,6 +472,7 @@ class ImportProposal {
     itemCount: itemCount,
     fieldCount: fieldCount,
     agentName: agentName,
+    title: title,
     purpose: purpose,
     operationId: operationId,
     submissionDigest: submissionDigest,
@@ -499,6 +504,7 @@ class ImportProposal {
     'createdItemVersions': createdItemVersions,
     'itemCount': itemCount,
     'agentName': agentName,
+    if (title.isNotEmpty) 'title': title,
     'purpose': purpose,
     'fieldCount': fieldCount,
     'itemNames': itemNames,
@@ -545,6 +551,7 @@ class ImportProposal {
         .cast<int>(),
     itemCount: json['itemCount'] as int?,
     agentName: json['agentName'] as String? ?? '',
+    title: json['title'] as String? ?? '',
     purpose: json['purpose'] as String? ?? '',
     operationId: json['operationId'] as String?,
     submissionDigest: json['submissionDigest'] as String?,

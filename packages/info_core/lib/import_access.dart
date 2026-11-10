@@ -134,6 +134,7 @@ extension AgentImports on AgentAccess {
     String session,
     List<ImportItemInput> items, {
     String agentName = '',
+    String title = '',
     String purpose = '',
     String? operationId,
   }) => _service.owner._serialize(() async {
@@ -152,6 +153,7 @@ extension AgentImports on AgentAccess {
               'items': [for (final i in items) i.submissionJson],
               'purpose': purpose,
               'agentName': agentName,
+              if (title.isNotEmpty) 'title': title,
             }),
           ),
         )
@@ -180,7 +182,10 @@ extension AgentImports on AgentAccess {
     );
     items = _service.owner._compileTemplateImports(items);
     _validateImport(items);
-    if (agentName.length > 200 || purpose.length > 2000) {
+    if (agentName.length > 200 ||
+        purpose.length > 2000 ||
+        title.length > 200 ||
+        title.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
       throw const AccessFailure('invalid_proposal');
     }
     // Bound retained pending work per chat without revealing other sessions.
@@ -201,6 +206,7 @@ extension AgentImports on AgentAccess {
       createdAt: _service._clock(),
       items: items,
       agentName: agentName.trim(),
+      title: title.trim(),
       purpose: purpose.trim(),
       operationId: operationId,
       submissionDigest: operationId == null ? null : digest,
@@ -234,6 +240,7 @@ extension AgentImports on AgentAccess {
           ? 'approved_awaiting_admission'
           : proposal.state.name,
       'proposalId': proposal.id,
+      if (proposal.title.isNotEmpty) 'title': proposal.title,
       'createdAt': proposal.createdAt.toUtc().toIso8601String(),
       'version': proposal.version,
       'items': [

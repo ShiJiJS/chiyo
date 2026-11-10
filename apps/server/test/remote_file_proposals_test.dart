@@ -144,6 +144,7 @@ void main() {
       };
       final submitted = await run('import-submit', {
         'operationId': 'file-proposal-once',
+        'title': '更新合成项目文件',
         'items': [item],
       });
       expect(submitted['status'], 'pending');
@@ -151,12 +152,14 @@ void main() {
       expect(
         (await run('import-submit', {
           'operationId': 'file-proposal-once',
+          'title': '更新合成项目文件',
           'items': [item],
         }))['proposalId'],
         id,
       );
       final detailJson = await owner.request('GET', '/v1/owner/proposals/$id');
       final detail = proposalDetailFromJson(detailJson);
+      expect(detail.summary.title, '更新合成项目文件');
       expect(detail.items.single.proposed.record.type.id, 'file');
       expect(detail.items.single.attachments.single.versions, hasLength(2));
       expect(jsonEncode(detailJson), isNot(contains(first.path)));
@@ -210,6 +213,12 @@ void main() {
       );
       expect(utf8.decode(original.bytes), 'FIRST_SYNTHETIC_FILE');
       await reopen();
+      expect(
+        proposalDetailFromJson(
+          await owner.request('GET', '/v1/owner/proposals/$id'),
+        ).summary.title,
+        '更新合成项目文件',
+      );
       expect(
         (await run('import-status', {
           'operationId': 'file-proposal-once',

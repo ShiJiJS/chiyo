@@ -157,6 +157,7 @@ final class AgentGateway {
               'credential-ssh-session-validity.v1',
           ],
           'information-import-operations.v1',
+          'import-proposal-title.v1',
           'information-update-operations.v1',
           if ((result['capabilities'] as List).contains('credential-import.v1'))
             'credential-import.v1',

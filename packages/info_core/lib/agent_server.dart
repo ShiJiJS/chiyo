@@ -287,6 +287,7 @@ class AgentProtocol {
               'information-import-admission.v1',
             if (_agent.credentialImportAvailable) 'credential-import.v1',
             'information-import-operations.v1',
+            'import-proposal-title.v1',
             'information-update-operations.v1',
             'information-directory-discovery.v1',
             if (_agent.informationImportFilesAvailable)
@@ -941,10 +942,13 @@ class AgentProtocol {
         raw.any((i) => i is! Map<String, dynamic>)) {
       throw const AccessFailure('invalid_request');
     }
-    for (final key in ['agentName', 'purpose']) {
+    for (final key in ['agentName', 'purpose', 'title']) {
       if (body.containsKey(key) && body[key] is! String) {
         throw const AccessFailure('invalid_request');
       }
+    }
+    if (body.containsKey('title') && (body['title'] as String).trim().isEmpty) {
+      throw const AccessFailure('proposal_title_required');
     }
     final session = _text(body, 'sessionSecret');
     final items = raw
@@ -954,6 +958,7 @@ class AgentProtocol {
       session,
       items,
       agentName: body['agentName'] is String ? body['agentName'] as String : '',
+      title: body['title'] as String? ?? '',
       purpose: body['purpose'] is String ? body['purpose'] as String : '',
       operationId: body['operationId'] as String?,
     );
