@@ -673,39 +673,77 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        t.name,
-                        style: libraryText(
-                          context,
-                          14,
-                          weight: FontWeight.w600,
-                        ),
-                      ),
-                      if (!t.exists)
-                        Text(
-                          '当前对象已删除或不可用。历史名称与身份仍保留。',
-                          style: libraryText(
-                            context,
-                            13,
-                            color: c.muted,
-                            height: 1.8,
+                      Tooltip(
+                        message: t.exists ? '在信息库中打开' : '资料已删除或不可用',
+                        child: DesktopButton(
+                          key: ValueKey('grant-current-${t.record.key}'),
+                          kind: DesktopButtonKind.link,
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          onPressed: m.frozen || !t.exists
+                              ? null
+                              : () => widget.onRecord(t.record),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: c.selected,
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: Icon(
+                                  t.record.kind ==
+                                          WorkspaceRecordKind.credential
+                                      ? Icons.key_outlined
+                                      : Icons.description_outlined,
+                                  size: 18,
+                                  color: t.exists ? c.accent : c.muted,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t.name,
+                                      style: libraryText(
+                                        context,
+                                        14,
+                                        weight: FontWeight.w600,
+                                        color: t.exists ? c.ink : c.muted,
+                                      ),
+                                    ),
+                                    if (!t.exists)
+                                      Text(
+                                        '资料已删除或不可用',
+                                        style: libraryText(
+                                          context,
+                                          12,
+                                          color: c.muted,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Icon(Icons.open_in_new, size: 16, color: c.muted),
+                            ],
                           ),
                         ),
+                      ),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          DesktopButton(
-                            key: ValueKey('grant-current-${t.record.key}'),
-                            onPressed: m.frozen || !t.exists
-                                ? null
-                                : () => widget.onRecord(t.record),
-                            leading: const Icon(Icons.open_in_new, size: 16),
-                            child: const Text('在信息库中打开'),
-                          ),
                           if (t.record.kind == WorkspaceRecordKind.information)
                             DesktopButton(
                               key: ValueKey('grant-snapshot-${t.record.key}'),
+                              kind: DesktopButtonKind.quiet,
                               leading: Icon(
                                 _expandedSnapshots.contains(
                                       '${h.id}/${t.record.key}',
