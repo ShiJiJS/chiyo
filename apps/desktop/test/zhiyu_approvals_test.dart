@@ -140,11 +140,11 @@ void main() {
       expect(m.offset, 2);
       await tap(t, find.byKey(const ValueKey('approval-prev')));
       await tap(t, find.byKey(const ValueKey('approval-field-ttl')));
-      await tap(t, find.text('1 小时').last);
+      await tap(t, find.text('4 小时').last);
       await tap(t, find.byKey(const ValueKey('approval-credential-ttl')));
-      await tap(t, find.text('30 分钟').last);
-      expect(m.draft!.fieldMinutes, 60);
-      expect(m.draft!.credentialMinutes, 30);
+      await tap(t, find.text('2 小时').last);
+      expect(m.draft!.fieldMinutes, 240);
+      expect(m.draft!.credentialMinutes, 120);
       final d = m.detail!,
           wanted = d.scopes.firstWhere((x) => x.fieldKey == 'host');
       for (final x in d.scopes.where((x) => x.requested && x.id != wanted.id)) {
@@ -168,7 +168,7 @@ void main() {
       expect(m.detailScroll, 0);
       expect(
         m.detail!.fieldExpiresAt,
-        m.detail!.decidedAt!.add(const Duration(hours: 1)),
+        m.detail!.decidedAt!.add(const Duration(hours: 4)),
       );
       expect(m.detail!.credentialExpiresAt, isNull);
       expect((await s.loadSummary()).pending, 4);
@@ -554,7 +554,7 @@ void main() {
     },
   );
   testWidgets(
-    'organization approval narrows fixed records, caps its deadline and does not pretend to apply classification results',
+    'organization approval narrows fixed records, uses the selected fixed deadline and does not pretend to apply classification results',
     (t) async {
       final s = await start(t), m = model(t);
       await t.scrollUntilVisible(
@@ -577,12 +577,12 @@ void main() {
       await tap(t, find.byKey(ValueKey('approval-scope-${scopes.first.id}')));
       await tap(t, find.byKey(const ValueKey('approval-field-ttl')));
       expect(find.text('1 小时'), findsNothing);
-      await tap(t, find.text('15 分钟').last);
+      await tap(t, find.text('4 小时').last);
       await tap(t, find.byKey(const ValueKey('approval-approve')));
       expect(m.detail!.approved, scopes.skip(1).map((x) => x.id).toSet());
       expect(
         m.detail!.fieldExpiresAt,
-        m.detail!.decidedAt!.add(const Duration(minutes: 15)),
+        m.detail!.decidedAt!.add(const Duration(hours: 4)),
       );
       expect(m.detail!.credentialExpiresAt, isNull);
       final after = await s.readDetail(scopes[1].record);

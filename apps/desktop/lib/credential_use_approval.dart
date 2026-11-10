@@ -214,8 +214,8 @@ class _CredentialUseApprovalPanelState
                               ? reusable
                                     ? draft.minutes == null
                                           ? '不限时（限本聊天）'
-                                          : '${draft.minutes} 分钟内可重复使用，不续期'
-                                    : '${draft.minutes} 分钟内允许启动一次'
+                                          : '${approvalDurationLabel(draft.minutes!)}内可重复使用，不续期'
+                                    : '${approvalDurationLabel(draft.minutes!)}内允许启动一次'
                               : r.credentialValidity ==
                                     CredentialUseValidity.session
                               ? '不限时（限本聊天）'
@@ -226,7 +226,7 @@ class _CredentialUseApprovalPanelState
                     fact(
                       '字段许可',
                       pending
-                          ? '$selectedFieldCount 个字段 · ${reusable && draft.fieldMinutes == 480 ? '8 小时' : '${reusable ? draft.fieldMinutes : draft.minutes} 分钟'}（独立许可）'
+                          ? '$selectedFieldCount 个字段 · ${approvalDurationLabel(reusable ? draft.fieldMinutes : draft.minutes!)}（独立许可）'
                           : '$selectedFieldCount 个字段 · 截止 ${_time(r.fieldExpiresAt)}（独立许可）',
                     ),
                   for (final field in fileFields) ...[

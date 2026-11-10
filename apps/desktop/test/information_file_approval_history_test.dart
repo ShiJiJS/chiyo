@@ -22,7 +22,9 @@ void main() {
           final session = f.service.agent.openSession('较晚的交付');
           final ref = FieldRef(f.item.id, f.item.fields.last.id);
           final request = f.service.agent.request(session, '读取简历', [ref]);
-          f.owner.approve(request.id, [ref]);
+          f.owner.approve(request.id, [
+            ref,
+          ], lifetime: const Duration(hours: 8));
           await f.owner.retryAuditStorage();
           now = now.add(const Duration(hours: 7));
           await f.fetch(session, request.id, 'later-file-operation');
@@ -119,7 +121,7 @@ void main() {
           );
           expect(
             f.owner.requests.single.grantLifetime,
-            const Duration(hours: 8),
+            const Duration(hours: 2),
           );
           await f.fetch(session, request.id, 'first-copy');
           await f.replace([1, 2, 3]);
