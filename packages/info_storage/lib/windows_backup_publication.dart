@@ -424,7 +424,10 @@ final class _WindowsPublicationNative {
     }
     if (handle == -1) {
       if (missing && {2, 3}.contains(error)) return -1;
-      throw const BackupPublicationFailure('identity_unavailable');
+      throw BackupPublicationFailure(
+        'identity_unavailable',
+        nativeError: error,
+      );
     }
     try {
       final buffer = calloc<Uint16>(32768);

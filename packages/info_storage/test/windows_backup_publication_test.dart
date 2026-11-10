@@ -40,9 +40,25 @@ void main() {
     return MacBackupPublicationFiles.prepare(source, destination);
   }
 
+  Future<void> cleanupOriginal(MacBackupPublication publication) async {
+    final wait = Stopwatch()..start();
+    while (true) {
+      try {
+        MacBackupPublicationFiles.cleanup(publication);
+        return;
+      } on BackupPublicationFailure catch (error) {
+        if (error.code != 'identity_unavailable' ||
+            !const {5, 32, 33}.contains(error.nativeError) ||
+            wait.elapsed > const Duration(seconds: 3))
+          rethrow;
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+  }
+
   test(
     'publish retains a private original until durable result, cleanup leaves selected file',
-    () {
+    () async {
       final original = prepare();
       final publication = MacBackupPublication.fromPrivateJson(
         jsonDecode(jsonEncode(original.toPrivateJson()))
@@ -66,7 +82,7 @@ void main() {
         () => WindowsPrivateFiles.verify(source),
         throwsA(isA<RuntimeMaterialFailure>()),
       );
-      MacBackupPublicationFiles.cleanup(publication);
+      await cleanupOriginal(publication);
       expect(File(source).existsSync(), isFalse);
       expect(File(destination).readAsBytesSync(), bytes);
       MacBackupPublicationFiles.cleanupStaging(staging);
@@ -87,11 +103,54 @@ void main() {
         MacBackupPublicationFiles.confirmPublished(publication),
         BackupPublicationObservation.matching,
       );
-      MacBackupPublicationFiles.cleanup(publication);
+      await cleanupOriginal(publication);
       MacBackupPublicationFiles.cleanupStaging(staging);
       expect(File(destination).readAsBytesSync(), bytes);
     },
   );
+  test(
+    'an occupied original reports the native sharing error then cleans the same publication after release',
+    () async {
+      final publication = prepare();
+      final reader = await Process.start(Platform.resolvedExecutable, [
+        '--packages=${Directory.current.path}/.dart_tool/package_config.json',
+        '${Directory.current.path}/../info_core/test/support/windows_private_reader.dart',
+        source,
+        '800',
+      ]);
+      final errors = utf8.decoder.bind(reader.stderr).join();
+      try {
+        expect(
+          await reader.stdout
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .first,
+          'reader-ready',
+        );
+        expect(
+          () => MacBackupPublicationFiles.cleanup(publication),
+          throwsA(
+            isA<BackupPublicationFailure>()
+                .having((e) => e.code, 'code', 'identity_unavailable')
+                .having((e) => e.nativeError, 'nativeError', 32),
+          ),
+        );
+        expect(File(source).existsSync(), isTrue);
+        expect(File(destination).existsSync(), isFalse);
+      } finally {
+        await reader.stdin.close();
+        expect(
+          await reader.exitCode.timeout(const Duration(seconds: 5)),
+          0,
+          reason: await errors,
+        );
+      }
+      await cleanupOriginal(publication);
+      MacBackupPublicationFiles.cleanupStaging(staging);
+      expect(File(destination).existsSync(), isFalse);
+    },
+  );
+
   test(
     'existing selected name and changed prepared bytes are never published over',
     () {
