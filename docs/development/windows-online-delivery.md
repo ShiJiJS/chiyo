@@ -11,6 +11,8 @@
 3. 配置默认位于 %APPDATA%/Chiyo/online，由当前用户 DPAPI 和私有 ACL 保护。已有配置会正常重连；不要把另一台电脑的加密文件当作本机登记。
 4. 通过“AI 接入”生成本机独立 Agent 配置，再按 [Codex 接入说明](CODEX-INTEGRATION.md) 准备运行目录。管理 Token 不交给 Agent。
 
+本版需配套包含审批卡顿修复的服务端（`5e416708` 或包含该改动的更新版本），以支持独立连接检查；旧服务端先更新再替换客户端。业务更新等待期间保留当前页面，单次连接检查失败不会立即覆盖界面，确认断线后仍需恢复连接。
+
 这是 Windows x64 开发包；本轮检查机器为 Windows 11 x64。运行需要兼容的 Microsoft Visual C++ v14 x64 Runtime，包不自动安装系统运行库。相关官方说明见 [Microsoft C++ Runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)。无需安装 Flutter、Dart 或 Python 来运行本包。
 
 ## 主要使用方式
