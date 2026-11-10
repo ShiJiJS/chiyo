@@ -1,1 +1,0 @@
-/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue47-stale-permission-fix-20261022/notification-cleanup/SyntheticNoticeCleanup.app: replacing existing signature

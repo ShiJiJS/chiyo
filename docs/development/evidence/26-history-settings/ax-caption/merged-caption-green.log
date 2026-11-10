@@ -1,6 +1,0 @@
-00:00 +0: loading C:/Project/network_config/info-manage-worktrees/26-history-settings/apps/desktop/test/window_frame_test.dart
-00:00 +0: caption controls remain accessible above the workspace route
-00:00 +1: custom caption routes controls to native host and supports dragging
-00:00 +2: a host without custom-caption support keeps workspace usable
-00:00 +3: launcher replacement keeps native maximize-state updates connected
-00:00 +4: All tests passed!

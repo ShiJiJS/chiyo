@@ -1,9 +1,0 @@
-* -text
-/manifest.json text eol=lf
-# These five immutable producer snapshots retain their original CRLF bytes.
-# Keep the normal whitespace checks; recognise CR as their line terminator.
-/comparison.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-/verification.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-/compare_frozen.py whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-/proposal_capture_test.dart.txt whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-/credential_capture_test.dart.txt whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,3 +1,0 @@
-00:00 +0: loading test/credential_field_state_test.dart
-00:00 +0: a mixed request reports independent current field permission after credential revocation, field revocation and expiry without reloading history
-00:00 +1: All tests passed!

@@ -1,1 +1,0 @@
-/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue44-tools-bundled-ui-1/source/apps/desktop/build/macos/Build/Products/Release/info_desktop.app: replacing existing signature

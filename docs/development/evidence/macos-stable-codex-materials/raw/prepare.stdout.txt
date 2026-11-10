@@ -1,2 +1,0 @@
-Prepared bundle: /Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/Codex 接入材料
-Review hooks.json and Skill before installing or trusting.

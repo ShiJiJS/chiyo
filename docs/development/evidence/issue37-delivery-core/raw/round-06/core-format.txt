@@ -1,2 +1,0 @@
-Formatted lib\information_delivery_access.dart
-Formatted 10 files (1 changed) in 0.05 seconds.

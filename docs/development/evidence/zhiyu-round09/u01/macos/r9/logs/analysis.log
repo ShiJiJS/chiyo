@@ -1,7 +1,0 @@
-Analyzing desktop...                                            
-
-  error • Arguments of a constant creation must be constant expressions. Try making the argument a valid constant, or use 'new' to call the constructor • lib/workspace/host_settings.dart:139:26 • const_with_non_constant_argument
-  error • The getter 'server' isn't defined for the type 'WorkspaceType'. Try importing the library that defines 'server', correcting the name to the name of an existing getter, or defining a getter or field named 'server' • lib/workspace/host_settings.dart:139:40 • undefined_getter
-   info • Statements in a for should be enclosed in a block. Try wrapping the statement in a block • test/zhiyu_plugins_test.dart:134:13 • curly_braces_in_flow_control_structures
-
-3 issues found. (ran in 2.2s)

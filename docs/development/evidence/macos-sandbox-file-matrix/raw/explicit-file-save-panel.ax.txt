@@ -1,2 +1,0 @@
-There has been no change in the accessibility tree for Window: "Save".
-The focused UI element is 19 text field (settable) Value: granted-output.bin, ID: saveAsNameTextField

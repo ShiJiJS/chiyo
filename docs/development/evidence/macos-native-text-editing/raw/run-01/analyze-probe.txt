@@ -1,5 +1,0 @@
-Analyzing editing_probe.dart...                                 
-
-   info • The import of 'desktop_controls.dart' is unnecessary because all of the used elements are also provided by the import of 'ui.dart'. Try removing the import directive • lib/editing_probe.dart:3:8 • unnecessary_import
-
-1 issue found. (ran in 3.1s)

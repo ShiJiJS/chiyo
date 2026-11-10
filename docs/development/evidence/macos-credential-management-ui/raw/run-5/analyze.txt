@@ -1,5 +1,0 @@
-Analyzing macos_credential_management_native_test.dart...       
-
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • integration_test/macos_credential_management_native_test.dart:181:11 • curly_braces_in_flow_control_structures
-
-1 issue found. (ran in 0.8s)

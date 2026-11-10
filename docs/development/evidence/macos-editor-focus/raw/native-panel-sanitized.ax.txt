@@ -1,4 +1,0 @@
-Window: "Open", App: info_desktop.
-0 sheet Description: open, ID: open-panel, Secondary Actions: Raise
-		103 button Cancel, ID: CancelButton
-		104 button (disabled) Open, ID: OKButton

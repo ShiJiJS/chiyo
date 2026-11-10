@@ -1,9 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-flutter: QA_AX {"field":"secure","secureKnownExact":true,"toggleKnownExact":true,"length":17,"selection":[17,17]}
-2026-10-22 08:42:03.663 MacAXFlutterControl[97941:5721410] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
-flutter: QA_AX {"field":"secure","secureKnownExact":true,"toggleKnownExact":true,"length":17,"selection":[16,16]}
-flutter: QA_AX {"field":"secure","secureKnownExact":false,"toggleKnownExact":true,"length":18,"selection":[17,17]}
-flutter: QA_AX {"field":"secure","secureKnownExact":false,"toggleKnownExact":true,"length":18,"selection":[0,18]}
-flutter: QA_AX {"field":"toggle","secureKnownExact":false,"toggleKnownExact":true,"length":17,"selection":[17,17]}
-flutter: QA_AX {"field":"toggle","secureKnownExact":false,"toggleKnownExact":true,"length":17,"selection":[16,16]}
-flutter: QA_AX panelCancelled=true

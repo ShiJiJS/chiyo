@@ -1,5 +1,0 @@
-Analyzing desktop...                                            
-
-  error • The method 'startsWith' can't be unconditionally invoked because the receiver can be 'null'. Try making the call conditional (using '?.') or adding a null check to the target ('!') • integration_test/macos_lifecycle_probe.dart:278:16 • unchecked_use_of_nullable_value
-
-1 issue found. (ran in 4.3s)

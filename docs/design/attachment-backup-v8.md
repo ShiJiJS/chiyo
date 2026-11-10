@@ -2,7 +2,7 @@
 
 2026-10-19，#37的实现合同，沿用ADR0011和已有SQLCipher4恢复密钥封装。格式冻结先于正式附件写入启用。格式1–7读取和旧数据库迁移继续保留；新格式不是现有用户包已经可用的能力。
 
-2026-10-19最终状态：[#37验收](../development/issue37-completion.md)通过，schema21；存在交付事实采用[格式9](attachment-delivery-archive-v9.md)，仅附件/文件模板仍8，纯文本7。真实旧读取器5/6拒绝有效8/9，完整混合库原字节往返及AOT组合容量通过，#38客户端尚待。
+2026-10-19最终状态：[#37验收](https://github.com/ShiJiJS/chiyo/issues/37)通过，schema21；存在交付事实采用[格式9](attachment-delivery-archive-v9.md)，仅附件/文件模板仍8，纯文本7。真实旧读取器5/6拒绝有效8/9，完整混合库原字节往返及AOT组合容量通过，#38客户端尚待。
 
 schema20检查点已将本容器接到正式草稿保存及完整库备份/恢复。含附件版本或文件模板输出8，其他库仍输出7。`tables`在格式7全部行之外增加`information_file_fields(field_id,attachment_id,attachment_version)`；每个当前文件字段必须有且仅有一份可用版本引用，文本字段不得带该关系。历史/回收快照使用类型化`content`引用，同样不得悬空。旧SQL文本列对文件仅保留未使用的空槽，类型化模型及备份关系才是内容，不能把空槽返回为文件值。
 

@@ -1,7 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-EDITOR_FOCUS_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.editor-focus.05c4eda52c324448b156026c3afb5f9f/Data/tmp/aim-editor-focus-t1G3an
-NATIVE_FIELD_GEOMETRY={"fields":[],"labels":[{"label":"搜索聊天、信息名称","rect":[58,243.5,204.29600524902344,20]}],"viewBounds":[0,0,800,600],"viewFlipped":false}
-EDITOR_FOCUS_COMPLETE=reopen
-NATIVE_FIELD_GEOMETRY={"fields":[],"labels":[{"label":"搜索聊天、信息名称","rect":[58,239.5,204.29600524902344,20]}],"viewBounds":[0,0,800,600],"viewFlipped":false}
-NATIVE_FIELD_GEOMETRY={"fields":[{"axScreenFrame":[619,555.5,202.2960205078125,22],"label":"","liveScreenFrame":[618,556.5,204.2960205078125,20],"viewFrame":[58,340.5,204.2960205078125,20]}],"labels":[{"label":"搜索聊天、信息名称","rect":[58,239.5,204.29600524902344,20]}],"viewBounds":[0,0,800,600],"viewFlipped":false}
-NATIVE_FIELD_GEOMETRY={"fields":[{"axScreenFrame":[619,555.5,202.2960205078125,22],"label":"搜索聊天、信息名称","liveScreenFrame":[618,556.5,204.2960205078125,20],"viewFrame":[58,340.5,204.2960205078125,20]}],"labels":[{"label":"搜索聊天、信息名称","rect":[58,239.5,204.29600524902344,20]}],"viewBounds":[0,0,800,600],"viewFlipped":false}

@@ -1,1 +1,0 @@
-{"mode":"backup-recover","format":9,"phase":"complete","rawIntegrity":"ok","rawSchema":21,"rawPartialRows":0,"sameTargetRetry":true,"verifiedAttachmentBytes":83886080,"oldAuthorizationDenied":true,"runtimeFileLeasesRestored":false,"targetBaselinePreservedBeforeRetry":true,"nativeTerminationRequested":true,"libraryCloses":1}

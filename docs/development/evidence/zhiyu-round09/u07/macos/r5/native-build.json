@@ -1,8 +1,0 @@
-{
-  "app": "apps/desktop/build/macos/Build/Products/Debug/info_desktop.app",
-  "bundleIdentifier": "com.example.infoDesktop.zhiyuPreview",
-  "AgentInfoInterfacePreview": "YES",
-  "architecture": "arm64",
-  "executableSha256": "8371aa1ca99e2d39397b488793aeda20db1b9237ec144ceecea096905fd9a4c0",
-  "newCocoaRuntime": false
-}

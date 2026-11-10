@@ -1,8 +1,0 @@
-{
-  "action": "nonrecursive deletion of the known six-byte synthetic copy and empty parent from failed round-03 fixture",
-  "path": "C:/Users/Todoki/AppData/Local/Temp/info-managed-YOiIWXFUE5UJxXz9xTQpEFq63kVHET_x/attachment.pdf",
-  "expectedBytesBase64": "AP8IChsq",
-  "result": "automatic approval review rejected exec_command: blocked by policy",
-  "retained": true,
-  "retriedThroughAnotherMethod": false
-}

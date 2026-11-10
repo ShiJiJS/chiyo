@@ -1,5 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_runtime_test.dart
-00:00 +0: C:/Project/network_config/info-manage/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
-00:00 +1: C:/Project/network_config/info-manage/apps/desktop/test/information_file_runtime_test.dart: application settings explain a held ordinary file copy and retry only registered cleanup
-00:00 +2: All tests passed!

@@ -1,9 +1,0 @@
-Running build hooks...Running build hooks...00:00 +0: loading test/macos_backup_recovery_test.dart
-00:00 +0: (setUpAll)
-MAC_RESTORE_AOT_PAYLOAD=[{"path":"bin/macos_restore_child","bytes":7225008,"sha256":"2d71dd75582c4d569c1d3550d66c9b2ff18df7aa8c336165c1a18568358d3182"},{"path":"lib/libsqlcipher.dylib","bytes":1792352,"sha256":"0eea040b90e45f380573abd315e79bd25a2ac17dff9818fbaa47fec1e213102f"}]
-00:02 +0: Mac AOT format8 interruption during 80MiB restore rolls back and retries with distinct target key
-MAC_RESTORE_FORMAT_8: AOT SIGKILL after 4MiB growth and hot journal; SQLCipher integrity/rollback passed; same-target retry restored 80MiB and no live authority. Synthetic in-memory keys, not Keychain or packaged UI.
-00:23 +1: Mac AOT format9 interruption during 80MiB restore rolls back and retries with distinct target key
-MAC_RESTORE_FORMAT_9: AOT SIGKILL after 4MiB growth and hot journal; SQLCipher integrity/rollback passed; same-target retry restored 80MiB and no live authority. Synthetic in-memory keys, not Keychain or packaged UI.
-00:42 +2: (tearDownAll)
-00:42 +2: All tests passed!

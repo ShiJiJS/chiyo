@@ -1,8 +1,0 @@
-{
-  "hypothesisOnly": true,
-  "contractFailures": 4,
-  "realWindowsRunnerUsed": false,
-  "nativeAXFixSucceeded": false,
-  "productionTimingChanged": false,
-  "reason": "Awaiting route.completed did not prevent native AXTree errors in the actual comparator, so neither the timing change nor this proposed test contract was adopted as a product fix."
-}

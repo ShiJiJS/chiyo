@@ -1,4 +1,0 @@
-00:00 +0: loading test/file_protocol_policy_test.dart
-00:00 +0: public file requests reject unknown, mistyped and concatenated references and case-conflicting environment names without creating a request
-00:00 +1: cleanup refuses a hard-linked registered material and preserves its outside link until separately removed
-00:00 +2: All tests passed!

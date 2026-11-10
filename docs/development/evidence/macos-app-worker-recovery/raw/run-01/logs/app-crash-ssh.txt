@@ -1,1 +1,0 @@
-{"directory": "/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue43-app-worker-1/app-crash-ssh", "port": 50623}

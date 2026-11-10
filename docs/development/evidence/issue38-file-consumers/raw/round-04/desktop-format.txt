@@ -1,2 +1,0 @@
-Formatted test/information_file_consumers_test.dart
-Formatted 9 files (1 changed) in 0.10 seconds.

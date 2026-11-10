@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'desktop_motion.dart';
 
-/// Symbol IDs from docs/design/prototypes/round-05/index.html.
+/// Symbol IDs for the desktop's shared SVG icon geometry.
 enum PrototypeIconGlyph {
   layers,
   inbox,

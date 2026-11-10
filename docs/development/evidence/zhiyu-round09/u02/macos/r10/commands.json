@@ -1,9 +1,0 @@
-{
-  "cwd": "apps/desktop",
-  "workflows": "../../scripts/dev-macos.sh flutter test --no-pub --dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r10/actual test/zhiyu_library_workflows_test.dart --reporter expanded",
-  "related": "../../scripts/dev-macos.sh flutter test --no-pub test/desktop_controls_test.dart test/desktop_motion_contract_test.dart test/zhiyu_library_test.dart test/zhiyu_directory_test.dart test/zhiyu_relations_test.dart test/zhiyu_history_test.dart test/zhiyu_stress_test.dart test/zhiyu_plugin_contracts_test.dart test/zhiyu_preview_test.dart test/zhiyu_library_fidelity_test.dart --reporter expanded",
-  "analysis": "../../scripts/dev-macos.sh flutter analyze --no-pub --fatal-infos",
-  "build": "FLUTTER_MACOS_ARM64_ONLY=true XCODE_XCCONFIG_FILE=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig ../../scripts/dev-macos.sh flutter build macos --debug --no-pub --target lib/preview_main.dart",
-  "comparison": "python3 scripts/qa/compare-zhiyu-library-workflows.py --reference /Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r10/reference --actual /Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r10/actual --output /Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u02/macos/r10/geometry.json",
-  "execution": "All Dart/Flutter jobs sequential; final metadata-only changes rechecked with workflows and full strict analysis"
-}

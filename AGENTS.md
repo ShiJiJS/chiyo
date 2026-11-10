@@ -15,4 +15,8 @@ Windows交付与构建清理按 `docs/development/windows-delivery.md` 的“本
 
 ### Windows online adaptation
 
-规划或接续 Windows 联网适配时，先读 `docs/planning/windows-online/README.md` 和其中的当前进度入口；草案本身不授权发布或开发，执行范围以当前用户指令为准。
+Windows 联网开发先读 `docs/development/windows-local-setup.md`；任务范围和进度从 GitHub Issues 读取，执行范围以当前用户指令为准。
+
+### Development artifacts
+
+截图、日志、录屏和本次任务的一次性脚本放在被 Git 忽略的 `build/` 下，用完清理。仓库只保留可复用工具、正式测试夹具及持续维护的规格和使用说明；任务进度写 GitHub Issues。

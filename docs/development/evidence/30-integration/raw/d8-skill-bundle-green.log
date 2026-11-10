@@ -1,3 +1,0 @@
-00:00 +0: loading test/bundle_preparation_test.dart
-00:00 +0: a copied CLI prepares a stable Codex bundle without the Dart SDK or changing existing configuration
-00:06 +1: All tests passed!

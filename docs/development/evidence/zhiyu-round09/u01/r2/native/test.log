@@ -1,7 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/zhiyu_foundation_native_test.dart
-Building Windows application...                                    17.5s
-√ Built build\windows\x64\runner\Debug\info_desktop.exe
-00:00 +0: isolated Zhiyu native controls, motion, large text and reduced motion
-00:13 +1: (tearDownAll)
-00:13 +1: All tests passed!

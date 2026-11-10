@@ -1,172 +1,40 @@
-# Windows 交付
+# Windows 构建、安装与清理
 
-当前 NAS 联网开发包使用 [联网交付说明](windows-online-delivery.md)、[Codex 接入](windows-codex-integration.md) 和[连续核对范围](windows-online-acceptance.md)。下方“本机安装与清理”的既有约定继续适用；其余 Round05 安装版本/路径和测试数为旧单机版历史，不能作为当前包状态。
+Windows x64 开发包包含完整桌面程序、CLI、worker、固定 GH/AWS 工具、依赖许可和来源清单。构建要求固定 Flutter SDK、Windows C++ 工具链及 Python。
 
-## 当前联网版安装（2026-11-10）
+## 从源码构建
 
-用户本次明确要求：有新的完整已验证版本时，安装到`C:\Software\AgentInfoManage`并保留桌面“知予”快捷方式；后续本项目同类更新沿用此偏好，无需每次重新询问安装位置。沿用下方“本机安装与清理”的校验、正常退出和保留数据规则；未验证候选不自动覆盖正式安装。
+在干净、已提交的源码下执行，输出必须是新目录：
 
-当前已安装`0.4.4+18-dev.3d2d6c6713fd`，源码`3d2d6c6713fddc7b717375cc767be5d2fbfcb7cf`。桌面“知予”指向`C:\Software\AgentInfoManage\current\app\info_desktop.exe`。同版本ZIP、SHA及验收记录保存在安装目录`package`，全部7700项载荷和归档哈希再次核对通过。安装回执为安装目录`installation.json`；本轮事实见[evidence/windows-online/w104-branding-installed-3d2d6c67.json](evidence/windows-online/w104-branding-installed-3d2d6c67.json)。
+```powershell
+.\scripts\package-windows.ps1 -FlutterBin 'C:\SDK\flutter\bin' -Python 'C:\Tools\python.exe' -OutputDirectory 'C:\Artifacts\chiyo-new' -Offline -PackageOnly
+```
 
-已把本机已验证的NAS管理连接用正式存储格式保存到正常用户`%APPDATA%/Chiyo/online`：当前用户DPAPI、私有ACL、固定服务器身份及原44条资料只读核对通过。不新建Agent身份、不恢复本聊天关联、不改全局hooks/信任、不打开App或改NAS资料。旧Windows离线资料库没有迁移或覆盖。
-
-本聊天运行于MSIX宿主，直接子进程的AppData会被重定向到宿主LocalCache；严格规范路径检查正确拒绝写入该别名。配置由正常桌面Shell代理启动的无窗口辅助进程保存并回读验证，没有放宽路径或权限检查。原理见[Microsoft的文件系统虚拟化说明](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes)。这只是安装辅助环境处理，没有改动已验证产品包。
-
-本次未重试此前被自动审批拒绝的旧包/临时构建清理；旧产物仍保留。#104的真实桌面/宿主/通知/睡眠等人工核对仍开放，安装不等于这些事项已完成。
-
-## 旧开发预览（Issue #18）
-
-交付物是未签名的 Windows x64 ZIP，包含完整 Flutter release 目录、独立 AOT
-CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依赖许可和来源清单。
-它用于配合验收；Issue #18 的干净环境、真实桌面和 Codex 检查仍开放。
+首次缺少缓存依赖时去掉 `-Offline`；版本和摘要仍按锁定配置核对。`-PackageOnly` 只产包。脚本验证归档和解包载荷，生成 ZIP、SHA256、manifest 与核对回执；这些结果不替代真实桌面、Codex 宿主或干净机器验收。
 
 ## 本机安装与清理
 
-按用户2026-10-22约定，Windows软件固定放在 `C:\Software\AgentInfoManage`：`current`为完整程序，`package`只留同版本ZIP／SHA和验收记录，桌面“知予”快捷方式指向`current/app/info_desktop.exe`。个人数据库仍在原LOCALAPPDATA位置；已安装Codex hooks／Skill独立管理，交付不擅自改其路径或信任。
+Windows 固定安装位置为 `C:\Software\AgentInfoManage`：`current` 保存完整程序，`package` 保存当前版本 ZIP、SHA 和安装核对信息。桌面“知予”快捷方式指向 `current/app/info_desktop.exe`。
 
-`scripts/package-windows.ps1`完整检查通过后默认安装并清理；`-PackageOnly`只产包。安装先校验归档与全部载荷，暂存新目录，使用CLI正常退出旧实例，切换后保存快捷方式，再移除旧安装。保存／退出失败时保留原实例；不强杀。若需切换从构建目录启动的实例，先核对路径，再给安装脚本传入明确的`-RunningProcessId`。
+用户已授权安装时，可省略 `-PackageOnly`，完整检查成功后脚本安装并清理。安装器先校验归档与全部载荷、暂存新目录、通过 CLI 正常退出旧实例，再切换目录和保存快捷方式。退出或保存失败时保留旧实例，不强杀。
 
-当前已知未通过全包验收的界面候选，仅在用户明确要求预览时使用`install-windows-preview.ps1 -ArchivePath <ZIP> -PreviewReason <具体限制> -CleanBuildArtifacts`，将失败原因写入安装记录，不伪造`.verified.json`。没有新版本交付成功时，保留现有安装和构建候选供定位。
-
-交付成功后，`clean-windows-artifacts.ps1`先复核外部安装及ZIP，再删除项目`build/windows-*`历次包、桌面build和四包`.dart_tool`生成缓存、QA／`.scratch`编译二进制。保留源代码、归档证据、日志、独立Codex接入材料、已下载测试工具，以及运行中产物；共享Flutter SDK／Pub缓存、用户资料库和Temp中的凭据／附件材料不属于本清理范围。测试临时资料按所属测试的finally清理，不按宽泛Temp前缀批量删除。清理支持`-WhatIf`，路径验证和非递归链接删除保护外部文件。
-
-当前本机安装为0.4.1+13-dev.9310b1090ecf，113项载荷及ZIP逐项校验通过，桌面快捷方式已经创建。仍保留#30的SessionEnd启动超时说明，不标记完整运行验收通过。首次迁移时原构建目录实例已自行退出；本轮没有强杀或启动正式库。移除11,222,148,115字节／4,829个生成文件，第二次`-WhatIf`候选数为0；归档证据和测试日志保留。原build路径的下载链接现由上述固定安装位置取代。
-
-本轮信息库分类与公共控件改版（#52–#60）使用schema22；首次打开旧库会迁移，此后旧程序会拒绝打开。含已删分类历史引用的完整备份为格式10，旧程序同样拒绝。新程序仍能读取旧备份，迁移／旧阅读器检查见改版记录；预览验证使用独立虚构库，未替用户运行正式库迁移。
-
-## 当前 Round05 Windows 预览
-
-本文适用于当前 **0.4.1+13** 预览；是否已生成和验收以具体交付记录为准。准确源码、构建时间及逐文件校验值见本包 `manifest.json`，
-ZIP 校验值见随附的同名 `.sha256` 文件。具体本地交付路径及大小记录在
-[实施进度](https://github.com/ShiJiJS/agent-info-manage/issues/21)，不在随包说明中写入自身归档的哈希。
-已展开 EXE 位于 `AgentInfoManage/app/info_desktop.exe`，须保留其全部相邻文件。
-本版采用授权协议v2；应用、CLI、worker、焦点辅助程序和Skill必须来自同一整包，不能只覆盖单个EXE或模板。此前已交付的0.4.0+8仍是旧v1，不会因新源码通过检查就自动更新。
-
-沿用已确认Round05顶部导航、紫/绿/蓝/黑白四主题、审批收件箱与卡片、信息库目录树/
-列表/详情、录入提案、授权历史和设置。支持搜索分页、历史定位与放大文字。
-
-已修正删除字段后的Owner显示：旧审批保留已记录名称，历史批准范围明确标记原字段移除、
-部分范围、授权结束或恢复归档；同名字段恢复使用新身份，不使旧许可重新可读。历史事实
-与当前可用范围分别判断，不读取旧字段正文，不改变原批准范围或截止时间。
-
-字符串与文件凭据独立管理，可关联服务器等普通信息。申请显示使用的凭据版本、注入位置和首个启动计划；一次批准后可在固定有效期内用不同operationId启动多条命令，不重复审批也不续期。程序核对每次完整计划，再由随包worker启动并注入环境变量、配置或文件路径；不能直接执行带占位符的原命令。支持gh Token、非交互Linux/Unix SSH身份文件和AWS静态凭据文件，默认15分钟、可选30分钟。旧v1证明不升级为复用许可。
-
-本机焦点填充使用独立批准方式：先发现当前可用应用、申请字符串凭据，批准后重新点击空的遮挡密码框，再后台调用CLI填充。结果表示发送情况，不代表登录成功。当前仅验证有限Win32控件和当前前台内置浏览器的合成页面；工具不能激活应用时需要先切回。不是通用浏览器插件或远程浏览器桥接，也不保证其他工具、明文截图或目标程序不会读到秘密。实际步骤见随包Skill的`references/credential-use.md`。
-
-信息库支持文字与普通文件混合、独立批准文件字段。普通附件原字节加密存入数据库，单文件10MiB、保留原文与暂存合计100MiB。Agent经`file-fetch`取得受管副本实际路径，供同机文档/浏览器工具读取或上传，用完`file-release`；普通文件原文可读，与凭据文件的进程材料分开清理。同操作重试固定原版本，新操作领取当前版本；撤销或结束停止新交付，不能收回已经读出或保存的内容。远程工具不能访问本机路径时不提供上传桥接，Agent提案暂不提交文件字节。详见随包Skill的`references/information-files.md`。
-
-跨次CLI调用由应用宿主保留有界内存输出；应用退出或缓存淘汰后不能恢复输出。重启只恢复
-过去事实和必要清理登记，不恢复有效许可。未知结果先核查原任务，不能自动重放。命令结束记录暂时无法写入时显示结果未知；审计存储恢复并重试后补记已收到的结束事实，再核查清理，不重新执行命令。若应用先退出或崩溃而回执丢失，仍保持未知，不推断退出码。普通字段
-许可与凭据使用许可独立。旧秘密字段可明确选择转换，默认不允许发现；原读取路径关闭，
-保留历史/回收副本及已导出的离线备份不会同时擦除，恢复旧内容不复活旧授权。
-
-整理从 Codex 等外部聊天发起：Agent 经 CLI 提交整理请求，用户在现有“访问审批”选择
-资料范围并批准一次，之后 Agent 可自动应用分类及标签。无需在应用创建任务或再次确认
-整理方案。只提供所选标题、说明、目录和标签元数据，不含字段值；批准最长30分钟，
-完成、撤销、到期或会话结束即失效。旧版待确认方案保持原确认要求，不升级其写入能力。
-协议详见[整理流程说明](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/development/organization-tasks.md)。
-
-本版数据库schema21，兼容迁移旧schema1–20。按内容输出完整备份：有文件交付事实为格式9，有普通附件/文件模板为8，其余为7；读取格式1–9。备份包含普通文件原字节、托管凭据及保留版本、回收对象、关联、已确认SSH主机数据和历史；排除私密授权证明、可用审批能力、暂存、受管副本、运行材料及输出。恢复的交付记录只表示过去事实，不恢复有效路径、次数或许可。只向空库恢复，独立凭据非空也不能覆盖。使用独立恢复密钥和新本机密钥，到期按恢复时的时间判断，历史许可不重新生效。旧程序会拒绝新备份。
-
-打开新版前，请在旧版导出备份并单独保存恢复密钥，再完全
-退出旧版托盘进程。不要直接用旧程序重新打开已升级的数据库；需要回退时使用独立备份
-和新资料库，按支持的恢复流程操作。自动检查只使用合成资料，未直接迁移用户当前库。
-
-凭据复用、本机焦点填充和普通文件已分别完成其Windows功能验收；实际范围见[#33](https://github.com/ShiJiJS/agent-info-manage/issues/33)、[#35](https://github.com/ShiJiJS/agent-info-manage/issues/35)、[#34](https://github.com/ShiJiJS/agent-info-manage/issues/34)。原生选择器、虚构简历同机浏览器消费及加密空库恢复已有独立证据；它们不替代当前整包验收。包的准确构建检查以manifest及交付记录为准，不沿用旧版通过计数。
-
-已修复阶段回执覆盖失败及通知旧回调串到后续请求的队列错误。后者有C++红绿、桌面回归和编译证据，新通知入口的真实系统显示与点击仍待复验；不能拿修复前的显示回调当作新版点击通过。旧单次CLI超时缺阶段日志，仍不能唯一归因。通知及接入状态继续由[#23](https://github.com/ShiJiJS/agent-info-manage/issues/23)和[#30](https://github.com/ShiJiJS/agent-info-manage/issues/30)跟踪。
-真实Codex安装/信任、系统通知点击和干净机器联合验收仍开放；先用虚构资料验收，
-不据此宣称正式发行完成，详见随包 `ACCEPTANCE.md`。
-
-## 使用预览包
-
-1. 对照一起提供的 `.sha256` 文件核对 ZIP 的 SHA-256，然后完整解压到一个稳定
-   的当前用户目录。保留 `AgentInfoManage/app` 中全部 DLL 和 `data/`。
-   `manifest.json` 记录准确源码提交、SDK、锁文件和每个文件的校验值。
-2. 环境须为 Windows x64，并已安装兼容构建工具链的 Microsoft Visual C++ v14
-   x64 Redistributable。本包不包含、不下载也不自动安装运行库。需要时由用户从
-   [Microsoft 官方运行库页面](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)
-   安装。当前编译及无窗口检查环境为 Windows 11 Home x64（10.0.26300）；
-   Windows 10、ARM64、32 位、无开发工具干净机器尚未实测，不承诺支持。
-3. 用户准备好后启动 `app/info_desktop.exe`。托盘可用时关闭窗口转入后台，托盘不可用时
-   保持窗口可达；使用“设置 → 应用运行 → 完全退出”停止服务。先使用虚构信息。
-4. CLI 可用完整路径调用 `cli/info.exe`（通用 JSON-lines），无需安装 Dart、
-   Flutter 或 Java；不自动修改 PATH。Codex 使用下面的独立接入步骤。
-
-Agent 可用同包 `cli/info.exe app status` 查询、`cli/info.exe app quit` 正常退出。
-默认只定位同目录桌面程序，另一目录须核对后加 `--pid <进程号>`。CLI确认进程实际结束才返回
-`exited`；保存失败返回 `shutdown_failed` 并保留窗口及库可重试，超时不强杀。旧版不支持此入口时
-仍需原托盘菜单。完整状态/退出码见[CLI说明](https://github.com/ShiJiJS/agent-info-manage/blob/codex/round05-windows-sync/docs/cli.md)。
-
-示例（路径仅为示例，使用实际解压路径）：
+单独安装已核对的归档：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath '.\agent-info-manage-<版本>-windows-x64.zip'
-& 'C:\Tools\AgentInfoManage\cli\info-prepare-codex.exe' 'C:\Tools\AgentInfoCodex-preview'
+.\scripts\install-windows-preview.ps1 -ArchivePath 'C:\Artifacts\chiyo-new\chiyo-version-windows-x64.zip' -CleanBuildArtifacts
 ```
 
-生成器将编译好的 Codex CLI/hook 复制到指定的**新目录**，生成指向该最终目录的
-`hooks.json` 和 `skills/agent-info-access/SKILL.md`，并携带凭据使用、普通文件两份引用说明。已有目标目录或文件会被拒绝；
-不合并、不覆盖项目/用户配置，也不安装或信任 hook。支持含空格和中文的路径。
-生成后保持此目录位置稳定；更换位置时选新目录重新生成并审查配置。
+如需退出从其他构建目录启动的实例，先核对路径，再传入准确的 `-RunningProcessId`。未通过完整检查的候选仅在用户明确要求预览时使用 `-PreviewReason`，如实保留限制。
 
-在用户明确准备接入后，按随包 `CODEX-INTEGRATION.md` 审查、合并项目 hook、
-放置 Skill 并通过 Codex 正式入口信任准确的定义，保留现有配置。
-生成器只写指定的新目录；安装与信任仍需单独配合。不要将私密关联放进命令参数。
+`clean-windows-artifacts.ps1` 复核外部安装和 ZIP 后，清理项目中的旧包、桌面 build、Dart 生成缓存及所属 QA 编译输出。它支持 `-WhatIf`。当前安装及正在使用的产物、用户资料库、密钥、恢复备份、已配置的独立 Codex 运行目录、共享 SDK 和依赖缓存分别管理。
 
-`diagnostics/bin/info-storage-check.exe` 仅在独立临时目录使用合成资料和当前用户
-DPAPI 验证加密、重开、旧凭据失效及旧 schema 迁移，不打开实际资料库，也不启动
-桌面。保留旁边完整的 `diagnostics/lib/`；原生资产使用
-[Dart build cli 的 bin/lib 布局](https://dart.dev/tools/dart-build)。其 SQLCipher DLL
-校验值与桌面包相同；这不能代替真实桌面启动验收。
+开发截图、历史日志和一次性证据不作为长期仓库资料；任务产物放在被 Git 忽略的 `build/` 下，用完清理。当前包的完整性清单和安装核对信息随包保留，避免把历史截图当作当前版本的运行验收。
 
-## 升级、数据和已知限制
+## 使用和接入
 
-资料保存在 `%LOCALAPPDATA%\AgentInfoManage`，本机随机数据库密钥由当前用户
-DPAPI 保护，和安装目录分离。升级前在应用中导出独立恢复密钥的备份并另行保存
-恢复密钥，然后完全退出旧应用，将新 ZIP 解压到新目录，保留原数据目录及
-`database-key.dpapi`。不要同时运行两个版本；重新生成及审查新版本 Codex bundle。
-仅复制本机数据库或 DPAPI 文件到另一个用户/设备不能代替独立备份恢复。
+- [联网包使用说明](windows-online-delivery.md)
+- [Codex 接入](windows-codex-integration.md)
+- [连续核对范围](windows-online-acceptance.md)
+- [本机开发环境](windows-local-setup.md)
 
-当前保持既有内部可执行文件名和资料路径；没有安装器、自动升级、开机自启、
-商店发布或代码签名。Windows 可能提示未知发布者；不安装自签根证书、不修改
-系统执行策略来绕过提示。源码尚未声明项目级开源许可，本包仅作私有开发验收。
-第三方许可见 `notices/`，Flutter 生成的组件许可也保留在 `app/data/`。
-
-等待用户配合的项目见随包 `ACCEPTANCE.md`，包括真实桌面、通知/托盘、文件对话框、
-Codex 两聊天/主子 agent/结束事件、干净用户环境及实际升级。macOS 使用用户自己的
-Mac 后续验证，当前不运行托管 Mac 作业。生产发布及跨平台依赖锁定仍受 ADR 0004
-验收约束，不能从本包的编译成功推断全部完成。
-
-## 从源码重建
-
-在带 Flutter 及 Visual Studio C++ 桌面工作负载和 Windows SDK 的 Windows x64
-开发环境（本次使用 PowerShell 7），从干净已提交源码执行：
-
-```powershell
-.\scripts\package-windows.ps1 -FlutterBin 'C:\SDK\flutter\bin' -OutputDirectory 'C:\Artifacts\agent-info-new' -Offline
-```
-
-首次依赖未缓存时去掉 `-Offline`。命令运行全量无窗口分析/测试和 Windows release
-编译，编译独立 CLI/检查程序，复制完整发行目录和依赖许可，验证 SQLCipher
-官方资产哈希，生成版本化 ZIP、manifest 和 SHA-256；随后解压到中文/空格临时
-路径运行真实编译 CLI/hook 和合成 DPAPI/SQLCipher 检查。输出目录须不存在。
-不承诺不同机器生成的二进制逐字节相同；锁文件、源码提交、工具链及输出哈希用于
-复现和核对构建。失败会保留输出供诊断，重试使用新目录。
-
-ZIP 布局遵循 [Flutter Windows 分发说明](https://docs.flutter.dev/platform-integration/windows/building)。
-SQLCipher 使用 sqlite3 包锁定的原生资产，其预期哈希及 Dart 依赖锁文件收录于
-`provenance/`；SQLCipher 4.19.0 许可来源为
-[上游 LICENSE](https://github.com/sqlcipher/sqlcipher/blob/v4.19.0/LICENSE.md)。
-
-## Windows名称与图标同步修正（已完成，2026-11-10）
-
-用户指出新安装仍叫“信息授权”。已确认当前源码包含既定知予/Chiyo名称及原始图标，但Windows runner标题、托盘/通知、PE版本资源、ICO与安装快捷方式仍旧。不是重新设计图标，也不需要NAS更新。修正使用既有Mac的16/32/64/128/256 PNG帧直接封装为Windows ICO，原PNG字节保持；`scripts/sync-windows-app-icon.py`可重新生成。
-
-Windows产品显示名/窗口/托盘/通知/残留旧CLI文案改为“知予”，新包ZIP命名chiyo，保留原安装位置、程序文件名和协议身份兼容既有连接与工具。新快捷方式用随包chiyo.ico；确认旧“信息授权”快捷方式属于本安装且无自定义参数后，先保存新快捷方式再移除旧快捷方式，不改其他快捷方式。
-
-新增`test-windows-branding.ps1`直接读取编译后PE资源，检查真实产品名、五尺寸图标与随包ICO、原批准PNG帧一致，不启动App；打包、实际解包和安装阶段均核对。旧安装负例已正确拒绝、PowerShell解析与PE读取器检查通过；实际Windows release、完整同源ZIP、解包和安装阶段的编译资源检查全部通过，已完成实际替换。
-
-新包`chiyo-0.4.4+18-dev.3d2d6c6713fd-windows-x64.zip`为123507372字节，SHA256 `5a83e46e530e1d4a6bbc22ddcf00486bb14034ed94e1a62b76bf7bba9100da70`，保存在`C:/Software/AgentInfoManage/package`；源构建目录为`build/development/w104-branding-3d2d6c67`。固定同源2071项全套、解包CLI/hooks16项、加密生命周期7项、SQLCipher/DPAPI通过。7700项载荷与安装ZIP再校验通过，实际PE产品名/描述均为“知予”，五个图标帧与原批准PNG字节相同。
-
-更新通过正常控制协议退出原安装进程，未强杀或启动新App。桌面`知予.lnk`的目标/描述/图标位置已读回核对，原受管`信息授权.lnk`已移除；实际图标为新独立路径`current/app/chiyo.ico`，避免继续引用旧EXE图标位置。正常用户NAS连接、DPAPI、私有ACL、固定服务器身份及原44资料只读检查再次通过；NAS/旧离线库/全局hooks和信任未变，人工GUI/通知/睡眠等条件仍留#104。原先被拒绝的项目构建清理没有重试。
+已安装 hooks 和 Skill 独立管理；构建与清理不改变它们的路径或信任。用户资料与安装目录分离，升级前按实际迁移需要准备恢复材料，勿将另一台机器的 DPAPI 文件当作备份。

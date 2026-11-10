@@ -1,7 +1,0 @@
-00:00 +0: loading test/credential_reuse_test.dart
-00:00 +0: test/credential_reuse_test.dart: v2 authorization records its protocol instead of silently becoming a v1 permit
-00:00 +1: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
-00:00 +2: test/credential_history_retention_test.dart: one ended operation cannot prune an earlier active operation of the same grant
-00:00 +3: test/credential_reuse_test.dart: v2 permission cannot enter the legacy one-shot consume path
-00:00 +4: test/credential_history_retention_test.dart: retention previews and removes only ended credential facts while keeping an execution whose end cannot be established
-00:00 +5: All tests passed!

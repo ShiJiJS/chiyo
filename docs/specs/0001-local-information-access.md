@@ -15,7 +15,7 @@
 - #34（父票；#36设计、#37核心、#38客户端）：客户端新建/编辑增加“文件”字段类型，模板/提案兼容、信息库展示、部分审批、交付历史/回收及设置恢复同步改造；普通附件作为可单独授权的信息字段，原始字节与元数据存入SQLCipher；本机副本交付、版本/回收和完整加密备份一起完成。任意格式解析/OCR不因此成为首版承诺。
 - #35：先授权、Agent点击本机密码框、CLI提交引用、本机服务输入；正常流程不直接把秘密交给模型，仍记录显示明文截图等泄漏边界，不承诺所有内置/远程浏览器支持。
 
-当前已交付基线是Windows 0.4.0+8、协议v1/schema16/备份5；授权一次启动的现状不能冒充#33已完成。后续以[当前设计](../design/windows-credential-and-file-update.md)和[Windows后续计划](../planning/windows-next-iteration.md)为准。保留Round05风格，新增流程先补原型再实施。无子Agent；服务器同步暂停；Mac与真实跨平台恢复延期，原跨平台验收未因此完成。
+当前已交付基线是Windows 0.4.0+8、协议v1/schema16/备份5；授权一次启动的现状不能冒充#33已完成。后续以[当前设计](../design/windows-credential-and-file-update.md)和[Windows后续计划](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/planning/windows-next-iteration.md)为准。保留Round05风格，新增流程先补原型再实施。无子Agent；服务器同步暂停；Mac与真实跨平台恢复延期，原跨平台验收未因此完成。
 
 
 状态：产品范围、主要测试边界、Flutter/Dart 及 SQLite/Drift/SQLCipher 方向已确认；其他技术设计与平台验证尚未完成。

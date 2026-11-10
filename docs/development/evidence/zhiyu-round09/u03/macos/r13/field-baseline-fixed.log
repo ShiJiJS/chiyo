@@ -1,8 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_credentials_test.dart
-00:00 +0: (setUpAll)
-00:00 +0: material choice preserves custom reference draft replace=false large=false
-00:02 +1: material choice preserves custom reference draft replace=false large=true
-00:03 +2: material choice preserves custom reference draft replace=true large=false
-00:04 +3: material choice preserves custom reference draft replace=true large=true
-00:06 +4: (tearDownAll)
-00:06 +4: All tests passed!

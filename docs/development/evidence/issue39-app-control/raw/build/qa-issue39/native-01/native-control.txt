@@ -1,3 +1,0 @@
-00:00 +0: loading test/windows_desktop_control_test.dart
-00:00 +0: native control pins one peer and preserves explicit failures and unknown exits
-00:01 +1: All tests passed!

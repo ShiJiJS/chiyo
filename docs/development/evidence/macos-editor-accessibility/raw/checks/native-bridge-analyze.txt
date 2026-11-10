@@ -1,5 +1,0 @@
-Analyzing desktop...                                            
-
-   info • Use the null-aware marker '?' rather than a null check via an 'if'. Try using '?' • lib/mac_text_field_accessibility.dart:115:11 • use_null_aware_elements
-
-1 issue found. (ran in 1.8s)

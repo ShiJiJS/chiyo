@@ -1,9 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-flutter: QA_FOCUS secretButton=false textEditor=false
-flutter: QA_FOCUS secretButton=false textEditor=false
-flutter: QA_FOCUS secretButton=false textEditor=false
-flutter: QA_LIFECYCLE AppLifecycleState.inactive
-flutter: QA_DESKTOP initialized
-flutter: QA_LIFECYCLE AppLifecycleState.resumed
-flutter: QA_FOCUS secretButton=false textEditor=false
-flutter: QA_QUIT forwarded

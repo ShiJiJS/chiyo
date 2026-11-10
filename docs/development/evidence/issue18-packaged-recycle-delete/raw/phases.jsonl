@@ -1,6 +1,0 @@
-{"phase": "approve-before-delete", "pid": 74132, "requestId": "YOUQGnodO0YIFE9uQb6YSkPVHQQosTg0rLIcCwimRk0="}
-{"phase": "confirm-human-approved-version3-deletion", "pid": 74132, "itemId": "cYLGmFDoPRvJdCNJiwQlfoOg8sNUFMByYSzuD2F1ZLo=", "version": 3, "itemName": "虚构回收验收简历", "bytes": 76}
-{"phase": "restore-actual-ui-deleted-file", "pid": 74132, "receipt": "C:\\Project\\network_config\\info-manage\\build\\qa-issue18-recycle-delete\\run-01\\delete-observed.json"}
-{"phase": "approve-after-restore", "pid": 74132, "requestId": "X_pL4g0VjrflM8Plgj-37ldogCKRXGAKVgPWi0Vjkyw="}
-{"phase": "observe-final-recycle-and-history", "pid": 74132, "receipt": "C:\\Project\\network_config\\info-manage\\build\\qa-issue18-recycle-delete\\run-01\\final-observed.json"}
-{"phase": "complete"}

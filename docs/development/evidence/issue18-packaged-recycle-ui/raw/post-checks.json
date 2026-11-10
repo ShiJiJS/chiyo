@@ -1,9 +1,0 @@
-{
-  "pythonASTExplicitUTF8": true,
-  "pythonHelpExitCode": 0,
-  "processExitCode": 0,
-  "port47125ListenerCount": 0,
-  "computerUseReset": true,
-  "uiDeleteConfirmation": "pending user reply; no UI deletion executed",
-  "preflightNote": "One-off AST command used implicit Windows GBK and failed decoding; repeated with explicit UTF-8 succeeded. The acceptance driver itself completed."
-}

@@ -1,5 +1,0 @@
-Analyzing info_storage...
-
-warning - tool\measure_information_library.dart:482:14 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
-
-1 issue found.

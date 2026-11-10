@@ -1,4 +1,0 @@
-{
-  "sourceBase": "63e1ce9d612e5afac84adb838b54c2fff67db838",
-  "scope": "Minimal Release, current product native/Dart menu bridge; synthetic controller and memory-only clipboard, no bootstrap or database/Keychain. QA logs booleans only."
-}

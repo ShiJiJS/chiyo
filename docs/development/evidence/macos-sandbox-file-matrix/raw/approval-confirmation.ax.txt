@@ -1,2 +1,0 @@
-There has been no change in the accessibility tree for Window: "info_desktop".
-The focused UI element is 1 container info_desktop

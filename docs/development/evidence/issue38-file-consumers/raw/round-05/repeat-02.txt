@@ -1,7 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/information_file_consumers_test.dart
-00:00 +0: owner deletion and recycle preview retain file version, restoring never revives the old field grant
-00:00 +1: revision comparison displays both exact file versions and restores the old original as a new current revision
-00:00 +2: text proposal review preserves an existing file and file deletion proposals preview private metadata
-00:01 +3: credential approval also reviews an attached ordinary file and rejects replacement while the confirmation is open
-00:01 +4: All tests passed!

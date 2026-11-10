@@ -1,3 +1,0 @@
-Initial pin verification stopped before running any old reader or changing locks:
-AssertionError: ('0da5fa61ec05076634fd5973d5f43ea132bd2476', 'packages/info_core/lib/agent_server.dart')
-The retained folder is the later released schema16 source2918010, as recorded in build/qa-issue33/legacy16-release-source.json. The next run verifies every production source and canonical lock byte against that recorded release revision instead. No source mismatch was waived.

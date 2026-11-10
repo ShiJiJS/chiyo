@@ -1,8 +1,0 @@
-{"phase":"originals-retention-recycle","elapsedMs":7371,"rss":49553408,"maxRss":86507520}
-{"phase":"ten100MiB-native-copies","elapsedMs":12239,"rss":60727296,"maxRss":86507520}
-{"phase":"metadata-admitted","elapsedMs":26851,"rss":386969600,"maxRss":515035136}
-{"phase":"full-export-verified","elapsedMs":40486,"rss":189530112,"maxRss":524734464}
-{"phase":"atomic-restore","elapsedMs":59417,"rss":550506496,"maxRss":550506496}
-{"phase":"all-versions-checked-copies-released","elapsedMs":70776,"rss":483147776,"maxRss":634675200}
-{"phase":"closed-and-cleaned","elapsedMs":71674,"rss":454832128,"maxRss":634675200}
-{"result":{"scenario":"near-limit","execution":"AOT bundle","dart":"3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on \"windows_x64\"","baselineRss":16322560,"metadataBytes":67043368,"originalBytes":104857600,"managedCopyBytes":104857600,"backupFileBytes":175833088,"exportAndVerifyMs":13437,"inspectAndRestoreMs":18836,"allVersionsExact":true,"restoredFactsOnly":true,"historicalGrants":0,"measurements":[{"phase":"originals-retention-recycle","elapsedMs":7371,"rss":49553408,"maxRss":86507520},{"phase":"ten100MiB-native-copies","elapsedMs":12239,"rss":60727296,"maxRss":86507520},{"phase":"metadata-admitted","elapsedMs":26851,"rss":386969600,"maxRss":515035136},{"phase":"full-export-verified","elapsedMs":40486,"rss":189530112,"maxRss":524734464},{"phase":"atomic-restore","elapsedMs":59417,"rss":550506496,"maxRss":550506496},{"phase":"all-versions-checked-copies-released","elapsedMs":70776,"rss":483147776,"maxRss":634675200},{"phase":"closed-and-cleaned","elapsedMs":71674,"rss":454832128,"maxRss":634675200}],"maxRss":634675200,"totalMs":71675,"postCloseRss":454832128},"temporaryOutputRemoved":true}

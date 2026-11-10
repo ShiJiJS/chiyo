@@ -1,1 +1,0 @@
-/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-locked-keychain-2/LockedKeychain.app: replacing existing signature

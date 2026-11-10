@@ -1,5 +1,0 @@
-Formatted lib/main.dart
-Formatted lib/desktop_runtime.dart
-Formatted lib/settings.dart
-Formatted test/information_file_runtime_test.dart
-Formatted 6 files (4 changed) in 0.04 seconds.

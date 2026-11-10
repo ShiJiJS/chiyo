@@ -1,5 +1,0 @@
-{
-    "UserId": "LOCALFIXTURE",
-    "Account": "000000000000",
-    "Arn": "arn:aws:iam::000000000000:user/fixture"
-}

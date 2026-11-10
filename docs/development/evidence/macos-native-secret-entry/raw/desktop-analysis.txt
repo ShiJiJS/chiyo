@@ -1,5 +1,0 @@
-Analyzing desktop...                                            
-
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/mac_secret_input.dart:105:9 • curly_braces_in_flow_control_structures
-
-1 issue found. (ran in 1.9s)

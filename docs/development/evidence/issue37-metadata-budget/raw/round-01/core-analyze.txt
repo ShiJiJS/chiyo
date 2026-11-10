@@ -1,5 +1,0 @@
-Analyzing info_core...
-
-   info - test\information_delivery_test.dart:87:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-
-1 issue found.

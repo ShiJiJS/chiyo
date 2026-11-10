@@ -1,4 +1,0 @@
-00:00 +0: loading test/desktop_control_test.dart
-00:00 +0: app control rejects malformed or duplicate arguments before any IPC
-00:00 +1: explicit unrelated CLI process is refused and remains alive
-00:00 +2: All tests passed!

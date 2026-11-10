@@ -1,8 +1,0 @@
-00:00 +0: loading test/worker_protocol_test.dart
-00:00 +0: test/worker_protocol_test.dart: an incompatible worker is rejected before launch acknowledgement without hanging or replay
-00:00 +1: test/worker_protocol_test.dart: an incompatible worker is rejected before launch acknowledgement without hanging or replay
-00:01 +2: test/worker_protocol_test.dart: an incompatible worker is rejected before launch acknowledgement without hanging or replay
-00:02 +3: test/worker_protocol_test.dart: an incompatible worker is rejected before launch acknowledgement without hanging or replay
-00:02 +4: test/worker_protocol_test.dart: an incompatible worker is rejected before launch acknowledgement without hanging or replay
-00:02 +5: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
-00:03 +6: All tests passed!

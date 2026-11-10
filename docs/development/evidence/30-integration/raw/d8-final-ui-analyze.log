@@ -1,6 +1,0 @@
-Analyzing info_core, info_cli, desktop...
-
-   info - apps\desktop\lib\history.dart:87:9 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-   info - apps\desktop\lib\history.dart:228:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-
-2 issues found.

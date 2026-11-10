@@ -1,4 +1,0 @@
-Formatted lib/information.dart
-Formatted lib/information_files.dart
-Formatted test/information_draft_test.dart
-Formatted 5 files (3 changed) in 0.02 seconds.

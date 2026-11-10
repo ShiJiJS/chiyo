@@ -1,1 +1,0 @@
-QA assertion failed: extension-based *.* enumeration omitted extensionless payload files; no payload checksum mismatch. Final verification uses the exact set of all is_file entries.

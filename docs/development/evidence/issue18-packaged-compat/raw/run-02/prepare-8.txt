@@ -1,1 +1,0 @@
-Running build hooks...Running build hooks...{"status":"prepared","format":8,"information":1,"revisions":1,"attachments":2,"attachmentBytes":100,"templates":1,"credentials":0}

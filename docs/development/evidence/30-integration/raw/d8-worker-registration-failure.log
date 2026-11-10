@@ -1,3 +1,0 @@
-00:00 +0: loading test/worker_registration_failure_test.dart
-00:00 +0: a durable worker registration failure stops the waiting worker before target creation and consumes only the original attempt
-00:00 +1: All tests passed!

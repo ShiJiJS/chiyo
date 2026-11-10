@@ -1,6 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_settings_handoff_test.dart
-00:00 +0: (setUpAll)
-00:00 +0: settings-1440-light all eight sidebar destinations share saved state without system effects or creating grants
-00:02 +1: settings-1280-dark200 all eight sidebar destinations share saved state without system effects or creating grants
-00:03 +2: (tearDownAll)
-00:03 +2: All tests passed!

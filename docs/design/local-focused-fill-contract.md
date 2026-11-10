@@ -1,6 +1,6 @@
 # 本机焦点填充合同（#35）
 
-2026-10-19，沿用Round05，基线为#33提交3d31604。#35的Windows范围已完成，见[逐项验收与支持边界](../development/issue35-completion.md)：真实Flutter审批、SQLCipher/DPAPI、独立CLI与原生输入已接通，支持记录包括Win32合成密码控件和当前可见前台内置浏览器合成页面。源码在完整束校验成功后配置驱动并启用；此前QA整包和用户旧包尚未更新，最终分发及真实Codex联合验收分别归#18/#30。
+2026-10-19，沿用Round05，基线为#33提交3d31604。#35的Windows范围已完成，见[逐项验收与支持边界](https://github.com/ShiJiJS/chiyo/issues/35)：真实Flutter审批、SQLCipher/DPAPI、独立CLI与原生输入已接通，支持记录包括Win32合成密码控件和当前可见前台内置浏览器合成页面。源码在完整束校验成功后配置驱动并启用；此前QA整包和用户旧包尚未更新，最终分发及真实Codex联合验收分别归#18/#30。
 
 ## 用户任务与设计
 
@@ -78,7 +78,7 @@ SendInput不是向某个HWND原子定向输入；最终复核和Windows接受按
 
 ## 当前检查点与后续验证
 
-已交付[核心/CLI](../development/issue35-focused-fill-core.md)、[加密存储/备份](../development/issue35-focused-fill-storage.md)、[原生输入/发现](../development/issue35-focused-fill-native.md)及[Windows完整用户流程](../development/issue35-completion.md)。使用独立操作类型及同一私密会话/版本/代际/期限，Memory和SQLCipher均实现原子审计，真实驱动逐批复核输入。`focus-target`需独立`credential-focused-target.v1`能力；Windows入口已配置构建绑定的driver并显式启用；AgentServer通用默认值仍false，实际能力还要求宿主及仓储支持。真实界面复用/未知人工确认/撤销和保持旧CLI存活的加密服务重启均已验证，不把两个实际目标推广到所有工具。
+已交付[核心/CLI](https://github.com/ShiJiJS/chiyo/issues/35)、[加密存储/备份](https://github.com/ShiJiJS/chiyo/issues/35)、[原生输入/发现](https://github.com/ShiJiJS/chiyo/issues/35)及[Windows完整用户流程](https://github.com/ShiJiJS/chiyo/issues/35)。使用独立操作类型及同一私密会话/版本/代际/期限，Memory和SQLCipher均实现原子审计，真实驱动逐批复核输入。`focus-target`需独立`credential-focused-target.v1`能力；Windows入口已配置构建绑定的driver并显式启用；AgentServer通用默认值仍false，实际能力还要求宿主及仓储支持。真实界面复用/未知人工确认/撤销和保持旧CLI存活的加密服务重启均已验证，不把两个实际目标推广到所有工具。
 
 原生`focused_input`已实现[受管输入端](windows-focused-fill-native.md)：私有二进制通道、应用文件/进程及提供者链核验、桌面互斥、超时/父进程退出隔离、Unicode批次和结果。生产broker默认构建/安装并以EXE内摘要校验，测试/诊断目标仍EXCLUDE_FROM_ALL；只有明确测试接收器读自己的假密码比对，生产broker不读控件值或剪贴板。未解决的输入阻止同会话换已批申请重填，活动操作优先busy。
 

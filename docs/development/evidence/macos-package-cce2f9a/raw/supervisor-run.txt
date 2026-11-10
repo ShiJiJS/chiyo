@@ -1,1 +1,0 @@
-{"complete": true, "archive": "build/macos-adaptation/issue50-package-13/agent-info-manage-0.4.0+12-mac-dev.cce2f9a66fa2-macos-arm64.zip", "cleanupTargets": 6}

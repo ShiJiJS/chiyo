@@ -1,2 +1,0 @@
-Formatted test\information_delivery_crash_test.dart
-Formatted 4 files (1 changed) in 0.02 seconds.

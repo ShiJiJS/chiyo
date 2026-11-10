@@ -1,5 +1,0 @@
-Formatted lib\backup_metadata_budget.dart
-Formatted lib\backups.dart
-Formatted test\information_attachments_storage_test.dart
-Formatted test\information_delivery_storage_test.dart
-Formatted 6 files (4 changed) in 0.05 seconds.

@@ -1,1 +1,0 @@
-{"status":"ok","cipherVersion":"4.19.0 community","reopen":true,"independentRecovery":true,"oldAuthorityRefused":true,"scope":"synthetic memory keys; not Keychain or desktop acceptance"}

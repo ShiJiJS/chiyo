@@ -1,5 +1,0 @@
-{
-  "expectedParent": 35338,
-  "processes": [],
-  "scope": "kernel ps comm path and parent only; no process arguments or environment collected"
-}

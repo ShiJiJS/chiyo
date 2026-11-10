@@ -1,4 +1,0 @@
-Running build hooks...Running build hooks...00:00 +0: loading test/information_attachments_storage_test.dart
-00:00 +0: file libraries reject a1001st template before committing unbackable rows
-00:00 +1: file libraries reject history beyond the shared500000 nested fact ceiling
-00:12 +2: All tests passed!

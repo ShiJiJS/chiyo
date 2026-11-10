@@ -1,4 +1,0 @@
-Formatted lib/history.dart
-Formatted test/information_file_approval_history_test.dart
-Formatted test/support/information_attachment_fixture.dart
-Formatted 7 files (3 changed) in 0.11 seconds.

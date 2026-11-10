@@ -1,8 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/credential_keyboard_test.dart
-00:00 +0: credential Escape follows guarded cancellation and retains or discards the draft as chosen (variant: TargetPlatform.macOS)
-00:00 +1: credential Escape follows guarded cancellation and retains or discards the draft as chosen (variant: TargetPlatform.windows)
-00:00 +2: management Escape uses existing cancel behavior without changing metadata versions or state (variant: TargetPlatform.macOS)
-00:01 +3: management Escape uses existing cancel behavior without changing metadata versions or state (variant: TargetPlatform.windows)
-00:01 +4: Escape cannot dismiss a management save while its actual repository commit is pending (variant: TargetPlatform.macOS)
-00:01 +5: Escape cannot dismiss a management save while its actual repository commit is pending (variant: TargetPlatform.windows)
-00:01 +6: All tests passed!

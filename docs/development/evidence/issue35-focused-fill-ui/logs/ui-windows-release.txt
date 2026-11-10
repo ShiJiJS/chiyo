@@ -1,3 +1,0 @@
-Building Windows application...                                    23.6s
-√ Built build\windows\x64\runner\Release\info_desktop.exe
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!

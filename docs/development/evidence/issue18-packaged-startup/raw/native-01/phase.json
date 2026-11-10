@@ -1,7 +1,0 @@
-{
-  "stage": "observe-and-close",
-  "case": "corrupt-database",
-  "pid": 52404,
-  "executable": "C:\\Project\\network_config\\info-manage\\build\\windows-preview-0.4.0-10-527b4cc\\AgentInfoManage\\app\\info_desktop.exe",
-  "localAppData": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-startup-hl09b8lu\\corrupt-database"
-}

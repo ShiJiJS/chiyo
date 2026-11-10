@@ -1,7 +1,0 @@
-{
-  "signatureExitCode": 0,
-  "nativeSHA256": "f195e0fb839376ad5b0f0ebb81421e1042194505ed04462a3c7f3cd77b36fe5d",
-  "dartAppSHA256": "7447a0a3269877608976623b4302f6b1b5f85e320a8fc15bb70d7fb178dd2f09",
-  "architecture": "x86_64 arm64",
-  "nativeBaselineMode": "QA-only environment disables helper installation; product has no such flag"
-}

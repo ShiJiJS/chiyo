@@ -1,7 +1,0 @@
-{
-  "apps/desktop/lib/mac_text_editing.dart": true,
-  "apps/desktop/lib/window_frame.dart": true,
-  "apps/desktop/macos/Runner/NativeTextEditingMenu.swift": true,
-  "apps/desktop/macos/Runner.xcodeproj/project.pbxproj": true,
-  "apps/desktop/macos/Runner/MainFlutterWindow.swift excluding identified QA-only clipboard block": true
-}

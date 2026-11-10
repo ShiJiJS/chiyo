@@ -1,9 +1,0 @@
-{
-  "pairs": 4,
-  "order": "reference above actual, full header at 1 source pixel per displayed pixel",
-  "referenceICCConvertedForPairedDisplayOnly": true,
-  "solidStrokeMaskComparisonAccepted": false,
-  "reason": "Raw encoded CSS colors differ under embedded screenshot ICC; exact-color connected components are also affected by edge antialiasing. No cross-raster bound/color claim is made.",
-  "actualPixelContracts": "17 tests cover original border, 3px clear gap, exterior accent, menu exception, eight real-shell contexts and legacy/disabled behavior.",
-  "fullS5Passed": false
-}

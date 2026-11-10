@@ -1,1 +1,0 @@
-Generated: c:\project\network_config\info-manage\build\qa-issue35\core-cli\info-runtime-worker.exe

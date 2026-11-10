@@ -1,6 +1,6 @@
 # Windows焦点填充输入端
 
-2026-10-19，#35的Windows输入端已实现，见[完成记录](../development/issue35-completion.md)。业务边界以[填充合同](local-focused-fill-contract.md)为准；[338445a/3e98ec6](../development/issue35-focused-fill-bundle.md)已配置构建绑定driver并生成较早QA整包，Windows源码按束校验成功条件启用；用户旧包未变。支持记录覆盖一个真实Win32密码控件和当前可见、系统前台中的Codex内置浏览器合成页面，不能推广到所有工具/页面。
+2026-10-19，#35的Windows输入端已实现，见[完成记录](https://github.com/ShiJiJS/chiyo/issues/35)。业务边界以[填充合同](local-focused-fill-contract.md)为准；[338445a/3e98ec6](https://github.com/ShiJiJS/chiyo/issues/35)已配置构建绑定driver并生成较早QA整包，Windows源码按束校验成功条件启用；用户旧包未变。支持记录覆盖一个真实Win32密码控件和当前可见、系统前台中的Codex内置浏览器合成页面，不能推广到所有工具/页面。
 
 Agent经私密会话调用`focus-target`，只得到应用规范路径、当前文件SHA-256和当时是否就绪；无PID、窗口/控件身份、网页标题、字段值、DOM或截图。需要协议2及`credential-focused-target.v1`、既有填充/复用能力。查询不固定之后的焦点、不审批、不输入；批准后仍由Agent点击空密码框。
 
@@ -27,6 +27,6 @@ Agent经私密会话调用`focus-target`，只得到应用规范路径、当前�
 
 未解决的partial/unknown（含审计失败保留的checking）阻止同会话换操作ID或换另一项已批申请重填；活动操作优先返回busy。同ID仍查原事实，所有者确认不续期、不改成未输入；不使其他方式的命令操作失效。
 
-[原生检查点](../development/issue35-focused-fill-native.md)记录真实CLI/Win32、互斥、未知恢复、无粘贴/剪贴板不变及正常工具文字扫描。只有测试接收器读取自己的假密码作独立比对，生产broker不读回控件。后续[完整用户流程](../development/issue35-completion.md)补齐实际Flutter审批/历史/人工确认、SQLCipher/DPAPI、独立CLI、活动许可重启失效及真实broker父进程退出。当前内置浏览器的正常AX/value遮挡和明文截图反例已有实际观察；DOM聚焦无法切换系统前台时需先切回目标应用再发现ready。SDK辅助功能失败及对照原样留证，没有修改生产可访问性。生产broker默认安装，测试/诊断和故障桩仍EXCLUDE_FROM_ALL，不进用户包；最新验证不是新分发包。
+[原生检查点](https://github.com/ShiJiJS/chiyo/issues/35)记录真实CLI/Win32、互斥、未知恢复、无粘贴/剪贴板不变及正常工具文字扫描。只有测试接收器读取自己的假密码作独立比对，生产broker不读回控件。后续[完整用户流程](https://github.com/ShiJiJS/chiyo/issues/35)补齐实际Flutter审批/历史/人工确认、SQLCipher/DPAPI、独立CLI、活动许可重启失效及真实broker父进程退出。当前内置浏览器的正常AX/value遮挡和明文截图反例已有实际观察；DOM聚焦无法切换系统前台时需先切回目标应用再发现ready。SDK辅助功能失败及对照原样留证，没有修改生产可访问性。生产broker默认安装，测试/诊断和故障桩仍EXCLUDE_FROM_ALL，不进用户包；最新验证不是新分发包。
 
 依据：[UIA2超时](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomation2-put_transactiontimeout)、[SendInput边界](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)、[进程快照](https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot)、[PID复用](https://devblogs.microsoft.com/oldnewthing/20150403-00/?p=44313)。

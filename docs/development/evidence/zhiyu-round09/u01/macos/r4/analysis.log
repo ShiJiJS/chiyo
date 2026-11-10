@@ -1,5 +1,0 @@
-Analyzing desktop...                                            
-
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • integration_test/support/native_frame_recording.dart:119:7 • curly_braces_in_flow_control_structures
-
-1 issue found. (ran in 2.5s)

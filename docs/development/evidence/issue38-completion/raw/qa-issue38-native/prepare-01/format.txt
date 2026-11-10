@@ -1,3 +1,0 @@
-Formatted integration_test/ordinary_files_native_test.dart
-Formatted integration_test/support/ordinary_file_native_fixture.dart
-Formatted 2 files (2 changed) in 0.01 seconds.

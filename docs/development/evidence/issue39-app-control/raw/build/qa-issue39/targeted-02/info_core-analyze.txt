@@ -1,6 +1,0 @@
-Analyzing info_core...
-
-warning - test\windows_desktop_control_test.dart:51:83 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
-warning - test\windows_desktop_control_test.dart:53:83 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
-
-2 issues found.

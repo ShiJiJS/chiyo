@@ -1,7 +1,0 @@
-Building Windows application...                                 
-.scratch/ax_probe_app.dart(49,18): error G297C951C: Can't find ')' to match '('. [C:\Project\network_config\info-manage-worktrees\26-history-settings\apps\desktop\build\windows\x64\flutter\flutter_assemble.vcxproj]
-.scratch/ax_probe_app.dart(146,1): error G67247B7E: Expected '{' before this. [C:\Project\network_config\info-manage-worktrees\26-history-settings\apps\desktop\build\windows\x64\flutter\flutter_assemble.vcxproj]
-.scratch/ax_probe_app.dart(194,54): error G4127D1E8: The getter 'fields' isn't defined for the type 'RequestReceipt'. [C:\Project\network_config\info-manage-worktrees\26-history-settings\apps\desktop\build\windows\x64\flutter\flutter_assemble.vcxproj]
-C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(254,5): error MSB8066: “C:\Project\network_config\info-manage-worktrees\26-history-settings\apps\desktop\build\windows\x64\CMakeFiles\d2b0467d84f57a41b25a768cbf085811\flutter_windows.dll.rule;C:\Project\network_config\info-manage-worktrees\26-history-settings\apps\desktop\build\windows\x64\CMakeFiles\c821bc82ab632f38b78e6cd1c7aafe56\flutter_assemble.rule”的自定义生成已退出，代码为 1。 [C:\Project\network_config\info-manage-worktrees\26-history-settings\apps\desktop\build\windows\x64\flutter\flutter_assemble.vcxproj]
-Building Windows application...                                    16.7s
-Build process failed.

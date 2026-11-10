@@ -1,8 +1,0 @@
-Analyzing desktop...                                            
-
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • integration_test/macos_editor_focus_manual.dart:133:13 • curly_braces_in_flow_control_structures
-warning • Dead code. Try removing the code, or fixing the code before it so that it can be reached • integration_test/macos_editor_focus_manual.dart:133:50 • dead_code
-warning • The left operand can't be null, so the right operand is never executed. Try removing the operator and the right operand • integration_test/macos_editor_focus_manual.dart:133:53 • dead_null_aware_expression
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • integration_test/macos_editor_focus_manual.dart:135:13 • curly_braces_in_flow_control_structures
-
-4 issues found. (ran in 5.0s)

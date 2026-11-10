@@ -1,9 +1,0 @@
-00:00 +0: loading test/information_draft_test.dart
-00:00 +0: owner usage accounts for retained originals and uncommitted stages in the same byte budget
-00:00 +1: mixed save consumes stages once, retries after form close and rejects operation reuse
-00:00 +2: text-only edit and retained file metadata preserve exact attachment and identity
-00:00 +3: same-purpose replacement keeps field identity and creates immutable original version
-00:00 +4: meaning or kind changes use new identity and create recoverable deletion facts
-00:00 +5: stale forms, foreign stages and borrowed references cannot alter saved content
-00:00 +6: restore invalidates both completed receipts and uncommitted form handles
-00:00 +7: All tests passed!
