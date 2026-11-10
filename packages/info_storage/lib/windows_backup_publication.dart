@@ -312,21 +312,51 @@ final class _WindowsPublicationFiles {
   });
 }
 
+final class _PublicationUnicodeString extends Struct {
+  @Uint16()
+  external int length;
+  @Uint16()
+  external int maximumLength;
+  external Pointer<Utf16> buffer;
+}
+
+final class _PublicationObjectAttributes extends Struct {
+  @Uint32()
+  external int length;
+  external Pointer<Void> rootDirectory;
+  external Pointer<_PublicationUnicodeString> objectName;
+  @Uint32()
+  external int attributes;
+  external Pointer<Void> securityDescriptor;
+  external Pointer<Void> securityQualityOfService;
+}
+
 final class _WindowsPublicationNative {
   late final kernel = DynamicLibrary.open('kernel32.dll');
-  late final _open = kernel
+  late final _ntdll = DynamicLibrary.open('ntdll.dll');
+  late final _ntOpen = _ntdll
       .lookupFunction<
-        IntPtr Function(
-          Pointer<Utf16>,
+        Int32 Function(
+          Pointer<IntPtr>,
           Uint32,
-          Uint32,
+          Pointer<_PublicationObjectAttributes>,
           Pointer<Void>,
           Uint32,
           Uint32,
-          IntPtr,
         ),
-        int Function(Pointer<Utf16>, int, int, Pointer<Void>, int, int, int)
-      >('CreateFileW');
+        int Function(
+          Pointer<IntPtr>,
+          int,
+          Pointer<_PublicationObjectAttributes>,
+          Pointer<Void>,
+          int,
+          int,
+        )
+      >('NtOpenFile');
+  late final _statusToError = _ntdll
+      .lookupFunction<Uint32 Function(Int32), int Function(int)>(
+        'RtlNtStatusToDosError',
+      );
   late final _close = kernel
       .lookupFunction<Int32 Function(IntPtr), int Function(int)>('CloseHandle');
   late final _info = kernel
@@ -383,6 +413,49 @@ final class _WindowsPublicationNative {
     }
   }
 
+  // Return the open status as a value, rather than reading thread-local
+  // GetLastError after a Dart FFI transition (dart-lang/sdk#38832).
+  (int, int) _openExisting(String path, int access, int share, bool directory) {
+    final ntPath = r'\??\' + path.replaceAll('/', r'\');
+    if (ntPath.length > 32766)
+      throw const BackupPublicationFailure('invalid_path');
+    final name = ntPath.toNativeUtf16();
+    final text = calloc<_PublicationUnicodeString>();
+    final attributes = calloc<_PublicationObjectAttributes>();
+    final result = calloc<IntPtr>();
+    final statusBlock = calloc<Uint64>(2);
+    try {
+      text.ref
+        ..length = ntPath.length * 2
+        ..maximumLength = ntPath.length * 2 + 2
+        ..buffer = name;
+      attributes.ref
+        ..length = sizeOf<_PublicationObjectAttributes>()
+        ..objectName = text
+        ..attributes =
+            0x40; // OBJ_CASE_INSENSITIVE, never an inherited/kernel handle.
+      final status = _ntOpen(
+        result,
+        access | 0x100000, // SYNCHRONIZE, required by synchronous I/O.
+        attributes,
+        statusBlock.cast(),
+        share,
+        0x00200000 | 0x20 | (directory ? 1 : 0x40),
+      );
+      // OPEN_REPARSE_POINT + synchronous non-alertable I/O. Keep the original
+      // sharing rules; NtOpenFile opens existing objects and cannot create one.
+      if (status < 0) return (-1, _statusToError(status));
+      if (result.value == 0 || result.value == -1) return (-1, 6);
+      return (result.value, 0);
+    } finally {
+      calloc.free(statusBlock);
+      calloc.free(result);
+      calloc.free(attributes);
+      calloc.free(text);
+      calloc.free(name);
+    }
+  }
+
   int open(
     String path, {
     bool directory = false,
@@ -394,22 +467,15 @@ final class _WindowsPublicationNative {
   }) {
     // The parent directory handles omit SHARE_DELETE, pinning the complete
     // canonical binding while a source/destination operation is in progress.
-    final lastError = _lastError;
-    (int, int) acquire() => _name(path, (name) {
-      final handle = _open(
-        name,
-        0x20080 |
-            (directory ? 0 : 0x80000000) |
-            (writing ? 0x40000000 : 0) |
-            (deleting ? 0x10000 : 0),
-        directory ? 3 : 5,
-        nullptr,
-        3,
-        0x00200000 | (directory ? 0x02000000 : 0),
-        0,
-      );
-      return (handle, lastError());
-    });
+    (int, int) acquire() => _openExisting(
+      path,
+      0x20080 |
+          (directory ? 0 : 0x80000000) |
+          (writing ? 0x40000000 : 0) |
+          (deleting ? 0x10000 : 0),
+      directory ? 3 : 5,
+      directory,
+    );
     var (handle, error) = acquire();
     final acquisition = Stopwatch()..start();
     // A short-lived reader may temporarily deny DELETE. Only cleanup handle

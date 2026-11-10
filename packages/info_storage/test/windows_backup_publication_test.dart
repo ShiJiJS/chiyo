@@ -40,25 +40,9 @@ void main() {
     return MacBackupPublicationFiles.prepare(source, destination);
   }
 
-  Future<void> cleanupOriginal(MacBackupPublication publication) async {
-    final wait = Stopwatch()..start();
-    while (true) {
-      try {
-        MacBackupPublicationFiles.cleanup(publication);
-        return;
-      } on BackupPublicationFailure catch (error) {
-        if (error.code != 'identity_unavailable' ||
-            !const {5, 32, 33}.contains(error.nativeError) ||
-            wait.elapsed > const Duration(seconds: 3))
-          rethrow;
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-    }
-  }
-
   test(
     'publish retains a private original until durable result, cleanup leaves selected file',
-    () async {
+    () {
       final original = prepare();
       final publication = MacBackupPublication.fromPrivateJson(
         jsonDecode(jsonEncode(original.toPrivateJson()))
@@ -82,7 +66,7 @@ void main() {
         () => WindowsPrivateFiles.verify(source),
         throwsA(isA<RuntimeMaterialFailure>()),
       );
-      await cleanupOriginal(publication);
+      MacBackupPublicationFiles.cleanup(publication);
       expect(File(source).existsSync(), isFalse);
       expect(File(destination).readAsBytesSync(), bytes);
       MacBackupPublicationFiles.cleanupStaging(staging);
@@ -103,7 +87,7 @@ void main() {
         MacBackupPublicationFiles.confirmPublished(publication),
         BackupPublicationObservation.matching,
       );
-      await cleanupOriginal(publication);
+      MacBackupPublicationFiles.cleanup(publication);
       MacBackupPublicationFiles.cleanupStaging(staging);
       expect(File(destination).readAsBytesSync(), bytes);
     },
@@ -145,9 +129,21 @@ void main() {
           reason: await errors,
         );
       }
-      await cleanupOriginal(publication);
+      MacBackupPublicationFiles.cleanup(publication);
       MacBackupPublicationFiles.cleanupStaging(staging);
       expect(File(destination).existsSync(), isFalse);
+    },
+  );
+
+  test(
+    'repeated cleanup of an already absent original preserves the native missing result',
+    () {
+      final publication = prepare();
+      MacBackupPublicationFiles.cleanup(publication);
+      for (var attempt = 0; attempt < 1500; attempt++) {
+        MacBackupPublicationFiles.cleanup(publication);
+      }
+      MacBackupPublicationFiles.cleanupStaging(staging);
     },
   );
 
