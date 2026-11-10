@@ -318,22 +318,6 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           ),
         ),
       ),
-      const SizedBox(height: 32),
-      SettingsCard(
-        children: [
-          SettingsPreferenceRow(
-            title: '阅读层次',
-            description: '背景、列表和详情用不同明度区分；强调色用于当前选择与主要操作。',
-            control: const PrototypeIcon(PrototypeIconGlyph.layers),
-          ),
-          SettingsPreferenceRow(
-            title: '资料识别',
-            divider: false,
-            description: '保留服务器、文件和凭据的图标色，并始终显示类型名称。',
-            control: const PrototypeIcon(PrototypeIconGlyph.file),
-          ),
-        ],
-      ),
     ],
   );
   Widget _records(BuildContext context) {
@@ -857,18 +841,19 @@ class _NotificationPreviewState extends State<_NotificationPreview> {
           const SizedBox(height: 15),
           Text(p.description, style: libraryText(context, 14, height: 1.8)),
           const SizedBox(height: 15),
-          const Text('仅显示申请概况；点击后进入对应申请，不会自动批准。'),
+          if (p.requestId != null) const Text('点击可查看申请详情。'),
         ],
       ],
     ),
     actions: [
-      DesktopButton(
-        key: const ValueKey('settings-notification-open'),
-        onPressed: _preview?.requestId == null
-            ? null
-            : () => Navigator.pop(context, _preview!.requestId),
-        child: const Text('前往对应申请'),
-      ),
+      if (_preview?.requestId != null)
+        DesktopButton(
+          key: const ValueKey('settings-notification-open'),
+          onPressed: _preview?.requestId == null
+              ? null
+              : () => Navigator.pop(context, _preview!.requestId),
+          child: const Text('前往对应申请'),
+        ),
       DesktopButton(
         onPressed: () => Navigator.pop(context),
         child: const Text('关闭'),

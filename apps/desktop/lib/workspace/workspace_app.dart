@@ -505,11 +505,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
         (context, location) => location.page == WorkspacePage.library
             ? LibraryPage(
                 controller: _library,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 workspaceNavigationEnabled: !_controller.navigationLocked,
                 filePicker: widget.inputsBuilder?.call(context).file,
                 credentialPicker: widget.inputsBuilder
@@ -544,11 +539,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             : location.page == WorkspacePage.history
             ? GrantHistoryPage(
                 controller: _history,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 onProposal: (id) => _navigate(WorkspacePage.proposals, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onRequest: (id) => _navigate(WorkspacePage.approvals, id),

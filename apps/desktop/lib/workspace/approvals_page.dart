@@ -615,11 +615,6 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             d.request.purpose,
             style: libraryText(context, 14, height: 1.95),
           ),
-          const SizedBox(height: 14),
-          Text(
-            '聊天名称和用途由 Agent 自述，仅供判断。',
-            style: libraryText(context, 12, color: c.muted),
-          ),
           _section(context, '申请范围', _scopes(context)),
           _section(
             context,
@@ -798,7 +793,11 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                         Padding(
                           padding: const EdgeInsets.all(14),
                           child: Text(
-                            '没有匹配的请求。',
+                            model.keyword.isEmpty &&
+                                    model.filter ==
+                                        WorkspaceApprovalFilter.pending
+                                ? '暂无待处理申请'
+                                : '没有找到匹配的申请',
                             style: libraryText(context, 13, color: c.muted),
                           ),
                         ),

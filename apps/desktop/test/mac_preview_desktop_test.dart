@@ -166,7 +166,7 @@ void main() {
       expect(t.widget<DesktopTextField>(name).controller, same(editor));
       expect(editor.text, 'Kept draft');
       expect(page.controller.selection, selected);
-      expect(t.getSize(title).width, width + 11);
+      expect(t.getSize(title).width, width);
       final dialogBehavior = ScrollConfiguration.of(t.element(name));
       expect((dialogBehavior as DesktopScrollBehavior).scrollbarGutter, 9);
       await t.tap(find.text('取消'));

@@ -95,7 +95,7 @@ void main() {
               expect(find.byTooltip('资料操作'), findsOneWidget);
 
               await tap(t, key('library-create'));
-              expect(find.text('保存到 自托管服务'), findsOneWidget);
+              expect(find.text('保存到 自托管服务'), findsNothing);
               final palette = UiPalette.of(
                 t.element(find.byType(LibraryCreateDialog)),
               );
@@ -104,7 +104,6 @@ void main() {
                   .text
                   .style!
                   .color;
-              expect(renderedColor('保存到 自托管服务'), palette.accent);
               expect(renderedColor('设置 · 插件'), palette.muted);
               expect(
                 t

@@ -101,7 +101,7 @@ class WorkspaceBackupPage extends StatelessWidget {
                     ? '正在核对目标库…'
                     : v.recipientEmpty
                     ? '当前目标库为空，可以选择备份和恢复密钥，再核对恢复范围。'
-                    : '目标库非空：${v.blockers.join('、')}。不能覆盖或合并恢复，请使用独立空库。',
+                    : '当前库已有${v.blockers.join('、')}。请先保留当前备份，再选择独立空库恢复；不会覆盖当前资料。',
                 control: DesktopButton(
                   key: const ValueKey('backup-open-restore'),
                   onPressed: m.available
@@ -381,7 +381,7 @@ class _BackupFlowState extends State<_BackupFlow> {
                       ? '正在核对目标库…'
                       : v.recipientEmpty
                       ? '当前目标库为空，可以检查备份。'
-                      : '目标库非空，不能覆盖或合并恢复。${v.blockers.join('、')}仍存在。',
+                      : '当前库已有${v.blockers.join('、')}。请先保留当前备份，再选择独立空库恢复；不会覆盖当前资料。',
                   key: const ValueKey('backup-recipient-state'),
                   style: libraryText(
                     context,

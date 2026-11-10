@@ -53,12 +53,6 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
     final types = widget.catalog.creatableTypes;
-    final directory =
-        widget.catalog.directories
-            .where((d) => d.id == widget.directoryId)
-            .firstOrNull
-            ?.name ??
-        '未分类';
     return DesktopDialog(
       title: const Text('添加资料'),
       content: FutureBuilder<WorkspacePluginCatalog>(
@@ -69,7 +63,11 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
                 in snapshot.data?.packages ?? <WorkspacePlugin>[])
               if (package.enabled)
                 for (final template in package.templates)
-                  template.type.id: package.description,
+                  template.type.id:
+                      template.definition['description'] as String? ??
+                      (package.description.isNotEmpty
+                          ? package.description
+                          : '记录${(template.definition['fields'] as List? ?? []).take(3).map((f) => f['label']).join('、')}。'),
           };
           final core = [
             for (final id in _core) ...types.where((type) => type.id == id),
@@ -78,26 +76,6 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 20.8),
-                child: Wrap(
-                  key: const ValueKey('library-create-intro'),
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 12,
-                  runSpacing: 4,
-                  children: [
-                    Text(
-                      '选择资料的内容形式。',
-                      style: libraryText(context, 13, color: c.muted),
-                    ),
-                    Text(
-                      '保存到 $directory',
-                      style: libraryText(context, 12, color: c.accent),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 17),
               if (snapshot.connectionState != ConnectionState.done)
                 Semantics(
@@ -222,9 +200,31 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
-                                    child: Text(
-                                      type.id == 'file' ? '普通文件' : type.name,
-                                      style: libraryText(context, 14),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          type.id == 'file'
+                                              ? '普通文件'
+                                              : type.name,
+                                          style: libraryText(context, 14),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          switch (type.id) {
+                                            'document' => '说明、笔记与长文',
+                                            'file' => 'PDF、图片或其他附件',
+                                            'credential' => '密码、Token 与密钥',
+                                            _ => '没有专用模板的简短信息',
+                                          },
+                                          style: libraryText(
+                                            context,
+                                            12,
+                                            color: c.muted,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
