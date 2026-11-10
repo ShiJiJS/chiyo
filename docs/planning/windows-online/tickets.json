@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "status": "implementation-active",
+  "status": "implementation-completed",
   "repository": "ShiJiJS/chiyo",
   "preparedOn": "2026-11-09",
   "baseline": "ac8960c77e124e7f10c3be3c6a67364db3a0ea2e",
@@ -89,7 +89,8 @@
       "issueNumber": 113,
       "issueId": 6289281534,
       "url": "https://github.com/ShiJiJS/chiyo/issues/113",
-      "state": "in_progress"
+      "state": "completed",
+      "sourceCommit": "a1b35ed"
     },
     {
       "id": "W09",
@@ -120,7 +121,8 @@
       "issueNumber": 115,
       "issueId": 6289284877,
       "url": "https://github.com/ShiJiJS/chiyo/issues/115",
-      "state": "in_progress"
+      "state": "completed",
+      "sourceCommit": "a1b35ed"
     },
     {
       "id": "W11",
@@ -134,7 +136,10 @@
       "issueNumber": 116,
       "issueId": 6289285896,
       "url": "https://github.com/ShiJiJS/chiyo/issues/116",
-      "state": "published"
+      "state": "completed",
+      "sourceCommit": "5845d3cb7ba1641370beb32ccd92df73dfdafc68"
     }
-  ]
+  ],
+  "completedOn": "2026-11-10",
+  "deliveryEvidence": "docs/development/evidence/windows-online/w116-package-5845d3c.json"
 }
