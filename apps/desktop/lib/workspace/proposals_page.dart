@@ -11,6 +11,7 @@ import 'proposal_batch_dialog.dart';
 import 'organization_reading.dart';
 import 'workspace_source.dart';
 import 'proposal_passwords.dart';
+import 'proposal_item_tabs.dart';
 import 'proposal_content_preview.dart';
 import 'proposal_directory.dart';
 
@@ -1045,21 +1046,19 @@ class _ProposalsPageState extends State<ProposalsPage> {
                     if (m.reviewItems.length > 1)
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final (index, item) in m.reviewItems.indexed)
-                              ChoiceChip(
-                                showCheckmark: false,
+                        child: ProposalItemTabs(
+                          selected: m.activeItemId!,
+                          enabled: !m.frozen,
+                          onSelected: m.selectItem,
+                          items: [
+                            for (final item in m.reviewItems)
+                              (
+                                id: item.id,
+                                title:
+                                    m.draft?.items[item.id]?.name ??
+                                    item.proposed.record.name,
+                                attention: m.isPasswordMissing(item),
                                 key: ValueKey('proposal-tab-${item.id}'),
-                                selected: m.activeItemId == item.id,
-                                onSelected: m.frozen
-                                    ? null
-                                    : (_) => m.selectItem(item.id),
-                                label: Text(
-                                  '${index + 1}. ${m.draft?.items[item.id]?.name ?? item.proposed.record.name}${m.isPasswordMissing(item) ? ' · 待填密码' : ''}',
-                                ),
                               ),
                           ],
                         ),
@@ -1086,24 +1085,24 @@ class _ProposalsPageState extends State<ProposalsPage> {
                     if (d.targets.length > 1)
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
+                        child: ProposalItemTabs(
+                          selected:
+                              (_savedSelection[s.id] ?? d.targets.first.record)
+                                  .key,
+                          onSelected: (id) => setState(
+                            () => _savedSelection[s.id] = d.targets
+                                .firstWhere((t) => t.record.key == id)
+                                .record,
+                          ),
+                          items: [
                             for (final target in d.targets)
-                              ChoiceChip(
-                                showCheckmark: false,
+                              (
+                                id: target.record.key,
+                                title: target.name,
+                                attention: false,
                                 key: ValueKey(
                                   'proposal-saved-tab-${target.record.key}',
                                 ),
-                                selected:
-                                    (_savedSelection[s.id] ??
-                                        d.targets.first.record) ==
-                                    target.record,
-                                onSelected: (_) => setState(
-                                  () => _savedSelection[s.id] = target.record,
-                                ),
-                                label: Text(target.name),
                               ),
                           ],
                         ),
