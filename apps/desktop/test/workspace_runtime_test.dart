@@ -165,7 +165,7 @@ void main() {
         (await s.approvals.read('server')).credentialExpiresAt,
         grant.credentialExpiresAt,
       );
-      s.advanceApprovalClock(const Duration(minutes: 31));
+      s.advanceApprovalClock(const Duration(minutes: 121));
       final expired = await write(WorkspaceRuntimeAction.checkAttachments);
       expect(expired.released, 1);
       expect(

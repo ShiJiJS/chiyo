@@ -88,7 +88,7 @@ void main() {
         desired: p.copyWith(
           theme: WorkspaceTheme.dark,
           notifications: false,
-          requestMinutes: 15,
+          requestMinutes: 30,
         ),
       );
       await settings.change(off);
@@ -111,7 +111,7 @@ void main() {
       await open();
       final reopened = await settings.read();
       expect(reopened.theme, WorkspaceTheme.dark);
-      expect(reopened.requestMinutes, 15);
+      expect(reopened.requestMinutes, 30);
       expect(reopened.notifications, isTrue);
       expect((await settings.receipt('off'))!.commandDigest, off.digest);
       expect((await settings.change(off)).commandDigest, off.digest);

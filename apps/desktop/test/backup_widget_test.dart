@@ -130,10 +130,10 @@ void main() {
       expect(
         tester
             .widget<DesktopSelect<int>>(
-              find.byKey(const ValueKey('timeout-30')),
+              find.byKey(const ValueKey('timeout-120')),
             )
             .value,
-        30,
+        120,
       );
       expect(
         tester

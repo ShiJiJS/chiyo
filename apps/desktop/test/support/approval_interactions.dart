@@ -9,11 +9,7 @@ Future<void> selectGrantMinutes(
   if (control.evaluate().single.widget is DesktopSelect<int>) {
     await tester.tap(control);
     await tester.pumpAndSettle();
-    final label = minutes == 480
-        ? '8 小时（默认）'
-        : minutes < 60
-        ? '$minutes 分钟'
-        : '${minutes ~/ 60} 小时';
+    final label = minutes < 60 ? '$minutes 分钟' : '${minutes ~/ 60} 小时';
     await tester.tap(find.text(label).last);
   } else {
     await tester.enterText(control, '$minutes');

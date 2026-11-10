@@ -358,6 +358,7 @@ void main() {
         (await cli.call({
           'command': 'session',
           'chatLabel': '独立CLI合成聊天',
+          'externalChatId': 'synthetic-file-cli-chat',
         }))['status'],
         'ok',
       );
@@ -365,6 +366,7 @@ void main() {
         'command': 'request',
         'operationId': 'cli-request',
         'purpose': '合成文件领取',
+        'agentName': '合成文件 Agent',
         'fields': [
           for (final f in item.fields) {'itemId': item.id, 'fieldId': f.id},
         ],
@@ -626,7 +628,7 @@ void main() {
       await source.approvals.change(await command(r.id));
       final copy =
           (await fetch(r.session, r.id, 'before-expiry'))['delivery'] as Map;
-      now = now.add(const Duration(minutes: 31));
+      now = now.add(const Duration(minutes: 121));
       expect((await fetch(r.session, r.id, 'expired'))['status'], 'expired');
       await service.agent.drainInformationFileDeliveries();
       expect(File(copy['path'] as String).existsSync(), false);

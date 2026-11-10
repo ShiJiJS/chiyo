@@ -192,3 +192,6 @@ class PrototypeSelfDescription extends StatelessWidget {
     ),
   );
 }
+
+String approvalDurationLabel(int minutes) =>
+    minutes < 60 || minutes % 60 != 0 ? '$minutes 分钟' : '${minutes ~/ 60} 小时';

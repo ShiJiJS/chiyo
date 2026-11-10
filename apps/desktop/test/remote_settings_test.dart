@@ -153,8 +153,8 @@ void main() {
         await ui.tap('settings-section-records');
         expect(find.text('47 分钟'), findsOneWidget);
         await ui.tap('settings-request-minutes');
-        await ui.until(() => find.text('60 分钟').evaluate().isNotEmpty);
-        await t.runAsync(() => t.tap(find.text('60 分钟').last));
+        await ui.until(() => find.text('1 小时').evaluate().isNotEmpty);
+        await t.runAsync(() => t.tap(find.text('1 小时').last));
         await t.pump();
         await ui.until(() => model.draft!.requestMinutes == 60);
         await ui.tap('settings-records-save');
@@ -271,7 +271,7 @@ void main() {
         expect(b.model.uncertain, isTrue);
         expect(b.model.draft!.theme, WorkspaceTheme.dark);
         expect(b.model.draft!.requestMinutes, 60);
-        expect(b.model.value!.requestMinutes, 30);
+        expect(b.model.value!.requestMinutes, 120);
         await b.model.reconcile();
         expect(b.model.uncertain, isTrue);
         proxy.failGetPrefix = null;
@@ -313,7 +313,7 @@ void main() {
         await a.model.reconcile();
         expect(a.model.writeFailure!.code, 'not_submitted');
         expect(a.model.value!.theme, WorkspaceTheme.light);
-        expect((await a.source.settings.read()).requestMinutes, 30);
+        expect((await a.source.settings.read()).requestMinutes, 120);
         proxy.failPostPrefix = null;
         await expectLater(
           a.source.settings.change(original),
@@ -450,13 +450,13 @@ void main() {
         expect(a.model.writeFailure!.code, 'library_changed');
         expect(a.model.uncertain, isFalse);
         expect(a.model.value!.theme, WorkspaceTheme.dark);
-        expect(a.model.value!.requestMinutes, 30);
+        expect(a.model.value!.requestMinutes, 120);
         expect(proxy.requests['POST /v1/owner/settings/changes'], 1);
         await a.close();
         final b = await _App.open(f, 'restore');
         expect(b.model.uncertain, isFalse);
         expect(b.model.value!.theme, WorkspaceTheme.dark);
-        expect(b.model.value!.requestMinutes, 30);
+        expect(b.model.value!.requestMinutes, 120);
       }, _Http());
     },
   );
