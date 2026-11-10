@@ -1,4 +1,12 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:info_remote/connection_profile.dart';
+import 'package:info_desktop/desktop_controls.dart';
+import 'package:info_desktop/online_desktop_launcher.dart';
+import 'package:info_desktop/workspace/settings_page.dart';
+import 'package:info_desktop/workspace/remote_workspace_source.dart';
+import '../test/support/desktop_platform_fixture.dart';
+import '../test/support/online_ui_harness.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -379,5 +387,122 @@ void main() {
       desktop.dispose();
       semantics.finishAfterUnmount();
     },
+  );
+  testWidgets(
+    'real connection settings retain the native workspace',
+    (t) async {
+      final semantics = NativeSemanticsLifetime(t);
+      await loadDesktopFonts();
+      final fixture =
+          jsonDecode(
+                utf8.decode(
+                  base64Decode(
+                    const String.fromEnvironment(
+                      'CHIYO_NATIVE_CONNECTION_FIXTURE',
+                    ),
+                  ),
+                ),
+              )
+              as Map<String, dynamic>;
+      final root = await Directory.systemTemp.createTemp(
+        'chiyo-native-connection-',
+      );
+      final store = PrivateConnectionProfileStore(root.path);
+      await store.save(ConnectionProfile.fromJson(fixture));
+      final desktop = MacPreviewDesktop();
+      await desktop.initialize();
+      final output = (await MacPreviewDesktop.channel.invokeMethod<String>(
+        'createEvidenceDirectory',
+      ))!;
+      // ignore: avoid_print
+      print('NATIVE_CONNECTION_SETTINGS_EVIDENCE=$output');
+      final harness = OnlineUiHarness(t);
+      final boundary = GlobalKey();
+      RemoteWorkspaceSource? live;
+      try {
+        await t.pumpWidget(
+          RepaintBoundary(
+            key: boundary,
+            child: OnlineDesktopLauncher(
+              profiles: store,
+              desktopPlatform: NativeDesktopFixture(),
+              deviceFilesDirectory: '${root.path}/files',
+            ),
+          ),
+        );
+        await harness.until(() => find.text('原生连接验收资料').evaluate().isNotEmpty);
+        final source = t.widget<WorkspaceApp>(find.byType(WorkspaceApp)).source;
+        live = source as RemoteWorkspaceSource;
+        await harness.tap('workspace-nav-settings');
+        await harness.tap('settings-section-connection');
+        final settings = t
+            .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
+            .controller;
+        Finder field(String label) => find.byWidgetPredicate(
+          (w) => w is DesktopTextField && w.decoration.labelText == label,
+        );
+        for (final width in [1440.0, 1000.0]) {
+          await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
+            'width': width,
+            'height': 900.0,
+          });
+          await harness.until(
+            () => t.view.physicalSize.width / t.view.devicePixelRatio == width,
+          );
+          for (final dark in [false, true]) {
+            await harness.resolve(
+              () => settings.setTheme(
+                dark ? WorkspaceTheme.dark : WorkspaceTheme.light,
+              ),
+            );
+            await t.pumpAndSettle();
+            expect(find.text('已核验'), findsOneWidget);
+            expect(find.byTooltip('连接设置'), findsNothing);
+            final render =
+                boundary.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary;
+            final image = await render.toImage(pixelRatio: 1);
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            await File(
+              '$output/connection-settings-${width.toInt()}-${dark ? 'dark' : 'light'}.png',
+            ).writeAsBytes(bytes!.buffer.asUint8List());
+            image.dispose();
+            expect(t.takeException(), isNull);
+          }
+        }
+        await t.tap(find.byTooltip('显示 Token'));
+        await t.pumpAndSettle();
+        await t.enterText(field('Token'), 'SYNTHETIC_WRONG_TOKEN');
+        await harness.tap('connection-save');
+        await harness.until(
+          () => find.text('Token 不正确，请重新填写。').evaluate().isNotEmpty,
+        );
+        await harness.until(
+          () => !t.widget<ConnectionForm>(find.byType(ConnectionForm)).busy,
+        );
+        expect(
+          identical(
+            t.widget<WorkspaceApp>(find.byType(WorkspaceApp)).source,
+            source,
+          ),
+          isTrue,
+        );
+        await harness.tap('connection-cancel');
+        await harness.until(() => find.text('原生连接验收资料').evaluate().isNotEmpty);
+        expect((await store.read())!.token, fixture['token']);
+        await t.pumpWidget(const SizedBox());
+      } finally {
+        await t.pumpWidget(const SizedBox());
+        await live?.dispose();
+        desktop.dispose();
+        await root.delete(recursive: true);
+        semantics.finishAfterUnmount();
+      }
+    },
+    skip: const String.fromEnvironment(
+      'CHIYO_NATIVE_CONNECTION_FIXTURE',
+    ).isEmpty,
   );
 }

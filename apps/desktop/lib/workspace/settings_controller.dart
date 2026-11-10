@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
 enum WorkspaceSettingsSection {
+  connection('存储与同步', '服务器地址与连接状态'),
   appearance('外观', '明亮与黑暗主题'),
   notifications('通知', '访问申请提醒'),
   records('请求与记录', '等待时间与记录保留'),
