@@ -698,6 +698,11 @@ class _LibraryPageState extends State<LibraryPage> {
   void _toggleReading() {
     _reading = !_reading;
     _changed();
+    // Reading removes the search field (and may remove the focused button).
+    // Keep subsequent search/escape shortcuts inside this workspace scope.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _workspaceFocus.requestFocus();
+    });
   }
 
   Future<void> _changeDirectory(
@@ -1258,7 +1263,12 @@ class _LibraryPageState extends State<LibraryPage> {
                     ),
                   ),
                 ),
-                Text('⌘ K', style: libraryText(context, 11, color: c.muted)),
+                Text(
+                  Theme.of(context).platform == TargetPlatform.macOS
+                      ? '⌘ K'
+                      : 'Ctrl K',
+                  style: libraryText(context, 11, color: c.muted),
+                ),
               ],
             ),
           ),
@@ -1883,8 +1893,11 @@ class _LibraryPageState extends State<LibraryPage> {
         const SingleActivator(LogicalKeyboardKey.escape): _cancelDrag
       else if (_reading)
         const SingleActivator(LogicalKeyboardKey.escape): _toggleReading,
-      const SingleActivator(LogicalKeyboardKey.keyK, meta: true):
-          model.focusSearch,
+      SingleActivator(
+        LogicalKeyboardKey.keyK,
+        meta: Theme.of(context).platform == TargetPlatform.macOS,
+        control: Theme.of(context).platform != TargetPlatform.macOS,
+      ): model.focusSearch,
     },
     child: Focus(
       focusNode: _workspaceFocus,

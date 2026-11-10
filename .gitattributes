@@ -157,3 +157,6 @@ docs/development/evidence/macos-notification-reuse/raw/** -text -diff
 docs/development/evidence/macos-inbox-status-counts/raw/** -text -diff
 
 docs/development/evidence/macos-package-cce2f9a/raw/** -text -diff
+
+# Bundled file fixtures are hashed immutable payloads on every platform.
+apps/desktop/assets/zhiyu_files/** -text

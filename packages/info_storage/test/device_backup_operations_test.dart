@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -64,6 +66,25 @@ void main() {
     }
   }
 
+  Future<List<int>> journalKey() async => Platform.isWindows
+      ? (await WindowsDatabaseKeyStore(
+          '$path/operations.key',
+          privateFile: true,
+        ).read())!
+      : await File('$path/operations.key').readAsBytes();
+
+  Future<void> privateDirectory(Directory directory) async {
+    if (Platform.isWindows) {
+      WindowsPrivateFiles.directory(directory);
+    } else {
+      await directory.create();
+      expect(
+        (await Process.run('/bin/chmod', ['700', directory.path])).exitCode,
+        0,
+      );
+    }
+  }
+
   setUp(() async {
     root = await Directory.systemTemp.createTemp('device-backup-journal-');
     root = Directory(await root.resolveSymbolicLinks());
@@ -92,8 +113,7 @@ void main() {
       counts: action == 'saveKey' ? {} : counts(),
     );
     final dir = Directory('${root.path}/stage-$id');
-    await dir.create();
-    expect((await Process.run('/bin/chmod', ['700', dir.path])).exitCode, 0);
+    await privateDirectory(dir);
     final output = '${root.path}/${(c['selection'] as Map)['name']}';
     final version = await store.publication.operationVersion();
     await store.publication.registerOutputStaging(
@@ -157,6 +177,82 @@ void main() {
   };
 
   test(
+    'Windows staging rejects an output inside its own private root with backslashes/case aliases',
+    () async {
+      final output = '${root.path}/outside.bin';
+      final staging = MacBackupPublicationFiles.createWindowsStaging(output);
+      try {
+        await expectLater(
+          store.publication.registerOutputStaging(
+            operationId: 'inside',
+            commandDigest: 'a' * 64,
+            expectedVersion: await store.publication.operationVersion(),
+            action: BackupOutputAction.export,
+            directory: staging.path,
+            destination: '${staging.path}\\nested.bin'.toUpperCase(),
+          ),
+          fails('invalid_backup_operation_receipt'),
+        );
+        expect(await store.publication.pendingOutputStaging(), isEmpty);
+      } finally {
+        MacBackupPublicationFiles.cleanupStaging(staging);
+      }
+    },
+    skip: !Platform.isWindows,
+  );
+
+  test(
+    'Windows occupied backup anchor retains cleanup facts until consumer releases it',
+    () async {
+      final p = await prepare('occupied-backup', List.filled(8192, 38));
+      await store.publication.publishOutputOperation(p.id);
+      await store.settle(p.id, receipt(p.id, p.digest));
+      final kernel = DynamicLibrary.open('kernel32.dll');
+      final openFile = kernel
+          .lookupFunction<
+            IntPtr Function(
+              Pointer<Utf16>,
+              Uint32,
+              Uint32,
+              Pointer<Void>,
+              Uint32,
+              Uint32,
+              IntPtr,
+            ),
+            int Function(Pointer<Utf16>, int, int, Pointer<Void>, int, int, int)
+          >('CreateFileW');
+      final closeHandle = kernel
+          .lookupFunction<Int32 Function(IntPtr), int Function(int)>(
+            'CloseHandle',
+          );
+      final path = File('${p.stage}/prepared').path.toNativeUtf16();
+      final handle = openFile(path, 0x80000000, 3, nullptr, 3, 0, 0);
+      calloc.free(path);
+      expect(handle != -1, true);
+      try {
+        await expectLater(
+          store.publication.cleanupRegisteredOutputStaging(p.id),
+          fails('backup_cleanup_pending'),
+        );
+        expect(
+          (await store.publication.pendingOutputStaging()).contains(p.id),
+          true,
+        );
+        expect(await Directory(p.stage).exists(), true);
+        expect(await File(p.output).length(), 8192);
+      } finally {
+        closeHandle(handle);
+      }
+      await close();
+      await open();
+      await store.publication.cleanupRegisteredOutputStaging(p.id);
+      expect(await Directory(p.stage).exists(), false);
+      expect(await File(p.output).length(), 8192);
+    },
+    skip: !Platform.isWindows,
+  );
+
+  test(
     'native backup publication above the ordinary attachment limit survives reopen without a local information database',
     () async {
       final bytes = Uint8List(18 * 1024 * 1024)
@@ -199,7 +295,7 @@ void main() {
         throwsA(isA<StorageFailure>()),
       );
       await close();
-      final key = await File('$path/operations.key').readAsBytes();
+      final key = await journalKey();
       final db = sqlite3.open('$path/operations.db');
       try {
         db.execute(
@@ -226,7 +322,7 @@ void main() {
         isFalse,
       );
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 
   test(
@@ -256,7 +352,45 @@ void main() {
         fails('operation_conflict'),
       );
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
+  );
+
+  test(
+    'a transient Windows reader releases before abandoned staging cleanup finishes',
+    () async {
+      final p = await prepare('transient-reader', List.filled(8192, 42));
+      await close();
+      await open();
+      expect(await store.publication.reconcileOutputOperation(p.id), isNull);
+      await store.settle(p.id, null);
+      final reader = await Process.start(Platform.resolvedExecutable, [
+        '--packages=${Directory.current.path}/.dart_tool/package_config.json',
+        '${Directory.current.path}/../info_core/test/support/windows_private_reader.dart',
+        '${p.stage}/prepared',
+      ]);
+      final errors = utf8.decoder.bind(reader.stderr).join();
+      try {
+        expect(
+          await reader.stdout
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .first,
+          'reader-ready',
+        );
+        await store.publication.cleanupRegisteredOutputStaging(p.id);
+        expect(await Directory(p.stage).exists(), isFalse);
+        expect(await store.publication.reconcileOutputOperation(p.id), isNull);
+        expect(await File(p.output).exists(), isFalse);
+      } finally {
+        await reader.stdin.close();
+        expect(
+          await reader.exitCode.timeout(const Duration(seconds: 5)),
+          0,
+          reason: await errors,
+        );
+      }
+    },
+    skip: !Platform.isWindows,
   );
 
   test(
@@ -296,7 +430,7 @@ void main() {
       );
       expect((await store.pending()).single.intent.pending, isTrue);
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 
   test(
@@ -327,7 +461,7 @@ void main() {
       await store.settle(p.id, receipt(p.id, p.digest, action: 'saveKey'));
       await store.publication.cleanupRegisteredOutputStaging(p.id);
       await close();
-      final key = await File('$path/operations.key').readAsBytes();
+      final key = await journalKey();
       final db = sqlite3.open('$path/operations.db');
       try {
         db.execute(
@@ -347,7 +481,7 @@ void main() {
         db.close();
       }
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 
   test(
@@ -421,7 +555,7 @@ void main() {
         isFalse,
       );
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 
   test(
@@ -433,8 +567,7 @@ void main() {
         serverId: 'synthetic-server',
       );
       final dir = Directory('${root.path}/original-stage');
-      await dir.create();
-      await Process.run('/bin/chmod', ['700', dir.path]);
+      await privateDirectory(dir);
       final bytes = [0, 1, 128, 255];
       await original.fileOutputs.reserve(
         operationId: 'old-file',
@@ -453,7 +586,7 @@ void main() {
         isTrue,
       );
       await original.close();
-      final key = await File('$path/operations.key').readAsBytes();
+      final key = await journalKey();
       final db = sqlite3.open('$path/operations.db');
       try {
         db.execute(
@@ -489,6 +622,6 @@ void main() {
         await original.close();
       }
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 }

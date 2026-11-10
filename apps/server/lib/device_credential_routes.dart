@@ -46,7 +46,10 @@ final class DeviceCredentialRoutes {
         if (raw is! Map<String, dynamic>) {
           throw const CredentialUseFailure('invalid_plan');
         }
-        final input = CredentialUseInput.fromJson(command);
+        final input = CredentialUseInput.fromJson(
+          command,
+          allowPortableLaunchPaths: true,
+        );
         final request = await agent.requestDeviceCredentialUse(
           deviceId,
           _text(body, 'sessionSecret'),
@@ -62,7 +65,10 @@ final class DeviceCredentialRoutes {
         final command = Map<String, dynamic>.from(body)
           ..remove('sessionSecret');
         if (path.endsWith('/status')) {
-          final input = CredentialOperationInput.fromJson(command);
+          final input = CredentialOperationInput.fromJson(
+            command,
+            allowPortableLaunchPaths: true,
+          );
           return agent
                   .deviceCredentialOperationStatus(
                     deviceId,
@@ -77,7 +83,10 @@ final class DeviceCredentialRoutes {
         if (raw is! Map<String, dynamic> || job is! String) {
           throw const CredentialUseFailure('invalid_plan');
         }
-        final input = CredentialOperationInput.fromJson(command);
+        final input = CredentialOperationInput.fromJson(
+          command,
+          allowPortableLaunchPaths: true,
+        );
         final claim = await agent.beginDeviceCredentialOperation(
           deviceId,
           _text(body, 'sessionSecret'),

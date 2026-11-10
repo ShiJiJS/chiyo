@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
@@ -50,8 +52,13 @@ void main() {
         if (!closed) await store.close();
         await root.delete(recursive: true);
       });
-      expect((await File('$path/operations.key').stat()).mode & 0x3F, 0);
-      expect((await Directory(path).stat()).mode & 0x3F, 0);
+      if (Platform.isWindows) {
+        WindowsPrivateFiles.verify('$path/operations.key');
+        WindowsPrivateFiles.verify(path, directory: true);
+      } else {
+        expect((await File('$path/operations.key').stat()).mode & 0x3F, 0);
+        expect((await Directory(path).stat()).mode & 0x3F, 0);
+      }
       expect(await store.fileOutputs.status('absent'), isNull);
       await expectLater(
         DeviceFileOperations.open(path, serverId: 'synthetic-server-A'),
@@ -59,7 +66,12 @@ void main() {
       );
       await store.close();
       closed = true;
-      final key = await File('$path/operations.key').readAsBytes();
+      final key = Platform.isWindows
+          ? (await WindowsDatabaseKeyStore(
+              '$path/operations.key',
+              privateFile: true,
+            ).read())!
+          : await File('$path/operations.key').readAsBytes();
       final db = sqlite3.open('$path/operations.db');
       try {
         final hex = key.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
@@ -92,12 +104,34 @@ void main() {
       );
       expect(await File('$path/operations.key').exists(), isFalse);
       await File('$path/key-saved').rename('$path/operations.key');
-      await Process.run('chmod', ['644', '$path/operations.key']);
+      if (Platform.isWindows) {
+        expect(
+          (await Process.run('icacls.exe', [
+            '$path/operations.key',
+            '/grant',
+            '*S-1-1-0:R',
+          ])).exitCode,
+          0,
+        );
+      } else {
+        await Process.run('chmod', ['644', '$path/operations.key']);
+      }
       await expectLater(
         DeviceFileOperations.open(path, serverId: 'synthetic-server-A'),
         failure('key_unavailable'),
       );
-      await Process.run('chmod', ['600', '$path/operations.key']);
+      if (Platform.isWindows) {
+        expect(
+          (await Process.run('icacls.exe', [
+            '$path/operations.key',
+            '/remove:g',
+            '*S-1-1-0',
+          ])).exitCode,
+          0,
+        );
+      } else {
+        await Process.run('chmod', ['600', '$path/operations.key']);
+      }
       store = await DeviceFileOperations.open(
         path,
         serverId: 'synthetic-server-A',
@@ -107,7 +141,25 @@ void main() {
       await store.close();
       closed = true;
       await File('$path/operations.db').rename('$path/db-saved');
-      await Link('$path/operations.db').create('$path/db-saved');
+      if (Platform.isWindows) {
+        // NTFS hard links need no symlink privilege/system developer setting.
+        // The production private-file check must reject the second link.
+        final create = DynamicLibrary.open('kernel32.dll')
+            .lookupFunction<
+              Int32 Function(Pointer<Utf16>, Pointer<Utf16>, Pointer<Void>),
+              int Function(Pointer<Utf16>, Pointer<Utf16>, Pointer<Void>)
+            >('CreateHardLinkW');
+        final name = '$path/operations.db'.toNativeUtf16(),
+            target = '$path/db-saved'.toNativeUtf16();
+        try {
+          expect(create(name, target, nullptr), 1);
+        } finally {
+          calloc.free(name);
+          calloc.free(target);
+        }
+      } else {
+        await Link('$path/operations.db').create('$path/db-saved');
+      }
       await expectLater(
         DeviceFileOperations.open(path, serverId: 'synthetic-server-A'),
         failure('device_journal_unavailable'),

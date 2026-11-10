@@ -1,3 +1,4 @@
+import 'support/encrypted_artifacts.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
@@ -95,7 +96,7 @@ void main() {
           await target.close();
         }
         for (final file in root.listSync(recursive: true).whereType<File>()) {
-          final content = latin1.decode(await file.readAsBytes());
+          final content = latin1.decode(encryptedArtifactBytes(file));
           expect(content, isNot(contains('synthetic-user@example.test')));
           expect(content, isNot(contains('SYNTHETIC-PRIVATE-PASSWORD')));
         }
@@ -351,7 +352,7 @@ void main() {
       // Whole database, WAL and portable backup remain ciphertext on disk.
       for (final file in root.listSync(recursive: true).whereType<File>()) {
         if (file.path.endsWith('recovery-key.txt')) continue;
-        final bytes = await file.readAsBytes();
+        final bytes = encryptedArtifactBytes(file);
         final text = latin1.decode(bytes);
         expect(text, isNot(contains('PRIVATE-PASSWORD-KEEP')));
         expect(

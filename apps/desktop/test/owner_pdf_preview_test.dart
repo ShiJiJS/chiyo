@@ -6,6 +6,12 @@ import 'package:info_desktop/workspace/owner_pdf_preview.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 
 void main() {
+  for (final platform in [TargetPlatform.macOS, TargetPlatform.windows]) {
+    group('$platform PDF adapter', () => previewChecks(platform));
+  }
+}
+
+void previewChecks(TargetPlatform platform) {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('agent_info_manage/owner_pdf_preview');
   const renderer = NativeOwnerPdfPreview();
@@ -21,7 +27,7 @@ void main() {
   PlatformException? failure;
   var calls = 0;
   setUp(() async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    debugDefaultTargetPlatformOverride = platform;
     final recorder = ui.PictureRecorder();
     ui.Canvas(recorder).drawPaint(ui.Paint());
     final picture = recorder.endRecording();
@@ -134,7 +140,7 @@ void main() {
         renderer.render(file, Uint8List.fromList([1]), -1),
         fails('invalid_request'),
       );
-      debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
       await expectLater(
         renderer.render(file, Uint8List.fromList([1]), 0),
         fails('pdf_unsupported'),

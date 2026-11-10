@@ -96,7 +96,7 @@ Future<void> main(List<String> args) async {
     }
     final connection = connectionFile == null
         ? null
-        : await AgentConnectionProfile.read(File(connectionFile));
+        : await AgentConnectionProfile.read(File(connectionFile).absolute);
     client = connection == null
         ? AgentClient(port)
         : AgentClient.remote(connection);

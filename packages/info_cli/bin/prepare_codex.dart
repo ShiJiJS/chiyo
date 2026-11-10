@@ -6,6 +6,7 @@ import 'package:info_cli/codex_registration.dart';
 import 'package:info_core/new_file_publish.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_cli/macos_bundled_tools.dart';
+import 'package:info_cli/windows_bundled_tools.dart';
 
 /// SDK-free preparation from the delivered CLI folder. No user configuration
 /// or state directory is touched: all output goes into a new chosen directory.
@@ -110,6 +111,16 @@ Future<void> main(List<String> args) async {
         if (reference != null) {
           await File(
             '${staging.path}/${MacBundledTools.sourceFile}',
+          ).writeAsString(jsonEncode(reference));
+        }
+      }
+      if (Platform.isWindows) {
+        final reference = await WindowsBundledTools(
+          executable: '${source.path}/info-codex.exe',
+        ).sourceReference();
+        if (reference != null) {
+          await File(
+            '${staging.path}/${WindowsBundledTools.sourceFile}',
           ).writeAsString(jsonEncode(reference));
         }
       }

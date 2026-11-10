@@ -1,4 +1,4 @@
-import 'package:info_cli/macos_agent_bundle.dart';
+import 'package:info_cli/agent_bundle.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_workspace/agent_sessions.dart';
 import 'package:info_workspace/agent_sessions_transport.dart';
@@ -8,10 +8,10 @@ import 'workspace_source.dart';
 class RemoteWorkspaceAgents extends WorkspaceAgentObservations {
   RemoteWorkspaceAgents(
     OwnerClient client, {
-    Future<MacAgentBundleObservation> Function({bool rehash})? readBundle,
+    Future<AgentBundleObservation> Function({bool rehash})? readBundle,
   }) : super(
          readSessions: () => _read(client),
-         readBundle: readBundle ?? MacAgentBundle().read,
+         readBundle: readBundle ?? AgentBundle().read,
          independentServer: true,
        );
   static Future<WorkspaceAgentSessions> _read(OwnerClient client) async {

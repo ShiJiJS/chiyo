@@ -51,7 +51,7 @@ bool FlutterWindow::AddTrayIcon() {
   data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
   data.uCallbackMessage = kTrayMessage;
   data.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
-  wcscpy_s(data.szTip, L"信息访问授权");
+  wcscpy_s(data.szTip, L"\u77e5\u4e88");
   tray_available_ = Shell_NotifyIconW(NIM_ADD, &data) != FALSE;
   if (tray_available_) {
     data.uVersion = NOTIFYICON_VERSION_4;
@@ -139,7 +139,7 @@ bool FlutterWindow::ShowNotification(const NotificationMessage& message) {
   data.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
   data.dwStateMask = NIS_HIDDEN;
   data.dwState = NIS_HIDDEN;
-  wcscpy_s(data.szTip, L"信息访问授权");
+  wcscpy_s(data.szTip, L"\u77e5\u4e88");
   if (!Shell_NotifyIconW(NIM_ADD, &data)) return false;
   notification_icon_id_ = message.native_id;
   data.uVersion = NOTIFYICON_VERSION_4;
@@ -149,7 +149,7 @@ bool FlutterWindow::ShowNotification(const NotificationMessage& message) {
   }
   data.uFlags = NIF_INFO;
   data.dwInfoFlags = NIIF_INFO | NIIF_RESPECT_QUIET_TIME;
-  wcscpy_s(data.szInfoTitle, L"信息访问授权");
+  wcscpy_s(data.szInfoTitle, L"\u77e5\u4e88");
   wcscpy_s(data.szInfo, message.test ? L"这是一条测试通知。访问申请提醒已连接到系统。" : L"有新的访问请求。打开应用查看并审批。");
   const bool accepted = Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
   if (!accepted) RemoveNotificationIcon();
@@ -176,6 +176,10 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   backup_files_ = std::make_unique<BackupFileDialogs>(
+      flutter_controller_->engine()->messenger(), GetHandle());
+  pdf_previews_ = std::make_unique<OwnerPdfPreviews>(
+      flutter_controller_->engine()->messenger(), GetHandle());
+  owner_file_open_ = std::make_unique<OwnerFileOpenChannel>(
       flutter_controller_->engine()->messenger(), GetHandle());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   window_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
@@ -301,6 +305,8 @@ bool FlutterWindow::OnCreate() {
 void FlutterWindow::OnDestroy() {
   RemoveNotificationIcon();
   notifications_.Reset();
+  pdf_previews_.reset();
+  owner_file_open_.reset();
   backup_files_.reset();
   RemoveTrayIcon();
   desktop_ready_ = false;
@@ -317,6 +323,7 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (pdf_previews_ && pdf_previews_->HandleMessage(message)) return 0;
   if (control_message_ != 0 && message == control_message_) {
     if (wparam != GetCurrentProcessId() || (lparam != 0 && lparam != 1)) return 0;
     if (lparam == 1) RequestQuit();
@@ -343,6 +350,14 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   if (custom_frame_ && message == WM_SIZE && window_channel_) {
     window_channel_->InvokeMethod("state",
         std::make_unique<flutter::EncodableValue>(IsZoomed(hwnd) != FALSE));
+  }
+  if (message == WM_POWERBROADCAST &&
+      wparam == PBT_APMRESUMEAUTOMATIC && desktop_ready_) {
+    // The automatic event is delivered for unattended wake as well. The later
+    // user-activity RESUMESUSPEND event must not trigger a second reconnect.
+    // Dart owns connection/identity checks and local registered-copy recovery.
+    SendDesktopEvent("resume");
+    return TRUE;
   }
   if (taskbar_created_ != 0 && message == taskbar_created_ && desktop_ready_) {
     // Explorer restarts lose the old icon. Restore a visible entry or window.

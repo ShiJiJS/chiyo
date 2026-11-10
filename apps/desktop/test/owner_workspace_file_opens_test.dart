@@ -1,4 +1,4 @@
-@TestOn('mac-os')
+@TestOn('mac-os || windows')
 library;
 
 import 'dart:async';

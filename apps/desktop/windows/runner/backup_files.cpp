@@ -17,9 +17,11 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
         const bool credential = call.method_name() == "credentialInput";
         const bool known_hosts = call.method_name() == "knownHostsInput";
         const bool information_input = call.method_name() == "informationFileInput";
-        const bool information_output = call.method_name() == "informationFileOutput";
+        const bool template_package = call.method_name() == "templatePackageInput";
+        const bool information_output = call.method_name() == "informationFileOutput" ||
+                                        call.method_name() == "ownerFileOutput";
         const bool information = information_input || information_output;
-        const bool input = call.method_name() == "backupInput" || call.method_name() == "recoveryKeyInput" || credential || known_hosts || information_input;
+        const bool input = call.method_name() == "backupInput" || call.method_name() == "recoveryKeyInput" || credential || known_hosts || information_input || template_package;
         const bool recovery = call.method_name() == "recoveryKeyOutput" || call.method_name() == "recoveryKeyInput";
         if (!input && !recovery && !information_output && call.method_name() != "backupOutput") {
           result->NotImplemented();
@@ -66,16 +68,17 @@ BackupFileDialogs::BackupFileDialogs(flutter::BinaryMessenger* messenger,
         dialog.hwndOwner = owner;
         dialog.lpstrFile = path.data();
         dialog.nMaxFile = static_cast<DWORD>(path.size());
-        dialog.lpstrFilter = information ? L"All files\0*.*\0\0" : known_hosts ? L"SSH known_hosts file\0*.*\0\0" : credential ? L"Credential file\0*.*\0\0" : recovery ? L"Recovery key (*.txt)\0*.txt\0All files\0*.*\0\0"
+        dialog.lpstrFilter = template_package ? L"Template package (*.json)\0*.json\0All files\0*.*\0\0" : information ? L"All files\0*.*\0\0" : known_hosts ? L"SSH known_hosts file\0*.*\0\0" : credential ? L"Credential file\0*.*\0\0" : recovery ? L"Recovery key (*.txt)\0*.txt\0All files\0*.*\0\0"
                                      : L"Encrypted backup (*.aimbackup)\0*.aimbackup\0All files\0*.*\0\0";
-        dialog.lpstrTitle = information_input ? L"Choose information file (up to 10 MiB)"
+        dialog.lpstrTitle = template_package ? L"Choose template package"
+            : information_input ? L"Choose information file (up to 10 MiB)"
             : information_output ? L"Save original information file to a new file"
             : known_hosts ? L"Choose trusted SSH known_hosts file (confirm before enabling)" : credential ? L"Choose credential file (1 byte to 1 MiB)" : input ? (recovery ? L"Choose recovery key file" : L"Choose encrypted backup")
                                  : (recovery ? L"Save recovery key separately"
                                              : L"Export encrypted backup to a new file");
-        dialog.lpstrDefExt = information || credential || known_hosts ? nullptr : recovery ? L"txt" : L"aimbackup";
+        dialog.lpstrDefExt = information || credential || known_hosts || template_package ? nullptr : recovery ? L"txt" : L"aimbackup";
         dialog.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR |
-                       OFN_DONTADDTORECENT | (input ? OFN_FILEMUSTEXIST : OFN_OVERWRITEPROMPT);
+                       OFN_DONTADDTORECENT | (input ? OFN_FILEMUSTEXIST : OFN_OVERWRITEPROMPT | OFN_NOTESTFILECREATE);
         const BOOL chosen = input ? GetOpenFileNameW(&dialog) : GetSaveFileNameW(&dialog);
         if (!chosen) {
           if (CommDlgExtendedError() == 0) result->Success();

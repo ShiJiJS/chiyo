@@ -108,6 +108,73 @@ WorkspaceCredentialUseRequest credentialUseRequestFromJson(Object? raw) {
   return result;
 }
 
+Map<String, Object?> credentialUseHistoryToJson(
+  WorkspaceCredentialUseHistory value,
+) => {
+  'grantId': value.grantId,
+  'credentialName': value.credentialName,
+  'materialVersion': value.materialVersion,
+  'delivery': value.delivery.name,
+  'session': {
+    'id': value.session.id,
+    'label': value.session.label,
+    'agentClaim': value.session.agentClaim,
+  },
+  'purpose': value.purpose,
+  'expiresAt': value.expiresAt?.toUtc().toIso8601String(),
+  'state': value.state,
+  'operations': [
+    for (final operation in value.operations)
+      {
+        'id': operation.id,
+        'at': operation.at.toUtc().toIso8601String(),
+        'description': operation.description,
+        'result': operation.result,
+      },
+  ],
+};
+
+WorkspaceCredentialUseHistory credentialUseHistoryFromJson(Object? raw) {
+  final value = _map(raw);
+  _shape(
+    value,
+    'grantId credentialName materialVersion delivery session purpose expiresAt state operations',
+  );
+  final session = _map(value['session']);
+  _shape(session, 'id label agentClaim');
+  final version = value['materialVersion'] as int;
+  if (version < 1) throw const FormatException('Invalid material version');
+  return WorkspaceCredentialUseHistory(
+    grantId: value['grantId'] as String,
+    credentialName: value['credentialName'] as String,
+    materialVersion: version,
+    delivery: WorkspaceCredentialDelivery.values.byName(
+      value['delivery'] as String,
+    ),
+    session: WorkspaceCredentialSession(
+      session['id'] as String,
+      session['label'] as String,
+      session['agentClaim'] as String,
+    ),
+    purpose: value['purpose'] as String,
+    expiresAt: _date(value['expiresAt']),
+    state: value['state'] as String,
+    operations: [
+      for (final raw in value['operations'] as List)
+        () {
+          final operation = _map(raw);
+          _shape(operation, 'id at description result');
+          return WorkspaceCredentialUseOperation(
+            operation['id'] as String,
+            DateTime.parse(operation['at'] as String),
+            operation['description'] as String,
+            operation['result'] as String,
+          );
+        }(),
+    ],
+  );
+}
+
 Map<String, Object?> approvalExecutionToJson(
   WorkspaceApprovalExecution value,
 ) => {

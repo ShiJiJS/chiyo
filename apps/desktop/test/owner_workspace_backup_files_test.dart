@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -20,6 +21,9 @@ class _Picker extends BackupFilePicker {
   @override
   Future<String?> recoveryKeyInput() => next();
 }
+
+String nativePath(String path) =>
+    Platform.isWindows ? 'C:${path.replaceAll('/', r'\')}' : path;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -105,7 +109,8 @@ void main() {
   test(
     'same names remain distinct, cancel retains selection and reselect invalidates old handle',
     () async {
-      picker.next = () async => '/synthetic private/a/中文 备份.aimbackup';
+      picker.next = () async =>
+          nativePath('/synthetic private/a/中文 备份.aimbackup');
       final first = (await files.pick(WorkspaceBackupPick.archiveInput))!;
       expect(first.name, '中文 备份.aimbackup');
       expect(jsonEncode(first.json), isNot(contains('/synthetic private')));
@@ -113,9 +118,10 @@ void main() {
       expect(await files.pick(WorkspaceBackupPick.archiveInput), isNull);
       expect(
         files.pathFor(first, kind: WorkspaceBackupPick.archiveInput),
-        startsWith('/synthetic private/a/'),
+        startsWith(nativePath('/synthetic private/a/')),
       );
-      picker.next = () async => '/synthetic private/b/中文 备份.aimbackup';
+      picker.next = () async =>
+          nativePath('/synthetic private/b/中文 备份.aimbackup');
       final second = (await files.pick(WorkspaceBackupPick.archiveInput))!;
       expect(second.id, isNot(first.id));
       expect(
@@ -124,7 +130,7 @@ void main() {
       );
       expect(
         files.pathFor(second, kind: WorkspaceBackupPick.archiveInput),
-        startsWith('/synthetic private/b/'),
+        startsWith(nativePath('/synthetic private/b/')),
       );
       for (final altered in [
         WorkspaceBackupResource(id: second.id, name: '伪造名称', kind: second.kind),
@@ -214,7 +220,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
             calls.add(call.method);
-            return '/synthetic/${call.method}.txt';
+            return nativePath('/synthetic/${call.method}.txt');
           });
       addTearDown(
         () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -227,7 +233,7 @@ void main() {
         expect(selected.kind, kind);
         expect(
           files.pathFor(selected, kind: kind),
-          '/synthetic/${calls.last}.txt',
+          nativePath('/synthetic/${calls.last}.txt'),
         );
       }
       expect(calls, [

@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:info_cli/macos_bundled_tools.dart';
+import 'package:info_cli/windows_bundled_tools.dart';
 import 'package:info_core/agent_server.dart';
 import 'settings_controls.dart';
 
@@ -14,7 +16,7 @@ class BundledToolSettings extends StatefulWidget {
 class _BundledToolSettingsState extends State<BundledToolSettings> {
   late Future<List<CredentialToolLocation>> _tools = _read();
   Future<List<CredentialToolLocation>> _read() =>
-      (widget.read ?? MacBundledTools().read)();
+      (widget.read ?? (Platform.isWindows ? WindowsBundledTools().read : MacBundledTools().read))();
   String? _message;
 
   @override
@@ -23,7 +25,7 @@ class _BundledToolSettingsState extends State<BundledToolSettings> {
     builder: (context, snapshot) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Mac 凭据工具'),
+        Text(Platform.isWindows ? 'Windows 凭据工具' : 'Mac 凭据工具'),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 12),
           child: Text(
@@ -43,7 +45,7 @@ class _BundledToolSettingsState extends State<BundledToolSettings> {
                 ? '${tool.executable}\n${tool.source == 'app_bundle' ? '随包入口摘要已核对。' : '版本将在使用时核对。'}'
                 : tool.source == 'system'
                 ? '系统 SSH 不可用，请检查系统程序。'
-                : '工具未随包提供或入口校验失败，请使用完整的 Mac Release 构建。',
+                : '工具未随包提供或校验失败，请使用完整应用包。',
             control: settingsAction(
               context,
               '复制路径',

@@ -1,0 +1,23 @@
+{
+  "release": "0.4.4+18-dev.5845d3cb7ba1",
+  "sourceCommit": "5845d3cb7ba1641370beb32ccd92df73dfdafc68",
+  "installDirectory": "C:/Software/AgentInfoManage",
+  "archive": "C:\\Software\\AgentInfoManage\\package\\agent-info-manage-0.4.4+18-dev.5845d3cb7ba1-windows-x64.zip",
+  "archiveSha256": "acc9b54de69fff5a3fc2d3d6a9321499815a0b8bd0aa6151f226af8ea067c547",
+  "payloadFiles": 7699,
+  "shortcut": "C:\\Users\\Todoki\\Desktop\\信息授权.lnk",
+  "allHashesVerified": true,
+  "guiLaunched": false,
+  "defaultProfileConfigured": true,
+  "currentUserDpapi": true,
+  "privateAclVerified": true,
+  "serverIdentityVerified": true,
+  "ordinaryItems": 44,
+  "nasMutated": false,
+  "agentIdentityCreated": false,
+  "globalHooksChanged": false,
+  "oldOfflineDatabaseChanged": false,
+  "configurationHelperExitCode": 0,
+  "cleanupRetried": false,
+  "manualRemainingIssue": 104
+}

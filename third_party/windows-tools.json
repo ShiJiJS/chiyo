@@ -1,0 +1,43 @@
+{
+  "format": 1,
+  "platform": "windows-x64",
+  "tools": [
+    {
+      "id": "gh",
+      "receiver": "gh_token",
+      "version": "2.102.0",
+      "executable": "gh/bin/gh.exe",
+      "executableSha256": "756724853cc579510b58e65e7a7429ad6b1af29cf99ef19b3a95f3b701c5c580",
+      "archive": "gh_2.102.0_windows_amd64.zip",
+      "url": "https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_windows_amd64.zip",
+      "sha256": "ae64e556ecc240b200f7eba60d550e4bb60d78e860e69dd88c449405b86067f4",
+      "provenance": "Official cli/cli release asset SHA256 digest; MIT license retained in gh/LICENSE"
+    },
+    {
+      "id": "aws-cli",
+      "receiver": "aws_shared_credentials",
+      "version": "2.38.1",
+      "executable": "aws-cli/aws.exe",
+      "executableSha256": "82c7fef1eb1a5894793ef9f0a56b2b8509dfab98460106db45ac409c1b31bc60",
+      "archive": "AWSCLIV2-2.38.1.msi",
+      "url": "https://awscli.amazonaws.com/AWSCLIV2-2.38.1.msi",
+      "sha256": "ad07f9acd855f48ad016e63b2f0b4f87783c1b6524b86e966f4a6d21d01f524a",
+      "signerThumbprint": "81A9EFB93199F2C7441EE14050360EDAB7E8242A",
+      "provenance": "Fixed official MSI; Valid Amazon Web Services, Inc. Authenticode signature; only read-only tables and cabinets extracted, no install actions"
+    }
+  ],
+  "notices": [
+    {
+      "name": "AWS-LICENSE.txt",
+      "cache": "aws-2.38.1-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/aws/aws-cli/10b7b71c678dd01942a88071be7cddb683daa802/LICENSE.txt",
+      "sha256": "9b3a0d5c384b013bfc56f2f265afdbbe5c2fb674b1d6ee54190d235f284a1af0"
+    },
+    {
+      "name": "AWS-THIRD-PARTY-LICENSES.txt",
+      "cache": "aws-2.38.1-THIRD_PARTY_LICENSES",
+      "url": "https://raw.githubusercontent.com/aws/aws-cli/10b7b71c678dd01942a88071be7cddb683daa802/exe/assets/THIRD_PARTY_LICENSES",
+      "sha256": "85fce11752b3b8364fb549cdb585657296043c3896251e7809095b2f58d584cd"
+    }
+  ]
+}

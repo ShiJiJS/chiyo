@@ -84,62 +84,72 @@ void main() {
     expect(find.text('新建标签'), findsOneWidget);
   });
 
-  for (final save in [false, true]) {
-    testWidgets(
-      'Cmd K works after creation closes (save=$save) and in reading view',
-      (t) async {
-        await start(t);
-        final model = t
-            .widget<LibraryPage>(find.byType(LibraryPage))
-            .controller;
-        await tap(t, key('library-create'));
-        if (save) {
-          await tap(t, key('library-new-type-generic'));
-          await t.enterText(key('library-edit-name'), '合成快捷键资料');
-          await t.enterText(key('library-edit-body'), '合成正文');
-          await tap(t, key('library-edit-save'));
-          expect(model.detail!.record.name, '合成快捷键资料');
-        } else {
-          await t.sendKeyEvent(LogicalKeyboardKey.escape);
-        }
-        await t.pumpAndSettle();
-        await t.tap(key('library-detail-title'));
-        await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-        await t.sendKeyEvent(LogicalKeyboardKey.keyK);
-        await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-        await t.pumpAndSettle();
-        final search = t.widget<EditableText>(
-          find.descendant(
-            of: key('library-search-frame'),
-            matching: find.byType(EditableText),
-          ),
-        );
-        expect(search.focusNode.hasFocus, isTrue);
-        t.testTextInput.enterText('备份');
-        await t.pumpAndSettle();
-        expect(model.query.keyword, '备份');
-        await model.clearFilters();
-        await t.pumpAndSettle();
-        await tap(t, key('library-detail-expand'));
-        await t.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
-        await t.sendKeyEvent(LogicalKeyboardKey.keyK);
-        await t.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
-        await t.pumpAndSettle();
-        expect(key('library-search-frame'), findsOneWidget);
-        expect(
-          t
-              .widget<EditableText>(
-                find.descendant(
-                  of: key('library-search-frame'),
-                  matching: find.byType(EditableText),
-                ),
-              )
-              .focusNode
-              .hasFocus,
-          isTrue,
-        );
-      },
-    );
+  for (final platform in [TargetPlatform.macOS, TargetPlatform.windows]) {
+    for (final save in [false, true]) {
+      testWidgets(
+        '$platform search shortcut works after creation closes (save=$save) and in reading view',
+        (t) async {
+          final modifier = platform == TargetPlatform.macOS
+              ? LogicalKeyboardKey.metaLeft
+              : LogicalKeyboardKey.controlLeft;
+          await start(t);
+          expect(
+            find.text(platform == TargetPlatform.macOS ? '⌘ K' : 'Ctrl K'),
+            findsOneWidget,
+          );
+          final model = t
+              .widget<LibraryPage>(find.byType(LibraryPage))
+              .controller;
+          await tap(t, key('library-create'));
+          if (save) {
+            await tap(t, key('library-new-type-generic'));
+            await t.enterText(key('library-edit-name'), '合成快捷键资料');
+            await t.enterText(key('library-edit-body'), '合成正文');
+            await tap(t, key('library-edit-save'));
+            expect(model.detail!.record.name, '合成快捷键资料');
+          } else {
+            await t.sendKeyEvent(LogicalKeyboardKey.escape);
+          }
+          await t.pumpAndSettle();
+          await t.tap(key('library-detail-title'));
+          await t.sendKeyDownEvent(modifier);
+          await t.sendKeyEvent(LogicalKeyboardKey.keyK);
+          await t.sendKeyUpEvent(modifier);
+          await t.pumpAndSettle();
+          final search = t.widget<EditableText>(
+            find.descendant(
+              of: key('library-search-frame'),
+              matching: find.byType(EditableText),
+            ),
+          );
+          expect(search.focusNode.hasFocus, isTrue);
+          t.testTextInput.enterText('备份');
+          await t.pumpAndSettle();
+          expect(model.query.keyword, '备份');
+          await model.clearFilters();
+          await t.pumpAndSettle();
+          await tap(t, key('library-detail-expand'));
+          await t.sendKeyDownEvent(modifier);
+          await t.sendKeyEvent(LogicalKeyboardKey.keyK);
+          await t.sendKeyUpEvent(modifier);
+          await t.pumpAndSettle();
+          expect(key('library-search-frame'), findsOneWidget);
+          expect(
+            t
+                .widget<EditableText>(
+                  find.descendant(
+                    of: key('library-search-frame'),
+                    matching: find.byType(EditableText),
+                  ),
+                )
+                .focusNode
+                .hasFocus,
+            isTrue,
+          );
+        },
+        variant: TargetPlatformVariant({platform}),
+      );
+    }
   }
 
   testWidgets(

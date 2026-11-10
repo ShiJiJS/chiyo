@@ -145,13 +145,7 @@ class InformationFileOutputs {
         j['root'] as Map<String, dynamic>,
       );
       final dest = j['destination'] as String;
-      if (!dest.startsWith('/') ||
-          dest.contains('\x00') ||
-          dest.split('/').any((s) => s == '.' || s == '..') ||
-          dest.startsWith('${root.path}/') ||
-          dest.endsWith('/')) {
-        throw const FormatException();
-      }
+      MacBackupPublicationFiles.validateOutputPath(dest, root);
       final p = j['publication'] == null
           ? null
           : MacBackupPublication.fromPrivateJson(

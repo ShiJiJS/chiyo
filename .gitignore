@@ -1,4 +1,5 @@
 .scratch/
+/local/private/
 .dart_tool/
 .packages
 build/
@@ -10,3 +11,4 @@ build/
 .idea/
 .vscode/
 /.worktrees/
+__pycache__/

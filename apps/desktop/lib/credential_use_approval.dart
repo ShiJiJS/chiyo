@@ -272,7 +272,7 @@ class _CredentialUseApprovalPanelState
                   Text(
                     reusable
                         ? '首条命令用于理解用途，批准不会立即运行。同一批准范围内的新命令不重新审批；每次操作冻结自己的完整计划和操作 ID。增加未批准的凭据或使用方式需要新申请。'
-                        : '由信息授权 CLI 启动。批准不会立即运行；程序、参数和注入位置按本次申请固定。',
+                        : '由知予 CLI 启动。批准不会立即运行；程序、参数和注入位置按本次申请固定。',
                     style: prototypeText(
                       context,
                       12,
@@ -840,8 +840,8 @@ class _CredentialUseApprovalPanelState
               reusable ? '首条 CLI 命令参考' : '由 CLI 启动什么命令',
               'launch',
               reusable
-                  ? '批准不会自动运行。Agent 为每次操作提供唯一操作 ID 和完整命令，由信息授权 CLI 校验后注入并启动。同一批准范围内的新命令不重新审批；每次操作冻结自己的计划。增加未批准的凭据或使用方式需要新申请。'
-                  : 'Agent 让信息授权 CLI 执行这份申请。批准不会自动运行。CLI 校验当前会话和使用授权后，准备凭据并启动下面的程序；程序、参数、工作目录或注入位置改变都需要重新申请。',
+                  ? '批准不会自动运行。Agent 为每次操作提供唯一操作 ID 和完整命令，由知予 CLI 校验后注入并启动。同一批准范围内的新命令不重新审批；每次操作冻结自己的计划。增加未批准的凭据或使用方式需要新申请。'
+                  : 'Agent 让知予 CLI 执行这份申请。批准不会自动运行。CLI 校验当前会话和使用授权后，准备凭据并启动下面的程序；程序、参数、工作目录或注入位置改变都需要重新申请。',
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

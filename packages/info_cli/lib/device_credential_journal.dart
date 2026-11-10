@@ -66,7 +66,9 @@ final class DeviceCredentialJournal {
     var count = 0;
     await for (final file in folder.list(followLinks: false)) {
       if (file is! File ||
-          !RegExp(r'/[0-9a-f]{64}\.json$').hasMatch(file.path)) {
+          !RegExp(
+            r'^[0-9a-f]{64}\.json$',
+          ).hasMatch(file.uri.pathSegments.last)) {
         continue;
       }
       if (++count > 500) throw const CredentialUseFailure('execution_capacity');
