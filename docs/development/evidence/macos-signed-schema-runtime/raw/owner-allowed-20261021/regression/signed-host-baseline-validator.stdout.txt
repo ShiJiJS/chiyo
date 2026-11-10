@@ -1,1 +1,0 @@
-{"migrationAndReopenBaselinesAccepted":true,"changedTableCasesRefused":30,"oldBaselineAndMissingTableRefused":true}

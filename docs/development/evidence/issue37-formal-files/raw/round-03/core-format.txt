@@ -1,2 +1,0 @@
-Formatted test\information_draft_test.dart
-Formatted 7 files (1 changed) in 0.03 seconds.

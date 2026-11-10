@@ -1,8 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/integration_test/proposals_native_test.dart
-Building Windows application...                                    19.2s
-√ Built build\windows\x64\runner\Debug\info_desktop.exe
-00:00 +0: isolated Windows CLI batch review retry current content reject delete conflict
-D3_NATIVE_VERIFIED CLI two-item → review one → classification validation failure retains whole draft → repair/retry → current-by-ID → reject/delete/conflict; SQLCipher/DPAPI reopen retained receipts and field IDs. Storage I/O fault is separately injected at the public repository widget seam.
-00:18 +1: (tearDownAll)
-00:18 +1: All tests passed!

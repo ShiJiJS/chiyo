@@ -76,9 +76,9 @@ Seam仍是核心服务与原生驱动之间，审批/存储不直接调用系统
 输入验收；23/11仍为本分支未启用能力的格式准备，正式启用/合并前应重新对齐当时
 Windows发布格式，不能假定未来其他分支不会使用相同编号。
 复现入口为`scripts/qa/check-macos-focused-format.py`；
-[旧源身份/摘要及当前检查回执](../development/evidence/macos-focused-fill-format/verification.json)、
-[填充存储日志](../development/evidence/macos-focused-fill-format/portable-tests.txt)及
-[相关存储回归](../development/evidence/macos-focused-fill-format/regression-tests.txt)明确区分共享
+[旧源身份/摘要及当前检查回执](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/evidence/macos-focused-fill-format/verification.json)、
+[填充存储日志](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/evidence/macos-focused-fill-format/portable-tests.txt)及
+[相关存储回归](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/evidence/macos-focused-fill-format/regression-tests.txt)明确区分共享
 代码检查与尚未执行的系统/Windows验收。
 
 ## 原生执行方案审查
@@ -198,8 +198,8 @@ python3 scripts/package-macos.py build/macos-adaptation/package-candidate-new --
 及候选参数只在build消费；不是一次完整Flutter产品构建。所有这轮App/XPC/编译
 夹具在检查后删除，未触碰普通预览、数据库、Keychain、TCC或系统配置。
 本轮18项构建/目录/参数检查的输入摘要和原始日志见
-[回执](../development/evidence/macos-focused-fill-embedding/verification.json)与
-[日志](../development/evidence/macos-focused-fill-embedding/checks.txt)。构建根目录本身
+[回执](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/evidence/macos-focused-fill-embedding/verification.json)与
+[日志](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/evidence/macos-focused-fill-embedding/checks.txt)。构建根目录本身
 也不能通过符号链接转到工作区外；候选构建和App内嵌均在修改前拒绝这类重定向。
 
 上述系统Adapter的主人侧桌面策略默认拒绝，当前支持矩阵仍为空。控制台、登录完成
@@ -210,7 +210,7 @@ python3 scripts/package-macos.py build/macos-adaptation/package-candidate-new --
 条件格式迁移已实现；尚需有效会话策略、真实权限归属与目标支持证据，再连接生产能力。
 当前已完成可选内嵌/外层签名流程及合成封装检查；`6ff99169`完整Flutter开发候选包已
 构建并归档，解压后签名/载荷检查通过，能力仍关闭，未安装或启动App/helper。
-准确产物与范围见[当前构建回执](../development/evidence/macos-current-candidate/verification.json)。
+准确产物与范围见[当前构建回执](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/evidence/macos-current-candidate/verification.json)。
 私有签名要求已编译并有独立包/合成嵌套签名检查，
 没有在真实XPC连接上证明ad-hoc产物被系统接受；不能把“代码中设置了要求”写成
 签名/权限验收通过。不同版本不自动重连恢复输入，旧helper可能需明确退出后重启。

@@ -1,3 +1,0 @@
-00:00 +0: loading test/credential_history_retention_test.dart
-00:00 +0: retention previews and removes only ended credential facts while keeping an execution whose end cannot be established
-00:00 +1: All tests passed!

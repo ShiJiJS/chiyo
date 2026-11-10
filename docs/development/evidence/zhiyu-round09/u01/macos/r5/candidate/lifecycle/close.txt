@@ -1,3 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-flutter: The Dart VM service is listening on http://127.0.0.1:60289/hEX90tV73mw=/
-flutter: ZHIYU_LIFECYCLE={"action":"close","native":{"savedDirectories":false,"productionServices":false,"scrollbarStyle":"legacy","title":"知予 · 界面预览·示例数据","applicationId":"com.example.infoDesktop.zhiyuPreview","isolated":true,"scrollbarRevision":1},"renderedFramesSettled":true}

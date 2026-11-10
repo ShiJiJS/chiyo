@@ -1,6 +1,6 @@
 # 知予 Round09：Mac 优先改版规格与前端实施基线
 
-2026-10-25。用户已认可原型方向，并确认本轮仅发布U01–U07七张前端任务和F01后续阶段规划票；见[当前计划及发布记录](../../planning/zhiyu-round09/README.md)。本组规格约束界面与后续数据设计；真实功能任务暂不发布，待界面完成后在F01重审和拆分。2026-10-26已完成Windows检查点交接；后续转为Mac优先，当前已恢复持续Mac开发，按#62起的票序审阅已有成果并推进。接手顺序见[Mac计划](../../planning/zhiyu-round09/macos-continuation.md)，进度与未通过项见[实施记录](../../development/zhiyu-round09-frontend.md)。
+本组文档保存已确认的领域、界面与实现约束。开发任务和进度以 [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues) 为准；运行和构建见 [Mac 开发](../../development/macos-local-setup.md) 与 [Windows 开发](../../development/windows-local-setup.md)。
 
 设计北极星：以三栏浏览和按资料类型组织的详情，让人先找到、读懂资料，再明确决定向 Agent 提供什么。插件负责资料结构和展示，宿主负责数据、授权与执行。
 
@@ -8,16 +8,12 @@
 
 | 文档 | 内容 |
 | --- | --- |
-| [现状与差距](../../planning/zhiyu-round09/gap-audit.md) | 安装版本、分支差异、已有能力与本轮增量、旧 issue 对照 |
 | [S1 领域与数据](01-domain-and-data.md) | 模板、类型、重复条目、关联、稳定身份、兼容与迁移 |
 | [S2 插件合同](02-plugin-contract.md) | 安装、版本、生命周期、插件设置、Agent 制作插件 |
 | [S3 信息库与资料阅读](03-library.md) | 三栏、搜索、分类、类型详情、文件与凭据 |
 | [S4 授权与完整流程](04-flows.md) | 审批、提案、历史、设置和旧功能保留 |
 | [S5 视觉与动效合同](05-fidelity.md) | 参照状态、颜色、尺寸、动画、验收证据及阻断条件 |
 | [S6 实现边界与交付](06-architecture-and-delivery.md) | 模块边界、增量迁移、测试和 Mac 交付，Windows 后置 |
-| [当前任务与后续范围](../../planning/zhiyu-round09/README.md) | 每票独立交付、依赖、规格覆盖和发布规则 |
-| [先界面、再接功能](../../planning/zhiyu-round09/frontend-first.md) | 先完成整套Flutter界面，再逐模块接入本地服务并测试 |
-| [冻结原型](../../design/prototypes/round-09-zhiyu/index.html) | 本轮唯一新视觉基线；也可直接打开 offline.html |
 
 ## 决策优先级
 

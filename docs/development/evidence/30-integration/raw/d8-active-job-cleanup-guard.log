@@ -1,4 +1,0 @@
-00:00 +0: loading test/file_job_recovery_test.dart
-00:00 +0: unknown receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
-00:00 +1: exited receipt retains files while the registered Windows job lives, then cleans without rewriting the reported outcome
-00:01 +2: All tests passed!

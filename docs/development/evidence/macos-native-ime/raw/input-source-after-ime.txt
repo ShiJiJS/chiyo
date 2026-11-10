@@ -1,1 +1,0 @@
-com.apple.inputmethod.SCIM.ITABC

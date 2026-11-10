@@ -1,7 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/test/credential_reuse_widget_test.dart
-00:00 +0: v2 approval displays reusable scope and defaults independent fields to eight hours
-00:00 +1: independent field lifetime selection reaches the owner decision without shortening credential scope
-00:01 +2: v2 history separates field authorization and shows each frozen command, not only latest execution
-00:01 +3: operation pagination and selection survive reports at 200 percent text
-00:02 +4: All tests passed!

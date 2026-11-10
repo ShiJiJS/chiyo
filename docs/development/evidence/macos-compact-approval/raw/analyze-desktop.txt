@@ -1,6 +1,0 @@
-Analyzing desktop...                                            
-
-   info • 'hasFlag' is deprecated and shouldn't be used. Use flagsCollection instead. This feature was deprecated after v3.32.0-0.0.pre. Try replacing the use of the deprecated member with the replacement • test/approval_compact_window_test.dart:44:33 • deprecated_member_use
-   info • 'hasFlag' is deprecated and shouldn't be used. Use flagsCollection instead. This feature was deprecated after v3.32.0-0.0.pre. Try replacing the use of the deprecated member with the replacement • test/approval_compact_window_test.dart:49:33 • deprecated_member_use
-
-2 issues found. (ran in 1.9s)

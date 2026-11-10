@@ -1,4 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/hidden_page_tooltip_test.dart
-00:00 +0: a tooltip from a retained page disappears after semantic navigation (variant: TargetPlatform.macOS)
-00:00 +1: a tooltip from a retained page disappears after semantic navigation (variant: TargetPlatform.windows)
-00:01 +2: All tests passed!

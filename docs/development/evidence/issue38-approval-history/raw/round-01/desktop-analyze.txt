@@ -1,7 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-Analyzing desktop...                                            
-
-  error - The method 'prototypeSecondary' isn't defined for the type '_InformationDeliveryHistoryState'. Try correcting the name to the name of an existing method, or defining a method named 'prototypeSecondary' - lib\information_delivery_history.dart:169:22 - undefined_method
-   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - test\support\information_attachment_fixture.dart:30:7 - curly_braces_in_flow_control_structures
-
-2 issues found. (ran in 4.2s)

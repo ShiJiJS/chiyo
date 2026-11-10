@@ -1,8 +1,0 @@
-Analyzing info_core...
-
-   info - lib\information_delivery_access.dart:211:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-   info - test\information_delivery_test.dart:48:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-   info - test\information_delivery_test.dart:51:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-   info - test\information_delivery_test.dart:59:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-
-4 issues found.

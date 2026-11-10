@@ -1,7 +1,0 @@
-PASS new approval creates reusable credential grant and independent ordinary deadline
-PASS one grant permits two different commands without another approval or expiry extension
-PASS same operation returns old facts; changing content conflicts
-PASS failed operation leaves grant valid for an explicit new operation
-PASS unknown is not success or replay and shows no exit code
-PASS revoking grant prevents new uses without terminating an active operation
-6 reusable design checks passed; actual execution and concurrency remain production gates.

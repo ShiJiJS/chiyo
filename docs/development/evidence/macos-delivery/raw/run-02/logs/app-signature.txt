@@ -1,1 +1,0 @@
-/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-package-2/AgentInfoManage/app/info_desktop.app: nested code is modified or invalid

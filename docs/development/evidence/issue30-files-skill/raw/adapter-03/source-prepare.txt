@@ -1,2 +1,0 @@
-Prepared bundle: C:\Project\network_config\info-manage\build\qa-issue30-files\adapter-03\codex-preview
-No hooks installed or trusted. Follow integrations/codex/README.md.

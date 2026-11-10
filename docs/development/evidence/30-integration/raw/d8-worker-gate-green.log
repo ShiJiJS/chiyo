@@ -1,3 +1,0 @@
-00:00 +0: loading test/worker_start_gate_test.dart
-00:00 +0: worker joins its process group but cannot start the approved program before the supervisor acknowledges durable registration
-00:00 +1: All tests passed!

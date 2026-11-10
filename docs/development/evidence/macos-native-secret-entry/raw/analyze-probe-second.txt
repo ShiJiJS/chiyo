@@ -1,5 +1,0 @@
-Analyzing secret_form_probe.dart...                             
-
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/secret_form_probe.dart:37:7 • curly_braces_in_flow_control_structures
-
-1 issue found. (ran in 3.2s)

@@ -1,3 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-STATUS_FALLBACK_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.status-fallback.0d8e754eef5347d9b8c64c6154dcf5e5/Data/tmp/aim-status-fallback-av5inN
-STATUS_FALLBACK_COMPLETE=reopen

@@ -1,7 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/test/zhiyu_proposals_test.dart
-00:00 +0: (setUpAll)
-00:00 +0: actual mixed batch confirms addition, modification and whole deletion independently
-00:02 +1: actual middle-unknown batch stops the tail, blocks Escape and close, then explicitly continues and returns from results to its query
-00:03 +2: dark200 batch keeps definite failure and rejection separate and explicitly retries only the failed proposal
-00:04 +3: (tearDownAll)
-00:04 +3: All tests passed!

@@ -1,5 +1,0 @@
-{"phase":"mounted","frameworkSemantics":false,"nativeSemantics":false,"handles":0,"rootId":null}
-{"phase":"observer_connected","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":null}
-{"phase":"incremental_update","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":0}
-{"phase":"modal_open","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":0}
-{"phase":"modal_closed","frameworkSemantics":true,"nativeSemantics":true,"handles":1,"rootId":0}

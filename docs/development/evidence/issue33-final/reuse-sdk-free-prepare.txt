@@ -1,2 +1,0 @@
-Prepared bundle: C:\Project\network_config\info-manage\build\qa-issue33\prepared-v2-sdk-free-0dbf4b45
-Review hooks.json and Skill before installing or trusting.

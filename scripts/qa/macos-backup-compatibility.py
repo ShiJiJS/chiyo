@@ -19,7 +19,7 @@ VERSIONS = [
     ("16", "291801046f7d1e6e4217a4bc001ea714689855c5",
      "packages/info_storage/test/support/legacy16_probe.dart"),
     ("17", "299a8b1f9615de218c1fba42d9f383dad377890f",
-     "docs/development/evidence/issue35-focused-fill-storage/schema17-probe.dart"),
+     "packages/info_storage/test/support/legacy17_probe.dart"),
 ]
 
 

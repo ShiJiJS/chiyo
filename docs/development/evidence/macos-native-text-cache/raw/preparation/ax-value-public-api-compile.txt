@@ -1,9 +1,0 @@
-build/macos-adaptation/issue48-native-values-20261022/ax-value-public-api.swift:6:30: warning: 'accessibilitySetOverrideValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
- 4 | field.stringValue = "SyntheticNative"
- 5 | let before = field.stringValue
- 6 | let overrideAccepted = field.accessibilitySetOverrideValue("SyntheticAX", forAttribute: .value)
-   |                              `- warning: 'accessibilitySetOverrideValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
- 7 | let result: [String: Any] = ["overrideAccepted":overrideAccepted,"nativeBefore":before,"nativeAfter":field.stringValue,"axAfter":field.accessibilityValue() ?? NSNull()]
- 8 | let bytes = try! JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
-
-[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>

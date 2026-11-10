@@ -1,7 +1,0 @@
-{
-  "source": "b98e487",
-  "testSha256": "16923904d91dfc3b09b2e399e06be1b6aae948384b0e2143d9fcdb16606e6972",
-  "exit": 1,
-  "expectedFailure": "second native termination occurs before late library close completes",
-  "productionFilesModified": false
-}

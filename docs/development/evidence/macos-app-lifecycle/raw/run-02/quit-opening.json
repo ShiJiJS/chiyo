@@ -1,8 +1,0 @@
-{
-  "label": "quit-opening",
-  "exit": 0,
-  "mode": "quit-opening",
-  "quitWaitedForOpening": true,
-  "nativeTerminationRequested": true,
-  "libraryCloses": 1
-}

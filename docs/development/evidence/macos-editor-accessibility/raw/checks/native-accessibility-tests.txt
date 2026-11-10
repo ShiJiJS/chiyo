@@ -1,9 +1,0 @@
-PASS purpose attaches through public AppKit without changing text or focus
-PASS malformed, boolean, duplicate and content-bearing metadata preserve prior assignment
-PASS clearing restores original labels and stops ownership
-PASS owner changes are not overwritten during restoration
-PASS ambiguous overlapping native fields receive no guessed labels
-PASS secure and unmatched sibling controls retain their own names and values
-PASS changed geometry requires a new matching location
-PASS deinitialization releases the timer and restores native labels
-PASS total=8

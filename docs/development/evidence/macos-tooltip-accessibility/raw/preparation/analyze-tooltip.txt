@@ -1,5 +1,0 @@
-Analyzing desktop...                                            
-
-   info • The import of 'package:flutter/semantics.dart' is unnecessary because all of the used elements are also provided by the import of 'dart:ui'. Try removing the import directive • test/hidden_page_tooltip_test.dart:3:8 • unnecessary_import
-
-1 issue found. (ran in 1.6s)

@@ -1,8 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/zhiyu_library_native_test.dart
-Building macOS application...                                   
-✓ Built build/macos/Build/Products/Debug/info_desktop.app
-Failed to foreground app; open returned 1
-00:00 +0: Mac library query, edit failure, related return and viewport matrix
-ZHIYU_NATIVE_EVIDENCE=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop.zhiyuPreview/Data/tmp/ZhiyuUI-0DB9F8E9-875B-4065-8FE8-61C0C742D52F
-01:11 +1: (tearDownAll)
-01:11 +1: All tests passed!

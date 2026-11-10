@@ -1,5 +1,0 @@
-Analyzing info_storage...
-
-warning - lib\attachment_backup_integration.dart:81:25 - The ability to import 'BytesBuilder' indirectly is deprecated. Try importing 'BytesBuilder' directly. - deprecated_export_use
-
-1 issue found.

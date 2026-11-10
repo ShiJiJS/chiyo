@@ -1,4 +1,0 @@
-Running build hooks...Running build hooks...00:00 +0: loading test/ssh_host_trust_storage_test.dart
-00:00 +0: schema15 upgrades without losing existing information, and format4 refuses to silently omit confirmed SSH trust
-00:00 +1: explicitly confirmed SSH host data survives encrypted reopening and clearing without reading user SSH configuration
-00:00 +2: All tests passed!

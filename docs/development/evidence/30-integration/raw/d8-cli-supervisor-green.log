@@ -1,3 +1,0 @@
-00:00 +0: loading test/runtime_cli_crash_test.dart
-00:00 +0: compiled CLI death does not stop its worker draining a running approved process
-00:00 +1: All tests passed!

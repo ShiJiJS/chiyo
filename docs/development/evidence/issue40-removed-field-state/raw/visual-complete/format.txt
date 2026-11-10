@@ -1,2 +1,0 @@
-Formatted test/removed_field_state_test.dart
-Formatted 4 files (1 changed) in 0.11 seconds.

@@ -58,7 +58,7 @@ argv 项只能是字符串或恰含 `file` 的对象；env 值只能是字符串
 
 不继承父进程环境。Windows 基础仅 `SystemRoot,WINDIR,COMSPEC`（供 DLL/工具定位，不允许 shell 接收配置）、受控 `TEMP/TMP`、`PATH=<SystemRoot>\\System32;<exe目录>`，并由执行器把 `ProgramData` 设置为本次私有空目录，不继承系统共享目录；Unix 仅 `PATH=/usr/bin:/bin`、受控 `TMPDIR`、`LANG=C.UTF-8`。HOME/USERPROFILE/APPDATA/LOCALAPPDATA/XDG_CONFIG_HOME 指向每次私有空配置目录。应用会话、grants、Git、SSH、云账号、代理认证等其他变量一律不继承。显式 env 中不能覆盖配置隔离变量（包括 `ProgramData`）或注入 `PATH,COMSPEC,LD_PRELOAD,DYLD_*,PYTHONPATH,NODE_OPTIONS` 等程序加载控制；接收配置仅允许表中认证变量和已列出的非秘密常量。无法核实当前工具版本的账号优先级时返回 `unsupported_tool_version`，不能用原用户环境重试。
 
-2026-10-17 接收预检修订：本机 Windows OpenSSH 9.5p2 在缺少 `ProgramData` 时，连 `-V` 也退出255且没有可用标准错误；设置为本次空目录即可初始化。该变量是执行器生成的隔离配置位置，不是增加可继承认证来源。SSH 同时显式设置 `GlobalKnownHostsFile` 为受管空文件，`UserKnownHostsFile` 为已确认快照，两项均作为内部类型化材料纳入 effective argv 与 planHash；不能只隔离用户 known_hosts 而遗漏全局文件。依据及真实工具预检边界见[运行工具预检](../development/runtime-receiver-preflight.md)。
+2026-10-17 接收预检修订：本机 Windows OpenSSH 9.5p2 在缺少 `ProgramData` 时，连 `-V` 也退出255且没有可用标准错误；设置为本次空目录即可初始化。该变量是执行器生成的隔离配置位置，不是增加可继承认证来源。SSH 同时显式设置 `GlobalKnownHostsFile` 为受管空文件，`UserKnownHostsFile` 为已确认快照，两项均作为内部类型化材料纳入 effective argv 与 planHash；不能只隔离用户 known_hosts 而遗漏全局文件。依据及真实工具预检边界见[运行工具预检](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/runtime-receiver-preflight.md)。
 
 同轮 gh 预检发现：空 `GH_CONFIG_DIR` 不保证没有系统 keyring 认证。`gh_token` 执行器在私有材料准备后、启动前必须确认 `GH_TOKEN` 的非空值恰来自本次获批字符串；缺失、空值或绑定错误一律准备失败且不启动，不能通过不设置该变量让 gh 自行选账号。申请层和私有材料层均核对，测试覆盖“空 Token 时未创建进程”。真实工具负向验收始终带非空合成 Token，预期401；缺 Token 的对照只在受控程序/注入测试中执行，不再让真实 gh 查询用户已有账号。
 
@@ -149,7 +149,7 @@ D6实现澄清：私有领取尚未建立连接时可以明确返回`service_una
 - 私有材料领取DTO可包含credentialMaterial、内部主机快照和materialLease，响应上限4MiB，覆盖两份各最多1MiB材料的base64及计划。此限制与4MiB输出缓冲是两个不同边界；公开CLI/HTTP请求的262144字节上限不变。材料字节、受管路径/真实身份及进程组私有登记不进入普通CLI响应、公共目录或历史导出。
 - 文件登记先于秘密写入：服务持久化受限目录身份，CLI独占建立空文件，私有能力接口核对并保存全部预期文件身份后才写入。正常终态和重启核查按真实身份清理；活动或不确定进程、身份不匹配或额外硬链接均保留材料，只能重试清理，不能重放启动。退出码与清理结果独立。
 
-Windows验证及未完成项见[实施记录](../development/round05-29-files.md)。完整凭据历史/Codex持续执行衔接归#30，格式5及用户资料迁移归#31；不扩大浏览器填充、交互SSH或服务器同步范围。
+Windows验证及未完成项见[实施记录](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/round05-29-files.md)。完整凭据历史/Codex持续执行衔接归#30，格式5及用户资料迁移归#31；不扩大浏览器填充、交互SSH或服务器同步范围。
 
 ## 直接验收 seam
 

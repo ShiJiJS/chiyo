@@ -1,2 +1,0 @@
-Targeted system AX entry; unrelated notifications omitted.
-				4 container Description: “Mac 通知合成验收”通知 通知可能包括提醒、声音和图标标记。, ID: EDC64B77-0777-4F26-BD25-175249BD2680, Secondary Actions: 显示详细信息, 不允许, 允许, 关闭

@@ -1,7 +1,0 @@
-{"pid":85616,"phase":"started"}
-{"pid":85616,"phase":"close-drain-started"}
-{"pid":85616,"phase":"close-drain-complete"}
-{"pid":85616,"phase":"host-close-complete"}
-{"pid":85616,"phase":"close-reply-flushed"}
-{"pid":85616,"phase":"finally-entered"}
-{"pid":85616,"phase":"finally-complete"}

@@ -1,6 +1,0 @@
-Analyzing desktop...                                            
-
-   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • integration_test/support/native_frame_recording.dart:68:7 • curly_braces_in_flow_control_structures
-  error • The constructor being called isn't a const constructor. Try removing 'const' from the constructor invocation • integration_test/support/native_frame_recording.dart:82:9 • const_with_non_const
-
-2 issues found. (ran in 2.4s)

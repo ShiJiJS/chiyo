@@ -1,9 +1,0 @@
-PASS save, deduplicate, private permissions and no bookmark response
-PASS reopen restores, deinit balances access
-PASS failed save/remove preserves previous archive and active entry
-PASS stale and denied bookmarks require reselect without deleting records
-PASS duplicate replacement and oversized bookmark preserve active entries
-PASS missing directory is unavailable and releases active scope
-PASS forget persists across reopen without deleting selected files
-PASS corrupt archive is retained and cannot be overwritten
-PASS symlink archive is refused without changing target

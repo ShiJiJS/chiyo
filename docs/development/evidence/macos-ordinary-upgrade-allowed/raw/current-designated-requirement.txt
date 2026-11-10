@@ -1,2 +1,0 @@
-# designated => cdhash H"25df740118260a19e91d92b74600c41bd13d28d1"
-Executable=/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/MacOS/info_desktop

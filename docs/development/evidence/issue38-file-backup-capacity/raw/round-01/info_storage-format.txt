@@ -1,4 +1,0 @@
-Formatted lib/backups.dart
-Formatted lib/info_storage.dart
-Formatted test/information_attachment_lifecycle_test.dart
-Formatted 3 files (3 changed) in 0.04 seconds.

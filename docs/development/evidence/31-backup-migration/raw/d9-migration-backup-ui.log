@@ -1,6 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-00:00 +0: loading C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart
-00:00 +0: C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/credential_migration_widget_test.dart: owner must explicitly choose and confirm a field, sees grant and backup effects, and gets the linked credential
-00:01 +1: C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/backup_widget_test.dart: restore refreshes mounted preference controls, keeps the settings section and imports information
-00:03 +2: C:/Project/network_config/info-manage-worktrees/31-backup-migration/apps/desktop/test/backup_widget_test.dart: owner enables backup and separately saves key before exporting
-00:04 +3: All tests passed!

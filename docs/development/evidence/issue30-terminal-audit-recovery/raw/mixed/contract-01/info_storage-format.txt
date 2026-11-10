@@ -1,3 +1,0 @@
-Formatted test/support/mixed_lifecycle.dart
-Formatted test/mixed_lifecycle_windows_test.dart
-Formatted 2 files (2 changed) in 0.01 seconds.

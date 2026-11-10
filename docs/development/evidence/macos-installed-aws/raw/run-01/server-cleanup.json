@@ -1,6 +1,0 @@
-{
-  "pid": 40333,
-  "ownedReceiverVerified": true,
-  "signal": "SIGTERM",
-  "scope": "test receiver only; application not terminated by signal"
-}

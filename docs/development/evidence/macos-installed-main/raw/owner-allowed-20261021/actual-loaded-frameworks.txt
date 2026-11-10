@@ -1,8 +1,0 @@
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/FlutterMacOS.framework/Versions/A/FlutterMacOS
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/fonts/MaterialIcons-Regular.otf
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/App.framework/Versions/A/App
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/FlutterMacOS.framework/Versions/A/Resources/icudtl.dat
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/assets/fonts/NotoSansSC-Regular.otf
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/assets/fonts/NotoSansSC-Medium.otf
-n/Users/jiangxinyi/Documents/Project/agent-info/local/中文 Mac 预览/AgentInfoManage/app/info_desktop.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets

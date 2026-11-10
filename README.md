@@ -76,7 +76,7 @@ cd chiyo
 python3 scripts/qa/package-macos-isolated.py build/macos-adaptation/my-release
 ```
 
-构建器核对 App 签名、配套 CLI、加密存储和解包后的文件。通过源码或打包检查不等于已经完成所有系统交互验收，实际范围见 [Mac 交付记录](docs/development/macos-latest-delivery.md)。
+构建器核对 App 签名、配套 CLI、加密存储和解包后的文件。通过源码或打包检查不等于已经完成所有系统交互验收；具体任务状态见 GitHub Issues。
 
 ### 代码结构
 
@@ -95,7 +95,8 @@ Windows 的资料库启动代码位于 `apps/desktop/lib/platform/windows_librar
 ## 文档
 
 - [Mac 本机开发环境](docs/development/macos-local-setup.md)
-- [当前交付与剩余事项](docs/development/macos-latest-delivery.md)
+- [Windows 本机开发环境](docs/development/windows-local-setup.md)
+- [服务部署与维护](apps/server/OPERATIONS.md)
 - [产品规格](docs/specs/0001-local-information-access.md)
 - [领域术语](GLOSSARY.md)与[架构决策](docs/adr/)
 - [图标原图与应用图标](apps/desktop/assets/branding/README.md)

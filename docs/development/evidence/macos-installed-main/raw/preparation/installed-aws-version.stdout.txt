@@ -1,1 +1,0 @@
-aws-cli/2.38.1 Python/3.14.6 Darwin/27.0.0 exe/arm64

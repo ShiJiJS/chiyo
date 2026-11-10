@@ -1,7 +1,0 @@
-Running build hooks...Running build hooks...{"phase":"originals-retention-recycle","elapsedMs":8147,"rss":342818816,"maxRss":393031680}
-{"phase":"ten100MiB-native-copies","elapsedMs":13536,"rss":354353152,"maxRss":393031680}
-{"phase":"metadata-admitted","elapsedMs":24194,"rss":352964608,"maxRss":393031680}
-{"phase":"full-export-verified","elapsedMs":35363,"rss":310784000,"maxRss":393031680}
-{"phase":"atomic-restore","elapsedMs":49046,"rss":329498624,"maxRss":393031680}
-{"phase":"all-versions-checked-copies-released","elapsedMs":52452,"rss":334032896,"maxRss":393031680}
-{"result":{"scenario":"small","execution":"JIT","dart":"3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on \"windows_x64\"","baselineRss":316088320,"metadataBytes":24508,"originalBytes":104857600,"managedCopyBytes":104857600,"backupFileBytes":107413504,"exportAndVerifyMs":11168,"inspectAndRestoreMs":13593,"allVersionsExact":true,"restoredFactsOnly":true,"measurements":[{"phase":"originals-retention-recycle","elapsedMs":8147,"rss":342818816,"maxRss":393031680},{"phase":"ten100MiB-native-copies","elapsedMs":13536,"rss":354353152,"maxRss":393031680},{"phase":"metadata-admitted","elapsedMs":24194,"rss":352964608,"maxRss":393031680},{"phase":"full-export-verified","elapsedMs":35363,"rss":310784000,"maxRss":393031680},{"phase":"atomic-restore","elapsedMs":49046,"rss":329498624,"maxRss":393031680},{"phase":"all-versions-checked-copies-released","elapsedMs":52452,"rss":334032896,"maxRss":393031680}],"maxRss":393031680,"totalMs":52452},"temporaryOutputRemoved":true}

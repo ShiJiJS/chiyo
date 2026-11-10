@@ -1,4 +1,0 @@
-{
-  "sourceBase": "5e58c6d615b8c6bb6b3121c6fd7f1fa4996b34e9",
-  "scope": "Minimal current DesktopTextField and DesktopWindowFrame; no library, Keychain or bootstrap. Reuse audited QA memory-only all-format clipboard capture/restore; record only synthetic equality/selection."
-}

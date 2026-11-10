@@ -1,2 +1,0 @@
-{"phase": "select-backup-and-observe-preview", "pid": 82472, "backup": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-restore-crash-hdjcms5k\\synthetic.aimbackup", "recovery": "C:\\Users\\Todoki\\AppData\\Local\\Temp\\aim-packaged-restore-crash-hdjcms5k\\synthetic.recovery.txt", "files": 10, "bytes": 83886080, "receipt": "C:\\Project\\network_config\\info-manage\\build\\qa-issue18-restore-crash\\run-01\\preview-observed.json"}
-{"phase": "watcher-armed-click-confirm-restore", "pid": 82472}

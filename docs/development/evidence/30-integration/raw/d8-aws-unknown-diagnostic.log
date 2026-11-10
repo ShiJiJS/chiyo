@@ -1,3 +1,0 @@
-00:00 +0: loading test/aws_receiver_native_test.dart
-00:00 +0: real AWS CLI uses only approved static file credentials for signed reads and writes, and rejects the wrong secret
-00:08 +1: All tests passed!

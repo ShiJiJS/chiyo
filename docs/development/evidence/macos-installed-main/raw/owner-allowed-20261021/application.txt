@@ -1,4 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-[ERROR:flutter/lib/ui/window/platform_configuration.cc(475)] Reported frame time is older than the last one; clamping. 286335187884 < 286335194820 ~= 6936
-2026-10-21 20:44:55.270 info_desktop[30999:4776414] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
-2026-10-21 20:44:55.513 info_desktop[30999:4776414] error messaging the mach port for IMKCFRunLoopWakeUpReliable

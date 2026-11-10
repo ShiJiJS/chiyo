@@ -1,2 +1,0 @@
-WINDOWS_HOSTED_CRASH_VERIFIED {"activeMaterialRetained": true, "attemptRemainsConsumed": true, "endedMaterialRemoved": true, "guiProcessDied": true, "oldProofRejected": true, "sshSurvived": true, "unknownWithoutExitCode": true}
-{"imageId": "sha256:4c33580cdd4166ddf8faeb4f6bba9fb7e208720978f0a92751681b3f22d9406c", "testExitCode": 0, "fixture": "synthetic localhost only", "containerRemovedAfterRun": true}

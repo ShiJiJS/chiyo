@@ -1,2 +1,0 @@
-Formatted tool/render_information_file_consumers_test.dart
-Formatted 10 files (1 changed) in 0.12 seconds.

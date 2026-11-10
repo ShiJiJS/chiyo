@@ -1,1 +1,0 @@
-/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue42-owner-access-regression-1/Changed-Version.app: replacing existing signature

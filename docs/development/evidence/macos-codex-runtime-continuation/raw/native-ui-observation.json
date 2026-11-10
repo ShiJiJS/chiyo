@@ -1,6 +1,0 @@
-{
-  "tool": "cua.getApp(com.apple.finder)",
-  "result": "The Mac is locked and automatic unlock could not unlock it.",
-  "nativeUiAcceptance": false,
-  "userUnlockRequested": true
-}

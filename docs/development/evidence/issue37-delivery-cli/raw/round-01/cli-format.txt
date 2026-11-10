@@ -1,4 +1,0 @@
-Formatted lib\agent_client.dart
-Formatted lib\information_file_client.dart
-Formatted test\information_file_client_test.dart
-Formatted 3 files (3 changed) in 0.01 seconds.

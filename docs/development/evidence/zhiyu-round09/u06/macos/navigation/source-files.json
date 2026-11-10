@@ -1,7 +1,0 @@
-{
-  "apps/desktop/lib/workspace/mac_preview_desktop.dart": "dac561e70d263b97493c2f04b5a0f1fbf33d11f3569069e6107ae3b72778df06",
-  "apps/desktop/lib/workspace/preview_workspace.dart": "3e5d6699ab21d5766c963693c1fa9df3243a0a2e2a43d0785325cc2c07eaae21",
-  "apps/desktop/test/mac_preview_desktop_test.dart": "943aace5092c56ab0361fb46298eaf589202600acebb07f40f951ef2dea78f76",
-  "apps/desktop/test/zhiyu_approvals_test.dart": "25c37e23fc2554b9ee83fc6d9cd45e874430e954a9d67f86822fa39554d74ea5",
-  "apps/desktop/test/zhiyu_preview_test.dart": "2b26d6fb1ad0155af8ceef4e96e0002d2852205a5d697a7b89cfac33c2ff0daa"
-}

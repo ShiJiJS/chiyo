@@ -9,4 +9,4 @@ status: accepted
 
 被引用内容遭到拒绝时，不自动拒绝相关的已批准资料，而是保留为需要处理并说明原因，修改引用后重新审批。待录入资料相互引用时，全部批准后作为一组入库，不因互相等待而无法完成；不相关资料按各自状态处理。
 
-Mac 开发分支已将这项决定接入新增、修改、凭据及普通文件提案，最终整包和独立新会话试用仍待完成，见[开发进度](../development/ai-template-ingestion.md)及[文件录入](../development/ordinary-file-ingestion.md)。现有修改提案、用户查看变化和批准后保存的流程继续复用；本决定不允许 Agent 自行批准，也不把录入批准变成信息读取或凭据使用许可。通用状态及引用处理归 GitHub #78，凭据和文件接入分别归 #79/#80，实际验证归 #73。
+Mac 开发分支已将这项决定接入新增、修改、凭据及普通文件提案，最终整包和独立新会话试用仍待完成，见[开发进度](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/ai-template-ingestion.md)及[文件录入](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/ordinary-file-ingestion.md)。现有修改提案、用户查看变化和批准后保存的流程继续复用；本决定不允许 Agent 自行批准，也不把录入批准变成信息读取或凭据使用许可。通用状态及引用处理归 GitHub #78，凭据和文件接入分别归 #79/#80，实际验证归 #73。

@@ -1,7 +1,0 @@
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
-Analyzing desktop...                                            
-
-  error - Undefined name 'record'. Try correcting the name to one that is defined, or defining the name - lib\information_delivery_history.dart:183:21 - undefined_identifier
-  error - Undefined name 'record'. Try correcting the name to one that is defined, or defining the name - lib\information_delivery_history.dart:183:60 - undefined_identifier
-
-2 issues found. (ran in 2.9s)

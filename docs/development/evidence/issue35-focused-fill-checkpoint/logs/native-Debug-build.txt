@@ -1,9 +1,0 @@
-适用于 .NET Framework MSBuild 版本 17.14.60+43b635718
-
-  focus_snapshot.cpp
-  focused_input_snapshot.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\focused_input\Debug\focused_input_snapshot.lib
-  focus_snapshot_test.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\focused_input\Debug\focus_snapshot_test.exe
-适用于 .NET Framework MSBuild 版本 17.14.60+43b635718
-
-  focused_input_snapshot.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\focused_input\Debug\focused_input_snapshot.lib
-  focus_inspector.vcxproj -> C:\Project\network_config\info-manage\apps\desktop\build\windows\x64\focused_input\Debug\info-focus-inspector.exe

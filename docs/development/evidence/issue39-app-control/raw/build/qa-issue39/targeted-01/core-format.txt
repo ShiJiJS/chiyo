@@ -1,2 +1,0 @@
-Formatted lib/windows_desktop_control.dart
-Formatted 1 file (1 changed) in 0.01 seconds.

@@ -1,4 +1,0 @@
-00:00 +0: loading test/worker_receipt_contention_test.dart
-00:00 +0: test/worker_receipt_contention_test.dart: a brief Windows reader of the ready receipt cannot lose the started or exited receipt or repeat the target
-00:00 +1: test/early_worker_crash_test.dart: worker death after launch acknowledgement but before target identity keeps the attempt unknown and preserves live material
-00:02 +2: All tests passed!

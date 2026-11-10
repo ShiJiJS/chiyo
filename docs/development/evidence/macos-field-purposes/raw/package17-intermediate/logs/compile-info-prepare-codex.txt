@@ -1,1 +1,0 @@
-Generated: /Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-package-17/AgentInfoManage/cli/info-prepare-codex

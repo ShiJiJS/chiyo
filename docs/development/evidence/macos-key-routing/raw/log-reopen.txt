@@ -1,5 +1,0 @@
-[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
-EDITOR_FOCUS_ROOT=/Users/jiangxinyi/Library/Containers/org.shijijs.agent-info-manage.qa.editor-focus.528d027080de491596daf274afd1254b/Data/tmp/aim-editor-focus-pApwr9
-EDITOR_FOCUS_COMPLETE=reopen
-EDITOR_FOCUS_NATIVE_KEY={"event":10,"flags":1048576,"keyCode":12,"marked":false,"responder":"FlutterView"}
-EDITOR_FOCUS_NATIVE_KEY={"event":11,"flags":1048576,"keyCode":12,"marked":false,"responder":"FlutterView"}

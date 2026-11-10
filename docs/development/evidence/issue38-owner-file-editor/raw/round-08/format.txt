@@ -1,4 +1,0 @@
-Formatted lib/information_editor.dart
-Formatted test/information_file_editor_test.dart
-Formatted test/desktop_reshape_test.dart
-Formatted 10 files (3 changed) in 0.10 seconds.

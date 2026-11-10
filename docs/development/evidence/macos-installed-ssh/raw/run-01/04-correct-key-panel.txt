@@ -1,3 +1,0 @@
-							303 text field (selected, settable) Value: 正确 SSH 私钥, Secondary Actions: Open Finder item, URL: file:///Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue50-installed-ssh-1/%E4%B8%AD%E6%96%87%20SSH%20%E5%90%88%E6%88%90%E7%9B%AE%E5%BD%95/%E6%AD%A3%E7%A1%AE%20SSH%20%E7%A7%81%E9%92%A5
-		336 button Cancel, ID: CancelButton
-		337 button Open, ID: OKButton

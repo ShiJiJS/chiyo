@@ -1,4 +1,0 @@
-00:00 +0: loading test/file_material_failure_test.dart
-00:00 +0: cleanup refuses an identity-replaced file and never deletes the preserved source material
-00:01 +1: resource audit failure writes no credential bytes, starts no program and records a consumed preparation failure
-00:01 +2: All tests passed!

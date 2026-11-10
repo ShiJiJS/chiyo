@@ -1,1 +1,0 @@
-/Users/jiangxinyi/Documents/Project/agent-info/build/macos-adaptation/issue46-duplicate-ui-2/source/apps/desktop/build/macos/Build/Products/Release/Mac Duplicate QA.app: replacing existing signature

@@ -10,7 +10,7 @@
 
 Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。
 
-#35的Windows焦点输入及#34普通附件已完成各自验收，先以实际capabilities判断安装版本的能力。Skill包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)和[普通文件申请、领取与释放](skills/agent-info-access/references/information-files.md)。文件副本可交给同机文档工具或浏览器上传工具；凭据文件仍由命令宿主注入，不作为普通附件领取。各自实测范围见[#35完成记录](../../docs/development/issue35-completion.md)和[#38完成记录](../../docs/development/issue38-completion.md)。#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件；用户旧0.4.0+8包仍未替换。
+#35的Windows焦点输入及#34普通附件已完成各自验收，先以实际capabilities判断安装版本的能力。Skill包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)和[普通文件申请、领取与释放](skills/agent-info-access/references/information-files.md)。文件副本可交给同机文档工具或浏览器上传工具；凭据文件仍由命令宿主注入，不作为普通附件领取。各自实测范围见[#35完成记录](https://github.com/ShiJiJS/chiyo/issues/35)和[#38完成记录](https://github.com/ShiJiJS/chiyo/issues/38)。#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件；用户旧0.4.0+8包仍未替换。
 
 ## 凭据边界
 
@@ -144,7 +144,7 @@ python scripts/prepare-codex-acceptance.py --delivery <AgentInfoManage目录> --
 
 CLI 一次 stdin JSON 的内容见 Skill。通用 `info` 仍支持 JSON-lines；Codex 适配
 独立于业务命令。wait/cancel 由 #4 提供；主子 agent 与结束适配的实际 Codex 验收
-使用 [Issue #7 检查清单](../../docs/development/chat-lifecycle.md)。
+使用 [Issue #7 检查清单](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/chat-lifecycle.md)。
 
 ## 已验证与未验证
 

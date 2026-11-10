@@ -1,5 +1,0 @@
-00:00 +0: loading test/ssh_credential_use_test.dart
-00:00 +0: a closed service cannot replace or clear its confirmed SSH host settings
-00:00 +1: confirming SSH hosts copies the submitted bytes before asynchronous storage and returns an immutable snapshot
-00:00 +2: SSH approval binds an owner-confirmed host snapshot and effective isolation arguments, and never silently follows a replacement snapshot
-00:00 +3: All tests passed!

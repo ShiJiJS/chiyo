@@ -1,9 +1,0 @@
-{
-  "cwd": "apps/desktop unless noted",
-  "focused": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_file_confirmation_test.dart test/zhiyu_content_states_test.dart test/zhiyu_content_test.dart test/workspace_content_test.dart --reporter expanded --dart-define=UI_EVIDENCE_DIR=/Users/jiangxinyi/Documents/Project/agent-info/build/zhiyu-ui/u03/macos/r14/confirmation",
-  "related": "../../scripts/dev-macos.sh flutter test --no-pub test/zhiyu_content_test.dart test/zhiyu_content_states_test.dart test/zhiyu_file_confirmation_test.dart test/zhiyu_file_types_test.dart test/zhiyu_attachment_reading_test.dart test/zhiyu_content_fidelity_test.dart test/workspace_content_test.dart test/workspace_file_types_test.dart test/zhiyu_record_receipts_test.dart test/workspace_records_test.dart test/workspace_history_test.dart test/mac_preview_isolation_test.dart --reporter expanded",
-  "analysis": "../../scripts/dev-macos.sh flutter analyze --no-pub --fatal-infos",
-  "native": "../../scripts/dev-macos.sh preview-check --library --reporter expanded",
-  "build": "FLUTTER_MACOS_ARM64_ONLY=true XCODE_XCCONFIG_FILE=/Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/macos/Runner/Configs/Preview.xcconfig ../../scripts/dev-macos.sh flutter build macos --debug --no-pub --target lib/preview_main.dart",
-  "ordering": "Two real same-version page failures reproduced; metadata identity changed with a reused version number reproduced; application corrected. Test-host IO/fake-clock and painting flag restoration corrected before final28 focused,current strict analysis and80 related. Native and ordinary build follow sequentially. No application edits after source commit."
-}

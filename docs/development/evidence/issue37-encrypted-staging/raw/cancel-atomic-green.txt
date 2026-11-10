@@ -1,3 +1,0 @@
-Running build hooks...Running build hooks...00:00 +0: loading test/information_file_staging_test.dart
-00:00 +0: failed draft cancellation cannot partially remove its staged files
-00:00 +1: All tests passed!

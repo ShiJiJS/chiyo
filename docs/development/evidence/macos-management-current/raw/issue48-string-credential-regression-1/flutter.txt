@@ -1,8 +1,0 @@
-00:00 +0: loading /Users/jiangxinyi/Documents/Project/agent-info/apps/desktop/integration_test/macos_credential_management_native_test.dart
-Building macOS application...                                   
-✓ Built build/macos/Build/Products/Debug/info_desktop.app
-Failed to foreground app; open returned 1
-00:00 +0: Mac native credential management and discovery lifecycle
-MAC_CREDENTIAL_MANAGEMENT_ROOT=/Users/jiangxinyi/Library/Containers/com.example.infoDesktop/Data/tmp/aim-mac-credential-management-ui-ImsDKU
-00:26 +1: (tearDownAll)
-00:26 +1: All tests passed!

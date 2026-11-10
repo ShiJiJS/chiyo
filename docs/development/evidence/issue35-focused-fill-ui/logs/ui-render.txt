@@ -1,4 +1,0 @@
-00:00 +0: loading C:/Project/network_config/info-manage/apps/desktop/tool/render_focused_fill_test.dart
-00:00 +0: render focused-fill application surfaces with real local fonts
-00:03 +1: All tests passed!
-Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!

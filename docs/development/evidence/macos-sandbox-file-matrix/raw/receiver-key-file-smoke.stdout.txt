@@ -1,8 +1,0 @@
-{
-    "ContentLength": 2009,
-    "ETag": "\"synthetic\"",
-    "ChecksumSHA256": "YJAYOilSqfrql5vyCzgk4c1elA3Suq+ml35/snBeMVE=",
-    "ChecksumType": "FULL_OBJECT",
-    "ContentType": "application/octet-stream",
-    "Metadata": {}
-}
