@@ -516,6 +516,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
               )
             : location.page == WorkspacePage.approvals
             ? ApprovalsPage(
+                records: _source,
                 controller: _approvals,
                 onHistory: (id) =>
                     _navigate(WorkspacePage.history, 'request:$id'),

@@ -6,6 +6,7 @@ import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'approvals_controller.dart';
 import 'approval_executions.dart';
+import 'approval_directory_location.dart';
 import 'workspace_source.dart';
 
 class ApprovalsPage extends StatefulWidget {
@@ -14,10 +15,12 @@ class ApprovalsPage extends StatefulWidget {
     required this.controller,
     required this.onRecord,
     this.onSettings,
+    this.records,
     this.onHistory,
     this.onRetry,
   });
   final ApprovalsController controller;
+  final WorkspaceSource? records;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final VoidCallback? onSettings, onRetry;
   final ValueChanged<String>? onHistory;
@@ -263,6 +266,12 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     weight: FontWeight.w600,
                   ),
                 ),
+                if (widget.records != null)
+                  ApprovalDirectoryLocation(
+                    key: ValueKey('approval-location-${e.key.$1.key}'),
+                    source: widget.records!,
+                    record: e.key.$1,
+                  ),
                 if (e.value.every((s) => s.entryId != null)) ...[
                   DesktopButton(
                     key: ValueKey('approval-expand-${e.value.first.entryId}'),
