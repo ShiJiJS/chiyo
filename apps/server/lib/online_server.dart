@@ -993,29 +993,26 @@ final class OnlineServer {
         throw const AccessFailure('unauthorized');
       }
       if (request.method == 'POST') parsedBody = await _body(request);
-      final pureOwnerRead =
-          request.method == 'GET' &&
-          (const {
-                '/v1/owner/updates',
-                '/v1/owner/catalog',
-                '/v1/owner/summaries',
-                '/v1/owner/plugins',
-              }.contains(request.uri.path) ||
-              (path.length == 4 &&
-                  path.take(3).join('/') == 'v1/owner/information'));
-      await _runtime.run(
-        () async {
+      if (request.method == 'GET' && request.uri.path == '/v1/owner/health') {
+        final expected = request.headers.value('x-chiyo-server-id');
+        if (request.uri.hasQuery) throw const FormatException();
+        if (expected != null && expected != serverId) {
+          throw const AccessFailure('server_changed');
+        }
+        status = _runtime.isAvailable ? 200 : 503;
+        result = {
+          'serverId': serverId,
+          'state': _runtime.isAvailable ? 'ready' : 'unavailable',
+        };
+      } else
+        await _runtime.run(() async {
           routeStarted = timing.elapsed;
           try {
             await route();
           } finally {
             routeFinished = timing.elapsed;
           }
-        },
-        skipUnchangedCheckpoint:
-            pureOwnerRead ||
-            (request.method == 'POST' && request.uri.path == '/v1/owner/sync'),
-      );
+        }, skipUnchangedCheckpoint: true);
     } on AccessFailure catch (e) {
       status = e.status == 'unauthorized' ? 401 : 409;
       result = {'error': e.status, 'status': e.status};

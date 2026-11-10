@@ -1809,7 +1809,18 @@ class _ImportProposalsPageState extends State<ImportProposalsPage> {
                           : '确认这些修改',
                     ),
                     const SizedBox(width: 16),
-                    const Text('→'),
+                    if (_busy)
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: p.paper,
+                          semanticsLabel: '正在保存提案',
+                        ),
+                      )
+                    else
+                      const Text('→'),
                   ],
                 ),
               ),

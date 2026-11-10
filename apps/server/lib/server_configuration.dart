@@ -15,11 +15,12 @@ final class ServerConfiguration {
     this.tls,
     this.address,
     this.port,
+    this.readCacheMiB,
   );
   final String dataDirectory, databaseKeyFile, ownerToken, serverId;
   final SecurityContext tls;
   final InternetAddress address;
-  final int port;
+  final int port, readCacheMiB;
 
   static Future<ServerConfiguration> read(String configPath) async {
     final file = File(configPath).absolute;
@@ -31,6 +32,7 @@ final class ServerConfiguration {
       'tlsPrivateKey',
       'address',
       'port',
+      'readCacheMiB',
     }).isNotEmpty)
       throw const FormatException('Unknown configuration');
     String resolve(String name) {
@@ -39,6 +41,12 @@ final class ServerConfiguration {
       return file.parent.uri.resolve(path).toFilePath();
     }
 
+    final cache = input.containsKey('readCacheMiB')
+        ? input['readCacheMiB']
+        : 128;
+    if (cache is! int || cache < 32 || cache > 512) {
+      throw const FormatException('Invalid readCacheMiB (32..512)');
+    }
     final secrets = resolve('secretsDirectory');
     String encode(List<int> bytes) =>
         base64Url.encode(bytes).replaceAll('=', '');
@@ -66,6 +74,7 @@ final class ServerConfiguration {
       tls,
       address,
       port,
+      cache,
     );
   }
 }

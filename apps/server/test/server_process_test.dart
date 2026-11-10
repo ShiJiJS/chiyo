@@ -31,6 +31,28 @@ void main() {
           'port': 0,
         }),
       );
+      final configInput =
+          jsonDecode(await config.readAsString()) as Map<String, dynamic>;
+      expect((await ServerConfiguration.read(config.path)).readCacheMiB, 128);
+      for (final size in [32, 512]) {
+        await config.writeAsString(
+          jsonEncode({...configInput, 'readCacheMiB': size}),
+        );
+        expect(
+          (await ServerConfiguration.read(config.path)).readCacheMiB,
+          size,
+        );
+      }
+      for (final size in [null, 0, 31, 513, 128.5, '128', true]) {
+        await config.writeAsString(
+          jsonEncode({...configInput, 'readCacheMiB': size}),
+        );
+        await expectLater(
+          ServerConfiguration.read(config.path),
+          throwsFormatException,
+        );
+      }
+      await config.writeAsString(jsonEncode(configInput));
       final token = base64Url
           .encode(await File('$secrets/owner.token').readAsBytes())
           .replaceAll('=', '');
@@ -40,9 +62,9 @@ void main() {
       var diagnostics = <String>[];
       Future<Map<String, dynamic>> start() async {
         diagnostics = [];
-        process = await Process.start(Platform.resolvedExecutable, [
-          'run',
-          'bin/server.dart',
+        final binary = Platform.environment['CHIYO_TEST_SERVER_BINARY'];
+        process = await Process.start(binary ?? Platform.resolvedExecutable, [
+          if (binary == null) ...['run', 'bin/server.dart'],
           'serve',
           config.path,
         ], workingDirectory: Directory.current.path);

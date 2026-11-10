@@ -26,6 +26,16 @@ extension _EncryptedServerState on EncryptedInformationRepository {
 
   Future<ServerStateSnapshot> _openServerState() async {
     if (_closed) throw const StorageFailure('library_closed');
+    if (await _hasServerStateTable()) {
+      final rows = await _db
+          .customSelect(
+            'SELECT generation,revision,payload FROM server_runtime_state WHERE singleton=1',
+          )
+          .get();
+      if (rows.isNotEmpty) return _serverSnapshot(rows.single);
+    }
+    // Initialization is transactional; restore removes the row and takes this
+    // path again. No process-local 'initialized' flag can survive a rollback.
     return _db.transaction(() async {
       await _db.customStatement(
         'CREATE TABLE IF NOT EXISTS server_runtime_state('

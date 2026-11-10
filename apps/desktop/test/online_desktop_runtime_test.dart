@@ -531,7 +531,24 @@ void main() {
           () => _request(f!, 'slow-native-notification'),
         );
         await ui.until(() => native.requestIds.contains(pending.$1));
-        proxy!.failGetPrefix = '/v1/server';
+        final updatesGate = Completer<void>();
+        final healthCount = proxy!.requests['GET /v1/owner/health'] ?? 0;
+        proxy!.beforeReply = (path) async {
+          if (path == '/v1/owner/updates') await updatesGate.future;
+        };
+        try {
+          await ui.until(
+            () =>
+                (proxy!.requests['GET /v1/owner/health'] ?? 0) >=
+                healthCount + 3,
+          );
+          expect(ui.key('online-offline-blocker'), findsNothing);
+          expect(find.text('服务器响应较慢'), findsNothing);
+        } finally {
+          updatesGate.complete();
+          proxy!.beforeReply = null;
+        }
+        proxy!.failGetPrefix = '/v1/owner/health';
         await ui.until(
           () => ui.key('online-offline-blocker').evaluate().isNotEmpty,
         );
