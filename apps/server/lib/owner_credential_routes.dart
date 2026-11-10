@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_workspace/credential_file_selection.dart';
 import 'package:info_workspace/credential_transport.dart';
+import 'package:info_workspace/credential_use_transport.dart';
 import 'package:info_workspace/history_transport.dart';
 import 'package:info_workspace/owner_workspace_credentials.dart';
 import 'package:info_workspace/workspace_source.dart';
@@ -130,6 +131,42 @@ final class OwnerCredentialRoutes {
     Map<String, dynamic>? body,
   ) async {
     await cleanup();
+    if (method == 'GET' && path.length == 4 && path.last == 'requests') {
+      return (
+        200,
+        {
+          'version': 1,
+          'requests': (await source.requests())
+              .map(credentialUseRequestToJson)
+              .toList(),
+        },
+      );
+    }
+    if (method == 'GET' &&
+        path.length == 5 &&
+        {'requests', 'history'}.contains(path.last)) {
+      final ref = WorkspaceRecordRef(WorkspaceRecordKind.credential, path[3]);
+      return path.last == 'requests'
+          ? (
+              200,
+              {
+                'version': 1,
+                'requests': (await source.requests(
+                  ref: ref,
+                )).map(credentialUseRequestToJson).toList(),
+              },
+            )
+          : (
+              200,
+              {
+                'version': 1,
+                'credentialId': ref.id,
+                'history': (await source.history(
+                  ref,
+                )).map(credentialUseHistoryToJson).toList(),
+              },
+            );
+    }
     if (path.length == 4 && path.last == 'inputs' && method == 'POST')
       return (200, await upload(body!));
     if (path.length == 5 && path[3] == 'inputs') {
