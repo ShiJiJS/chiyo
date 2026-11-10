@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,9 @@ import 'support/nas_ui_harness.dart';
 
 class _Http extends HttpOverrides {
   bool disconnected = false;
+  int healthRequests = 0, heldUpdates = 0, healthFailures = 0;
+  bool failNextHealth = false;
+  Completer<void>? updatesGate;
   @override
   HttpClient createHttpClient(SecurityContext? context) =>
       _NetworkClient(super.createHttpClient(context), this);
@@ -28,9 +32,24 @@ class _NetworkClient implements HttpClient {
   @override
   void close({bool force = false}) => inner.close(force: force);
   @override
-  Future<HttpClientRequest> openUrl(String method, Uri url) {
+  Future<HttpClientRequest> openUrl(String method, Uri url) async {
     if (network.disconnected) {
       throw const SocketException('Synthetic device network disconnect');
+    }
+    if (method == 'GET' && url.path == '/v1/owner/health') {
+      network.healthRequests++;
+      if (network.failNextHealth) {
+        network.failNextHealth = false;
+        network.healthFailures++;
+        throw const SocketException('Synthetic single health failure');
+      }
+    }
+    if (method == 'GET' && url.path == '/v1/owner/updates') {
+      final gate = network.updatesGate;
+      if (gate != null) {
+        network.heldUpdates++;
+        await gate.future;
+      }
     }
     return inner.openUrl(method, url);
   }
@@ -56,7 +75,7 @@ class _Profile implements ConnectionProfileStore {
 void main() {
   const directory = String.fromEnvironment('CHIYO_NAS_PROFILE_DIRECTORY');
   testWidgets(
-    'existing NAS: normal launcher rejects wrong Token, CA and server identity, then reconnects',
+    'existing NAS: Windows launcher keeps the page during slow updates, rejects wrong identity and reconnects',
     (t) async {
       final previousHttp = HttpOverrides.current;
       final network = _Http();
@@ -189,9 +208,35 @@ void main() {
         expect(model.failure, isNull);
         expect(model.results!.total, greaterThan(0));
         expect(profiles.saves, 1);
-        ui.phase = 'connected App loses network';
         await ui.until(() => model.detail != null);
         final version = model.detail!.version;
+        ui.phase = 'slow updates keep the original Windows page';
+        final updatesGate = Completer<void>();
+        network.updatesGate = updatesGate;
+        final healthBefore = network.healthRequests;
+        try {
+          await ui.until(
+            () =>
+                network.heldUpdates > 0 &&
+                network.healthRequests >= healthBefore + 3,
+          );
+          expect(ui.key('online-offline-blocker'), findsNothing);
+          expect(find.text('服务器响应较慢'), findsNothing);
+          expect(model.detail?.version, version);
+          expect(profiles.saves, 1);
+        } finally {
+          network.updatesGate = null;
+          updatesGate.complete();
+        }
+        ui.phase = 'one failed health check preserves the Windows page';
+        network.failNextHealth = true;
+        await ui.until(() => network.healthFailures == 1);
+        expect(ui.key('online-offline-blocker'), findsNothing);
+        expect(model.detail?.version, version);
+        final recoveredHealth = network.healthRequests;
+        await ui.until(() => network.healthRequests >= recoveredHealth + 2);
+        expect(ui.key('online-offline-blocker'), findsNothing);
+        ui.phase = 'connected App loses network';
         network.disconnected = true;
         await ui.until(
           () => ui.key('online-offline-blocker').evaluate().isNotEmpty,
