@@ -39,7 +39,7 @@ void main() {
       await service.owner.revokeFromHistory(history.grants.single.id);
       expect(service.owner.credentialFieldGrantState(r), 'revoked');
       final expiring = await approve();
-      now = now.add(const Duration(minutes: 16));
+      now = now.add(const Duration(minutes: 121));
       expect(service.owner.credentialFieldGrantState(expiring), 'expired');
     },
   );

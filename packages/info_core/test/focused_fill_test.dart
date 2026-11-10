@@ -587,7 +587,7 @@ void main() {
           await f.service.owner.revokeCredentialUse(f.request.id);
         }
         if (action == 'end') f.service.agent.endSession(f.session);
-        if (action == 'expire') f.now = f.now.add(const Duration(minutes: 16));
+        if (action == 'expire') f.now = f.now.add(const Duration(minutes: 121));
         if (action == 'rotate') {
           await f.service.owner.rotateStringCredential(
             f.credential.id,

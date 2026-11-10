@@ -149,7 +149,7 @@ void main() {
       await s.owner.decideCredentialUse(r.id, approveCredential: true);
       final saved = s.owner.credentialUseRequests.single;
       expect(saved.toJson().containsKey('credentialValidity'), isFalse);
-      now = now.add(const Duration(minutes: 16));
+      now = now.add(const Duration(minutes: 121));
       expect(s.owner.credentialGrantState(saved), 'expired');
       expect(
         () => CredentialUseRequest.fromJson({

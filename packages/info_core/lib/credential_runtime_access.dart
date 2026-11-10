@@ -1011,7 +1011,7 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     String id, {
     required bool approveCredential,
     List<FieldRef> fields = const [],
-    Duration? lifetime = const Duration(minutes: 15),
+    Duration? lifetime = AccessTiming.defaultLifetime,
     Duration? fieldLifetime,
     Map<FieldRef, int>? reviewedVersions,
   }) => _serialize(() async {
@@ -1022,20 +1022,20 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     if (_service._useState(r) != 'pending') {
       throw const CredentialUseFailure('request_terminal');
     }
-    final fieldDurations = r.protocolVersion == 2
-        ? const [15, 30, 60, 480]
-        : const [15, 30];
-    if ((lifetime == null
-            ? !r.supportsSessionValidity
-            : lifetime != const Duration(minutes: 15) &&
-                  lifetime != const Duration(minutes: 30)) ||
+    if (!AccessTiming.acceptsCredentialLifetime(
+          lifetime,
+          sessionValidity: r.supportsSessionValidity,
+        ) ||
         fieldLifetime != null &&
-            !fieldDurations.any((m) => fieldLifetime == Duration(minutes: m))) {
+            !AccessTiming.acceptsFieldLifetime(
+              fieldLifetime,
+              protocolVersion: r.protocolVersion,
+            )) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final effectiveFieldLifetime =
         fieldLifetime ??
-        (r.protocolVersion == 2 ? const Duration(hours: 8) : lifetime!);
+        (r.protocolVersion == 2 ? AccessTiming.defaultLifetime : lifetime!);
     if (fields.toSet().length != fields.length ||
         fields.any(
           (f) => !r.fields.contains(f) || _service._field(f) == null,

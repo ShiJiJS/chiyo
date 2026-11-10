@@ -265,7 +265,7 @@ void main() {
         WorkspaceApprovalState.revoked,
       );
       final third = service.agent.request(session, 'third', [ref]);
-      now = now.add(const Duration(hours: 1));
+      now = now.add(const Duration(hours: 2));
       expect(
         (await source.approvals.read(third.id)).request.state,
         WorkspaceApprovalState.expired,

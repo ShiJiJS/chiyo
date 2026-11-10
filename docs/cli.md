@@ -142,7 +142,7 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 {"command":"request","agentName":"Example Agent","operationId":"inspect-host-01","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
 ```
 
-保存 `request` 返回的 `requestId`。返回值还包括创建时间 `createdAt` 和待审批到期时间 `requestExpiresAt`，均为 UTC。默认待审批 30 分钟；用户可以在桌面设置中调整新请求的有效期，已提交请求的截止时间保持不变。
+保存 `request` 返回的 `requestId`。返回值还包括创建时间 `createdAt` 和待审批到期时间 `requestExpiresAt`，均为 UTC。默认待审批 2 小时（设置可选30分钟、1/2/4/8/24小时）；用户可以在桌面设置中调整新请求的有效期，已提交请求的截止时间保持不变。
 
 Mac 新开发源码（#71，尚未交付到当前预览）支持 `information-request-operations.v1`。
 新接入应为每个申请意图指定 `operationId`：1–128 个 ASCII 字符，以字母或数字开头，
@@ -199,7 +199,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 
 授权仅包含用户批准时选中的字段，新增信息或字段需要另行申请。已经批准的请求不能再取消；如需停止已有访问，由用户撤销授权。
 
-用户可能只批准一部分，也可能改选其他信息项或补选字段。`claim` 返回的 `fields` 才是最终可读范围，不应继续假定原申请范围已全部批准。`expiresAt` 是本次授权固定的 UTC 到期时间；默认从批准时起 8 小时，用户可在批准前调整，重复领取或读取不会延长。`scopeNotice` 明确说明新增信息项或字段需要新申请。上述输出不包含实际访问凭据；凭据仍由 CLI 进程保管。
+用户可能只批准一部分，也可能改选其他信息项或补选字段。`claim` 返回的 `fields` 才是最终可读范围，不应继续假定原申请范围已全部批准。`expiresAt` 是本次授权固定的 UTC 到期时间；默认从批准时起 2 小时（可选2/4/8/24小时），用户可在批准前调整，重复领取或读取不会延长。`scopeNotice` 明确说明新增信息项或字段需要新申请。上述输出不包含实际访问凭据；凭据仍由 CLI 进程保管。
 
 放弃尚未处理的申请时可显式发送：
 
@@ -238,7 +238,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 {"protocolVersion":2,"command":"request-use","purpose":"查看技能仓库信息","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
 ```
 
-首条launch供用户理解用途。通过原requestId查询status/wait，用户批准不会自动执行。credentialUse.approved及当前state为available时，使用授权固定15/30分钟，期间每个操作独立提交完整launch和唯一operationId，不逐命令再审批；普通字段独立默认8小时，可由用户缩短。复用不续期，新增未批凭据或使用方式需要新申请。
+首条launch供用户理解用途。通过原requestId查询status/wait，用户批准不会自动执行。credentialUse.approved及当前state为available时，使用授权默认2小时，可选2/4/8/24小时；SSH还可由用户选择“本聊天内不限时”，期间每个操作独立提交完整launch和唯一operationId，不逐命令再审批；普通字段独立默认2小时，可选2/4/8/24小时。复用不续期，新增未批凭据或使用方式需要新申请。
 
 ```json
 {"protocolVersion":2,"command":"run-use","requestId":"REQUEST_ID","operationId":"repo-check-01","launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
@@ -262,7 +262,7 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 
 若另有`credential-focused-target.v1`，`{"protocolVersion":2,"command":"focus-target"}`可观察本机当前密码目标，仅返回ready/refused和就绪应用路径/SHA；不提供值、窗口句柄或PID，不预留焦点、不审批、不输入。批准后必须重新点击空密码框。详见[原生合同与当前验证范围](design/windows-focused-fill-native.md)。
 
-`request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及15/30分钟期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
+`request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及用户选择的2/4/8/24小时期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
 
 ```json
 {"protocolVersion":2,"command":"fill-use","requestId":"REQUEST_ID","operationId":"password-fill-01"}

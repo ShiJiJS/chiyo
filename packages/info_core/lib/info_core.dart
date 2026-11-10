@@ -38,6 +38,8 @@ export 'update_proposals.dart';
 export 'recycle.dart';
 export 'revisions.dart';
 import 'revisions.dart';
+import 'access_timing.dart';
+export 'access_timing.dart';
 import 'submission_metadata.dart';
 export 'submission_metadata.dart';
 part 'organization_access.dart';
@@ -303,7 +305,9 @@ class InformationService {
 
   final DateTime Function() _clock;
   Duration get _requestLifetime => Duration(
-    milliseconds: _repository.readSetting('requestLifetimeMs') ?? 1800000,
+    milliseconds:
+        _repository.readSetting('requestLifetimeMs') ??
+        AccessTiming.defaultLifetime.inMilliseconds,
   );
   late final agent = AgentAccess._(this);
   late final owner = OwnerAccess._(this);
@@ -1087,7 +1091,7 @@ class OwnerAccess {
   void approve(
     String requestId,
     List<FieldRef> fields, {
-    Duration lifetime = const Duration(hours: 8),
+    Duration lifetime = AccessTiming.defaultLifetime,
     Map<FieldRef, int>? reviewedVersions,
   }) {
     if (_service._backupBusy) throw const AccessFailure('service_unavailable');

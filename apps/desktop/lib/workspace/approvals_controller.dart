@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
@@ -25,8 +26,8 @@ class ApprovalDraft {
   final Set<String> selected;
   final Map<String, int> files;
   final Set<String> expanded = {};
-  int fieldMinutes = 30;
-  int? credentialMinutes = 15;
+  int fieldMinutes = AccessTiming.defaultMinutes;
+  int? credentialMinutes = AccessTiming.defaultMinutes;
   bool dirty = false;
 }
 
