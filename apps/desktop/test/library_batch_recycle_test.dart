@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/desktop_controls.dart';
@@ -13,6 +14,8 @@ import 'package:info_desktop/workspace/classification_page.dart';
 import 'package:info_desktop/workspace/library_batch_recycle_controller.dart';
 import 'package:info_desktop/workspace/library_batch_recycle_dialog.dart';
 import 'package:info_desktop/workspace/library_controller.dart';
+import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/approval_directory_location.dart';
 import 'package:info_desktop/workspace/library_directory_dialog.dart';
 import 'package:info_desktop/workspace/library_recycle.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
@@ -750,6 +753,148 @@ void main() {
           f.repo.libraryRecycleBatches.single.state,
           core.RecycleState.available,
         );
+      } finally {
+        await _close(t, f);
+      }
+    },
+  );
+  testWidgets(
+    'unfiled recycles its information and credential together, hides when empty, and returns on restore',
+    (t) async {
+      t.view.physicalSize = const Size(1280, 900);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(() => _Fixture.create()))!;
+      final originalMaterial = List<int>.of(
+        f.repo.credentialMaterials.single.bytes,
+      );
+      final credential = WorkspaceRecordRef(
+        WorkspaceRecordKind.credential,
+        f.credential.id,
+      );
+      final selection = WorkspaceLibrarySelection(records: [credential]);
+      final move = await t.runAsync(
+        () => f.source.previewLibraryMove(selection, null),
+      );
+      await t.runAsync(
+        () => f.source.moveLibrarySelection(
+          WorkspaceLibraryMoveCommand(
+            operationId: 'unfiled-credential',
+            selection: selection,
+            targetId: null,
+            reviewToken: move!.token,
+          ),
+        ),
+      );
+      final model = LibraryController(f.source);
+      await t.runAsync(model.resetView);
+      try {
+        await t.pumpWidget(
+          _home(LibraryPage(controller: model, onNavigate: (_, _) {})),
+        );
+        await _settle(t);
+        final unfiled = find.byKey(const ValueKey('library-directory-unfiled'));
+        expect(unfiled, findsOneWidget);
+        Future<void> open() async {
+          await t.ensureVisible(unfiled);
+          await t.tap(unfiled, buttons: kSecondaryMouseButton);
+          await _settle(t);
+          await t.tap(find.text('将未分类资料移到回收站'));
+          await _settle(t);
+        }
+
+        await open();
+        expect(find.textContaining('外部资料'), findsWidgets);
+        expect(find.textContaining('登录凭据'), findsWidgets);
+        await t.tap(find.widgetWithText(DesktopButton, '取消'));
+        await _settle(t);
+        expect(f.source.writes, 0);
+        await open();
+        await t.tap(find.byKey(const ValueKey('batch-recycle-confirm')));
+        await _settle(t);
+        expect(f.source.writes, 1);
+        expect(unfiled, findsNothing);
+        expect(f.repo.libraryRecycleBatches, hasLength(1));
+        final batch = f.repo.libraryRecycleBatches.single;
+        final options = WorkspaceLibraryRestoreOptions();
+        final preview = await t.runAsync(
+          () => f.source.previewLibraryRecycleRestore(batch.id, options),
+        );
+        await t.runAsync(
+          () => f.source.changeLibraryRecycle(
+            WorkspaceLibraryRecycleCommand(
+              operationId: 'restore-unfiled',
+              batchId: batch.id,
+              reviewToken: preview!.token,
+              options: options,
+            ),
+          ),
+        );
+        await t.runAsync(model.resetView);
+        await _settle(t);
+        expect(unfiled, findsOneWidget);
+        final restoredCatalog = await t.runAsync(f.source.loadCatalog);
+        expect(restoredCatalog!.directoryCounts['unfiled'], 2);
+        expect(f.service.owner.credentials.single.id, f.credential.id);
+        expect(f.repo.credentialMaterials, isNotEmpty);
+        expect(
+          f.repo.credentialMaterials.map((m) => m.bytes),
+          everyElement(originalMaterial),
+        );
+        expect(t.takeException(), isNull);
+      } finally {
+        model.dispose();
+        await _close(t, f);
+      }
+    },
+  );
+  testWidgets(
+    'approval location shows the real path and follows directory changes without exposing field bodies',
+    (t) async {
+      final f = (await t.runAsync(() => _Fixture.create()))!;
+      final record = WorkspaceRecordRef(
+        WorkspaceRecordKind.information,
+        f.first.id,
+      );
+      try {
+        await t.pumpWidget(
+          _home(ApprovalDirectoryLocation(source: f.source, record: record)),
+        );
+        await _settle(t);
+        expect(find.text('服务 › 应用'), findsOneWidget);
+        expect(find.textContaining('PRIVATE-FIRST'), findsNothing);
+        await t.tap(find.text('服务 › 应用'));
+        await _settle(t);
+        expect(find.text('更换目录'), findsNothing);
+        final catalog = await t.runAsync(f.source.loadCatalog);
+        await t.runAsync(
+          () => f.source.changeDirectory(
+            WorkspaceDirectoryChange(
+              operationId: 'rename-for-location',
+              expectedVersion: catalog!.version,
+              action: WorkspaceDirectoryAction.update,
+              directoryId: f.child.id,
+              name: '新应用',
+              parentId: f.root.id,
+            ),
+          ),
+        );
+        await _settle(t);
+        expect(find.text('服务 › 新应用'), findsOneWidget);
+        await t.runAsync(
+          () => f.source.changeRecord(
+            WorkspaceRecordChange(
+              operationId: 'recycle-for-location',
+              ref: record,
+              expectedVersion: f.first.version,
+              action: WorkspaceRecordAction.recycle,
+            ),
+          ),
+        );
+        await _settle(t);
+        expect(find.text('资料已删除或不可用'), findsOneWidget);
+        expect(t.takeException(), isNull);
       } finally {
         await _close(t, f);
       }

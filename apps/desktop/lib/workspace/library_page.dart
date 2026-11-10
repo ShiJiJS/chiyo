@@ -392,6 +392,35 @@ class _LibraryPageState extends State<LibraryPage> {
     }
   }
 
+  Future<void> _unfiledContext(Offset position) async {
+    final action = await showLibraryContextMenu<String>(context, position, [
+      const PopupMenuItem(value: 'recycle', child: Text('将未分类资料移到回收站')),
+    ]);
+    if (!mounted || action != 'recycle') return;
+    try {
+      final records = <WorkspaceRecordRef>[];
+      var offset = 0;
+      while (true) {
+        final result = await model.source.queryRecords(
+          WorkspaceQuery(directoryId: 'unfiled', offset: offset, limit: 100),
+        );
+        records.addAll(result.items.map((r) => r.ref));
+        offset += result.items.length;
+        if (offset >= result.total || result.items.isEmpty) break;
+      }
+      if (mounted && records.isNotEmpty) {
+        await _manage(
+          WorkspaceLibrarySelection(records: records),
+          moving: false,
+        );
+      }
+    } on WorkspaceFailure catch (error) {
+      if (mounted) DesktopFeedback.show(context, error.message);
+    } catch (_) {
+      if (mounted) DesktopFeedback.show(context, '未分类资料暂时无法读取，请重试。');
+    }
+  }
+
   Future<void> _directoryContext(
     WorkspaceDirectory directory,
     Offset position,
@@ -766,10 +795,15 @@ class _LibraryPageState extends State<LibraryPage> {
     }
 
     final content = LibraryContextRegion(
-      enabled: _canManage && model.selectionAvailable && !_placing && real,
+      enabled:
+          _canManage &&
+          model.selectionAvailable &&
+          !_placing &&
+          (real || directory.id == 'unfiled'),
       onActivate: activate,
       onContext: (position) async {
         if (real) await _directoryContext(directory, position);
+        if (directory.id == 'unfiled') await _unfiledContext(position);
       },
       builder: (activate) => Padding(
         padding: const EdgeInsets.only(bottom: 3),
@@ -963,8 +997,13 @@ class _LibraryPageState extends State<LibraryPage> {
         : [
             if (!catalog.directories.any((d) => d.id == 'all'))
               const WorkspaceDirectory('all', '全部资料'),
-            ...libraryVisibleDirectoryTree(catalog, _collapsed),
-            if (!catalog.directories.any((d) => d.id == 'unfiled'))
+            ...libraryVisibleDirectoryTree(catalog, _collapsed).where(
+              (d) =>
+                  d.id != 'unfiled' ||
+                  (catalog.directoryCounts['unfiled'] ?? 0) > 0,
+            ),
+            if (!catalog.directories.any((d) => d.id == 'unfiled') &&
+                (catalog.directoryCounts['unfiled'] ?? 0) > 0)
               const WorkspaceDirectory('unfiled', '未分类'),
           ];
     final decorations = <Widget>[
