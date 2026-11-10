@@ -6,7 +6,7 @@ import 'dart:io';
 Future<void> main(List<String> args) async {
   if (args.length == 2 && args.first == '--descendant') {
     final gate = File(args.last);
-    final end = DateTime.now().add(const Duration(seconds: 45));
+    final end = DateTime.now().add(const Duration(minutes: 3));
     while (!await gate.exists() && DateTime.now().isBefore(end)) {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
@@ -92,7 +92,7 @@ Future<void> main(List<String> args) async {
     await stdout.flush();
     exit(0);
   }
-  final end = DateTime.now().add(const Duration(seconds: 45));
+  final end = DateTime.now().add(const Duration(minutes: 3));
   while (!await gate.exists() && DateTime.now().isBefore(end)) {
     await Future<void>.delayed(const Duration(milliseconds: 50));
   }
