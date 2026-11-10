@@ -115,7 +115,9 @@ void main() {
       expect(accepted['status'], 'accepted', reason: jsonEncode(accepted));
       await _until(
         () async =>
-            await counter.exists() && (await counter.readAsLines()).length == 1,
+            await counter.exists() &&
+            (await counter.readAsLines()).length == 1 &&
+            await File('${counter.path}.material-path').exists(),
       );
       final material = await File(
         '${counter.path}.material-path',

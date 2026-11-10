@@ -49,9 +49,11 @@ final class OnlineInformationRuntime {
     }
   }
 
+  bool get isAvailable => !_closing && !_failed;
+
   Future<T> run<T>(
     FutureOr<T> Function() action, {
-    bool skipUnchangedCheckpoint = false,
+    bool skipUnchangedCheckpoint = true,
   }) {
     if (_closing || _failed) {
       return Future.error(const AccessFailure('service_unavailable'));

@@ -316,7 +316,7 @@ void main() {
         });
         final disconnectedPort = server.port;
         await t.runAsync(() => server.close());
-        await settle();
+        await waitFor(find.byKey(const ValueKey('online-offline-blocker')));
         expect(
           find.byKey(const ValueKey('online-offline-blocker')),
           findsOneWidget,

@@ -581,14 +581,26 @@ class EncryptedInformationRepository
     String directory,
     DatabaseKeyStore keys, {
     DateTime Function()? clock,
-  }) =>
-      _open(directory, keys, clock: clock, preserveOnlineCredentialFacts: true);
+    int readCacheMiB = 128,
+  }) {
+    if (readCacheMiB < 32 || readCacheMiB > 512) {
+      throw ArgumentError.value(readCacheMiB, 'readCacheMiB');
+    }
+    return _open(
+      directory,
+      keys,
+      clock: clock,
+      preserveOnlineCredentialFacts: true,
+      readCacheMiB: readCacheMiB,
+    );
+  }
 
   static Future<EncryptedInformationRepository> _open(
     String directory,
     DatabaseKeyStore keys, {
     DateTime Function()? clock,
     required bool preserveOnlineCredentialFacts,
+    int? readCacheMiB,
   }) async {
     final folder = Directory(directory);
     await folder.create(recursive: true);
@@ -697,8 +709,21 @@ class EncryptedInformationRepository
         throw const StorageFailure('unsupported_schema');
       }
       native.execute('PRAGMA foreign_keys = ON');
-      db = _InformationDatabase(NativeDatabase.opened(native), openingFormat);
-      native = null; // Drift owns the handle now.
+      if (preserveOnlineCredentialFacts) {
+        native.close();
+        native = null;
+        db = _InformationDatabase(
+          NativeDatabase.createInBackground(
+            file,
+            setup: _onlineDatabaseSetup(hex, readCacheMiB!),
+            readPool: 0,
+          ),
+          openingFormat,
+        );
+      } else {
+        db = _InformationDatabase(NativeDatabase.opened(native), openingFormat);
+        native = null; // Drift owns the handle now.
+      }
       final repository = EncryptedInformationRepository._(
         db,
         lock,
@@ -1441,16 +1466,24 @@ class EncryptedInformationRepository
   }
 
   Future<void> _requireAdmissionFormat(int format) async {
-    await _db.customStatement(
-      'UPDATE library_format SET version=? WHERE singleton=1 AND version<?',
-      [format, format],
-    );
     final marker = await _db
         .customSelect('SELECT version FROM library_format WHERE singleton=1')
         .getSingle();
-    await _db.customStatement(
-      'PRAGMA user_version = ${marker.read<int>('version')}',
-    );
+    final stored = marker.read<int>('version');
+    final version = max(stored, format);
+    if (stored < version) {
+      await _db.customStatement(
+        'UPDATE library_format SET version=? WHERE singleton=1 AND version<?',
+        [version, version],
+      );
+    }
+    final header = await _db.customSelect('PRAGMA user_version').getSingle();
+    if (header.read<int>('user_version') > version) {
+      throw const StorageFailure('unsupported_schema');
+    }
+    if (header.read<int>('user_version') < version) {
+      await _db.customStatement('PRAGMA user_version = $version');
+    }
   }
 
   Future<void> _requireTemplateImportFormat() =>
@@ -2374,3 +2407,19 @@ class _InformationDatabase extends GeneratedDatabase {
     );
   }
 }
+
+// Construct outside the opener so the worker captures only these two values,
+// never the native handle, key store, repository lock or caller's stack.
+DatabaseSetup _onlineDatabaseSetup(String hex, int readCacheMiB) => (db) {
+  if (db.select('PRAGMA cipher_version').isEmpty) {
+    throw const StorageFailure('cipher_unavailable');
+  }
+  db.execute('PRAGMA key = "x\'$hex\'"');
+  db.execute('PRAGMA temp_store = MEMORY');
+  db.execute('PRAGMA foreign_keys = ON');
+  final budget = -readCacheMiB * 1024;
+  db.execute('PRAGMA cache_size = $budget');
+  if (db.select('PRAGMA cache_size').single.values.single != budget) {
+    throw const StorageFailure('cache_configuration_failed');
+  }
+};

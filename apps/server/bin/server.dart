@@ -26,6 +26,7 @@ Future<void> main(List<String> args) async {
     final repository = await EncryptedInformationRepository.openOnline(
       config.dataDirectory,
       MountedDatabaseKeyStore(config.databaseKeyFile),
+      readCacheMiB: config.readCacheMiB,
     );
     final runtime = await OnlineInformationRuntime.open(repository: repository);
     OnlineServer? server;

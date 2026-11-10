@@ -53,6 +53,8 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   bool _busy = true;
   bool _serverChanged = false;
   bool _offline = false, _probing = false;
+  int _failedHealthChecks = 0;
+  RemoteWorkspaceSource? _updatingSource;
   Timer? _connectionTimer, _syncTimer;
   late final OnlineDesktopRuntime _desktop;
   String? _desktopObservation;
@@ -154,6 +156,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           openDispatcher: widget.openDispatcher,
         );
         _offline = false;
+        _failedHealthChecks = 0;
         _busy = false;
       });
       await _source!.cache.synchronize();
@@ -206,6 +209,35 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     if (source == null || _probing) return;
     _probing = true;
     try {
+      await source.client.request('GET', '/v1/owner/health');
+      if (!mounted || !identical(source, _source)) return;
+      _failedHealthChecks = 0;
+      if (mounted && identical(source, _source) && _offline) {
+        source.notifyConnectionChanged();
+        setState(() => _offline = false);
+      }
+      unawaited(_checkUpdates(source));
+    } on Object {
+      // An update may wait for a durable approval while the host is healthy.
+      // Only repeated failed health checks make the connection unavailable.
+      if (!mounted || !identical(source, _source)) return;
+      _failedHealthChecks++;
+      if (_failedHealthChecks >= 2 &&
+          mounted &&
+          identical(source, _source) &&
+          !_offline) {
+        setState(() => _offline = true);
+        source.notifyConnectionChanged();
+      }
+    } finally {
+      _probing = false;
+    }
+  }
+
+  Future<void> _checkUpdates(RemoteWorkspaceSource source) async {
+    if (identical(_updatingSource, source)) return;
+    _updatingSource = source;
+    try {
       final status = await source.client.request('GET', '/v1/owner/updates');
       final observation = status['workspaceObservation'];
       if (observation is! String) throw const RemoteFailure('invalid_response');
@@ -227,17 +259,11 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           unawaited(_maintainOwnerFiles(source));
         }
       }
-      if (mounted && identical(source, _source) && _offline) {
-        source.notifyConnectionChanged();
-        setState(() => _offline = false);
-      }
     } on Object {
-      if (mounted && identical(source, _source) && !_offline) {
-        setState(() => _offline = true);
-        source.notifyConnectionChanged();
-      }
+      // Keep the current view and inputs. Independent health checks continue
+      // while this business query is queued, delayed or unavailable.
     } finally {
-      _probing = false;
+      if (identical(_updatingSource, source)) _updatingSource = null;
     }
   }
 
@@ -347,7 +373,13 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     }
     if (source != null && source.cache.resources == null) {
       return MaterialApp(
-        home: Scaffold(body: Center(child: Text(_error ?? '正在同步资料…'))),
+        home: Scaffold(
+          body: Center(
+            child: _error != null
+                ? Text(_error!)
+                : const CircularProgressIndicator(semanticsLabel: '正在同步资料'),
+          ),
+        ),
       );
     }
     if (source != null) {

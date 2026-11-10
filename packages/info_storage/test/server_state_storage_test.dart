@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:sqlite3/sqlite3.dart' as sql;
 import 'package:info_core/info_core.dart';
 import 'package:info_core/server_state.dart';
 import 'package:info_storage/info_storage.dart';
@@ -7,6 +8,81 @@ import 'storage_test.dart' show TestKeyStore;
 import 'backup_setup.dart';
 
 void main() {
+  test(
+    'online cache boundary configurations open and persist normally',
+    () async {
+      final root = await Directory.systemTemp.createTemp('chiyo-cache-budget-');
+      try {
+        for (final budget in [32, 512]) {
+          final keys = TestKeyStore();
+          var repo = await EncryptedInformationRepository.openOnline(
+            '${root.path}/$budget',
+            keys,
+            readCacheMiB: budget,
+          );
+          final initial = await repo.openServerState();
+          await repo.commitServerState(initial, {'value': budget});
+          await repo.close();
+          repo = await EncryptedInformationRepository.openOnline(
+            '${root.path}/$budget',
+            keys,
+            readCacheMiB: budget,
+          );
+          expect((await repo.openServerState()).payload['value'], budget);
+          await repo.close();
+        }
+        for (final invalid in [0, 31, 513]) {
+          expect(
+            () => EncryptedInformationRepository.openOnline(
+              '${root.path}/invalid',
+              TestKeyStore(),
+              readCacheMiB: invalid,
+            ),
+            throwsArgumentError,
+          );
+        }
+      } finally {
+        await root.delete(recursive: true);
+      }
+    },
+  );
+
+  test('online unchanged reads do not commit SQLCipher pages', () async {
+    final root = await Directory.systemTemp.createTemp('chiyo-no-write-');
+    final keys = TestKeyStore();
+    final repo = await EncryptedInformationRepository.openOnline(
+      root.path,
+      keys,
+    );
+    final runtime = await OnlineInformationRuntime.open(repository: repo);
+    final observer = sql.sqlite3.open('${root.path}/library.db');
+    final hex = keys.key!
+        .map((b) => b.toRadixString(16).padLeft(2, '0'))
+        .join();
+    observer.execute('PRAGMA key = "x\'$hex\'"');
+    int version() =>
+        observer.select('PRAGMA data_version').single.values.single as int;
+    try {
+      final initial = version();
+      for (var i = 0; i < 5; i++) {
+        await repo.openServerState();
+        await runtime.run(() {});
+        expect(version(), initial);
+      }
+      await runtime.run(
+        () => runtime.service.owner.createInformation('New item', '', [
+          const FieldInput('Body', '', 'durable value'),
+        ]),
+      );
+      expect(version(), greaterThan(initial));
+    } finally {
+      observer.close();
+      await runtime.close();
+      await repo.close();
+      await root.delete(recursive: true);
+    }
+  });
+
   test(
     'encrypted host state survives reopen and rejects stale writers',
     () async {
