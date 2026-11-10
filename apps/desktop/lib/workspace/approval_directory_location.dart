@@ -66,7 +66,22 @@ class _ApprovalDirectoryLocationState extends State<ApprovalDirectoryLocation> {
       FutureBuilder<(WorkspaceCatalog, WorkspaceRecordSummary?)>(
         future: _location,
         builder: (context, snapshot) {
-          if (snapshot.hasError) return const Text('目录位置暂不可用');
+          if (snapshot.hasError) {
+            return Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Text('目录位置暂不可用'),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _location = _load();
+                    });
+                  },
+                  child: const Text('重新读取位置'),
+                ),
+              ],
+            );
+          }
           final value = snapshot.data;
           if (snapshot.connectionState != ConnectionState.done ||
               value == null) {

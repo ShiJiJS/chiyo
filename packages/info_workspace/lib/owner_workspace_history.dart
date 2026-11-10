@@ -34,14 +34,25 @@ class OwnerWorkspaceHistory {
     }
   }
 
-  String? _directory(core.InformationItem item) => owner.directories
-      .where((d) => d.id == item.directoryId)
-      .firstOrNull
-      ?.name;
+  String? _directory(core.InformationItem item) {
+    final directories = {for (final d in owner.directories) d.id: d};
+    var current = item.directoryId;
+    if (!directories.containsKey(current)) return null;
+    final names = <String>[], seen = <String>{};
+    while (current != null && seen.add(current)) {
+      final directory = directories[current];
+      if (directory == null) break;
+      names.add(directory.name);
+      current = directory.parentId;
+    }
+    return names.reversed.join(' / ');
+  }
+
   Future<WorkspaceArchive> _archive(
     core.InformationItem item,
     DateTime at, {
     bool wholeItem = true,
+    String? directoryName,
   }) async {
     final detail = _codec.decode(item, tagNames: _tagNames);
     final targets = await information.readSummaries(
@@ -51,7 +62,7 @@ class OwnerWorkspaceHistory {
       detail: detail,
       archivedAt: at,
       wholeItem: wholeItem,
-      directoryName: _directory(item),
+      directoryName: directoryName ?? _directory(item),
       targets: {for (final target in targets) target.ref: target},
     );
   }
@@ -212,7 +223,34 @@ class OwnerWorkspaceHistory {
       entry!.snapshot!,
       entry.deletedAt,
       wholeItem: entry.wholeItem,
+      directoryName: owner.libraryRecycleSupported
+          ? owner.libraryRecycleBatches
+                .where((b) => b.informationEntries.containsValue(entryId))
+                .firstOrNull
+                ?.directoryPaths[entry.snapshot!.directoryId]
+                ?.join(' / ')
+          : null,
     );
+  }
+
+  Future<core.InformationAttachmentRef> resolveRecycledFile(
+    String entryId,
+    String fieldKey,
+  ) async {
+    final archive = await readRecycled(entryId);
+    final fieldId = archive.detail.fieldIds[fieldKey];
+    final entry = owner.recycleEntries
+        .where((e) => e.id == entryId)
+        .firstOrNull;
+    final field = entry?.snapshot?.fields
+        .where((f) => f.id == fieldId)
+        .firstOrNull;
+    if (field == null ||
+        field.kind != core.FieldKind.file ||
+        field.attachment == null) {
+      throw const WorkspaceFailure('not_found', '此回收资料的附件已不可用。');
+    }
+    return field.attachment!;
   }
 
   Future<WorkspaceRecordReceipt> changeRecord(

@@ -121,6 +121,21 @@ class OwnerHistoryRoutes {
           ),
         );
       }
+      if (tail.length == 1 &&
+          tail.single == 'recycled-file' &&
+          method == 'POST') {
+        final b = historyEnvelope(body, ['entryId', 'fieldKey']);
+        final ref = await history.resolveRecycledFile(
+          historyText(b['entryId']),
+          historyText(b['fieldKey']),
+        );
+        return (
+          200,
+          fileOriginalToJson(
+            await library.owner.readInformationAttachment(ref),
+          ),
+        );
+      }
       if (tail.length == 2 && tail.first == 'recycled' && method == 'GET') {
         return (
           200,

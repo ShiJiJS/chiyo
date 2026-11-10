@@ -39,6 +39,7 @@ import 'package:info_workspace/adoption_transport.dart';
 class RemoteWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceRecycledFiles,
         WorkspaceLibraryNotifications,
         WorkspaceStorageLocation,
         WorkspaceLibraryMove,
@@ -147,6 +148,12 @@ class RemoteWorkspaceSource
   @override
   Future<WorkspaceArchive> readRecycled(String entryId) =>
       _history.readRecycled(entryId);
+  @override
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  }) => _history.readRecycledFilePreview(entryId, fieldKey, page: page);
   @override
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
       _history.changeRecord(change);

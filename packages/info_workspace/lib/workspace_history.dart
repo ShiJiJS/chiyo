@@ -1,4 +1,5 @@
 import 'workspace_records.dart';
+import 'workspace_files.dart';
 import 'workspace_library_recycle.dart';
 
 /// Immutable owner snapshot. Lists expose only [WorkspaceRevision] metadata;
@@ -197,4 +198,14 @@ class WorkspaceRecordReceipt {
   final int version;
   final String? entryId;
   final List<String> notices;
+}
+
+/// Owner-only original selected from a retained recycle entry. The caller
+/// supplies an entry and field key, never a free attachment ID or file path.
+abstract interface class WorkspaceRecycledFiles {
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  });
 }

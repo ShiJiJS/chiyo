@@ -85,8 +85,13 @@ Map<String, String> librarySnapshot(
 }
 
 class LibrarySnapshotView extends StatefulWidget {
-  const LibrarySnapshotView({super.key, required this.archive});
+  const LibrarySnapshotView({
+    super.key,
+    required this.archive,
+    this.fileBuilder,
+  });
   final WorkspaceArchive archive;
+  final Widget Function(String)? fileBuilder;
   @override
   State<LibrarySnapshotView> createState() => _LibrarySnapshotViewState();
 }
@@ -109,7 +114,7 @@ class _LibrarySnapshotViewState extends State<LibrarySnapshotView> {
         Text(detail.record.name, style: libraryHeading(context, 20)),
         const SizedBox(height: 8),
         Text(
-          '${detail.record.type.name} · ${archive.directoryName ?? '未分类'}',
+          '${detail.record.type.name} · ${archive.directoryName ?? (detail.record.directoryId == null ? '未分类' : '原目录已移除')}',
           style: libraryText(context, 13, color: UiPalette.of(context).muted),
         ),
         Text(
@@ -129,17 +134,21 @@ class _LibrarySnapshotViewState extends State<LibrarySnapshotView> {
           relations: _ArchiveRelations(archive),
           onOpen: null,
           documentController: _reading,
-          fileBuilder: (key) {
-            final raw = detail.values[key];
-            final version = raw is Map ? raw['version'] : null;
-            final name = raw is Map ? raw['filename'] : null;
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.insert_drive_file_outlined),
-              title: Text(name is String ? name : detail.record.name),
-              subtitle: Text(version == null ? '已保存的附件' : '附件 · 第 $version 版'),
-            );
-          },
+          fileBuilder:
+              widget.fileBuilder ??
+              (key) {
+                final raw = detail.values[key];
+                final version = raw is Map ? raw['version'] : null;
+                final name = raw is Map ? raw['filename'] : null;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.insert_drive_file_outlined),
+                  title: Text(name is String ? name : detail.record.name),
+                  subtitle: Text(
+                    version == null ? '已保存的附件' : '附件 · 第 $version 版',
+                  ),
+                );
+              },
           credentialBuilder: (_) => const Text('凭据内容不在历史预览中展示。'),
         ),
       ],
