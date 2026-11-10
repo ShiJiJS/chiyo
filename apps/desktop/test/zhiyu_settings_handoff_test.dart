@@ -246,13 +246,17 @@ void main() {
             ).writeAsString(jsonEncode(geometry)),
           );
         }
-        for (final section in WorkspaceSettingsSection.values) {
+        for (final section in WorkspaceSettingsSection.values.where(
+          (s) => s != WorkspaceSettingsSection.connection,
+        )) {
           await tap(t, 'settings-section-${section.name}');
           final page = t.widget<WorkspaceSettingsPage>(
             find.byType(WorkspaceSettingsPage),
           );
           expect(page.controller.section, section);
           switch (section) {
+            case WorkspaceSettingsSection.connection:
+              fail('Connection section needs an online configuration host');
             case WorkspaceSettingsSection.appearance:
               expect(
                 find.byKey(const ValueKey('settings-theme-light')),

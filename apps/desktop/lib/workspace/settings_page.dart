@@ -30,6 +30,7 @@ class WorkspaceSettingsPage extends StatefulWidget {
     required this.pluginBuilder,
     required this.onRequest,
     this.onModalChanged,
+    this.connectionBuilder,
   });
   final WorkspaceSettingsController controller;
   final PluginsController plugins;
@@ -42,6 +43,7 @@ class WorkspaceSettingsPage extends StatefulWidget {
   final WidgetBuilder pluginBuilder;
   final ValueChanged<String> onRequest;
   final ValueChanged<bool>? onModalChanged;
+  final WidgetBuilder? connectionBuilder;
   @override
   State<WorkspaceSettingsPage> createState() => _WorkspaceSettingsPageState();
 }
@@ -493,7 +495,11 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                   child: Text('设置', style: libraryHeading(context, 24)),
                 ),
                 const SizedBox(height: 23),
-                for (final section in WorkspaceSettingsSection.values) ...[
+                for (final section in WorkspaceSettingsSection.values.where(
+                  (s) =>
+                      s != WorkspaceSettingsSection.connection ||
+                      widget.connectionBuilder != null,
+                )) ...[
                   DesktopButton(
                     key: ValueKey('settings-section-${section.name}'),
                     kind: DesktopButtonKind.quiet,
@@ -505,6 +511,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                     leadingGap: 11,
                     alignment: Alignment.centerLeft,
                     leading: PrototypeIcon(switch (section) {
+                      WorkspaceSettingsSection.connection =>
+                        PrototypeIconGlyph.server,
                       WorkspaceSettingsSection.appearance =>
                         PrototypeIconGlyph.layers,
                       WorkspaceSettingsSection.notifications =>
@@ -589,7 +597,9 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
             ),
           ),
           Expanded(
-            child: m.section == WorkspaceSettingsSection.plugins
+            child: m.section == WorkspaceSettingsSection.connection
+                ? widget.connectionBuilder!(context)
+                : m.section == WorkspaceSettingsSection.plugins
                 ? widget.pluginBuilder(context)
                 : m.section == WorkspaceSettingsSection.classifications
                 ? ClassificationPage(

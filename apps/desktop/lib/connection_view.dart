@@ -13,18 +13,20 @@ class ConnectionSurface extends StatelessWidget {
     required this.children,
     this.icon = Icons.dns_outlined,
     this.loading = false,
+    this.embedded = false,
   });
   final String title, description;
   final List<Widget> children;
   final IconData icon;
-  final bool loading;
+  final bool loading, embedded;
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
     return ColoredBox(
       color: c.rail,
       child: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: embedded ? Alignment.topLeft : Alignment.center,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(32),
             child: SizedBox(
@@ -77,6 +79,8 @@ class ConnectionSurface extends StatelessWidget {
   }
 }
 
+enum ConnectionCertificateStatus { unconfigured, unverified, verified, error }
+
 class ConnectionForm extends StatefulWidget {
   const ConnectionForm({
     super.key,
@@ -87,12 +91,17 @@ class ConnectionForm extends StatefulWidget {
     required this.onConnect,
     this.error,
     this.onConfirmServer,
+    this.onCancel,
+    this.embedded = false,
+    this.certificateStatus = ConnectionCertificateStatus.unconfigured,
   });
   final TextEditingController address, token, certificate;
   final bool busy;
   final String? error;
   final VoidCallback onConnect;
-  final VoidCallback? onConfirmServer;
+  final VoidCallback? onConfirmServer, onCancel;
+  final bool embedded;
+  final ConnectionCertificateStatus certificateStatus;
   @override
   State<ConnectionForm> createState() => _ConnectionFormState();
 }
@@ -103,8 +112,9 @@ class _ConnectionFormState extends State<ConnectionForm> {
   Widget build(BuildContext context) {
     final c = UiPalette.of(context), w = widget;
     return ConnectionSurface(
-      title: '连接服务器',
-      description: '连接后查看和管理你的资料。',
+      title: w.embedded ? '存储与同步' : '连接服务器',
+      embedded: w.embedded,
+      description: w.embedded ? '查看或修改服务器连接。保存成功后切换。' : '连接后查看和管理你的资料。',
       loading: w.busy,
       children: [
         DesktopTextField(
@@ -142,12 +152,47 @@ class _ConnectionFormState extends State<ConnectionForm> {
             border: Border.all(color: c.line),
             borderRadius: BorderRadius.circular(8),
           ),
+          clipBehavior: Clip.antiAlias,
           child: ExpansionTile(
+            backgroundColor: Colors.transparent,
+            collapsedBackgroundColor: Colors.transparent,
             tilePadding: const EdgeInsets.symmetric(horizontal: 14),
             childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             shape: const Border(),
             collapsedShape: const Border(),
-            title: Text('证书设置（可选）', style: libraryText(context, 14)),
+            leading: Icon(
+              Icons.verified_user_outlined,
+              size: 18,
+              color: w.certificateStatus == ConnectionCertificateStatus.error
+                  ? c.danger
+                  : w.certificateStatus == ConnectionCertificateStatus.verified
+                  ? c.success
+                  : c.muted,
+            ),
+            title: Row(
+              children: [
+                Expanded(child: Text('服务器证书', style: libraryText(context, 13))),
+                Text(
+                  switch (w.certificateStatus) {
+                    ConnectionCertificateStatus.unconfigured => '未配置',
+                    ConnectionCertificateStatus.unverified => '待核验',
+                    ConnectionCertificateStatus.verified => '已核验',
+                    ConnectionCertificateStatus.error => '核验失败',
+                  },
+                  style: libraryText(
+                    context,
+                    13,
+                    color:
+                        w.certificateStatus == ConnectionCertificateStatus.error
+                        ? c.danger
+                        : w.certificateStatus ==
+                              ConnectionCertificateStatus.verified
+                        ? c.success
+                        : c.muted,
+                  ),
+                ),
+              ],
+            ),
             children: [
               DesktopTextField(
                 controller: w.certificate,
@@ -181,9 +226,26 @@ class _ConnectionFormState extends State<ConnectionForm> {
         ],
         DesktopButton(
           kind: DesktopButtonKind.primary,
+          key: const ValueKey('connection-save'),
+          busy: w.busy,
           onPressed: w.busy ? null : w.onConnect,
-          child: Text(w.busy ? '正在连接…' : '连接'),
+          child: Text(
+            w.busy
+                ? '正在连接…'
+                : w.embedded
+                ? '保存并连接'
+                : '连接',
+          ),
         ),
+        if (w.onCancel != null) ...[
+          const SizedBox(height: 12),
+          DesktopButton(
+            key: const ValueKey('connection-cancel'),
+            kind: DesktopButtonKind.quiet,
+            onPressed: w.busy ? null : w.onCancel,
+            child: const Text('返回工作区'),
+          ),
+        ],
       ],
     );
   }

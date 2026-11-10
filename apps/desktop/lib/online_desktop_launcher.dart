@@ -52,7 +52,9 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   ConnectionProfile? _previous;
   String? _error;
   bool _busy = true;
-  bool _serverChanged = false;
+  bool _serverChanged = false, _certificateError = false;
+  bool _connecting = false, _connectionView = false;
+  final _connectionSettingsRequests = ValueNotifier<int>(0);
   bool _offline = false, _probing = false;
   int _failedHealthChecks = 0;
   RemoteWorkspaceSource? _updatingSource;
@@ -64,6 +66,9 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   @override
   void initState() {
     super.initState();
+    _address.addListener(_draftChanged);
+    _token.addListener(_draftChanged);
+    _certificate.addListener(_draftChanged);
     final platform = widget.desktopPlatform ?? NativeDesktopPlatform();
     _desktop = OnlineDesktopRuntime(
       platform: platform,
@@ -106,62 +111,120 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     }
   }
 
-  Future<void> _connect() async {
+  void _draftChanged() {
+    if (mounted) {
+      setState(() {
+        _serverChanged = false;
+        _certificateError = false;
+        _error = null;
+      });
+    }
+  }
+
+  bool _matchesProfile(ConnectionProfile profile) =>
+      _address.text.trim() == profile.address &&
+      _token.text.trim() == profile.token &&
+      _certificate.text.trim() == profile.certificate;
+
+  ConnectionCertificateStatus get _certificateStatus {
+    if (_certificateError) return ConnectionCertificateStatus.error;
+    if (_source != null &&
+        !_offline &&
+        _previous != null &&
+        _matchesProfile(_previous!)) {
+      return ConnectionCertificateStatus.verified;
+    }
+    return _certificate.text.trim().isEmpty
+        ? ConnectionCertificateStatus.unconfigured
+        : ConnectionCertificateStatus.unverified;
+  }
+
+  RemoteWorkspaceSource _createSource(
+    OwnerClient client,
+  ) => RemoteWorkspaceSource(
+    client,
+    filePicker: widget.filePicker,
+    onNotificationEnable: _desktop.enableNotifications,
+    onClosing: _desktop.release,
+    desktopRuntime: _desktop,
+    deviceFilesDirectory:
+        widget.deviceFilesDirectory ??
+        (widget.profiles is PrivateConnectionProfileStore
+            ? '${(widget.profiles as PrivateConnectionProfileStore).directory}/files'
+            : null),
+    outputPicker: widget.outputPicker,
+    openDispatcher: widget.openDispatcher,
+  );
+
+  Future<void> _connect({bool confirmServer = false}) async {
+    if (_connecting || _desktop.quitting || confirmServer && !_serverChanged) {
+      return;
+    }
+    _connecting = true;
     setState(() {
       _busy = true;
       _error = null;
       _serverChanged = false;
+      _certificateError = false;
     });
     OwnerClient? client;
+    RemoteWorkspaceSource? candidate;
+    var adopted = false;
+    var parsingCertificate = false;
     try {
+      // Capture a draft once. It cannot replace the active connection until
+      // identity, authentication and the first complete projection all pass.
       final address = _address.text.trim();
+      final token = _token.text.trim();
       final certificate = _certificate.text.trim();
       SecurityContext? trust;
       if (certificate.isNotEmpty) {
+        parsingCertificate = true;
         trust = SecurityContext(withTrustedRoots: false)
           ..setTrustedCertificatesBytes(certificate.codeUnits);
+        parsingCertificate = false;
       }
       client = await OwnerClient.connect(
         address: Uri.parse(address),
-        token: _token.text.trim(),
+        token: token,
         trust: trust,
-        expectedServerId: _previous?.address == address
+        expectedServerId: !confirmServer && _previous?.address == address
             ? _previous!.serverId
             : null,
       );
+      if (!mounted || _desktop.quitting) return;
+      if (_source != null &&
+          _previous != null &&
+          _matchesProfile(_previous!) &&
+          client.serverId == _previous!.serverId) {
+        // A reconnect with unchanged settings keeps every controller and draft.
+        setState(() {
+          _offline = false;
+          _failedHealthChecks = 0;
+        });
+        _source!.notifyConnectionChanged();
+        return;
+      }
+      candidate = _createSource(client);
+      await candidate.cache.synchronize();
+      if (!mounted || _desktop.quitting) return;
       final profile = ConnectionProfile(
         address: address,
-        token: _token.text.trim(),
+        token: token,
         serverId: client.serverId,
         certificate: certificate,
       );
       await widget.profiles.save(profile);
-      if (!mounted) {
-        client.close();
-        return;
-      }
+      if (!mounted || _desktop.quitting) return;
+      final old = _source;
       _previous = profile;
       setState(() {
-        _source = RemoteWorkspaceSource(
-          client!,
-          filePicker: widget.filePicker,
-          onNotificationEnable: _desktop.enableNotifications,
-          onClosing: _desktop.release,
-          desktopRuntime: _desktop,
-          deviceFilesDirectory:
-              widget.deviceFilesDirectory ??
-              (widget.profiles is PrivateConnectionProfileStore
-                  ? '${(widget.profiles as PrivateConnectionProfileStore).directory}/files'
-                  : null),
-          outputPicker: widget.outputPicker,
-          openDispatcher: widget.openDispatcher,
-        );
+        _source = candidate;
+        adopted = true;
+        _connectionView = false;
         _offline = false;
         _failedHealthChecks = 0;
-        _busy = false;
       });
-      await _source!.cache.synchronize();
-      if (mounted) setState(() {});
       _syncTimer?.cancel();
       _syncTimer = Timer.periodic(const Duration(minutes: 1), (_) {
         final source = _source;
@@ -169,39 +232,53 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           unawaited(source.cache.synchronize().catchError((Object _) {}));
         }
       });
-      await _desktop.bind(_source);
+      // Retiring the old projection happens after widgets have released it;
+      // its cleanup cannot turn a successfully adopted connection into failure.
+      await WidgetsBinding.instance.endOfFrame;
+      if (old != null) unawaited(old.dispose().catchError((Object _) {}));
       if (!mounted || _desktop.quitting) return;
+      unawaited(_desktop.bind(candidate));
       _connectionTimer?.cancel();
       _connectionTimer = Timer.periodic(
         const Duration(seconds: 2),
         (_) => unawaited(_checkConnection()),
       );
     } on Object catch (e) {
-      client?.close();
-      final failedSource = _source;
-      _source = null;
-      if (failedSource != null) {
-        unawaited(failedSource.dispose().catchError((Object _) {}));
-      }
-      if (mounted) {
+      if (mounted && !_desktop.quitting) {
         setState(() {
-          _busy = false;
           _serverChanged = e is RemoteFailure && e.code == 'server_changed';
-          _error = switch (e) {
-            RemoteFailure(code: 'unauthorized') => 'Token 不正确，请重新填写。',
-            RemoteFailure(code: 'server_changed') => '服务器身份已变化，请核对服务器地址。',
-            RemoteFailure(code: 'untrusted_server') => '无法验证服务器证书，请检查证书或连接地址。',
-            RemoteFailure(code: 'invalid_connection') =>
-              '请填写完整的 HTTPS 服务器地址和 Token。',
-            RemoteFailure(code: 'server_unavailable') =>
-              '无法连接服务器，请检查网络、服务器是否运行，以及系统是否允许知予访问本地网络。',
-            RemoteFailure(code: 'server_timeout') => '连接服务器超时，请检查网络和服务器状态后重试。',
-            FileSystemException() ||
-            ProcessException() => '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
-            _ => '连接失败，请检查服务器地址、Token 和网络后重试。',
-          };
+          _certificateError =
+              parsingCertificate ||
+              e is RemoteFailure && e.code == 'untrusted_server';
+          _error = parsingCertificate
+              ? '证书格式不正确，请填写 PEM 格式的 CA 证书。'
+              : switch (e) {
+                  RemoteFailure(code: 'unauthorized') => 'Token 不正确，请重新填写。',
+                  RemoteFailure(code: 'server_changed') => '服务器身份已变化，请核对服务器地址。',
+                  RemoteFailure(code: 'untrusted_server') =>
+                    '无法验证服务器证书，请检查证书或连接地址。',
+                  RemoteFailure(code: 'invalid_connection') ||
+                  FormatException() => '请填写完整的 HTTPS 服务器地址和 Token。',
+                  RemoteFailure(code: 'server_unavailable') =>
+                    '无法连接服务器，请检查网络、服务器是否运行，以及系统是否允许知予访问本地网络。',
+                  RemoteFailure(code: 'server_timeout') =>
+                    '连接服务器超时，请检查网络和服务器状态后重试。',
+                  FileSystemException() ||
+                  ProcessException() => '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
+                  _ => '连接失败，请检查服务器地址、Token 和网络后重试。',
+                };
         });
       }
+    } finally {
+      if (!adopted) {
+        if (candidate != null) {
+          await candidate.dispose().catchError((Object _) {});
+        } else {
+          client?.close();
+        }
+      }
+      _connecting = false;
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -269,13 +346,8 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   }
 
   void _settings() {
-    if (_desktop.quitting) return;
-    unawaited(_desktop.bind(null));
-    _connectionTimer?.cancel();
-    _syncTimer?.cancel();
-    final old = _source;
-    setState(() => _source = null);
-    if (old != null) unawaited(old.dispose());
+    if (_desktop.quitting || _connecting) return;
+    _connectionSettingsRequests.value++;
   }
 
   Future<void> _resumeConnection() async {
@@ -336,6 +408,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     _connectionTimer?.cancel();
     _syncTimer?.cancel();
     _source?.dispose();
+    _connectionSettingsRequests.dispose();
     _address.dispose();
     _token.dispose();
     _certificate.dispose();
@@ -370,21 +443,6 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
         ),
       );
     }
-    if (source != null && source.cache.resources == null) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: zhiyuTheme(Brightness.light),
-        home: Scaffold(
-          body: ConnectionSurface(
-            title: _error == null ? '正在同步资料' : '暂时无法读取资料',
-            description: _error ?? '请稍候…',
-            loading: _error == null,
-            children: const [],
-          ),
-        ),
-      );
-    }
-
     if (source != null) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -392,11 +450,11 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           fit: StackFit.expand,
           children: [
             ExcludeSemantics(
-              excluding: _offline,
+              excluding: _offline && !_connectionView,
               child: ExcludeFocus(
-                excluding: _offline,
+                excluding: _offline && !_connectionView,
                 child: AbsorbPointer(
-                  absorbing: _offline,
+                  absorbing: _offline && !_connectionView,
                   child: WorkspaceApp(
                     source: source,
                     desktop: _desktop,
@@ -414,7 +472,28 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                         files: widget.credentialFiles,
                       ),
                     ),
-                    onConnectionSettings: _settings,
+                    connectionSettingsRequests: _connectionSettingsRequests,
+                    onConnectionSettingsVisible: (visible) {
+                      if (mounted &&
+                          identical(_source, source) &&
+                          _connectionView != visible) {
+                        setState(() => _connectionView = visible);
+                      }
+                    },
+                    connectionBuilder: (context, onCancel) => ConnectionForm(
+                      embedded: true,
+                      address: _address,
+                      token: _token,
+                      certificate: _certificate,
+                      certificateStatus: _certificateStatus,
+                      busy: _busy,
+                      error: _error,
+                      onConnect: _connect,
+                      onCancel: onCancel,
+                      onConfirmServer: _serverChanged
+                          ? () => _connect(confirmServer: true)
+                          : null,
+                    ),
                     onAgentConnectionSetup:
                         widget.profiles is PrivateConnectionProfileStore
                         ? (context) async {
@@ -435,7 +514,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                 ),
               ),
             ),
-            if (_offline)
+            if (_offline && !_connectionView)
               MaterialApp(
                 debugShowCheckedModeBanner: false,
                 theme: zhiyuTheme(Brightness.light),
@@ -475,11 +554,11 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           busy: _busy,
           error: _error,
           onConnect: _connect,
+          certificateStatus: _certificateStatus,
           onConfirmServer: !_serverChanged
               ? null
               : () {
-                  _previous = null;
-                  unawaited(_connect());
+                  unawaited(_connect(confirmServer: true));
                 },
         ),
       ),

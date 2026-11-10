@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'remote_workspace_source.dart';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
@@ -39,11 +40,16 @@ class WorkspaceApp extends StatelessWidget {
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
-    this.onConnectionSettings,
+    this.connectionBuilder,
+    this.connectionSettingsRequests,
+    this.onConnectionSettingsVisible,
     this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
-  final VoidCallback? onConnectionSettings;
+  final Widget Function(BuildContext context, VoidCallback onCancel)?
+  connectionBuilder;
+  final ValueListenable<int>? connectionSettingsRequests;
+  final ValueChanged<bool>? onConnectionSettingsVisible;
   final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
@@ -61,7 +67,9 @@ class WorkspaceApp extends StatelessWidget {
     pageBuilder: pageBuilder,
     desktop: desktop,
     inputsBuilder: inputsBuilder,
-    onConnectionSettings: onConnectionSettings,
+    connectionBuilder: connectionBuilder,
+    connectionSettingsRequests: connectionSettingsRequests,
+    onConnectionSettingsVisible: onConnectionSettingsVisible,
     onAgentConnectionSetup: onAgentConnectionSetup,
   );
 }
@@ -78,11 +86,16 @@ class _WorkspaceSession extends StatefulWidget {
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
-    this.onConnectionSettings,
+    this.connectionBuilder,
+    this.connectionSettingsRequests,
+    this.onConnectionSettingsVisible,
     this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
-  final VoidCallback? onConnectionSettings;
+  final Widget Function(BuildContext context, VoidCallback onCancel)?
+  connectionBuilder;
+  final ValueListenable<int>? connectionSettingsRequests;
+  final ValueChanged<bool>? onConnectionSettingsVisible;
   final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
@@ -118,13 +131,19 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   late final void Function(String) _desktopRequestNavigation;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   int _modalDepth = 0;
+  WorkspaceLocation _beforeConnection = const WorkspaceLocation(
+    WorkspacePage.library,
+  );
+  bool _connectionVisible = false;
   bool? _nativeNavigationEnabled;
   VoidCallback? _pendingUiNavigation;
   @override
   void initState() {
     super.initState();
     _source = widget.source;
-    _controller = WorkspaceController(_source);
+    _controller = WorkspaceController(_source)
+      ..addListener(_connectionLocationChanged);
+    widget.connectionSettingsRequests?.addListener(_openConnectionSettings);
     _approvals = ApprovalsController(_source.approvals, _source.changes)
       ..addListener(_approvalChanged);
     unawaited(_approvals.load());
@@ -188,6 +207,47 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     );
   }
 
+  void _openConnectionSettings() {
+    if (_deferNavigation(_openConnectionSettings)) return;
+    _navigate(WorkspacePage.settings, 'connection');
+  }
+
+  void _connectionLocationChanged() {
+    if (_controller.location.page != WorkspacePage.settings) {
+      _beforeConnection = _controller.location;
+    }
+    final visible =
+        _controller.location.page == WorkspacePage.settings &&
+        _settings.section == WorkspaceSettingsSection.connection;
+    if (visible == _connectionVisible) return;
+    _connectionVisible = visible;
+    scheduleMicrotask(() {
+      if (mounted) widget.onConnectionSettingsVisible?.call(_connectionVisible);
+    });
+  }
+
+  void _cancelConnectionSettings() {
+    final prior = _beforeConnection;
+    _controller.navigate(
+      prior.page,
+      objectId: prior.objectId,
+      query: prior.query,
+      scrollOffset: prior.scrollOffset,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _WorkspaceSession oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.connectionSettingsRequests !=
+        widget.connectionSettingsRequests) {
+      oldWidget.connectionSettingsRequests?.removeListener(
+        _openConnectionSettings,
+      );
+      widget.connectionSettingsRequests?.addListener(_openConnectionSettings);
+    }
+  }
+
   void _approvalChanged() {
     if (_approvals.frozen) _pendingUiNavigation = null;
     _syncNavigation();
@@ -206,6 +266,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   }
 
   void _settingsChanged() {
+    _connectionLocationChanged();
     _settingsFrozen = _settings.frozen;
     if (_settingsFrozen) _pendingUiNavigation = null;
     _syncNavigation();
@@ -294,6 +355,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _runtime.dispose();
     _agents.dispose();
     _classifications.dispose();
+    widget.connectionSettingsRequests?.removeListener(_openConnectionSettings);
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
@@ -365,7 +427,9 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
       _settings.select(
-        id == 'agents'
+        id == 'connection'
+            ? WorkspaceSettingsSection.connection
+            : id == 'agents'
             ? WorkspaceSettingsSection.agents
             : id == 'runtime'
             ? WorkspaceSettingsSection.runtime
@@ -471,12 +535,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                     }
                   },
           ),
-        if (widget.onConnectionSettings != null)
-          IconButton(
-            tooltip: '连接设置',
-            onPressed: widget.onConnectionSettings,
-            icon: const Icon(Icons.dns_outlined),
-          ),
         ListenableBuilder(
           listenable: _backups,
           builder: (context, _) => !_backups.uncertain
@@ -549,6 +607,12 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 },
               )
             : WorkspaceSettingsPage(
+                connectionBuilder: widget.connectionBuilder == null
+                    ? null
+                    : (context) => widget.connectionBuilder!(
+                        context,
+                        _cancelConnectionSettings,
+                      ),
                 controller: _settings,
                 plugins: _plugins,
                 classifications: _classifications,

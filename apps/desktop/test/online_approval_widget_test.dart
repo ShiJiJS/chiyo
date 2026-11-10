@@ -117,7 +117,12 @@ void main() {
       });
       try {
         await t.pumpWidget(OnlineDesktopLauncher(profiles: profiles));
-        await until(() => find.byTooltip('连接设置').evaluate().isNotEmpty);
+        await until(
+          () => find
+              .byKey(const ValueKey('workspace-nav-settings'))
+              .evaluate()
+              .isNotEmpty,
+        );
         await t.runAsync(() => t.tap(find.byTooltip('AI 接入')));
         final generate = find.byKey(
           const ValueKey('agent-connection-generate'),
@@ -348,7 +353,12 @@ void main() {
         });
         expect(queued['status'], 'pending');
         await t.pumpWidget(OnlineDesktopLauncher(profiles: profiles));
-        await until(() => find.byTooltip('连接设置').evaluate().isNotEmpty);
+        await until(
+          () => find
+              .byKey(const ValueKey('workspace-nav-settings'))
+              .evaluate()
+              .isNotEmpty,
+        );
         await t.runAsync(() => t.tap(find.text('访问审批').first));
         await until(
           () => find
