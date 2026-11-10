@@ -36,6 +36,7 @@ void main() {
       final other = service.agent.openSession('B');
       final input = {
         'sessionSecret': session,
+        'title': '新增 NAS 应用信息',
         'items': [
           {
             'name': 'PRIVATE-PENDING-NAME',
@@ -47,6 +48,19 @@ void main() {
       };
       final pending = await call('/import/submit', input);
       expect(pending['status'], 'pending');
+      expect(pending['title'], '新增 NAS 应用信息');
+      expect(service.owner.importProposals.single.title, '新增 NAS 应用信息');
+      expect(
+        (await call('/import/submit', {...input, 'title': '  '}))['status'],
+        'proposal_title_required',
+      );
+      expect(
+        (await call('/import/submit', {
+          ...input,
+          'title': '字' * 201,
+        }))['status'],
+        'invalid_proposal',
+      );
       expect(pending.toString(), isNot(contains('PRIVATE')));
       expect(
         await call('/import/status', {

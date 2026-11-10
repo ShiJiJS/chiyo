@@ -24,6 +24,7 @@ class ProposalEntry {
     required this.chatLabel,
     required this.agentName,
     required this.purpose,
+    this.title = '',
     required this.count,
     this.changeCount = 0,
     this.statusText,
@@ -31,7 +32,7 @@ class ProposalEntry {
     required this.pending,
     required Iterable<String> itemIds,
   }) : itemIds = List.unmodifiable(itemIds);
-  final String id, chatLabel, agentName, purpose;
+  final String id, chatLabel, agentName, purpose, title;
   final String? statusText;
   final ProposalKind kind;
   final ProposalStatus status;
@@ -136,6 +137,7 @@ extension OwnerProposals on OwnerAccess {
           createdAt: p.createdAt,
           chatLabel: p.chatLabel,
           agentName: p.agentName,
+          title: p.title,
           purpose: p.purpose,
           count: p.state == ImportProposalState.pending
               ? p.items.length
@@ -246,6 +248,7 @@ extension OwnerProposals on OwnerAccess {
                     entry.chatLabel,
                     entry.agentName,
                     entry.purpose,
+                    entry.title,
                     entry.kindLabel,
                     entry.stateLabel,
                     for (final item in information.where(

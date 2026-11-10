@@ -48,6 +48,7 @@ void main() {
           ]),
         ],
         agentName: 'Codex',
+        title: '新增 NAS 应用信息',
         purpose: '整理指定入口',
       );
       await service.close();
@@ -61,6 +62,7 @@ void main() {
       );
       final pending = service.owner.importProposals.single;
       expect(pending.agentName, 'Codex');
+      expect(pending.title, '新增 NAS 应用信息');
       expect(pending.purpose, '整理指定入口');
       expect(
         pending.items.first.fields.single.value,
@@ -71,6 +73,7 @@ void main() {
         pending.version,
         pending.items,
       );
+      expect(service.owner.importProposals.single.title, '新增 NAS 应用信息');
       await service.close();
       await store.close();
       store = await EncryptedInformationRepository.open(directory.path, keys);
