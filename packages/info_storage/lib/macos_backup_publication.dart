@@ -81,10 +81,13 @@ final class MacBackupPublication {
 }
 
 final class BackupPublicationFailure implements Exception {
-  const BackupPublicationFailure(this.code);
+  const BackupPublicationFailure(this.code, {this.nativeError});
   final String code;
+  final int? nativeError;
   @override
-  String toString() => 'BackupPublicationFailure($code)';
+  String toString() => nativeError == null
+      ? 'BackupPublicationFailure($code)'
+      : 'BackupPublicationFailure($code, nativeError: $nativeError)';
 }
 
 /// These are observations, NOT operation outcomes. An absent/replaced output

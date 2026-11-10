@@ -339,7 +339,20 @@ void main() {
       );
       await store.settle(p.id, null);
       expect((await store.read(p.id))!.intent.pending, isFalse);
-      await store.publication.cleanupRegisteredOutputStaging(p.id);
+      final cleanup = Stopwatch()..start();
+      while (true) {
+        try {
+          await store.publication.cleanupRegisteredOutputStaging(p.id);
+          break;
+        } on StorageFailure catch (error) {
+          if (error.code != 'backup_cleanup_pending' ||
+              cleanup.elapsed > const Duration(seconds: 3))
+            rethrow;
+          expect((await store.read(p.id))!.intent.pending, isFalse);
+          expect(await File(p.output).exists(), isFalse);
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+      }
       expect(await Directory(p.stage).exists(), isFalse);
       expect(await store.record(command(p.id)), isFalse);
       await expectLater(

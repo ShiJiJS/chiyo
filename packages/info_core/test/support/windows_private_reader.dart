@@ -21,14 +21,18 @@ Future<void> main(List<String> args) async {
       >('CreateFileW');
   final close = kernel
       .lookupFunction<Int32 Function(IntPtr), int Function(int)>('CloseHandle');
-  final path = args.single.toNativeUtf16();
+  final path = args.first.toNativeUtf16();
+  final milliseconds = args.length == 2 ? int.parse(args[1]) : 200;
+  if (milliseconds < 1 || milliseconds > 10000) {
+    throw ArgumentError('Bounded synthetic reader duration required');
+  }
   final handle = open(path, 0x80000000, 1, nullptr, 3, 0x80, 0);
   calloc.free(path);
   if (handle == -1) throw StateError('Synthetic reader did not acquire file');
   try {
     stdout.writeln('reader-ready');
     await stdout.flush();
-    await Future<void>.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(Duration(milliseconds: milliseconds));
   } finally {
     close(handle);
   }
