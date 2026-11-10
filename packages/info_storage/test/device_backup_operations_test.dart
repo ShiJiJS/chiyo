@@ -356,6 +356,44 @@ void main() {
   );
 
   test(
+    'a transient Windows reader releases before abandoned staging cleanup finishes',
+    () async {
+      final p = await prepare('transient-reader', List.filled(8192, 42));
+      await close();
+      await open();
+      expect(await store.publication.reconcileOutputOperation(p.id), isNull);
+      await store.settle(p.id, null);
+      final reader = await Process.start(Platform.resolvedExecutable, [
+        '--packages=${Directory.current.path}/.dart_tool/package_config.json',
+        '${Directory.current.path}/../info_core/test/support/windows_private_reader.dart',
+        '${p.stage}/prepared',
+      ]);
+      final errors = utf8.decoder.bind(reader.stderr).join();
+      try {
+        expect(
+          await reader.stdout
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .first,
+          'reader-ready',
+        );
+        await store.publication.cleanupRegisteredOutputStaging(p.id);
+        expect(await Directory(p.stage).exists(), isFalse);
+        expect(await store.publication.reconcileOutputOperation(p.id), isNull);
+        expect(await File(p.output).exists(), isFalse);
+      } finally {
+        await reader.stdin.close();
+        expect(
+          await reader.exitCode.timeout(const Duration(seconds: 5)),
+          0,
+          reason: await errors,
+        );
+      }
+    },
+    skip: !Platform.isWindows,
+  );
+
+  test(
     'publication uncertainty requires the original file identity and cannot be settled as absence',
     () async {
       final p = await prepare('uncertain', List.filled(8192, 19));
