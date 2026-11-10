@@ -431,7 +431,7 @@ void main() {
       await t.tap(snapshot);
       await t.pumpAndSettle();
       expect(find.byType(LibrarySnapshotView), findsOneWidget);
-      await t.tap(find.text('关闭').last);
+      await t.tap(snapshot);
       await t.pumpAndSettle();
       final revoke = find.byKey(const ValueKey('grant-revoke'));
       await t.ensureVisible(revoke);
