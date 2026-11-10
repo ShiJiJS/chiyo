@@ -54,6 +54,8 @@ class OrganizationTask {
     required Map<String, int> itemVersions,
     this.state = OrganizationTaskState.active,
     this.agentName = '',
+    this.title = '',
+    this.externalChatId = '',
     this.approvedAt,
     this.completedAt,
     Map<String, String> itemNames = const {},
@@ -63,6 +65,7 @@ class OrganizationTask {
        itemNames = Map.unmodifiable(itemNames),
        changes = List.unmodifiable(changes);
   final String id, sessionBinding, chatLabel, purpose;
+  final String title, externalChatId;
   final DateTime createdAt, expiresAt;
   final DateTime? approvedAt;
   final DateTime? completedAt;
@@ -85,6 +88,8 @@ class OrganizationTask {
     id: id,
     sessionBinding: sessionBinding,
     chatLabel: chatLabel,
+    title: title,
+    externalChatId: externalChatId,
     purpose: purpose,
     createdAt: createdAt,
     expiresAt: expiresAt ?? this.expiresAt,
@@ -101,6 +106,8 @@ class OrganizationTask {
     'id': id,
     'sessionBinding': sessionBinding,
     'chatLabel': chatLabel,
+    if (title.isNotEmpty) 'title': title,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
     'purpose': purpose,
     'createdAt': createdAt.toUtc().toIso8601String(),
     'expiresAt': expiresAt.toUtc().toIso8601String(),
@@ -117,6 +124,8 @@ class OrganizationTask {
     id: j['id'] as String,
     sessionBinding: j['sessionBinding'] as String,
     chatLabel: j['chatLabel'] as String,
+    title: j['title'] as String? ?? '',
+    externalChatId: j['externalChatId'] as String? ?? '',
     purpose: j['purpose'] as String,
     agentName: j['agentName'] as String? ?? '',
     approvedAt: j['approvedAt'] == null

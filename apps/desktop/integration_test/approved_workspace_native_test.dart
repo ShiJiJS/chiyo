@@ -14,6 +14,8 @@ import 'package:info_desktop/workspace/mac_preview_desktop.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/library_batch_recycle_dialog.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
+import 'package:info_desktop/workspace/owner_workspace_proposals.dart';
+import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_core/info_core.dart' as core;
 import '../test/support/workspace_fixtures.dart';
 import 'support/native_semantics_lifetime.dart';
@@ -276,8 +278,106 @@ void main() {
     expect(service.owner.libraryRecycleBatches, hasLength(1));
     await t.pumpWidget(const SizedBox());
     await source.dispose();
-      await service.close();
+    await service.close();
     desktop.dispose();
     semantics.finishAfterUnmount();
   });
+  testWidgets(
+    'real submissions show their names and titles in the native workspace',
+    (t) async {
+      final semantics = NativeSemanticsLifetime(t);
+      final desktop = MacPreviewDesktop();
+      await desktop.initialize();
+      final output = (await MacPreviewDesktop.channel.invokeMethod<String>(
+        'createEvidenceDirectory',
+      ))!;
+      // ignore: avoid_print
+      print('APPROVED_SUBMISSION_EVIDENCE=$output');
+      final service = core.InformationService(
+        repository: core.MemoryInformationRepository(),
+      );
+      final item = await service.owner.createInformation('合成 NAS', '', [
+        const core.FieldInput('地址', '', 'synthetic.invalid'),
+      ]);
+      final session = service.agent.openSession('原生验收聊天');
+      final fields = [core.FieldRef(item.id, item.fields.single.id)];
+      final granted = service.agent.request(
+        session,
+        '检查 NAS 地址',
+        fields,
+        agentName: '原生验收 Agent',
+        externalChatId: 'native-synthetic-chat',
+      );
+      service.owner.approve(granted.id, fields);
+      service.agent.request(
+        session,
+        '核对 NAS 部署位置',
+        fields,
+        agentName: '原生验收 Agent',
+        externalChatId: 'native-synthetic-chat',
+      );
+      await service.agent.submitImport(
+        session,
+        [
+          core.ImportItemInput('合成应用', '', [
+            const core.FieldInput('用途', '', '自动验收'),
+          ]),
+        ],
+        title: '补齐 NAS 应用清单',
+        purpose: '整理应用信息',
+        agentName: '原生验收 Agent',
+        externalChatId: 'native-synthetic-chat',
+      );
+      late OwnerWorkspaceSource source;
+      final proposals = OwnerWorkspaceProposals(
+        owner: service.owner,
+        library: () => source,
+        changed: () => source.notifyExternalChange(),
+      );
+      source = OwnerWorkspaceSource(
+        owner: service.owner,
+        proposals: proposals,
+        refreshInterval: Duration.zero,
+      );
+      final boundary = GlobalKey();
+      await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
+        'width': 1440.0,
+        'height': 900.0,
+      });
+      await t.pumpWidget(
+        RepaintBoundary(
+          key: boundary,
+          child: WorkspaceApp(
+            source: source,
+            desktop: desktop,
+            windowTitle: MacPreviewDesktop.windowTitle,
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      for (final page in ['approvals', 'proposals', 'history']) {
+        await t.tap(find.byKey(ValueKey('workspace-nav-$page')));
+        await t.pumpAndSettle();
+        expect(find.textContaining('原生验收 Agent'), findsWidgets);
+        expect(find.textContaining('native-synthetic-chat'), findsWidgets);
+        expect(find.textContaining('未提供 Agent 名称'), findsNothing);
+        if (page == 'proposals') expect(find.text('补齐 NAS 应用清单'), findsWidgets);
+        expect(t.takeException(), isNull);
+        final render =
+            boundary.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final image = await render.toImage(pixelRatio: 1);
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        await File(
+          '$output/$page-source.png',
+        ).writeAsBytes(bytes!.buffer.asUint8List());
+        image.dispose();
+      }
+      await t.pumpWidget(const SizedBox());
+      await source.dispose();
+      await service.close();
+      desktop.dispose();
+      semantics.finishAfterUnmount();
+    },
+  );
 }

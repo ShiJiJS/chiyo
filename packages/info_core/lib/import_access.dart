@@ -135,6 +135,7 @@ extension AgentImports on AgentAccess {
     List<ImportItemInput> items, {
     String agentName = '',
     String title = '',
+    String externalChatId = '',
     String purpose = '',
     String? operationId,
   }) => _service.owner._serialize(() async {
@@ -154,6 +155,7 @@ extension AgentImports on AgentAccess {
               'purpose': purpose,
               'agentName': agentName,
               if (title.isNotEmpty) 'title': title,
+              if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
             }),
           ),
         )
@@ -182,10 +184,12 @@ extension AgentImports on AgentAccess {
     );
     items = _service.owner._compileTemplateImports(items);
     _validateImport(items);
-    if (agentName.length > 200 ||
-        purpose.length > 2000 ||
-        title.length > 200 ||
-        title.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+    if (!validSubmissionMetadata(
+      title: title,
+      agentName: agentName,
+      purpose: purpose,
+      externalChatId: externalChatId,
+    )) {
       throw const AccessFailure('invalid_proposal');
     }
     // Bound retained pending work per chat without revealing other sessions.
@@ -207,6 +211,7 @@ extension AgentImports on AgentAccess {
       items: items,
       agentName: agentName.trim(),
       title: title.trim(),
+      externalChatId: externalChatId.trim(),
       purpose: purpose.trim(),
       operationId: operationId,
       submissionDigest: operationId == null ? null : digest,

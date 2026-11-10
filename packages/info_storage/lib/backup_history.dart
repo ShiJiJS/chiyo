@@ -32,6 +32,19 @@ String _backupText(
 
 String _backupId(Map<String, dynamic> row, String key) =>
     _backupText(row, key, 200, required: true);
+
+void _backupSubmissionSource(Map<String, dynamic> row) {
+  String optional(String key, int limit) =>
+      row.containsKey(key) ? _backupText(row, key, limit) : '';
+  if (!validSubmissionMetadata(
+    agentName: optional('agentName', 200),
+    externalChatId: optional('externalChatId', 200),
+    purpose: optional('purpose', 2000),
+  )) {
+    _backupInvalid();
+  }
+}
+
 int _backupVersion(Map<String, dynamic> row, [String key = 'version']) {
   final value = row[key];
   if (value is! int || value < 1 || value > 2147483647) _backupInvalid();
@@ -309,11 +322,12 @@ void _validateBackupHistory(
         'sessionEnded',
         'applicationClosed',
       },
-      {'restoredAt'},
+      {'restoredAt', 'agentName', 'externalChatId'},
     );
     final id = _backupId(j, 'id');
     _backupId(j, 'sessionId');
     _backupText(j, 'chatLabel', 200, required: true);
+    _backupSubmissionSource(j);
     _backupText(j, 'purpose', 2000, required: true);
     final created = recordedDate(j['createdAt']);
     final expires = _backupDate(j['requestExpiresAt']);
@@ -363,12 +377,19 @@ void _validateBackupHistory(
         'fields',
         'events',
       },
-      {'restoredAt', if (allowGrantVersions) 'itemVersions'},
+      {
+        'restoredAt',
+        'agentName',
+        'externalChatId',
+        'purpose',
+        if (allowGrantVersions) 'itemVersions',
+      },
     );
     final id = _backupId(j, 'id');
     _backupId(j, 'requestId');
     _backupId(j, 'sessionId');
     _backupText(j, 'chatLabel', 200, required: true);
+    _backupSubmissionSource(j);
     final approvedAt = recordedDate(j['approvedAt']);
     final expiresAt = _backupDate(j['expiresAt']);
     if (id != row['id'] ||

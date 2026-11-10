@@ -263,6 +263,31 @@ class AgentProtocol {
     String path,
     Map<String, dynamic> body,
   ) async {
+    if (const {
+      '/request',
+      '/credential-use/request',
+      '/organization/request',
+      '/import/submit',
+      '/update/submit',
+      '/delete/submit',
+    }.contains(path)) {
+      final errors = submissionMetadataErrors(
+        body,
+        proposal: const {
+          '/organization/request',
+          '/import/submit',
+          '/update/submit',
+          '/delete/submit',
+        }.contains(path),
+      );
+      if (errors.isNotEmpty) {
+        return {
+          'status': 'invalid_request',
+          'errorCode': 'invalid_submission_metadata',
+          'fieldErrors': errors,
+        };
+      }
+    }
     switch (path) {
       case '/capabilities':
         if (body.isNotEmpty) throw const CredentialUseFailure('unknown_field');
@@ -273,6 +298,7 @@ class AgentProtocol {
           'protocolVersions': [1, if (enableReusableCredentialUse) 2],
           'capabilities': [
             'information-request-operations.v1',
+            'submission-metadata.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
             if (enableReusableCredentialUse)
               'credential-ssh-session-validity.v1',
@@ -734,6 +760,8 @@ class AgentProtocol {
           _text(body, 'purpose'),
           ids.cast<String>(),
           agentName: agentName,
+          title: _optionalMetadata(body, 'title'),
+          externalChatId: _optionalMetadata(body, 'externalChatId'),
         );
         return _agent.organizationStatus(_text(body, 'sessionSecret'), task.id);
       case '/organization/status':
@@ -887,6 +915,8 @@ class AgentProtocol {
           _text(body, 'purpose'),
           fields,
           operationId: body['operationId'] as String?,
+          agentName: _optionalMetadata(body, 'agentName'),
+          externalChatId: _optionalMetadata(body, 'externalChatId'),
         );
         return {
           ..._agent.status(_text(body, 'sessionSecret'), receipt.id),
@@ -942,7 +972,7 @@ class AgentProtocol {
         raw.any((i) => i is! Map<String, dynamic>)) {
       throw const AccessFailure('invalid_request');
     }
-    for (final key in ['agentName', 'purpose', 'title']) {
+    for (final key in ['agentName', 'purpose', 'title', 'externalChatId']) {
       if (body.containsKey(key) && body[key] is! String) {
         throw const AccessFailure('invalid_request');
       }
@@ -959,6 +989,7 @@ class AgentProtocol {
       items,
       agentName: body['agentName'] is String ? body['agentName'] as String : '',
       title: body['title'] as String? ?? '',
+      externalChatId: body['externalChatId'] as String? ?? '',
       purpose: body['purpose'] is String ? body['purpose'] as String : '',
       operationId: body['operationId'] as String?,
     );
@@ -974,6 +1005,10 @@ class AgentProtocol {
     final id = await _agent.submitUpdate(
       session,
       UpdateInput.fromJson(raw),
+      title: _optionalMetadata(body, 'title'),
+      agentName: _optionalMetadata(body, 'agentName'),
+      purpose: _optionalMetadata(body, 'purpose'),
+      externalChatId: _optionalMetadata(body, 'externalChatId'),
       operationId: body['operationId'] == null
           ? null
           : _text(body, 'operationId'),
@@ -993,8 +1028,21 @@ class AgentProtocol {
       _text(body, 'itemId'),
       version,
       fieldId: body['fieldId'] == null ? null : _text(body, 'fieldId'),
+      title: _optionalMetadata(body, 'title'),
+      agentName: _optionalMetadata(body, 'agentName'),
+      purpose: _optionalMetadata(body, 'purpose'),
+      externalChatId: _optionalMetadata(body, 'externalChatId'),
     );
     return _agent.deleteStatus(session, id);
+  }
+
+  String _optionalMetadata(Map<String, dynamic> body, String key) {
+    final value = body[key];
+    if (!body.containsKey(key)) return '';
+    if (value is! String) {
+      throw const AccessFailure('invalid_submission_metadata');
+    }
+    return value;
   }
 
   String _text(Map<String, dynamic> body, String key) {

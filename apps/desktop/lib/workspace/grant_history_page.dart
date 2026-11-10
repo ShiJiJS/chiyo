@@ -337,7 +337,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          '${h.kind.label} · ${h.agentClaim}',
+          [h.kind.label, h.agentClaim].where((v) => v.isNotEmpty).join(' · '),
           style: libraryText(context, 12, color: c.muted, height: 1.7),
         ),
       ],
@@ -480,7 +480,10 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${h.agentClaim} · ${h.chatClaim}',
+              [
+                h.agentClaim,
+                h.chatClaim,
+              ].where((v) => v.isNotEmpty).join(' · '),
               style: libraryText(context, 13, color: c.muted, height: 1.8),
             ),
             const SizedBox(height: 10),

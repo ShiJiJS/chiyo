@@ -107,8 +107,8 @@ class OwnerCredentialUseProjection {
           : receiver(r.plan),
       session: WorkspaceCredentialSession(
         session ?? 'unlinked:${r.id}',
-        session == null ? '${r.chatLabel}（历史会话身份不可用）' : r.chatLabel,
-        '未提供 Agent 名称',
+        core.submissionChatLabel(r.chatLabel, r.externalChatId),
+        r.agentName,
       ),
       purpose: r.purpose,
       supportsSessionValidity: r.supportsSessionValidity,

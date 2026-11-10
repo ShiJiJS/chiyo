@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/agent_client.dart';
+import 'package:info_cli/agent_help.dart';
 import 'package:info_cli/codex_association.dart';
 import 'package:info_core/protocol_json.dart';
 
 /// One command per process, with a private reference passed on stdin, not argv.
 Future<void> main(List<String> args) async {
+  if (args.length == 1 && args.single == '--help') {
+    stdout.writeln(jsonEncode(agentCommandHelp()));
+    return;
+  }
   AgentClient? client;
   Map<String, dynamic> result;
   try {
@@ -26,6 +31,8 @@ Future<void> main(List<String> args) async {
             association.connection!,
             sessionSecret: association.secret,
             sourceAgent: 'Codex',
+            requireSubmissionMetadata: true,
+            externalChatId: association.chatId,
             hostedCredentialExecutions: true,
             deviceFileStateDirectory: Directory(
               '${File(input['association'] as String).absolute.parent.path}/device-files',
@@ -35,6 +42,8 @@ Future<void> main(List<String> args) async {
             association.port,
             sessionSecret: association.secret,
             sourceAgent: 'Codex',
+            requireSubmissionMetadata: true,
+            externalChatId: association.chatId,
             hostedCredentialExecutions: true,
           );
     if (input['command'] == 'delegate') {

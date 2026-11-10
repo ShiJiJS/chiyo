@@ -1,5 +1,14 @@
 part of 'info_core.dart';
 
+String _useSourceText(Map<String, dynamic> input, String key) {
+  if (!input.containsKey(key)) return '';
+  final value = _useText(input[key], key, max: 200, empty: true);
+  if (!validSubmissionMetadata(agentName: value)) {
+    throw CredentialUseFailure('invalid_type', fieldPath: key);
+  }
+  return value.trim();
+}
+
 String? _useTimestamp(DateTime? value) => value == null
     ? null
     : DateTime.fromMillisecondsSinceEpoch(
@@ -224,9 +233,12 @@ class CredentialUseInput {
     this.version,
     this.launch,
     this.readFields,
-    this.protocolVersion,
-  );
+    this.protocolVersion, [
+    this.agentName = '',
+    this.externalChatId = '',
+  ]);
   final String purpose, alias, credentialId;
+  final String agentName, externalChatId;
   final int version;
   final int protocolVersion;
   final CredentialLaunchPlan launch;
@@ -239,7 +251,13 @@ class CredentialUseInput {
     _useShape(
       j,
       {'command', 'purpose', 'credentials', 'launch'},
-      {'readFields', 'protocolVersion'},
+      {
+        'readFields',
+        'protocolVersion',
+        'agentName',
+        'externalChatId',
+        'submissionVersion',
+      },
     );
     if (j['command'] != 'request-use') {
       throw const CredentialUseFailure('invalid_plan');
@@ -313,6 +331,8 @@ class CredentialUseInput {
       ),
       List.unmodifiable(fields),
       protocolVersion,
+      _useSourceText(j, 'agentName'),
+      _useSourceText(j, 'externalChatId'),
     );
   }
 }
@@ -650,6 +670,8 @@ class CredentialUseRequest {
     this.protocolVersion = 1,
     required this.id,
     required this.chatLabel,
+    this.agentName = '',
+    this.externalChatId = '',
     required this.purpose,
     required this.alias,
     required this.credentialId,
@@ -698,6 +720,7 @@ class CredentialUseRequest {
     }
   }
   final String id, chatLabel, purpose, alias, credentialId, state;
+  final String agentName, externalChatId;
   final int version, useGeneration;
   final int protocolVersion;
   final CredentialUseSpecification specification;
@@ -733,6 +756,8 @@ class CredentialUseRequest {
     if (protocolVersion != 1) 'protocolVersion': protocolVersion,
     'id': id,
     'chatLabel': chatLabel,
+    if (agentName.isNotEmpty) 'agentName': agentName,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
     'purpose': purpose,
     'alias': alias,
     'credentialId': credentialId,
@@ -768,6 +793,8 @@ class CredentialUseRequest {
         protocolVersion: _useProtocol(j),
         id: j['id'] as String,
         chatLabel: j['chatLabel'] as String,
+        agentName: j['agentName'] as String? ?? '',
+        externalChatId: j['externalChatId'] as String? ?? '',
         purpose: j['purpose'] as String,
         alias: j['alias'] as String,
         credentialId: j['credentialId'] as String,

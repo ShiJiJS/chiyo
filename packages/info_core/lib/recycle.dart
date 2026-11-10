@@ -19,10 +19,15 @@ class DeleteProposal {
     this.state = DeleteProposalState.pending,
     this.version = 1,
     this.entryId,
+    this.title = '',
+    this.agentName = '',
+    this.purpose = '',
+    this.externalChatId = '',
   });
   final String id, sessionBinding, chatLabel, itemId;
   final String? fieldId, entryId;
   final int baseVersion, version;
+  final String title, agentName, purpose, externalChatId;
   final DateTime createdAt;
   final DeleteProposalState state;
   DeleteProposal finish(DeleteProposalState state, {String? entryId}) =>
@@ -30,6 +35,10 @@ class DeleteProposal {
         id: id,
         sessionBinding: sessionBinding,
         chatLabel: chatLabel,
+        title: title,
+        agentName: agentName,
+        purpose: purpose,
+        externalChatId: externalChatId,
         itemId: itemId,
         baseVersion: baseVersion,
         createdAt: createdAt,
@@ -42,6 +51,10 @@ class DeleteProposal {
     'id': id,
     'sessionBinding': sessionBinding,
     'chatLabel': chatLabel,
+    if (title.isNotEmpty) 'title': title,
+    if (agentName.isNotEmpty) 'agentName': agentName,
+    if (purpose.isNotEmpty) 'purpose': purpose,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
     'itemId': itemId,
     'baseVersion': baseVersion,
     'createdAt': createdAt.toUtc().toIso8601String(),
@@ -54,6 +67,10 @@ class DeleteProposal {
     id: j['id'] as String,
     sessionBinding: j['sessionBinding'] as String,
     chatLabel: j['chatLabel'] as String,
+    title: j['title'] as String? ?? '',
+    agentName: j['agentName'] as String? ?? '',
+    purpose: j['purpose'] as String? ?? '',
+    externalChatId: j['externalChatId'] as String? ?? '',
     itemId: j['itemId'] as String,
     baseVersion: j['baseVersion'] as int,
     createdAt: DateTime.parse(j['createdAt'] as String),

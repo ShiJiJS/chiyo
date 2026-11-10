@@ -82,6 +82,10 @@ extension AgentUpdates on AgentAccess {
       id: previous.id,
       sessionBinding: previous.sessionBinding,
       chatLabel: previous.chatLabel,
+      title: previous.title,
+      agentName: previous.agentName,
+      purpose: previous.purpose,
+      externalChatId: previous.externalChatId,
       createdAt: previous.createdAt,
       input: input,
       version: previous.version + 1,
@@ -96,11 +100,23 @@ extension AgentUpdates on AgentAccess {
     String session,
     UpdateInput input, {
     String? operationId,
+    String title = '',
+    String agentName = '',
+    String purpose = '',
+    String externalChatId = '',
   }) => _service.owner._serialize(() async {
     _service._requireSession(session);
     final binding = _service._sessionBindings[session];
     if (binding == null) throw const AccessFailure('unauthorized');
     _validateUpdate(input);
+    if (!validSubmissionMetadata(
+      title: title,
+      agentName: agentName,
+      purpose: purpose,
+      externalChatId: externalChatId,
+    )) {
+      throw const AccessFailure('invalid_submission_metadata');
+    }
     if (operationId != null &&
         !RegExp(
           r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
@@ -108,7 +124,17 @@ extension AgentUpdates on AgentAccess {
       throw const AccessFailure('invalid_operation_id');
     }
     final digest = sha256
-        .convert(utf8.encode(jsonEncode(input.submissionJson)))
+        .convert(
+          utf8.encode(
+            jsonEncode({
+              ...input.submissionJson,
+              if (title.isNotEmpty) 'title': title,
+              if (agentName.isNotEmpty) 'agentName': agentName,
+              if (purpose.isNotEmpty) 'purpose': purpose,
+              if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
+            }),
+          ),
+        )
         .toString();
     operationId ??= input.attachments.isNotEmpty ? 'file-update-$digest' : null;
     if (operationId != null) {
@@ -142,6 +168,10 @@ extension AgentUpdates on AgentAccess {
       id: _service._secret(),
       sessionBinding: binding,
       chatLabel: _service._sessions[session]!,
+      title: title.trim(),
+      agentName: agentName.trim(),
+      purpose: purpose.trim(),
+      externalChatId: externalChatId.trim(),
       createdAt: _service._clock(),
       input: input,
       operationId: operationId,
@@ -187,6 +217,7 @@ extension AgentUpdates on AgentAccess {
           ? 'approved_awaiting_admission'
           : p.state.name,
       'proposalId': id,
+      if (p.title.isNotEmpty) 'title': p.title,
       'version': p.version,
       if (p.result case final result?)
         'result': {'itemId': result.itemId, 'version': result.version},

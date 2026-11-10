@@ -25,6 +25,7 @@ class ProposalEntry {
     required this.agentName,
     required this.purpose,
     this.title = '',
+    this.externalChatId = '',
     required this.count,
     this.changeCount = 0,
     this.statusText,
@@ -32,7 +33,7 @@ class ProposalEntry {
     required this.pending,
     required Iterable<String> itemIds,
   }) : itemIds = List.unmodifiable(itemIds);
-  final String id, chatLabel, agentName, purpose, title;
+  final String id, chatLabel, agentName, purpose, title, externalChatId;
   final String? statusText;
   final ProposalKind kind;
   final ProposalStatus status;
@@ -138,6 +139,7 @@ extension OwnerProposals on OwnerAccess {
           chatLabel: p.chatLabel,
           agentName: p.agentName,
           title: p.title,
+          externalChatId: p.externalChatId,
           purpose: p.purpose,
           count: p.state == ImportProposalState.pending
               ? p.items.length
@@ -172,8 +174,10 @@ extension OwnerProposals on OwnerAccess {
           },
           createdAt: p.createdAt,
           chatLabel: p.chatLabel,
-          agentName: '',
-          purpose: '',
+          agentName: p.agentName,
+          purpose: p.purpose,
+          title: p.title,
+          externalChatId: p.externalChatId,
           count: 1,
           version: p.version,
           pending: p.state == UpdateProposalState.pending,
@@ -194,8 +198,10 @@ extension OwnerProposals on OwnerAccess {
           },
           createdAt: p.createdAt,
           chatLabel: p.chatLabel,
-          agentName: '',
-          purpose: '',
+          agentName: p.agentName,
+          purpose: p.purpose,
+          title: p.title,
+          externalChatId: p.externalChatId,
           count: 1,
           version: p.version,
           pending: p.state == DeleteProposalState.pending,
@@ -230,6 +236,8 @@ extension OwnerProposals on OwnerAccess {
             createdAt: task.createdAt,
             chatLabel: task.chatLabel,
             agentName: task.agentName,
+            title: task.title,
+            externalChatId: task.externalChatId,
             purpose: task.purpose,
             count: task.itemVersions.length,
             version: 1,
@@ -249,6 +257,7 @@ extension OwnerProposals on OwnerAccess {
                     entry.agentName,
                     entry.purpose,
                     entry.title,
+                    entry.externalChatId,
                     entry.kindLabel,
                     entry.stateLabel,
                     for (final item in information.where(

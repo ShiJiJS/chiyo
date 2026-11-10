@@ -623,7 +623,10 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     : c.successSurface,
               ),
               Text(
-                '${d.request.agentClaim} · ${d.request.chatClaim}',
+                [
+                  d.request.agentClaim,
+                  d.request.chatClaim,
+                ].where((v) => v.isNotEmpty).join(' · '),
                 style: libraryText(context, 12, color: c.muted),
               ),
             ],
@@ -841,7 +844,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  r.agentClaim,
+                                  r.agentClaim.isEmpty
+                                      ? r.chatClaim
+                                      : r.agentClaim,
                                   style: libraryText(
                                     context,
                                     12,

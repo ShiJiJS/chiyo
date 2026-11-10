@@ -8,6 +8,26 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'both CLI help entry points work without a connection or private association',
+    () async {
+      for (final entry in ['info.dart', 'codex_info.dart']) {
+        final result = await Process.run(Platform.resolvedExecutable, [
+          'run',
+          'bin/$entry',
+          '--help',
+        ]);
+        expect(result.exitCode, 0);
+        final help = jsonDecode(result.stdout as String) as Map;
+        expect(help['status'], 'ok');
+        expect(
+          (help['submissionFields'] as Map).keys,
+          containsAll(['title', 'agentName', 'externalChatId', 'purpose']),
+        );
+        expect(help.containsKey('association'), false);
+      }
+    },
+  );
+  test(
     'real CLI process claims only approved fields without printing credentials',
     () async {
       final core = InformationService.fictional();
@@ -44,13 +64,26 @@ void main() {
       }
 
       expect((await command({'command': 'catalog'}))['status'], 'ok');
+      expect(
+        (await command({'command': 'help'}))['submissionFields'],
+        contains('title'),
+      );
       final session = await command({
         'command': 'session',
         'chatLabel': 'chat',
+        'externalChatId': 'synthetic-cli-chat',
       });
       expect(session, {'status': 'ok'});
+      final incomplete = await command({
+        'command': 'import-submit',
+        'items': [],
+      });
+      expect(incomplete['errorCode'], 'invalid_submission_metadata');
+      expect(incomplete['fieldErrors'], contains('title'));
+      expect(core.owner.importProposals, isEmpty);
       final request = await command({
         'command': 'request',
+        'agentName': 'Synthetic process Agent',
         'purpose': 'demo',
         'fields': [
           {'itemId': 'demo-server', 'fieldId': 'host'},
@@ -72,6 +105,8 @@ void main() {
       expect(waited['waitTimedOut'], isTrue);
       expect(waited['requestId'], id);
       expect(core.owner.requests, hasLength(1));
+      expect(core.owner.requests.single.agentName, 'Synthetic process Agent');
+      expect(core.owner.requests.single.externalChatId, 'synthetic-cli-chat');
       core.owner.approve(id, [const FieldRef('demo-server', 'host')]);
       expect(
         (await command({
@@ -103,6 +138,7 @@ void main() {
         'unauthorized',
       );
       final beforeRevoke = await core.owner.history();
+      expect(beforeRevoke.requests.single.agentName, 'Synthetic process Agent');
       expect(beforeRevoke.grants.single.requestId, id);
       expect(beforeRevoke.accesses.map((record) => record.outcome), [
         AccessOutcome.allowed,

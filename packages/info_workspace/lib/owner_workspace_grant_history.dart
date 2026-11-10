@@ -122,9 +122,14 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
         ? WorkspaceApprovalKind.file
         : WorkspaceApprovalKind.information,
     state: _state(e),
-    agentClaim: '未提供 Agent 名称',
-    chatClaim: e.request?.chatLabel ?? e.grant!.chatLabel,
-    purpose: e.request?.purpose ?? '原申请说明已不可用',
+    agentClaim: e.request?.agentName ?? e.grant!.agentName,
+    chatClaim: core.submissionChatLabel(
+      e.request?.chatLabel ?? e.grant!.chatLabel,
+      e.request?.externalChatId ?? e.grant!.externalChatId,
+    ),
+    purpose:
+        e.request?.purpose ??
+        (e.grant!.purpose.isEmpty ? '原申请说明已不可用' : e.grant!.purpose),
     recordedAt: e.at,
     operationCount: e.accesses.length + e.deliveries.length,
   );

@@ -6,6 +6,16 @@
 
 远程整理也沿用 `organize-request`、`organize-status`、`organize-tasks`、`organize-metadata`、`organize-submit`：先在 App 批准限定资料，再获取这次任务的分类元数据及版本，最后提交该范围内的分类和标签变动。不能仅凭目录查询改动分类，不能混入未批准资料或字段内容。结果在 App 的录入提案中只读查看；普通重启保留有效范围和原期限，已到期、撤销或聊天结束的任务不会恢复。
 
+## 提交主题和来源
+
+新版 `info` 和 `info-codex` 的申请需要服务具备 `submission-metadata.v1`。`--help` 或 `{"command":"help"}` 可在未连接时查看用法。
+
+所有新申请填写 `purpose`；`import-submit`、`update-submit`、`delete-submit`、`organize-request` 还必须有 `title`。例如“补齐 NAS 应用清单”，而不是只写条数。每次申请的 `agentName` 是实际提交者名称，`externalChatId` 是实际聊天标识；它们只作说明，不能代替私密会话证明。`info-codex` 自动提供 Codex 和当前聊天标识。通用 CLI 在 `session` 提供 `externalChatId`，每次申请提供 `agentName`，也可以单次明确提供聊天标识。
+
+标题、名称、聊天标识各最多200字、不含换行；用途最多2000字。不要将密码、Token、私钥或资料正文放入这些说明。模板例子中的主题和来源都是虚构值，提交时替换为当前任务的信息；具体 `items`／`update` 结构仍从当前插件查询。
+
+缺少或超长时返回 `invalid_request`、`errorCode:invalid_submission_metadata` 和按字段给出的 `fieldErrors`，补齐原意图后再提交。CLI 自动附 `submissionVersion:1`；直接调用新版 API 时也提供该标记，服务端按相同规则核对。旧传输和旧库缺少的字段保留为空，App 使用原用途和聊天说明，不伪填 Agent 名称或历史标题。修订待审内容保留原提案的主题和来源；批准范围和整份保存规则不变。
+
 ## 查询完整资料目录（Mac 开发分支，#83）
 
 能力查询中的 `information-directory-discovery.v1` 表示支持
@@ -128,8 +138,8 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 
 ```json
 {"command":"catalog"}
-{"command":"session","chatLabel":"当前聊天的说明"}
-{"command":"request","operationId":"inspect-host-01","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
+{"command":"session","chatLabel":"当前聊天的说明","externalChatId":"example-current-chat"}
+{"command":"request","agentName":"Example Agent","operationId":"inspect-host-01","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
 ```
 
 保存 `request` 返回的 `requestId`。返回值还包括创建时间 `createdAt` 和待审批到期时间 `requestExpiresAt`，均为 UTC。默认待审批 30 分钟；用户可以在桌面设置中调整新请求的有效期，已提交请求的截止时间保持不变。
@@ -206,7 +216,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 `catalog` 的每条信息包含当前 `version`。选择目标及基础版本，通过标准输入提交明确操作：
 
 ```json
-{"command":"update-submit","update":{"itemId":"ITEM_ID","baseVersion":1,"description":"修订后的公开描述","changes":[{"operation":"correct","fieldId":"FIELD_ID","value":"修正后的值"}]}}
+{"command":"update-submit","agentName":"Example Agent","title":"修正服务器地址","purpose":"更新用户指出的地址变化","update":{"itemId":"ITEM_ID","baseVersion":1,"description":"修订后的公开描述","changes":[{"operation":"correct","fieldId":"FIELD_ID","value":"修正后的值"}]}}
 {"command":"update-status","proposalId":"PROPOSAL_ID"}
 ```
 
