@@ -76,6 +76,8 @@ try {
         if ($entry.Name -eq 'native_assets.json') { continue }
         Copy-Item -LiteralPath $entry.FullName -Destination $app -Recurse
     }
+    Copy-Item -LiteralPath (Join-Path $projectRoot 'apps/desktop/windows/runner/resources/app_icon.ico') -Destination (Join-Path $app 'chiyo.ico')
+    & (Join-Path $PSScriptRoot 'test-windows-branding.ps1') -Executable (Join-Path $app 'info_desktop.exe') -Icon (Join-Path $app 'chiyo.ico') -VerifySource
     $nativeAssets = Get-Content -LiteralPath (Join-Path $app 'data/flutter_assets/NativeAssetsManifest.json') -Raw | ConvertFrom-Json
     $cipherLoader = @($nativeAssets.'native-assets'.windows_x64.'package:sqlite3/src/ffi/libsqlite3.g.dart')
     if ($cipherLoader.Count -ne 2 -or $cipherLoader[0] -ne 'absolute' -or $cipherLoader[1] -ne 'sqlcipher.dll') {
@@ -198,7 +200,7 @@ try {
     Assert-CleanSources
     if ((git rev-parse HEAD).Trim() -ne $commit) { throw 'Sources changed during packaging.' }
     Write-Json (Join-Path $payload 'manifest.json') ([ordered]@{
-        format = 2; product = 'Agent Info Manage'; release = $identity
+        format = 2; product = 'Agent Info Manage'; displayName = '知予'; release = $identity
         sourceCommit = $commit; sourceDirty = $false; architecture = 'windows-x64'
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
         signing = 'unsigned development preview'
@@ -214,7 +216,7 @@ try {
         verification = 'Full headless check.ps1 and Windows release compilation; no desktop/Codex/clean-machine acceptance implied'
         files = $files
     })
-    $archive = Join-Path $output "agent-info-manage-$identity-windows-x64.zip"
+    $archive = Join-Path $output "chiyo-$identity-windows-x64.zip"
     Compress-Archive -LiteralPath $payload -DestinationPath $archive -CompressionLevel Optimal
     $digest = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText("$archive.sha256", "$digest  $([IO.Path]::GetFileName($archive))`n", $utf8)

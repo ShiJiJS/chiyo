@@ -4,7 +4,7 @@
 
 ## 当前联网版安装（2026-11-10）
 
-用户本次明确要求：有新的完整已验证版本时，安装到`C:\Software\AgentInfoManage`并保留桌面快捷方式；后续本项目同类更新沿用此偏好，无需每次重新询问安装位置。沿用下方“本机安装与清理”的校验、正常退出和保留数据规则；未验证候选不自动覆盖正式安装。
+用户本次明确要求：有新的完整已验证版本时，安装到`C:\Software\AgentInfoManage`并保留桌面“知予”快捷方式；后续本项目同类更新沿用此偏好，无需每次重新询问安装位置。沿用下方“本机安装与清理”的校验、正常退出和保留数据规则；未验证候选不自动覆盖正式安装。
 
 当前已安装`0.4.4+18-dev.5845d3cb7ba1`，源码`5845d3cb7ba1641370beb32ccd92df73dfdafc68`。桌面“信息授权”指向`C:\Software\AgentInfoManage\current\app\info_desktop.exe`。同版本ZIP、SHA及验收记录保存在安装目录`package`，全部7699项载荷和归档哈希再次核对通过。安装回执为安装目录`installation.json`；本轮事实见[evidence/windows-online/w116-installed-5845d3c.json](evidence/windows-online/w116-installed-5845d3c.json)。
 
@@ -22,7 +22,7 @@ CLI、SDK-free Codex 接入材料生成器、合成资料控制台检查、依�
 
 ## 本机安装与清理
 
-按用户2026-10-22约定，Windows软件固定放在 `C:\Software\AgentInfoManage`：`current`为完整程序，`package`只留同版本ZIP／SHA和验收记录，桌面“信息授权”快捷方式指向`current/app/info_desktop.exe`。个人数据库仍在原LOCALAPPDATA位置；已安装Codex hooks／Skill独立管理，交付不擅自改其路径或信任。
+按用户2026-10-22约定，Windows软件固定放在 `C:\Software\AgentInfoManage`：`current`为完整程序，`package`只留同版本ZIP／SHA和验收记录，桌面“知予”快捷方式指向`current/app/info_desktop.exe`。个人数据库仍在原LOCALAPPDATA位置；已安装Codex hooks／Skill独立管理，交付不擅自改其路径或信任。
 
 `scripts/package-windows.ps1`完整检查通过后默认安装并清理；`-PackageOnly`只产包。安装先校验归档与全部载荷，暂存新目录，使用CLI正常退出旧实例，切换后保存快捷方式，再移除旧安装。保存／退出失败时保留原实例；不强杀。若需切换从构建目录启动的实例，先核对路径，再给安装脚本传入明确的`-RunningProcessId`。
 
@@ -158,3 +158,11 @@ ZIP 布局遵循 [Flutter Windows 分发说明](https://docs.flutter.dev/platfor
 SQLCipher 使用 sqlite3 包锁定的原生资产，其预期哈希及 Dart 依赖锁文件收录于
 `provenance/`；SQLCipher 4.19.0 许可来源为
 [上游 LICENSE](https://github.com/sqlcipher/sqlcipher/blob/v4.19.0/LICENSE.md)。
+
+## Windows名称与图标同步修正（进行中，2026-11-10）
+
+用户指出新安装仍叫“信息授权”。已确认当前源码包含既定知予/Chiyo名称及原始图标，但Windows runner标题、托盘/通知、PE版本资源、ICO与安装快捷方式仍旧。不是重新设计图标，也不需要NAS更新。修正使用既有Mac的16/32/64/128/256 PNG帧直接封装为Windows ICO，原PNG字节保持；`scripts/sync-windows-app-icon.py`可重新生成。
+
+Windows产品显示名/窗口/托盘/通知/残留旧CLI文案改为“知予”，新包ZIP命名chiyo，保留原安装位置、程序文件名和协议身份兼容既有连接与工具。新快捷方式用随包chiyo.ico；确认旧“信息授权”快捷方式属于本安装且无自定义参数后，先保存新快捷方式再移除旧快捷方式，不改其他快捷方式。
+
+新增`test-windows-branding.ps1`直接读取编译后PE资源，检查真实产品名、五尺寸图标与随包ICO、原批准PNG帧一致，不启动App；打包、实际解包和安装阶段均核对。旧安装负例已正确拒绝、PowerShell解析与PE读取器检查通过；新完整包与实际替换尚待执行。
