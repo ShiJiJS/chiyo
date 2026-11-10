@@ -36,4 +36,3 @@ AI 获批后把指定版本的 NAS 附件领取到 Windows 本机，取得可用
 实现与证据 `fe37707`：[w112.md](https://github.com/ShiJiJS/chiyo/blob/fe37707/docs/development/evidence/windows-online/w112.md)。Windows 日志枚举和已确认清理的队列竞态已修正；7 项定向检查（包含真实 AOT 看护进程）及另一个实际 AOT 旧协议组合检查、分析通过。现有 NAS/真实 AOT 在 App 关闭时完成并发领取、原文核对、丢失回复、异常退出、重启原交付、撤销、到期、占用与结束后清理/拒绝。只使用本轮 Windows 附件说明和全新隔离验证聊天，不恢复本聊天丢失的 association。
 
 实际两秒 SessionEnd 回调未确认，保留原事实后，在回调外通过原 end-only 索引以 20 秒上限恢复成功；未放宽 hook 预算，也未把恢复当成两秒内成功。完整包/真实宿主连续事件仍归 #116。正式安装与全局接入未操作。
-
