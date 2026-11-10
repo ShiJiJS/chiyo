@@ -395,7 +395,7 @@ final class _WindowsPublicationNative {
     // The parent directory handles omit SHARE_DELETE, pinning the complete
     // canonical binding while a source/destination operation is in progress.
     final lastError = _lastError;
-    final (handle, error) = _name(path, (name) {
+    (int, int) acquire() => _name(path, (name) {
       final handle = _open(
         name,
         0x20080 |
@@ -410,6 +410,18 @@ final class _WindowsPublicationNative {
       );
       return (handle, lastError());
     });
+    var (handle, error) = acquire();
+    final acquisition = Stopwatch()..start();
+    // A short-lived reader may temporarily deny DELETE. Only cleanup handle
+    // acquisition waits; canonical identity and private ACL checks still run
+    // on the actual handle. Persistent occupation retains pending cleanup.
+    while (handle == -1 &&
+        deleting &&
+        const {5, 32, 33}.contains(error) &&
+        acquisition.elapsed < const Duration(milliseconds: 500)) {
+      sleep(const Duration(milliseconds: 10));
+      (handle, error) = acquire();
+    }
     if (handle == -1) {
       if (missing && {2, 3}.contains(error)) return -1;
       throw const BackupPublicationFailure('identity_unavailable');
