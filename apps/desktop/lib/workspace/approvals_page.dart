@@ -301,7 +301,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             ? '批准指定字段和附件版本后，Agent通过CLI领取受管副本。撤销或到期会阻止后续交付，但不能收回已经读到或上传的内容。普通附件与凭据文件分别管理。'
             : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
       WorkspaceApprovalKind.organization =>
-        '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。最长30分钟。',
+        '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
       WorkspaceApprovalKind.focus =>
         'Mac本机焦点填充尚未启用。本次只能查看申请与限制，不能批准填充。网页或工具的DOM焦点不代表系统前台焦点；未来真实能力由单独验收决定。',
       WorkspaceApprovalKind.credential =>
@@ -409,10 +409,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         items: [
           if (credential && detail.credential?.supportsSessionValidity == true)
             const DropdownMenuItem(value: 'session', child: Text('不限时（限本聊天）')),
-          for (final m
-              in credential || r.kind == WorkspaceApprovalKind.organization
-                  ? [15, 30]
-                  : [15, 30, 60, 480])
+          for (final m in [120, 240, 480, 1440])
             DropdownMenuItem(
               value: m.toString(),
               child: Text(m < 60 ? '$m 分钟' : '${m ~/ 60} 小时'),
@@ -476,7 +473,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             const SizedBox(height: 18),
             Text(
               r.kind == WorkspaceApprovalKind.organization
-                  ? '限定资料元数据与分类写入，最长30分钟。'
+                  ? '限定资料元数据与分类写入，'
                   : '仅当前会话有效；批准范围内可复用，不随以后新增内容扩大。',
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
@@ -623,11 +620,6 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           Text(
             d.request.purpose,
             style: libraryText(context, 14, height: 1.95),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            '聊天名称和用途由 Agent 自述，仅供判断。',
-            style: libraryText(context, 12, color: c.muted),
           ),
           _section(context, '申请范围', _scopes(context)),
           _section(

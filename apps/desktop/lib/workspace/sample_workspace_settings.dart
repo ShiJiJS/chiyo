@@ -33,7 +33,7 @@ class SampleWorkspaceSettings implements WorkspaceSettingsSource {
   final DateTime Function() now;
   final SampleRetentionScope Function(DateTime cutoff) retentionScope;
   final void Function(Set<String> ids) pruneRetention;
-  WorkspacePreferences _value = const WorkspacePreferences();
+  WorkspacePreferences _value = const WorkspacePreferences(requestMinutes: 120);
   final _receipts = <String, WorkspaceSettingsReceipt>{};
   final _plans =
       <
@@ -85,7 +85,7 @@ class SampleWorkspaceSettings implements WorkspaceSettingsSource {
       throw const WorkspaceFailure('conflict', '设置已在别处变化，原选择保留，请先核对。');
     }
     final d = c.desired;
-    if (![5, 15, 30, 60, 120].contains(d.requestMinutes) ||
+    if (![30, 60, 120, 240, 480, 1440].contains(d.requestMinutes) ||
         ![30, 90, 180, 365].contains(d.retentionDays)) {
       throw const WorkspaceFailure('validation', '请核对等待时间和记录保留期限。');
     }

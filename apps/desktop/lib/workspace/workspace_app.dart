@@ -41,11 +41,13 @@ class WorkspaceApp extends StatelessWidget {
     this.inputsBuilder,
     this.onConnectionSettings,
     this.statusBuilder,
+    this.connectionBuilder,
     this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
   final VoidCallback? onConnectionSettings;
   final WidgetBuilder? statusBuilder;
+  final WidgetBuilder? connectionBuilder;
   final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
@@ -65,6 +67,7 @@ class WorkspaceApp extends StatelessWidget {
     inputsBuilder: inputsBuilder,
     onConnectionSettings: onConnectionSettings,
     statusBuilder: statusBuilder,
+    connectionBuilder: connectionBuilder,
     onAgentConnectionSetup: onAgentConnectionSetup,
   );
 }
@@ -83,11 +86,13 @@ class _WorkspaceSession extends StatefulWidget {
     this.inputsBuilder,
     this.onConnectionSettings,
     this.statusBuilder,
+    this.connectionBuilder,
     this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
   final VoidCallback? onConnectionSettings;
   final WidgetBuilder? statusBuilder;
+  final WidgetBuilder? connectionBuilder;
   final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
@@ -177,6 +182,9 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _desktopNavigation = (page) {
       if (_controller.navigationLocked) return;
       _controller.navigate(page);
+      if (page == WorkspacePage.settings) {
+        _settings.select(WorkspaceSettingsSection.connection);
+      }
       if (page == WorkspacePage.library) _library.focusSearch();
     };
     _desktopRequestNavigation = (id) {
@@ -462,12 +470,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
               );
             },
           ),
-        if (widget.onConnectionSettings != null)
-          IconButton(
-            tooltip: '连接设置',
-            onPressed: widget.onConnectionSettings,
-            icon: const Icon(Icons.dns_outlined),
-          ),
         ListenableBuilder(
           listenable: _backups,
           builder: (context, _) => !_backups.uncertain
@@ -496,11 +498,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
         (context, location) => location.page == WorkspacePage.library
             ? LibraryPage(
                 controller: _library,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 workspaceNavigationEnabled: !_controller.navigationLocked,
                 filePicker: widget.inputsBuilder?.call(context).file,
                 credentialPicker: widget.inputsBuilder
@@ -536,11 +533,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             : location.page == WorkspacePage.history
             ? GrantHistoryPage(
                 controller: _history,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 onProposal: (id) => _navigate(WorkspacePage.proposals, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onRequest: (id) => _navigate(WorkspacePage.approvals, id),
@@ -550,6 +542,8 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 },
               )
             : WorkspaceSettingsPage(
+                connectionBuilder: widget.connectionBuilder,
+                onConnectionSettings: widget.onConnectionSettings,
                 controller: _settings,
                 plugins: _plugins,
                 classifications: _classifications,

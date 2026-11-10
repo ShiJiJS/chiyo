@@ -9,12 +9,14 @@ class PreviewConnection extends StatefulWidget {
   const PreviewConnection({
     super.key,
     required this.disconnected,
+    this.embedded = false,
     required this.onBack,
     required this.onConnected,
     required this.onDisconnect,
     required this.onSettings,
   });
   final bool disconnected;
+  final bool embedded;
   final VoidCallback onBack, onConnected, onDisconnect, onSettings;
   @override
   State<PreviewConnection> createState() => _PreviewConnectionState();
@@ -41,7 +43,10 @@ class _PreviewConnectionState extends State<PreviewConnection> {
     });
     // Only a simulated delay; no user-entered address is contacted.
     await Future<void>.delayed(const Duration(milliseconds: 900));
-    if (mounted) widget.onConnected();
+    if (mounted) {
+      setState(() => _busy = false);
+      widget.onConnected();
+    }
   }
 
   @override
@@ -59,23 +64,32 @@ class _PreviewConnectionState extends State<PreviewConnection> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: [
-                  DesktopButton(
-                    kind: DesktopButtonKind.quiet,
-                    leading: const Icon(Icons.arrow_back, size: 18),
-                    onPressed: _busy ? null : widget.onBack,
-                    child: const Text('返回工作区'),
-                  ),
-                ],
+            if (!widget.embedded)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    DesktopButton(
+                      kind: DesktopButtonKind.quiet,
+                      leading: const Icon(Icons.arrow_back, size: 18),
+                      onPressed: _busy ? null : widget.onBack,
+                      child: const Text('返回工作区'),
+                    ),
+                  ],
+                ),
               ),
-            ),
             Expanded(
-              child: Center(
+              child: Align(
+                alignment: widget.embedded
+                    ? Alignment.topLeft
+                    : Alignment.center,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
+                  padding: EdgeInsets.fromLTRB(
+                    32,
+                    widget.embedded ? 32 : 0,
+                    32,
+                    40,
+                  ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 480),
                     child: Column(
@@ -202,15 +216,18 @@ class _PreviewConnectionState extends State<PreviewConnection> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            DesktopButton(
-                              kind: DesktopButtonKind.quiet,
-                              onPressed: _busy
-                                  ? null
-                                  : widget.disconnected
-                                  ? widget.onSettings
-                                  : widget.onBack,
-                              child: Text(widget.disconnected ? '连接设置' : '取消'),
-                            ),
+                            if (!widget.embedded)
+                              DesktopButton(
+                                kind: DesktopButtonKind.quiet,
+                                onPressed: _busy
+                                    ? null
+                                    : widget.disconnected
+                                    ? widget.onSettings
+                                    : widget.onBack,
+                                child: Text(
+                                  widget.disconnected ? '连接设置' : '取消',
+                                ),
+                              ),
                             if (!widget.disconnected) ...[
                               const Spacer(),
                               TextButton(

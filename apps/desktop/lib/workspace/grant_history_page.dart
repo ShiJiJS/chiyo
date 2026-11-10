@@ -483,10 +483,6 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
               '${h.agentClaim} · ${h.chatClaim}',
               style: libraryText(context, 13, color: c.muted, height: 1.8),
             ),
-            Text(
-              '申请方提供的名称与用途',
-              style: libraryText(context, 12, color: c.muted),
-            ),
             const SizedBox(height: 10),
             Text(h.purpose, style: libraryText(context, 14, height: 1.9)),
             if (d.fieldExpiresAt != null)
@@ -588,12 +584,19 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
               ApprovalExecutions(controller: m.decision),
             if (d.events.isNotEmpty)
               _section(context, '访问与使用事件', [
-                for (final e in d.events)
+                for (final (index, e) in d.events.indexed)
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
+                      if (index < d.events.length - 1)
+                        Positioned(
+                          left: 5.5,
+                          top: 6,
+                          bottom: -6,
+                          child: Container(width: 1, color: c.line),
+                        ),
                       Positioned(
-                        left: -3.5,
+                        left: 2.5,
                         top: 6,
                         child: Container(
                           width: 7,
@@ -605,10 +608,8 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.only(left: 17, bottom: 26),
-                        decoration: BoxDecoration(
-                          border: Border(left: BorderSide(color: c.line)),
-                        ),
+                        padding: const EdgeInsets.only(left: 24, bottom: 26),
+
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -665,11 +666,6 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                   style: libraryText(context, 13, color: c.muted, height: 1.9),
                 ),
               ]),
-            if (d.legacyNotice != null)
-              Text(
-                d.legacyNotice!,
-                style: libraryText(context, 12, color: c.muted, height: 1.8),
-              ),
             _section(context, '关联资料', [
               for (final t in d.targets)
                 Padding(
@@ -798,13 +794,6 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                 onPressed: m.decision.busy ? null : m.reconcile,
                 child: const Text('核对本次撤销'),
               ),
-            const SizedBox(height: 12),
-            DesktopButton(
-              key: const ValueKey('grant-refresh'),
-              kind: DesktopButtonKind.quiet,
-              onPressed: m.frozen ? null : () => m.load(review: true),
-              child: const Text('重新读取记录'),
-            ),
           ],
         ),
       ),

@@ -13,8 +13,7 @@ class _ApprovalInput {
     this.requestedKeys = const {},
     this.additional = true,
     DateTime? requestExpiresAt,
-  }) : requestExpiresAt =
-           requestExpiresAt ?? at.add(const Duration(minutes: 15));
+  }) : requestExpiresAt = requestExpiresAt ?? at.add(const Duration(hours: 2));
   final String id, title, purpose;
   final WorkspaceApprovalKind kind;
   final DateTime at;
@@ -121,7 +120,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
       session: const WorkspaceCredentialSession(
         'session-maintenance',
         '当前维护会话',
-        'Codex（自述）',
+        'Codex',
       ),
       purpose: purpose,
       minutes: 15,
@@ -135,7 +134,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     const session = WorkspaceCredentialSession(
       'session-maintenance',
       '当前维护会话',
-      'Codex（自述）',
+      'Codex',
     );
     final rows =
         <
@@ -644,9 +643,8 @@ class _SampleApprovals implements WorkspaceApprovalSource {
           selected.values.any((x) => !x.available)) {
         throw const WorkspaceFailure('validation', '请选择1–200个当前可用且不重复的范围。');
       }
-      if (![15, 30, 60, 480].contains(c.fieldMinutes) ||
-          ![15, 30].contains(c.credentialMinutes) ||
-          r.kind == WorkspaceApprovalKind.organization && c.fieldMinutes > 30) {
+      if (![120, 240, 480, 1440].contains(c.fieldMinutes) ||
+          ![120, 240, 480, 1440].contains(c.credentialMinutes)) {
         throw const WorkspaceFailure('validation', '请核对普通范围、凭据与整理的独立期限。');
       }
       final files = selected.values

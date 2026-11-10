@@ -14,10 +14,12 @@ class MacPreviewDesktop
   Future<void> Function(String id, bool approve)? onPreviewDecision;
   Future<void> updateApprovals(
     List<Map<String, Object?>> requests,
-    int total,
-  ) => channel.invokeMethod<void>('updatePreviewApprovals', {
+    int total, {
+    required Map<String, int> colors,
+  }) => channel.invokeMethod<void>('updatePreviewApprovals', {
     'requests': requests,
     'total': total,
+    'colors': colors,
   });
 
   static const windowTitle = '知予 · 界面预览·示例数据';

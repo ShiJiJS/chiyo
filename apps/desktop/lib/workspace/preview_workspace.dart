@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'preview_connection.dart';
 import 'zhiyu_theme.dart';
+import '../ui_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'sample_workspace_source.dart';
@@ -75,7 +76,26 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       });
     }
     if (mounted && revision == _menuRevision) {
-      await widget.desktop!.updateApprovals(values, rows.pending);
+      final preferences = await _source.settings.read();
+      final palette = UiPalette.zhiyu(
+        preferences.theme == WorkspaceTheme.dark
+            ? Brightness.dark
+            : Brightness.light,
+      );
+      await widget.desktop!.updateApprovals(
+        values,
+        rows.pending,
+        colors: {
+          'accent': palette.accent.toARGB32(),
+          'ink': palette.ink.toARGB32(),
+          'muted': palette.muted.toARGB32(),
+          'paper': palette.paper.toARGB32(),
+          'rail': palette.rail.toARGB32(),
+          'line': palette.line.toARGB32(),
+          'selected': palette.selected.toARGB32(),
+          'onAccent': palette.onAccent.toARGB32(),
+        },
+      );
     }
   }
 
@@ -90,6 +110,8 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         operationId: workspaceOperationId(),
         requestId: id,
         reviewToken: detail.reviewToken,
+        fieldMinutes: 120,
+        credentialMinutes: 120,
         action: approve
             ? WorkspaceApprovalAction.approve
             : WorkspaceApprovalAction.deny,
@@ -128,7 +150,14 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     children: [
       WorkspaceApp(
         source: _source,
-        onConnectionSettings: () => setState(() => _connection = 'settings'),
+        connectionBuilder: (context) => PreviewConnection(
+          embedded: true,
+          disconnected: false,
+          onBack: () {},
+          onConnected: () => setState(() => _connection = null),
+          onDisconnect: () => setState(() => _connection = 'offline'),
+          onSettings: () {},
+        ),
         statusBuilder: (context) => TextButton.icon(
           onPressed: _syncing ? null : _sync,
           icon: _syncing
@@ -161,7 +190,10 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
               onBack: () => setState(() => _connection = null),
               onConnected: () => setState(() => _connection = null),
               onDisconnect: () => setState(() => _connection = 'offline'),
-              onSettings: () => setState(() => _connection = 'settings'),
+              onSettings: () {
+                setState(() => _connection = null);
+                widget.desktop?.onNavigate?.call(WorkspacePage.settings);
+              },
             ),
           ),
         ),

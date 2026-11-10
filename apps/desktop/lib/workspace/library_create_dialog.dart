@@ -53,12 +53,6 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
   Widget build(BuildContext context) {
     final c = UiPalette.of(context);
     final types = widget.catalog.creatableTypes;
-    final directory =
-        widget.catalog.directories
-            .where((d) => d.id == widget.directoryId)
-            .firstOrNull
-            ?.name ??
-        '未分类';
     return DesktopDialog(
       title: const Text('添加资料'),
       content: FutureBuilder<WorkspacePluginCatalog>(
@@ -80,26 +74,6 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 20.8),
-                child: Wrap(
-                  key: const ValueKey('library-create-intro'),
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 12,
-                  runSpacing: 4,
-                  children: [
-                    Text(
-                      '选择资料的内容形式。',
-                      style: libraryText(context, 13, color: c.muted),
-                    ),
-                    Text(
-                      '保存到 $directory',
-                      style: libraryText(context, 12, color: c.accent),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 17),
               if (snapshot.connectionState != ConnectionState.done)
                 Semantics(

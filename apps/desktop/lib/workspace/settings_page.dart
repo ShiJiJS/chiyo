@@ -30,7 +30,11 @@ class WorkspaceSettingsPage extends StatefulWidget {
     required this.pluginBuilder,
     required this.onRequest,
     this.onModalChanged,
+    this.connectionBuilder,
+    this.onConnectionSettings,
   });
+  final WidgetBuilder? connectionBuilder;
+  final VoidCallback? onConnectionSettings;
   final WorkspaceSettingsController controller;
   final PluginsController plugins;
   final ClassificationController classifications;
@@ -330,7 +334,7 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           children: [
             SettingsPreferenceRow(
               title: '新申请等待时间',
-              description: '超过等待时间仍未处理的申请将到期。只影响之后提交的新申请；已有申请和已批准授权的到期时间不变。',
+              description: '超过这个时间还没审批，申请会自动过期。只影响新申请。',
               control: m.draft == null
                   ? const Text('尚未读取')
                   : DesktopSelect<int>(
@@ -338,11 +342,14 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                       value: m.draft!.requestMinutes,
                       items: [
                         for (final n in {
-                          ...[5, 15, 30, 60, 120],
+                          ...[30, 60, 120, 240, 480, 1440],
                           m.draft!.requestMinutes,
                           if (m.value != null) m.value!.requestMinutes,
                         }.toList()..sort())
-                          DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                          DropdownMenuItem(
+                            value: n,
+                            child: Text(n < 60 ? '$n 分钟' : '${n ~/ 60} 小时'),
+                          ),
                       ],
                       onChanged: !enabled
                           ? null
@@ -507,6 +514,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                     leadingGap: 11,
                     alignment: Alignment.centerLeft,
                     leading: PrototypeIcon(switch (section) {
+                      WorkspaceSettingsSection.connection =>
+                        PrototypeIconGlyph.link,
                       WorkspaceSettingsSection.appearance =>
                         PrototypeIconGlyph.layers,
                       WorkspaceSettingsSection.notifications =>
@@ -570,7 +579,22 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
             ),
           ),
           Expanded(
-            child: m.section == WorkspaceSettingsSection.plugins
+            child: m.section == WorkspaceSettingsSection.connection
+                ? widget.connectionBuilder?.call(context) ??
+                      SettingsPageContent(
+                        title: '服务器连接',
+                        description: '地址与连接状态',
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: DesktopButton(
+                              onPressed: widget.onConnectionSettings,
+                              child: const Text('查看连接设置'),
+                            ),
+                          ),
+                        ],
+                      )
+                : m.section == WorkspaceSettingsSection.plugins
                 ? widget.pluginBuilder(context)
                 : m.section == WorkspaceSettingsSection.classifications
                 ? ClassificationPage(

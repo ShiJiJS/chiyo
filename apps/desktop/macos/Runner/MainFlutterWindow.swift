@@ -19,6 +19,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private let previewPopover = NSPopover()
   private var previewRequests: [[String: Any]] = []
   private var previewRequestCount = 0
+  private var previewColors: [String: NSNumber] = [:]
 
   // The built entry point, not a Dart runtime request, selects isolation before
   // any production service or saved security-scoped bookmark is constructed.
@@ -470,6 +471,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         }
         self.previewRequests = requests
         self.previewRequestCount = total
+        self.previewColors = data["colors"] as? [String: NSNumber] ?? [:]
         self.statusItem?.button?.title = total > 0 ? " \(total)" : ""
         self.rebuildPreviewPopover()
         result(nil)
@@ -566,7 +568,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     if let menu = NSApp.mainMenu, !menu.items.contains(where: { $0.title == "原型状态" }) {
       let root = NSMenuItem(title: "原型状态", action: nil, keyEquivalent: "")
       let states = NSMenu(title: "原型状态")
-      for (title, value) in [("服务器连接页面", "settings"), ("连接断开页面", "offline")] {
+      for (title, value) in [("连接断开页面", "offline")] {
         let row = NSMenuItem(title: title, action: #selector(previewConnectionState(_:)), keyEquivalent: "")
         row.target = self; row.representedObject = value; states.addItem(row)
       }
@@ -592,64 +594,94 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   }
 
   private func rebuildPreviewPopover() {
+    // Colors come from Flutter's UiPalette, including the selected dark theme.
+    func color(_ key: String, _ fallback: UInt32) -> NSColor {
+      let value = previewColors[key]?.uint32Value ?? fallback
+      return NSColor(srgbRed: CGFloat((value >> 16) & 255) / 255,
+                     green: CGFloat((value >> 8) & 255) / 255,
+                     blue: CGFloat(value & 255) / 255, alpha: 1)
+    }
+    let accent = color("accent", 0x66528e), ink = color("ink", 0x242936)
+    let muted = color("muted", 0x586477), paper = color("paper", 0xffffff)
+    let rail = color("rail", 0xf7f8fa), line = color("line", 0xdce1e8)
+    let onAccent = color("onAccent", 0xffffff)
+    func label(_ value: String, size: CGFloat = 13, strong: Bool = false) -> NSTextField {
+      let text = NSTextField(wrappingLabelWithString: value)
+      text.font = .systemFont(ofSize: size, weight: strong ? .semibold : .regular)
+      text.textColor = strong ? ink : muted
+      text.preferredMaxLayoutWidth = 332
+      return text
+    }
+    func button(_ title: String, action: Selector, primary: Bool = false) -> NSButton {
+      let button = NSButton(title: title, target: self, action: action)
+      button.isBordered = false; button.wantsLayer = true
+      button.layer?.cornerRadius = 7
+      button.layer?.backgroundColor = (primary ? accent : paper).cgColor
+      button.layer?.borderWidth = primary ? 0 : 1
+      button.layer?.borderColor = line.cgColor
+      let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
+      button.attributedTitle = NSAttributedString(string: title, attributes: [
+        .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+        .foregroundColor: primary ? onAccent : ink, .paragraphStyle: paragraph,
+      ])
+      button.heightAnchor.constraint(equalToConstant: 32).isActive = true
+      button.widthAnchor.constraint(equalToConstant: max(64, CGFloat(title.count * 14 + 24))).isActive = true
+      return button
+    }
     let controller = NSViewController()
     let content = NSStackView()
-    content.orientation = .vertical; content.alignment = .leading; content.spacing = 14
-    content.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-    let heading = NSTextField(labelWithString: "知予 · 待审批 \(previewRequestCount)")
-    heading.font = .systemFont(ofSize: 17, weight: .semibold)
-    content.addArrangedSubview(heading)
-    let connection = NSTextField(labelWithString: "已连接 · 家庭 NAS")
-    connection.font = .systemFont(ofSize: 12); connection.textColor = .secondaryLabelColor
-    content.addArrangedSubview(connection)
-    if previewRequests.isEmpty {
-      content.addArrangedSubview(NSTextField(labelWithString: "没有待处理申请"))
-    }
+    content.orientation = .vertical; content.alignment = .leading; content.spacing = 16
+    content.edgeInsets = NSEdgeInsets(top: 20, left: 18, bottom: 18, right: 18)
+    content.wantsLayer = true; content.layer?.backgroundColor = rail.cgColor
+    let header = NSStackView(); header.orientation = .horizontal; header.spacing = 10
+    header.addArrangedSubview(label("知予", size: 20, strong: true))
+    let count = label("待审批 \(previewRequestCount)", size: 13)
+    count.textColor = accent; header.addArrangedSubview(count)
+    content.addArrangedSubview(header)
+    content.addArrangedSubview(label("已连接 · 家庭 NAS", size: 12))
+    if previewRequests.isEmpty { content.addArrangedSubview(label("暂无待处理申请")) }
     for row in previewRequests.prefix(3) {
-      let card = NSStackView(); card.orientation = .vertical; card.alignment = .leading; card.spacing = 7
-      card.edgeInsets = NSEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-      card.wantsLayer = true; card.layer?.cornerRadius = 10
-      card.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
-      for (key, size, weight) in [("title", 14.0, NSFont.Weight.semibold), ("agent", 12.0, .regular), ("purpose", 12.0, .regular), ("scope", 12.0, .regular)] {
-        let text = NSTextField(wrappingLabelWithString: row[key] as? String ?? "")
-        text.font = .systemFont(ofSize: size, weight: weight)
-        text.textColor = key == "title" ? .labelColor : .secondaryLabelColor
-        text.maximumNumberOfLines = key == "scope" ? 6 : 3
-        text.preferredMaxLayoutWidth = 308
+      let card = NSStackView(); card.orientation = .vertical; card.alignment = .leading; card.spacing = 8
+      card.edgeInsets = NSEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
+      card.wantsLayer = true; card.layer?.cornerRadius = 8
+      card.layer?.backgroundColor = paper.cgColor
+      card.layer?.borderWidth = 1; card.layer?.borderColor = line.cgColor
+      for (key, size, strong) in [("title", CGFloat(15), true), ("agent", CGFloat(12), false), ("purpose", CGFloat(13), false), ("scope", CGFloat(12), false)] {
+        let text = label(row[key] as? String ?? "", size: size, strong: strong)
+        // Do not clip the scope of an action that can be approved here.
+        text.maximumNumberOfLines = 0
         card.addArrangedSubview(text)
-        text.widthAnchor.constraint(equalToConstant: 308).isActive = true
+        text.widthAnchor.constraint(equalToConstant: 332).isActive = true
       }
       let actions = NSStackView(); actions.orientation = .horizontal; actions.spacing = 8
-      let quick = row["quick"] as? Bool == true
-      if quick {
-        let duration = NSTextField(labelWithString: "资料读取 · 30 分钟")
-        duration.font = .systemFont(ofSize: 11); duration.textColor = .secondaryLabelColor
-        card.addArrangedSubview(duration)
+      if row["quick"] as? Bool == true {
+        card.addArrangedSubview(label("授权时长 · 2 小时", size: 12))
         for (title, action) in [("批准", "approve"), ("拒绝", "deny")] {
-          let button = NSButton(title: title, target: self, action: #selector(previewDecision(_:)))
-          button.identifier = NSUserInterfaceItemIdentifier("\(row["id"] as? String ?? "")|\(action)")
-          button.bezelStyle = .rounded
-          if action == "approve" { button.contentTintColor = NSColor(calibratedRed: 0.4, green: 0.32, blue: 0.56, alpha: 1) }
-          actions.addArrangedSubview(button)
+          let control = button(title, action: #selector(previewDecision(_:)), primary: action == "approve")
+          control.identifier = NSUserInterfaceItemIdentifier("\(row["id"] as? String ?? "")|\(action)")
+          actions.addArrangedSubview(control)
         }
       }
-      let detail = NSButton(title: "查看详情", target: self, action: #selector(openPreviewRequest(_:)))
+      let detail = button("查看详情", action: #selector(openPreviewRequest(_:)))
       detail.identifier = NSUserInterfaceItemIdentifier(row["id"] as? String ?? "")
-      detail.bezelStyle = .rounded; actions.addArrangedSubview(detail)
+      actions.addArrangedSubview(detail)
       card.addArrangedSubview(actions); content.addArrangedSubview(card)
-      card.widthAnchor.constraint(equalToConstant: 332).isActive = true
+      card.widthAnchor.constraint(equalToConstant: 360).isActive = true
     }
-    let open = NSButton(title: "查看全部申请", target: self, action: #selector(openPreviewRequest(_:)))
-    open.bezelStyle = .rounded; content.addArrangedSubview(open)
-    content.widthAnchor.constraint(equalToConstant: 372).isActive = true
+    content.addArrangedSubview(button("查看全部申请", action: #selector(openPreviewRequest(_:))))
+    content.widthAnchor.constraint(equalToConstant: 396).isActive = true
     content.layoutSubtreeIfNeeded()
-    let scroll = NSScrollView(); scroll.hasVerticalScroller = true; scroll.drawsBackground = false
+    let scroll = NSScrollView(); scroll.hasVerticalScroller = true
+    scroll.scrollerStyle = .overlay; scroll.autohidesScrollers = true
+    scroll.drawsBackground = true; scroll.backgroundColor = rail
     scroll.documentView = content
-    let height = min(700, content.fittingSize.height)
-    content.setFrameSize(NSSize(width: 372, height: content.fittingSize.height))
-    scroll.frame = NSRect(x: 0, y: 0, width: 380, height: height)
+    let height = min(680, content.fittingSize.height)
+    content.setFrameSize(NSSize(width: 396, height: content.fittingSize.height))
+    scroll.frame = NSRect(x: 0, y: 0, width: 396, height: height)
     controller.view = scroll; previewPopover.contentViewController = controller
-    previewPopover.contentSize = NSSize(width: 380, height: height)
+    previewPopover.contentSize = NSSize(width: 396, height: height)
+    scroll.contentView.scroll(to: NSPoint(x: 0, y: max(0, content.frame.height - height)))
+    scroll.reflectScrolledClipView(scroll.contentView)
   }
 
   @objc private func previewDecision(_ sender: NSButton) {

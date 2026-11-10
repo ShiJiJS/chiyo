@@ -25,8 +25,8 @@ class ApprovalDraft {
   final Set<String> selected;
   final Map<String, int> files;
   final Set<String> expanded = {};
-  int fieldMinutes = 30;
-  int? credentialMinutes = 15;
+  int fieldMinutes = 120;
+  int? credentialMinutes = 120;
   bool dirty = false;
 }
 
@@ -176,7 +176,7 @@ class ApprovalsController extends ChangeNotifier {
         if (prior != null &&
             prior.request.state != WorkspaceApprovalState.pending) {
           filter = WorkspaceApprovalFilter.all;
-          notice = '原请求已处理或结束，正在显示它的当前状态。';
+          notice = null;
           found = await source.query(
             WorkspaceApprovalQuery(
               keyword: keyword,
@@ -412,7 +412,7 @@ class ApprovalsController extends ChangeNotifier {
     detail = null;
     selection = receipt.requestId;
     filter = WorkspaceApprovalFilter.all;
-    notice = '本次决定已记录。';
+    notice = null;
     _notify();
     await load(accepted: true);
   }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
 enum WorkspaceSettingsSection {
+  connection('服务器连接', '地址与连接状态'),
   appearance('外观', '明亮与黑暗主题'),
   notifications('通知', '访问申请提醒'),
   records('请求与记录', '等待时间与记录保留'),
@@ -29,7 +30,7 @@ class WorkspaceSettingsController extends ChangeNotifier {
   final WorkspaceSettingsSource source;
   final void Function(WorkspaceTheme) onTheme;
   late final StreamSubscription<WorkspaceRecordRef?> _subscription;
-  WorkspaceSettingsSection section = WorkspaceSettingsSection.appearance;
+  WorkspaceSettingsSection section = WorkspaceSettingsSection.connection;
   WorkspacePreferences? value, draft;
   WorkspaceFailure? readFailure, writeFailure;
   WorkspaceFailure? retentionFailure;
@@ -64,6 +65,7 @@ class WorkspaceSettingsController extends ChangeNotifier {
   void select(WorkspaceSettingsSection target) {
     if (_closed || frozen) return;
     section = target;
+    notice = null;
     _notify();
   }
 
