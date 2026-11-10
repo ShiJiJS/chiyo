@@ -500,7 +500,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
               DesktopButton(
                 key: const ValueKey('credential-replace'),
                 onPressed: enabled ? _replace : null,
-                child: const Text('更换材料'),
+                child: const Text('更新凭据内容'),
               ),
               DesktopButton(
                 key: const ValueKey('credential-toggle'),

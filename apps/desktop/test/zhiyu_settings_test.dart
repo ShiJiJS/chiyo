@@ -301,14 +301,7 @@ void main() {
       s.setScenario(SampleWorkspaceScenario.empty);
       await tap(t, find.byKey(const ValueKey('settings-notification-preview')));
       expect(find.textContaining('暂无待处理申请'), findsOneWidget);
-      expect(
-        t
-            .widget<DesktopButton>(
-              find.byKey(const ValueKey('settings-notification-open')),
-            )
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const ValueKey('settings-notification-open')), findsNothing);
     },
   );
 

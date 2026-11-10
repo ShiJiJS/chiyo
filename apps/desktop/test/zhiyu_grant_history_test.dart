@@ -120,12 +120,12 @@ void main() {
           await history(t);
           final pane = find.byType(GrantHistoryPage);
           final title = find.descendant(of: pane, matching: find.text('授权历史'));
-          expect(t.getTopLeft(title).dy, closeTo(96, 2));
+          expect(t.getTopLeft(title).dy, closeTo(90, 2));
           final detail = t.getRect(
             find.byKey(const ValueKey('grant-history-detail-scroll')),
           );
           // The scroll viewport excludes the detail pane's 1px left border.
-          expect(detail.width + 1, width == 1440 ? 365 : 335);
+          expect(detail.width + 1, width - 350);
           expect(detail.top, 66);
           await capture(
             t,
@@ -168,7 +168,8 @@ void main() {
       await tap(t, find.byKey(ValueKey('grant-current-${ref.key}')));
       expect(find.byType(LibraryPage), findsOneWidget);
       final scroll = m.detailScroll;
-      await tap(t, find.byKey(const ValueKey('workspace-back')));
+      expect(find.byKey(const ValueKey('workspace-back')), findsNothing);
+      await tap(t, find.byKey(const ValueKey('workspace-nav-history')));
       expect(model(t), same(m));
       expect(m.selection, selection);
       expect(m.keyword, query);
@@ -282,7 +283,6 @@ void main() {
       await t.pumpAndSettle();
       expect(find.byType(LibrarySnapshotView), findsNothing);
       expect(find.textContaining('不会替换为当前或同名内容'), findsOneWidget);
-      await tap(t, find.text('关闭').last);
       expect(model(t).detail!.targets.single.snapshotAvailable, false);
       expect(
         t

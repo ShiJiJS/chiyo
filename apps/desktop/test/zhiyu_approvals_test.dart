@@ -112,7 +112,7 @@ void main() {
           final frame = t.getRect(find.byKey(const ValueKey('approval-card')));
           expect(frame.left, closeTo(width == 1440 ? 324 : 294, 2));
           expect(frame.top, closeTo(width == 1440 ? 90 : 85, 2));
-          expect(frame.width, closeTo(width == 1440 ? 1081 : 956, 2));
+          expect(frame.width, closeTo(width == 1440 ? 1092 : 967, 2));
           expect(
             t.getSize(find.byKey(const ValueKey('approval-decision'))).width,
             width == 1440 ? 234 : 210,

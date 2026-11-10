@@ -121,7 +121,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
       session: const WorkspaceCredentialSession(
         'session-maintenance',
         '当前维护会话',
-        'Codex（自述）',
+        'Codex',
       ),
       purpose: purpose,
       minutes: 15,
@@ -135,7 +135,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
     const session = WorkspaceCredentialSession(
       'session-maintenance',
       '当前维护会话',
-      'Codex（自述）',
+      'Codex',
     );
     final rows =
         <

@@ -121,7 +121,7 @@ class WorkspaceRuntimePage extends StatelessWidget {
                 control: DesktopButton(
                   key: const ValueKey('runtime-materials'),
                   onPressed: active ? () => _maintenance(context, true) : null,
-                  child: const Text('查看材料'),
+                  child: const Text('查看凭据文件任务'),
                 ),
               ),
               SettingsPreferenceRow(

@@ -163,6 +163,16 @@ void main() {
       final visibility = find.byKey(
         ValueKey('proposal-password-visible-${item.id}'),
       );
+      final editable = find.descendant(
+        of: input,
+        matching: find.byType(EditableText),
+      );
+      final eyeRect = t.getRect(visibility), textRect = t.getRect(editable);
+      expect(
+        (eyeRect.center.dy - textRect.center.dy).abs(),
+        lessThanOrEqualTo(2),
+      );
+      expect(eyeRect.left, greaterThanOrEqualTo(textRect.right));
       await t.tap(visibility);
       await t.pumpAndSettle();
       expect(

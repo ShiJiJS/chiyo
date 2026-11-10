@@ -48,8 +48,8 @@ const _candidates = [
   ),
 ];
 const _sessions = [
-  WorkspaceCredentialSession('session-maintenance', '服务器维护会话', '维护 Agent（自述）'),
-  WorkspaceCredentialSession('session-notes', '笔记整理会话', '资料整理 Agent（自述）'),
+  WorkspaceCredentialSession('session-maintenance', '服务器维护会话', '维护 Agent'),
+  WorkspaceCredentialSession('session-notes', '笔记整理会话', '资料整理 Agent'),
 ];
 
 class _CredentialState {

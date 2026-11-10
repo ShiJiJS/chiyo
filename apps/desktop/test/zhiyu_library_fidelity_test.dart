@@ -109,10 +109,10 @@ void main() {
         'CSS row box/labels and end-aligned 230px menu at ${size.width}, dark=$dark',
         (t) async {
           final model = await start(t, size, dark);
-          // Measured 11px-gutter reference: 155.78125px, two summary lines.
+          // Approved native prototype uses a compact row with one summary line.
           // The reference capture must record its actual gutter and viewport;
           // this row/menu check is not a full-page fidelity claim.
-          expect(t.getRect(row()).height, closeTo(155.78125, 2));
+          expect(t.getRect(row()).height, closeTo(126, 2));
           final palette = UiPalette.of(t.element(row()));
           final button = t.widget<TextButton>(
             find.descendant(of: row(), matching: find.byType(TextButton)),
@@ -244,7 +244,7 @@ void main() {
     }
   }
   testWidgets(
-    'long summary clamps to two visible lines; empty purpose leaves CSS metadata gap',
+    'long summary clamps to one visible line; empty purpose leaves CSS metadata gap',
     (t) async {
       final model = await start(t, const Size(1280, 800), false);
       final current = model.detail!;
@@ -258,7 +258,7 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      expect(t.getRect(inside(description)).height, inInclusiveRange(40, 46));
+      expect(t.getRect(inside(description)).height, inInclusiveRange(20, 24));
       final long = await model.source.readDetail(azure);
       await model.source.saveRecord(
         WorkspaceEdit(
