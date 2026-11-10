@@ -323,6 +323,8 @@ void main() {
             .controller;
         expect(m.value!.independentServer, isTrue);
         expect(m.readFailure, isNull);
+        await ui.tap('runtime-maintenance');
+        await t.pumpAndSettle();
         await ui.tap('runtime-materials');
         await ui.tap('runtime-maintenance-check');
         await ui.until(

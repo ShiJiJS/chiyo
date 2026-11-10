@@ -238,6 +238,7 @@ void main() {
             metadata.current.ref,
           );
           await open('Azure SSH', 'credential:sshkey');
+          await tap(key('credential-advanced'));
           expect(
             find.descendant(of: detail, matching: find.text('概览')),
             findsNothing,

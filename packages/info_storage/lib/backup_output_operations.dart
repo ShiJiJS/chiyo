@@ -12,8 +12,13 @@ final class BackupOutputReceipt {
       expectedVersion = record.expectedVersion,
       version = record.version,
       action = record.action,
+      completedAt = record.completedAt,
+      destination = record.publication.destination,
       fileName = File(record.publication.destination).uri.pathSegments.last,
       counts = Map.unmodifiable(record.counts);
+  // Trusted device metadata; deliberately excluded from toJson().
+  final DateTime? completedAt;
+  final String destination;
   final String operationId, commandDigest, fileName;
   final int expectedVersion, version;
   final BackupOutputAction action;
@@ -40,6 +45,7 @@ final class _BackupOutputRecord {
     required Map<String, int> counts,
     this.phase = BackupOutputPhase.prepared,
     this.cleanupPending = true,
+    this.completedAt,
   }) : counts = Map.unmodifiable(counts);
   final String id, digest;
   final int expectedVersion, version;
@@ -48,10 +54,12 @@ final class _BackupOutputRecord {
   final Map<String, int> counts;
   final BackupOutputPhase phase;
   final bool cleanupPending;
+  final DateTime? completedAt;
   _BackupOutputRecord change({
     BackupOutputPhase? phase,
     bool? cleanupPending,
     int? version,
+    DateTime? completedAt,
   }) => _BackupOutputRecord(
     id: id,
     digest: digest,
@@ -62,9 +70,11 @@ final class _BackupOutputRecord {
     counts: counts,
     phase: phase ?? this.phase,
     cleanupPending: cleanupPending ?? this.cleanupPending,
+    completedAt: completedAt ?? this.completedAt,
   );
   Map<String, Object?> toPrivateJson() => {
-    'format': 2,
+    'format': 3,
+    'completedAt': completedAt?.toUtc().toIso8601String(),
     'operationId': id,
     'commandDigest': digest,
     'expectedVersion': expectedVersion,
@@ -165,8 +175,14 @@ extension BackupOutputOperations on InformationBackups {
 
   _BackupOutputRecord _decodeOutput(Map<String, dynamic> json) {
     try {
-      if (json.length != 10 ||
-          json['format'] != 2 ||
+      final legacy = json['format'] == 2;
+      if ((legacy ? json.length != 10 : json.length != 11) ||
+          (!legacy &&
+              (json['format'] != 3 || !json.containsKey('completedAt'))) ||
+          (!legacy &&
+              json['completedAt'] != null &&
+              (json['completedAt'] is! String ||
+                  DateTime.tryParse(json['completedAt'] as String) == null)) ||
           json['cleanupPending'] is! bool ||
           json['counts'] is! Map ||
           json['expectedVersion'] is! int ||
@@ -211,6 +227,9 @@ extension BackupOutputOperations on InformationBackups {
         counts: counts,
         phase: phase,
         cleanupPending: json['cleanupPending'] as bool,
+        completedAt: legacy || json['completedAt'] == null
+            ? null
+            : DateTime.parse(json['completedAt'] as String).toUtc(),
       );
     } on Object {
       throw const StorageFailure('invalid_backup_operation_receipt');
@@ -396,6 +415,7 @@ extension BackupOutputOperations on InformationBackups {
     await _advanceOperationVersion();
     final completed = value.change(
       phase: BackupOutputPhase.succeeded,
+      completedAt: (_repositoryValue?._clock() ?? DateTime.now()).toUtc(),
       version: await operationVersion(),
     );
     await _writeOutput(completed);

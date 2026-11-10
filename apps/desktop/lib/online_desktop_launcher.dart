@@ -9,6 +9,7 @@ import 'workspace/workspace_app.dart';
 import 'workspace/workspace_inputs.dart';
 import 'workspace/zhiyu_theme.dart';
 import 'desktop_controls.dart';
+import 'connection_view.dart';
 import 'online_agent_connection_dialog.dart';
 import 'information_files.dart';
 import 'backups.dart';
@@ -349,39 +350,41 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
         debugShowCheckedModeBanner: false,
         theme: zhiyuTheme(Brightness.light),
         home: Scaffold(
-          body: Center(
-            child: _desktop.shutdownFailed
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _desktop.resourcesClosed
-                            ? '应用未能退出，请重试。服务器和CLI会话不受影响。'
-                            : '本机资源尚未关闭，请重试退出。服务器和CLI会话不受影响。',
-                      ),
-                      TextButton(
-                        key: const ValueKey('online-retry-exit'),
-                        onPressed: _desktop.quit,
-                        child: const Text('重试退出'),
-                      ),
-                    ],
-                  )
-                : const Text('正在退出应用…'),
+          body: ConnectionSurface(
+            title: _desktop.shutdownFailed ? '退出未完成' : '正在退出应用…',
+            description: _desktop.shutdownFailed
+                ? (_desktop.resourcesClosed
+                      ? '应用未能退出，请重试。服务器和CLI会话不受影响。'
+                      : '本机资源尚未关闭，请重试退出。服务器和CLI会话不受影响。')
+                : '正在保存状态并关闭本机连接。',
+            loading: !_desktop.shutdownFailed,
+            children: [
+              if (_desktop.shutdownFailed)
+                DesktopButton(
+                  key: const ValueKey('online-retry-exit'),
+                  onPressed: _desktop.quit,
+                  child: const Text('重试退出'),
+                ),
+            ],
           ),
         ),
       );
     }
     if (source != null && source.cache.resources == null) {
       return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: zhiyuTheme(Brightness.light),
         home: Scaffold(
-          body: Center(
-            child: _error != null
-                ? Text(_error!)
-                : const CircularProgressIndicator(semanticsLabel: '正在同步资料'),
+          body: ConnectionSurface(
+            title: _error == null ? '正在同步资料' : '暂时无法读取资料',
+            description: _error ?? '请稍候…',
+            loading: _error == null,
+            children: const [],
           ),
         ),
       );
     }
+
     if (source != null) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -438,24 +441,22 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                 theme: zhiyuTheme(Brightness.light),
                 home: Scaffold(
                   key: const ValueKey('online-offline-blocker'),
-                  body: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('与服务器的连接已断开。'),
-                        const SizedBox(height: 12),
-                        const Text('连接恢复后可继续操作。'),
-                        const SizedBox(height: 16),
-                        FilledButton(
-                          onPressed: _checkConnection,
-                          child: const Text('重新连接'),
-                        ),
-                        TextButton(
-                          onPressed: _settings,
-                          child: const Text('连接设置'),
-                        ),
-                      ],
-                    ),
+                  body: ConnectionSurface(
+                    title: '与服务器的连接已断开。',
+                    description: '连接恢复后可继续操作。',
+                    icon: Icons.cloud_off_outlined,
+                    children: [
+                      DesktopButton(
+                        kind: DesktopButtonKind.primary,
+                        onPressed: _checkConnection,
+                        child: const Text('重新连接'),
+                      ),
+                      const SizedBox(height: 12),
+                      DesktopButton(
+                        onPressed: _settings,
+                        child: const Text('连接设置'),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -467,81 +468,19 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       debugShowCheckedModeBanner: false,
       theme: zhiyuTheme(Brightness.light),
       home: Scaffold(
-        body: Center(
-          child: SingleChildScrollView(
-            child: SizedBox(
-              width: 480,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      '连接服务器',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    const Text('连接后查看和管理你的资料。'),
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: _address,
-                      enabled: !_busy,
-                      decoration: const InputDecoration(
-                        labelText: '服务器地址',
-                        hintText: 'https://server.example:47126',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _token,
-                      enabled: !_busy,
-                      obscureText: true,
-                      decoration: const InputDecoration(labelText: 'Token'),
-                    ),
-                    ExpansionTile(
-                      title: const Text('证书设置（可选）'),
-                      children: [
-                        TextField(
-                          controller: _certificate,
-                          enabled: !_busy,
-                          minLines: 3,
-                          maxLines: 6,
-                          decoration: const InputDecoration(
-                            labelText: '服务器 CA 证书',
-                            helperText: '使用私人证书时填写，不会修改系统信任设置。',
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_error != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          _error!,
-                          key: const ValueKey('connection-error'),
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                    if (_serverChanged)
-                      TextButton(
-                        onPressed: _busy
-                            ? null
-                            : () {
-                                _previous = null;
-                                unawaited(_connect());
-                              },
-                        child: const Text('确认连接新服务器'),
-                      ),
-                    FilledButton(
-                      onPressed: _busy ? null : _connect,
-                      child: Text(_busy ? '正在连接…' : '连接'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        body: ConnectionForm(
+          address: _address,
+          token: _token,
+          certificate: _certificate,
+          busy: _busy,
+          error: _error,
+          onConnect: _connect,
+          onConfirmServer: !_serverChanged
+              ? null
+              : () {
+                  _previous = null;
+                  unawaited(_connect());
+                },
         ),
       ),
     );

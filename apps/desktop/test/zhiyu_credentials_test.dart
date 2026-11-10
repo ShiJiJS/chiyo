@@ -117,6 +117,8 @@ void main() {
     (t) async {
       final model = await start(t, 'Azure SSH 私钥');
       expect(textValue('••••••••'), findsOneWidget);
+      expect(textValue('SSH_KEY_FILE'), findsNothing);
+      await tap(t, find.byKey(const ValueKey('credential-advanced')));
       expect(textValue('SSH_KEY_FILE'), findsOneWidget);
       await capture(t, 'credential-1440-light-reading');
       await tap(t, find.byKey(const ValueKey('credential-history')));
@@ -368,6 +370,7 @@ void main() {
         expect(current.delivery, original.delivery);
         expect(current.binding, original.binding);
         expect(textValue(note), findsOneWidget);
+        await tap(t, find.byKey(const ValueKey('credential-advanced')));
         expect(
           t
               .widget<LibraryReadingText>(

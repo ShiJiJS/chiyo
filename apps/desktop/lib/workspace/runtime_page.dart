@@ -77,9 +77,7 @@ class WorkspaceRuntimePage extends StatelessWidget {
       return SettingsPageContent(
         scrollKey: const ValueKey('runtime-page-scroll'),
         title: '应用运行',
-        description: remote
-            ? '查看资料服务器、CLI执行报告及此App的临时文件和关闭方式。'
-            : '查看本机服务、登记材料和关闭方式。材料回收与外部进程是否结束分别核对。',
+        description: remote ? '连接状态、后台运行与退出方式。' : '本机服务、后台运行与退出方式。',
         children: [
           if (m.loading) const LinearProgressIndicator(),
           if (m.readFailure != null)
@@ -109,33 +107,49 @@ class WorkspaceRuntimePage extends StatelessWidget {
                   child: const Text('重新读取状态'),
                 ),
               ),
-              SettingsPreferenceRow(
-                title: remote ? '凭据临时文件' : '临时凭据材料',
-                description: remote
-                    ? '这里显示使用凭据文件的任务状态，临时文件的回收结果由运行任务的电脑提供。'
-                    : v == null
-                    ? '正在核对已登记的执行…'
-                    : v.materials.isEmpty
-                    ? '暂无已登记材料。活动任务使用的文件保留至进程组结束。'
-                    : '已登记 ${v.materials.length} 项执行。核查只处理身份已确认结束的材料，不重跑命令或终止进程。',
-                control: DesktopButton(
-                  key: const ValueKey('runtime-materials'),
-                  onPressed: active ? () => _maintenance(context, true) : null,
-                  child: const Text('查看凭据文件任务'),
+              ExpansionTile(
+                key: const ValueKey('runtime-maintenance'),
+                tilePadding: EdgeInsets.zero,
+                shape: const Border(),
+                collapsedShape: const Border(),
+                title: Text(
+                  '高级维护',
+                  style: libraryText(context, 15, weight: FontWeight.w600),
                 ),
-              ),
-              SettingsPreferenceRow(
-                title: '普通附件维护',
-                description: remote
-                    ? 'CLI副本按设备报告展示；本机只核查此App创建的临时文件，另存的正式文件保留。'
-                    : v == null
-                    ? '正在核对已登记副本…'
-                    : '撤销、到期或范围失效后回收已登记副本；活动授权的副本保留。当前原文和保留版本不因副本核查被删除。',
-                control: DesktopButton(
-                  key: const ValueKey('runtime-attachments'),
-                  onPressed: active ? () => _maintenance(context, false) : null,
-                  child: const Text('核查附件'),
-                ),
+                children: [
+                  SettingsPreferenceRow(
+                    title: remote ? '凭据临时文件' : '临时凭据材料',
+                    description: remote
+                        ? '这里显示使用凭据文件的任务状态，临时文件的回收结果由运行任务的电脑提供。'
+                        : v == null
+                        ? '正在核对已登记的执行…'
+                        : v.materials.isEmpty
+                        ? '暂无已登记材料。活动任务使用的文件保留至进程组结束。'
+                        : '已登记 ${v.materials.length} 项执行。核查只处理身份已确认结束的材料，不重跑命令或终止进程。',
+                    control: DesktopButton(
+                      key: const ValueKey('runtime-materials'),
+                      onPressed: active
+                          ? () => _maintenance(context, true)
+                          : null,
+                      child: const Text('查看凭据文件任务'),
+                    ),
+                  ),
+                  SettingsPreferenceRow(
+                    title: '普通附件维护',
+                    description: remote
+                        ? 'CLI副本按设备报告展示；本机只核查此App创建的临时文件，另存的正式文件保留。'
+                        : v == null
+                        ? '正在核对已登记副本…'
+                        : '撤销、到期或范围失效后回收已登记副本；活动授权的副本保留。当前原文和保留版本不因副本核查被删除。',
+                    control: DesktopButton(
+                      key: const ValueKey('runtime-attachments'),
+                      onPressed: active
+                          ? () => _maintenance(context, false)
+                          : null,
+                      child: const Text('核查附件'),
+                    ),
+                  ),
+                ],
               ),
               SettingsPreferenceRow(
                 title: '关闭窗口后继续运行',

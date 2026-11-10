@@ -981,7 +981,7 @@ void main() {
           find.descendant(of: card, matching: find.text('服务 / 配置')),
           findsOneWidget,
         );
-        expect(find.text('不分组 · 手动顺序'), findsOneWidget);
+        expect(find.text('不分组 · 手动顺序 · 当前目录内的排列顺序'), findsOneWidget);
         expect(t.takeException(), isNull);
       } finally {
         m.dispose();

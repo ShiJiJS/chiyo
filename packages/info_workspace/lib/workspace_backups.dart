@@ -73,12 +73,17 @@ class WorkspaceBackupStatus {
     required Iterable<String> blockers,
     required this.cleanupCount,
     this.latestArchive,
+    this.latestArchiveAt,
+    this.latestArchiveLocation,
     this.pending,
   }) : blockers = List.unmodifiable(blockers);
   final int version, cleanupCount;
   final bool keyCreated, keySaved, recipientEmpty;
   final List<String> blockers;
   final WorkspaceBackupResource? latestArchive;
+  // Device-only publication facts, never copied through server transport.
+  final DateTime? latestArchiveAt;
+  final String? latestArchiveLocation;
   final WorkspaceBackupPending? pending;
 }
 

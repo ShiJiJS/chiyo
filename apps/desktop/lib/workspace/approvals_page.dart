@@ -129,7 +129,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
-          checked: checked,
+          checked: editable ? checked : null,
           child: DesktopButton(
             key: ValueKey('approval-scope-${scope.id}'),
             kind: DesktopButtonKind.quiet,
@@ -142,7 +142,13 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
-                  checked ? Icons.check_box : Icons.check_box_outline_blank,
+                  editable
+                      ? (checked
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank)
+                      : (checked
+                            ? Icons.check_circle_outline
+                            : Icons.remove_circle_outline),
                   size: 19,
                   color: checked ? c.accent : c.muted,
                 ),
@@ -173,40 +179,45 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         if (scope.kind == WorkspaceApprovalScopeKind.file && checked)
           Padding(
             padding: const EdgeInsets.only(left: 30, bottom: 16),
-            child: DesktopSelect<int>(
-              key: ValueKey('approval-file-${scope.id}'),
-              value: d.files[scope.id],
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: current.fileVersionPolicy == null
-                    ? '普通附件版本'
-                    : '当前附件版本',
-              ),
-              items: [
-                if (d.files[scope.id] != null &&
-                    !scope.fileVersions.any(
-                      (v) => v.ref.version == d.files[scope.id],
-                    ))
-                  DropdownMenuItem(
+            child: !editable
+                ? Text(
+                    '批准附件版本：v${d.files[scope.id]}',
+                    style: libraryText(context, 13, color: c.muted),
+                  )
+                : DesktopSelect<int>(
+                    key: ValueKey('approval-file-${scope.id}'),
                     value: d.files[scope.id],
-                    enabled: false,
-                    child: const Text('原选版本已不可用'),
-                  ),
-                for (final v in scope.fileVersions)
-                  DropdownMenuItem(
-                    value: v.ref.version,
-                    enabled: v.available,
-                    child: Text(
-                      'v${v.ref.version} · ${v.filename} · ${v.mediaType} · ${(v.byteLength / 1024).toStringAsFixed(1)} KB',
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: current.fileVersionPolicy == null
+                          ? '普通附件版本'
+                          : '当前附件版本',
                     ),
+                    items: [
+                      if (d.files[scope.id] != null &&
+                          !scope.fileVersions.any(
+                            (v) => v.ref.version == d.files[scope.id],
+                          ))
+                        DropdownMenuItem(
+                          value: d.files[scope.id],
+                          enabled: false,
+                          child: const Text('原选版本已不可用'),
+                        ),
+                      for (final v in scope.fileVersions)
+                        DropdownMenuItem(
+                          value: v.ref.version,
+                          enabled: v.available,
+                          child: Text(
+                            'v${v.ref.version} · ${v.filename} · ${v.mediaType} · ${(v.byteLength / 1024).toStringAsFixed(1)} KB',
+                          ),
+                        ),
+                    ],
+                    onChanged: editable && scope.available
+                        ? (v) {
+                            if (v != null) model.chooseFile(scope.id, v);
+                          }
+                        : null,
                   ),
-              ],
-              onChanged: editable && scope.available
-                  ? (v) {
-                      if (v != null) model.chooseFile(scope.id, v);
-                    }
-                  : null,
-            ),
           ),
         Divider(height: 1, color: c.line),
       ],
