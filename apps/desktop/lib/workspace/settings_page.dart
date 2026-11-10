@@ -318,22 +318,6 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           ),
         ),
       ),
-      const SizedBox(height: 32),
-      SettingsCard(
-        children: [
-          SettingsPreferenceRow(
-            title: '阅读层次',
-            description: '背景、列表和详情用不同明度区分；强调色用于当前选择与主要操作。',
-            control: const PrototypeIcon(PrototypeIconGlyph.layers),
-          ),
-          SettingsPreferenceRow(
-            title: '资料识别',
-            divider: false,
-            description: '保留服务器、文件和凭据的图标色，并始终显示类型名称。',
-            control: const PrototypeIcon(PrototypeIconGlyph.file),
-          ),
-        ],
-      ),
     ],
   );
   Widget _records(BuildContext context) {
@@ -509,7 +493,9 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                   child: Text('设置', style: libraryHeading(context, 24)),
                 ),
                 const SizedBox(height: 23),
-                for (final section in WorkspaceSettingsSection.values) ...[
+                for (final section in WorkspaceSettingsSection.values.where(
+                  (s) => s != WorkspaceSettingsSection.agents,
+                )) ...[
                   DesktopButton(
                     key: ValueKey('settings-section-${section.name}'),
                     kind: DesktopButtonKind.quiet,
@@ -579,27 +565,6 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  if (section == WorkspaceSettingsSection.plugins) ...[
-                    DesktopButton(
-                      key: const ValueKey('legacy-menu'),
-                      alignment: Alignment.centerLeft,
-                      selected:
-                          m.section == section && widget.plugins.showingLegacy,
-                      kind: DesktopButtonKind.quiet,
-                      onPressed:
-                          m.frozen ||
-                              widget.backups.frozen ||
-                              widget.runtime.frozen ||
-                              widget.runtime.shutdownGate
-                          ? null
-                          : () {
-                              m.select(section);
-                              widget.plugins.showLegacy(true);
-                            },
-                      child: const Text('旧版模板'),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
                 ],
               ],
             ),

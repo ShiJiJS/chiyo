@@ -6,6 +6,7 @@ import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'approvals_controller.dart';
 import 'approval_executions.dart';
+import 'approval_directory_location.dart';
 import 'workspace_source.dart';
 
 class ApprovalsPage extends StatefulWidget {
@@ -14,10 +15,12 @@ class ApprovalsPage extends StatefulWidget {
     required this.controller,
     required this.onRecord,
     this.onSettings,
+    this.records,
     this.onHistory,
     this.onRetry,
   });
   final ApprovalsController controller;
+  final WorkspaceSource? records;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final VoidCallback? onSettings, onRetry;
   final ValueChanged<String>? onHistory;
@@ -252,6 +255,12 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     weight: FontWeight.w600,
                   ),
                 ),
+                if (widget.records != null)
+                  ApprovalDirectoryLocation(
+                    key: ValueKey('approval-location-${e.key.$1.key}'),
+                    source: widget.records!,
+                    record: e.key.$1,
+                  ),
                 if (e.value.every((s) => s.entryId != null)) ...[
                   DesktopButton(
                     key: ValueKey('approval-expand-${e.value.first.entryId}'),
@@ -798,7 +807,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                         Padding(
                           padding: const EdgeInsets.all(14),
                           child: Text(
-                            '没有匹配的请求。',
+                            model.keyword.isEmpty ? '暂无待处理申请' : '没有找到匹配的申请',
                             style: libraryText(context, 13, color: c.muted),
                           ),
                         ),
@@ -822,20 +831,20 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  r.agentClaim,
-                                  style: libraryText(
-                                    context,
-                                    12,
-                                    color: c.muted,
-                                  ),
-                                ),
-                                const SizedBox(height: 9),
-                                Text(
                                   r.title,
                                   style: libraryText(
                                     context,
                                     15,
                                     weight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  r.agentClaim,
+                                  style: libraryText(
+                                    context,
+                                    12,
+                                    color: c.muted,
                                   ),
                                 ),
                                 const SizedBox(height: 8),

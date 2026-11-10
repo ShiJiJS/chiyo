@@ -104,14 +104,14 @@ class _SampleProposals
           definition: service.definition,
           values: {'url': url, 'purpose': purpose, 'auth': '由各应用单独管理'},
           relations: {
-            if (s._initial.containsKey(info('azure')))
-              'hostedOn': [info('azure')],
+            if (s._initial.containsKey(info('nas')))
+              'hostedOn': [info('nas')],
           },
         ),
       );
       _rows['import'] = _ProposalInput(
         'import',
-        '补充北辰服务域名',
+        'NAS 相关应用信息新增',
         WorkspaceProposalKind.addition,
         '将维护文档中独立的入口信息整理为资料，关联已有服务器。',
         s._now().subtract(const Duration(minutes: 1)),

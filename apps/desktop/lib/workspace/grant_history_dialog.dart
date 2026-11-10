@@ -16,12 +16,14 @@ class GrantHistoryContentDialog extends StatefulWidget {
     required this.record,
     required this.label,
     this.scopeId,
+    this.inline = false,
   });
   final WorkspaceGrantHistorySource source;
   final Stream<WorkspaceRecordRef?> changes;
   final String historyId, label;
   final WorkspaceRecordRef record;
   final String? scopeId;
+  final bool inline;
   @override
   State<GrantHistoryContentDialog> createState() =>
       _GrantHistoryContentDialogState();
@@ -94,42 +96,46 @@ class _GrantHistoryContentDialogState extends State<GrantHistoryContentDialog> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => DesktopDialog(
-    title: Text(widget.label),
-    content: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_loading) const LinearProgressIndicator(),
-        if (_error != null)
-          Text(_error!.message, style: libraryText(context, 14)),
-        if (_archive != null) LibrarySnapshotView(archive: _archive!),
-        if (_preview != null) ...[
-          Text(
-            '${_preview!.file.filename} · v${_preview!.file.ref.version}',
-            style: libraryText(context, 14, weight: FontWeight.w600),
-          ),
-          LibraryFilePreviewView(
-            preview: _preview!,
-            onPage: (page) {
-              if (_loading) return;
-              _page = page;
-              unawaited(_load());
-            },
-          ),
-        ],
-      ],
-    ),
-    actions: [
+  Widget _body(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (_loading) const LinearProgressIndicator(),
       if (_error != null)
-        DesktopButton(
-          onPressed: _loading ? null : _load,
-          child: const Text('重新读取'),
+        Text(_error!.message, style: libraryText(context, 14)),
+      if (_archive != null) LibrarySnapshotView(archive: _archive!),
+      if (_preview != null) ...[
+        Text(
+          '${_preview!.file.filename} · v${_preview!.file.ref.version}',
+          style: libraryText(context, 14, weight: FontWeight.w600),
         ),
-      DesktopButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('关闭'),
-      ),
+        LibraryFilePreviewView(
+          preview: _preview!,
+          onPage: (page) {
+            if (_loading) return;
+            _page = page;
+            unawaited(_load());
+          },
+        ),
+      ],
     ],
   );
+
+  @override
+  Widget build(BuildContext context) => widget.inline
+      ? _body(context)
+      : DesktopDialog(
+          title: Text(widget.label),
+          content: _body(context),
+          actions: [
+            if (_error != null)
+              DesktopButton(
+                onPressed: _loading ? null : _load,
+                child: const Text('重新读取'),
+              ),
+            DesktopButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('关闭'),
+            ),
+          ],
+        );
 }

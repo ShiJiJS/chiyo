@@ -517,15 +517,16 @@ class _ProposalsPageState extends State<ProposalsPage> {
             style: libraryText(context, 12, color: UiPalette.of(context).muted),
           ),
           const SizedBox(height: 8),
-          DesktopButton(
-            key: const ValueKey('proposal-batch-open'),
-            onPressed: m.soloFrozen || m.batch.entries.isEmpty
-                ? null
-                : _showBatch,
-            child: Text(
-              '${m.hasBatchLocation ? '返回本批次' : '批量清单'} · ${m.batch.entries.length}份',
+          if (m.batch.entries.isNotEmpty)
+            DesktopButton(
+              key: const ValueKey('proposal-batch-open'),
+              onPressed: m.soloFrozen || m.batch.entries.isEmpty
+                  ? null
+                  : _showBatch,
+              child: Text(
+                '${m.hasBatchLocation ? '返回本批次' : '批量清单'} · ${m.batch.entries.length}份',
+              ),
             ),
-          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,

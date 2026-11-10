@@ -20,6 +20,7 @@ import 'sample_workspace_settings.dart';
 export 'sample_workspace_hosts.dart' show SampleHostScenario;
 
 part 'sample_workspace_history.dart';
+part 'preview_library_source.dart';
 part 'sample_workspace_adoption.dart';
 part 'sample_workspace_approvals.dart';
 part 'sample_workspace_grant_history.dart';

@@ -151,6 +151,7 @@ class _EditorState extends State<_Editor> {
   late WorkspaceCatalog _catalog;
   WorkspaceDetail? _detail;
   bool _reviewing = false, _reviewOpen = false;
+  String _tagSearch = '';
   final _fields = <String, TextEditingController>{};
   Set<String> get _documentFormats => {
     for (final section in _definition['sections'] as List? ?? [])
@@ -594,38 +595,6 @@ class _EditorState extends State<_Editor> {
               ),
             ),
             const SizedBox(height: 18),
-            LibraryDirectorySelect(
-              catalog: catalog,
-              value: _directory,
-              onChanged: _locked
-                  ? null
-                  : (value) => setState(() {
-                      _directory = value;
-                      _dirty = true;
-                    }),
-            ),
-            const SizedBox(height: 18),
-            Text('标签', style: libraryText(context, 13, color: c.muted)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 7,
-              runSpacing: 7,
-              children: [
-                for (final tag in catalog.tags)
-                  LibraryTag(
-                    tag.name,
-                    selected: _tags.contains(tag.id),
-                    onPressed: _locked
-                        ? null
-                        : () => setState(() {
-                            _tags.contains(tag.id)
-                                ? _tags.remove(tag.id)
-                                : _tags.add(tag.id);
-                            _dirty = true;
-                          }),
-                  ),
-              ],
-            ),
             for (final field in _definition['fields'] as List? ?? [])
               if (field['type'] == 'file') ...[
                 const SizedBox(height: 18),
@@ -779,6 +748,53 @@ class _EditorState extends State<_Editor> {
                   ),
                 ),
               ],
+            const SizedBox(height: 24),
+            LibraryDirectorySelect(
+              catalog: catalog,
+              value: _directory,
+              onChanged: _locked
+                  ? null
+                  : (value) => setState(() {
+                      _directory = value;
+                      _dirty = true;
+                    }),
+            ),
+            const SizedBox(height: 18),
+            Text('标签', style: libraryText(context, 13, color: c.muted)),
+            TextField(
+              decoration: const InputDecoration(
+                hintText: '查找标签',
+                prefixIcon: Icon(Icons.search, size: 16),
+              ),
+              onChanged: (value) => setState(() => _tagSearch = value),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: [
+                for (final tag in catalog.tags.where(
+                  (t) =>
+                      _tags.contains(t.id) ||
+                      (_tagSearch.isNotEmpty &&
+                          t.name.toLowerCase().contains(
+                            _tagSearch.toLowerCase(),
+                          )),
+                ))
+                  LibraryTag(
+                    tag.name,
+                    selected: _tags.contains(tag.id),
+                    onPressed: _locked
+                        ? null
+                        : () => setState(() {
+                            _tags.contains(tag.id)
+                                ? _tags.remove(tag.id)
+                                : _tags.add(tag.id);
+                            _dirty = true;
+                          }),
+                  ),
+              ],
+            ),
             for (final rule in _definition['relations'] as List? ?? []) ...[
               const SizedBox(height: 24),
               LibraryRelationPicker(

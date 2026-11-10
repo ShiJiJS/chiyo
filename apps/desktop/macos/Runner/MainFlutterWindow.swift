@@ -16,6 +16,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   }
   private(set) var desktopReady = false
   private var previewReady = false
+  private let previewPopover = NSPopover()
+  private var previewRequests: [[String: Any]] = []
+  private var previewRequestCount = 0
+
   // The built entry point, not a Dart runtime request, selects isolation before
   // any production service or saved security-scoped bookmark is constructed.
   private var interfacePreview: Bool {
@@ -408,6 +412,10 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
 
   private func configureInterfacePreview(_ controller: FlutterViewController) {
     title = "知予 · 界面预览·示例数据"
+    let available = (screen ?? NSScreen.main)?.visibleFrame.size ?? NSSize(width: 1280, height: 820)
+    contentMinSize = NSSize(width: min(1100, available.width), height: min(680, available.height - 40))
+    setContentSize(NSSize(width: min(1280, available.width), height: min(800, available.height - 40)))
+    center()
     delegate = self
     // This is an in-process Cocoa editor, not a credential/data service. Keep
     // the same secure-input UI seam that the production forms already use.
@@ -448,12 +456,23 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         self.previewReady = true
         self.navigationEnabled = true
         self.configurePreviewAppearance()
+        self.installPreviewStatus()
         result(["isolated": true, "title": self.title,
                 "applicationId": Bundle.main.bundleIdentifier ?? "",
                 "productionServices": self.desktopReady || self.focusedFill != nil,
                 "savedDirectories": self.toolAccess != nil,
                 "scrollbarStyle": self.previewScrollbarStyle,
                 "scrollbarRevision": self.previewScrollbarRevision])
+      case "updatePreviewApprovals":
+        guard let data = call.arguments as? [String: Any],
+              let requests = data["requests"] as? [[String: Any]], let total = data["total"] as? Int else {
+          result(FlutterError(code: "invalid_preview_requests", message: "Invalid preview requests", details: nil)); return
+        }
+        self.previewRequests = requests
+        self.previewRequestCount = total
+        self.statusItem?.button?.title = total > 0 ? " \(total)" : ""
+        self.rebuildPreviewPopover()
+        result(nil)
       case "setNavigationEnabled":
         guard let enabled = call.arguments as? Bool else {
           result(FlutterError(code: "invalid_navigation_state", message: "Invalid navigation state", details: nil)); return
@@ -529,6 +548,127 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
       item.title = "知予"
       item.submenu?.title = "知予"
     }
+  }
+
+  // This panel exists only in the isolated UI runner. It projects the same
+  // in-memory requests as Flutter; it cannot access the production server.
+  private func installPreviewStatus() {
+    guard statusItem == nil else { return }
+    let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    item.button?.image = NSImage(systemSymbolName: "square.stack.3d.up", accessibilityDescription: "知予原型待审批")
+    item.button?.image?.isTemplate = true
+    item.button?.target = self
+    item.button?.action = #selector(togglePreviewPopover(_:))
+    item.button?.toolTip = "知予原型 · 待审批"
+    statusItem = item
+    previewPopover.behavior = .transient
+    rebuildPreviewPopover()
+    if let menu = NSApp.mainMenu, !menu.items.contains(where: { $0.title == "原型状态" }) {
+      let root = NSMenuItem(title: "原型状态", action: nil, keyEquivalent: "")
+      let states = NSMenu(title: "原型状态")
+      for (title, value) in [("服务器连接页面", "settings"), ("连接断开页面", "offline")] {
+        let row = NSMenuItem(title: title, action: #selector(previewConnectionState(_:)), keyEquivalent: "")
+        row.target = self; row.representedObject = value; states.addItem(row)
+      }
+      let approvals = NSMenuItem(title: "打开菜单栏审批", action: #selector(togglePreviewPopover(_:)), keyEquivalent: "")
+      approvals.target = self; states.addItem(approvals)
+      root.submenu = states; menu.addItem(root)
+    }
+  }
+
+  @objc private func previewConnectionState(_ sender: NSMenuItem) {
+    guard navigationEnabled else { return }
+    makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+    desktopChannel?.invokeMethod("previewState", arguments: sender.representedObject)
+  }
+
+  @objc private func togglePreviewPopover(_ sender: Any?) {
+    guard let button = statusItem?.button else { return }
+    if previewPopover.isShown { previewPopover.performClose(nil); return }
+    rebuildPreviewPopover()
+    NSApp.activate(ignoringOtherApps: true)
+    previewPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    previewPopover.contentViewController?.view.window?.makeKey()
+  }
+
+  private func rebuildPreviewPopover() {
+    let controller = NSViewController()
+    let content = NSStackView()
+    content.orientation = .vertical; content.alignment = .leading; content.spacing = 14
+    content.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+    let heading = NSTextField(labelWithString: "知予 · 待审批 \(previewRequestCount)")
+    heading.font = .systemFont(ofSize: 17, weight: .semibold)
+    content.addArrangedSubview(heading)
+    let connection = NSTextField(labelWithString: "已连接 · 家庭 NAS")
+    connection.font = .systemFont(ofSize: 12); connection.textColor = .secondaryLabelColor
+    content.addArrangedSubview(connection)
+    if previewRequests.isEmpty {
+      content.addArrangedSubview(NSTextField(labelWithString: "没有待处理申请"))
+    }
+    for row in previewRequests.prefix(3) {
+      let card = NSStackView(); card.orientation = .vertical; card.alignment = .leading; card.spacing = 7
+      card.edgeInsets = NSEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+      card.wantsLayer = true; card.layer?.cornerRadius = 10
+      card.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+      for (key, size, weight) in [("title", 14.0, NSFont.Weight.semibold), ("agent", 12.0, .regular), ("purpose", 12.0, .regular), ("scope", 12.0, .regular)] {
+        let text = NSTextField(wrappingLabelWithString: row[key] as? String ?? "")
+        text.font = .systemFont(ofSize: size, weight: weight)
+        text.textColor = key == "title" ? .labelColor : .secondaryLabelColor
+        text.maximumNumberOfLines = key == "scope" ? 6 : 3
+        text.preferredMaxLayoutWidth = 308
+        card.addArrangedSubview(text)
+        text.widthAnchor.constraint(equalToConstant: 308).isActive = true
+      }
+      let actions = NSStackView(); actions.orientation = .horizontal; actions.spacing = 8
+      let quick = row["quick"] as? Bool == true
+      if quick {
+        let duration = NSTextField(labelWithString: "资料读取 · 30 分钟")
+        duration.font = .systemFont(ofSize: 11); duration.textColor = .secondaryLabelColor
+        card.addArrangedSubview(duration)
+        for (title, action) in [("批准", "approve"), ("拒绝", "deny")] {
+          let button = NSButton(title: title, target: self, action: #selector(previewDecision(_:)))
+          button.identifier = NSUserInterfaceItemIdentifier("\(row["id"] as? String ?? "")|\(action)")
+          button.bezelStyle = .rounded
+          if action == "approve" { button.contentTintColor = NSColor(calibratedRed: 0.4, green: 0.32, blue: 0.56, alpha: 1) }
+          actions.addArrangedSubview(button)
+        }
+      }
+      let detail = NSButton(title: "查看详情", target: self, action: #selector(openPreviewRequest(_:)))
+      detail.identifier = NSUserInterfaceItemIdentifier(row["id"] as? String ?? "")
+      detail.bezelStyle = .rounded; actions.addArrangedSubview(detail)
+      card.addArrangedSubview(actions); content.addArrangedSubview(card)
+      card.widthAnchor.constraint(equalToConstant: 332).isActive = true
+    }
+    let open = NSButton(title: "查看全部申请", target: self, action: #selector(openPreviewRequest(_:)))
+    open.bezelStyle = .rounded; content.addArrangedSubview(open)
+    content.widthAnchor.constraint(equalToConstant: 372).isActive = true
+    content.layoutSubtreeIfNeeded()
+    let scroll = NSScrollView(); scroll.hasVerticalScroller = true; scroll.drawsBackground = false
+    scroll.documentView = content
+    let height = min(700, content.fittingSize.height)
+    content.setFrameSize(NSSize(width: 372, height: content.fittingSize.height))
+    scroll.frame = NSRect(x: 0, y: 0, width: 380, height: height)
+    controller.view = scroll; previewPopover.contentViewController = controller
+    previewPopover.contentSize = NSSize(width: 380, height: height)
+  }
+
+  @objc private func previewDecision(_ sender: NSButton) {
+    guard navigationEnabled, let raw = sender.identifier?.rawValue else { return }
+    let parts = raw.split(separator: "|").map(String.init)
+    guard parts.count == 2 else { return }
+    sender.isEnabled = false
+    desktopChannel?.invokeMethod("previewDecision", arguments: ["id": parts[0], "approve": parts[1] == "approve"]) { [weak self] _ in
+      self?.rebuildPreviewPopover()
+    }
+  }
+
+  @objc private func openPreviewRequest(_ sender: NSButton) {
+    guard navigationEnabled else { return }
+    previewPopover.performClose(nil)
+    makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+    if let id = sender.identifier?.rawValue, !id.isEmpty {
+      desktopChannel?.invokeMethod("previewRequest", arguments: id)
+    } else { desktopChannel?.invokeMethod("open", arguments: nil) }
   }
 
   private var previewScrollbarStyle: String {

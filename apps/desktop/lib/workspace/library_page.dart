@@ -392,6 +392,26 @@ class _LibraryPageState extends State<LibraryPage> {
     }
   }
 
+  Future<void> _unfiledContext(Offset position) async {
+    final action = await showLibraryContextMenu<String>(context, position, [
+      const PopupMenuItem(value: 'recycle', child: Text('将未分类资料移到回收站')),
+    ]);
+    if (!mounted || action != 'recycle') return;
+    final records = <WorkspaceRecordRef>[];
+    var offset = 0;
+    while (true) {
+      final result = await model.source.queryRecords(
+        WorkspaceQuery(directoryId: 'unfiled', offset: offset, limit: 100),
+      );
+      records.addAll(result.items.map((r) => r.ref));
+      offset += result.items.length;
+      if (offset >= result.total || result.items.isEmpty) break;
+    }
+    if (mounted && records.isNotEmpty) {
+      await _manage(WorkspaceLibrarySelection(records: records), moving: false);
+    }
+  }
+
   Future<void> _directoryContext(
     WorkspaceDirectory directory,
     Offset position,
@@ -760,10 +780,15 @@ class _LibraryPageState extends State<LibraryPage> {
     }
 
     final content = LibraryContextRegion(
-      enabled: _canManage && model.selectionAvailable && !_placing && real,
+      enabled:
+          _canManage &&
+          model.selectionAvailable &&
+          !_placing &&
+          (real || directory.id == 'unfiled'),
       onActivate: activate,
       onContext: (position) async {
         if (real) await _directoryContext(directory, position);
+        if (directory.id == 'unfiled') await _unfiledContext(position);
       },
       builder: (activate) => Padding(
         padding: const EdgeInsets.only(bottom: 3),
@@ -835,6 +860,41 @@ class _LibraryPageState extends State<LibraryPage> {
                             ],
                           ),
                         ),
+                        if (_canMove &&
+                            real &&
+                            model.catalog!.directories.any(
+                              (d) => d.parentId == directory.id,
+                            ))
+                          SizedBox(
+                            width: 24,
+                            child: IconButton(
+                              key: ValueKey(
+                                'library-directory-toggle-${directory.id}',
+                              ),
+                              padding: EdgeInsets.zero,
+                              tooltip: _collapsed.contains(directory.id)
+                                  ? '展开${directory.name}'
+                                  : '收起${directory.name}',
+                              onPressed: () {
+                                if (HardwareKeyboard
+                                    .instance
+                                    .isControlPressed) {
+                                  return;
+                                }
+                                setState(() {
+                                  if (!_collapsed.add(directory.id)) {
+                                    _collapsed.remove(directory.id);
+                                  }
+                                });
+                              },
+                              icon: Icon(
+                                _collapsed.contains(directory.id)
+                                    ? Icons.chevron_right
+                                    : Icons.expand_more,
+                                size: 17,
+                              ),
+                            ),
+                          ),
                         if (!largeText) ...[
                           const SizedBox(width: 5),
                           Text(
@@ -852,35 +912,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 },
               ),
             ),
-            if (_canMove &&
-                real &&
-                model.catalog!.directories.any(
-                  (d) => d.parentId == directory.id,
-                ))
-              SizedBox(
-                width: 24,
-                child: IconButton(
-                  key: ValueKey('library-directory-toggle-${directory.id}'),
-                  padding: EdgeInsets.zero,
-                  tooltip: _collapsed.contains(directory.id)
-                      ? '展开${directory.name}'
-                      : '收起${directory.name}',
-                  onPressed: () {
-                    if (HardwareKeyboard.instance.isControlPressed) return;
-                    setState(() {
-                      if (!_collapsed.add(directory.id)) {
-                        _collapsed.remove(directory.id);
-                      }
-                    });
-                  },
-                  icon: Icon(
-                    _collapsed.contains(directory.id)
-                        ? Icons.chevron_right
-                        : Icons.expand_more,
-                    size: 17,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -951,13 +982,18 @@ class _LibraryPageState extends State<LibraryPage> {
         : [
             if (!catalog.directories.any((d) => d.id == 'all'))
               const WorkspaceDirectory('all', '全部资料'),
-            ...libraryVisibleDirectoryTree(catalog, _collapsed),
-            if (!catalog.directories.any((d) => d.id == 'unfiled'))
+            ...libraryVisibleDirectoryTree(catalog, _collapsed).where(
+              (d) =>
+                  d.id != 'unfiled' ||
+                  (catalog.directoryCounts['unfiled'] ?? 0) > 0,
+            ),
+            if (!catalog.directories.any((d) => d.id == 'unfiled') &&
+                (catalog.directoryCounts['unfiled'] ?? 0) > 0)
               const WorkspaceDirectory('unfiled', '未分类'),
           ];
     final decorations = <Widget>[
       Padding(
-        padding: const EdgeInsets.fromLTRB(21, 13, 0, 13),
+        padding: const EdgeInsets.fromLTRB(10, 18, 0, 12),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 33),
           child: Row(
@@ -967,9 +1003,9 @@ class _LibraryPageState extends State<LibraryPage> {
                   '资料目录',
                   style: libraryText(
                     context,
-                    12,
-                    color: c.muted,
-                    weight: FontWeight.w600,
+                    15,
+                    color: c.ink,
+                    weight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -1002,7 +1038,7 @@ class _LibraryPageState extends State<LibraryPage> {
           child: Divider(height: 1, color: c.line),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(21, 6, 21, 20),
+          padding: const EdgeInsets.fromLTRB(10, 6, 4, 14),
           child: Row(
             children: [
               Expanded(
@@ -1011,9 +1047,9 @@ class _LibraryPageState extends State<LibraryPage> {
                   key: const ValueKey('library-tag-label'),
                   style: libraryText(
                     context,
-                    12,
-                    color: c.muted,
-                    weight: FontWeight.w600,
+                    15,
+                    color: c.ink,
+                    weight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -1432,7 +1468,7 @@ class _LibraryPageState extends State<LibraryPage> {
           selected: selected,
           onPressed: model.selectionAvailable ? activate : null,
           // CSS border-box includes a 1px border outside its 12/14px padding.
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           alignment: Alignment.topLeft,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1464,7 +1500,7 @@ class _LibraryPageState extends State<LibraryPage> {
                         padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Text(
                           r.description,
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: libraryText(
                             context,

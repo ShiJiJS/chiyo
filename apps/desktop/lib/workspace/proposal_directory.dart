@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'directory_picker.dart';
+import '../desktop_controls.dart';
+import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 export 'directory_picker.dart' show DirectorySelection;
@@ -100,17 +102,6 @@ class ProposalDirectoryLocation extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('存放目录', style: libraryText(context, 13)),
-          const SizedBox(height: 4),
-          if (compare && beforeId != directoryId)
-            Text(
-              '修改前：${directoryPath(catalog, beforeId)}',
-              style: libraryText(context, 13),
-            ),
-          SelectableText(
-            directoryPath(catalog, directoryId),
-            style: libraryText(context, 15),
-          ),
           if (path.any((d) => d.proposed))
             Wrap(
               spacing: 8,
@@ -123,28 +114,120 @@ class ProposalDirectoryLocation extends StatelessWidget {
                   ),
               ],
             ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () async {
-                final selected = await showDirectoryPicker(
-                  context,
-                  catalog,
-                  selected: directoryId,
-                  readOnly: onChanged == null,
-                  allowNew: allowNew,
-                  initialPath: suggestedPath.isNotEmpty
-                      ? suggestedPath
-                      : directoryId == null
-                      ? ''
-                      : directoryPath(catalog, directoryId),
-                );
-                if (context.mounted && selected != null) {
-                  onChanged?.call(selected);
-                }
-              },
-              child: Text(onChanged == null ? '查看完整目录树' : '查看目录树 / 更换位置'),
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 12),
+            shape: const Border(),
+            collapsedShape: const Border(),
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  onChanged == null ? '所在目录' : '将保存到',
+                  style: libraryText(
+                    context,
+                    12,
+                    color: UiPalette.of(context).muted,
+                  ),
+                ),
+                Text(
+                  directoryPath(catalog, directoryId).replaceAll('/', ' › '),
+                  style: libraryText(context, 14),
+                ),
+                if (compare && beforeId != directoryId)
+                  Text(
+                    '原位置：${directoryPath(catalog, beforeId)}',
+                    style: libraryText(context, 12),
+                  ),
+              ],
             ),
+
+            trailing: onChanged == null
+                ? null
+                : DesktopButton(
+                    leading: const Icon(
+                      Icons.drive_file_move_outlined,
+                      size: 16,
+                    ),
+                    onPressed: () async {
+                      final selected = await showDirectoryPicker(
+                        context,
+                        catalog,
+                        selected: directoryId,
+                        allowNew: allowNew,
+                        initialPath: suggestedPath.isNotEmpty
+                            ? suggestedPath
+                            : directoryId == null
+                            ? ''
+                            : directoryPath(catalog, directoryId),
+                      );
+                      if (context.mounted && selected != null) {
+                        onChanged?.call(selected);
+                      }
+                    },
+                    child: const Text('更换目录'),
+                  ),
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 240),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      for (final d in libraryDirectoryTree(
+                        catalog,
+                      ).where((d) => !{'all', 'unfiled'}.contains(d.id)))
+                        Container(
+                          decoration: BoxDecoration(
+                            color: d.id == directoryId
+                                ? UiPalette.of(context).selected
+                                : null,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.fromLTRB(
+                            12.0 +
+                                (libraryDirectoryAncestors(catalog, d).length -
+                                        1) *
+                                    18,
+                            7,
+                            12,
+                            7,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.folder_outlined,
+                                size: 16,
+                                color: d.id == directoryId
+                                    ? UiPalette.of(context).accent
+                                    : UiPalette.of(context).muted,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  d.name,
+                                  style: libraryText(context, 13),
+                                ),
+                              ),
+                              if (d.proposed)
+                                Text(
+                                  '将新建',
+                                  style: libraryText(
+                                    context,
+                                    12,
+                                    color: UiPalette.of(context).accent,
+                                  ),
+                                ),
+                              if (d.id == directoryId)
+                                const Icon(Icons.check, size: 16),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

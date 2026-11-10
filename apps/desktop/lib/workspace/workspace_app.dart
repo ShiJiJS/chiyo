@@ -40,10 +40,12 @@ class WorkspaceApp extends StatelessWidget {
     this.desktop,
     this.inputsBuilder,
     this.onConnectionSettings,
+    this.statusBuilder,
     this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
   final VoidCallback? onConnectionSettings;
+  final WidgetBuilder? statusBuilder;
   final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
@@ -62,6 +64,7 @@ class WorkspaceApp extends StatelessWidget {
     desktop: desktop,
     inputsBuilder: inputsBuilder,
     onConnectionSettings: onConnectionSettings,
+    statusBuilder: statusBuilder,
     onAgentConnectionSetup: onAgentConnectionSetup,
   );
 }
@@ -79,10 +82,12 @@ class _WorkspaceSession extends StatefulWidget {
     this.desktop,
     this.inputsBuilder,
     this.onConnectionSettings,
+    this.statusBuilder,
     this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
   final VoidCallback? onConnectionSettings;
+  final WidgetBuilder? statusBuilder;
   final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
@@ -426,6 +431,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     trailingBuilder: (context) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (widget.statusBuilder != null) widget.statusBuilder!(context),
         if (_source is RemoteWorkspaceSource)
           ListenableBuilder(
             listenable: _source.cache,
@@ -455,21 +461,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 ),
               );
             },
-          ),
-        if (widget.onAgentConnectionSetup != null)
-          IconButton(
-            tooltip: 'AI 接入',
-            icon: const Icon(Icons.smart_toy_outlined),
-            onPressed: _controller.navigationLocked
-                ? null
-                : () async {
-                    _modalChanged(true);
-                    try {
-                      await widget.onAgentConnectionSetup!(context);
-                    } finally {
-                      _modalChanged(false);
-                    }
-                  },
           ),
         if (widget.onConnectionSettings != null)
           IconButton(
@@ -521,6 +512,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
               )
             : location.page == WorkspacePage.approvals
             ? ApprovalsPage(
+                records: _source,
                 controller: _approvals,
                 onHistory: (id) =>
                     _navigate(WorkspacePage.history, 'request:$id'),

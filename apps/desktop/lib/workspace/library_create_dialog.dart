@@ -69,7 +69,9 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
                 in snapshot.data?.packages ?? <WorkspacePlugin>[])
               if (package.enabled)
                 for (final template in package.templates)
-                  template.type.id: package.description,
+                  template.type.id:
+                      template.definition['description'] as String? ??
+                      '记录${(template.definition['fields'] as List? ?? []).take(3).map((f) => f['label']).join('、')}。',
           };
           final core = [
             for (final id in _core) ...types.where((type) => type.id == id),
@@ -222,9 +224,31 @@ class _LibraryCreateDialogState extends State<LibraryCreateDialog> {
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
-                                    child: Text(
-                                      type.id == 'file' ? '普通文件' : type.name,
-                                      style: libraryText(context, 14),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          type.id == 'file'
+                                              ? '普通文件'
+                                              : type.name,
+                                          style: libraryText(context, 14),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          switch (type.id) {
+                                            'document' => '说明、笔记与长文',
+                                            'file' => 'PDF、图片或其他附件',
+                                            'credential' => '密码、Token 与密钥',
+                                            _ => '没有专用模板的简短信息',
+                                          },
+                                          style: libraryText(
+                                            context,
+                                            12,
+                                            color: c.muted,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],

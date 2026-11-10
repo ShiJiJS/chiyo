@@ -150,6 +150,15 @@ class _SampleApprovals implements WorkspaceApprovalSource {
           })
         >[
           (
+            id: 'server-info',
+            title: '核对 NAS 服务入口',
+            kind: WorkspaceApprovalKind.information,
+            purpose: '读取服务器地址和连接端口，核对部署位置。',
+            records: ['nas'],
+            credential: null,
+            fields: {'nas:host', 'nas:port'},
+          ),
+          (
             id: 'server',
             title: '检查反向代理服务',
             kind: WorkspaceApprovalKind.credential,
@@ -174,15 +183,6 @@ class _SampleApprovals implements WorkspaceApprovalSource {
             purpose: '查看仓库状态和待处理事项。',
             records: [],
             credential: 'github-token',
-            fields: {},
-          ),
-          (
-            id: 'fill',
-            title: '登录任务管理',
-            kind: WorkspaceApprovalKind.focus,
-            purpose: '在已打开的任务管理登录页填入密码。',
-            records: [],
-            credential: 'vikunja-password',
             fields: {},
           ),
           (
