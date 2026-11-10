@@ -5,6 +5,8 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_cli/codex_end_index.dart';
 import 'package:info_cli/device_credential_host.dart';
+import 'package:info_cli/device_credential_journal.dart';
+import 'package:info_cli/private_device_state.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/connection_profile.dart';
@@ -30,6 +32,8 @@ Future<void> main(List<String> args) async {
         '--after-restart',
         '--finish',
         '--inspect',
+        '--lifetime',
+        '--expiry-check',
       }.contains(args[0]),
       'Unknown mode',
     );
@@ -521,6 +525,9 @@ Future<void> main(List<String> args) async {
       }
       phase = 'real GH concurrent/lost-output execution';
       final gh = await request('gh', 'gh');
+      // A separate 15-minute approval expires naturally while restart/lifetime
+      // checks run. Do not shorten production rules or advance a fake clock.
+      await request('gh', 'gh-expiry', minutes: 15);
       final actual = await operation('gh', gh, 'gh-real');
       require(
         actual['status'] == 'accepted',
@@ -640,10 +647,283 @@ Future<void> main(List<String> args) async {
           'sessionBoundSsh': true,
         }),
       );
+    } else if (args[0] == '--expiry-check') {
+      final expiry = DateTime.parse(state['expiry-gh-expiry'] as String);
+      if (DateTime.now().toUtc().isBefore(expiry)) {
+        stdout.writeln(
+          jsonEncode({
+            'status': 'waiting-expiry',
+            'remainingSeconds': expiry
+                .difference(DateTime.now().toUtc())
+                .inSeconds,
+          }),
+        );
+        return;
+      }
+      final current = await review(state['request-gh-expiry'] as String);
+      require(
+        current.credential!.state != WorkspaceCredentialRequestState.approved,
+        'Expired approval still active',
+      );
+      final result = await operation(
+        'gh',
+        state['request-gh-expiry'] as String,
+        'gh-after-natural-expiry',
+      );
+      require(result['status'] != 'accepted', 'Expired approval executed');
+      require(
+        current.credentialExpiresAt?.toUtc().toIso8601String() ==
+            state['expiry-gh-expiry'],
+        'Natural expiry changed original deadline',
+      );
+      state['naturalExpiryChecked'] = true;
+      save();
+      stdout.writeln(
+        jsonEncode({
+          'status': 'expiry-verified',
+          'originalDeadlineUnchanged':
+              current.credentialExpiresAt?.toUtc().toIso8601String() ==
+              state['expiry-gh-expiry'],
+        }),
+      );
+    } else if (args[0] == '--lifetime') {
+      require(
+        state['phase'] == 'restart-verified',
+        'Verify original restart first',
+      );
+      require(
+        state['lifetimeChecked'] != true,
+        'Do not replay completed lifetime checks',
+      );
+      final journalDirectory = Directory(
+        '${hostFiles().parent.path}/credential-executions',
+      );
+      Future<Map<String, dynamic>> journal(String execution) async {
+        final file = File(
+          '${journalDirectory.path}/${sha256.convert(utf8.encode(execution))}.json',
+        );
+        final value = await readPrivateDeviceState(file);
+        require(
+          value?['executionId'] == execution,
+          'Original execution journal required',
+        );
+        return value!;
+      }
+
+      Future<void> until(Future<bool> Function() test, String message) async {
+        final end = DateTime.now().add(const Duration(seconds: 25));
+        while (!await test()) {
+          require(DateTime.now().isBefore(end), message);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+      }
+
+      final gate = File('${work.path}/ssh-release');
+      if (await gate.exists()) await gate.delete();
+      final treeMode = File('${work.path}/tree-mode');
+      if (await treeMode.exists()) await treeMode.delete();
+      final counter = File('${work.path}/ssh-counter');
+      final previousCount = (await counter.readAsLines()).length;
+      phase = 'actual App exit with live credential worker';
+      final app = File('${tools.parent.path}/app/info_desktop.exe');
+      final appData = Directory(args[1]).absolute.parent.parent;
+      final desktop = await Process.start(
+        app.path,
+        [],
+        environment: {'APPDATA': appData.path},
+      );
+      desktop.stdout.listen((_) {});
+      desktop.stderr.listen((_) {});
+      final desktopIdentity = CredentialProcessIdentity.capture(desktop.pid);
+      require(desktopIdentity != null, 'Actual candidate App identity missing');
+      try {
+        final running = await operation(
+          'ssh',
+          state['request-ssh'] as String,
+          'ssh-app-exit',
+        );
+        require(
+          running['status'] == 'accepted',
+          'App lifetime operation rejected',
+        );
+        await until(
+          () async => (await counter.readAsLines()).length == previousCount + 1,
+          'Receiver did not start',
+        );
+        final fact = await journal(running['executionId'] as String);
+        final lease = CredentialMaterialLease.fromPrivateJson(
+          Map<String, dynamic>.from(fact['lease'] as Map),
+        );
+        ManagedCredentialFiles.verify(lease);
+        require(
+          CredentialProcessIdentity.isActive(
+                desktop.pid,
+                desktopIdentity!.value,
+              ) ==
+              true,
+          'App exited before quit check',
+        );
+        final quit = await Process.run('${tools.parent.path}/cli/info.exe', [
+          'app',
+          'quit',
+          '--pid',
+          '${desktop.pid}',
+        ]);
+        require(
+          quit.exitCode == 0 && quit.stdout.toString().contains('exited'),
+          'Same-package normal App quit failed',
+        );
+        await desktop.exitCode.timeout(const Duration(seconds: 15));
+        final status = await command('execution-status', {
+          'executionId': running['executionId'],
+        });
+        require(
+          status['executionState'] == 'running',
+          'App quit interrupted credential execution',
+        );
+        ManagedCredentialFiles.verify(lease);
+        await gate.writeAsString('release');
+        await settled(
+          running['executionId'] as String,
+          contains: 'WINDOWS_RECEIVER_COMPLETED',
+        );
+        require(
+          !Directory(lease.path).existsSync(),
+          'Finished execution materials remained',
+        );
+      } finally {
+        desktopIdentity?.close();
+      }
+      phase = 'original worker crash and live descendant retention';
+      await gate.delete();
+      await treeMode.writeAsString('own synthetic descendant only');
+      final descendantPidFile = File('${work.path}/descendant-pid');
+      if (await descendantPidFile.exists()) await descendantPidFile.delete();
+      final crash = await operation(
+        'ssh',
+        state['request-ssh'] as String,
+        'ssh-worker-crash',
+      );
+      require(crash['status'] == 'accepted', 'Crash operation rejected');
+      final execution = crash['executionId'] as String;
+      await until(descendantPidFile.exists, 'Synthetic descendant missing');
+      final descendantPid = int.parse(await descendantPidFile.readAsString());
+      final descendantIdentity = CredentialProcessIdentity.capture(
+        descendantPid,
+      );
+      require(descendantIdentity != null, 'Owned descendant identity missing');
+      final fact = await journal(execution);
+      final lease = CredentialMaterialLease.fromPrivateJson(
+        Map<String, dynamic>.from(fact['lease'] as Map),
+      );
+      final workerPid = fact['workerPid'] as int;
+      final workerIdentity = fact['workerIdentity'] as String;
+      require(
+        CredentialProcessIdentity.isActive(workerPid, workerIdentity) == true,
+        'Original registered worker already ended',
+      );
+      require(
+        CredentialProcessJob.isActive(
+              fact['jobName'] as String,
+              workerPid: workerPid,
+              workerCreatedAt: workerIdentity,
+            ) ==
+            true,
+        'Original job not live',
+      );
+      require(
+        Process.killPid(workerPid),
+        'Owned worker fault injection failed',
+      );
+      try {
+        await until(
+          () async =>
+              CredentialProcessIdentity.isActive(workerPid, workerIdentity) ==
+              false,
+          'Original worker did not end',
+        );
+        final count = (await counter.readAsLines()).length;
+        final retry = await operation(
+          'ssh',
+          state['request-ssh'] as String,
+          'ssh-worker-crash',
+        );
+        require(
+          retry['executionId'] == execution,
+          'Crash retry replaced original execution',
+        );
+        final status = await command('execution-status', {
+          'executionId': execution,
+        });
+        require(
+          status['executionState'] == 'unknown',
+          'Worker loss guessed terminal success',
+        );
+        require(
+          status['cleanupState'] != 'complete',
+          'Live descendant prematurely cleaned',
+        );
+        require(
+          CredentialProcessIdentity.isActive(
+                descendantPid,
+                descendantIdentity!.value,
+              ) ==
+              true,
+          'Descendant terminated with worker',
+        );
+        ManagedCredentialFiles.verify(lease);
+        require(
+          (await counter.readAsLines()).length == count,
+          'Unknown execution automatically replayed',
+        );
+        await gate.writeAsString('release');
+        await until(
+          () async =>
+              CredentialProcessIdentity.isActive(
+                descendantPid,
+                descendantIdentity.value,
+              ) ==
+              false,
+          'Owned descendant did not end',
+        );
+        final journalStore = DeviceCredentialJournal(device, journalDirectory);
+        await until(() async {
+          await journalStore.maintain();
+          final result = await command('execution-status', {
+            'executionId': execution,
+          });
+          return result['executionState'] == 'unknown' &&
+              result['cleanupState'] == 'complete';
+        }, 'Unknown execution cleanup not acknowledged');
+        require(
+          !Directory(lease.path).existsSync(),
+          'Crash materials remained after tree ended',
+        );
+      } finally {
+        descendantIdentity?.close();
+        await treeMode.delete();
+      }
+      state['lifetimeChecked'] = true;
+      save();
+      stdout.writeln(
+        jsonEncode({
+          'status': 'lifetime-verified',
+          'actualAppQuit': true,
+          'workerCrashUnknown': true,
+          'liveDescendantRetained': true,
+          'noReplay': true,
+          'materialsCleanedAfterTreeEnded': true,
+        }),
+      );
     } else if (args[0] == '--finish') {
       require(
         state['phase'] == 'restart-verified',
         'Original verified flow required',
+      );
+      require(
+        state['lifetimeChecked'] == true &&
+            state['naturalExpiryChecked'] == true,
+        'Complete actual lifetime and natural expiry checks first',
       );
       phase = 'revocation';
       await decide(
