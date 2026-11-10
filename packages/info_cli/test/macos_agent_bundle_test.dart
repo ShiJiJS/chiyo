@@ -1,3 +1,8 @@
+@TestOn('!windows')
+library;
+
+// This fixture verifies POSIX executable bits and .app identities. Windows
+// package paths/identities are exercised by windows_agent_bundle_test.dart.
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';

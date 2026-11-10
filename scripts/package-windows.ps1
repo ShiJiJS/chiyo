@@ -2,7 +2,8 @@ param(
     [Parameter(Mandatory = $true)][string]$FlutterBin,
     [Parameter(Mandatory = $true)][string]$OutputDirectory,
     [switch]$Offline,
-    [switch]$PackageOnly
+    [switch]$PackageOnly,
+    [string]$Python = ''
 )
 
 # Developer build only. The resulting ZIP needs neither Dart nor Flutter.
@@ -67,7 +68,21 @@ try {
     $payload = Join-Path $output 'AgentInfoManage'
     New-Item -ItemType Directory -Path $payload | Out-Null
     $app = Join-Path $payload 'app'
-    Copy-Item -LiteralPath (Join-Path $projectRoot 'apps/desktop/build/windows/x64/runner/Release') -Destination $app -Recurse
+    New-Item -ItemType Directory -Path $app | Out-Null
+    # Flutter tests can leave this absolute-path VM loader cache in an existing
+    # runner directory. The release engine uses data/flutter_assets/
+    # NativeAssetsManifest.json instead. Do not ship the test-only root cache.
+    foreach ($entry in Get-ChildItem -LiteralPath (Join-Path $projectRoot 'apps/desktop/build/windows/x64/runner/Release') -Force) {
+        if ($entry.Name -eq 'native_assets.json') { continue }
+        Copy-Item -LiteralPath $entry.FullName -Destination $app -Recurse
+    }
+    Copy-Item -LiteralPath (Join-Path $projectRoot 'apps/desktop/windows/runner/resources/app_icon.ico') -Destination (Join-Path $app 'chiyo.ico')
+    & (Join-Path $PSScriptRoot 'test-windows-branding.ps1') -Executable (Join-Path $app 'info_desktop.exe') -Icon (Join-Path $app 'chiyo.ico') -VerifySource
+    $nativeAssets = Get-Content -LiteralPath (Join-Path $app 'data/flutter_assets/NativeAssetsManifest.json') -Raw | ConvertFrom-Json
+    $cipherLoader = @($nativeAssets.'native-assets'.windows_x64.'package:sqlite3/src/ffi/libsqlite3.g.dart')
+    if ($cipherLoader.Count -ne 2 -or $cipherLoader[0] -ne 'absolute' -or $cipherLoader[1] -ne 'sqlcipher.dll') {
+        throw 'The release SQLCipher loader must resolve the bundled DLL, without a build-machine path.'
+    }
     foreach ($required in @('info_desktop.exe', 'info-focus-broker.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
         if (-not (Test-Path -LiteralPath (Join-Path $app $required))) { throw "Missing desktop payload: $required" }
     }
@@ -96,8 +111,19 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $cli 'template') | Out-Null
     Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/SKILL.md' -Destination (Join-Path $cli 'template/SKILL.md')
     New-Item -ItemType Directory -Path (Join-Path $cli 'template/references') | Out-Null
-    Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/credential-use.md' -Destination (Join-Path $cli 'template/references/credential-use.md')
-    Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/references/information-files.md' -Destination (Join-Path $cli 'template/references/information-files.md')
+    foreach ($reference in Get-ChildItem -LiteralPath 'integrations/codex/skills/agent-info-access/references' -File -Filter '*.md') {
+        Copy-Item -LiteralPath $reference.FullName -Destination (Join-Path $cli "template/references/$($reference.Name)")
+    }
+
+    # Fixed official tools are copied from verified archives, never a user's
+    # installation. The MSI is read as tables/cabinets; no install action runs.
+    if (-not $Python) {
+        $Python = Join-Path $projectRoot '.tools/python/cpython-3.13-windows-x86_64-none/python.exe'
+    }
+    if (-not (Test-Path -LiteralPath $Python -PathType Leaf)) {
+        throw 'Pass -Python with a Python 3.13+ executable for tool assembly.'
+    }
+    Invoke-Checked $Python @((Join-Path $PSScriptRoot 'bundle-windows-tools.py'), (Join-Path $payload 'tools'))
 
     # This console probe uses only synthetic data in a newly created temp
     # directory and current-user DPAPI. It never opens the application database.
@@ -114,6 +140,7 @@ try {
     $notices = Join-Path $payload 'notices'
     $provenance = Join-Path $payload 'provenance'
     New-Item -ItemType Directory -Path $notices, $provenance | Out-Null
+    Copy-Item -LiteralPath 'third_party/windows-tools.json' -Destination $provenance
     $flutterRoot = Split-Path -Parent (Get-Item -LiteralPath $FlutterBin).FullName
     Copy-Item -LiteralPath (Join-Path $flutterRoot 'LICENSE') -Destination (Join-Path $notices 'Flutter-LICENSE')
     Copy-Item -LiteralPath (Join-Path $flutterRoot 'bin/cache/dart-sdk/LICENSE') -Destination (Join-Path $notices 'Dart-LICENSE')
@@ -149,9 +176,9 @@ try {
             throw 'Diagnostic and desktop SQLCipher DLLs differ.'
         }
     }
-    Copy-Item -LiteralPath 'docs/development/windows-delivery.md' -Destination (Join-Path $payload 'README.md')
-    Copy-Item -LiteralPath 'integrations/codex/README.md' -Destination (Join-Path $payload 'CODEX-INTEGRATION.md')
-    Copy-Item -LiteralPath 'docs/development/windows-acceptance.md' -Destination (Join-Path $payload 'ACCEPTANCE.md')
+    Copy-Item -LiteralPath 'docs/development/windows-online-delivery.md' -Destination (Join-Path $payload 'README.md')
+    Copy-Item -LiteralPath 'docs/development/windows-codex-integration.md' -Destination (Join-Path $payload 'CODEX-INTEGRATION.md')
+    Copy-Item -LiteralPath 'docs/development/windows-online-acceptance.md' -Destination (Join-Path $payload 'ACCEPTANCE.md')
     $flutterVersion = (& $flutter --version --machine | Out-String | ConvertFrom-Json)
     if ($LASTEXITCODE -ne 0) { throw 'Cannot record Flutter SDK version.' }
     # Record revisions and versions without publishing the builder's username
@@ -173,7 +200,7 @@ try {
     Assert-CleanSources
     if ((git rev-parse HEAD).Trim() -ne $commit) { throw 'Sources changed during packaging.' }
     Write-Json (Join-Path $payload 'manifest.json') ([ordered]@{
-        format = 2; product = 'Agent Info Manage'; release = $identity
+        format = 2; product = 'Agent Info Manage'; displayName = '知予'; release = $identity
         sourceCommit = $commit; sourceDirty = $false; architecture = 'windows-x64'
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
         signing = 'unsigned development preview'
@@ -189,7 +216,7 @@ try {
         verification = 'Full headless check.ps1 and Windows release compilation; no desktop/Codex/clean-machine acceptance implied'
         files = $files
     })
-    $archive = Join-Path $output "agent-info-manage-$identity-windows-x64.zip"
+    $archive = Join-Path $output "chiyo-$identity-windows-x64.zip"
     Compress-Archive -LiteralPath $payload -DestinationPath $archive -CompressionLevel Optimal
     $digest = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText("$archive.sha256", "$digest  $([IO.Path]::GetFileName($archive))`n", $utf8)

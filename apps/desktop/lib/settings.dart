@@ -12,6 +12,7 @@ import 'credential_files.dart';
 import 'ssh_host_settings.dart';
 import 'credential_material_checks.dart';
 import 'tool_directory_settings.dart';
+import 'bundled_tool_settings.dart';
 
 enum SettingsSection {
   appearance,
@@ -630,6 +631,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _application() => _inset([
     if (Platform.isMacOS) const ToolDirectorySettings(),
+    if (Platform.isWindows) const BundledToolSettings(),
     CredentialMaterialChecks(
       owner: widget.owner,
       reconcile: widget.runtime?.reconcileRuntimeMaterialCleanup,

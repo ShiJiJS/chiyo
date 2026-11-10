@@ -1,0 +1,45 @@
+# 知予 Windows 开发包
+
+本包直接连接现有知予 NAS 服务。资料、附件、凭据和审批由服务器保存；主题、通知、关窗行为及设备操作记录保存在当前 Windows 用户下。断网时不能查看或修改资料。
+
+准确版本、源码提交、SDK 和逐文件 SHA256 见 manifest.json。完整解压后使用 app/info_desktop.exe，保留相邻 DLL、data、cli 和 tools 目录。移动时移动整个目录；更新时把新 ZIP 解压到新目录。
+
+## 打开和连接
+
+1. 对照 ZIP 旁的 .sha256 核对归档。
+2. 启动 app/info_desktop.exe，填写现有服务的 HTTPS 地址、管理 Token 和证书。程序固定服务器身份；地址、证书或身份不符时先核对原配置。
+3. 配置默认位于 %APPDATA%/Chiyo/online，由当前用户 DPAPI 和私有 ACL 保护。已有配置会正常重连；不要把另一台电脑的加密文件当作本机登记。
+4. 通过“AI 接入”生成本机独立 Agent 配置，再按 [Codex 接入说明](CODEX-INTEGRATION.md) 准备运行目录。管理 Token 不交给 Agent。
+
+这是 Windows x64 开发包；本轮检查机器为 Windows 11 x64。运行需要兼容的 Microsoft Visual C++ v14 x64 Runtime，包不自动安装系统运行库。相关官方说明见 [Microsoft C++ Runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)。无需安装 Flutter、Dart 或 Python 来运行本包。
+
+## 主要使用方式
+
+- 在信息库管理资料、目录、标签、关联和回收，点击搜索框查找。Agent 修改资料提交提案，由主人在原页面整份核对后保存。
+- 访问申请按字段、附件版本和期限批准。普通附件可由 Agent 领取本机受管副本，用完释放；系统打开产生的临时副本按原登记回收。主人自行另存的文件不会因此删除。
+- Token、SSH 私钥和 AWS 文件经批准后交给当前电脑的获批程序，普通读取不会返回凭据原文。GH 2.102.0、AWS CLI 2.38.1 在 tools 随包提供，SSH 使用系统 OpenSSH；“设置”与 CLI 能力查询显示实际路径和不可用原因。使用时仍核对版本及文件身份。
+- 凭据设备执行要求 NAS 支持 Windows 绝对路径。修补候选源码为 a9eccb3c5746e8aaa932debdfa2e1af27e86d90e；本轮当前 NAS 的兼容与运行验收状态以交付记录为准，不能只因服务器声明通用设备能力就假定 Windows 流程已通过。
+- 凭据详情的申请和使用记录需要服务器提供对应只读查询接口（4b7bfc55d1a8af57259f3f4f00040c706457b2c2 起提供）。旧服务器会明确提示尚未提供该功能；更新运行版本按当次授权执行，不重建资料或现有连接。
+- “备份”独立保存恢复材料，再导出完整加密备份。已有文件不覆盖；恢复只允许空目标，保留历史不恢复旧许可、材料路径或受管副本。恢复前核对目标，NAS 原库不作为验证恢复目标。
+- 允许后台且托盘可用时，关窗转入后台；完全退出使用现有菜单或设置入口。App 退出只关闭当前 App，不停止 NAS、独立 CLI 或原聊天的有效许可。
+- 断线或操作结果未知时保留原编号，恢复后核对原结果。未知不等于未执行，不能更换编号重做同一次保存、发布、恢复或凭据操作。
+
+## 包内容和检查
+
+app 为完整桌面程序、同版 worker 与原有辅助程序；cli 含五个 AOT 命令、模板及四份当前引用；tools 为固定官方 GH/AWS 完整载荷及许可。notices、tools/notices 与 provenance 保存第三方许可、依赖锁和工具来源。
+
+diagnostics/bin/info-storage-check.exe 在新临时目录检查 SQLCipher/当前用户 DPAPI、重开和迁移，不打开实际资料库。运行时保留 diagnostics/lib。
+
+归档的 .verified.json 表示打包脚本完成了其声明的解包/CLI/存储检查，不代替实际桌面或宿主事件验收。[ACCEPTANCE.md](ACCEPTANCE.md) 说明连续使用及需要用户在场的检查；实际通过范围、候选 SHA 和限制由对应交付记录给出。
+
+## 本机安装与源码重建
+
+当前开发工作只产包，不自动安装、覆盖旧版本、修改全局 PATH、启用 hooks 或授予信任。正式安装位置和交付后清理沿用仓库 windows-delivery.md 的“本机安装与清理”；用户原资料、共享 SDK/缓存及运行中的材料不属于构建清理范围。
+
+从干净已提交源码，在已有工具链下运行（示例路径替换为实际位置）：
+
+```powershell
+.\scripts\package-windows.ps1 -FlutterBin 'C:\SDK\flutter\bin' -Python 'C:\Tools\python.exe' -OutputDirectory 'C:\Artifacts\chiyo-new' -Offline -PackageOnly
+```
+
+输出目录必须为新目录。离线构建需要已缓存的锁定依赖与官方工具归档；去掉 -Offline 只允许补取依赖，不改变版本锁。构建脚本先检查当前主机适用的全部测试和分析，再生成同提交载荷、清单、ZIP 与摘要；平台专用检查按其声明执行，跳过不算通过。

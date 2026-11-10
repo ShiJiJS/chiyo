@@ -19,7 +19,9 @@ Future<void> main(List<String> args) async {
   if (args.isNotEmpty) {
     if (args.length == 2 && args.first == '--connection') {
       try {
-        connection = await AgentConnectionProfile.read(File(args.last));
+        connection = await AgentConnectionProfile.read(
+          File(args.last).absolute,
+        );
       } on Object {
         stdout.writeln(jsonEncode({'status': 'connection_unavailable'}));
         exitCode = 64;

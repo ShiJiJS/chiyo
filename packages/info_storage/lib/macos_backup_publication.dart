@@ -1,7 +1,19 @@
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:ffi/ffi.dart';
+import 'package:info_core/info_core.dart' show WindowsPrivateFiles;
+part 'windows_backup_publication.dart';
+
+// Preserve the established private record types and Darwin format. Windows
+// uses its own native identities, never fabricated Darwin inode metadata.
+(String, String) _publicationPath(String value) => value.startsWith('/')
+    ? _MacFiles.path(value)
+    : _WindowsPublicationFiles.path(value);
+bool _publicationIdentity(String value) =>
+    RegExp(r'^macos:-?\d+:\d+:\d+:\d+:\d+:\d+$').hasMatch(value) ||
+    RegExp(r'^windows:\d+:\d+:\d+(?::\d+:\d+)?$').hasMatch(value);
 
 /// A private journal value, never a page resource or an Agent response.
 /// Keep the prepared source until the durable successful receipt is committed.
@@ -43,16 +55,14 @@ final class MacBackupPublication {
         !RegExp(r'^[0-9a-f]{64}$').hasMatch(json['digest'] as String)) {
       throw const BackupPublicationFailure('invalid_publication');
     }
-    _MacFiles.path(json['source'] as String);
-    _MacFiles.path(json['destination'] as String);
+    _publicationPath(json['source'] as String);
+    _publicationPath(json['destination'] as String);
     if (json['source'] == json['destination'] ||
         '${json['source']}.publish' == json['destination']) {
       throw const BackupPublicationFailure('invalid_publication');
     }
     for (final key in strings.skip(2).take(3)) {
-      if (!RegExp(
-        r'^macos:-?\d+:\d+:\d+:\d+:\d+:\d+$',
-      ).hasMatch(json[key] as String)) {
+      if (!_publicationIdentity(json[key] as String)) {
         throw const BackupPublicationFailure('invalid_publication');
       }
     }
@@ -71,10 +81,13 @@ final class MacBackupPublication {
 }
 
 final class BackupPublicationFailure implements Exception {
-  const BackupPublicationFailure(this.code);
+  const BackupPublicationFailure(this.code, {this.nativeError});
   final String code;
+  final int? nativeError;
   @override
-  String toString() => 'BackupPublicationFailure($code)';
+  String toString() => nativeError == null
+      ? 'BackupPublicationFailure($code)'
+      : 'BackupPublicationFailure($code, nativeError: $nativeError)';
 }
 
 /// These are observations, NOT operation outcomes. An absent/replaced output
@@ -102,11 +115,9 @@ final class MacBackupStagingDirectory {
         json['parentIdentity'] is! String) {
       throw const BackupPublicationFailure('invalid_staging');
     }
-    _MacFiles.path(json['path'] as String);
+    _publicationPath(json['path'] as String);
     for (final key in ['identity', 'parentIdentity']) {
-      if (!RegExp(
-        r'^macos:-?\d+:\d+:\d+:\d+:\d+:\d+$',
-      ).hasMatch(json[key] as String)) {
+      if (!_publicationIdentity(json[key] as String)) {
         throw const BackupPublicationFailure('invalid_staging');
       }
     }
@@ -127,7 +138,35 @@ final class MacBackupStagingDirectory {
 class MacBackupPublicationFiles {
   static final _native = _MacFiles();
 
+  static void validateOutputPath(
+    String destination,
+    MacBackupStagingDirectory staging,
+  ) {
+    if (Platform.isWindows) {
+      _WindowsPublicationFiles.path(destination);
+      _WindowsPublicationFiles.path(staging.path);
+      final target = destination.replaceAll('/', r'\').toLowerCase();
+      final root = staging.path.replaceAll('/', r'\').toLowerCase();
+      if (target == root || target.startsWith('$root\\')) {
+        throw const BackupPublicationFailure('invalid_publication');
+      }
+    } else {
+      _MacFiles.path(destination);
+      if (destination == staging.path ||
+          destination.startsWith('${staging.path}/')) {
+        throw const BackupPublicationFailure('invalid_publication');
+      }
+    }
+  }
+
+  /// Windows has no sandbox Save-panel staging capability. Create an empty
+  /// protected sibling on the selected destination's volume instead.
+  static MacBackupStagingDirectory createWindowsStaging(String destination) =>
+      _WindowsPublicationFiles.createStaging(destination);
+
   static MacBackupStagingDirectory captureStaging(String path) {
+    if (Platform.isWindows)
+      return _WindowsPublicationFiles.captureStaging(path);
     final (parent, _) = _MacFiles.path(path);
     final dir = _native.directory(path, private: true);
     var parentFd = -1;
@@ -149,6 +188,8 @@ class MacBackupPublicationFiles {
 
   /// False means the registered name is absent, never a different directory.
   static bool stagingExists(MacBackupStagingDirectory value) {
+    if (Platform.isWindows)
+      return _WindowsPublicationFiles.stagingExists(value);
     final (parent, name) = _MacFiles.path(value.path);
     final parentFd = _native.directory(parent, missing: true);
     if (parentFd < 0) return false;
@@ -177,6 +218,12 @@ class MacBackupPublicationFiles {
     MacBackupStagingDirectory value, {
     Set<String> generatedFiles = const {},
   }) {
+    if (Platform.isWindows) {
+      return _WindowsPublicationFiles.cleanupStaging(
+        value,
+        generatedFiles: generatedFiles,
+      );
+    }
     for (final name in generatedFiles) {
       if (name.isEmpty ||
           name == '.' ||
@@ -271,6 +318,9 @@ class MacBackupPublicationFiles {
   }
 
   static void _writePrivate(String path, List<int> bytes) {
+    if (Platform.isWindows) {
+      return _WindowsPublicationFiles.writePrivate(path, bytes);
+    }
     final (parent, name) = _MacFiles.path(path);
     final dir = _native.directory(parent, private: true);
     var fd = -1;
@@ -286,6 +336,8 @@ class MacBackupPublicationFiles {
   }
 
   static MacBackupPublication prepare(String source, String destination) {
+    if (Platform.isWindows)
+      return _WindowsPublicationFiles.prepare(source, destination);
     final (sourceParent, sourceName) = _MacFiles.path(source);
     final (targetParent, _) = _MacFiles.path(destination);
     if (source == destination ||
@@ -352,25 +404,23 @@ class MacBackupPublicationFiles {
     }
   }
 
-  static void publish(MacBackupPublication value) => _with(value, (
-    from,
-    to,
-    source,
-    target,
-  ) {
-    _verify(from, source, value);
-    final pending = '$source.publish';
-    // Hard-linking preserves the original inode as evidence across a crash.
-    // Both linkat and renameatx_np refuse an existing name. No copying fallback.
-    _native.link(from, source, pending);
-    _verify(from, pending, value);
-    _native.rename(from, pending, to, target);
-    _native.flush(to);
-    _native.flush(from);
-  });
+  static void publish(MacBackupPublication value) => Platform.isWindows
+      ? _WindowsPublicationFiles.publish(value)
+      : _with(value, (from, to, source, target) {
+          _verify(from, source, value);
+          final pending = '$source.publish';
+          // Hard-linking preserves the original inode as evidence across a crash.
+          // Both linkat and renameatx_np refuse an existing name. No copying fallback.
+          _native.link(from, source, pending);
+          _verify(from, pending, value);
+          _native.rename(from, pending, to, target);
+          _native.flush(to);
+          _native.flush(from);
+        });
 
-  static void verifyPrepared(MacBackupPublication value) =>
-      _with(value, (from, _, source, _) => _verify(from, source, value));
+  static void verifyPrepared(MacBackupPublication value) => Platform.isWindows
+      ? _WindowsPublicationFiles.verifyPrepared(value)
+      : _with(value, (from, _, source, _) => _verify(from, source, value));
 
   static BackupPublicationObservation observe(MacBackupPublication value) =>
       _observe(value, flush: false);
@@ -384,27 +434,30 @@ class MacBackupPublicationFiles {
   static BackupPublicationObservation _observe(
     MacBackupPublication value, {
     required bool flush,
-  }) => _with(value, (from, to, source, target) {
-    _verify(from, source, value);
-    final fd = _native.at(to, target, missing: true);
-    if (fd < 0) return BackupPublicationObservation.absent;
-    try {
-      if (_native.identity(fd) != value.sourceIdentity ||
-          _native.content(fd) != (value.bytes, value.digest)) {
-        return BackupPublicationObservation.different;
-      }
-      if (flush) {
-        _native.flush(fd);
-        _native.flush(to);
-        _native.flush(from);
-      }
-      return BackupPublicationObservation.matching;
-    } finally {
-      _native.close(fd);
-    }
-  });
+  }) => Platform.isWindows
+      ? _WindowsPublicationFiles.observe(value, flush: flush)
+      : _with(value, (from, to, source, target) {
+          _verify(from, source, value);
+          final fd = _native.at(to, target, missing: true);
+          if (fd < 0) return BackupPublicationObservation.absent;
+          try {
+            if (_native.identity(fd) != value.sourceIdentity ||
+                _native.content(fd) != (value.bytes, value.digest)) {
+              return BackupPublicationObservation.different;
+            }
+            if (flush) {
+              _native.flush(fd);
+              _native.flush(to);
+              _native.flush(from);
+            }
+            return BackupPublicationObservation.matching;
+          } finally {
+            _native.close(fd);
+          }
+        });
 
   static void cleanup(MacBackupPublication value) {
+    if (Platform.isWindows) return _WindowsPublicationFiles.cleanup(value);
     final (parent, source) = _MacFiles.path(value.source);
     final dir = _native.directory(parent, private: true);
     try {

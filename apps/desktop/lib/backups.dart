@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_storage/macos_backup_publication.dart';
 import 'ui.dart';
 import 'prototype_ui.dart';
 import 'settings_controls.dart';
@@ -42,6 +45,7 @@ class BackupStaging {
 class NativeBackupFilePicker extends BackupFilePicker {
   const NativeBackupFilePicker();
   static const _channel = MethodChannel('agent_info_manage/backup_files');
+  static final _windowsStaging = <String, MacBackupStagingDirectory>{};
   @override
   Future<String?> recoveryKeyOutput() =>
       _channel.invokeMethod<String>('recoveryKeyOutput');
@@ -58,6 +62,19 @@ class NativeBackupFilePicker extends BackupFilePicker {
       _channel.invokeMethod<String>('recoveryKeyInput');
   @override
   Future<BackupStaging?> prepareStaging(String output) async {
+    if (defaultTargetPlatform == TargetPlatform.windows && Platform.isWindows) {
+      if (_windowsStaging.length >= 256) {
+        throw const StorageFailure('backup_staging_failed');
+      }
+      final directory = MacBackupPublicationFiles.createWindowsStaging(output);
+      final random = Random.secure();
+      final token = List.generate(
+        24,
+        (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+      ).join();
+      _windowsStaging[token] = directory;
+      return BackupStaging(directory.path, token);
+    }
     if (defaultTargetPlatform != TargetPlatform.macOS) return null;
     final value = await _channel.invokeMapMethod<String, String>(
       'prepareBackupStaging',
@@ -77,12 +94,37 @@ class NativeBackupFilePicker extends BackupFilePicker {
   }
 
   @override
-  Future<void> releaseStaging(BackupStaging staging) =>
-      _channel.invokeMethod<void>('releaseBackupStaging', staging.token);
+  Future<void> releaseStaging(BackupStaging staging) async {
+    if (defaultTargetPlatform == TargetPlatform.windows && Platform.isWindows) {
+      final directory = _windowsStaging[staging.token];
+      if (directory == null || directory.path != staging.directory) {
+        throw const StorageFailure('backup_staging_failed');
+      }
+      MacBackupPublicationFiles.cleanupStaging(directory);
+      _windowsStaging.remove(staging.token);
+      return;
+    }
+    await _channel.invokeMethod<void>('releaseBackupStaging', staging.token);
+  }
 
   @override
-  Future<void> releaseRecordedStaging(Map<String, Object?> directory) =>
-      _channel.invokeMethod<void>('releaseRegisteredBackupStaging', directory);
+  Future<void> releaseRecordedStaging(Map<String, Object?> directory) async {
+    if (defaultTargetPlatform == TargetPlatform.windows && Platform.isWindows) {
+      final original = MacBackupStagingDirectory.fromPrivateJson(
+        Map<String, dynamic>.from(directory),
+      );
+      MacBackupPublicationFiles.cleanupStaging(original);
+      _windowsStaging.removeWhere(
+        (_, value) =>
+            value.path == original.path && value.identity == original.identity,
+      );
+      return;
+    }
+    await _channel.invokeMethod<void>(
+      'releaseRegisteredBackupStaging',
+      directory,
+    );
+  }
 
   Future<String?> _access(String method, Object arguments) async {
     try {

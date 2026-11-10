@@ -60,6 +60,8 @@ class WorkspaceRuntimePage extends StatelessWidget {
           p = preferences,
           c = UiPalette.of(context);
       final remote = v?.independentServer == true;
+      final windows = Theme.of(context).platform == TargetPlatform.windows;
+      final backgroundEntry = windows ? '系统托盘' : '菜单栏';
       final exitFailed = v?.phase == WorkspaceRuntimePhase.terminationFailed;
       final active = m.available && !p.frozen,
           canOperate = m.canMaintain && !p.frozen;
@@ -138,8 +140,8 @@ class WorkspaceRuntimePage extends StatelessWidget {
               SettingsPreferenceRow(
                 title: '关闭窗口后继续运行',
                 description: v?.menuBarAvailable == false
-                    ? '菜单栏入口不可用。继续运行时会保留窗口，避免无法重新打开。'
-                    : '收起到 Mac 菜单栏，继续接收申请；关闭窗口不会延长授权期限。关闭此选项后，关闭窗口需要先确认完全退出。',
+                    ? '$backgroundEntry入口不可用。继续运行时会保留窗口，避免无法重新打开。'
+                    : '收起到${windows ? '系统托盘' : ' Mac 菜单栏'}，继续接收申请；关闭窗口不会延长授权期限。关闭此选项后，关闭窗口需要先确认完全退出。',
                 control: p.value == null || p.draft == null
                     ? Text(
                         p.readFailure == null ? '正在读取…' : '暂不可用',
@@ -198,7 +200,7 @@ class WorkspaceRuntimePage extends StatelessWidget {
               SettingsPreferenceRow(
                 title: '关闭工作窗口',
                 description: v?.windowHidden == true
-                    ? '工作窗口已收起；可从菜单栏重新打开，当前会话与期限保持。'
+                    ? '工作窗口已收起；可从$backgroundEntry重新打开，当前会话与期限保持。'
                     : '继续运行时只收起工作窗口；完全退出会另行确认。',
                 control: DesktopButton(
                   key: const ValueKey('runtime-close-window'),

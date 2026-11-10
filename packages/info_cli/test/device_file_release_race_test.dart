@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:info_cli/device_information_files.dart';
+import 'package:info_cli/private_device_state.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:test/test.dart';
@@ -10,8 +11,8 @@ void main() {
   test(
     'release accepts only acknowledged physical cleanup if the guardian closes its socket first',
     () async {
-      final root = await Directory.systemTemp.createTemp(
-        'device-release-race-',
+      final root = await privateDeviceDirectory(
+        await Directory.systemTemp.createTemp('device-release-race-'),
       );
       final journal = File(
         '${root.path}/${sha256.convert(utf8.encode('delivery'))}.json',
@@ -59,13 +60,7 @@ void main() {
         'controlCapability': 'synthetic-control',
       };
       var mode = 'cleaned', controls = 0;
-      Future<void> write() =>
-          journal.writeAsString(jsonEncode(record), flush: true).then((_) {});
-      await journal.create();
-      expect(
-        (await Process.run('/bin/chmod', ['600', journal.path])).exitCode,
-        0,
-      );
+      Future<void> write() => writePrivateDeviceState(journal, record);
       server.listen((request) async {
         controls++;
         await request.drain<void>();
@@ -114,6 +109,6 @@ void main() {
         await root.delete(recursive: true);
       }
     },
-    testOn: 'mac-os',
+    testOn: 'mac-os || windows',
   );
 }

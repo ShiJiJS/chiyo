@@ -184,17 +184,37 @@ final class DeviceCredentialHost {
     final worker = await RuntimeWorkerCommand.resolve(
       workerExecutable: workerExecutable,
     );
+    final system = Platform.isWindows
+        ? Platform.environment['SystemRoot']
+        : null;
+    if (Platform.isWindows && (system == null || system.isEmpty)) {
+      throw const CredentialUseFailure('service_unavailable');
+    }
+    final environment = Platform.isWindows
+        ? <String, String>{
+            'SystemRoot': system!,
+            'WINDIR': system,
+            'COMSPEC': '$system\\System32\\cmd.exe',
+            'PATH': '$system\\System32',
+            'HOME': file.parent.path,
+            'USERPROFILE': file.parent.path,
+            'APPDATA': file.parent.path,
+            'LOCALAPPDATA': file.parent.path,
+            'TEMP': Directory.systemTemp.path,
+            'TMP': Directory.systemTemp.path,
+          }
+        : <String, String>{
+            'PATH': '/usr/bin:/bin',
+            'HOME': file.parent.path,
+            'TMPDIR': Directory.systemTemp.path,
+            'LANG': 'C.UTF-8',
+          };
     final process = await Process.start(
       worker.executable,
       [...worker.arguments, '--credential-execution-host'],
       mode: ProcessStartMode.detachedWithStdio,
       runInShell: false,
-      environment: {
-        'PATH': '/usr/bin:/bin',
-        'HOME': file.parent.path,
-        'TMPDIR': Directory.systemTemp.path,
-        'LANG': 'C.UTF-8',
-      },
+      environment: environment,
       includeParentEnvironment: false,
     );
     await process.stdout.listen((_) {}).cancel();

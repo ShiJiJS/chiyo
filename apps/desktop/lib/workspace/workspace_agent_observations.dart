@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:info_cli/macos_agent_bundle.dart';
+import 'package:info_cli/agent_bundle_observation.dart';
 import 'package:info_workspace/agent_sessions.dart';
 import 'workspace_agents.dart';
 import 'workspace_approvals.dart';
@@ -14,7 +14,7 @@ class WorkspaceAgentObservations implements WorkspaceAgentsSource {
     this.independentServer = false,
   });
   final Future<WorkspaceAgentSessions> Function() readSessions;
-  final Future<MacAgentBundleObservation> Function({bool rehash})? readBundle;
+  final Future<AgentBundleObservation> Function({bool rehash})? readBundle;
   final bool independentServer;
   int _version = 0;
   _Observation? _current;
@@ -24,13 +24,13 @@ class WorkspaceAgentObservations implements WorkspaceAgentsSource {
     int version, {
     bool rehash = false,
   }) async {
-    MacAgentBundleObservation bundle;
+    AgentBundleObservation bundle;
     try {
       bundle =
           await readBundle?.call(rehash: rehash) ??
-          const MacAgentBundleObservation(status: 'not_observed');
+          const AgentBundleObservation(status: 'not_observed');
     } on Object {
-      bundle = const MacAgentBundleObservation(status: 'not_observed');
+      bundle = const AgentBundleObservation(status: 'not_observed');
     }
     final cliReason = switch (bundle.status) {
       'verified' =>

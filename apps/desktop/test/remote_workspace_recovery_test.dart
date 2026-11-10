@@ -1,3 +1,8 @@
+@TestOn('!windows')
+library;
+
+// Real OnlineServer fixture uses POSIX secret mounts. Windows behavior is
+// exercised by the explicit existing-NAS tests, without relaxing that boundary.
 import 'package:info_server/agent_devices.dart';
 import 'dart:convert';
 import 'dart:io';

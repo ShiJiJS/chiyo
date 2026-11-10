@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_workspace/credential_transport.dart';
+import 'package:info_workspace/credential_use_transport.dart';
 import 'package:info_workspace/history_transport.dart';
 import '../credential_files.dart';
 import 'unavailable_workspace_sources.dart';
@@ -91,6 +92,54 @@ class RemoteWorkspaceCredentials extends UnavailableWorkspaceCredential
       await client.request('GET', '${_record(ref)}/materials'),
     ),
   );
+  @override
+  Future<List<WorkspaceCredentialUseRequest>> requests({
+    WorkspaceRecordRef? ref,
+  }) => _read(() async {
+    final response = await _usageMetadata(
+      ref == null ? '$_prefix/requests' : '${_record(ref)}/requests',
+    );
+    if (response.length != 2 ||
+        response['version'] != 1 ||
+        response['requests'] is! List) {
+      throw const FormatException('Invalid credential request list');
+    }
+    final requests = (response['requests'] as List)
+        .map(credentialUseRequestFromJson)
+        .toList();
+    if (ref != null && requests.any((request) => request.ref != ref)) {
+      throw const FormatException('Mismatched credential request');
+    }
+    return requests;
+  });
+  @override
+  Future<List<WorkspaceCredentialUseHistory>> history(WorkspaceRecordRef ref) =>
+      _read(() async {
+        final response = await _usageMetadata('${_record(ref)}/history');
+        if (response.length != 3 ||
+            response['version'] != 1 ||
+            response['credentialId'] != ref.id ||
+            response['history'] is! List) {
+          throw const FormatException('Invalid credential history');
+        }
+        return (response['history'] as List)
+            .map(credentialUseHistoryFromJson)
+            .toList();
+      });
+  Future<Map<String, dynamic>> _usageMetadata(String path) async {
+    try {
+      return await client.request('GET', path);
+    } on RemoteFailure catch (error) {
+      if (error.code == 'not_found') {
+        throw const WorkspaceFailure(
+          'unsupported',
+          '当前服务器尚未提供凭据使用记录，请更新服务器后重试。',
+        );
+      }
+      rethrow;
+    }
+  }
+
   @override
   Future<WorkspaceCredentialCandidate> string(String secret) async {
     final bytes = utf8.encode(secret);

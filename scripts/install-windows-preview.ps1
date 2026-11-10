@@ -38,12 +38,19 @@ if (Test-Path -LiteralPath $install) {
 $stage = Join-Path $parent ('.AgentInfoManage-stage-' + [Guid]::NewGuid().ToString('N'))
 $previous = Join-Path $parent ('.AgentInfoManage-previous-' + [Guid]::NewGuid().ToString('N'))
 $desktop = [Environment]::GetFolderPath('Desktop')
-$shortcutPath = Join-Path $desktop '信息授权.lnk'
+$shortcutPath = Join-Path $desktop '知予.lnk'
+$legacyShortcutPath = Join-Path $desktop '信息授权.lnk'
 $shell = New-Object -ComObject WScript.Shell
 $shortcut = $shell.CreateShortcut($shortcutPath)
 $exe = Join-Path $install 'current/app/info_desktop.exe'
 if ((Test-Path -LiteralPath $shortcutPath) -and $shortcut.TargetPath -ne $exe) {
     throw 'Desktop shortcut already points elsewhere; keep it unchanged.'
+}
+$removeLegacyShortcut = $false
+if (Test-Path -LiteralPath $legacyShortcutPath) {
+    $legacyShortcut = $shell.CreateShortcut($legacyShortcutPath)
+    # Retire only the old default shortcut owned by this exact installation.
+    $removeLegacyShortcut = $legacyShortcut.TargetPath -eq $exe -and $legacyShortcut.Arguments -eq ''
 }
 New-Item -ItemType Directory -Path $stage | Out-Null
 $swapped = $false
@@ -62,6 +69,10 @@ try {
     $payload = Join-Path $stage 'AgentInfoManage'
     $manifest = Get-Content -LiteralPath (Join-Path $payload 'manifest.json') -Raw | ConvertFrom-Json
     if ($manifest.product -ne 'Agent Info Manage' -or $manifest.sourceDirty -or $manifest.architecture -ne 'windows-x64') { throw 'Invalid package identity.' }
+    if ($manifest.PSObject.Properties['displayName']) {
+        if ($manifest.displayName -ne '知予') { throw 'Unexpected application display name.' }
+        & (Join-Path $PSScriptRoot 'test-windows-branding.ps1') -Executable (Join-Path $payload 'app/info_desktop.exe') -Icon (Join-Path $payload 'app/chiyo.ico')
+    }
     foreach ($entry in $manifest.files) {
         $file = [IO.Path]::GetFullPath((Join-Path $payload $entry.path))
         if (-not $file.StartsWith("$payload\", [StringComparison]::OrdinalIgnoreCase) -or
@@ -74,11 +85,11 @@ try {
     Copy-Item -LiteralPath $archive -Destination (Join-Path $stage 'package')
     Copy-Item -LiteralPath "$archive.sha256" -Destination (Join-Path $stage 'package')
     if (Test-Path -LiteralPath $verified) { Copy-Item -LiteralPath $verified -Destination (Join-Path $stage 'package') }
-    [ordered]@{ product='Agent Info Manage'; release=$manifest.release; sourceCommit=$manifest.sourceCommit;
+    [ordered]@{ product='Agent Info Manage'; displayName='知予'; release=$manifest.release; sourceCommit=$manifest.sourceCommit;
         archiveName=[IO.Path]::GetFileName($archive); archiveSha256=$digest; installedAtUtc=[DateTime]::UtcNow.ToString('o');
         fullPackageAcceptancePassed=[bool](-not $PreviewReason); previewReason=$PreviewReason } |
         ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stage 'installation.json') -Encoding utf8
-    $note = "版本：$($manifest.release)`n运行current/app/info_desktop.exe，保留完整目录。首次打开旧资料库会升级，建议事先导出加密备份。`n"
+    $note = "知予 $($manifest.release)`n运行current/app/info_desktop.exe，保留完整目录。联网版连接现有NAS，连接配置保存在当前用户AppData；不会自动导入旧离线资料库。`n"
     if ($PreviewReason) { $note += "开发预览，尚未通过全部整包验收：$PreviewReason`n" }
     $note | Set-Content -LiteralPath (Join-Path $stage '预览说明.txt') -Encoding utf8
     $cli = Join-Path $stage 'current/cli/info.exe'
@@ -100,9 +111,11 @@ try {
     catch { if (Test-Path -LiteralPath $previous) { Move-Item -LiteralPath $previous -Destination $install }; throw }
     $shortcut.TargetPath = $exe
     $shortcut.WorkingDirectory = Split-Path -Parent $exe
-    $shortcut.IconLocation = "$exe,0"
-    $shortcut.Description = '信息授权'
+    $icon = Join-Path $install 'current/app/chiyo.ico'
+    $shortcut.IconLocation = if (Test-Path -LiteralPath $icon) { "$icon,0" } else { "$exe,0" }
+    $shortcut.Description = '知予'
     $shortcut.Save()
+    if ($removeLegacyShortcut) { Remove-Item -LiteralPath $legacyShortcutPath }
     # Only the verified, exact prior install is removed, after the new shortcut is saved.
     if (Test-Path -LiteralPath $previous) {
         if ([IO.Path]::GetFullPath($previous) -ne (Join-Path $parent (Split-Path -Leaf $previous))) { throw 'Unsafe previous directory.' }

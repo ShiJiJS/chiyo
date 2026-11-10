@@ -5,6 +5,13 @@ import 'package:info_core/protocol_json.dart';
 
 // Shared private journal storage for device files and credential executions.
 Future<Directory> privateDeviceDirectory(Directory folder) async {
+  if (Platform.isWindows) {
+    try {
+      return WindowsPrivateFiles.directory(folder);
+    } on Object {
+      throw const InformationFileFailure('delivery_io_failed');
+    }
+  }
   if (!Platform.isMacOS) {
     throw const InformationFileFailure('unsupported_capability');
   }
@@ -23,6 +30,14 @@ Future<Directory> privateDeviceDirectory(Directory folder) async {
 }
 
 Future<void> privateDeviceFile(File file) async {
+  if (Platform.isWindows) {
+    try {
+      WindowsPrivateFiles.reserve(file);
+      return;
+    } on Object {
+      throw const InformationFileFailure('delivery_io_failed');
+    }
+  }
   final type = await FileSystemEntity.type(file.path, followLinks: false);
   if (type != FileSystemEntityType.notFound &&
       type != FileSystemEntityType.file) {
@@ -48,6 +63,16 @@ Future<void> privateDeviceFile(File file) async {
 }
 
 Future<Map<String, dynamic>?> readPrivateDeviceState(File file) async {
+  if (Platform.isWindows) {
+    try {
+      final value = WindowsPrivateFiles.readSecret(file);
+      return value == null
+          ? null
+          : decodeProtocolObject(value, maxBytes: 131072);
+    } on Object {
+      throw const InformationFileFailure('delivery_io_failed');
+    }
+  }
   final type = await FileSystemEntity.type(file.path, followLinks: false);
   if (type == FileSystemEntityType.notFound) return null;
   if (type != FileSystemEntityType.file ||
@@ -62,6 +87,14 @@ Future<void> writePrivateDeviceState(
   File file,
   Map<String, dynamic> value,
 ) async {
+  if (Platform.isWindows) {
+    try {
+      WindowsPrivateFiles.writeSecret(file, jsonEncode(value));
+      return;
+    } on Object {
+      throw const InformationFileFailure('delivery_io_failed');
+    }
+  }
   final staging = await file.parent.createTemp('.copy-state-');
   try {
     await privateDeviceDirectory(staging);

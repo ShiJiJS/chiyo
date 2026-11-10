@@ -18,8 +18,12 @@ class CredentialProcessIdentity {
       return _MacOsProcessIdentity.isActive(processId, createdAt);
     }
     if (!Platform.isWindows || processId < 1) return null;
+    // Resolve the lazily loaded GetLastError function before OpenProcess.
+    // Loading it after a failed first observation can overwrite that call's
+    // error and turn a confirmed missing process into an inconclusive result.
+    final lastError = _lastError;
     final handle = _openProcess(0x1000 | 0x100000, 0, processId);
-    final error = _lastError();
+    final error = lastError();
     if (handle == 0) return error == 87 ? false : null;
     final times = calloc<Uint64>(4);
     try {

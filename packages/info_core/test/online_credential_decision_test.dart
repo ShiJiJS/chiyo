@@ -112,7 +112,7 @@ void main() {
                   'GH_TOKEN': {'secret': 'token'},
                 },
               },
-            });
+            }, allowPortableLaunchPaths: true);
             final prepared = DeviceCredentialLaunch.fromPrivateJson({
               'version': 1,
               'planHash': input.launch.planHash,

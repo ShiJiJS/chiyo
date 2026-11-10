@@ -12,6 +12,8 @@
 
 #include "win32_window.h"
 #include "backup_files.h"
+#include "owner_pdf_previews.h"
+#include "owner_file_open_channel.h"
 #include "notification_queue.h"
 
 // A window that does nothing but host a Flutter view.
@@ -68,6 +70,8 @@ class FlutterWindow : public Win32Window {
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
   std::unique_ptr<BackupFileDialogs> backup_files_;
+  std::unique_ptr<OwnerPdfPreviews> pdf_previews_;
+  std::unique_ptr<OwnerFileOpenChannel> owner_file_open_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

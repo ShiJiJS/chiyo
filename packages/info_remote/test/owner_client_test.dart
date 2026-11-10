@@ -1,6 +1,11 @@
-import 'package:info_server/agent_devices.dart';
+@TestOn('!windows')
+library;
+
+// Exercises the real POSIX OnlineServer secret mounts. Windows client/TLS
+// behavior is covered by the explicit existing-NAS desktop checks.
 import 'dart:convert';
 import 'dart:io';
+import 'package:info_server/agent_devices.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_server/mounted_database_key_store.dart';

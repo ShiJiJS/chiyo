@@ -206,6 +206,7 @@ class RemoteWorkspaceSource
     if (mutation != null && local != null) {
       throw const WorkspaceFailure('unknown_outcome', '操作编号对应多种结果，无法确认。');
     }
+    if (mutation != null) await _refreshResolvedRecord(mutation.record);
     return local ?? mutation;
   }
 
@@ -803,13 +804,17 @@ class RemoteWorkspaceSource
     if (r != null && lifecycle != null) {
       throw const WorkspaceFailure('unknown_outcome', '原操作编号对应多种结果，无法确认。');
     }
-    if (lifecycle != null) return lifecycle;
+    if (lifecycle != null) {
+      await _refreshResolvedRecord(lifecycle.result.ref);
+      return lifecycle;
+    }
     if (r == null) return null;
     final command = r.command;
     if (command == null) {
       throw const WorkspaceFailure('unknown_outcome', '此旧操作缺少原表单标识，请核对操作结果。');
     }
     final ref = WorkspaceRecordRef(WorkspaceRecordKind.information, r.itemId);
+    await _refreshResolvedRecord(ref);
     return WorkspaceOperationReceipt(
       operationId: r.operationId,
       intent: WorkspaceOperationIntent(
@@ -828,4 +833,13 @@ class RemoteWorkspaceSource
       result: WorkspaceRecordReceipt(ref: ref, version: r.version),
     );
   });
+
+  Future<void> _refreshResolvedRecord(WorkspaceRecordRef ref) async {
+    // Resolved file/save receipts must publish their updated projection
+    // before the caller closes the editor or reads the new file.
+    // This also covers records moved out of their previous directory.
+    // Failure remains an unknown outcome; this never submits another write.
+    if (cache.resources != null) await cache.synchronize(requireFresh: true);
+    if (!_changes.isClosed) _changes.add(ref);
+  }
 }
