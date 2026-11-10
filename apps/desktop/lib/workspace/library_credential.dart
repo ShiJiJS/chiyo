@@ -36,7 +36,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
   List<WorkspaceRecordSummary> _links = [];
   List<WorkspaceCredentialUseRequest> _requests = [];
   WorkspaceFailure? _failure, _requestFailure, _linksFailure;
-  bool _loading = true, _busy = false;
+  bool _loading = true, _refreshing = true, _busy = false;
   int _generation = 0;
   @override
   void initState() {
@@ -65,6 +65,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
     final generation = ++_generation;
     setState(() {
       _loading = _detail == null;
+      _refreshing = true;
       _failure = null;
     });
     try {
@@ -95,6 +96,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
           _requests = requests;
           _requestFailure = requestFailure;
           _loading = false;
+          _refreshing = false;
         });
       }
     } catch (error) {
@@ -104,6 +106,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
               ? error
               : const WorkspaceFailure('unavailable', '凭据资料暂不可读取。');
           _loading = false;
+          _refreshing = false;
         });
       }
     }
@@ -147,8 +150,10 @@ class _LibraryCredentialState extends State<LibraryCredential> {
     }
   });
   Future<void> _toggle() => _modal(() async {
-    final detail = _detail;
-    if (detail == null) return;
+    // A mutation or change notification may finish before the detail projection
+    // has refreshed. Review the current version instead of opening a stale form.
+    final detail = await widget.source.credentials.read(widget.ref);
+    if (!mounted) return;
     final result = await showDesktopDialog<bool>(
       context,
       builder: (_) =>
@@ -224,7 +229,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
         ],
       );
     }
-    final enabled = !_busy && _failure == null;
+    final enabled = !_busy && !_refreshing && _failure == null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
