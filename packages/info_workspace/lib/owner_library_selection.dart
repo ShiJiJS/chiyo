@@ -15,8 +15,10 @@ core.LibrarySelection coreLibrarySelection(
 
 List<WorkspaceLibraryRecycleRecord> workspaceLibraryRecords(
   Iterable<core.LibraryRecycleRecord> records,
-  WorkspaceCatalog catalog,
-) => [
+  WorkspaceCatalog catalog, {
+  Map<String, String> informationEntries = const {},
+  Map<String, String> credentialEntries = const {},
+}) => [
   for (final r in records)
     WorkspaceLibraryRecycleRecord(
       ref: WorkspaceRecordRef(
@@ -31,5 +33,8 @@ List<WorkspaceLibraryRecycleRecord> workspaceLibraryRecords(
           (r.kind == 'credential' ? '凭据' : '资料'),
       directoryId: r.directoryId,
       path: r.directoryPath,
+      recycleEntryId: r.kind == 'credential'
+          ? credentialEntries[r.id]
+          : informationEntries[r.id],
     ),
 ];

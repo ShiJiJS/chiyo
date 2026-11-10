@@ -397,27 +397,33 @@ class _LibraryPageState extends State<LibraryPage> {
       const PopupMenuItem(value: 'recycle', child: Text('将未分类资料移到回收站')),
     ]);
     if (!mounted || action != 'recycle') return;
+    final source = model.source;
     try {
       final records = <WorkspaceRecordRef>[];
       var offset = 0;
       while (true) {
-        final result = await model.source.queryRecords(
+        final result = await source.queryRecords(
           WorkspaceQuery(directoryId: 'unfiled', offset: offset, limit: 100),
         );
+        if (!mounted || !identical(source, model.source)) return;
         records.addAll(result.items.map((r) => r.ref));
         offset += result.items.length;
         if (offset >= result.total || result.items.isEmpty) break;
       }
-      if (mounted && records.isNotEmpty) {
+      if (mounted && identical(source, model.source) && records.isNotEmpty) {
         await _manage(
           WorkspaceLibrarySelection(records: records),
           moving: false,
         );
       }
     } on WorkspaceFailure catch (error) {
-      if (mounted) DesktopFeedback.show(context, error.message);
+      if (mounted && identical(source, model.source)) {
+        DesktopFeedback.show(context, error.message);
+      }
     } catch (_) {
-      if (mounted) DesktopFeedback.show(context, '未分类资料暂时无法读取，请重试。');
+      if (mounted && identical(source, model.source)) {
+        DesktopFeedback.show(context, '未分类资料暂时无法读取，请重试。');
+      }
     }
   }
 
@@ -1000,10 +1006,10 @@ class _LibraryPageState extends State<LibraryPage> {
             ...libraryVisibleDirectoryTree(catalog, _collapsed).where(
               (d) =>
                   d.id != 'unfiled' ||
-                  (catalog.directoryCounts['unfiled'] ?? 0) > 0,
+                  (catalog.directoryCounts['unfiled'] ?? 1) > 0,
             ),
             if (!catalog.directories.any((d) => d.id == 'unfiled') &&
-                (catalog.directoryCounts['unfiled'] ?? 0) > 0)
+                (catalog.directoryCounts['unfiled'] ?? 1) > 0)
               const WorkspaceDirectory('unfiled', '未分类'),
           ];
     final decorations = <Widget>[

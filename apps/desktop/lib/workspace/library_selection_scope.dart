@@ -23,10 +23,12 @@ class LibrarySelectionScope extends StatelessWidget {
     super.key,
     required this.preview,
     this.catalog,
+    this.onPreview,
     this.listKey = const ValueKey('batch-recycle-scope'),
   });
   final WorkspaceLibraryRecyclePreview preview;
   final WorkspaceCatalog? catalog;
+  final void Function(WorkspaceLibraryRecycleRecord)? onPreview;
   final Key listKey;
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,14 @@ class LibrarySelectionScope extends StatelessWidget {
                 subtitle: Text(
                   '${r.type} · ${r.path.isEmpty ? '未分类' : r.path.join(' / ')}',
                 ),
+                trailing: onPreview == null || r.recycleEntryId == null
+                    ? null
+                    : TextButton.icon(
+                        key: ValueKey('batch-member-preview-${r.ref.key}'),
+                        onPressed: () => onPreview!(r),
+                        icon: const Icon(Icons.visibility_outlined, size: 18),
+                        label: const Text('查看内容'),
+                      ),
               );
             },
           ),

@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/desktop_controls.dart';
+import 'package:info_desktop/desktop_feedback.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:info_desktop/workspace/classification_controller.dart';
@@ -27,6 +28,19 @@ class _Source extends OwnerWorkspaceSource {
     : super(owner: owner, refreshInterval: Duration.zero);
   bool loseAfter = false, loseBefore = false, wrongReceipt = false;
   int writes = 0, queries = 0;
+  bool failUnfiled = false;
+  @override
+  Future<WorkspaceResults> queryRecords(
+    WorkspaceQuery query, {
+    WorkspaceRecordRef? keepSelection,
+  }) {
+    if (failUnfiled && query.directoryId == 'unfiled') {
+      failUnfiled = false;
+      throw const WorkspaceFailure('unavailable', '合成目录读取失败');
+    }
+    return super.queryRecords(query, keepSelection: keepSelection);
+  }
+
   @override
   Future<WorkspaceLibraryRecycleReceipt> changeLibraryRecycle(
     WorkspaceLibraryRecycleCommand c,
@@ -178,7 +192,9 @@ Future<void> _close(WidgetTester t, _Fixture f) async {
   await closing;
 }
 
-Widget _home(Widget child) => MaterialApp(home: Scaffold(body: child));
+Widget _home(Widget child) => MaterialApp(
+  home: Scaffold(body: DesktopFeedback(child: child)),
+);
 const _evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
 Future<void> _capture(WidgetTester t, String name) async {
   if (_evidence.isEmpty) return;
@@ -343,6 +359,96 @@ void main() {
   );
 
   testWidgets(
+    'recycled document reuses Markdown and relation presentation and restores its retained version',
+    (t) async {
+      t.view.physicalSize = const Size(1200, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(() => _Fixture.create()))!;
+      try {
+        final ref = (await t.runAsync(() async {
+          final definition = await f.source.loadTemplate('document');
+          final created = await f.source.createRecord(
+            WorkspaceCreate(
+              operationId: 'recycle-markdown-create',
+              typeId: 'document',
+              name: '合成文档',
+              directoryId: f.child.id,
+              expectedTemplateVersion: definition['templateVersion'] as String?,
+              expectedTemplateDigest: definition['packageDigest'] as String?,
+              values: const {'bodyFormat': 'markdown', 'body': '# 原始标题'},
+              relations: {
+                'related': [
+                  WorkspaceRecordRef(
+                    WorkspaceRecordKind.information,
+                    f.first.id,
+                  ),
+                ],
+              },
+            ),
+          );
+          expect(created, isA<WorkspaceSaved>());
+          final detail = (created as WorkspaceSaved).detail;
+          final ref = detail.record.ref;
+          final edited = await f.source.saveRecord(
+            WorkspaceEdit(
+              operationId: 'recycle-markdown-edit',
+              expectedVersion: detail.version,
+              record: detail.record,
+              values: const {'body': '# 合成标题\n\n**合成正文**'},
+            ),
+          );
+          expect(edited, isA<WorkspaceSaved>());
+          return ref;
+        }))!;
+        final entry = (await t.runAsync(() async {
+          final current = await f.source.readDetail(ref);
+          final receipt = await f.source.changeRecord(
+            WorkspaceRecordChange(
+              operationId: 'recycle-markdown',
+              ref: ref,
+              expectedVersion: current.version,
+              action: WorkspaceRecordAction.recycle,
+            ),
+          );
+          return (await f.source.queryRecycled()).items.singleWhere(
+            (e) => e.id == receipt.entryId,
+          );
+        }))!;
+        await t.pumpWidget(
+          _home(
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () =>
+                    showLibraryRecycle(context, f.source, entry: entry),
+                child: const Text('查看合成文档'),
+              ),
+            ),
+          ),
+        );
+        await t.tap(find.text('查看合成文档'));
+        await _settle(t);
+        expect(find.text('合成标题', findRichText: true), findsWidgets);
+        expect(find.text('合成正文', findRichText: true), findsWidgets);
+        expect(find.text('应用资料'), findsOneWidget);
+        expect(find.textContaining('服务 / 应用'), findsWidgets);
+        await t.tap(find.byKey(const ValueKey('library-recycle-submit')));
+        await _settle(t);
+        final restored = (await t.runAsync(() => f.source.readDetail(ref)))!;
+        expect(restored.values['body'], '# 合成标题\n\n**合成正文**');
+        expect(restored.relations['related'], [
+          WorkspaceRecordRef(WorkspaceRecordKind.information, f.first.id),
+        ]);
+        expect(restored.version, greaterThan(entry.version));
+        expect(restored.record.directoryId, f.child.id);
+        expect(t.takeException(), isNull);
+      } finally {
+        await _close(t, f);
+      }
+    },
+  );
+  testWidgets(
     'classification deletion confirms the whole range, cancels without changes and restores one group from the recycle page',
     (t) async {
       t.view.physicalSize = const Size(1200, 1100);
@@ -391,6 +497,36 @@ void main() {
         expect(find.textContaining('整批回收 · 2 个目录、2 条资料、1 项凭据'), findsOneWidget);
         await t.tap(find.byKey(ValueKey('library-recycle-batch-${batch.id}')));
         await _settle(t);
+        await t.tap(find.text('查看完整范围'));
+        await _settle(t);
+        final previewFirst = find.byKey(
+          ValueKey('batch-member-preview-information:${f.first.id}'),
+        );
+        // The retained item is inspectable without exposing a per-item restore.
+        await t.ensureVisible(previewFirst);
+        await t.tap(previewFirst);
+        await _settle(t);
+        expect(find.text('回收内容预览'), findsOneWidget);
+        expect(find.textContaining('PRIVATE-'), findsWidgets);
+        expect(
+          find.byKey(const ValueKey('library-recycle-submit')),
+          findsNothing,
+        );
+        await t.tap(find.byKey(const ValueKey('batch-member-close')));
+        await _settle(t);
+        final previewCredential = find.byKey(
+          ValueKey('batch-member-preview-credential:${f.credential.id}'),
+        );
+        await t.ensureVisible(previewCredential);
+        await t.tap(previewCredential);
+        await _settle(t);
+        expect(find.textContaining('材料：'), findsOneWidget);
+        expect(find.textContaining('PRIVATE-TOKEN'), findsNothing);
+        await t.tap(find.byKey(const ValueKey('batch-member-close')));
+        await _settle(t);
+        await t.ensureVisible(
+          find.byKey(const ValueKey('batch-recycle-confirm')),
+        );
         await t.tap(find.byKey(const ValueKey('batch-recycle-confirm')));
         await _settle(t);
         expect(f.service.owner.directories.map((d) => d.name).toSet(), {
@@ -896,6 +1032,68 @@ void main() {
         expect(find.text('资料已删除或不可用'), findsOneWidget);
         expect(t.takeException(), isNull);
       } finally {
+        await _close(t, f);
+      }
+    },
+  );
+  testWidgets(
+    'failed unfiled reads never delete and a later new item is outside the confirmed selection',
+    (t) async {
+      t.view.physicalSize = const Size(1280, 900);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final f = (await t.runAsync(() => _Fixture.create()))!;
+      await t.runAsync(
+        () => f.service.owner.createInformation('另一外部资料', '', [
+          const core.FieldInput('正文', '', 'PRIVATE-OTHER'),
+        ]),
+      );
+      final model = LibraryController(f.source);
+      await t.runAsync(model.resetView);
+      try {
+        await t.pumpWidget(
+          _home(LibraryPage(controller: model, onNavigate: (_, _) {})),
+        );
+        await _settle(t);
+        Future<void> open() async {
+          final target = find.byKey(
+            const ValueKey('library-directory-unfiled'),
+          );
+          await t.ensureVisible(target);
+          await t.tap(target, buttons: kSecondaryMouseButton);
+          await _settle(t);
+          await t.tap(find.text('将未分类资料移到回收站'));
+          await _settle(t);
+        }
+
+        f.source.failUnfiled = true;
+        await open();
+        expect(find.text('合成目录读取失败'), findsOneWidget);
+        expect(f.source.writes, 0);
+        expect(f.repo.libraryRecycleBatches, isEmpty);
+        await open();
+        expect(find.textContaining('外部资料'), findsWidgets);
+        final fresh = await t.runAsync(
+          () => f.service.owner.createInformation('并发新增', '', [
+            const core.FieldInput('正文', '', 'PRIVATE-NEW'),
+          ]),
+        );
+        await t.tap(find.byKey(const ValueKey('batch-recycle-confirm')));
+        await _settle(t);
+        expect(f.source.writes, 1);
+        expect(f.repo.libraryRecycleBatches, hasLength(1));
+        expect(
+          f.service.owner.information.any((r) => r.id == fresh!.id),
+          isTrue,
+        );
+        expect(
+          f.service.owner.information.any((r) => r.name == '外部资料'),
+          isFalse,
+        );
+        expect(t.takeException(), isNull);
+      } finally {
+        model.dispose();
         await _close(t, f);
       }
     },

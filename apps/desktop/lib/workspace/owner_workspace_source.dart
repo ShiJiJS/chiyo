@@ -32,6 +32,7 @@ import 'workspace_source.dart';
 class OwnerWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceRecycledFiles,
         WorkspaceLibraryRecycle,
         WorkspaceLibraryMove,
         WorkspaceFileSelectionReleaser,
@@ -494,6 +495,15 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceArchive> readRecycled(String entryId) =>
       _read(() => _history.readRecycled(entryId));
+  @override
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  }) => _read(() async {
+    final ref = await _history.resolveRecycledFile(entryId, fieldKey);
+    return OwnerWorkspaceAttachmentPreview(owner).read(ref, page: page);
+  });
   @override
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
       _read(() => _history.changeRecord(change));

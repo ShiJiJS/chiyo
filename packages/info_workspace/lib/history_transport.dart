@@ -352,7 +352,8 @@ WorkspaceOperationReceipt lifecycleReceiptFromJson(Object? raw) =>
       final r = historyEnvelope(raw, ['operationId', 'change', 'result']);
       final c = recordChangeFromJson(r['change']),
           result = recordReceiptFromJson(r['result']);
-      if (_operation(r['operationId']) != c.operationId || result.ref != c.ref) {
+      if (_operation(r['operationId']) != c.operationId ||
+          result.ref != c.ref) {
         throw const FormatException();
       }
       return WorkspaceOperationReceipt(
@@ -463,17 +464,20 @@ WorkspaceLibraryRecyclePreview batchPreviewFromJson(Object? raw) =>
         _bool(d['proposed']);
       }
       for (final raw in _list(p['records'])) {
+        final fields = workspaceObject(raw);
         final r = historyWire(raw, [
           'ref',
           'name',
           'type',
           'directoryId',
           'path',
+          if (fields.containsKey('recycleEntryId')) 'recycleEntryId',
         ]);
         recordRefFromJson(r['ref']);
         historyText(r['name']);
         historyText(r['type']);
         _optionalText(r['directoryId']);
+        _optionalText(r['recycleEntryId']);
         _texts(r['path']);
       }
       final paths = workspaceObject(p['paths']);

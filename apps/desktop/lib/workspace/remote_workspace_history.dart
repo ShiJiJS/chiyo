@@ -108,6 +108,25 @@ class RemoteWorkspaceHistory implements WorkspaceLibraryRecycle {
       }),
     ),
   );
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  }) => _historyCall(() async {
+    if (page < 0) throw const WorkspaceFailure('invalid_request', '页码无效。');
+    final content = fileOriginalFromJson(
+      await client.request('POST', '$prefix/recycled-file', {
+        'wireVersion': 1,
+        'entryId': entryId,
+        'fieldKey': fieldKey,
+      }),
+    );
+    return const WorkspaceAttachmentRenderer().renderContent(
+      content.file,
+      content.bytes,
+      page: page,
+    );
+  });
   Future<WorkspaceArchive> readRecycled(String entryId) => _historyCall(
     () async => historyArchiveFromJson(
       await client.request(
