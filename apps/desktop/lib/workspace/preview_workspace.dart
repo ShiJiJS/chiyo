@@ -55,6 +55,9 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
     if (widget.desktop == null) return;
     final revision = ++_menuRevision;
     final rows = await _source.approvals.query(const WorkspaceApprovalQuery());
+    final proposals = await _source.proposals.query(
+      const WorkspaceProposalQuery(filter: WorkspaceProposalFilter.pending),
+    );
     final values = <Map<String, Object?>>[];
     for (final row in rows.items.take(4)) {
       final detail = await _source.approvals.read(row.id);
@@ -85,6 +88,17 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       await widget.desktop!.updateApprovals(
         values,
         rows.pending,
+        proposals: [
+          for (final row in proposals.items.take(4))
+            {
+              'id': row.id,
+              'title': row.title,
+              'agent': row.agentClaim,
+              'purpose': row.purpose,
+              'scope': '${row.kind.label} · ${row.itemCount} 项',
+            },
+        ],
+        proposalTotal: proposals.pending,
         storage: _source.storageDescription,
         colors: {
           'accent': palette.accent.toARGB32(),

@@ -19,3 +19,9 @@ abstract interface class WorkspaceRequestNavigation {
   void Function(String requestId)? get onOpenRequest;
   set onOpenRequest(void Function(String requestId)? callback);
 }
+
+/// Optional native shortcut to an import proposal's review page.
+abstract interface class WorkspaceProposalNavigation {
+  void Function(String proposalId)? get onOpenProposal;
+  set onOpenProposal(void Function(String proposalId)? callback);
+}

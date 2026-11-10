@@ -19,6 +19,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private let previewPopover = NSPopover()
   private var previewRequests: [[String: Any]] = []
   private var previewRequestCount = 0
+  private var previewProposals: [[String: Any]] = []
+  private var previewProposalCount = 0
+  private var previewShowingProposals = false
   private var previewStorage = "已连接 · 家庭 NAS"
   private var previewColors: [String: NSNumber] = [:]
 
@@ -472,9 +475,12 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         }
         self.previewRequests = requests
         self.previewRequestCount = total
+        self.previewProposals = data["proposals"] as? [[String: Any]] ?? []
+        self.previewProposalCount = data["proposalTotal"] as? Int ?? 0
         self.previewStorage = data["storage"] as? String ?? ""
         self.previewColors = data["colors"] as? [String: NSNumber] ?? [:]
-        self.statusItem?.button?.title = total > 0 ? " \(total)" : ""
+        let pending = total + self.previewProposalCount
+        self.statusItem?.button?.title = pending > 0 ? " \(pending)" : ""
         self.rebuildPreviewPopover()
         result(nil)
       case "setNavigationEnabled":
@@ -637,12 +643,23 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     content.wantsLayer = true; content.layer?.backgroundColor = rail.cgColor
     let header = NSStackView(); header.orientation = .horizontal; header.spacing = 10
     header.addArrangedSubview(label("知予", size: 20, strong: true))
-    let count = label("待审批 \(previewRequestCount)", size: 13)
+    let count = label("待处理 \(previewRequestCount + previewProposalCount)", size: 13)
     count.textColor = accent; header.addArrangedSubview(count)
     content.addArrangedSubview(header)
     content.addArrangedSubview(label(previewStorage, size: 12))
-    if previewRequests.isEmpty { content.addArrangedSubview(label("暂无待处理申请")) }
-    for row in previewRequests.prefix(3) {
+    let tabs = NSStackView(); tabs.orientation = .horizontal; tabs.spacing = 8
+    for (index, title) in ["访问审批 \(previewRequestCount)", "录入提案 \(previewProposalCount)"].enumerated() {
+      let tab = button(title, action: #selector(selectPreviewCategory(_:)),
+                       primary: (index == 1) == previewShowingProposals)
+      tab.tag = index
+      tabs.addArrangedSubview(tab)
+    }
+    content.addArrangedSubview(tabs)
+    let rows = previewShowingProposals ? previewProposals : previewRequests
+    if rows.isEmpty {
+      content.addArrangedSubview(label(previewShowingProposals ? "暂无待处理录入提案" : "暂无待处理访问申请"))
+    }
+    for row in rows.prefix(3) {
       let card = NSStackView(); card.orientation = .vertical; card.alignment = .leading; card.spacing = 8
       card.edgeInsets = NSEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
       card.wantsLayer = true; card.layer?.cornerRadius = 8
@@ -656,7 +673,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         text.widthAnchor.constraint(equalToConstant: 332).isActive = true
       }
       let actions = NSStackView(); actions.orientation = .horizontal; actions.spacing = 8
-      if row["quick"] as? Bool == true {
+      if !previewShowingProposals && row["quick"] as? Bool == true {
         card.addArrangedSubview(label("授权时长 · 2 小时", size: 12))
         for (title, action) in [("批准", "approve"), ("拒绝", "deny")] {
           let control = button(title, action: #selector(previewDecision(_:)), primary: action == "approve")
@@ -664,13 +681,13 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           actions.addArrangedSubview(control)
         }
       }
-      let detail = button("查看详情", action: #selector(openPreviewRequest(_:)))
+      let detail = button(previewShowingProposals ? "查看提案" : "查看申请", action: #selector(openPreviewRequest(_:)))
       detail.identifier = NSUserInterfaceItemIdentifier(row["id"] as? String ?? "")
       actions.addArrangedSubview(detail)
       card.addArrangedSubview(actions); content.addArrangedSubview(card)
       card.widthAnchor.constraint(equalToConstant: 360).isActive = true
     }
-    content.addArrangedSubview(button("查看全部申请", action: #selector(openPreviewRequest(_:))))
+    content.addArrangedSubview(button(previewShowingProposals ? "查看全部录入提案" : "查看全部访问申请", action: #selector(openPreviewRequest(_:))))
     content.widthAnchor.constraint(equalToConstant: 396).isActive = true
     content.layoutSubtreeIfNeeded()
     let scroll = NSScrollView(); scroll.hasVerticalScroller = true
@@ -684,6 +701,11 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     previewPopover.contentSize = NSSize(width: 396, height: height)
     scroll.contentView.scroll(to: NSPoint(x: 0, y: max(0, content.frame.height - height)))
     scroll.reflectScrolledClipView(scroll.contentView)
+  }
+
+  @objc private func selectPreviewCategory(_ sender: NSButton) {
+    previewShowingProposals = sender.tag == 1
+    rebuildPreviewPopover()
   }
 
   @objc private func previewDecision(_ sender: NSButton) {
@@ -701,8 +723,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     previewPopover.performClose(nil)
     makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     if let id = sender.identifier?.rawValue, !id.isEmpty {
-      desktopChannel?.invokeMethod("previewRequest", arguments: id)
-    } else { desktopChannel?.invokeMethod("open", arguments: nil) }
+      desktopChannel?.invokeMethod(previewShowingProposals ? "previewProposal" : "previewRequest", arguments: id)
+    } else { desktopChannel?.invokeMethod(previewShowingProposals ? "openProposals" : "open", arguments: nil) }
   }
 
   private var previewScrollbarStyle: String {

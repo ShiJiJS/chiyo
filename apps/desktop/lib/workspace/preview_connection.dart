@@ -244,22 +244,35 @@ class _PreviewConnectionState extends State<PreviewConnection> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          ExpansionTile(
-                            tilePadding: EdgeInsets.zero,
-                            shape: const Border(),
-                            collapsedShape: const Border(),
-                            title: Text('证书', style: libraryText(context, 13)),
-                            children: [
-                              ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                leading: Icon(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: c.line),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
                                   Icons.verified_user_outlined,
+                                  size: 18,
                                   color: c.success,
                                 ),
-                                title: const Text('已信任此服务器证书'),
-                                subtitle: const Text('连接时核对服务器身份。'),
-                              ),
-                            ],
+                                const SizedBox(width: 10),
+                                Text('服务器证书', style: libraryText(context, 13)),
+                                const Spacer(),
+                                Text(
+                                  '已信任',
+                                  style: libraryText(
+                                    context,
+                                    13,
+                                    color: c.success,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                         if (_error != null)

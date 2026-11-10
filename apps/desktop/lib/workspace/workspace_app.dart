@@ -126,6 +126,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   bool _quitRequested = false;
   late final void Function(WorkspacePage) _desktopNavigation;
   late final void Function(String) _desktopRequestNavigation;
+  late final void Function(String) _desktopProposalNavigation;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   int _modalDepth = 0;
   bool? _nativeNavigationEnabled;
@@ -193,6 +194,13 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     };
     if (widget.desktop case final WorkspaceRequestNavigation desktop) {
       desktop.onOpenRequest = _desktopRequestNavigation;
+    }
+    _desktopProposalNavigation = (id) {
+      if (_controller.navigationLocked) return;
+      _navigate(WorkspacePage.proposals, id);
+    };
+    if (widget.desktop case final WorkspaceProposalNavigation desktop) {
+      desktop.onOpenProposal = _desktopProposalNavigation;
     }
     widget.desktop?.onNavigate = _desktopNavigation;
     unawaited(_controller.refresh());
@@ -318,6 +326,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     if (widget.desktop case final WorkspaceRequestNavigation desktop) {
       if (identical(desktop.onOpenRequest, _desktopRequestNavigation)) {
         desktop.onOpenRequest = null;
+      }
+    }
+    if (widget.desktop case final WorkspaceProposalNavigation desktop) {
+      if (identical(desktop.onOpenProposal, _desktopProposalNavigation)) {
+        desktop.onOpenProposal = null;
       }
     }
     super.dispose();

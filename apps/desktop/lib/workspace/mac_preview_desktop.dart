@@ -7,9 +7,14 @@ import 'workspace_desktop.dart';
 /// The preview runner exposes navigation and host appearance. No desktop service
 /// is initialized to obtain menus, a title or a normal Cocoa quit action.
 class MacPreviewDesktop
-    implements WorkspaceDesktop, WorkspaceRequestNavigation {
+    implements
+        WorkspaceDesktop,
+        WorkspaceRequestNavigation,
+        WorkspaceProposalNavigation {
   @override
   void Function(String requestId)? onOpenRequest;
+  @override
+  void Function(String proposalId)? onOpenProposal;
   void Function(String state)? onPreviewState;
   Future<void> Function(String id, bool approve)? onPreviewDecision;
   Future<void> updateApprovals(
@@ -17,11 +22,15 @@ class MacPreviewDesktop
     int total, {
     required Map<String, int> colors,
     required String storage,
+    required List<Map<String, Object?>> proposals,
+    required int proposalTotal,
   }) => channel.invokeMethod<void>('updatePreviewApprovals', {
     'requests': requests,
     'total': total,
     'colors': colors,
     'storage': storage,
+    'proposals': proposals,
+    'proposalTotal': proposalTotal,
   });
 
   static const windowTitle = '知予 · 界面预览·示例数据';
@@ -70,6 +79,10 @@ class MacPreviewDesktop
           onPreviewState?.call(call.arguments as String);
         case 'previewRequest':
           onOpenRequest?.call(call.arguments as String);
+        case 'previewProposal':
+          onOpenProposal?.call(call.arguments as String);
+        case 'openProposals':
+          onNavigate?.call(WorkspacePage.proposals);
         case 'previewDecision':
           final args = call.arguments as Map;
           await onPreviewDecision?.call(
@@ -121,6 +134,7 @@ class MacPreviewDesktop
     _navigationEnabled = false;
     onNavigate = null;
     onOpenRequest = null;
+    onOpenProposal = null;
     onPreviewState = null;
     onPreviewDecision = null;
     channel.setMethodCallHandler(null);
