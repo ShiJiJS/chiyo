@@ -12,7 +12,7 @@ final class InformationApprovalCommand {
     Iterable<FieldRef> fields = const [],
     Map<String, int> itemVersions = const {},
     Map<FieldRef, InformationAttachmentRef> expectedFiles = const {},
-    this.lifetime = const Duration(minutes: 30),
+    this.lifetime = AccessTiming.defaultLifetime,
   }) : fields = List.unmodifiable(fields),
        itemVersions = Map.unmodifiable(itemVersions),
        expectedFiles = Map.unmodifiable(expectedFiles) {

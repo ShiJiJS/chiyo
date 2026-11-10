@@ -301,7 +301,10 @@ void main() {
       s.setScenario(SampleWorkspaceScenario.empty);
       await tap(t, find.byKey(const ValueKey('settings-notification-preview')));
       expect(find.textContaining('暂无待处理申请'), findsOneWidget);
-      expect(find.byKey(const ValueKey('settings-notification-open')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('settings-notification-open')),
+        findsNothing,
+      );
     },
   );
 
@@ -337,10 +340,10 @@ void main() {
     (t) async {
       final s = await start(t);
       await tap(t, find.byKey(const ValueKey('settings-section-records')));
-      await select(t, 'settings-request-minutes', '5 分钟');
-      expect((await s.settings.read()).requestMinutes, 30);
+      await select(t, 'settings-request-minutes', '30 分钟');
+      expect((await s.settings.read()).requestMinutes, 120);
       await tap(t, find.byKey(const ValueKey('settings-records-save')));
-      expect((await s.settings.read()).requestMinutes, 5);
+      expect((await s.settings.read()).requestMinutes, 30);
       s.advanceApprovalClock(const Duration(days: 60));
       await ready(t);
       final total = (await s.grantHistory.query(
@@ -368,7 +371,7 @@ void main() {
       );
       await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
       await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
-      expect(model(t).draft!.requestMinutes, 5);
+      expect(model(t).draft!.requestMinutes, 30);
       expect(model(t).draft!.retentionDays, 30);
     },
   );

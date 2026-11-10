@@ -78,7 +78,7 @@ void main() {
       await service.owner.approveOrganization(other.id, ['demo-server']);
       expect(
         service.owner.organizationTasks.last.expiresAt,
-        now.add(const Duration(minutes: 30)),
+        now.add(const Duration(hours: 2)),
       );
       now = now.add(const Duration(minutes: 15));
       expect(
@@ -253,7 +253,7 @@ void main() {
       final expired = await service.agent.requestOrganization(session, '整理分类', [
         item.id,
       ]);
-      now = now.add(const Duration(minutes: 31));
+      now = now.add(const Duration(minutes: 121));
       expect(
         service.agent.organizationTasks(session).last['status'],
         'expired',
@@ -467,7 +467,7 @@ void main() {
       final expired = await service.agent.requestOrganization(session, '整理分类', [
         item.id,
       ]);
-      now = now.add(const Duration(minutes: 31));
+      now = now.add(const Duration(minutes: 121));
       expect(
         service.agent.organizationStatus(session, expired.id)['status'],
         'expired',
@@ -511,7 +511,7 @@ void main() {
         final denied = expectLater(saving, throwsA(isA<AccessFailure>()));
         await repo.entered.future;
         if (expire) {
-          now = now.add(const Duration(minutes: 31));
+          now = now.add(const Duration(minutes: 121));
         } else {
           service.agent.endSession(session);
         }

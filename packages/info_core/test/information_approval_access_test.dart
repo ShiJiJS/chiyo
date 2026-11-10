@@ -209,7 +209,7 @@ void main() {
             case 'cancel':
               service.agent.cancel(session, request);
             case 'expiry':
-              now = now.add(const Duration(minutes: 31));
+              now = now.add(const Duration(minutes: 121));
               service.owner.requests;
             case 'close':
               closing = service.close().then((_) => closed = true);

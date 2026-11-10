@@ -11,6 +11,8 @@ Map<String, dynamic> agentCommandHelp() => {
   },
   'sourceNotice':
       '填写实际名称和当前聊天标识。主题和说明中不放密码、Token、私钥或资料正文。插件模板决定 items/update 的具体结构。',
+  'approvalTiming':
+      '新申请默认等待2小时；设置可改为30分钟或1/2/4/8/24小时，只影响新申请。批准后默认可用2小时，可选2/4/8/24小时。以返回的实际到期时间为准，重试不续期；SSH另可由用户批准本聊天内不限时。',
   'commands': {
     'session': '通用 CLI 建立新会话；提供 chatLabel 和 externalChatId。',
     'request': '提供 purpose、fields、operationId。',

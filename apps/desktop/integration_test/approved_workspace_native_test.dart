@@ -4,6 +4,7 @@ import 'package:info_remote/connection_profile.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/online_desktop_launcher.dart';
 import 'package:info_desktop/workspace/settings_page.dart';
+import 'package:info_desktop/workspace/approvals_page.dart';
 import 'package:info_desktop/workspace/remote_workspace_source.dart';
 import '../test/support/desktop_platform_fixture.dart';
 import '../test/support/online_ui_harness.dart';
@@ -472,6 +473,81 @@ void main() {
             expect(t.takeException(), isNull);
           }
         }
+
+        // The external synthetic fixture includes a real persisted request.
+        // Exercise the same controls used by the shipped App, then read the
+        // actual saved decision; no preview state or fake approval is involved.
+        await harness.tap('workspace-nav-approvals');
+        await harness.tap('approval-select-${fixture['requestId']}');
+        await harness.until(
+          () => find
+              .byKey(const ValueKey('approval-field-ttl'))
+              .evaluate()
+              .isNotEmpty,
+        );
+        await t.tap(find.byKey(const ValueKey('approval-field-ttl')));
+        await t.pumpAndSettle();
+        for (final label in ['2 小时', '4 小时', '8 小时', '24 小时']) {
+          expect(find.text(label), findsWidgets);
+        }
+        expect(find.text('15 分钟'), findsNothing);
+        expect(find.text('30 分钟'), findsNothing);
+        final menuRender =
+            boundary.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final menuImage = await menuRender.toImage(pixelRatio: 1);
+        final menuBytes = await menuImage.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
+        await File(
+          '$output/approval-duration-options.png',
+        ).writeAsBytes(menuBytes!.buffer.asUint8List());
+        menuImage.dispose();
+        await t.tap(find.text('4 小时').last);
+        await t.pumpAndSettle();
+        await harness.tap('approval-approve');
+        await harness.until(
+          () => !t
+              .widget<ApprovalsPage>(find.byType(ApprovalsPage))
+              .controller
+              .frozen,
+        );
+        final approved = await harness.resolve(
+          () => source.approvals.read(fixture['requestId'] as String),
+        );
+        expect(approved.request.state, WorkspaceApprovalState.approved);
+        expect(
+          approved.fieldExpiresAt!.difference(approved.decidedAt!),
+          const Duration(hours: 4),
+        );
+        await harness.tap('workspace-nav-settings');
+        await harness.tap('settings-section-records');
+        await harness.until(
+          () =>
+              t
+                  .widget<DesktopSelect<int>>(
+                    find.byKey(const ValueKey('settings-request-minutes')),
+                  )
+                  .onChanged !=
+              null,
+        );
+        await t.tap(find.byKey(const ValueKey('settings-request-minutes')));
+        await t.pumpAndSettle();
+        for (final label in [
+          '30 分钟',
+          '1 小时',
+          '2 小时',
+          '4 小时',
+          '8 小时',
+          '24 小时',
+        ]) {
+          expect(find.text(label), findsWidgets);
+        }
+        expect(find.text('5 分钟'), findsNothing);
+        expect(find.text('15 分钟'), findsNothing);
+        await t.tap(find.text('2 小时').last);
+        await t.pumpAndSettle();
+        await harness.tap('settings-section-connection');
         await t.tap(find.byTooltip('显示 Token'));
         await t.pumpAndSettle();
         await t.enterText(field('Token'), 'SYNTHETIC_WRONG_TOKEN');
@@ -490,7 +566,9 @@ void main() {
           isTrue,
         );
         await harness.tap('connection-cancel');
-        await harness.until(() => find.text('原生连接验收资料').evaluate().isNotEmpty);
+        await harness.until(
+          () => find.byType(ApprovalsPage).evaluate().isNotEmpty,
+        );
         expect((await store.read())!.token, fixture['token']);
         await t.pumpWidget(const SizedBox());
       } finally {

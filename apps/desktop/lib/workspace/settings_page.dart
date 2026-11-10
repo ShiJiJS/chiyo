@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../prototype_icons.dart';
@@ -340,11 +341,16 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                       value: m.draft!.requestMinutes,
                       items: [
                         for (final n in {
-                          ...[5, 15, 30, 60, 120],
+                          ...AccessTiming.waitingMinutes,
                           m.draft!.requestMinutes,
                           if (m.value != null) m.value!.requestMinutes,
                         }.toList()..sort())
-                          DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                          DropdownMenuItem(
+                            value: n,
+                            child: Text(
+                              n < 60 || n % 60 != 0 ? '$n 分钟' : '${n ~/ 60} 小时',
+                            ),
+                          ),
                       ],
                       onChanged: !enabled
                           ? null

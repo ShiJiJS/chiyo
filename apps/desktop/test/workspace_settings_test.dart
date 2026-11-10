@@ -77,7 +77,7 @@ void main() {
       expect(saved.version, 3);
       expect(saved.theme, WorkspaceTheme.dark);
       expect(saved.notifications, false);
-      expect(saved.requestMinutes, 30);
+      expect(saved.requestMinutes, 120);
       expect(saved.retentionDays, 180);
       expect(saved.background, true);
       final another = WorkspaceSettingsController(
@@ -363,15 +363,15 @@ void main() {
       final first = await request('first');
       expect(
         first.requestExpiresAt!.difference(first.submittedAt),
-        const Duration(minutes: 30),
+        const Duration(hours: 2),
       );
       final firstDeadline = first.requestExpiresAt;
-      m.stage(m.draft!.copyWith(requestMinutes: 5));
+      m.stage(m.draft!.copyWith(requestMinutes: 30));
       await m.save();
       final second = await request('second');
       expect(
         second.requestExpiresAt!.difference(second.submittedAt),
-        const Duration(minutes: 5),
+        const Duration(minutes: 30),
       );
       expect(
         (await s.approvals.read('server')).request.requestExpiresAt,
@@ -381,7 +381,7 @@ void main() {
         (await s.approvals.read(first.approvalId)).request.requestExpiresAt,
         firstDeadline,
       );
-      s.advanceApprovalClock(const Duration(minutes: 6));
+      s.advanceApprovalClock(const Duration(minutes: 31));
       expect(
         (await s.approvals.read(second.approvalId)).request.state,
         WorkspaceApprovalState.expired,
@@ -393,7 +393,7 @@ void main() {
       final third = await request('third');
       expect(
         third.submittedAt,
-        first.submittedAt.add(const Duration(minutes: 6)),
+        first.submittedAt.add(const Duration(minutes: 31)),
       );
       final d = await s.approvals.read(first.approvalId);
       await s.approvals.change(decision(d));

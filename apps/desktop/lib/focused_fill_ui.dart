@@ -764,12 +764,15 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
                   value: draft.minutes,
                   isExpanded: true,
                   items: [
-                    for (final n in [15, 30])
-                      DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                    for (final n in AccessTiming.grantMinutes)
+                      DropdownMenuItem(value: n, child: Text('${n ~/ 60} 小时')),
                   ],
                   onChanged: _busy
                       ? null
-                      : (v) => setState(() => draft.minutes = v ?? 15),
+                      : (v) => setState(
+                          () =>
+                              draft.minutes = v ?? AccessTiming.defaultMinutes,
+                        ),
                 )
               else
                 _text(context, '截止 ${_time(r.credentialExpiresAt)}', 12),

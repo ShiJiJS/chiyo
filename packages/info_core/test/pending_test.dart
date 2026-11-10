@@ -106,25 +106,22 @@ void main() {
       );
     },
   );
-  test(
-    'pending request expires at thirty minutes and can never be approved',
-    () {
-      var now = DateTime.utc(2026, 10, 16);
-      final core = InformationService.fictional(clock: () => now);
-      final session = core.agent.openSession('chat');
-      final request = core.agent.request(session, 'Need host', [
+  test('pending request expires at two hours and can never be approved', () {
+    var now = DateTime.utc(2026, 10, 16);
+    final core = InformationService.fictional(clock: () => now);
+    final session = core.agent.openSession('chat');
+    final request = core.agent.request(session, 'Need host', [
+      const FieldRef('demo-server', 'host'),
+    ]);
+    now = now.add(const Duration(hours: 2));
+    expect(core.agent.status(session, request.id)['status'], 'expired');
+    expect(
+      () => core.owner.approve(request.id, [
         const FieldRef('demo-server', 'host'),
-      ]);
-      now = now.add(const Duration(minutes: 30));
-      expect(core.agent.status(session, request.id)['status'], 'expired');
-      expect(
-        () => core.owner.approve(request.id, [
-          const FieldRef('demo-server', 'host'),
-        ]),
-        throwsA(isA<AccessFailure>()),
-      );
-      now = now.subtract(const Duration(minutes: 10));
-      expect(core.agent.status(session, request.id)['status'], 'expired');
-    },
-  );
+      ]),
+      throwsA(isA<AccessFailure>()),
+    );
+    now = now.subtract(const Duration(minutes: 10));
+    expect(core.agent.status(session, request.id)['status'], 'expired');
+  });
 }

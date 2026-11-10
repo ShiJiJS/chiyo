@@ -29,13 +29,13 @@ extension OwnerOrganizationTasks on OwnerAccess {
   Future<void> approveOrganization(
     String id,
     List<String> selected, {
-    Duration lifetime = const Duration(minutes: 30),
+    Duration lifetime = AccessTiming.defaultLifetime,
   }) => _serialize(() async {
     final task = _organization(id);
     if (organizationState(task) != OrganizationTaskState.pending) {
       throw const AccessFailure('invalid_request');
     }
-    if (lifetime <= Duration.zero || lifetime > const Duration(minutes: 30)) {
+    if (!AccessTiming.acceptsOrganizationLifetime(lifetime)) {
       throw const AccessFailure('invalid_duration');
     }
     final ids = selected.toSet();

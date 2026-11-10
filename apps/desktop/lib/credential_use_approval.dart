@@ -1129,17 +1129,19 @@ class _CredentialUseApprovalPanelState
                           value: 'session',
                           child: Text('不限时（限本聊天）'),
                         ),
-                      for (final n in [15, 30])
+                      for (final n in AccessTiming.grantMinutes)
                         DropdownMenuItem(
                           value: n.toString(),
-                          child: Text('$n 分钟'),
+                          child: Text('${n ~/ 60} 小时'),
                         ),
                     ],
                     onChanged: pending
                         ? (v) => setState(
                             () => draft.minutes = v == 'session'
                                 ? null
-                                : int.parse(v ?? '15'),
+                                : int.parse(
+                                    v ?? AccessTiming.defaultMinutes.toString(),
+                                  ),
                           )
                         : null,
                   ),
@@ -1161,15 +1163,18 @@ class _CredentialUseApprovalPanelState
                     value: draft.fieldMinutes,
                     isExpanded: true,
                     items: [
-                      for (final n in [15, 30, 60, 480])
+                      for (final n in AccessTiming.grantMinutes)
                         DropdownMenuItem(
                           value: n,
-                          child: Text(n == 480 ? '8 小时' : '$n 分钟'),
+                          child: Text('${n ~/ 60} 小时'),
                         ),
                     ],
                     onChanged: draft.fields.isEmpty
                         ? null
-                        : (v) => setState(() => draft.fieldMinutes = v ?? 480),
+                        : (v) => setState(
+                            () => draft.fieldMinutes =
+                                v ?? AccessTiming.defaultMinutes,
+                          ),
                   )
                 else
                   Text(
