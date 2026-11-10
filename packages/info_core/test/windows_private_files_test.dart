@@ -92,10 +92,12 @@ void main() {
       calloc.free(path);
       expect(handle, isNot(-1));
       try {
+        final publication = Stopwatch()..start();
         expect(
           () => WindowsPrivateFiles.writeSecret(file, 'replacement'),
           throwsA(isA<RuntimeMaterialFailure>()),
         );
+        expect(publication.elapsed, lessThan(const Duration(seconds: 2)));
         expect(file.readAsBytesSync(), original);
       } finally {
         close(handle);
@@ -105,6 +107,44 @@ void main() {
       ]);
       WindowsPrivateFiles.writeSecret(file, 'replacement');
       expect(WindowsPrivateFiles.readSecret(file), 'replacement');
+    },
+  );
+
+  test(
+    'a temporary native reader releases its original handle before atomic publication completes',
+    () async {
+      final folder = WindowsPrivateFiles.directory(
+        Directory('${root.path}/reader'),
+      );
+      final file = File('${folder.path}/state.json');
+      WindowsPrivateFiles.writeSecret(file, 'original');
+      final reader = await Process.start(Platform.resolvedExecutable, [
+        '--packages=${Directory.current.path}/.dart_tool/package_config.json',
+        '${Directory.current.path}/test/support/windows_private_reader.dart',
+        file.path,
+      ]);
+      final errors = utf8.decoder.bind(reader.stderr).join();
+      try {
+        expect(
+          await reader.stdout
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .first,
+          'reader-ready',
+        );
+        WindowsPrivateFiles.writeSecret(file, 'replacement');
+        expect(WindowsPrivateFiles.readSecret(file), 'replacement');
+        expect(folder.listSync().map((f) => f.uri.pathSegments.last), [
+          'state.json',
+        ]);
+      } finally {
+        await reader.stdin.close();
+        expect(
+          await reader.exitCode.timeout(const Duration(seconds: 5)),
+          0,
+          reason: await errors,
+        );
+      }
     },
   );
 

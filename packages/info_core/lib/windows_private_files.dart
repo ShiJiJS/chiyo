@@ -201,13 +201,27 @@ final class WindowsPrivateFiles {
       final source = stage.path.toNativeUtf16(),
           target = file.path.toNativeUtf16();
       try {
+        final lastError = _files._lastError;
         final move = _files.kernel
             .lookupFunction<
               Int32 Function(Pointer<Utf16>, Pointer<Utf16>, Uint32),
               int Function(Pointer<Utf16>, Pointer<Utf16>, int)
             >('MoveFileExW');
-        if (move(source, target, 8 | (replace ? 1 : 0)) == 0) {
-          throw const RuntimeMaterialFailure('write_failed');
+        final publication = Stopwatch()..start();
+        while (move(source, target, 8 | (replace ? 1 : 0)) == 0) {
+          // Concurrent NTFS replacements can briefly deny delete access even
+          // when all readers share deletion. Retry only this original atomic
+          // publication, never remove the destination or stage new contents.
+          final error = lastError();
+          if (!const {5, 32, 33}.contains(error) ||
+              publication.elapsed >= const Duration(milliseconds: 500)) {
+            throw const RuntimeMaterialFailure('write_failed');
+          }
+          sleep(const Duration(milliseconds: 10));
+          if (FileSystemEntity.typeSync(file.path, followLinks: false) !=
+              FileSystemEntityType.notFound) {
+            verify(file.path);
+          }
         }
         created = false;
       } finally {
