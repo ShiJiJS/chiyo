@@ -74,7 +74,35 @@ void main() {
             .transform(const LineSplitter())
             .first
             .timeout(const Duration(seconds: 60));
-        return jsonDecode(ready) as Map<String, dynamic>;
+        final result = jsonDecode(ready) as Map<String, dynamic>;
+        // A container wrapper may print readiness before the host's port
+        // forward is reachable. Probe a read only; never retry a save here.
+        if (binary != null) {
+          final probe = HttpClient(context: trusted);
+          final deadline = DateTime.now().add(const Duration(seconds: 10));
+          try {
+            while (true) {
+              try {
+                final req = await probe.getUrl(
+                  Uri.parse(
+                    'https://127.0.0.1:${result['port']}/v1/owner/health',
+                  ),
+                );
+                req.headers.set('authorization', 'Bearer $token');
+                final response = await req.close();
+                await response.drain<void>();
+                expect(response.statusCode, 200);
+                break;
+              } on SocketException {
+                if (DateTime.now().isAfter(deadline)) rethrow;
+                await Future<void>.delayed(const Duration(milliseconds: 50));
+              }
+            }
+          } finally {
+            probe.close(force: true);
+          }
+        }
+        return result;
       }
 
       Future<void> stop() async {
