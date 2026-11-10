@@ -35,4 +35,3 @@ Windows App 能管理 NAS 上的附件和历史版本，另存到本机、交给
 ## 当前实现
 
 PDF 原生实现 `871a83f`，Windows 文件发布/系统打开与完整本票验证 `620bcbe`，见 [w111.md](https://github.com/ShiJiJS/chiyo/blob/620bcbe/docs/development/evidence/windows-online/w111.md)。真实 NAS 附件/版本/丢失回执/重开，原生另存/模板面板与记事本内容观察、6 项 core/20 项 storage/43 项桌面检查、分析和 Release 构建通过。真实面板发现的 NTFS 创建时间变化已复现并修正，未用编译代替功能结果。完整同版本包与主入口连续流程仍归 #116，未计作正式安装或全部原生主入口验收完成。
-

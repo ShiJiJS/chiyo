@@ -42,4 +42,3 @@ Windows 直接连接用户现有 NAS 服务，接通已有 App、AI CLI、附件
 - 执行方式参考此前[复盘](../server-multidevice/retrospective.md)；旧文件中的分支、后置范围和其他平台安排不覆盖本轮指令。
 
 本目录保存正文、GitHub 实际编号、原生父关系/前置核对与 goal 描述。持续目标已启动；实际状态和首个动作以 progress.md 为准。
-
