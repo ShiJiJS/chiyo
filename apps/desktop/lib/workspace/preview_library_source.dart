@@ -8,7 +8,13 @@ class PreviewLibrarySource extends SampleWorkspaceSource
         WorkspaceLibraryMove,
         WorkspaceStorageLocation {
   @override
-  String get storageDescription => '已连接 · 家庭 NAS';
+  String get storageDescription => syncEnabled ? '已连接 · 家庭 NAS' : '本地模式';
+  bool syncEnabled = true;
+  void setSyncEnabled(bool value) {
+    syncEnabled = value;
+    _changes.add(null);
+  }
+
   PreviewLibrarySource({super.readAsset});
   final _recycleReceipts = <String, WorkspaceLibraryRecycleReceipt>{};
   final _moveReceipts = <String, WorkspaceLibraryMoveReceipt>{};

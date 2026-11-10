@@ -254,7 +254,7 @@ void main() {
           expect(page.controller.section, section);
           switch (section) {
             case WorkspaceSettingsSection.connection:
-              expect(find.text('服务器连接'), findsWidgets);
+              expect(find.text('存储与同步'), findsWidgets);
             case WorkspaceSettingsSection.appearance:
               expect(
                 find.byKey(const ValueKey('settings-theme-light')),

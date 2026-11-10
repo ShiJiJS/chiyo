@@ -16,10 +16,12 @@ class MacPreviewDesktop
     List<Map<String, Object?>> requests,
     int total, {
     required Map<String, int> colors,
+    required String storage,
   }) => channel.invokeMethod<void>('updatePreviewApprovals', {
     'requests': requests,
     'total': total,
     'colors': colors,
+    'storage': storage,
   });
 
   static const windowTitle = '知予 · 界面预览·示例数据';

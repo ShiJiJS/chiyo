@@ -85,6 +85,7 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
       await widget.desktop!.updateApprovals(
         values,
         rows.pending,
+        storage: _source.storageDescription,
         colors: {
           'accent': palette.accent.toARGB32(),
           'ink': palette.ink.toARGB32(),
@@ -152,23 +153,31 @@ class _PreviewWorkspaceState extends State<PreviewWorkspace> {
         source: _source,
         connectionBuilder: (context) => PreviewConnection(
           embedded: true,
+          syncEnabled: _source.syncEnabled,
+          onModeChanged: (enabled) =>
+              setState(() => _source.setSyncEnabled(enabled)),
           disconnected: false,
           onBack: () {},
           onConnected: () => setState(() => _connection = null),
           onDisconnect: () => setState(() => _connection = 'offline'),
           onSettings: () {},
         ),
-        statusBuilder: (context) => TextButton.icon(
-          onPressed: _syncing ? null : _sync,
-          icon: _syncing
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.sync, size: 17),
-          label: Text(_syncing ? '同步中' : '已同步 · $_syncedAt'),
-        ),
+        statusBuilder: (context) => !_source.syncEnabled
+            ? const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text('本地模式'),
+              )
+            : TextButton.icon(
+                onPressed: _syncing ? null : _sync,
+                icon: _syncing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync, size: 17),
+                label: Text(_syncing ? '同步中' : '已同步 · $_syncedAt'),
+              ),
         windowTitle: MacPreviewDesktop.windowTitle,
         initialQuery: const WorkspaceQuery(directoryId: 'selfhost'),
         initialSelection: const WorkspaceRecordRef(

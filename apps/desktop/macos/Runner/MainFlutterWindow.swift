@@ -19,6 +19,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private let previewPopover = NSPopover()
   private var previewRequests: [[String: Any]] = []
   private var previewRequestCount = 0
+  private var previewStorage = "已连接 · 家庭 NAS"
   private var previewColors: [String: NSNumber] = [:]
 
   // The built entry point, not a Dart runtime request, selects isolation before
@@ -471,6 +472,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         }
         self.previewRequests = requests
         self.previewRequestCount = total
+        self.previewStorage = data["storage"] as? String ?? ""
         self.previewColors = data["colors"] as? [String: NSNumber] ?? [:]
         self.statusItem?.button?.title = total > 0 ? " \(total)" : ""
         self.rebuildPreviewPopover()
@@ -638,7 +640,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     let count = label("待审批 \(previewRequestCount)", size: 13)
     count.textColor = accent; header.addArrangedSubview(count)
     content.addArrangedSubview(header)
-    content.addArrangedSubview(label("已连接 · 家庭 NAS", size: 12))
+    content.addArrangedSubview(label(previewStorage, size: 12))
     if previewRequests.isEmpty { content.addArrangedSubview(label("暂无待处理申请")) }
     for row in previewRequests.prefix(3) {
       let card = NSStackView(); card.orientation = .vertical; card.alignment = .leading; card.spacing = 8

@@ -10,13 +10,16 @@ class PreviewConnection extends StatefulWidget {
     super.key,
     required this.disconnected,
     this.embedded = false,
+    this.syncEnabled = true,
+    this.onModeChanged,
     required this.onBack,
     required this.onConnected,
     required this.onDisconnect,
     required this.onSettings,
   });
   final bool disconnected;
-  final bool embedded;
+  final bool embedded, syncEnabled;
+  final ValueChanged<bool>? onModeChanged;
   final VoidCallback onBack, onConnected, onDisconnect, onSettings;
   @override
   State<PreviewConnection> createState() => _PreviewConnectionState();
@@ -28,8 +31,20 @@ class _PreviewConnectionState extends State<PreviewConnection> {
   );
   final _token = TextEditingController(text: 'preview-connection-token');
   bool _busy = false, _visible = false;
+  late bool _syncEnabled;
+  @override
+  void initState() {
+    super.initState();
+    _syncEnabled = widget.syncEnabled;
+  }
+
   String? _error;
   Future<void> _connect() async {
+    if (!_syncEnabled && widget.embedded) {
+      widget.onModeChanged?.call(false);
+      widget.onConnected();
+      return;
+    }
     final uri = Uri.tryParse(_address.text);
     if (uri == null ||
         !{'https', 'http'}.contains(uri.scheme) ||
@@ -45,6 +60,7 @@ class _PreviewConnectionState extends State<PreviewConnection> {
     await Future<void>.delayed(const Duration(milliseconds: 900));
     if (mounted) {
       setState(() => _busy = false);
+      widget.onModeChanged?.call(true);
       widget.onConnected();
     }
   }
@@ -114,17 +130,67 @@ class _PreviewConnectionState extends State<PreviewConnection> {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          widget.disconnected ? '连接已断开' : '服务器连接',
+                          widget.disconnected ? '连接已断开' : '存储与同步',
                           style: libraryHeading(context, 28),
                         ),
                         const SizedBox(height: 10),
                         Text(
                           widget.disconnected
                               ? '恢复连接后，就能继续查看资料和处理申请。'
-                              : '资料和审批保存在这台服务器上。',
+                              : '资料保存在本机，可选择同步到自己的服务器。',
                           style: libraryText(context, 14, color: c.muted),
                         ),
                         const SizedBox(height: 28),
+                        if (widget.embedded) ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '同步到服务器',
+                                      style: libraryHeading(context, 16),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '关闭后，仅在这台电脑上保存资料和处理审批。',
+                                      style: libraryText(
+                                        context,
+                                        13,
+                                        color: c.muted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              DesktopToggle(
+                                value: _syncEnabled,
+                                onChanged: _busy
+                                    ? null
+                                    : (value) => setState(() {
+                                        _syncEnabled = value;
+                                        _error = null;
+                                      }),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 28),
+                          if (!_syncEnabled) ...[
+                            Text('本地模式', style: libraryHeading(context, 16)),
+                            const SizedBox(height: 8),
+                            Text(
+                              '资料、文件和凭据加密保存在这台电脑。无需连接服务器，也能接收 AI 申请和审批。',
+                              style: libraryText(
+                                context,
+                                14,
+                                color: c.muted,
+                                height: 1.8,
+                              ),
+                            ),
+                          ],
+                        ],
                         if (widget.disconnected) ...[
                           Text('家庭 NAS', style: libraryHeading(context, 16)),
                           const SizedBox(height: 6),
@@ -132,7 +198,7 @@ class _PreviewConnectionState extends State<PreviewConnection> {
                             _address.text,
                             style: libraryText(context, 14, color: c.muted),
                           ),
-                        ] else ...[
+                        ] else if (_syncEnabled) ...[
                           Text(
                             '服务器地址',
                             style: libraryText(
@@ -212,7 +278,11 @@ class _PreviewConnectionState extends State<PreviewConnection> {
                               busy: _busy,
                               onPressed: _busy ? null : _connect,
                               child: Text(
-                                widget.disconnected ? '重新连接' : '保存并连接',
+                                widget.disconnected
+                                    ? '重新连接'
+                                    : _syncEnabled
+                                    ? '保存并连接'
+                                    : '使用本地模式',
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -228,7 +298,9 @@ class _PreviewConnectionState extends State<PreviewConnection> {
                                   widget.disconnected ? '连接设置' : '取消',
                                 ),
                               ),
-                            if (!widget.disconnected) ...[
+                            if (!widget.disconnected &&
+                                _syncEnabled &&
+                                widget.syncEnabled) ...[
                               const Spacer(),
                               TextButton(
                                 onPressed: _busy ? null : widget.onDisconnect,
