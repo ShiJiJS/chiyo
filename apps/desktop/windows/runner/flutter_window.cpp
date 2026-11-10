@@ -51,7 +51,7 @@ bool FlutterWindow::AddTrayIcon() {
   data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
   data.uCallbackMessage = kTrayMessage;
   data.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
-  wcscpy_s(data.szTip, L"信息访问授权");
+  wcscpy_s(data.szTip, L"\u77e5\u4e88");
   tray_available_ = Shell_NotifyIconW(NIM_ADD, &data) != FALSE;
   if (tray_available_) {
     data.uVersion = NOTIFYICON_VERSION_4;
@@ -139,7 +139,7 @@ bool FlutterWindow::ShowNotification(const NotificationMessage& message) {
   data.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
   data.dwStateMask = NIS_HIDDEN;
   data.dwState = NIS_HIDDEN;
-  wcscpy_s(data.szTip, L"信息访问授权");
+  wcscpy_s(data.szTip, L"\u77e5\u4e88");
   if (!Shell_NotifyIconW(NIM_ADD, &data)) return false;
   notification_icon_id_ = message.native_id;
   data.uVersion = NOTIFYICON_VERSION_4;
@@ -149,7 +149,7 @@ bool FlutterWindow::ShowNotification(const NotificationMessage& message) {
   }
   data.uFlags = NIF_INFO;
   data.dwInfoFlags = NIIF_INFO | NIIF_RESPECT_QUIET_TIME;
-  wcscpy_s(data.szInfoTitle, L"信息访问授权");
+  wcscpy_s(data.szInfoTitle, L"\u77e5\u4e88");
   wcscpy_s(data.szInfo, message.test ? L"这是一条测试通知。访问申请提醒已连接到系统。" : L"有新的访问请求。打开应用查看并审批。");
   const bool accepted = Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
   if (!accepted) RemoveNotificationIcon();

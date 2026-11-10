@@ -26,6 +26,10 @@ try {
     Expand-Archive -LiteralPath $archive -DestinationPath $testRoot
     $payload = Join-Path $testRoot 'AgentInfoManage'
     $manifest = Get-Content -LiteralPath (Join-Path $payload 'manifest.json') -Raw | ConvertFrom-Json
+    if ($manifest.PSObject.Properties['displayName']) {
+        if ($manifest.displayName -ne '知予') { throw 'Unexpected application display name.' }
+        & (Join-Path $PSScriptRoot 'test-windows-branding.ps1') -Executable (Join-Path $payload 'app/info_desktop.exe') -Icon (Join-Path $payload 'app/chiyo.ico')
+    }
     if (Test-Path -LiteralPath (Join-Path $payload 'app/native_assets.json')) {
         throw 'The test-only absolute native asset cache must not be shipped.'
     }

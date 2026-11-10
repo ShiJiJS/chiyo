@@ -360,7 +360,7 @@ class _InformationAppState extends State<InformationApp>
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: '信息访问授权',
+    title: '知予',
     debugShowCheckedModeBanner: false,
     scrollBehavior: const DesktopScrollBehavior(),
     theme: informationTheme(_colorTheme),

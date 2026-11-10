@@ -223,7 +223,7 @@ class _DesktopShellState extends State<DesktopShell> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        '信息授权',
+                        '知予',
                         style: prototypeText(
                           context,
                           18,

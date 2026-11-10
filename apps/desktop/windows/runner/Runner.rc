@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Agent Info Manage contributors" "\0"
-            VALUE "FileDescription", "Agent Info Manage development preview" "\0"
+            VALUE "CompanyName", "Chiyo contributors" "\0"
+            VALUE "FileDescription", "知予" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "info_desktop" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Agent Info Manage contributors" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Chiyo contributors" "\0"
             VALUE "OriginalFilename", "info_desktop.exe" "\0"
-            VALUE "ProductName", "Agent Info Manage" "\0"
+            VALUE "ProductName", "知予" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
