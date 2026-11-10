@@ -14,6 +14,8 @@ extension _AuditService on InformationService {
       id: request.id,
       sessionId: _sessionBindings[request.session]!,
       chatLabel: _sessions[request.session]!,
+      agentName: request.agentName,
+      externalChatId: request.externalChatId,
       purpose: request.purpose,
       createdAt: request.createdAt,
       requestExpiresAt: request.expiresAt,
@@ -82,6 +84,9 @@ extension _AuditService on InformationService {
       requestId: request.id,
       sessionId: _sessionBindings[request.session]!,
       chatLabel: _sessions[request.session]!,
+      agentName: request.agentName,
+      externalChatId: request.externalChatId,
+      purpose: request.purpose,
       approvedAt: request.approvedAt!,
       expiresAt: grant.expiresAt,
       fields: grant.fields.map((ref) {

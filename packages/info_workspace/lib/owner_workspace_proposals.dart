@@ -316,7 +316,7 @@ class OwnerWorkspaceProposals
           : 2,
       at: e.createdAt,
       agentClaim: e.agentName,
-      chatClaim: e.chatLabel,
+      chatClaim: core.submissionChatLabel(e.chatLabel, e.externalChatId),
       purpose: e.purpose,
       itemCount: e.count,
       wholeDeletion: deletion != null && deletion.fieldId == null,

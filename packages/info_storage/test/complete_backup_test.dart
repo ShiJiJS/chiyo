@@ -77,7 +77,13 @@ void main() {
       ]);
       final ref = FieldRef(item.id, item.fields.single.id);
       final session = service.agent.openSession('reader');
-      final request = service.agent.request(session, 'host', [ref]);
+      final request = service.agent.request(
+        session,
+        'host',
+        [ref],
+        agentName: 'Synthetic backup Agent',
+        externalChatId: 'synthetic-backup-chat',
+      );
       service.owner.approve(request.id, [ref]);
       final token = service.agent.claim(session, request.id).token;
       await service.agent.read(token, ref);
@@ -112,6 +118,12 @@ void main() {
         final history = (await restored.owner.history()).grants.single;
         expect(history.active, isFalse);
         expect(history.approvedAt, approvedAt);
+        expect(history.agentName, 'Synthetic backup Agent');
+        expect(history.externalChatId, 'synthetic-backup-chat');
+        expect(history.purpose, 'host');
+        final requestFact = (await restored.owner.history()).requests.single;
+        expect(requestFact.agentName, 'Synthetic backup Agent');
+        expect(requestFact.externalChatId, 'synthetic-backup-chat');
         if (name == 'revoked') {
           expect(history.events.last.kind, GrantEventKind.revoked);
           expect(

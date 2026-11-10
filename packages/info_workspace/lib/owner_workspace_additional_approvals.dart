@@ -55,9 +55,9 @@ class OwnerWorkspaceAdditionalApprovals {
         kind: r.isFocusedFill
             ? WorkspaceApprovalKind.focus
             : WorkspaceApprovalKind.credential,
-        agentClaim: '未提供 Agent 名称',
+        agentClaim: r.agentName,
         sessionId: owner.credentialRequestSessionId(r.id) ?? 'unlinked:${r.id}',
-        chatClaim: r.chatLabel,
+        chatClaim: core.submissionChatLabel(r.chatLabel, r.externalChatId),
         purpose: r.purpose,
         submittedAt: r.createdAt,
         requestExpiresAt: r.requestExpiresAt,
@@ -66,11 +66,11 @@ class OwnerWorkspaceAdditionalApprovals {
   WorkspaceApprovalSummary organizationSummary(core.OrganizationTask t) =>
       WorkspaceApprovalSummary(
         id: t.id,
-        title: '分类整理申请',
+        title: t.title.isEmpty ? '分类整理申请' : t.title,
         kind: WorkspaceApprovalKind.organization,
-        agentClaim: t.agentName.isEmpty ? '未提供 Agent 名称' : t.agentName,
+        agentClaim: t.agentName,
         sessionId: t.sessionBinding,
-        chatClaim: t.chatLabel,
+        chatClaim: core.submissionChatLabel(t.chatLabel, t.externalChatId),
         purpose: t.purpose,
         submittedAt: t.createdAt,
         requestExpiresAt: t.expiresAt,

@@ -159,7 +159,7 @@ extension _CredentialImportClient on AgentClient {
         'version': input['version'],
       } else ...{
         'agentName': input['agentName'] ?? sourceAgent,
-        if (input.containsKey('title')) 'title': input['title'],
+        ..._submissionFields(input, proposal: true),
         if (input.containsKey('purpose')) 'purpose': input['purpose'],
         if (input.containsKey('operationId'))
           'operationId': input['operationId'],

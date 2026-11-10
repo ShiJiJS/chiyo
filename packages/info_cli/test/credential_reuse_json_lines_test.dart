@@ -39,6 +39,7 @@ void main() {
       expect(
         (await command({
           'command': 'session',
+          'externalChatId': 'synthetic-v1-chat',
           'chatLabel': 'Actual shipped v1 compatibility',
         }))['status'],
         'ok',
@@ -130,7 +131,11 @@ void main() {
           'credential-use-reuse.v1',
         ]),
       );
-      await command({'command': 'session', 'chatLabel': 'Independent v2 CLI'});
+      await command({
+        'command': 'session',
+        'chatLabel': 'Independent v2 CLI',
+        'externalChatId': 'synthetic-v2-chat',
+      });
       Map<String, Object?> launch(List<String> argv) => {
         'receiver': 'gh_token',
         'executable': h.executablePath,

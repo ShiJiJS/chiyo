@@ -6,8 +6,20 @@ extension AgentDeletes on AgentAccess {
     String itemId,
     int baseVersion, {
     String? fieldId,
+    String title = '',
+    String agentName = '',
+    String purpose = '',
+    String externalChatId = '',
   }) => _service.owner._serialize(() async {
     _service._requireSession(session);
+    if (!validSubmissionMetadata(
+      title: title,
+      agentName: agentName,
+      purpose: purpose,
+      externalChatId: externalChatId,
+    )) {
+      throw const AccessFailure('invalid_submission_metadata');
+    }
     final binding = _service._sessionBindings[session];
     if (binding == null) throw const AccessFailure('unauthorized');
     if (itemId.isEmpty ||
@@ -30,6 +42,10 @@ extension AgentDeletes on AgentAccess {
       id: _service._secret(),
       sessionBinding: binding,
       chatLabel: _service._sessions[session]!,
+      title: title.trim(),
+      agentName: agentName.trim(),
+      purpose: purpose.trim(),
+      externalChatId: externalChatId.trim(),
       itemId: itemId,
       baseVersion: baseVersion,
       createdAt: _service._clock(),

@@ -26,6 +26,14 @@ description: 使用信息授权软件查询公开目录和当前插件模板，�
 - 使用 Token、私钥、凭据文件执行命令或本机填充：先读 [凭据使用](references/credential-use.md)。这是使用已保存凭据，不是将凭据原文录成普通资料。
 - 调整目录和标签：走“整理分类”。定位原始 infos 资料库则使用 infos Skill。
 
+## 提交主题和来源
+
+新版运行包需要 `submission-metadata.v1`。每次申请填写实际 `purpose`；新增、修改、删除和整理提案还填写一句 `title`，例如“补齐 NAS 应用清单”“更新校园网服务器配置”。标题说明本次要做什么，条数和资料类型由 App 另外显示。标题、Agent 名称、聊天标识各最多200字，用途最多2000字；这些说明中不放密码、Token、私钥或资料正文。
+
+同包 `info-codex` 自动提供 Codex 名称和当前聊天标识；其他 Agent 以实际名称填写 `agentName`。通用 CLI 在 `session` 中提供 `chatLabel`、`externalChatId`，每次申请提供 `agentName`；也可在单次申请明确提供当前聊天的 `externalChatId`。它们只用于展示来源，实际授权仍由私密会话证明决定。
+
+模板例子中的名称、聊天标识和主题都是虚构的：复用其 `items`／`update` 结构，替换成当前任务的主题和来源。`invalid_submission_metadata` 时按 `fieldErrors` 补齐原提交，不通过改名或换聊天取得旧许可。随包程序 `--help` 可在未连接时查看字段和示例；旧服务器不支持时报告需要更新。
+
 ## 整理、按模板录入和修改
 
 用户指定的文件与资料是本次来源范围。自行判断名称、用途、分类、关联、条目数量和版本关系，不要求用户逐条指挥怎样建资料。已有资料的私有值若不在用户给定来源中，先取得正常读取授权；缺失事实保留未知，不猜填。
@@ -38,7 +46,7 @@ description: 使用信息授权软件查询公开目录和当前插件模板，�
 2. 没有合适模板或模板缺填写说明／例子时，说明这份材料需要什么格式，暂缓这一项。其他资料按自身审批和引用情况处理。新增或安装插件由用户决定，不能为了录入自行造插件。
 3. 名称写实际对象，描述写简短用途；应用用软件名，独立部署用位置区分，设备专属配置另建合适资料并关联应用。目录按内容用途选择，参考已有同类资料的位置，模板类型不等于目录；修改默认保留原目录，调整位置时在提案中明确提出。私有事实放模板值中。地址、端口等结构字段填简短值；长说明放模板声明的正文，按声明选择 plain／markdown 等格式。公开名称、用途和普通字段不放凭据原文或整理过程。
 4. 同一材料的前后修订作为历史版本；用途不同的材料分别建资料，例如两个投递方向。先完整提取有用信息；来源原件有独立保管、交付或修订价值时，再按当前文件模板建独立资料并关联，多处使用同一原件时复用。已提取完整且没有独立用途的来源不再附带保存。文件必须绑定模板声明的文件字段，不通过额外字段挂整份来源。版本以来源证据判断，不按文件名相似就合并。
-5. 新增使用 `import-submit`。按查询返回的 `submissionExample` 结构填写 `items`，保留所选 `templateId`、`templateVersion`、`templateDigest`，真实值放 `values`；附简短 `purpose` 与 `agentName`。可建议 `suggestedDirectory`、`suggestedTags`，它们只在用户批准并具备入库条件后应用。不要再用 `suggestedTemplate` 提示加平面文字来代替按模板保存。
+5. 新增使用 `import-submit`。按查询返回的 `submissionExample` 结构填写 `items`，保留所选 `templateId`、`templateVersion`、`templateDigest`，真实值放 `values`；按上节填写本次主题和来源。可建议 `suggestedDirectory`、`suggestedTags`，它们只在用户批准并具备入库条件后应用。不要再用 `suggestedTemplate` 提示加平面文字来代替按模板保存。
 6. 一份提案是一次完整提交和整体保存，不能按条目勾选部分入库。将需要一起新增的相关资料组织在同一提案；全部必填字段、密码和文件齐全后，由用户核对并一次保存。需要关联已入库内容时用公开目录中的准确 ID；同批待录入内容用稳定的 `itemKey`，由软件一起建立关联。跨提案再加同一会话中的 `proposalId`，但不能把它作为日常拆分用户一次操作的办法；未解决的引用会使整份等待。查询 `import-status` 可取得服务生成的 key。用户填写密码不另加一次密码审批；整份保存仍不授予AI使用许可。
 7. 修改已有资料仍使用 `update-submit`，提供准确 `itemId` 与当前 `baseVersion`。按模板修改时同时提供模板三个标识和**完整 values**；先从获准来源取得现有文字值，明确保留或修改每个字段，已有文件按查询返回的 `retainFileValue` 明确保留。省略字段会报错，不意味着清空。只补文件的修改按文件录入说明，不要求重填无关正文。修改可关联待录入普通资料，须给目标 `proposalId` 与 `itemKey`。用户看前后变化再批准，等待期间原资料保持不变。
 8. 只改明确字段且保留原含义时，也可用原有 `changes` 协议：`correct` 提供 `fieldId`、`value`；`add` 提供新 `field`；`replace` 明确更换字段含义；`remove` 明确删除。字段含 `name`、`description`、`value`、`kind`。此格式不与模板 values 混用；新增或替换的字段不会继承旧授权。
@@ -82,7 +90,7 @@ description: 使用信息授权软件查询公开目录和当前插件模板，�
 
 ## 整理分类
 
-使用同一会话的 `organize-request` 提供用途、候选 `itemIds` 和 agentName，保留 `taskId`；用户在 App 审批，不要求用户手动建立任务。通过 `organize-wait` 或 `organize-status` 查询原任务。
+使用同一会话的 `organize-request` 提供本次主题、用途、来源和候选 `itemIds`，保留 `taskId`；用户在 App 审批，不要求用户手动建立任务。通过 `organize-wait` 或 `organize-status` 查询原任务。
 
 `active` 时调用 `organize-metadata`，只用最终获批 ID、版本、目录和标签，按用户目标整理。`organize-submit` 提供完整期望分类和标签；没有变化时提交空 changes 完成任务。此批准同时允许限定范围的元数据读取与分类改动，不再二次审批，也不授予私有值读取或正文修改。
 

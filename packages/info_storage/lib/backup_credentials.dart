@@ -301,6 +301,8 @@ void _validateBackupCredentialHistory(
       {
         'requestedPlan',
         'restoredAt',
+        'agentName',
+        'externalChatId',
         if (formatVersion >= 6) 'protocolVersion',
         if (formatVersion >= 22) 'credentialValidity',
       },
@@ -309,6 +311,7 @@ void _validateBackupCredentialHistory(
     if (row['id'] != id || requests.containsKey(id)) _backupInvalid();
     _backupId(j, 'credentialId');
     _backupText(j, 'chatLabel', 2000);
+    _backupSubmissionSource(j);
     _backupText(j, 'purpose', 2000, required: true);
     if (!RegExp(
       r'^[A-Za-z_][A-Za-z0-9_]{0,63}$',

@@ -41,13 +41,19 @@ void main() {
         return jsonDecode(output.current) as Map<String, dynamic>;
       }
 
-      await command({'command': 'session', 'chatLabel': 'CLI updater'});
+      await command({
+        'command': 'session',
+        'externalChatId': 'synthetic-update-cli-test',
+        'chatLabel': 'CLI updater',
+      });
       final catalog = (await command({'command': 'catalog'}))['items'] as List;
       final metadata = catalog.single as Map<String, dynamic>;
       final fields =
           (metadata['fields'] as List).single as Map<String, dynamic>;
       final submitted = await command({
         'command': 'update-submit',
+        'title': '合成资料变更',
+        'purpose': '执行合成验收的资料变更',
         'update': {
           'itemId': metadata['id'],
           'baseVersion': metadata['version'],

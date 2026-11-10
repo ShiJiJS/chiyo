@@ -40,6 +40,7 @@ void main() {
 
       await command({
         'command': 'session',
+        'externalChatId': 'synthetic-revisions-cli-test',
         'chatLabel': 'fictional history chat',
       });
       final request = await command({

@@ -485,6 +485,7 @@ class _ProposalsPageState extends State<ProposalsPage> {
           Text(
             [
               if (r.agentClaim.isNotEmpty) r.agentClaim,
+              if (r.agentClaim.isEmpty && r.chatClaim.isNotEmpty) r.chatClaim,
               '${r.itemCount}项',
             ].join(' · '),
             style: libraryText(context, 12, color: UiPalette.of(context).muted),
@@ -974,10 +975,14 @@ class _ProposalsPageState extends State<ProposalsPage> {
                             ),
                           ),
                         ],
-                        if (s.agentClaim.isNotEmpty) ...[
+                        if (s.agentClaim.isNotEmpty ||
+                            s.chatClaim.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(
-                            s.agentClaim,
+                            [
+                              s.agentClaim,
+                              s.chatClaim,
+                            ].where((value) => value.isNotEmpty).join(' · '),
                             style: libraryText(context, 12, color: c.muted),
                           ),
                         ],

@@ -101,6 +101,7 @@ Future<_Fixture> _fixture({bool enabled = true, bool native = true}) async {
   expect(
     (await client.execute({
       'command': 'session',
+      'externalChatId': 'synthetic-focused-fill-client-test',
       'chatLabel': 'Synthetic CLI fill',
     }))['status'],
     'ok',
@@ -158,6 +159,7 @@ void main() {
       expect(
         (await command({
           'command': 'session',
+          'externalChatId': 'synthetic-focused-fill-client-test',
           'chatLabel': 'Independent fill CLI',
         }))['status'],
         'ok',
@@ -347,6 +349,7 @@ void main() {
       addTearDown(other.close);
       await other.execute({
         'command': 'session',
+        'externalChatId': 'synthetic-focused-fill-client-test',
         'chatLabel': 'Other private chat',
       });
       expect((await other.execute(query))['status'], 'unauthorized');

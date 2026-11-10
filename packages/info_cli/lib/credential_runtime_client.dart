@@ -280,6 +280,9 @@ extension _CredentialRuntimeClient on AgentClient {
           'launch',
           'readFields',
           'fill',
+          'agentName',
+          'externalChatId',
+          'submissionVersion',
         },
         'fill-use' || 'fill-status' => {
           'protocolVersion',

@@ -49,7 +49,11 @@ void main() {
         return jsonDecode(lines.current) as Map<String, dynamic>;
       }
 
-      await command({'command': 'session', 'chatLabel': 'chat'});
+      await command({
+        'command': 'session',
+        'chatLabel': 'chat',
+        'externalChatId': 'synthetic-adjusted-chat',
+      });
       final request = await command({
         'command': 'request',
         'purpose': 'Need connection information',

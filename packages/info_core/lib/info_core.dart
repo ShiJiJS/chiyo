@@ -38,6 +38,8 @@ export 'update_proposals.dart';
 export 'recycle.dart';
 export 'revisions.dart';
 import 'revisions.dart';
+import 'submission_metadata.dart';
+export 'submission_metadata.dart';
 part 'organization_access.dart';
 part 'organization_task_access.dart';
 part 'history_access.dart';
@@ -134,6 +136,8 @@ class OwnerRequestSnapshot {
     required this.grantExpiresAt,
     this.grantLifetime,
     this.sessionId = '',
+    this.agentName = '',
+    this.externalChatId = '',
     this.approvedAt,
     this.historical = false,
     this.applicationClosed = false,
@@ -162,6 +166,7 @@ class OwnerRequestSnapshot {
 
   /// Public audit identity, never the private session capability.
   final String sessionId;
+  final String agentName, externalChatId;
   final DateTime? approvedAt, restoredAt;
   final bool historical, applicationClosed;
 
@@ -178,8 +183,11 @@ class _Request {
     this.createdAt,
     this.expiresAt, {
     this.operationId,
+    this.agentName = '',
+    this.externalChatId = '',
   });
   final String? operationId;
+  final String agentName, externalChatId;
   final String id;
   final String session;
   final String purpose;
@@ -496,8 +504,17 @@ class AgentAccess {
     String purpose,
     List<FieldRef> fields, {
     String? operationId,
+    String agentName = '',
+    String externalChatId = '',
   }) {
     _service._requireSession(session);
+    if (!validSubmissionMetadata(
+      agentName: agentName,
+      purpose: purpose,
+      externalChatId: externalChatId,
+    )) {
+      throw const AccessFailure('invalid_submission_metadata');
+    }
     if (purpose.trim().isEmpty ||
         purpose.length > 2000 ||
         fields.isEmpty ||
@@ -508,6 +525,8 @@ class AgentAccess {
       final original = _findRequestOperation(session, operationId);
       if (original != null) {
         if (original.purpose != purpose ||
+            original.agentName != agentName.trim() ||
+            original.externalChatId != externalChatId.trim() ||
             original.fields.length != fields.toSet().length ||
             !original.fields.containsAll(fields)) {
           throw const AccessFailure('operation_conflict');
@@ -532,6 +551,8 @@ class AgentAccess {
             now,
             now.add(_service._requestLifetime),
             operationId: operationId,
+            agentName: agentName.trim(),
+            externalChatId: externalChatId.trim(),
           )
           ..recordedFields = fields.toSet().map((ref) {
             final item = _service._repository.items.firstWhere(
@@ -1013,6 +1034,8 @@ class OwnerAccess {
       id: r.id,
       state: r.state,
       chatLabel: _service._sessions[r.session]!,
+      agentName: r.agentName,
+      externalChatId: r.externalChatId,
       sessionId: _service._sessionBindings[r.session]!,
       approvedAt: r.approvedAt,
       purpose: r.purpose,

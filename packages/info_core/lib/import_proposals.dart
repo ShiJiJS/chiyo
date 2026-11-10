@@ -324,6 +324,7 @@ class ImportProposal {
     Iterable<int> createdItemVersions = const [],
     int? itemCount,
     this.agentName = '',
+    this.externalChatId = '',
     this.title = '',
     this.purpose = '',
     this.operationId,
@@ -398,7 +399,7 @@ class ImportProposal {
     }
   }
   final String id, sessionBinding, chatLabel;
-  final String agentName, purpose, title;
+  final String agentName, purpose, title, externalChatId;
   final String? operationId, submissionDigest;
   final DateTime createdAt;
   final List<ImportItemInput> items;
@@ -472,6 +473,7 @@ class ImportProposal {
     itemCount: itemCount,
     fieldCount: fieldCount,
     agentName: agentName,
+    externalChatId: externalChatId,
     title: title,
     purpose: purpose,
     operationId: operationId,
@@ -504,6 +506,7 @@ class ImportProposal {
     'createdItemVersions': createdItemVersions,
     'itemCount': itemCount,
     'agentName': agentName,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
     if (title.isNotEmpty) 'title': title,
     'purpose': purpose,
     'fieldCount': fieldCount,
@@ -551,6 +554,7 @@ class ImportProposal {
         .cast<int>(),
     itemCount: json['itemCount'] as int?,
     agentName: json['agentName'] as String? ?? '',
+    externalChatId: json['externalChatId'] as String? ?? '',
     title: json['title'] as String? ?? '',
     purpose: json['purpose'] as String? ?? '',
     operationId: json['operationId'] as String?,

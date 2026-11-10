@@ -126,8 +126,11 @@ class FocusedFillInput {
     this.credentialId,
     this.version,
     this.fill,
+    this.agentName,
+    this.externalChatId,
   );
   final String purpose, alias, credentialId;
+  final String agentName, externalChatId;
   final int version;
   final FocusedFillPlan fill;
   factory FocusedFillInput.fromJson(Map<String, dynamic> json) {
@@ -137,7 +140,7 @@ class FocusedFillInput {
     _useShape(
       json,
       {'protocolVersion', 'command', 'purpose', 'credentials', 'fill'},
-      {'readFields'},
+      {'readFields', 'agentName', 'externalChatId', 'submissionVersion'},
     );
     if (json['command'] != 'request-use' ||
         json.containsKey('readFields') &&
@@ -164,6 +167,8 @@ class FocusedFillInput {
       _useId(credential['credentialId'], 'credentials[0].credentialId'),
       version,
       FocusedFillPlan.fromJson(json['fill'] as Map<String, dynamic>),
+      _useSourceText(json, 'agentName'),
+      _useSourceText(json, 'externalChatId'),
     );
   }
 }

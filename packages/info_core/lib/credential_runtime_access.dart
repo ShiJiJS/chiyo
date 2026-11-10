@@ -551,6 +551,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       protocolVersion: input.protocolVersion,
       id: _service._secret(),
       chatLabel: _service._sessions[session]!,
+      agentName: input.agentName,
+      externalChatId: input.externalChatId,
       purpose: input.purpose,
       alias: input.alias,
       credentialId: c.id,
@@ -1086,6 +1088,9 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
             requestId: id,
             sessionId: _service._sessionBindings[session]!,
             chatLabel: r.chatLabel,
+            agentName: r.agentName,
+            externalChatId: r.externalChatId,
+            purpose: r.purpose,
             approvedAt: now,
             expiresAt: now.add(effectiveFieldLifetime),
             fields: recorded,
@@ -1097,6 +1102,8 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
             id: id,
             sessionId: _service._sessionBindings[session]!,
             chatLabel: r.chatLabel,
+            agentName: r.agentName,
+            externalChatId: r.externalChatId,
             purpose: r.purpose,
             createdAt: r.createdAt,
             requestExpiresAt: r.requestExpiresAt,
@@ -1135,6 +1142,8 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
                 Set.unmodifiable(r.fields),
                 r.createdAt,
                 r.requestExpiresAt,
+                agentName: r.agentName,
+                externalChatId: r.externalChatId,
               )
               ..approvedAt = now
               ..recordedFields = recorded
