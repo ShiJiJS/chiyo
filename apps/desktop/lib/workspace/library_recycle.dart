@@ -600,7 +600,7 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      '${entry.wholeItem ? '整条资料' : '部分字段'} · ${entry.record.type.name} · 原目录：${entry.directoryName ?? (entry.record.directoryId == null ? '未分类' : '原目录已移除')}\n回收于 ${entry.deletedAt.toIso8601String().substring(0, 10)}',
+                                      '${entry.wholeItem ? '整条资料' : '部分字段'} · ${entry.record.type.name} · 原目录：${entry.directoryName ?? (entry.record.directoryId == null ? '未分类' : '原目录已移除')}\n回收于 ${libraryLocalDateTime(entry.deletedAt).substring(0, 10)}',
                                       style: libraryText(
                                         context,
                                         13,
