@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_cli/agent_client.dart';
@@ -26,6 +27,17 @@ class _Keys implements DatabaseKeyStore {
   }
 }
 
+Future<File> _dartExecutable() async {
+  final flutter = await Isolate.resolvePackageUri(
+    Uri.parse('package:flutter/widgets.dart'),
+  );
+  if (flutter == null) throw StateError('Flutter SDK could not be resolved.');
+  final sdk = File.fromUri(flutter).parent.parent.parent.parent;
+  return File(
+    '${sdk.path}/bin/cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
+  );
+}
+
 void main() {
   test(
     'authenticated local credential use reaches a real child without exposing the password',
@@ -38,9 +50,7 @@ void main() {
         config.libraryDirectory,
         _Keys(),
       );
-      final executable = File(
-        '../../.tools/flutter/bin/cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
-      ).absolute;
+      final executable = (await _dartExecutable()).absolute;
       final stat = await executable.stat();
       final digest = 'sha256:${sha256.convert(await executable.readAsBytes())}';
       final service = InformationService(
@@ -455,6 +465,7 @@ void main() {
         [const FieldInput('正文', '', 'SYNTHETIC_LOCAL_CLI_VALUE')],
       );
       final directory = Directory('../../packages/info_cli').absolute.path;
+      final dart = await _dartExecutable();
       final env = {
         'CHIYO_CONNECTION_DIRECTORY': config.directory,
         'CODEX_THREAD_ID': 'local-formal-chat',
@@ -465,9 +476,7 @@ void main() {
         List<String> args = const [],
       ]) async {
         final child = await Process.start(
-          File(
-            '../../.tools/flutter/bin/cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
-          ).absolute.path,
+          dart.absolute.path,
           ['run', 'bin/$entry.dart', ...args],
           workingDirectory: directory,
           environment: env,

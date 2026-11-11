@@ -69,6 +69,7 @@ Future<void> main() async {
         (await command({
           'command': 'session',
           'chatLabel': 'Real CLI tree',
+          'externalChatId': 'synthetic-runtime-cli',
         }))['status'],
         'ok',
       );
@@ -90,7 +91,7 @@ Future<void> main() async {
             },
           },
         });
-        expect(result['status'], 'pending');
+        expect(result['status'], 'pending', reason: jsonEncode(result));
         final id = result['requestId'] as String;
         await h.service.owner.decideCredentialUse(id, approveCredential: true);
         return id;
