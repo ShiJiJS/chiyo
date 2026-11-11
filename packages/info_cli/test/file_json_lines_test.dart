@@ -68,7 +68,11 @@ void main() {
         return jsonDecode(cliLines.current) as Map<String, dynamic>;
       }
 
-      await command({'command': 'session', 'chatLabel': 'Isolated file CLI'});
+      await command({
+        'command': 'session',
+        'chatLabel': 'Isolated file CLI',
+        'externalChatId': 'synthetic-file-cli',
+      });
       final request = await command({
         'protocolVersion': 1,
         'command': 'request-use',
@@ -97,7 +101,7 @@ void main() {
           },
         },
       });
-      expect(request['status'], 'pending');
+      expect(request['status'], 'pending', reason: jsonEncode(request));
       owner.stdin.writeln(
         jsonEncode({'command': 'approve', 'requestId': request['requestId']}),
       );
