@@ -25,6 +25,112 @@ LibrarySyncBatch edit(
 );
 
 void main() {
+  test('small baseline headers bind the complete chunked version map', () {
+    final baseline = LibrarySyncBaseline(
+      libraryId: library,
+      sourceReplicaId: replicaA,
+      snapshotId: '1' * 64,
+      cursor: 7,
+      versions: {item: '2' * 64},
+      tombstones: {},
+    );
+    final header = LibrarySyncBaselineManifest.of(baseline);
+    expect(
+      header.byteLength,
+      utf8.encode(jsonEncode(baseline.toJson())).length,
+    );
+    expect(header.matches(baseline), true);
+    expect(
+      LibrarySyncBaselineManifest.fromJson(
+        Map<String, dynamic>.from(header.toJson()),
+      ).matches(baseline),
+      true,
+    );
+    final changed = LibrarySyncBaseline(
+      libraryId: library,
+      sourceReplicaId: replicaA,
+      snapshotId: baseline.snapshotId,
+      cursor: baseline.cursor,
+      versions: {item: '3' * 64},
+      tombstones: {},
+    );
+    expect(header.matches(changed), false);
+    for (final patch in <Map<String, Object?>>[
+      {'wireVersion': 3},
+      {'byteLength': 0},
+      {'byteLength': LibrarySyncBatch.maxBytes + 1},
+      {'cursor': -1},
+      {'cursor': 1.5},
+      {'unknown': true},
+    ]) {
+      expect(
+        () => LibrarySyncBaselineManifest.fromJson({
+          ...header.toJson(),
+          ...patch,
+        }),
+        throwsFormatException,
+      );
+    }
+  });
+
+  test(
+    'feed summaries identify an exact delta without exposing its contents',
+    () {
+      final batch = edit(
+        'feed-summary',
+        content: {'value': 'SYNTHETIC_PRIVATE_VALUE'},
+      );
+      final summary = LibrarySyncChangeSummary(
+        libraryId: library,
+        sourceReplicaId: replicaA,
+        operationId: batch.operationId,
+        sequence: batch.sequence,
+        digest: batch.digest,
+        cursor: 9,
+      );
+      LibraryDeltaTransfer transfer({int sequence = 1, String? digest}) =>
+          LibraryDeltaTransfer(
+            archive: LibraryInitialTransfer(
+              libraryId: library,
+              snapshotId: digest ?? batch.digest,
+              archiveDigest: '0' * 64,
+              byteLength: 4096,
+              contentFormat: 22,
+            ),
+            sourceReplicaId: replicaA,
+            operationId: batch.operationId,
+            sequence: sequence,
+          );
+      expect(summary.matches(transfer()), true);
+      expect(summary.matches(transfer(sequence: 2)), false);
+      expect(summary.matches(transfer(digest: 'f' * 64)), false);
+      expect(
+        jsonEncode(summary.toJson()),
+        isNot(contains('SYNTHETIC_PRIVATE_VALUE')),
+      );
+      expect(
+        LibrarySyncChangeSummary.fromJson(
+          Map<String, dynamic>.from(summary.toJson()),
+        ).matches(transfer()),
+        true,
+      );
+      for (final patch in <Map<String, Object?>>[
+        {'sequence': 0},
+        {'cursor': 0},
+        {'wireVersion': 1},
+        {'content': batch.changes.single.content},
+      ]) {
+        expect(
+          () => LibrarySyncChangeSummary.fromJson({
+            ...summary.toJson(),
+            ...patch,
+          }),
+          throwsFormatException,
+        );
+      }
+    },
+  );
+
   test(
     'initial versions and delta archive descriptors reject tampering and unknown formats',
     () {

@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/library_replication.dart';
+import 'package:info_core/library_sync_changes.dart';
+import 'package:info_core/protocol_json.dart';
 import 'package:info_storage/info_storage.dart';
+part 'owner_incremental_routes.dart';
 
 class _TransferFile {
   _TransferFile(
@@ -13,12 +17,17 @@ class _TransferFile {
     this.transfer,
     this.deadline, {
     this.key,
-  });
-  final String id, operationId;
+    String? cacheKey,
+    this.delta,
+    this.baseline,
+  }) : cacheKey = cacheKey ?? operationId;
+  final String id, operationId, cacheKey;
   final File file;
   final LibraryInitialTransfer transfer;
   final Duration deadline;
   final String? key;
+  final LibraryDeltaTransfer? delta;
+  final _BaselineTransfer? baseline;
 }
 
 /// Owner-only staging of encrypted content. Actual installation uses the same
@@ -34,6 +43,8 @@ class OwnerReplicationRoutes {
   final OwnerAccess owner;
   final LibraryReplication replication;
   final Directory directory;
+  late final LibraryIncremental _incremental = LibraryIncremental(replication);
+  Future<void>? _incrementalReady;
   OwnerLibraryScope _scope;
   bool _swept = false;
   final Duration Function() _elapsed;
@@ -51,6 +62,8 @@ class OwnerReplicationRoutes {
   static const capabilities = {
     'wireVersion': 1,
     'initialTransfer': true,
+    'incrementalWireVersion': 2,
+    'versionedInitial': true,
     'contentFormats': [
       8,
       9,
@@ -74,9 +87,13 @@ class OwnerReplicationRoutes {
       .encode(List.generate(24, (_) => Random.secure().nextInt(256)))
       .replaceAll('=', '');
 
-  Map<String, dynamic> _input(Object? raw, Set<String> fields) {
+  Map<String, dynamic> _input(
+    Object? raw,
+    Set<String> fields, {
+    int version = 1,
+  }) {
     if (raw is! Map ||
-        raw['wireVersion'] != 1 ||
+        raw['wireVersion'] != version ||
         raw.length != fields.length + 1 ||
         !fields.every(raw.containsKey))
       throw const FormatException('Invalid replication request');
@@ -129,6 +146,7 @@ class OwnerReplicationRoutes {
   Future<void> cleanup() async {
     if (!_scope.isCurrent) {
       await dispose();
+      _incrementalReady = null;
       _scope = owner.captureLibraryScope();
     }
     for (final transfer in _files.values.toList()) {
@@ -156,9 +174,9 @@ class OwnerReplicationRoutes {
     await transfer.file.parent.delete(recursive: true);
     _files.remove(transfer.id);
     if (transfer.key == null) {
-      _imports.remove(transfer.operationId);
+      _imports.remove(transfer.cacheKey);
     } else {
-      _exports.remove(transfer.operationId);
+      _exports.remove(transfer.cacheKey);
     }
   }
 
@@ -174,6 +192,16 @@ class OwnerReplicationRoutes {
   ) async {
     if (needsCleanup) await cleanup();
     final tail = path.skip(3).toList();
+    if (tail.isNotEmpty &&
+        {
+          'changes',
+          'versioned-exports',
+          'versioned-imports',
+          'delta-exports',
+          'delta-imports',
+        }.contains(tail[0])) {
+      return _dispatchIncremental(method, tail, raw);
+    }
     if (tail.isEmpty && method == 'GET')
       return (
         200,
@@ -262,6 +290,9 @@ class OwnerReplicationRoutes {
       await _release(transfer);
       return (200, {'wireVersion': 1});
     }
+    if (tail.length == 4 && tail[2] == 'baseline') {
+      return _baselineChunk(method, tail[3], transfer, raw);
+    }
     if (tail.length == 3 &&
         tail[2] == 'read' &&
         method == 'POST' &&
@@ -339,6 +370,9 @@ class OwnerReplicationRoutes {
         transfer.key == null) {
       final input = _input(raw, {'transferKey'});
       if (input['transferKey'] is! String) throw const FormatException();
+      if (transfer.delta != null || transfer.baseline != null) {
+        return _commitIncremental(transfer, input['transferKey'] as String);
+      }
       final receipt = await owner.restoreLibraryOnce(
         previous: () =>
             replication.receipt(transfer.operationId, transfer.transfer),

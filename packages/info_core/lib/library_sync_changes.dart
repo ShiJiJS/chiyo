@@ -473,6 +473,144 @@ final class LibrarySyncBaseline {
       'LibrarySyncBaseline(units: ${versions.length}, cursor: $cursor)';
 }
 
+/// Small descriptor for a bounded, chunked baseline held only in owner memory
+/// until the initial content and versions commit together in SQLCipher.
+final class LibrarySyncBaselineManifest {
+  LibrarySyncBaselineManifest({
+    required this.libraryId,
+    required this.sourceReplicaId,
+    required this.snapshotId,
+    required this.digest,
+    required this.cursor,
+    required this.byteLength,
+  }) {
+    libraryReplicaId(libraryId);
+    libraryReplicaId(sourceReplicaId);
+    replicaDigest(snapshotId);
+    replicaDigest(digest);
+    if (cursor < 0 ||
+        cursor > 9007199254740991 ||
+        byteLength < 1 ||
+        byteLength > LibrarySyncBatch.maxBytes) {
+      throw const FormatException('Invalid baseline transfer');
+    }
+  }
+  final String libraryId, sourceReplicaId, snapshotId, digest;
+  final int cursor, byteLength;
+  factory LibrarySyncBaselineManifest.of(LibrarySyncBaseline value) =>
+      LibrarySyncBaselineManifest(
+        libraryId: value.libraryId,
+        sourceReplicaId: value.sourceReplicaId,
+        snapshotId: value.snapshotId,
+        digest: value.digest,
+        cursor: value.cursor,
+        byteLength: utf8.encode(jsonEncode(value.toJson())).length,
+      );
+  bool matches(LibrarySyncBaseline value) =>
+      libraryId == value.libraryId &&
+      sourceReplicaId == value.sourceReplicaId &&
+      snapshotId == value.snapshotId &&
+      digest == value.digest &&
+      cursor == value.cursor;
+  Map<String, Object?> toJson() => {
+    'wireVersion': 2,
+    'libraryId': libraryId,
+    'sourceReplicaId': sourceReplicaId,
+    'snapshotId': snapshotId,
+    'digest': digest,
+    'cursor': cursor,
+    'byteLength': byteLength,
+  };
+  factory LibrarySyncBaselineManifest.fromJson(Map<String, dynamic> value) {
+    _fields(value, {
+      'wireVersion',
+      'libraryId',
+      'sourceReplicaId',
+      'snapshotId',
+      'digest',
+      'cursor',
+      'byteLength',
+    });
+    if (value['wireVersion'] != 2 ||
+        value['cursor'] is! int ||
+        value['byteLength'] is! int) {
+      throw const FormatException('Unsupported baseline transfer');
+    }
+    return LibrarySyncBaselineManifest(
+      libraryId: libraryReplicaId(value['libraryId']),
+      sourceReplicaId: libraryReplicaId(value['sourceReplicaId']),
+      snapshotId: replicaDigest(value['snapshotId']),
+      digest: replicaDigest(value['digest']),
+      cursor: value['cursor'] as int,
+      byteLength: value['byteLength'] as int,
+    );
+  }
+}
+
+/// No field bodies, credential materials or history payloads in a feed page.
+final class LibrarySyncChangeSummary {
+  LibrarySyncChangeSummary({
+    required this.libraryId,
+    required this.sourceReplicaId,
+    required this.operationId,
+    required this.sequence,
+    required this.digest,
+    required this.cursor,
+  }) {
+    libraryReplicaId(libraryId);
+    libraryReplicaId(sourceReplicaId);
+    replicaOperationId(operationId);
+    replicaDigest(digest);
+    if (sequence < 1 ||
+        sequence > 9007199254740991 ||
+        cursor < 1 ||
+        cursor > 9007199254740991) {
+      throw const FormatException('Invalid change summary');
+    }
+  }
+  final String libraryId, sourceReplicaId, operationId, digest;
+  final int sequence, cursor;
+  Map<String, Object?> toJson() => {
+    'wireVersion': 2,
+    'libraryId': libraryId,
+    'sourceReplicaId': sourceReplicaId,
+    'operationId': operationId,
+    'sequence': sequence,
+    'digest': digest,
+    'cursor': cursor,
+  };
+  factory LibrarySyncChangeSummary.fromJson(Map<String, dynamic> value) {
+    _fields(value, {
+      'wireVersion',
+      'libraryId',
+      'sourceReplicaId',
+      'operationId',
+      'sequence',
+      'digest',
+      'cursor',
+    });
+    if (value['wireVersion'] != 2 ||
+        value['sequence'] is! int ||
+        value['cursor'] is! int) {
+      throw const FormatException('Unsupported change summary');
+    }
+    return LibrarySyncChangeSummary(
+      libraryId: libraryReplicaId(value['libraryId']),
+      sourceReplicaId: libraryReplicaId(value['sourceReplicaId']),
+      operationId: replicaOperationId(value['operationId']),
+      sequence: value['sequence'] as int,
+      digest: replicaDigest(value['digest']),
+      cursor: value['cursor'] as int,
+    );
+  }
+  bool matches(LibraryDeltaTransfer transfer) =>
+      libraryId == transfer.archive.libraryId &&
+      sourceReplicaId == transfer.sourceReplicaId &&
+      operationId == transfer.operationId &&
+      sequence == transfer.sequence &&
+      digest == transfer.archive.snapshotId;
+}
+
 void _fields(Map<String, Object?> value, Set<String> fields) {
   if (value.length != fields.length || !fields.every(value.containsKey)) {
     throw const FormatException('Unsupported synchronization fields');

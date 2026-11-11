@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/library_replication.dart';
+import 'package:info_core/library_sync_changes.dart';
+import 'package:info_core/protocol_json.dart';
 import 'owner_client.dart';
+part 'library_incremental_client.dart';
 
 final class RemoteInitialExport {
   RemoteInitialExport._(this.resourceId, this.transfer, this.transferKey);
@@ -76,18 +80,7 @@ final class LibraryReplicationClient {
     try {
       while (offset < source.transfer.byteLength) {
         final length = min(chunkBytes, source.transfer.byteLength - offset);
-        final result = await client.request(
-          'POST',
-          '$base/transfers/${source.resourceId}/read',
-          {'wireVersion': 1, 'offset': offset, 'length': length},
-        );
-        if (result['wireVersion'] != 1 ||
-            result['offset'] != offset ||
-            result['bytesBase64'] is! String)
-          throw const RemoteFailure('invalid_response');
-        final bytes = base64Decode(result['bytesBase64'] as String);
-        if (bytes.length != length)
-          throw const RemoteFailure('sync_integrity_failed');
+        final bytes = await _readChunk(source.resourceId, offset, length);
         await output.writeFrom(bytes);
         await output.flush();
         offset += length;
@@ -106,6 +99,67 @@ final class LibraryReplicationClient {
         (await sha256.bind(file.openRead()).single).toString() !=
             transfer.archiveDigest)
       throw const RemoteFailure('sync_integrity_failed');
+  }
+
+  Future<Uint8List> _readChunk(
+    String resource,
+    int offset,
+    int length, {
+    bool baseline = false,
+  }) async {
+    final result = await client.request(
+      'POST',
+      '$base/transfers/$resource/${baseline ? 'baseline/read' : 'read'}',
+      {'wireVersion': 1, 'offset': offset, 'length': length},
+    );
+    if (result['wireVersion'] != 1 ||
+        result['offset'] != offset ||
+        result['bytesBase64'] is! String ||
+        (result['bytesBase64'] as String).length > ((length + 2) ~/ 3) * 4)
+      throw const RemoteFailure('invalid_response');
+    final bytes = base64Decode(result['bytesBase64'] as String);
+    if (bytes.length != length)
+      throw const RemoteFailure('sync_integrity_failed');
+    return bytes;
+  }
+
+  Future<void> _writeChunk(
+    String resource,
+    int offset,
+    Uint8List bytes, {
+    bool baseline = false,
+  }) async {
+    final result = await client.request(
+      'POST',
+      '$base/transfers/$resource/${baseline ? 'baseline/write' : 'write'}',
+      {'wireVersion': 1, 'offset': offset, 'bytesBase64': base64Encode(bytes)},
+    );
+    if (result['wireVersion'] != 1 || result['offset'] != offset + bytes.length)
+      throw const RemoteFailure('invalid_response');
+  }
+
+  Future<void> _uploadFile(
+    File file,
+    LibraryInitialTransfer transfer,
+    String resource,
+    int offset,
+    void Function(int completed, int total)? progress,
+  ) async {
+    final input = await file.open();
+    try {
+      await input.setPosition(offset);
+      while (offset < transfer.byteLength) {
+        final bytes = await input.read(
+          min(chunkBytes, transfer.byteLength - offset),
+        );
+        if (bytes.isEmpty) throw const RemoteFailure('sync_integrity_failed');
+        await _writeChunk(resource, offset, bytes);
+        offset += bytes.length;
+        progress?.call(offset, transfer.byteLength);
+      }
+    } finally {
+      await input.close();
+    }
   }
 
   Future<LibraryInitialReceipt?> receipt(String operationId) async {
@@ -165,33 +219,7 @@ final class LibraryReplicationClient {
     final uploaded = prepared['offset'];
     if (uploaded is! int || uploaded < 0 || uploaded > transfer.byteLength)
       throw const RemoteFailure('invalid_response');
-    var offset = uploaded;
-    final input = await file.open();
-    try {
-      await input.setPosition(offset);
-      while (offset < transfer.byteLength) {
-        final bytes = await input.read(
-          min(chunkBytes, transfer.byteLength - offset),
-        );
-        if (bytes.isEmpty) throw const RemoteFailure('sync_integrity_failed');
-        final result = await client.request(
-          'POST',
-          '$base/transfers/$resource/write',
-          {
-            'wireVersion': 1,
-            'offset': offset,
-            'bytesBase64': base64Encode(bytes),
-          },
-        );
-        if (result['wireVersion'] != 1 ||
-            result['offset'] != offset + bytes.length)
-          throw const RemoteFailure('invalid_response');
-        offset += bytes.length;
-        progress?.call(offset, transfer.byteLength);
-      }
-    } finally {
-      await input.close();
-    }
+    await _uploadFile(file, transfer, resource, uploaded, progress);
     final result = await client.request(
       'POST',
       '$base/transfers/$resource/commit',
