@@ -19,6 +19,50 @@ sqlite.Database inspect(String root, TestKeyStore keys) {
 
 void main() {
   test(
+    'comparison catches up all local changes beyond one journal page',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'sync-projection-backlog-',
+      );
+      final keys = TestKeyStore();
+      final repo = await EncryptedInformationRepository.open(root.path, keys);
+      final service = InformationService(repository: repo);
+      final incremental = LibraryIncremental(LibraryReplication(repo));
+      try {
+        await service.owner.exportLibrary(incremental.start);
+        for (var i = 0; i < 257; i++) {
+          await service.owner.createDirectory('合成目录 $i');
+        }
+        final first = await service.owner.exportLibrary(
+          () => incremental.after(0, limit: 256),
+        );
+        expect(first, hasLength(256));
+        final native = inspect(root.path, keys);
+        try {
+          expect(
+            native
+                .select('SELECT raw_cursor FROM library_sync_projection')
+                .single['raw_cursor'],
+            native
+                .select('SELECT max(sequence) AS n FROM library_sync_changes')
+                .single['n'],
+          );
+        } finally {
+          native.close();
+        }
+        final last = await service.owner.exportLibrary(
+          () => incremental.after(first.last.cursor),
+        );
+        expect(last, hasLength(1));
+      } finally {
+        await service.close();
+        await repo.close();
+        await root.delete(recursive: true);
+      }
+    },
+  );
+
+  test(
     'retention preserves pending original bytes in encrypted staging until transfer',
     () async {
       final root = await Directory.systemTemp.createTemp(

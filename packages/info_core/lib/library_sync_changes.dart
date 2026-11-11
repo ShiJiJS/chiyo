@@ -263,8 +263,9 @@ final class LibrarySyncReceipt {
     libraryReplicaId(sourceReplicaId);
     replicaOperationId(operationId);
     replicaDigest(digest);
-    if (cursor < 1)
+    if (cursor < 1) {
       throw const FormatException('Invalid synchronization receipt');
+    }
   }
   final String libraryId,
       receiverReplicaId,
@@ -309,6 +310,167 @@ final class LibrarySyncReceipt {
       conflict: value['outcome'] == 'conflict',
     );
   }
+}
+
+/// The encrypted archive manifest plus the immutable business intent it
+/// carries. Separate from the initial-copy importer, which requires an empty
+/// recipient. A re-encrypted archive may change bytes, never this intent.
+final class LibraryDeltaTransfer {
+  LibraryDeltaTransfer({
+    required this.archive,
+    required this.sourceReplicaId,
+    required this.operationId,
+    required this.sequence,
+  }) {
+    libraryReplicaId(sourceReplicaId);
+    replicaOperationId(operationId);
+    if (archive.contentFormat != 22) {
+      throw const FormatException('Unsupported delta content format');
+    }
+    if (sequence < 1 || sequence > 9007199254740991) {
+      throw const FormatException('Invalid delta sequence');
+    }
+  }
+  final LibraryInitialTransfer archive;
+  final String sourceReplicaId, operationId;
+  final int sequence;
+  Map<String, Object?> toJson() => {
+    'wireVersion': 2,
+    'archive': archive.toJson(),
+    'sourceReplicaId': sourceReplicaId,
+    'operationId': operationId,
+    'sequence': sequence,
+  };
+  factory LibraryDeltaTransfer.fromJson(Map<String, dynamic> value) {
+    _fields(value, {
+      'wireVersion',
+      'archive',
+      'sourceReplicaId',
+      'operationId',
+      'sequence',
+    });
+    if (value['wireVersion'] != 2 ||
+        value['sequence'] is! int ||
+        value['archive'] is! Map) {
+      throw const FormatException('Unsupported delta transfer');
+    }
+    return LibraryDeltaTransfer(
+      archive: LibraryInitialTransfer.fromJson(
+        Map<String, dynamic>.from(value['archive'] as Map),
+      ),
+      sourceReplicaId: libraryReplicaId(value['sourceReplicaId']),
+      operationId: replicaOperationId(value['operationId']),
+      sequence: value['sequence'] as int,
+    );
+  }
+}
+
+/// Content versions at one initial-copy snapshot, with the source feed's
+/// watermark. This establishes a new link; it is not the source device's
+/// acknowledged peer progress, receipts, authorization or database identity.
+final class LibrarySyncBaseline {
+  LibrarySyncBaseline({
+    required this.libraryId,
+    required this.sourceReplicaId,
+    required this.snapshotId,
+    required this.cursor,
+    required Map<LibrarySyncKey, String> versions,
+    required Set<LibrarySyncKey> tombstones,
+  }) : versions = Map.unmodifiable(versions),
+       tombstones = Set.unmodifiable(tombstones) {
+    libraryReplicaId(libraryId);
+    libraryReplicaId(sourceReplicaId);
+    replicaDigest(snapshotId);
+    if (cursor < 0 ||
+        cursor > 9007199254740991 ||
+        versions.length > LibrarySyncBatch.maxChanges ||
+        !versions.keys.toSet().containsAll(tombstones)) {
+      throw const FormatException('Invalid synchronization baseline');
+    }
+    for (final value in versions.values) {
+      replicaDigest(value);
+    }
+    digest = _digest(_body);
+    if (utf8.encode(jsonEncode(toJson())).length > LibrarySyncBatch.maxBytes) {
+      throw const FormatException('Synchronization baseline exceeds budget');
+    }
+  }
+  final String libraryId, sourceReplicaId, snapshotId;
+  final int cursor;
+  final Map<LibrarySyncKey, String> versions;
+  final Set<LibrarySyncKey> tombstones;
+  late final String digest;
+  Map<String, Object?> get _body {
+    final keys = versions.keys.toList()
+      ..sort(
+        (a, b) => a.kind.name == b.kind.name
+            ? a.id.compareTo(b.id)
+            : a.kind.name.compareTo(b.kind.name),
+      );
+    return {
+      'wireVersion': 2,
+      'libraryId': libraryId,
+      'sourceReplicaId': sourceReplicaId,
+      'snapshotId': snapshotId,
+      'cursor': cursor,
+      'versions': [
+        for (final key in keys)
+          {
+            'key': key.toJson(),
+            'version': versions[key],
+            'deleted': tombstones.contains(key),
+          },
+      ],
+    };
+  }
+
+  Map<String, Object?> toJson() => {..._body, 'digest': digest};
+  factory LibrarySyncBaseline.fromJson(Map<String, dynamic> value) {
+    _fields(value, {
+      'wireVersion',
+      'libraryId',
+      'sourceReplicaId',
+      'snapshotId',
+      'cursor',
+      'versions',
+      'digest',
+    });
+    if (value['wireVersion'] != 2 ||
+        value['cursor'] is! int ||
+        value['versions'] is! List ||
+        (value['versions'] as List).length > LibrarySyncBatch.maxChanges) {
+      throw const FormatException('Unsupported synchronization baseline');
+    }
+    final versions = <LibrarySyncKey, String>{};
+    final deleted = <LibrarySyncKey>{};
+    for (final raw in value['versions'] as List) {
+      final entry = _object(raw);
+      _fields(entry, {'key', 'version', 'deleted'});
+      final key = LibrarySyncKey.fromJson(_object(entry['key']));
+      if (versions.containsKey(key) || entry['deleted'] is! bool) {
+        throw const FormatException('Invalid baseline entity');
+      }
+      versions[key] = replicaDigest(entry['version']);
+      if (entry['deleted'] == true) deleted.add(key);
+    }
+    final baseline = LibrarySyncBaseline(
+      libraryId: libraryReplicaId(value['libraryId']),
+      sourceReplicaId: libraryReplicaId(value['sourceReplicaId']),
+      snapshotId: replicaDigest(value['snapshotId']),
+      cursor: value['cursor'] as int,
+      versions: versions,
+      tombstones: deleted,
+    );
+    if (baseline.digest != replicaDigest(value['digest'])) {
+      throw const FormatException(
+        'Synchronization baseline integrity check failed',
+      );
+    }
+    return baseline;
+  }
+  @override
+  String toString() =>
+      'LibrarySyncBaseline(units: ${versions.length}, cursor: $cursor)';
 }
 
 void _fields(Map<String, Object?> value, Set<String> fields) {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:info_core/library_sync_changes.dart';
+import 'package:info_core/library_replication.dart';
 import 'package:test/test.dart';
 
 const library = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
@@ -24,6 +25,80 @@ LibrarySyncBatch edit(
 );
 
 void main() {
+  test(
+    'initial versions and delta archive descriptors reject tampering and unknown formats',
+    () {
+      final batch = edit('initial-versions');
+      final baseline = LibrarySyncBaseline(
+        libraryId: library,
+        sourceReplicaId: replicaA,
+        snapshotId: batch.digest,
+        cursor: 7,
+        versions: {item: batch.changes.single.version, related: '0' * 64},
+        tombstones: {related},
+      );
+      final wire = Map<String, dynamic>.from(
+        jsonDecode(jsonEncode(baseline.toJson())) as Map,
+      );
+      expect(LibrarySyncBaseline.fromJson(wire).toJson(), baseline.toJson());
+      final altered = Map<String, dynamic>.from(
+        jsonDecode(jsonEncode(wire)) as Map,
+      );
+      (altered['versions'] as List).first['version'] = 'f' * 64;
+      expect(
+        () => LibrarySyncBaseline.fromJson(altered),
+        throwsFormatException,
+      );
+      expect(
+        () => LibrarySyncBaseline.fromJson({...wire, 'wireVersion': 3}),
+        throwsFormatException,
+      );
+      final archive = LibraryInitialTransfer(
+        libraryId: library,
+        snapshotId: batch.digest,
+        archiveDigest: '0' * 64,
+        byteLength: 4096,
+        contentFormat: 22,
+      );
+      final transfer = LibraryDeltaTransfer(
+        archive: archive,
+        sourceReplicaId: replicaA,
+        operationId: batch.operationId,
+        sequence: batch.sequence,
+      );
+      expect(
+        LibraryDeltaTransfer.fromJson(
+          Map<String, dynamic>.from(
+            jsonDecode(jsonEncode(transfer.toJson())) as Map,
+          ),
+        ).toJson(),
+        transfer.toJson(),
+      );
+      expect(
+        () => LibraryDeltaTransfer.fromJson({
+          ...transfer.toJson(),
+          'wireVersion': 1,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => LibraryDeltaTransfer(
+          archive: LibraryInitialTransfer(
+            libraryId: library,
+            snapshotId: batch.digest,
+            archiveDigest: '0' * 64,
+            byteLength: 4096,
+            contentFormat: 8,
+          ),
+          sourceReplicaId: replicaA,
+          operationId: batch.operationId,
+          sequence: 1,
+        ),
+        throwsFormatException,
+      );
+    },
+  );
+
   test(
     'receipt reports a retained conflict and rejects mismatched protocol fields',
     () {

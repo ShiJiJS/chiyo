@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:info_core/info_core.dart';
 import 'package:info_core/library_sync_changes.dart';
@@ -62,23 +61,21 @@ class _Pair {
       const FieldInput('正文', '', 'SYNTHETIC_BASE'),
     ]);
     await a.start();
-    final seed = await a.service.owner.exportLibrary(
-      () => LibraryReplication(a.repo).snapshotContents(),
-    );
     final prepared = await a.service.owner.exportLibrary(
-      () => LibraryReplication(
-        a.repo,
-      ).exportInitial('${root.path}/initial.encrypted'),
-    );
-    await b.service.owner.restoreLibrary(
-      () => LibraryReplication(b.repo).installInitial(
-        path: '${root.path}/initial.encrypted',
-        transferKey: prepared.transferKey,
-        operationId: 'receive-baseline',
-        transfer: prepared.transfer,
+      () => a.incremental.exportInitialWithBaseline(
+        '${root.path}/initial.encrypted',
       ),
     );
-    await b.start(initial: seed);
+    await b.service.owner.restoreLibrary(
+      () => b.incremental.installInitialWithBaseline(
+        path: '${root.path}/initial.encrypted',
+        transferKey: prepared.initial.transferKey,
+        operationId: 'receive-baseline',
+        transfer: prepared.initial.transfer,
+        baseline: prepared.baseline,
+        expectedSourceReplicaId: prepared.baseline.sourceReplicaId,
+      ),
+    );
     return _Pair(root, a, b, initial);
   }
 
@@ -94,33 +91,178 @@ Future<LibrarySyncReceipt> transfer(
   _Device target,
   LibrarySyncBatch batch,
 ) async {
-  for (final change in batch.changes.where(
-    (c) => c.key.kind == LibrarySyncKind.attachment && c.content != null,
-  )) {
-    for (final raw in change.content!['attachments'] as List) {
-      final version = InformationAttachmentVersion.fromPrivateJson(
-        Map<String, dynamic>.from(raw as Map),
-      );
-      if (await target.incremental.hasAttachment(version)) continue;
-      Stream<List<int>> bytes() async* {
-        for (var offset = 0; offset < version.byteLength; offset += 65536) {
-          yield await source.repo.readInformationAttachmentChunk(
-            version.reference,
-            offset,
-            min(65536, version.byteLength - offset),
-          );
-        }
-      }
-
-      await target.service.owner.exportLibrary(
-        () => target.incremental.cacheAttachment(version, bytes()),
-      );
-    }
+  final archive = File(
+    '${source.root.path}/transfer-${batch.operationId}.encrypted',
+  );
+  try {
+    final prepared = await source.service.owner.exportLibrary(
+      () => source.incremental.exportDelta(
+        archive.path,
+        sourceReplicaId: batch.sourceReplicaId,
+        operationId: batch.operationId,
+      ),
+    );
+    final before = target.service.owner.information.length;
+    await expectLater(
+      target.service.owner.exportLibrary(
+        () => target.incremental.installDelta(
+          path: archive.path,
+          transferKey:
+              'aim-recovery-v1:${base64Url.encode(List.filled(32, 17))}',
+          transfer: prepared.transfer,
+        ),
+      ),
+      throwsA(isA<Exception>()),
+    );
+    expect(target.service.owner.information, hasLength(before));
+    final receipt = await target.service.owner.exportLibrary(
+      () => target.incremental.installDelta(
+        path: archive.path,
+        transferKey: prepared.transferKey,
+        transfer: prepared.transfer,
+      ),
+    );
+    await archive.delete();
+    final replayed = await target.service.owner.exportLibrary(
+      () => target.incremental.installDelta(
+        path: archive.path,
+        transferKey: prepared.transferKey,
+        transfer: prepared.transfer,
+      ),
+    );
+    expect(replayed.toJson(), receipt.toJson());
+    await expectLater(
+      target.service.owner.exportLibrary(
+        () => target.incremental.installDelta(
+          path: archive.path,
+          transferKey: prepared.transferKey,
+          transfer: LibraryDeltaTransfer(
+            archive: prepared.transfer.archive,
+            sourceReplicaId: prepared.transfer.sourceReplicaId,
+            operationId: prepared.transfer.operationId,
+            sequence: prepared.transfer.sequence + 1,
+          ),
+        ),
+      ),
+      throwsA(
+        isA<StorageFailure>().having(
+          (e) => e.code,
+          'code',
+          'sync_operation_conflict',
+        ),
+      ),
+    );
+    return receipt;
+  } finally {
+    if (await archive.exists()) await archive.delete();
   }
-  return target.receive(batch);
 }
 
 void main() {
+  test(
+    'a new replica adopts current versions, tombstones and watermark in the initial commit',
+    () async {
+      final root = await Directory.systemTemp.createTemp('sync-new-replica-');
+      final a = await _Device.open('${root.path}/a');
+      final b = await _Device.open('${root.path}/b');
+      final native = b.inspect();
+      try {
+        await a.start();
+        final item = await a.service.owner.createInformation('已经改过的资料', '', [
+          const FieldInput('正文', '', 'SYNTHETIC_ONE'),
+        ]);
+        final ref = FieldRef(item.id, item.fields.single.id);
+        await a.service.owner.correctValue(ref, 'SYNTHETIC_TWO');
+        final dir = await a.service.owner.createDirectory('已经删除的目录');
+        await a.service.owner.deleteDirectory(dir.id, dir.version);
+        final prepared = await a.service.owner.exportLibrary(
+          () => a.incremental.exportInitialWithBaseline(
+            '${root.path}/initial.encrypted',
+          ),
+        );
+        final baseline = LibrarySyncBaseline.fromJson(
+          jsonDecode(jsonEncode(prepared.baseline.toJson())),
+        );
+        expect(baseline.cursor, greaterThan(0));
+        expect(
+          baseline.tombstones,
+          contains(LibrarySyncKey(LibrarySyncKind.directory, dir.id)),
+        );
+        await b.start();
+        native.execute(
+          "CREATE TRIGGER fail_initial_commit BEFORE INSERT ON library_replica_receipts BEGIN SELECT RAISE(ABORT,'synthetic initial failure'); END",
+        );
+        Future<void> install() => b.service.owner.restoreLibrary(
+          () => b.incremental.installInitialWithBaseline(
+            path: '${root.path}/initial.encrypted',
+            transferKey: prepared.initial.transferKey,
+            operationId: 'versioned-initial',
+            transfer: prepared.initial.transfer,
+            baseline: baseline,
+            expectedSourceReplicaId: baseline.sourceReplicaId,
+          ),
+        );
+        await expectLater(install(), throwsA(isA<StorageFailure>()));
+        expect(b.repo.items, isEmpty);
+        expect(await b.incremental.progress(baseline.sourceReplicaId), 0);
+        native.execute('DROP TRIGGER fail_initial_commit');
+        await install();
+        expect(b.repo.items.single.fields.single.value, 'SYNTHETIC_TWO');
+        expect(
+          await b.incremental.progress(baseline.sourceReplicaId),
+          baseline.cursor,
+        );
+        final copied = native.select(
+          'SELECT version,content FROM library_sync_units WHERE kind=? AND id=?',
+          ['directory', dir.id],
+        ).single;
+        expect(
+          copied['version'],
+          baseline.versions[LibrarySyncKey(LibrarySyncKind.directory, dir.id)],
+        );
+        expect(copied['content'], isNull);
+        await a.service.owner.correctValue(ref, 'SYNTHETIC_THREE');
+        final next = (await a.after(baseline.cursor)).single;
+        expect(
+          next.batch.changes.single.baseVersion,
+          baseline.versions[LibrarySyncKey(
+            LibrarySyncKind.information,
+            item.id,
+          )],
+        );
+        expect((await b.receive(next.batch)).conflict, false);
+        expect(b.repo.items.single.fields.single.value, 'SYNTHETIC_THREE');
+        await b.incremental.advanceProgress(
+          baseline.sourceReplicaId,
+          expected: baseline.cursor,
+          next: next.cursor,
+        );
+        await b.incremental.advanceProgress(
+          baseline.sourceReplicaId,
+          expected: baseline.cursor,
+          next: next.cursor,
+        );
+        expect(
+          await b.incremental.progress(baseline.sourceReplicaId),
+          next.cursor,
+        );
+        await expectLater(
+          b.incremental.advanceProgress(
+            baseline.sourceReplicaId,
+            expected: 0,
+            next: next.cursor + 1,
+          ),
+          throwsA(isA<StorageFailure>()),
+        );
+      } finally {
+        native.close();
+        await a.close();
+        await b.close();
+        await root.delete(recursive: true);
+      }
+    },
+  );
+
   test(
     'synchronized grant facts stay inactive in SQL and after process restart',
     () async {

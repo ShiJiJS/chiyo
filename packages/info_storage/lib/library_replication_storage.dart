@@ -152,6 +152,8 @@ final class LibraryReplication {
     required String transferKey,
     required String operationId,
     required LibraryInitialTransfer transfer,
+    Future<void> Function(LibraryReplicaContents contents)?
+    initializeIncremental,
   }) async {
     final previous = await receipt(operationId, transfer);
     if (previous != null) return previous;
@@ -190,6 +192,23 @@ final class LibraryReplication {
         preserveSettings: true,
         commitReplication: () async {
           await _saveIdentity(receipt.identity);
+          if (initializeIncremental != null) {
+            final archive = _backups._retain(
+              contents,
+              repository._clock().toUtc(),
+              restored: true,
+              preserveHistory: true,
+            );
+            await initializeIncremental(
+              LibraryReplicaContents._(
+                transfer.libraryId,
+                _LibrarySyncProjection.split(
+                  archive._tables,
+                  archive.attachments,
+                ),
+              ),
+            );
+          }
           await repository._db.customStatement(
             'INSERT INTO library_replica_receipts(operation_id,payload) VALUES(?,?)',
             [operationId, jsonEncode(receipt.toJson())],

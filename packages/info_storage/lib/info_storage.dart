@@ -58,6 +58,7 @@ part 'library_change_journal.dart';
 part 'library_sync_contents.dart';
 part 'library_incremental_storage.dart';
 part 'library_incremental_receive.dart';
+part 'library_delta_archive.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
