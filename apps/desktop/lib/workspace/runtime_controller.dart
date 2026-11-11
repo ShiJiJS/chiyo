@@ -7,13 +7,8 @@ class WorkspaceRuntimeController extends ChangeNotifier {
   WorkspaceRuntimeController(this.source, Stream<WorkspaceRecordRef?> changes) {
     _changes = changes.listen((_) {
       if (frozen) return;
-      if (quitPreview != null) {
-        unawaited(_release());
-        failure = const WorkspaceFailure(
-          'quit_changed',
-          '会话或运行事实已变化，请重新核对退出范围。',
-        );
-      }
+      // A broadcast can be an unchanged maintenance/metadata refresh. Disable
+      // submission while reading, then compare the actual runtime version.
       unawaited(load());
     });
   }
@@ -58,7 +53,16 @@ class WorkspaceRuntimeController extends ChangeNotifier {
     _notify();
     try {
       final next = await source.status();
-      if (!_closed && generation == _generation && !frozen) value = next;
+      if (!_closed && generation == _generation && !frozen) {
+        if (quitPreview != null && quitPreview!.version != next.version) {
+          failure = const WorkspaceFailure(
+            'quit_changed',
+            '会话或运行事实已变化，请重新核对退出范围。',
+          );
+          await _release();
+        }
+        if (!_closed && generation == _generation && !frozen) value = next;
+      }
     } catch (error) {
       if (!_closed && generation == _generation) {
         readFailure = _readError(error, '运行状态暂时无法读取，请重试。');
