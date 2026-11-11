@@ -10,6 +10,8 @@ if ($WindowsRelease -and $MacosRelease) {
     throw 'Choose the release target matching this host.'
 }
 $projectRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'windows-test-environment.ps1')
+Initialize-WindowsTestEnvironment
 if ($FlutterBin) {
     $env:PATH = "$FlutterBin;$env:PATH"
 }
