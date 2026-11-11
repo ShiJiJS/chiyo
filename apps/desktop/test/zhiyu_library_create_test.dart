@@ -41,7 +41,7 @@ class Metadata implements WorkspacePluginSource {
 void main() {
   const output = String.fromEnvironment('UI_EVIDENCE_DIR');
   setUpAll(() async {
-    if (!Platform.isMacOS) return;
+    if (!Platform.isMacOS && !Platform.isWindows) return;
     final fonts = await loadDesktopFonts();
     await (FontLoader(
       'MaterialIcons',
@@ -204,7 +204,7 @@ void main() {
               debugDisableShadows = shadows;
             }
           },
-          skip: !Platform.isMacOS,
+          skip: !Platform.isMacOS && !Platform.isWindows,
         );
       }
     }

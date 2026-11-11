@@ -15,7 +15,7 @@ import 'package:info_desktop/workspace/workspace_source.dart';
 const azure = WorkspaceRecordRef(WorkspaceRecordKind.information, 'azure');
 void main() {
   setUpAll(() async {
-    if (Platform.isMacOS) await loadDesktopFonts();
+    if (Platform.isMacOS || Platform.isWindows) await loadDesktopFonts();
   });
   Future<LibraryController> start(WidgetTester t, Size size, bool dark) async {
     t.view.physicalSize = size;
@@ -98,7 +98,7 @@ void main() {
             expect(note, findsOneWidget);
             expect(t.takeException(), isNull);
           },
-          skip: !Platform.isMacOS,
+          skip: !Platform.isMacOS && !Platform.isWindows,
         );
       }
     }
@@ -239,7 +239,7 @@ void main() {
           expect(model.query.tagId, isNull);
           expect(t.takeException(), isNull);
         },
-        skip: !Platform.isMacOS,
+        skip: !Platform.isMacOS && !Platform.isWindows,
       );
     }
   }
@@ -274,6 +274,6 @@ void main() {
       expect(type.top - name.bottom, closeTo(8, 1));
       expect(t.takeException(), isNull);
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 }
