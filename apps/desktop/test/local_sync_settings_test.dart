@@ -221,8 +221,7 @@ void main() {
         expect(find.byType(OnlineDesktopLauncher), findsOneWidget);
         await ui.tap('workspace-nav-settings');
         await ui.tap('settings-section-connection');
-        await ui.tap('connection-sync-toggle');
-        await ui.tap('connection-save');
+        await ui.tap('connection-mode-local');
         await ui.until(
           () => find
               .text('请先处理服务器上的访问申请和录入提案，再切换到本地资料库。待办不会自动转到本机。')
@@ -236,7 +235,7 @@ void main() {
             () async => host.runtime.service.owner.deny(request.id),
           ),
         );
-        await ui.tap('connection-save');
+        await ui.tap('connection-mode-local');
         await ui.until(
           () =>
               boot?.state == DesktopStartupState.ready &&
@@ -270,7 +269,7 @@ void main() {
     },
   );
   testWidgets(
-    'approved storage settings perform a real pull and can disable synchronization while offline',
+    'local and server modes reconnect, survive restart, and disable synchronization while offline',
     (t) async {
       t.view.physicalSize = const Size(1600, 1100);
       t.view.devicePixelRatio = 1;
@@ -319,22 +318,38 @@ void main() {
         await ui.until(() => find.byTooltip('添加资料').evaluate().isNotEmpty);
         await ui.tap('workspace-nav-settings');
         await ui.tap('settings-section-connection');
-        await ui.until(
-          () => ui.key('connection-sync-toggle').evaluate().isNotEmpty,
-        );
+        await ui.until(() => ui.key('connection-mode').evaluate().isNotEmpty);
         expect(field('服务器地址'), findsNothing);
-        await ui.tap('connection-sync-toggle');
+        await ui.tap('connection-mode-server');
         await ui.until(() => field('服务器地址').evaluate().isNotEmpty);
         await t.enterText(field('服务器地址'), proxy.address.toString());
-        await t.enterText(field('Token'), host.token);
+        await t.enterText(field('Token'), 'synthetic-invalid-token');
         await t.tap(find.text('服务器证书'));
         await t.pumpAndSettle();
         await t.enterText(field('服务器 CA 证书'), host.certificate);
         await ui.tap('connection-save');
         await ui.until(
+          () => find.text('Token 不正确，请重新填写。').evaluate().isNotEmpty,
+        );
+        expect(ui.key('workspace-storage-mode'), findsOneWidget);
+        final configuration = await ui.resolve(
+          () => LocalLibraryConfiguration.open(root.path),
+        );
+        final sync = LocalLibrarySync(
+          configuration: configuration,
+          owner: boot!.library!.service.owner,
+          replication: boot!.library!.replication!,
+        );
+        expect((await ui.resolve(sync.readConfiguration))['enabled'], false);
+        await t.enterText(field('Token'), host.token);
+        await ui.tap('connection-save');
+        await ui.until(
           () => boot!.library!.service.owner.information.isNotEmpty,
         );
-        await ui.until(() => find.text('本地 · 同步已开启').evaluate().isNotEmpty);
+        await ui.until(
+          () => find.textContaining('服务器同步 ·').evaluate().isNotEmpty,
+        );
+        expect(ui.key('workspace-storage-mode'), findsNothing);
         await ui.until(
           () => ui
               .key('workspace-nav-library')
@@ -345,10 +360,64 @@ void main() {
         await ui.tap('workspace-nav-library');
         await ui.until(() => find.text('服务器合成资料').evaluate().isNotEmpty);
         expect(
-          boot!.library!.service.owner.information.single.fields.single.value,
+          boot!.library!.service.owner.information.first.fields.single.value,
           'SYNTHETIC_STORAGE_SETTINGS',
         );
         expect(host.repo.items, hasLength(1));
+        await ui.tap('workspace-nav-settings');
+        await ui.tap('settings-section-connection');
+        await ui.tap('connection-mode-local');
+        await ui.until(
+          () => ui.key('workspace-storage-mode').evaluate().isNotEmpty,
+        );
+        expect(ui.key('connection-save'), findsNothing);
+        expect((await ui.resolve(sync.readConfiguration))['enabled'], false);
+        await ui.resolve(
+          () => host.runtime.run(
+            () => host.runtime.service.owner.createInformation('停用同步期间新增', '', [
+              const FieldInput('正文', '', 'SYNTHETIC_RECONNECTED'),
+            ]),
+          ),
+        );
+        await ui.tap('connection-mode-server');
+        expect(field('服务器地址'), findsOneWidget);
+        expect((await ui.resolve(sync.readConfiguration))['enabled'], false);
+        await ui.tap('connection-save');
+        await ui.until(
+          () =>
+              boot!.library!.service.owner.information.length == 2 &&
+              find.textContaining('服务器同步 ·').evaluate().isNotEmpty,
+        );
+        expect((await ui.resolve(sync.readConfiguration))['enabled'], true);
+        expect(ui.key('workspace-storage-mode'), findsNothing);
+        final originalLibrary = configuration.libraryId;
+        final previous = boot!;
+        await t.pumpWidget(const SizedBox());
+        await ui.resolve(previous.close);
+        await t.pumpWidget(
+          StorageDesktopLauncher(
+            profiles: PrivateConnectionProfileStore(root.path),
+            platform: NativeDesktopFixture(),
+            openLocal: (config, _) => openLocalLibrary(config, keyStore: keys),
+            localBuilder: (value) {
+              boot = value;
+              return DesktopLauncher(bootstrap: value, useWorkspace: true);
+            },
+          ),
+        );
+        await ui.until(
+          () =>
+              boot!.state == DesktopStartupState.ready &&
+              find.textContaining('服务器同步 ·').evaluate().isNotEmpty,
+        );
+        expect(boot!.library!.service.owner.information, hasLength(2));
+        expect(
+          (await ui.resolve(
+            () => LocalLibraryConfiguration.open(root.path),
+          )).libraryId,
+          originalLibrary,
+        );
+        expect(ui.key('workspace-storage-mode'), findsNothing);
         await ui.resolve(host.close);
         serverClosed = true;
         await ui.resolve(() async {
@@ -367,7 +436,7 @@ void main() {
               'chatLabel': '服务器关闭后的本机申请',
               'externalChatId': 'offline-local-synthetic',
             });
-            final info = boot!.library!.service.owner.information.single;
+            final info = boot!.library!.service.owner.information.first;
             final ref = FieldRef(info.id, info.fields.single.id);
             final request = await client.execute({
               'command': 'request',
@@ -405,20 +474,20 @@ void main() {
         await ui.tap('settings-section-connection');
         await ui.until(
           () =>
-              ui.key('connection-sync-toggle').evaluate().isNotEmpty &&
+              ui.key('connection-mode').evaluate().isNotEmpty &&
               field('服务器地址').evaluate().isNotEmpty,
         );
         proxy.failGetPrefix = '/v1/';
         final requests = jsonEncode(proxy.requests);
-        await ui.tap('connection-sync-toggle');
-        await ui.tap('connection-save');
+        await ui.tap('connection-mode-local');
         await ui.until(
           () =>
               find.text('本地模式').evaluate().isNotEmpty &&
-              find.text('使用本地模式').evaluate().isNotEmpty,
+              field('服务器地址').evaluate().isEmpty &&
+              ui.key('connection-save').evaluate().isEmpty,
         );
         expect(jsonEncode(proxy.requests), requests);
-        expect(boot!.library!.service.owner.information, hasLength(1));
+        expect(boot!.library!.service.owner.information, hasLength(2));
         expect(t.takeException(), isNull);
       } finally {
         await t.pumpWidget(const SizedBox());

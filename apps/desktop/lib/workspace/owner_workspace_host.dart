@@ -112,7 +112,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
 
   void _syncSaved(bool enabled) {
     if (!mounted) return;
-    setState(() => _storageDescription = enabled ? '本地 · 同步已开启' : '本地模式');
+    setState(() => _storageDescription = enabled ? '服务器同步' : '本地模式');
     _source.notifyExternalChange();
   }
 

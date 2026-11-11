@@ -211,6 +211,20 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     }
   }
 
+  Future<void> _selectStorageMode(bool enabled) async {
+    if (_busy || _connecting || _storageSyncEnabled == enabled) return;
+    setState(() {
+      _storageSyncEnabled = enabled;
+      _error = null;
+    });
+    if (!enabled) {
+      await _saveStorage();
+      if (mounted && _error != null) {
+        setState(() => _storageSyncEnabled = true);
+      }
+    }
+  }
+
   Future<void> _connect({bool confirmServer = false}) async {
     if (_connecting || _desktop.quitting || confirmServer && !_serverChanged) {
       return;
@@ -566,8 +580,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                       syncEnabled: widget.onSaveStorage == null
                           ? null
                           : _storageSyncEnabled,
-                      onSyncChanged: (value) =>
-                          setState(() => _storageSyncEnabled = value),
+                      onSyncChanged: _selectStorageMode,
                       onConnect: _saveStorage,
                       onCancel: onCancel,
                       onConfirmServer: _serverChanged

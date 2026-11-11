@@ -106,10 +106,8 @@ void main() {
           );
           await ui.tap('workspace-nav-settings');
           await ui.tap('settings-section-connection');
-          await ui.until(
-            () => ui.key('connection-sync-toggle').evaluate().isNotEmpty,
-          );
-          await ui.tap('connection-sync-toggle');
+          await ui.until(() => ui.key('connection-mode').evaluate().isNotEmpty);
+          await ui.tap('connection-mode-server');
           await t.enterText(field('服务器地址'), fixture['address'] as String);
           await t.tap(find.byTooltip('显示 Token'));
           await t.pumpAndSettle();
@@ -129,7 +127,7 @@ void main() {
             () =>
                 boot!.library!.service.owner.information.length ==
                     importedCount &&
-                find.text('本地 · 同步已开启').evaluate().isNotEmpty,
+                find.textContaining('服务器同步 ·').evaluate().isNotEmpty,
           );
           expect(
             boot!.library!.service.owner.queryInbox(limit: 1).pendingCount,
@@ -139,14 +137,33 @@ void main() {
           await ui.tap('settings-section-connection');
           await ui.until(() => field('服务器地址').evaluate().isNotEmpty);
           await capture('local-sync-connected');
-          await ui.tap('connection-sync-toggle');
-          await ui.tap('connection-save');
+          await ui.tap('connection-mode-local');
           await ui.until(
             () =>
                 find.text('本地模式').evaluate().isNotEmpty &&
-                find.text('使用本地模式').evaluate().isNotEmpty,
+                field('服务器地址').evaluate().isEmpty &&
+                ui.key('connection-save').evaluate().isEmpty,
           );
           await capture('local-sync-disabled');
+          await ui.tap('workspace-nav-library');
+        } else {
+          await ui.tap('workspace-nav-settings');
+          await ui.tap('settings-section-connection');
+          await ui.until(() => ui.key('connection-mode').evaluate().isNotEmpty);
+          expect(ui.key('connection-save'), findsNothing);
+          await capture('storage-mode-local');
+          await ui.tap('connection-mode-server');
+          await ui.until(() => ui.key('connection-save').evaluate().isNotEmpty);
+          await capture('storage-mode-server');
+          await ui.tap('connection-mode-local');
+          await ui.until(() => ui.key('connection-save').evaluate().isEmpty);
+          await ui.until(
+            () => ui
+                .key('workspace-nav-library')
+                .hitTestable()
+                .evaluate()
+                .isNotEmpty,
+          );
           await ui.tap('workspace-nav-library');
         }
         await ui.tap('library-create');

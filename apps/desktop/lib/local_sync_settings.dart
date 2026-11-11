@@ -29,6 +29,7 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
       _certificate = TextEditingController();
   ConnectionProfile? _saved;
   bool _loading = true, _busy = false, _enabled = false;
+  bool _activeEnabled = false;
   bool _serverChanged = false;
   String? _error;
   @override
@@ -54,6 +55,7 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
       final stored = await widget.sync.readConfiguration();
       if (!mounted) return;
       _enabled = stored['enabled'] as bool;
+      _activeEnabled = _enabled;
       if (stored['server'] != null) {
         _saved = ConnectionProfile.fromJson(
           Map<String, dynamic>.from(stored['server'] as Map),
@@ -69,6 +71,9 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
   }
 
   String _message(Object error) => switch (error) {
+    RemoteFailure(code: 'unauthorized') => 'Token 不正确，请重新填写。',
+    RemoteFailure(code: 'invalid_connection') ||
+    FormatException() => '请填写完整的 HTTPS 服务器地址和 Token。',
     RemoteFailure(code: 'different_libraries') =>
       '本机和服务器都有不同的资料。已保留双方内容，请先导出备份，再选择空的目标资料库。',
     RemoteFailure(code: 'server_changed') => '服务器身份与原连接不一致，请核对地址和证书。',
@@ -81,6 +86,17 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
     RemoteFailure(code: 'sync_transfer_expired') => '上次传输已过期，原资料没有被覆盖。请重新准备同步。',
     _ => '尚未确认同步完成，可以重试。已有资料会保留。',
   };
+
+  Future<void> _selectMode(bool enabled) async {
+    if (_busy || _loading || _enabled == enabled) return;
+    setState(() {
+      _enabled = enabled;
+      _error = null;
+    });
+    // Connecting needs an address and successful verification. Local mode can
+    // take effect immediately, including while the server is unavailable.
+    if (!enabled) await _save();
+  }
 
   Future<void> _save({bool confirmServer = false}) async {
     if (_busy || _loading) return;
@@ -110,7 +126,8 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
       } else {
         await widget.sync.disable();
       }
-      widget.onSaved(_enabled);
+      _activeEnabled = _enabled;
+      widget.onSaved(_activeEnabled);
       final stored = await widget.sync.readConfiguration();
       if (mounted && stored['server'] != null) {
         _saved = ConnectionProfile.fromJson(
@@ -122,6 +139,7 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
         _error = _message(error);
         _serverChanged =
             error is RemoteFailure && error.code == 'server_changed';
+        if (!_enabled) _enabled = _activeEnabled;
       }
     } finally {
       widget.onBusy(false);
@@ -159,10 +177,7 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
       certificate: _certificate,
       busy: _busy,
       syncEnabled: _enabled,
-      onSyncChanged: (value) => setState(() {
-        _enabled = value;
-        _error = null;
-      }),
+      onSyncChanged: _selectMode,
       onConnect: _save,
       onConfirmServer: _serverChanged ? () => _save(confirmServer: true) : null,
       onCancel: widget.onBack,
