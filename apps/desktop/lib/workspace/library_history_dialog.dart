@@ -491,7 +491,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       onPressed: _locked ? null : () => _select(r),
                       child: Text(
-                        'v${r.version} · ${r.record.name}\n${r.archivedAt.toIso8601String().substring(0, 16).replaceFirst('T', ' ')}',
+                        'v${r.version} · ${r.record.name}\n${libraryLocalDateTime(r.archivedAt)}',
                       ),
                     ),
                 ],
