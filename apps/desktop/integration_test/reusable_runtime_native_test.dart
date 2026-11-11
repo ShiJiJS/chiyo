@@ -155,6 +155,15 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('批准期限内使用'), findsOneWidget);
+      // New approvals default to two hours. Choose a longer independent field
+      // grant explicitly instead of depending on the old eight-hour default.
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('credential-field-lifetime')),
+      );
+      await tester.tap(find.byKey(const ValueKey('credential-field-lifetime')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('8 小时').last);
+      await tester.pumpAndSettle();
       expect(find.text('8 小时'), findsOneWidget);
       await capture('approval');
       await tester.ensureVisible(
@@ -168,7 +177,7 @@ void main() {
       final approved = service.owner.credentialUseRequests.single;
       expect(
         approved.credentialExpiresAt!.difference(approved.decidedAt!),
-        const Duration(minutes: 15),
+        const Duration(hours: 2),
       );
       expect(
         approved.fieldExpiresAt!.difference(approved.decidedAt!),
