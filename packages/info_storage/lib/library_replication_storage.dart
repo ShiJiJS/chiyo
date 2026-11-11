@@ -1,7 +1,7 @@
 part of 'info_storage.dart';
 
-/// An encrypted initial transfer. The independent one-transfer key remains
-/// in owner memory and is never stored in the source database or a receipt.
+/// An encrypted initial transfer. Its independent key belongs to owner-private
+/// transfer state and is excluded from the source database and receipts.
 final class PreparedLibraryTransfer {
   PreparedLibraryTransfer._(this.transfer, this.transferKey);
   final LibraryInitialTransfer transfer;

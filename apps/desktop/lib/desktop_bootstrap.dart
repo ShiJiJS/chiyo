@@ -23,12 +23,14 @@ class DesktopLibrary {
     this.backups,
     this.fileOutputs,
     this.fileOpens,
+    this.replication,
   });
   final InformationService service;
   final Future<void> Function() close;
   final InformationBackups? backups;
   final InformationFileOutputs? fileOutputs;
   final InformationFileOpens? fileOpens;
+  final LibraryReplication? replication;
 }
 
 enum DesktopStartupState { idle, starting, ready, failed }

@@ -121,6 +121,8 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                 backups: startup.library!.backups,
                 fileOutputs: startup.library!.fileOutputs,
                 fileOpens: startup.library!.fileOpens,
+                localConfiguration: startup.localConfiguration,
+                replication: startup.library!.replication,
               );
             }
             return InformationApp(

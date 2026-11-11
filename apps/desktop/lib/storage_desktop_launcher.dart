@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'local_library_sync.dart';
+import 'package:info_remote/library_replication_client.dart';
 
 import 'package:flutter/material.dart';
 import 'package:info_core/macos_desktop_control.dart';
@@ -6,6 +8,7 @@ import 'package:info_remote/automatic_connection.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/local_library_configuration.dart';
 import 'package:info_remote/owner_client.dart';
+import 'package:info_remote/private_connection_files.dart';
 
 import 'connection_view.dart';
 import 'desktop_bootstrap.dart';
@@ -52,9 +55,17 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       final active = await AutomaticConnectionStore(
         widget.profiles.directory,
       ).readOwner();
-      if (active?['mode'] != 'local' && await widget.profiles.read() != null) {
-        if (mounted) setState(() => _online = true);
-        return;
+      if (active?['mode'] != 'local') {
+        final saved = await widget.profiles.read();
+        if (saved != null) {
+          final recovered = await _recoverLocal(saved);
+          if (recovered != null) {
+            _startLocal(recovered);
+          } else if (mounted) {
+            setState(() => _online = true);
+          }
+          return;
+        }
       }
       final configuration = await LocalLibraryConfiguration.open(
         widget.profiles.directory,
@@ -63,31 +74,127 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
           active?['libraryId'] != configuration.libraryId) {
         throw const RemoteFailure('invalid_profile');
       }
-      Future<DesktopLibrary> open(bool interaction) =>
-          widget.openLocal?.call(configuration, interaction) ??
-          openLocalLibrary(configuration, requestKeyAccess: interaction);
-      final platform = widget.platform ?? NativeDesktopPlatform();
-      final bootstrap = DesktopBootstrap(
-        openLibrary: () => open(false),
-        openLibraryWithKeyAccess: Platform.isMacOS ? () => open(true) : null,
-        platform: platform,
-        port: 0,
-        localConfiguration: configuration,
-        openAppControl:
-            Platform.isMacOS &&
-                platform is NativeDesktopPlatform &&
-                widget.appControlDirectory != null
-            ? (state, quit) => MacDesktopControlHost.start(
-                directory: widget.appControlDirectory!,
-                state: state,
-                quit: quit,
-              )
-            : null,
-      );
-      if (mounted) setState(() => _local = bootstrap);
+      if (active?['mode'] == 'local' &&
+          await FileSystemEntity.type(
+                '${configuration.libraryDirectory}/library.db',
+                followLinks: false,
+              ) !=
+              FileSystemEntityType.file) {
+        throw const RemoteFailure('local_library_missing');
+      }
+      _startLocal(configuration);
     } on Object {
       if (mounted) setState(() => _failure = '无法打开资料库设置，请检查本机资料目录或使用备份恢复。');
     }
+  }
+
+  Future<DesktopLibrary> _openLocal(
+    LocalLibraryConfiguration configuration,
+    bool interaction,
+  ) =>
+      widget.openLocal?.call(configuration, interaction) ??
+      openLocalLibrary(configuration, requestKeyAccess: interaction);
+
+  Future<LocalLibraryConfiguration?> _recoverLocal(
+    ConnectionProfile profile,
+  ) async {
+    try {
+      final stored = await PrivateConnectionFiles.read(
+        File('${widget.profiles.directory}/library-sync.json'),
+      );
+      if (stored == null ||
+          stored['version'] != 1 ||
+          await FileSystemEntity.type(
+                '${widget.profiles.directory}/local/library.db',
+                followLinks: false,
+              ) !=
+              FileSystemEntityType.file) {
+        return null;
+      }
+      final configuration = await LocalLibraryConfiguration.open(
+        widget.profiles.directory,
+      );
+      if (stored['localLibraryId'] != configuration.libraryId) return null;
+      final library = await _openLocal(configuration, false);
+      try {
+        if (library.replication == null) return null;
+        final recovered = await LocalLibrarySync(
+          configuration: configuration,
+          owner: library.service.owner,
+          replication: library.replication!,
+        ).recoverCompletedLocalCopy(profile);
+        return recovered ? configuration : null;
+      } finally {
+        await library.service.close();
+        await library.close();
+      }
+    } on Object {
+      return null;
+    } // Keep the previous server selection and data.
+  }
+
+  void _startLocal(LocalLibraryConfiguration configuration) {
+    final platform = widget.platform ?? NativeDesktopPlatform();
+    final bootstrap = DesktopBootstrap(
+      openLibrary: () => _openLocal(configuration, false),
+      openLibraryWithKeyAccess: Platform.isMacOS
+          ? () => _openLocal(configuration, true)
+          : null,
+      platform: platform,
+      port: 0,
+      localConfiguration: configuration,
+      openAppControl:
+          Platform.isMacOS &&
+              platform is NativeDesktopPlatform &&
+              widget.appControlDirectory != null
+          ? (state, quit) => MacDesktopControlHost.start(
+              directory: widget.appControlDirectory!,
+              state: state,
+              quit: quit,
+            )
+          : null,
+    );
+    if (mounted) setState(() => _local = bootstrap);
+  }
+
+  Future<void> _adoptServer(
+    ConnectionProfile profile,
+    OwnerClient client,
+    bool enabled,
+  ) async {
+    // Verify support before opening a new system key or selecting local data.
+    await LibraryReplicationClient(client).status();
+    final configuration = await LocalLibraryConfiguration.open(
+      widget.profiles.directory,
+    );
+    final library = await _openLocal(configuration, false);
+    try {
+      final replication = library.replication;
+      if (replication == null) throw const RemoteFailure('unsupported_sync');
+      await LocalLibrarySync(
+        configuration: configuration,
+        owner: library.service.owner,
+        replication: replication,
+      ).connect(profile, enabled: enabled, connection: client);
+    } finally {
+      await library.service.close();
+      await library.close();
+    }
+    if (!mounted) return;
+    // Retire the server workspace first. Its client/menu must not be disposed
+    // after the new local runtime has already installed its handlers.
+    setState(() {
+      _online = false;
+      _failure = null;
+    });
+    final binding = WidgetsBinding.instance;
+    if (binding.framesEnabled) {
+      await binding.endOfFrame.timeout(
+        const Duration(milliseconds: 250),
+        onTimeout: () {},
+      );
+    }
+    if (mounted) _startLocal(configuration);
   }
 
   @override
@@ -104,6 +211,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
     if (_online) {
       return OnlineDesktopLauncher(
         profiles: widget.profiles,
+        onSaveStorage: _adoptServer,
         appControlDirectory: widget.appControlDirectory,
         desktopPlatform: widget.platform,
       );
