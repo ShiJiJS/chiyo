@@ -10,7 +10,6 @@ import 'workspace/workspace_inputs.dart';
 import 'workspace/zhiyu_theme.dart';
 import 'desktop_controls.dart';
 import 'connection_view.dart';
-import 'online_agent_connection_dialog.dart';
 import 'information_files.dart';
 import 'backups.dart';
 import 'package:info_storage/info_storage.dart';
@@ -156,6 +155,14 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     openDispatcher: widget.openDispatcher,
   );
 
+  Future<void> _saveConnection(ConnectionProfile profile, OwnerClient client) =>
+      widget.profiles is PrivateConnectionProfileStore
+      ? (widget.profiles as PrivateConnectionProfileStore).saveConnected(
+          profile,
+          client,
+        )
+      : widget.profiles.save(profile);
+
   Future<void> _connect({bool confirmServer = false}) async {
     if (_connecting || _desktop.quitting || confirmServer && !_serverChanged) {
       return;
@@ -193,10 +200,18 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
             : null,
       );
       if (!mounted || _desktop.quitting) return;
+      final profile = ConnectionProfile(
+        address: address,
+        token: token,
+        serverId: client.serverId,
+        certificate: certificate,
+      );
       if (_source != null &&
           _previous != null &&
           _matchesProfile(_previous!) &&
           client.serverId == _previous!.serverId) {
+        // Reuse the device too, including upgrading a legacy owner-only setup.
+        await _saveConnection(profile, client);
         // A reconnect with unchanged settings keeps every controller and draft.
         setState(() {
           _offline = false;
@@ -208,13 +223,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       candidate = _createSource(client);
       await candidate.cache.synchronize();
       if (!mounted || _desktop.quitting) return;
-      final profile = ConnectionProfile(
-        address: address,
-        token: token,
-        serverId: client.serverId,
-        certificate: certificate,
-      );
-      await widget.profiles.save(profile);
+      await _saveConnection(profile, client);
       if (!mounted || _desktop.quitting) return;
       final old = _source;
       _previous = profile;
@@ -263,8 +272,12 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                     '无法连接服务器，请检查网络、服务器是否运行，以及系统是否允许知予访问本地网络。',
                   RemoteFailure(code: 'server_timeout') =>
                     '连接服务器超时，请检查网络和服务器状态后重试。',
+                  RemoteFailure(code: 'profile_store_unavailable') ||
+                  RemoteFailure(code: 'invalid_profile') ||
                   FileSystemException() ||
                   ProcessException() => '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
+                  RemoteFailure(code: 'agent_connection_unavailable') =>
+                    '无法准备 CLI 连接，请检查服务器后重试。原连接设置已保留。',
                   _ => '连接失败，请检查服务器地址、Token 和网络后重试。',
                 };
         });
@@ -494,22 +507,6 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                           ? () => _connect(confirmServer: true)
                           : null,
                     ),
-                    onAgentConnectionSetup:
-                        widget.profiles is PrivateConnectionProfileStore
-                        ? (context) async {
-                            await showDesktopDialog<void>(
-                              context,
-                              barrierDismissible: false,
-                              builder: (_) => OnlineAgentConnectionDialog(
-                                client: source.client,
-                                certificate: _previous!.certificate,
-                                directory: Directory(
-                                  '${(widget.profiles as PrivateConnectionProfileStore).directory}/agent',
-                                ),
-                              ),
-                            );
-                          }
-                        : null,
                   ),
                 ),
               ),

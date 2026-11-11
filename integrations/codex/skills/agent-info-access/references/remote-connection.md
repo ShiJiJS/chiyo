@@ -1,10 +1,10 @@
 # 服务器连接与命令调用
 
-使用当前运行包末尾列出的 `Bundle executable`、`Connection profile` 和可选 `Session state directory`。连接配置由 App 顶部的“AI 接入”生成，包含指定服务器和受限设备身份。配置路径可作为程序参数；其中内容由程序读取。管理 Token 不属于 Agent 的接入资料。
+使用当前运行包末尾列出的 `Bundle executable` 和可选的 `Connection profile`、`Session state directory`。App 保存服务器连接成功后自动准备受限设备配置；CLI 默认自动发现，用户不需要生成配置。运行包明确指定配置路径时传给程序；配置内容只由程序读取，管理 Token 不属于 Agent 的接入资料。
 
 已从本聊天取得 association 时直接复用。首次连接可以按主说明手动连接；普通关闭 App 或服务器维护后继续用原关联，不能因连接失败而换会话、换申请或延长许可。身份、证书或连接不符时核对原服务器与配置，需要用户明确重新连接时再创建新关联。
 
-下面是当前 Mac/Linux 的 Node 子进程调用方式。`cliPath` 是运行包给出的 Bundle executable；`connectionFile` 和可选 `stateRoot` 也取自该运行包，未给出 stateRoot 时将该变量设为 undefined。只使用当前聊天标识；Node REPL 从 `nodeRepl.requestMeta.threadId` 取得，普通 Node 可取 `CODEX_THREAD_ID`。没有当前标识就停止接入。子进程通过 `/usr/bin/env` 继承正常环境并设置这一个公开标识，不要求 Node REPL 提供 process 全局对象。
+下面是当前 Mac/Linux 的 Node 子进程调用方式。`cliPath` 是运行包给出的 Bundle executable；可选 `connectionFile` 和 `stateRoot` 取自该运行包，未提供时设为 undefined。只使用当前聊天标识；Node REPL 从 `nodeRepl.requestMeta.threadId` 取得，普通 Node 可取 `CODEX_THREAD_ID`。没有当前标识就停止接入。子进程通过 `/usr/bin/env` 继承正常环境并设置这一个公开标识，不要求 Node REPL 提供 process 全局对象。
 
 ```js
 const { spawn } = await import('node:child_process');
@@ -33,7 +33,8 @@ async function invoke(executable, args, input) {
 
 ```js
 const hookPath = cliPath.replace(/info-codex(\.exe)?$/, 'info-codex-hook$1');
-const args = ['--connect', '--connection', connectionFile];
+const args = ['--connect'];
+if (connectionFile) args.push('--connection', connectionFile);
 if (stateRoot) args.push('--state-root', stateRoot);
 const opened = await invoke(hookPath, args);
 const context = opened.hookSpecificOutput?.additionalContext;

@@ -251,7 +251,7 @@ void main() {
         expect((await source.settings.read()).notifications, enabled);
       }
     }
-    await stage('u07-settings-failure-retry-eight-sections');
+    await stage('u07-settings-failure-retry-current-sections');
     for (final destination in [
       'library',
       'approvals',
@@ -261,7 +261,7 @@ void main() {
     ]) {
       await press('workspace-nav-$destination');
     }
-    expect(settings.section, WorkspaceSettingsSection.agents);
+    expect(settings.section, WorkspaceSettingsSection.runtime);
     await stage('all-primary-destinations-return');
     await File('$directory/native-checks.json').writeAsString(
       const JsonEncoder.withIndent('  ').convert({

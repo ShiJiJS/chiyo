@@ -29,7 +29,6 @@ import 'remote_workspace_hosts.dart';
 import 'remote_workspace_history.dart';
 import 'remote_workspace_backups.dart';
 import 'remote_workspace_settings.dart';
-import 'remote_workspace_agents.dart';
 import 'remote_workspace_runtime.dart';
 import '../online_desktop_runtime.dart';
 import 'package:info_workspace/adoption_transport.dart';
@@ -87,8 +86,6 @@ class RemoteWorkspaceSource
           preferences: settings.read,
           changed: notifyConnectionChanged,
         );
-  @override
-  late final WorkspaceAgentsSource agents = RemoteWorkspaceAgents(client);
   @override
   late final RemoteWorkspaceSettings settings = RemoteWorkspaceSettings(
     client,

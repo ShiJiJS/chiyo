@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_desktop/online_desktop_launcher.dart';
-import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'package:info_remote/automatic_connection.dart';
 import 'package:info_server/agent_devices.dart';
 import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/online_server.dart';
@@ -123,33 +123,11 @@ void main() {
               .evaluate()
               .isNotEmpty,
         );
-        await t.runAsync(() => t.tap(find.byTooltip('AI 接入')));
-        final generate = find.byKey(
-          const ValueKey('agent-connection-generate'),
-        );
-        await until(
-          () =>
-              generate.evaluate().isNotEmpty &&
-              t.widget<DesktopButton>(generate).onPressed != null,
-        );
-        await t.enterText(
-          find.descendant(
-            of: find.byKey(const ValueKey('agent-connection-name')),
-            matching: find.byType(TextField),
-          ),
-          '合成 CLI 设备',
-        );
-        await t.runAsync(() => t.tap(generate));
-        await until(
-          () => find
-              .byKey(const ValueKey('agent-connection-path'))
-              .evaluate()
-              .isNotEmpty,
-        );
+        expect(find.byTooltip('AI 接入'), findsNothing);
         await t.runAsync(() async {
-          final file = File(
-            '${profiles.directory}/agent/agent-connection.json',
-          );
+          final file = (await discoverAgentConnection(
+            environment: {'CHIYO_CONNECTION_DIRECTORY': profiles.directory},
+          ))!;
           final profile = await AgentConnectionProfile.read(file);
           device = profile.deviceToken;
           expect(
@@ -158,62 +136,26 @@ void main() {
             ),
             isFalse,
           );
-          expect(
-            (await AgentDeviceRegistry(repo).metadata()).single['name'],
-            '合成 CLI 设备',
-          );
-        });
-        await t.runAsync(
-          () => t.tap(find.byKey(const ValueKey('agent-connection-close'))),
-        );
-        await until(
-          () => find
-              .byKey(const ValueKey('agent-connection-path'))
-              .evaluate()
-              .isEmpty,
-        );
-        await until(
-          () => find
-              .byWidgetPredicate(
-                (w) =>
-                    w is IconButton &&
-                    w.tooltip == 'AI 接入' &&
-                    w.onPressed != null,
-              )
-              .evaluate()
-              .isNotEmpty,
-        );
-        await t.runAsync(() => t.tap(find.byTooltip('AI 接入')));
-        await until(
-          () => find
-              .byKey(const ValueKey('agent-connection-path'))
-              .evaluate()
-              .isNotEmpty,
-        );
-        expect(generate, findsNothing);
-        await t.runAsync(() async {
           expect(await AgentDeviceRegistry(repo).metadata(), hasLength(1));
         });
-        await t.runAsync(
-          () => t.tap(find.byKey(const ValueKey('agent-connection-close'))),
-        );
+        // A complete App restart reuses the published device without a setup
+        // dialog, rather than silently enrolling another device.
+        await t.pumpWidget(const SizedBox.shrink());
+        await t.pump();
+        await t.pumpWidget(OnlineDesktopLauncher(profiles: profiles));
         await until(
           () => find
-              .byKey(const ValueKey('agent-connection-path'))
-              .evaluate()
-              .isEmpty,
-        );
-        await until(
-          () => find
-              .byWidgetPredicate(
-                (w) =>
-                    w is IconButton &&
-                    w.tooltip == 'AI 接入' &&
-                    w.onPressed != null,
-              )
+              .byKey(const ValueKey('workspace-nav-settings'))
               .evaluate()
               .isNotEmpty,
         );
+        await t.runAsync(() async {
+          final file = (await discoverAgentConnection(
+            environment: {'CHIYO_CONNECTION_DIRECTORY': profiles.directory},
+          ))!;
+          expect((await AgentConnectionProfile.read(file)).deviceToken, device);
+          expect(await AgentDeviceRegistry(repo).metadata(), hasLength(1));
+        });
         await t.runAsync(() => t.tap(find.text('访问审批').first));
         await until(
           () => find

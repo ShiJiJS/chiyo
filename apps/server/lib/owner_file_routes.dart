@@ -27,10 +27,7 @@ final class OwnerFileRoutes {
   final OwnerWorkspaceFileStages stages;
   final OwnerWorkspaceFileReads reads;
   late final OwnerWorkspaceFileChanges changes;
-  late final legacy = OwnerWorkspaceLegacyTemplates(
-    library.owner,
-    library.plugins,
-  );
+  late final legacy = OwnerWorkspaceLegacyTemplates(library.owner);
   static const stagingLifetime = Duration(minutes: 30);
   static Duration Function() _monotonicClock() {
     final watch = Stopwatch()..start();
@@ -162,24 +159,7 @@ final class OwnerFileRoutes {
     if (path.length == 5 && path[3] == 'legacy-templates' && method == 'GET') {
       return (200, legacyTemplateToJson(await legacy.read(path.last)));
     }
-    if (path.length == 6 &&
-        path[3] == 'legacy-templates' &&
-        path.last == 'convert' &&
-        method == 'POST') {
-      if (body!.length != 1) throw const FormatException();
-      final c = await legacy.prepareConversion(
-        path[4],
-        body['expectedVersion'] as int,
-      );
-      return (
-        200,
-        {
-          'selectionId': c.selectionId,
-          'filename': c.filename,
-          'byteLength': c.byteLength,
-        },
-      );
-    }
+
     if (path.length == 4 && path.last == 'release' && method == 'POST') {
       if (body!.length != 2) throw const FormatException();
       final selections = (body['selections'] as List).cast<String>(),

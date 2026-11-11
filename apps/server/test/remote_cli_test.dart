@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/owner_client.dart';
+import 'package:info_remote/connection_profile.dart';
+import 'package:info_remote/automatic_connection.dart';
 import 'package:info_server/agent_devices.dart';
 import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/online_server.dart';
@@ -50,6 +52,23 @@ void main() {
         trust: trust,
       );
       final cliDirectory = Directory('../../packages/info_cli').absolute;
+      final executables = <String, String>{};
+      for (final entry in ['info', 'codex_hook', 'codex_info']) {
+        final executable = '${root.path}/$entry';
+        final built = await Process.run(Platform.resolvedExecutable, [
+          'compile',
+          'exe',
+          'bin/$entry.dart',
+          '-o',
+          executable,
+        ], workingDirectory: cliDirectory.path);
+        expect(
+          built.exitCode,
+          0,
+          reason: 'Compile actual CLI: ${built.stderr}',
+        );
+        executables[entry] = executable;
+      }
       Future<List<Map<String, dynamic>>> invoke(
         String entry,
         List<Map<String, Object?>> inputs, {
@@ -57,10 +76,13 @@ void main() {
         String chat = 'synthetic-root',
       }) async {
         final process = await Process.start(
-          Platform.resolvedExecutable,
-          ['run', 'bin/$entry.dart', ...args],
+          executables[entry]!,
+          args,
           workingDirectory: cliDirectory.path,
-          environment: {'CODEX_THREAD_ID': chat},
+          environment: {
+            'CODEX_THREAD_ID': chat,
+            'CHIYO_CONNECTION_DIRECTORY': '${root.path}/automatic',
+          },
         );
         final output = utf8.decoder.bind(process.stdout).join();
         final errors = utf8.decoder.bind(process.stderr).join();
@@ -102,29 +124,41 @@ void main() {
             ],
           ),
         );
-        final enrolled = await owner.request('POST', '/v1/owner/devices', {
-          'operationId': 'cli-enrollment',
-          'name': 'Synthetic CLI',
-        });
-        final profile = AgentConnectionProfile(
-          address: address,
-          deviceToken: enrolled['deviceToken'] as String,
+        final profiles = PrivateConnectionProfileStore(
+          '${root.path}/automatic',
+        );
+        final ownerProfile = ConnectionProfile(
+          address: address.toString(),
+          token: ownerToken,
           serverId: owner.serverId,
           certificate: await File(fixture.ca).readAsString(),
         );
-        final connectionFile = await profile.saveIn(
-          Directory('${root.path}/connection'),
+        await profiles.saveConnected(ownerProfile, owner);
+        final connectionFile = (await discoverAgentConnection(
+          environment: {'CHIYO_CONNECTION_DIRECTORY': profiles.directory},
+        ))!;
+        final profile = await AgentConnectionProfile.read(connectionFile);
+        expect(
+          (await connectionFile.readAsString()).contains(ownerToken),
+          isFalse,
         );
-        final discovery = await invoke(
-          'info',
-          [
-            {'command': 'capabilities'},
-            {'command': 'directory-list'},
-            {'command': 'catalog'},
-          ],
-          args: ['--connection', connectionFile.path],
+        final published = await File(
+          '${profiles.directory}/active.json',
+        ).readAsString();
+        await profiles.saveConnected(ownerProfile, owner);
+        expect(
+          await File('${profiles.directory}/active.json').readAsString(),
+          published,
         );
-        expect(discovery, hasLength(3));
+        expect(await AgentDeviceRegistry(repo).metadata(), hasLength(1));
+        final discovery = await invoke('info', [
+          {'command': 'capabilities'},
+          {'command': 'directory-list'},
+          {'command': 'catalog'},
+          {'command': 'plugin-list'},
+          {'command': 'template-list'},
+        ]);
+        expect(discovery, hasLength(5));
         expect(discovery.every((r) => r['status'] == 'ok'), isTrue);
         expect(
           jsonEncode(discovery).contains('SYNTHETIC_SELECTED_VALUE'),
@@ -139,12 +173,7 @@ void main() {
               'session_id': 'synthetic-root',
             },
           ],
-          args: [
-            '--connection',
-            connectionFile.path,
-            '--state-root',
-            '${root.path}/state',
-          ],
+          args: ['--state-root', '${root.path}/state'],
         )).single;
         final reference =
             jsonDecode(
@@ -287,12 +316,7 @@ void main() {
           [
             {'hook_event_name': 'SessionEnd', 'session_id': 'synthetic-root'},
           ],
-          args: [
-            '--connection',
-            connectionFile.path,
-            '--state-root',
-            '${root.path}/state',
-          ],
+          args: ['--state-root', '${root.path}/state'],
         )).single;
         expect(ended['systemMessage'], contains('ended'));
         expect((await read(reference))['status'], 'unauthorized');

@@ -1,6 +1,6 @@
 # 通用 CLI 申请与等待
 
-当前 Mac 服务端版按 [服务器接入说明](../integrations/codex/REMOTE-INTEGRATION.md) 取得设备配置，通用入口为 `info --connection <配置路径>`；Codex 使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际已接通的能力以 `capabilities` 为准，当前开发进度见[执行记录](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/planning/server-multidevice/execution.md)。以下各功能的历史说明不代表本轮远程入口已全部完成。
+当前 Mac 服务端版在 App 保存服务器连接后自动准备并复用设备配置。通用入口 `info` 默认发现当前连接，`info --connection <配置路径>` 可固定独立目标；隔离配置可设置 `CHIYO_CONNECTION_DIRECTORY`，步骤见[服务器接入说明](../integrations/codex/REMOTE-INTEGRATION.md)。Codex 使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际已接通的能力以 `capabilities` 为准，当前开发进度见[执行记录](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/planning/server-multidevice/execution.md)。以下各功能的历史说明不代表本轮远程入口已全部完成。
 
 远程文字新增和修改提案已接通，沿用以下模板查询和 import/update 命令。每次提交给稳定 operationId，结果不确定时查询原操作；用户在正常 App 预览类型、目录和内容后一次保存整份。App 关闭不停止服务器，重开后可处理待办。文件、密码和密钥仍按各自能力标记接续，不能把材料去掉后改报成功。
 

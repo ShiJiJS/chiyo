@@ -291,20 +291,26 @@ void main() {
         (listed['items'] as List).single,
       );
       expect(projected.id, template.id);
-      expect(projected.conversionProblem, isNotNull);
-      await expectLater(
-        owner.request(
+      // Removed setup/conversion routes cannot revive the deleted pages.
+      for (final (method, path, body) in <(String, String, Object?)>[
+        ('GET', '/v1/owner/agent-sessions', null),
+        (
           'POST',
           '/v1/owner/files/legacy-templates/${template.id}/convert',
           {'expectedVersion': template.version},
         ),
-        throwsA(
-          isA<RemoteFailure>().having(
-            (e) => e.code,
-            'code',
-            'conversion_unsupported',
+      ]) {
+        await expectLater(
+          owner.request(method, path, body),
+          throwsA(
+            isA<RemoteFailure>().having((e) => e.code, 'code', 'not_found'),
           ),
-        ),
+        );
+      }
+
+      expect(
+        projected.fields.where((f) => f.kind == WorkspaceLegacyFieldKind.file),
+        hasLength(2),
       );
       final fields = projected.definition['fields'] as List;
       final a = fileCandidateFromJson(
