@@ -308,7 +308,9 @@ void main() {
         findsOneWidget,
       );
       await capture(t, 'runtime-1440-light-quit-review');
-      s.advanceApprovalClock(const Duration(minutes: 1));
+      // Invalidate on a changed runtime fact. A clock refresh before any
+      // expiry does not itself change the confirmed shutdown scope.
+      s.runtime.setAvailability(menuBar: false);
       await ready(t);
       expect(find.byKey(const ValueKey('runtime-quit-confirm')), findsNothing);
       await tap(t, 'runtime-quit-preview-retry');
@@ -322,8 +324,6 @@ void main() {
         (await s.approvals.read('server')).request.state,
         WorkspaceApprovalState.approved,
       );
-      s.runtime.setAvailability(menuBar: false);
-      await ready(t);
       await p.setBackground(true);
       await ready(t);
       await tap(t, 'runtime-close-window');
