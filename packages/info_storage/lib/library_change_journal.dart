@@ -171,6 +171,14 @@ final class LibraryChangeJournal {
 
 extension _SyncChangeFlush on _InformationDatabase {
   Future<void> _flushSyncChanges() async {
+    if (Zone.current[_syncIncomingZone] == true) {
+      final captured = await customSelect(
+        'SELECT 1 FROM library_sync_dirty LIMIT 1',
+      ).get();
+      if (captured.isNotEmpty)
+        await customStatement('DELETE FROM library_sync_dirty');
+      return;
+    }
     final rows = await customSelect(
       'SELECT table_name,row_key,before_json,after_json FROM library_sync_dirty '
       'ORDER BY table_name,row_key',

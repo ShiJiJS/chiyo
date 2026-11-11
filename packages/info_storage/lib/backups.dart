@@ -641,6 +641,11 @@ class InformationBackups {
                 'library_sync_change_state',
                 'library_sync_dirty',
                 'library_sync_changes',
+                'library_sync_projection',
+                'library_sync_units',
+                'library_sync_feed',
+                'library_sync_progress',
+                'library_sync_blobs',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -931,6 +936,11 @@ class InformationBackups {
                     'library_sync_change_state',
                     'library_sync_dirty',
                     'library_sync_changes',
+                    'library_sync_projection',
+                    'library_sync_units',
+                    'library_sync_feed',
+                    'library_sync_progress',
+                    'library_sync_blobs',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -949,6 +959,11 @@ class InformationBackups {
         // the capture scope first so imported rows do not become local edits.
         final names = existingTables.map((r) => r.read<String>('name')).toSet();
         for (final name in [
+          'library_sync_projection',
+          'library_sync_units',
+          'library_sync_feed',
+          'library_sync_progress',
+          'library_sync_blobs',
           'library_sync_change_state',
           'library_sync_dirty',
           'library_sync_changes',

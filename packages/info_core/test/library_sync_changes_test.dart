@@ -24,6 +24,45 @@ LibrarySyncBatch edit(
 );
 
 void main() {
+  test(
+    'receipt reports a retained conflict and rejects mismatched protocol fields',
+    () {
+      final batch = edit('receipt');
+      final receipt = LibrarySyncReceipt(
+        libraryId: library,
+        receiverReplicaId: replicaB,
+        sourceReplicaId: replicaA,
+        operationId: batch.operationId,
+        digest: batch.digest,
+        cursor: 8,
+        conflict: true,
+      );
+      final decoded = LibrarySyncReceipt.fromJson(
+        jsonDecode(jsonEncode(receipt.toJson())),
+      );
+      expect(decoded.toJson(), receipt.toJson());
+      expect(decoded.conflict, true);
+      expect(
+        () => LibrarySyncReceipt.fromJson({
+          ...receipt.toJson(),
+          'outcome': 'successful',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => LibrarySyncReceipt.fromJson({...receipt.toJson(), 'cursor': 0}),
+        throwsFormatException,
+      );
+      expect(
+        () => LibrarySyncReceipt.fromJson({
+          ...receipt.toJson(),
+          'wireVersion': 1,
+        }),
+        throwsFormatException,
+      );
+    },
+  );
+
   test('wire survives a process roundtrip with stable versions and digest', () {
     final batch = edit('create-one');
     final restored = LibrarySyncBatch.decode(jsonEncode(batch.toJson()));

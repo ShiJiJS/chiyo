@@ -737,7 +737,10 @@ extension _CompleteBackups on InformationBackups {
     );
   }
 
-  void Function() _prepareInstall(BackupContents contents) {
+  void Function() _prepareInstall(
+    BackupContents contents, {
+    Set<LibrarySyncKey>? syncKeys,
+  }) {
     final tables = contents._tables;
     final recycleBatches = [
       for (final row
@@ -859,6 +862,150 @@ extension _CompleteBackups on InformationBackups {
       contents.attachments,
     );
     return () {
+      if (syncKeys != null) {
+        final byKind = <LibrarySyncKind, Set<String>>{
+          for (final kind in LibrarySyncKind.values)
+            kind: syncKeys
+                .where((k) => k.kind == kind)
+                .map((k) => k.id)
+                .toSet(),
+        };
+        final informationIds = byKind[LibrarySyncKind.information]!;
+        final credentialIds = byKind[LibrarySyncKind.credential]!;
+        void map<T>(
+          Map<String, T> target,
+          Iterable<T> values,
+          String Function(T) id,
+          Set<String> selected,
+        ) {
+          for (final key in selected) {
+            target.remove(key);
+          }
+          target.addEntries(
+            values
+                .where((v) => selected.contains(id(v)))
+                .map((v) => MapEntry(id(v), v)),
+          );
+        }
+
+        void list<T>(
+          List<T> target,
+          Iterable<T> values,
+          bool Function(T) selected,
+        ) {
+          target.removeWhere(selected);
+          target.addAll(values.where(selected));
+        }
+
+        map(_repository._items, items, (i) => i.id, informationIds);
+        map(
+          _repository._directories,
+          directories,
+          (d) => d.id,
+          byKind[LibrarySyncKind.directory]!,
+        );
+        map(_repository._tags, tags, (t) => t.id, byKind[LibrarySyncKind.tag]!);
+        map(
+          _repository._templates,
+          templates,
+          (t) => t.id,
+          byKind[LibrarySyncKind.template]!,
+        );
+        map(
+          _repository._templatePackages,
+          packages,
+          (p) => p.id,
+          byKind[LibrarySyncKind.plugin]!,
+        );
+        list(
+          _repository._revisions,
+          revisions,
+          (r) => informationIds.contains(r.item.id),
+        );
+        _repository._recycle.removeWhere(
+          (_, r) => informationIds.contains(r.itemId),
+        );
+        _repository._recycle.addEntries(
+          recycle
+              .where((r) => informationIds.contains(r.itemId))
+              .map((r) => MapEntry(r.id, r)),
+        );
+        list(
+          _repository._recycleFacts,
+          facts,
+          (f) => informationIds.contains(f.itemId),
+        );
+        list(
+          _repository._revisionPurges,
+          revisionPurges,
+          (p) => informationIds.contains(p.itemId),
+        );
+        list(
+          _repository._credentials,
+          credentials,
+          (c) => credentialIds.contains(c.id),
+        );
+        list(
+          _repository._credentialMaterials,
+          materials,
+          (m) => credentialIds.contains(m.credentialId),
+        );
+        map(
+          _repository._libraryRecycleBatches,
+          recycleBatches,
+          (b) => b.id,
+          byKind[LibrarySyncKind.recycle]!,
+        );
+        if (byKind[LibrarySyncKind.order]!.isNotEmpty)
+          _repository._libraryOrder = libraryOrder;
+        if (byKind[LibrarySyncKind.sshTrust]!.isNotEmpty)
+          _repository._sshHostTrust = trust;
+        Set<String> histories(String table) => byKind[LibrarySyncKind.history]!
+            .where((id) => id.startsWith('$table:'))
+            .map((id) => id.substring(table.length + 1))
+            .toSet();
+        map(
+          _repository._history,
+          history,
+          (h) => h.id,
+          histories('grant_history'),
+        );
+        map(
+          _repository._accesses,
+          accesses,
+          (a) => a.id,
+          histories('access_records'),
+        );
+        map(
+          _repository._requestHistory,
+          requests,
+          (r) => r.id,
+          histories('request_history'),
+        );
+        map(
+          _repository._fileDeliveries,
+          deliveries,
+          (d) => d.id,
+          histories('information_deliveries'),
+        );
+        final requestIds = histories('credential');
+        list(
+          _repository._credentialUseRequests,
+          useRequests,
+          (r) => requestIds.contains(r.id),
+        );
+        list(
+          _repository._credentialExecutions,
+          executions,
+          (e) => requestIds.contains(e.requestId),
+        );
+        list(
+          _repository._focusedFillOperations,
+          fills,
+          (f) => requestIds.contains(f.requestId),
+        );
+        return;
+      }
       _repository._libraryOrder = libraryOrder;
       _repository._libraryRecycleBatches
         ..clear()
