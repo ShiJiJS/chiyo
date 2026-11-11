@@ -21,6 +21,9 @@ int64_t Length(const Map& values) {
 }
 OwnerFileOpenChannel::OwnerFileOpenChannel(flutter::BinaryMessenger* messenger, HWND owner)
     : opener_([owner](const std::wstring& path) {
+      // Shell acceptance can also mean the user is choosing an application.
+      // This is a dispatch receipt, not proof that a reader displayed the file.
+      // Retain the copy until explicit finish/exit and never replay the intent.
       SHELLEXECUTEINFOW launch{};
       launch.cbSize = sizeof(launch);
       launch.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NOCLOSEPROCESS | SEE_MASK_ASYNCOK;

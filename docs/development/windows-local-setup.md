@@ -2,6 +2,8 @@
 
 需要 64 位 Windows、Git、Visual Studio 2022 Build Tools 的 C++ 桌面工作负载、MSVC、CMake 和 Windows SDK。项目使用 Flutter 3.47.7 / Dart 3.13.5，固定提交 `abaf9c523780a608bd46686fd5e53740a07077f8`，与 Mac 一致。
 
+同步与联网测试用 OpenSSL 创建临时证书。开发和完整检查脚本优先使用当前 PATH 的 OpenSSL，缺失时自动接入 Git for Windows 自带的 `usr/bin/openssl.exe`，仅影响当前进程及其测试子进程，不修改系统 PATH。这是测试依赖，运行已打包 App 不需要 OpenSSL。
+
 ## 常用命令
 
 在仓库根目录的 PowerShell 中运行：

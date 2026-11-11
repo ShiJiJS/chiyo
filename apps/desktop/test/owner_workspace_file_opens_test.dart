@@ -10,6 +10,7 @@ import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart';
 import 'package:info_desktop/workspace/library_file.dart';
 import 'package:info_desktop/backups.dart';
+import 'package:info_desktop/desktop_feedback.dart';
 import 'package:info_desktop/workspace/owner_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
@@ -488,6 +489,61 @@ void main() {
       );
     },
   );
+  testWidgets(
+    'accepted system dispatch reports a request and retains its copy',
+    (t) async {
+      t.view.physicalSize = const Size(1440, 1000);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      addTearDown(() => t.pumpWidget(const SizedBox.shrink()));
+      final detail = await real(t, () => source.readDetail(record));
+      await t.pumpWidget(
+        MaterialApp(
+          theme: zhiyuTheme(Brightness.light),
+          home: DesktopFeedback(
+            child: Scaffold(
+              body: SingleChildScrollView(
+                child: LibraryFile(
+                  detail: detail,
+                  fieldKey: field,
+                  source: source,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final actions = find.byKey(ValueKey('library-file-actions-$field'));
+      await settle(
+        t,
+        () =>
+            actions.hitTestable().evaluate().isNotEmpty &&
+            find.text('正在读取预览…').evaluate().isEmpty,
+      );
+      await t.tap(actions);
+      await t.pumpAndSettle();
+      await t.tap(find.text('用本机程序打开').last);
+      await settle(
+        t,
+        () => find.textContaining('已向系统发送打开请求').evaluate().isNotEmpty,
+      );
+      expect(find.textContaining('已交给本机程序打开'), findsNothing);
+      expect(find.text('结束使用并清理本机打开副本'), findsOneWidget);
+      expect(dispatch.count, 1);
+      expect(File(dispatch.lease!.filePath).existsSync(), isTrue);
+      await t.tap(find.text('结束使用并清理本机打开副本'));
+      await settle(
+        t,
+        () =>
+            !File(dispatch.lease!.filePath).existsSync() &&
+            find.text('正在读取预览…').evaluate().isEmpty,
+      );
+      await t.pumpWidget(const SizedBox.shrink());
+      await real(t, close);
+    },
+  );
+
   testWidgets(
     'reopened unknown open is visible; wrong receipt stays frozen; exact result permits copy cleanup',
     (t) async {

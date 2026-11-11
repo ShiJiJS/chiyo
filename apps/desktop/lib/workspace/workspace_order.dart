@@ -42,18 +42,82 @@ void sortWorkspaceSummaries(
     items.sort((a, b) => stable(b.updatedAt.compareTo(a.updatedAt), a, b));
     return;
   }
-  if (!Platform.isMacOS) {
-    // Retain the existing non-Mac behavior until that platform's delivery work.
+  if (!Platform.isMacOS && !Platform.isWindows) {
     items.sort((a, b) => stable(a.name.compareTo(b.name), a, b));
     return;
   }
-  final order = _MacNameOrder();
+  final _NameOrder order = Platform.isWindows
+      ? _WindowsNameOrder()
+      : _MacNameOrder();
   try {
     order.initialize();
     items.sort((a, b) => stable(order.compare(a.name, b.name), a, b));
   } finally {
     order.dispose();
   }
+}
+
+abstract interface class _NameOrder {
+  void initialize();
+  int compare(String a, String b);
+  void dispose();
+}
+
+/// Explicit Chinese collation, independent of the Windows display language.
+/// CompareStringEx consumes UTF-16 lengths, including embedded NULs. It returns
+/// 1/2/3 for less/equal/greater; zero is an API failure, never a sorting result.
+class _WindowsNameOrder implements _NameOrder {
+  static final _compare = DynamicLibrary.open('kernel32.dll')
+      .lookupFunction<
+        Int32 Function(
+          Pointer<Utf16>,
+          Uint32,
+          Pointer<Utf16>,
+          Int32,
+          Pointer<Utf16>,
+          Int32,
+          Pointer<Void>,
+          Pointer<Void>,
+          IntPtr,
+        ),
+        int Function(
+          Pointer<Utf16>,
+          int,
+          Pointer<Utf16>,
+          int,
+          Pointer<Utf16>,
+          int,
+          Pointer<Void>,
+          Pointer<Void>,
+          int,
+        )
+      >('CompareStringEx');
+  final _arena = Arena();
+  final _strings = <String, Pointer<Utf16>>{};
+  late Pointer<Utf16> _locale;
+  Pointer<Utf16> _string(String value) =>
+      _strings.putIfAbsent(value, () => value.toNativeUtf16(allocator: _arena));
+  @override
+  void initialize() => _locale = _string('zh-CN');
+  @override
+  int compare(String a, String b) {
+    final result = _compare(
+      _locale,
+      0,
+      _string(a),
+      a.length,
+      _string(b),
+      b.length,
+      nullptr,
+      nullptr,
+      0,
+    );
+    if (result == 0) throw StateError('Chinese name comparison failed');
+    return result - 2;
+  }
+
+  @override
+  void dispose() => _arena.releaseAll();
 }
 
 final class _CFRange extends Struct {
@@ -102,13 +166,14 @@ class _CoreFoundation {
 
 /// Owns one sort's locale, string cache and UTF-16 buffers. Release everything
 /// even if initialization or comparison fails; no native objects survive a query.
-class _MacNameOrder {
+class _MacNameOrder implements _NameOrder {
   final _cf = _CoreFoundation.instance;
   final _arena = Arena();
   final _strings = <String, Pointer<Void>>{};
   Pointer<Void> _locale = nullptr;
   late final Pointer<_CFRange> _range = _arena<_CFRange>();
 
+  @override
   void initialize() {
     _locale = _cf.createLocale(nullptr, _string('zh_CN'));
     if (_locale == nullptr) throw StateError('Chinese name locale unavailable');
@@ -126,6 +191,7 @@ class _MacNameOrder {
     return text;
   });
 
+  @override
   int compare(String a, String b) {
     _range.ref
       ..location = 0
@@ -133,6 +199,7 @@ class _MacNameOrder {
     return _cf.compare(_string(a), _string(b), _range.ref, 0, _locale);
   }
 
+  @override
   void dispose() {
     if (_locale != nullptr) _cf.release(_locale);
     for (final text in _strings.values) {

@@ -9,6 +9,14 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_storage/macos_backup_publication.dart';
 import 'package:test/test.dart';
 
+class _Keys implements DatabaseKeyStore {
+  List<int>? value;
+  @override
+  Future<List<int>?> read() async => value;
+  @override
+  Future<void> create(List<int> key) async => value = List.of(key);
+}
+
 void main() {
   late Directory root;
   late MacBackupStagingDirectory staging;
@@ -38,6 +46,127 @@ void main() {
   MacBackupPublication prepare() {
     MacBackupPublicationFiles.writePrivateFile(source, bytes);
     return MacBackupPublicationFiles.prepare(source, destination);
+  }
+
+  for (final withAttachment in [false, true]) {
+    test('registered encrypted backup exports and restores on Windows '
+        '(attachment=$withAttachment)', () async {
+      final repo = await EncryptedInformationRepository.open(
+        '${root.path}/library',
+        _Keys(),
+      );
+      final service = InformationService(repository: repo);
+      try {
+        await service.owner.createInformation('合成资料', '', [
+          const FieldInput('内容', '', 'synthetic-windows-backup'),
+        ]);
+        if (withAttachment) {
+          final file = File('${root.path}/合成附件.txt');
+          await file.writeAsBytes(bytes);
+          final draft = await service.owner.beginInformationFileDraft();
+          try {
+            final staged = await service.owner.stageInformationFile(
+              draft,
+              file.path,
+            );
+            await service.owner.commitInformationDraft(
+              draft,
+              'synthetic-file',
+              InformationDraftInput(
+                name: '合成附件',
+                description: '',
+                fields: [InformationDraftField.stagedFile('文件', '', staged.id)],
+              ),
+            );
+          } finally {
+            await service.owner.releaseInformationFileDraft(draft);
+          }
+        }
+        final recovery = await repo.backups.enable();
+        await repo.backups.saveRecoveryKeyTo('${root.path}/recovery.txt');
+        final version = await repo.backups.operationVersion();
+        await repo.backups.registerOutputStaging(
+          operationId: 'windows-export',
+          commandDigest: 'a' * 64,
+          expectedVersion: version,
+          action: BackupOutputAction.export,
+          directory: staging.path,
+          destination: destination,
+        );
+        var registered = false;
+        await service.owner.exportLibrary(
+          () => repo.backups.exportTo(
+            source,
+            stagingParent: staging.path,
+            onStagingCreated: (child) async {
+              expect(Directory(child).listSync(), isEmpty);
+              WindowsPrivateFiles.verify(child, directory: true);
+              await repo.backups.registerOutputStagingChild(
+                'windows-export',
+                child,
+              );
+              registered = true;
+            },
+          ),
+        );
+        expect(registered, isTrue);
+        WindowsPrivateFiles.verify(source);
+        final publication = MacBackupPublicationFiles.prepare(
+          source,
+          destination,
+        );
+        await repo.backups.prepareOutputOperation(
+          operationId: 'windows-export',
+          commandDigest: 'a' * 64,
+          expectedVersion: version,
+          action: BackupOutputAction.export,
+          publication: publication,
+        );
+        final receipt = await repo.backups.publishOutputOperation(
+          'windows-export',
+        );
+        expect(receipt.counts['information'], withAttachment ? 2 : 1);
+        await repo.backups.cleanupRegisteredOutputStaging('windows-export');
+        expect(Directory(staging.path).existsSync(), isFalse);
+        expect(await repo.backups.pendingOutputStaging(), isEmpty);
+        WindowsPrivateFiles.verify(destination);
+        final restored = await EncryptedInformationRepository.open(
+          '${root.path}/restored',
+          _Keys(),
+        );
+        try {
+          await restored.backups.restoreFrom(destination, recovery);
+          expect(restored.items.length, withAttachment ? 2 : 1);
+          expect(
+            restored.items
+                .firstWhere((i) => i.name == '合成资料')
+                .fields
+                .single
+                .value,
+            'synthetic-windows-backup',
+          );
+          expect(await restored.backups.pendingOutputStaging(), isEmpty);
+          if (withAttachment) {
+            final item = restored.items.firstWhere((i) => i.name == '合成附件');
+            final field = item.fields.single.attachment;
+            expect(field, isNotNull);
+            expect(
+              await restored.readInformationAttachmentChunk(
+                field!,
+                0,
+                bytes.length,
+              ),
+              bytes,
+            );
+          }
+        } finally {
+          await restored.close();
+        }
+      } finally {
+        await service.close();
+        await repo.close();
+      }
+    });
   }
 
   test(
