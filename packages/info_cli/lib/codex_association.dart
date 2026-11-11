@@ -123,14 +123,17 @@ class CodexAssociation {
 $ErrorActionPreference = 'Stop'
 $directory = $env:INFO_PRIVATE_DIR
 $sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+$owner = [System.IO.Directory]::GetAccessControl($directory).GetOwner([System.Security.Principal.SecurityIdentifier])
 $acl = New-Object System.Security.AccessControl.DirectorySecurity
-$acl.SetOwner($sid)
+# An owner may update its DACL while lacking WRITE_OWNER. Reassigning the same
+# owner unnecessarily requests that extra right on ordinary Modify-only paths.
+if ($owner.Value -ne $sid.Value) { $acl.SetOwner($sid) }
 $acl.SetAccessRuleProtection($true, $false)
 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($sid, 'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
 $acl.AddAccessRule($rule)
 [System.IO.Directory]::SetAccessControl($directory, $acl)
 $actual = [System.IO.Directory]::GetAccessControl($directory)
-if (-not $actual.AreAccessRulesProtected) { throw 'Private storage unavailable' }
+if (-not $actual.AreAccessRulesProtected -or $actual.GetOwner([System.Security.Principal.SecurityIdentifier]).Value -ne $sid.Value) { throw 'Private storage unavailable' }
 foreach ($entry in $actual.Access) {
   if ($entry.AccessControlType -eq 'Allow' -and $entry.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -ne $sid.Value) { throw 'Private storage unavailable' }
 }
