@@ -15,7 +15,10 @@ final class LibraryIncremental {
   EncryptedInformationRepository get _repo => replication.repository;
   _InformationDatabase get _db => _repo._db;
 
-  Future<void> start({LibraryReplicaContents? initialContents}) async {
+  Future<void> start({
+    LibraryReplicaContents? initialContents,
+    LibrarySyncBaseline? baseline,
+  }) async {
     final identity = await replication.identity();
     await LibraryChangeJournal(replication).start();
     await _db.transaction(() async {
@@ -23,7 +26,7 @@ final class LibraryIncremental {
         'CREATE TABLE IF NOT EXISTS library_sync_projection('
         'singleton INTEGER PRIMARY KEY CHECK(singleton=1),'
         'library_id TEXT NOT NULL,replica_id TEXT NOT NULL,'
-        'raw_cursor INTEGER NOT NULL,local_sequence INTEGER NOT NULL)',
+        'raw_cursor INTEGER NOT NULL,local_sequence INTEGER NOT NULL,initial_baseline_digest TEXT)',
       );
       await _db.customStatement(
         'CREATE TABLE IF NOT EXISTS library_sync_units('
@@ -49,7 +52,7 @@ final class LibraryIncremental {
       await _repo._requireAdmissionFormat(_libraryIncrementalFormat);
       final previous = await _db
           .customSelect(
-            'SELECT library_id,replica_id FROM library_sync_projection',
+            'SELECT library_id,replica_id,initial_baseline_digest FROM library_sync_projection',
           )
           .get();
       if (previous.isNotEmpty) {
@@ -57,30 +60,55 @@ final class LibraryIncremental {
             previous.single.read<String>('replica_id') != identity.replicaId) {
           throw const StorageFailure('sync_base_changed');
         }
+        if (baseline != null &&
+            previous.single.readNullable<String>('initial_baseline_digest') !=
+                baseline.digest) {
+          throw const StorageFailure('sync_operation_conflict');
+        }
         return;
       }
       final contents = initialContents ?? await replication.snapshotContents();
       if (contents.libraryId != identity.libraryId)
         throw const StorageFailure('sync_base_changed');
       contents.validate(_repo._clock().toUtc());
+      if (baseline != null &&
+          (baseline.libraryId != identity.libraryId ||
+              baseline.sourceReplicaId == identity.replicaId ||
+              !_sameKeys(
+                contents.units.keys.toSet(),
+                baseline.versions.keys.toSet().difference(baseline.tombstones),
+              ))) {
+        throw const StorageFailure('sync_base_changed');
+      }
       for (final entry in contents.units.entries) {
-        final version = crypto.sha256
-            .convert(
-              utf8.encode(
-                _syncJson({
-                  'libraryId': identity.libraryId,
-                  'key': entry.key.toJson(),
-                  'content': entry.value,
-                }),
-              ),
-            )
-            .toString();
+        final version =
+            baseline?.versions[entry.key] ??
+            crypto.sha256
+                .convert(
+                  utf8.encode(
+                    _syncJson({
+                      'libraryId': identity.libraryId,
+                      'key': entry.key.toJson(),
+                      'content': entry.value,
+                    }),
+                  ),
+                )
+                .toString();
         await _saveUnit(entry.key, version, entry.value);
+      }
+      if (baseline != null) {
+        for (final key in baseline.tombstones) {
+          await _saveUnit(key, baseline.versions[key]!, null);
+        }
+        await _db.customStatement(
+          'INSERT INTO library_sync_progress(peer_id,cursor) VALUES(?,?)',
+          [baseline.sourceReplicaId, baseline.cursor],
+        );
       }
       final cursor = await _rawCursor();
       await _db.customStatement(
-        'INSERT INTO library_sync_projection VALUES(1,?,?,?,0)',
-        [identity.libraryId, identity.replicaId, cursor],
+        'INSERT INTO library_sync_projection(singleton,library_id,replica_id,raw_cursor,local_sequence,initial_baseline_digest) VALUES(1,?,?,?,0,?)',
+        [identity.libraryId, identity.replicaId, cursor, baseline?.digest],
       );
       // Keep an original only when it is about to disappear from ordinary
       // immutable storage. This is encrypted disk staging, not an RAM prefetch.
@@ -105,6 +133,65 @@ final class LibraryIncremental {
               )
               .getSingle())
           .read<int>('n');
+
+  /// Call alongside the initial export under the same Owner snapshot barrier,
+  /// and bind the response to that export's immutable snapshot ID.
+  Future<LibrarySyncBaseline> baseline(String snapshotId) async {
+    replicaDigest(snapshotId);
+    await project();
+    final state = await _state();
+    final units = await _units();
+    final cursor =
+        (await _db
+                .customSelect(
+                  'SELECT coalesce(max(cursor),0) AS n FROM library_sync_feed',
+                )
+                .getSingle())
+            .read<int>('n');
+    return LibrarySyncBaseline(
+      libraryId: state.read<String>('library_id'),
+      sourceReplicaId: state.read<String>('replica_id'),
+      snapshotId: snapshotId,
+      cursor: cursor,
+      versions: {for (final entry in units.entries) entry.key: entry.value.$1},
+      tombstones: {
+        for (final entry in units.entries)
+          if (entry.value.$2 == null) entry.key,
+      },
+    );
+  }
+
+  Future<int> progress(String peerReplicaId) async {
+    libraryReplicaId(peerReplicaId);
+    await _state();
+    final rows = await _db
+        .customSelect(
+          'SELECT cursor FROM library_sync_progress WHERE peer_id=?',
+          variables: [Variable(peerReplicaId)],
+        )
+        .get();
+    return rows.isEmpty ? 0 : rows.single.read<int>('cursor');
+  }
+
+  Future<void> advanceProgress(
+    String peerReplicaId, {
+    required int expected,
+    required int next,
+  }) async {
+    libraryReplicaId(peerReplicaId);
+    if (expected < 0 || next < expected)
+      throw ArgumentError('Invalid synchronization progress');
+    await _db.transaction(() async {
+      final current = await progress(peerReplicaId);
+      if (current == next) return;
+      if (current != expected)
+        throw const StorageFailure('sync_progress_changed');
+      await _db.customStatement(
+        'INSERT INTO library_sync_progress(peer_id,cursor) VALUES(?,?) ON CONFLICT(peer_id) DO UPDATE SET cursor=excluded.cursor',
+        [peerReplicaId, next],
+      );
+    });
+  }
 
   Future<QueryRow> _state() async {
     if (_repo._closed) throw const StorageFailure('library_closed');
@@ -163,10 +250,6 @@ final class LibraryIncremental {
     if (await _rawCursor() == cursor) return;
     await _db.transaction(() async {
       final start = await _state();
-      final groups = await LibraryChangeJournal(
-        replication,
-      ).after(start.read<int>('raw_cursor'), limit: 256);
-      if (groups.isEmpty) return;
       var units = await _units();
       var contents =
           LibraryReplicaContents._(start.read<String>('library_id'), {
@@ -175,65 +258,78 @@ final class LibraryIncremental {
           });
       var sequence = start.read<int>('local_sequence');
       final pending = <LibrarySqlChangeGroup>[];
-      for (final group in groups) {
-        pending.add(group);
-        LibraryReplicaContents next;
-        try {
-          next = contents.replaying(pending, _repo._clock().toUtc());
-        } on StorageFailure catch (error) {
-          // Ordered audit writes can temporarily reference a not-yet-persisted
-          // fact. Keep that source group intact until its matching write exists.
-          if (error.code != 'invalid_backup' || group == groups.last) rethrow;
-          continue;
-        }
-        final keys = {...contents.units.keys, ...next.units.keys};
-        final edits = [
-          for (final key in keys)
-            if (_syncJson(contents.units[key]) != _syncJson(next.units[key]))
-              LibrarySyncEdit(
-                key: key,
-                baseVersion: units[key]?.$1,
-                content: next.units[key],
-              ),
-        ];
-        if (edits.isNotEmpty) {
-          final operation = pending.length == 1
-              ? group.operationId
-              : crypto.sha256
-                    .convert(
-                      utf8.encode(
-                        jsonEncode(pending.map((g) => g.operationId).toList()),
-                      ),
-                    )
-                    .toString();
-          final batch = LibrarySyncBatch(
-            libraryId: start.read<String>('library_id'),
-            sourceReplicaId: start.read<String>('replica_id'),
-            operationId: operation,
-            sequence: ++sequence,
-            edits: edits,
-          );
-          for (final change in batch.changes) {
-            await _saveUnit(change.key, change.version, change.content);
-            units[change.key] = (change.version, change.content);
+      var scanCursor = start.read<int>('raw_cursor');
+      while (true) {
+        final groups = await LibraryChangeJournal(
+          replication,
+        ).after(scanCursor, limit: 256);
+        if (groups.isEmpty) break;
+        for (final group in groups) {
+          scanCursor = group.sequence;
+          pending.add(group);
+          LibraryReplicaContents next;
+          try {
+            next = contents.replaying(pending, _repo._clock().toUtc());
+          } on StorageFailure catch (error) {
+            // Ordered audit writes can temporarily reference a not-yet-persisted
+            // fact. Keep that source group intact until its matching write exists.
+            if (error.code != 'invalid_backup') rethrow;
+            continue;
+          }
+          final keys = {...contents.units.keys, ...next.units.keys};
+          final edits = [
+            for (final key in keys)
+              if (_syncJson(contents.units[key]) != _syncJson(next.units[key]))
+                LibrarySyncEdit(
+                  key: key,
+                  baseVersion: units[key]?.$1,
+                  content: next.units[key],
+                ),
+          ];
+          if (edits.isNotEmpty) {
+            final operation = pending.length == 1
+                ? group.operationId
+                : crypto.sha256
+                      .convert(
+                        utf8.encode(
+                          jsonEncode(
+                            pending.map((g) => g.operationId).toList(),
+                          ),
+                        ),
+                      )
+                      .toString();
+            final batch = LibrarySyncBatch(
+              libraryId: start.read<String>('library_id'),
+              sourceReplicaId: start.read<String>('replica_id'),
+              operationId: operation,
+              sequence: ++sequence,
+              edits: edits,
+            );
+            for (final change in batch.changes) {
+              await _saveUnit(change.key, change.version, change.content);
+              units[change.key] = (change.version, change.content);
+            }
+            await _db.customStatement(
+              "INSERT INTO library_sync_feed(source_id,operation_id,sequence,digest,payload,outcome) VALUES(?,?,?,?,?,'applied')",
+              [
+                batch.sourceReplicaId,
+                batch.operationId,
+                batch.sequence,
+                batch.digest,
+                jsonEncode(batch.toJson()),
+              ],
+            );
           }
           await _db.customStatement(
-            "INSERT INTO library_sync_feed(source_id,operation_id,sequence,digest,payload,outcome) VALUES(?,?,?,?,?,'applied')",
-            [
-              batch.sourceReplicaId,
-              batch.operationId,
-              batch.sequence,
-              batch.digest,
-              jsonEncode(batch.toJson()),
-            ],
+            'UPDATE library_sync_projection SET raw_cursor=?,local_sequence=? WHERE singleton=1',
+            [group.sequence, sequence],
           );
+          contents = next;
+          pending.clear();
         }
-        await _db.customStatement(
-          'UPDATE library_sync_projection SET raw_cursor=?,local_sequence=? WHERE singleton=1',
-          [group.sequence, sequence],
-        );
-        contents = next;
-        pending.clear();
+      }
+      if (pending.isNotEmpty) {
+        throw const StorageFailure('sync_projection_incomplete');
       }
     });
   }
@@ -284,3 +380,6 @@ final class LibraryIncremental {
     return result;
   }
 }
+
+bool _sameKeys(Set<LibrarySyncKey> a, Set<LibrarySyncKey> b) =>
+    a.length == b.length && a.containsAll(b);

@@ -5,20 +5,24 @@ extension LibraryIncrementalReceive on LibraryIncremental {
     String sourceReplicaId,
     String operationId, {
     String? digest,
+    int? expectedSequence,
   }) async {
     libraryReplicaId(sourceReplicaId);
     replicaOperationId(operationId);
     final state = await _state();
     final rows = await _db
         .customSelect(
-          'SELECT cursor,digest,outcome FROM library_sync_feed WHERE source_id=? AND operation_id=?',
+          'SELECT cursor,digest,outcome,sequence FROM library_sync_feed WHERE source_id=? AND operation_id=?',
           variables: [Variable(sourceReplicaId), Variable(operationId)],
         )
         .get();
     if (rows.isEmpty) return null;
     final row = rows.single;
-    if (digest != null && row.read<String>('digest') != digest)
+    if (digest != null && row.read<String>('digest') != digest ||
+        expectedSequence != null &&
+            row.read<int>('sequence') != expectedSequence) {
       throw const StorageFailure('sync_operation_conflict');
+    }
     return LibrarySyncReceipt(
       libraryId: state.read<String>('library_id'),
       receiverReplicaId: state.read<String>('replica_id'),
