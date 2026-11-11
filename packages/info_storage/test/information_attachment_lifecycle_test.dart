@@ -187,7 +187,19 @@ void main() {
       );
       final db = inspect();
       try {
-        expect(db.select('PRAGMA user_version').single.values.single, 46);
+        expect(db.select('PRAGMA user_version').single.values.single, 60);
+        expect(
+          db
+              .select('SELECT base_format FROM library_file_branch_format')
+              .single['base_format'],
+          46,
+        );
+        expect(
+          db.select(
+            "SELECT name FROM sqlite_master WHERE name IN ('server_runtime_state','library_replica_state','library_sync_projection')",
+          ),
+          isEmpty,
+        );
       } finally {
         db.close();
       }
@@ -215,7 +227,7 @@ void main() {
       );
       try {
         final backup = await target.backups.inspect(path, key);
-        expect(backup.formatVersion, 17);
+        expect(backup.formatVersion, 23);
         expect(backup.attachmentCount, 3);
         await target.backups.restore(backup);
         expect(

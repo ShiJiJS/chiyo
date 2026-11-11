@@ -120,6 +120,8 @@ extension LibraryIncrementalArchives on LibraryIncremental {
     if (rows.isEmpty) throw const StorageFailure('sync_change_missing');
     final batch = LibrarySyncBatch.decode(rows.single.read<String>('payload'));
     final versions = _deltaVersions(batch);
+    final contentFormat =
+        versions.any((v) => v.seriesId != v.reference.attachmentId) ? 23 : 22;
     final random = Random.secure();
     final key =
         'aim-recovery-v1:${base64Url.encode(List.generate(32, (_) => random.nextInt(256)))}';
@@ -127,7 +129,7 @@ extension LibraryIncrementalArchives on LibraryIncremental {
       path: path,
       recoveryKey: key,
       createdAt: _repo._clock().toUtc(),
-      formatVersion: 22,
+      formatVersion: contentFormat,
       tables: {
         'sync_delta': [
           {'payload': jsonEncode(batch.toJson())},
@@ -150,7 +152,7 @@ extension LibraryIncrementalArchives on LibraryIncremental {
           snapshotId: batch.digest,
           archiveDigest: await _repo.backups._restoreArchiveDigest(path),
           byteLength: await File(path).length(),
-          contentFormat: 22,
+          contentFormat: contentFormat,
         ),
         sourceReplicaId: batch.sourceReplicaId,
         operationId: batch.operationId,
@@ -187,7 +189,7 @@ extension LibraryIncrementalArchives on LibraryIncremental {
       transferKey,
     );
     try {
-      if (reader.formatVersion != 22 ||
+      if (reader.formatVersion != transfer.archive.contentFormat ||
           reader.tables.length != 1 ||
           reader.tables['sync_delta']?.length != 1) {
         throw const StorageFailure('unsupported_sync_format');

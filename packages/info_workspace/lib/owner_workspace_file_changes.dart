@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:info_core/info_core.dart' as core;
 import 'information_file_messages.dart';
 import 'owner_file_stages.dart';
+import 'owner_workspace_file_reads.dart';
 import 'package:info_core/builtin_information_definitions.dart';
 import 'workspace_source.dart';
 
@@ -194,10 +195,10 @@ class OwnerWorkspaceFileChanges {
         draft = restoring = await owner.beginInformationFileDraft();
         stage = await owner.stageRetainedInformationFile(
           draft,
-          core.InformationAttachmentRef(
-            field.attachment!.attachmentId,
-            c.restoreVersion!,
-          ),
+          await OwnerWorkspaceFileReads(
+            owner,
+            information,
+          ).reference(c.record, c.fieldKey, version: c.restoreVersion),
         );
       }
       final input = core.InformationDraftInput(

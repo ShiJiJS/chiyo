@@ -168,7 +168,7 @@ final class LibraryReplicaContents {
     }
     return {
       'format': InformationBackups._format,
-      'version': 22,
+      'version': 23,
       'createdAt': now.toUtc().toIso8601String(),
       'tables': tables,
       'attachments': attachments,
@@ -193,7 +193,7 @@ extension LibraryReplicationContents on LibraryReplication {
       );
       final normalized = {
         ...document,
-        'version': 22,
+        'version': 23,
         'tables': tables,
         'attachments': document['attachments'] ?? <Object?>[],
       };

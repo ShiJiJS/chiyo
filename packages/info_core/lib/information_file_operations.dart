@@ -47,9 +47,8 @@ final class InformationFileReceipt {
         fieldId.codeUnits.any((c) => c < 33) ||
         command.fieldId != null && command.fieldId != fieldId ||
         command.expected != null &&
-            (reference.attachmentId != command.expected!.attachmentId ||
-                reference.attachmentVersion <=
-                    command.expected!.attachmentVersion)) {
+            reference.attachmentVersion <=
+                command.expected!.attachmentVersion) {
       throw const FormatException('Invalid file receipt');
     }
   }

@@ -17,9 +17,15 @@ extension _MemoryImportOriginals on MemoryInformationRepository {
     for (final p in promotions) {
       final row = _importUploadData[p.upload.id];
       final bytes = row?.$2;
-      final latest = {..._informationFiles.keys, ...result.keys}
-          .where((r) => r.attachmentId == p.version.reference.attachmentId)
-          .fold(0, (n, r) => n > r.attachmentVersion ? n : r.attachmentVersion);
+      final latest = [..._informationFiles.values, ...result.values]
+          .map((value) => value.$1)
+          .where((old) => old.seriesId == p.version.seriesId)
+          .fold(
+            0,
+            (n, old) => n > old.reference.attachmentVersion
+                ? n
+                : old.reference.attachmentVersion,
+          );
       if (row == null ||
           row.$1.consumed ||
           bytes == null ||

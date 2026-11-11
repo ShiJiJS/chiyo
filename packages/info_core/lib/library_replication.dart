@@ -34,7 +34,7 @@ final class LibraryInitialTransfer {
     if (byteLength < 4096 ||
         byteLength > 256 * 1024 * 1024 ||
         contentFormat < 8 ||
-        contentFormat > 22) {
+        contentFormat > 23) {
       throw const FormatException('Unsupported initial library transfer');
     }
   }

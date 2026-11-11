@@ -163,12 +163,14 @@ extension OwnerInformationDrafts on OwnerAccess {
             draft.id,
             f.stageId!,
           );
-          final attachmentId = retain && old.kind == FieldKind.file
+          final previousId = retain && old.kind == FieldKind.file
               ? old.attachment!.attachmentId
-              : _service._secret();
-          final versions = await _attachments.informationAttachmentVersions(
-            attachmentId,
-          );
+              : null;
+          final versions = previousId == null
+              ? <InformationAttachmentVersion>[]
+              : await _attachments.informationAttachmentVersions(previousId);
+          final attachmentId = _service._secret();
+          final seriesId = versions.firstOrNull?.seriesId ?? attachmentId;
           final number =
               versions.fold<int>(
                 0,
@@ -184,6 +186,7 @@ extension OwnerInformationDrafts on OwnerAccess {
               stage.id,
               InformationAttachmentVersion(
                 reference: reference,
+                seriesId: seriesId,
                 originalName: stage.originalName,
                 mediaType: stage.mediaType,
                 byteLength: stage.byteLength,

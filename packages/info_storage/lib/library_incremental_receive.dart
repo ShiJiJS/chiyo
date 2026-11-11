@@ -405,6 +405,9 @@ extension LibraryIncrementalReceive on LibraryIncremental {
   }
 
   Future<void> _writeAttachment(InformationAttachmentVersion version) async {
+    if (version.seriesId != version.reference.attachmentId) {
+      await _repo._requireAdmissionFormat(_libraryFileBranchFormat);
+    }
     final ref = version.reference;
     final existing = await _db
         .customSelect(
@@ -415,12 +418,14 @@ extension LibraryIncrementalReceive on LibraryIncremental {
           ],
         )
         .get();
-    if (existing.isNotEmpty &&
-        InformationAttachmentVersion.fromPrivateJson(
-              decodeProtocolObject(existing.single.read<String>('metadata')),
-            ).sha256 !=
-            version.sha256) {
-      throw const StorageFailure('sync_immutable_file_changed');
+    if (existing.isNotEmpty) {
+      final previous = InformationAttachmentVersion.fromPrivateJson(
+        decodeProtocolObject(existing.single.read<String>('metadata')),
+      );
+      if (previous.sha256 != version.sha256 ||
+          previous.seriesId != version.seriesId) {
+        throw const StorageFailure('sync_immutable_file_changed');
+      }
     }
     final body = version.available
         ? "COALESCE((SELECT body FROM information_attachment_versions WHERE body IS NOT NULL AND json_extract(metadata,'\$.sha256')=? LIMIT 1),(SELECT body FROM library_sync_blobs WHERE digest=?))"

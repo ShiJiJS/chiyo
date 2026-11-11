@@ -88,6 +88,7 @@ const _libraryReplicationFormat = 56;
 const _libraryChangeJournalFormat = 57;
 const _libraryIncrementalFormat = 58;
 const _libraryDirectionalSyncFormat = 59;
+const _libraryFileBranchFormat = 60;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -672,7 +673,8 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _libraryDirectionalSyncFormat) {
+      var captureOnOpen = false;
+      if (headerVersion > _libraryFileBranchFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -687,52 +689,76 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryDirectionalSyncFormat ||
+            (marker.single['version'] as int) > _libraryFileBranchFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
         final storedFormat = marker.single['version'] as int;
+        var capabilityFormat = storedFormat;
+        final fileBranchState = native.select(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='library_file_branch_format'",
+        );
+        if (storedFormat == _libraryFileBranchFormat) {
+          if (fileBranchState.length != 1)
+            throw const StorageFailure('unsupported_schema');
+          final base = native.select(
+            'SELECT singleton,base_format FROM library_file_branch_format',
+          );
+          if (base.length != 1 ||
+              base.single['singleton'] != 1 ||
+              base.single['base_format'] is! int ||
+              (base.single['base_format'] as int) < 17 ||
+              (base.single['base_format'] as int) >
+                  _libraryDirectionalSyncFormat) {
+            throw const StorageFailure('unsupported_schema');
+          }
+          capabilityFormat = base.single['base_format'] as int;
+        } else if (fileBranchState.isNotEmpty) {
+          throw const StorageFailure('unsupported_schema');
+        }
         final hasServerState = native
             .select(
               "SELECT name FROM sqlite_master WHERE type='table' AND name='server_runtime_state'",
             )
             .isNotEmpty;
-        if (hasServerState != (storedFormat >= _serverRuntimeLibraryFormat)) {
+        if (hasServerState !=
+            (capabilityFormat >= _serverRuntimeLibraryFormat)) {
           throw const StorageFailure('unsupported_schema');
         }
         final replicaTables = native.select(
           "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_replica_state','library_replica_receipts')",
         );
-        if ((storedFormat >= _libraryReplicationFormat &&
+        if ((capabilityFormat >= _libraryReplicationFormat &&
                 replicaTables.length != 2) ||
-            (storedFormat < _libraryReplicationFormat &&
+            (capabilityFormat < _libraryReplicationFormat &&
                 replicaTables.isNotEmpty)) {
           throw const StorageFailure('unsupported_schema');
         }
         final journalTables = native.select(
           "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_sync_change_state','library_sync_dirty','library_sync_changes')",
         );
-        if ((storedFormat >= _libraryChangeJournalFormat &&
+        if ((capabilityFormat >= _libraryChangeJournalFormat &&
                 journalTables.length != 3) ||
-            (storedFormat < _libraryChangeJournalFormat &&
+            (capabilityFormat < _libraryChangeJournalFormat &&
                 journalTables.isNotEmpty)) {
           throw const StorageFailure('unsupported_schema');
         }
         final incrementalTables = native.select(
           "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_sync_projection','library_sync_units','library_sync_feed','library_sync_progress','library_sync_blobs')",
         );
-        if ((storedFormat >= _libraryIncrementalFormat &&
+        if ((capabilityFormat >= _libraryIncrementalFormat &&
                 incrementalTables.length != 5) ||
-            (storedFormat < _libraryIncrementalFormat &&
+            (capabilityFormat < _libraryIncrementalFormat &&
                 incrementalTables.isNotEmpty)) {
           throw const StorageFailure('unsupported_schema');
         }
-        if (storedFormat >= _libraryDirectionalSyncFormat &&
+        if (capabilityFormat >= _libraryDirectionalSyncFormat &&
             !native
                 .select('PRAGMA table_info(library_sync_progress)')
                 .any((row) => row['name'] == 'uploaded_cursor')) {
           throw const StorageFailure('unsupported_schema');
         }
+        captureOnOpen = capabilityFormat >= _libraryChangeJournalFormat;
         // Preserve the portable-fill boundary across older receipt/layout
         // formats. Format38 adds local recovery-key operation receipts.
         openingFormat =
@@ -770,7 +796,7 @@ class EncryptedInformationRepository
         db = _InformationDatabase(NativeDatabase.opened(native), openingFormat);
         native = null; // Drift owns the handle now.
       }
-      if (openingFormat >= _libraryChangeJournalFormat) {
+      if (captureOnOpen) {
         // Open/migrate first: beforeOpen itself must not recursively open a
         // transaction through the capture wrapper. Resume before maintenance
         // writes in _load so restart cannot leave ungrouped committed changes.
@@ -1523,6 +1549,31 @@ class EncryptedInformationRepository
         .customSelect('SELECT version FROM library_format WHERE singleton=1')
         .getSingle();
     final stored = marker.read<int>('version');
+    if (stored == _libraryFileBranchFormat &&
+        format < _libraryFileBranchFormat) {
+      final state = await _db
+          .customSelect(
+            'SELECT base_format FROM library_file_branch_format WHERE singleton=1',
+          )
+          .getSingle();
+      if (state.read<int>('base_format') < format) {
+        await _db.customStatement(
+          'UPDATE library_file_branch_format SET base_format=? WHERE singleton=1',
+          [format],
+        );
+      }
+    } else if (stored < _libraryFileBranchFormat &&
+        format == _libraryFileBranchFormat) {
+      // File families are independent of optional server/sync tables. Keep
+      // their exact prior capabilities rather than pretending those exist.
+      await _db.customStatement(
+        'CREATE TABLE library_file_branch_format(singleton INTEGER PRIMARY KEY CHECK(singleton=1),base_format INTEGER NOT NULL)',
+      );
+      await _db.customStatement(
+        'INSERT INTO library_file_branch_format VALUES(1,?)',
+        [stored],
+      );
+    }
     final version = max(stored, format);
     if (stored < version) {
       await _db.customStatement(

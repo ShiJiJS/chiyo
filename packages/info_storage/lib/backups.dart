@@ -478,6 +478,9 @@ class InformationBackups {
         (r) => (_backupJson(r)['account'] as String? ?? '').isNotEmpty,
       );
       final longTermAttachments = versions.isNotEmpty;
+      final fileBranches = versions.any(
+        (v) => v.seriesId != v.reference.attachmentId,
+      );
       final describedFileVersions = versions.any(
         (v) => v.label.isNotEmpty || v.sourceNote.isNotEmpty,
       );
@@ -499,6 +502,7 @@ class InformationBackups {
                   .get())
               .isNotEmpty;
       final extendedColumns =
+          fileBranches ||
           sessionSshGrants ||
           orderedLibrary ||
           directoryRecycle ||
@@ -510,7 +514,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = sessionSshGrants
+        formatVersion = fileBranches
+            ? 23
+            : sessionSshGrants
             ? 22
             : orderedLibrary
             ? 21
@@ -536,7 +542,7 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (sessionSshGrants || orderedLibrary
+            in (fileBranches || sessionSshGrants || orderedLibrary
                     ? _v21Columns
                     : directoryRecycle
                     ? _v20Columns
@@ -646,6 +652,7 @@ class InformationBackups {
                 'library_sync_feed',
                 'library_sync_progress',
                 'library_sync_blobs',
+                'library_file_branch_format',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -941,6 +948,7 @@ class InformationBackups {
                     'library_sync_feed',
                     'library_sync_progress',
                     'library_sync_blobs',
+                    'library_file_branch_format',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -1070,6 +1078,9 @@ class InformationBackups {
             _sshSessionUseLibraryFormat,
           );
         }
+        if (contents.formatVersion >= 23) {
+          await _repository._requireAdmissionFormat(_libraryFileBranchFormat);
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
@@ -1153,6 +1164,7 @@ class InformationBackups {
           20,
           21,
           22,
+          23,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1175,7 +1187,7 @@ class InformationBackups {
       12 || 13 || 14 => _v12Columns,
       15 || 16 || 17 || 18 || 19 => _v15Columns,
       20 => _v20Columns,
-      21 || 22 => _v21Columns,
+      21 || 22 || 23 => _v21Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1213,6 +1225,9 @@ class InformationBackups {
     final attachments = v8
         ? _AttachmentBackupManifest.parse(jsonEncode(decoded)).versions
         : <InformationAttachmentVersion>[];
+    if ((decoded['version'] as int) < 23 &&
+        attachments.any((v) => v.seriesId != v.reference.attachmentId))
+      invalid();
     final available = attachments
         .where((v) => v.available)
         .map((v) => v.reference)
