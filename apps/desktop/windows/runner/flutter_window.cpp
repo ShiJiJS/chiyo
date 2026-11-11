@@ -7,6 +7,7 @@
 #include <flutter/standard_method_codec.h>
 #include "resource.h"
 #include "utils.h"
+#include "desktop_instance.h"
 #include "focused_fill_identity.h"
 
 #include "flutter/generated_plugin_registrant.h"
@@ -323,6 +324,7 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (DesktopInstance::HandleActivation(hwnd, message, wparam, lparam)) return 1;
   if (pdf_previews_ && pdf_previews_->HandleMessage(message)) return 0;
   if (control_message_ != 0 && message == control_message_) {
     if (wparam != GetCurrentProcessId() || (lparam != 0 && lparam != 1)) return 0;
