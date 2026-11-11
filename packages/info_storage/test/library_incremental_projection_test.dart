@@ -19,6 +19,104 @@ sqlite.Database inspect(String root, TestKeyStore keys) {
 
 void main() {
   test(
+    'upload acknowledgements and pull progress remain independent across migration and restart',
+    () async {
+      final root = await Directory.systemTemp.createTemp('sync-two-cursors-');
+      final keys = TestKeyStore();
+      var repo = await EncryptedInformationRepository.open(root.path, keys);
+      var service = InformationService(repository: repo);
+      var incremental = LibraryIncremental(LibraryReplication(repo));
+      const peer =
+          'b'
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      try {
+        await service.owner.exportLibrary(incremental.start);
+        await incremental.advanceProgress(peer, expected: 0, next: 7);
+        await incremental.advanceProgress(
+          peer,
+          expected: 0,
+          next: 2,
+          outgoing: true,
+        );
+        expect(await incremental.progress(peer), 7);
+        expect(await incremental.progress(peer, outgoing: true), 2);
+        await expectLater(
+          incremental.advanceProgress(
+            peer,
+            expected: 1,
+            next: 3,
+            outgoing: true,
+          ),
+          throwsA(
+            isA<StorageFailure>().having(
+              (e) => e.code,
+              'code',
+              'sync_progress_changed',
+            ),
+          ),
+        );
+        final observer = inspect(root.path, keys);
+        try {
+          final before = observer
+              .select('PRAGMA data_version')
+              .single
+              .values
+              .single;
+          await incremental.advanceProgress(
+            peer,
+            expected: 0,
+            next: 2,
+            outgoing: true,
+          );
+          await incremental.advanceProgress(peer, expected: 0, next: 7);
+          expect(
+            observer.select('PRAGMA data_version').single.values.single,
+            before,
+          );
+        } finally {
+          observer.close();
+        }
+        await service.close();
+        await repo.close();
+        // Reproduce the prior development format, which had only a pull cursor.
+        final previous = inspect(root.path, keys);
+        try {
+          previous.execute(
+            'ALTER TABLE library_sync_progress DROP COLUMN uploaded_cursor',
+          );
+          previous.execute('UPDATE library_format SET version=58');
+          previous.execute('PRAGMA user_version=58');
+        } finally {
+          previous.close();
+        }
+        repo = await EncryptedInformationRepository.open(root.path, keys);
+        service = InformationService(repository: repo);
+        incremental = LibraryIncremental(LibraryReplication(repo));
+        await service.owner.exportLibrary(incremental.start);
+        expect(await incremental.progress(peer), 7);
+        expect(await incremental.progress(peer, outgoing: true), 0);
+        await incremental.advanceProgress(
+          peer,
+          expected: 0,
+          next: 4,
+          outgoing: true,
+        );
+        await service.close();
+        await repo.close();
+        repo = await EncryptedInformationRepository.open(root.path, keys);
+        service = InformationService(repository: repo);
+        incremental = LibraryIncremental(LibraryReplication(repo));
+        expect(await incremental.progress(peer), 7);
+        expect(await incremental.progress(peer, outgoing: true), 4);
+      } finally {
+        await service.close();
+        await repo.close();
+        await root.delete(recursive: true);
+      }
+    },
+  );
+
+  test(
     'comparison catches up all local changes beyond one journal page',
     () async {
       final root = await Directory.systemTemp.createTemp(

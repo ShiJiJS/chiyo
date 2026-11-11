@@ -87,6 +87,7 @@ const _copyCleanupLibraryFormat = 55;
 const _libraryReplicationFormat = 56;
 const _libraryChangeJournalFormat = 57;
 const _libraryIncrementalFormat = 58;
+const _libraryDirectionalSyncFormat = 59;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -671,7 +672,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _libraryIncrementalFormat) {
+      if (headerVersion > _libraryDirectionalSyncFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -686,7 +687,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryIncrementalFormat ||
+            (marker.single['version'] as int) > _libraryDirectionalSyncFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -724,6 +725,12 @@ class EncryptedInformationRepository
                 incrementalTables.length != 5) ||
             (storedFormat < _libraryIncrementalFormat &&
                 incrementalTables.isNotEmpty)) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        if (storedFormat >= _libraryDirectionalSyncFormat &&
+            !native
+                .select('PRAGMA table_info(library_sync_progress)')
+                .any((row) => row['name'] == 'uploaded_cursor')) {
           throw const StorageFailure('unsupported_schema');
         }
         // Preserve the portable-fill boundary across older receipt/layout

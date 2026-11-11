@@ -99,26 +99,30 @@ final class LibraryInitialReceipt {
 }
 
 String libraryReplicaId(Object? value) {
-  if (value is! String || !RegExp(r'^[A-Za-z0-9_-]{32}$').hasMatch(value))
+  if (value is! String || !RegExp(r'^[A-Za-z0-9_-]{32}$').hasMatch(value)) {
     throw const FormatException('Invalid library identity');
+  }
   return value;
 }
 
 String replicaOperationId(Object? value) {
-  if (value is! String || !RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(value))
+  if (value is! String || !RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(value)) {
     throw const FormatException('Invalid library operation');
+  }
   return value;
 }
 
 String replicaDigest(Object? value) {
-  if (value is! String || !RegExp(r'^[0-9a-f]{64}$').hasMatch(value))
+  if (value is! String || !RegExp(r'^[0-9a-f]{64}$').hasMatch(value)) {
     throw const FormatException('Invalid transfer digest');
+  }
   return value;
 }
 
 void _envelope(Map<String, dynamic> value, Set<String> fields) {
   if (value['wireVersion'] != 1 ||
       value.length != fields.length + 1 ||
-      !fields.every(value.containsKey))
+      !fields.every(value.containsKey)) {
     throw const FormatException('Unsupported library replication format');
+  }
 }

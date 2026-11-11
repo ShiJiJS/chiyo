@@ -7,6 +7,27 @@ import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_desktop.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/zhiyu_app.dart';
+import 'package:info_desktop/workspace/workspace_sync.dart';
+
+class _Sync extends ChangeNotifier implements WorkspaceSync {
+  @override
+  bool enabled = false;
+  @override
+  bool busy = false;
+  @override
+  bool needsReview = false;
+  @override
+  Object? failure;
+  @override
+  DateTime? updatedAt;
+  int calls = 0;
+  @override
+  Future<void> synchronize() async {
+    calls++;
+  }
+
+  void refresh() => notifyListeners();
+}
 
 class _Source extends SampleWorkspaceSource {
   bool disposed = false;
@@ -31,6 +52,60 @@ class _Desktop implements WorkspaceDesktop {
 }
 
 void main() {
+  testWidgets(
+    'the shared toolbar reflects local sync without replacing the current library page',
+    (t) async {
+      t.view.physicalSize = const Size(1440, 900);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      final source = _Source(), sync = _Sync();
+      addTearDown(source.dispose);
+      addTearDown(sync.dispose);
+      await t.pumpWidget(
+        WorkspaceApp(source: source, windowTitle: '合成本地资料库', sync: sync),
+      );
+      await t.pumpAndSettle();
+      final controller = t
+          .widget<LibraryPage>(find.byType(LibraryPage))
+          .controller;
+      const key = ValueKey('workspace-sync');
+      expect(find.byKey(key), findsNothing);
+      sync.enabled = true;
+      sync.refresh();
+      await t.pump();
+      await t.tap(find.byKey(key));
+      expect(sync.calls, 1);
+      sync.busy = true;
+      sync.refresh();
+      await t.pump();
+      expect(
+        find.descendant(
+          of: find.byKey(key),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+      expect(t.widget<TextButton>(find.byKey(key)).onPressed, isNull);
+      sync.busy = false;
+      sync.needsReview = true;
+      sync.refresh();
+      await t.pump();
+      expect(find.text('同步 · 需处理冲突'), findsOneWidget);
+      sync.failure = StateError('synthetic connection unavailable');
+      sync.refresh();
+      await t.pump();
+      expect(find.text('同步失败，重试'), findsOneWidget);
+      expect(
+        t.widget<LibraryPage>(find.byType(LibraryPage)).controller,
+        same(controller),
+      );
+      expect(find.byType(LibraryPage), findsOneWidget);
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+    },
+  );
+
   testWidgets(
     'source replacement releases old projections without owning services',
     (t) async {

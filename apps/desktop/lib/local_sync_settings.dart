@@ -13,10 +13,12 @@ class LocalSyncSettings extends StatefulWidget {
     required this.onBack,
     required this.onSaved,
     required this.onBusy,
+    this.beforeSave,
   });
   final LocalLibrarySync sync;
   final VoidCallback onBack;
   final ValueChanged<bool> onSaved, onBusy;
+  final Future<void> Function()? beforeSave;
   @override
   State<LocalSyncSettings> createState() => _LocalSyncSettingsState();
 }
@@ -74,6 +76,8 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
     RemoteFailure(code: 'unsupported_sync') => '服务器版本暂不支持资料同步，请先更新服务器。',
     RemoteFailure(code: 'sync_pending_other_library') =>
       '上次同步还未完成，请先恢复原连接并核对结果。',
+    RemoteFailure(code: 'sync_base_changed') =>
+      '资料库的同步记录与当前连接不一致。资料已保留，请先备份，再使用空目标重新建立同步。',
     RemoteFailure(code: 'sync_transfer_expired') => '上次传输已过期，原资料没有被覆盖。请重新准备同步。',
     _ => '尚未确认同步完成，可以重试。已有资料会保留。',
   };
@@ -86,6 +90,7 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
     });
     widget.onBusy(true);
     try {
+      await widget.beforeSave?.call();
       if (_enabled) {
         final address = _address.text.trim();
         final uri = Uri.tryParse(address);

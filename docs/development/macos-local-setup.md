@@ -28,7 +28,15 @@ cd packages/info_core
 ../../scripts/dev-macos.sh dart test
 ```
 
-正常客户端连接独立服务器，接入与维护见 [服务说明](../../apps/server/README.md) 和 [维护说明](../../apps/server/OPERATIONS.md)。界面隔离预览使用 `./scripts/dev-macos.sh preview`，不替代正常客户端的运行验证。
+正常客户端支持加密本地库及可选服务器同步，已有服务器连接也可继续使用。接入与维护见 [服务说明](../../apps/server/README.md) 和 [维护说明](../../apps/server/OPERATIONS.md)。界面隔离预览使用 `./scripts/dev-macos.sh preview`，不替代正常客户端的运行验证。
+
+本地同步的自动验证使用临时 SQLCipher 库、独立 HTTPS 服务及合成密钥，不连接 NAS，也不使用系统钥匙串。可在 `apps/desktop` 运行：
+
+```sh
+../../scripts/dev-macos.sh flutter test test/local_library_sync_test.dart test/local_sync_settings_test.dart test/workspace_app_test.dart test/remote_library_cache_test.dart
+```
+
+其中定时同步通过可控计时器触发，不必等待一分钟；中断测试保留原操作、加密传输文件和独立上传/拉取进度。仅有这些测试通过不代表统一原生界面验收或正式安装已经完成。
 
 ## 构建与接入
 

@@ -271,6 +271,34 @@ final class LibraryIncrementalClient {
         : _confirmedDelta(result['receipt'], transfer);
   }
 
+  /// Check the business operation before exporting a new encrypted file. The
+  /// digest includes the sequence and every change; no archive or field value
+  /// is sent merely to check a previously acknowledged operation.
+  Future<LibrarySyncReceipt?> receiptFor(LibrarySyncBatch batch) async {
+    if (batch.libraryId != identity.libraryId) {
+      throw const RemoteFailure('sync_base_changed');
+    }
+    final result = await _client.request(
+      'GET',
+      '$_base/changes/receipts/${batch.sourceReplicaId}/${batch.operationId}',
+    );
+    _v2(result);
+    if (result['receipt'] == null) return null;
+    final receipt = _decode(
+      () => LibrarySyncReceipt.fromJson(
+        Map<String, dynamic>.from(result['receipt'] as Map),
+      ),
+    );
+    if (receipt.libraryId != batch.libraryId ||
+        receipt.receiverReplicaId != identity.replicaId ||
+        receipt.sourceReplicaId != batch.sourceReplicaId ||
+        receipt.operationId != batch.operationId ||
+        receipt.digest != batch.digest) {
+      throw const RemoteFailure('sync_operation_conflict');
+    }
+    return receipt;
+  }
+
   Future<LibraryInitialReceipt?> initialReceipt(
     String operation,
     LibraryInitialTransfer transfer,

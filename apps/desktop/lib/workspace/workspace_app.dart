@@ -3,6 +3,7 @@ import 'library_widgets.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'remote_workspace_source.dart';
+import 'workspace_sync.dart';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
 import '../desktop_controls.dart';
@@ -35,6 +36,7 @@ class WorkspaceApp extends StatelessWidget {
     super.key,
     required this.source,
     required this.windowTitle,
+    this.sync,
     this.initialSelection,
     this.initialQuery,
     this.pageBuilder,
@@ -45,6 +47,7 @@ class WorkspaceApp extends StatelessWidget {
     this.onConnectionSettingsVisible,
   });
   final WorkspaceSource source;
+  final WorkspaceSync? sync;
   final Widget Function(BuildContext context, VoidCallback onCancel)?
   connectionBuilder;
   final ValueListenable<int>? connectionSettingsRequests;
@@ -59,6 +62,7 @@ class WorkspaceApp extends StatelessWidget {
   Widget build(BuildContext context) => _WorkspaceSession(
     key: ValueKey((source, desktop)),
     source: source,
+    sync: sync,
     windowTitle: windowTitle,
     initialSelection: initialSelection,
     initialQuery: initialQuery,
@@ -78,6 +82,7 @@ class _WorkspaceSession extends StatefulWidget {
     super.key,
     required this.source,
     required this.windowTitle,
+    this.sync,
     this.initialSelection,
     this.initialQuery,
     this.pageBuilder,
@@ -88,6 +93,7 @@ class _WorkspaceSession extends StatefulWidget {
     this.onConnectionSettingsVisible,
   });
   final WorkspaceSource source;
+  final WorkspaceSync? sync;
   final Widget Function(BuildContext context, VoidCallback onCancel)?
   connectionBuilder;
   final ValueListenable<int>? connectionSettingsRequests;
@@ -455,6 +461,9 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     );
   }
 
+  WorkspaceSync? get _synchronization =>
+      widget.sync ?? (_source is RemoteWorkspaceSource ? _source.cache : null);
+
   Widget _buildApp() => ZhiyuApp(
     controller: _controller,
     windowTitle: widget.windowTitle,
@@ -463,11 +472,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     trailingBuilder: (context) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_source is RemoteWorkspaceSource)
+        if (_synchronization case final cache?)
           ListenableBuilder(
-            listenable: _source.cache,
+            listenable: cache,
             builder: (context, _) {
-              final cache = _source.cache;
+              if (!cache.enabled) return const SizedBox.shrink();
               final at = cache.updatedAt;
               return TextButton.icon(
                 key: const ValueKey('workspace-sync'),
@@ -480,12 +489,20 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                           /* shown below */
                         }
                       },
-                icon: const Icon(Icons.sync, size: 18),
+                icon: cache.busy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync, size: 18),
                 label: Text(
                   cache.busy
                       ? '同步中…'
                       : cache.failure != null
                       ? '同步失败，重试'
+                      : cache.needsReview
+                      ? '同步 · 需处理冲突'
                       : at == null
                       ? '同步'
                       : '同步 · 更新于 ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
