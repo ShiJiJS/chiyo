@@ -28,6 +28,8 @@ Windows 固定安装位置为 `C:\Software\AgentInfoManage`：`current` 保存�
 
 `clean-windows-artifacts.ps1` 复核外部安装和 ZIP 后，清理项目中的旧包、桌面 build、Dart 生成缓存及所属 QA 编译输出。它支持 `-WhatIf`。当前安装及正在使用的产物、用户资料库、密钥、恢复备份、已配置的独立 Codex 运行目录、共享 SDK 和依赖缓存分别管理。
 
+SDK 工具的可执行文件可能位于共享 SDK，进程路径不能反映其正在使用的工作目录。已知有此类工具仍在运行时，用 `-KeepPath @('apps/desktop/build', 'apps/desktop/.dart_tool')` 显式保留对应目录；路径相对当前 checkout，也可使用 checkout 内的绝对路径。缺少 `build` 根目录的独立 checkout 仍可清理其他已生成缓存。
+
 开发截图、历史日志和一次性证据不作为长期仓库资料；任务产物放在被 Git 忽略的 `build/` 下，用完清理。当前包的完整性清单和安装核对信息随包保留，避免把历史截图当作当前版本的运行验收。
 
 ## 使用和接入
