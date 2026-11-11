@@ -3,6 +3,7 @@ import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/automatic_connection.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/owner_client.dart';
+import 'package:info_remote/private_connection_files.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -33,7 +34,10 @@ void main() {
         (await AgentConnectionProfile.read(file)).deviceToken,
         agent.deviceToken,
       );
-      expect(await file.readAsString(), isNot(contains(owner.token)));
+      expect(
+        String.fromCharCodes(await file.readAsBytes()),
+        isNot(contains(owner.token)),
+      );
       // Unreadable/malformed owner data cannot be consulted by Agent discovery.
       final ownerFile = File('${file.parent.parent.path}/connection.json');
       await ownerFile.writeAsString('not an owner profile');
@@ -46,19 +50,19 @@ void main() {
         throwsA(isA<RemoteFailure>()),
       );
       final pointer = File('${root.path}/active.json');
-      final original = await pointer.readAsString();
+      final original = (await PrivateConnectionFiles.read(pointer))!;
       for (final invalid in [
-        '{"version":1,"generation":"../foreign"}',
-        '{"version":1,"generation":"${'a' * 32}","role":"owner"}',
-        '{"version":1,"generation":"${'a' * 32}"}',
+        {'version': 1, 'generation': '../foreign'},
+        {'version': 1, 'generation': 'a' * 32, 'role': 'owner'},
+        {'version': 1, 'generation': 'a' * 32},
       ]) {
-        await pointer.writeAsString(invalid);
+        await PrivateConnectionFiles.write(pointer, invalid);
         await expectLater(
           discoverAgentConnection(environment: env),
           throwsA(isA<RemoteFailure>()),
         );
       }
-      await pointer.writeAsString(original);
+      await PrivateConnectionFiles.write(pointer, original);
       if (!Platform.isWindows) {
         final generation = file.parent.parent;
         final retained = '${root.path}/retained';
