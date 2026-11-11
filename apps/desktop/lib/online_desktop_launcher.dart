@@ -243,7 +243,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       });
       // Retiring the old projection happens after widgets have released it;
       // its cleanup cannot turn a successfully adopted connection into failure.
-      await WidgetsBinding.instance.endOfFrame;
+      await _settleWorkspaceFrame();
       if (old != null) unawaited(old.dispose().catchError((Object _) {}));
       if (!mounted || _desktop.quitting) return;
       unawaited(_desktop.bind(candidate));
@@ -408,10 +408,21 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     // coordinators close. This callback has no server/session stop capability.
     if (mounted) {
       setState(() {});
-      await WidgetsBinding.instance.endOfFrame;
+      await _settleWorkspaceFrame();
     }
     await _ownerMaintenance;
     await _source?.dispose();
+  }
+
+  Future<void> _settleWorkspaceFrame() async {
+    final binding = WidgetsBinding.instance;
+    if (!binding.framesEnabled || _desktop.windowHidden) return;
+    // An occluded or minimized Mac window may stop receiving frames while
+    // still marked visible. Quitting has already gated further workspace work.
+    await binding.endOfFrame.timeout(
+      const Duration(milliseconds: 250),
+      onTimeout: () {},
+    );
   }
 
   @override

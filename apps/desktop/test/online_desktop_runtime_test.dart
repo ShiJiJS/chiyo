@@ -114,7 +114,7 @@ Future<(String, Map<String, dynamic>)> _request(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
-    'normal online launcher hides, routes a real request notification, quits without ending CLI access and reconnects with the same profile',
+    'online launcher quits without a Flutter frame or ending CLI access, and reconnects with the same profile',
     (t) async {
       final previous = HttpOverrides.current;
       HttpOverrides.global = _Http();
@@ -188,8 +188,27 @@ void main() {
               .state,
           AccessRequestState.pending,
         );
+        // An occluded window can stop delivering frames while the native
+        // process still receives a quit event. Keep running I/O and timers.
+        for (final state in [
+          AppLifecycleState.inactive,
+          AppLifecycleState.hidden,
+          AppLifecycleState.paused,
+        ]) {
+          t.binding.handleAppLifecycleStateChanged(state);
+        }
+        await t.pump();
+        expect(t.binding.framesEnabled, isFalse);
         await ui.resolve(() => native.events!(DesktopEvent.quit));
         expect(native.terminated, isTrue);
+        for (final state in [
+          AppLifecycleState.hidden,
+          AppLifecycleState.inactive,
+          AppLifecycleState.resumed,
+        ]) {
+          t.binding.handleAppLifecycleStateChanged(state);
+        }
+        await t.pump();
         expect(find.byType(WorkspaceApp), findsNothing);
         expect(runtime.closed, isTrue);
         expect(
