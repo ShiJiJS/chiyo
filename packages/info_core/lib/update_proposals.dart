@@ -253,8 +253,13 @@ class UpdateProposal {
     this.approvedReview,
     this.operationId,
     this.submissionDigest,
+    this.title = '',
+    this.agentName = '',
+    this.purpose = '',
+    this.externalChatId = '',
   });
   final String id, sessionBinding, chatLabel;
+  final String title, agentName, purpose, externalChatId;
   final DateTime createdAt;
   final UpdateInput input;
   final UpdateProposalState state;
@@ -267,6 +272,10 @@ class UpdateProposal {
     id: id,
     sessionBinding: sessionBinding,
     chatLabel: chatLabel,
+    title: title,
+    agentName: agentName,
+    purpose: purpose,
+    externalChatId: externalChatId,
     createdAt: createdAt,
     input: review.input,
     state: state,
@@ -283,6 +292,10 @@ class UpdateProposal {
     id: id,
     sessionBinding: sessionBinding,
     chatLabel: chatLabel,
+    title: title,
+    agentName: agentName,
+    purpose: purpose,
+    externalChatId: externalChatId,
     createdAt: createdAt,
     input: UpdateInput(input.itemId, input.baseVersion, const []),
     state: state,
@@ -295,6 +308,10 @@ class UpdateProposal {
     'id': id,
     'sessionBinding': sessionBinding,
     'chatLabel': chatLabel,
+    if (title.isNotEmpty) 'title': title,
+    if (agentName.isNotEmpty) 'agentName': agentName,
+    if (purpose.isNotEmpty) 'purpose': purpose,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
     'createdAt': createdAt.toUtc().toIso8601String(),
     'input': input.toJson(),
     'state': state.name,
@@ -316,6 +333,10 @@ class UpdateProposal {
     id: json['id'] as String,
     sessionBinding: json['sessionBinding'] as String,
     chatLabel: json['chatLabel'] as String,
+    title: json['title'] as String? ?? '',
+    agentName: json['agentName'] as String? ?? '',
+    purpose: json['purpose'] as String? ?? '',
+    externalChatId: json['externalChatId'] as String? ?? '',
     createdAt: DateTime.parse(json['createdAt'] as String),
     input: UpdateInput.fromPrivateJson(json['input'] as Map<String, dynamic>),
     state: UpdateProposalState.values.byName(json['state'] as String),

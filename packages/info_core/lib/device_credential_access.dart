@@ -297,6 +297,8 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
               r.fields.toSet(),
               r.createdAt,
               r.requestExpiresAt,
+              agentName: r.agentName,
+              externalChatId: r.externalChatId,
             )
             ..state = AccessRequestState.approved
             ..approvedAt = r.decidedAt

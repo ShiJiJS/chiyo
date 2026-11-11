@@ -359,11 +359,11 @@ void main() {
         );
         expect(find.textContaining('GH_TOKEN'), findsAtLeastNWidgets(1));
         await ui.tap('approval-credential-ttl');
-        await ui.until(() => find.text('30 分钟').evaluate().isNotEmpty);
+        await ui.until(() => find.text('4 小时').evaluate().isNotEmpty);
         expect(find.text('不限时（限本聊天）'), findsNothing);
-        await t.runAsync(() => t.tap(find.text('30 分钟').last));
+        await t.runAsync(() => t.tap(find.text('4 小时').last));
         await t.pump();
-        await ui.until(() => tokenApprovals.draft!.credentialMinutes == 30);
+        await ui.until(() => tokenApprovals.draft!.credentialMinutes == 240);
         await ui.tap('approval-approve');
         await ui.until(
           () => f!.runtime.service.owner.credentialUseRequests
@@ -377,7 +377,7 @@ void main() {
           recordedToken.credentialExpiresAt!.difference(
             recordedToken.decidedAt!,
           ),
-          const Duration(minutes: 30),
+          const Duration(hours: 4),
         );
         await t.pumpWidget(const SizedBox.shrink());
         await ui.resolve(() => source!.dispose());

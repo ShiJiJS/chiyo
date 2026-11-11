@@ -8,6 +8,7 @@ import 'library_credential_lifecycle.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 import 'record_mutation.dart';
+import 'recycled_attachment_preview.dart';
 import 'library_batch_recycle_dialog.dart';
 
 Future<WorkspaceRecordReceipt?> showLibraryRecycle(
@@ -224,8 +225,22 @@ class _RecycleDialogState extends State<_RecycleDialog> {
                         style: TextStyle(color: _purge ? c.danger : c.muted),
                       ),
                       const SizedBox(height: 20),
+                      if (!deleting && !_purge && widget.entry!.wholeItem)
+                        Text(
+                          '恢复后位置：${directoryPath(_catalog!, _catalog!.directories.any((d) => d.id == _archive!.detail.record.directoryId) ? _archive!.detail.record.directoryId : null)}',
+                          style: libraryText(context, 13),
+                        ),
                       if (!deleting && !_purge)
-                        LibrarySnapshotView(archive: _archive!),
+                        LibrarySnapshotView(
+                          archive: _archive!,
+                          fileBuilder: widget.source is! WorkspaceRecycledFiles
+                              ? null
+                              : (key) => RecycledAttachmentPreview(
+                                  source: widget.source,
+                                  entryId: widget.entry!.id,
+                                  fieldKey: key,
+                                ),
+                        ),
                     ],
                   ],
                 ),
@@ -585,7 +600,7 @@ class _LibraryRecyclePageState extends State<LibraryRecyclePage> {
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      '${entry.wholeItem ? '整条资料' : '部分字段'} · ${entry.record.type.name} · 原目录：${entry.directoryName ?? '未分类'}\n回收于 ${entry.deletedAt.toIso8601String().substring(0, 10)}',
+                                      '${entry.wholeItem ? '整条资料' : '部分字段'} · ${entry.record.type.name} · 原目录：${entry.directoryName ?? (entry.record.directoryId == null ? '未分类' : '原目录已移除')}\n回收于 ${entry.deletedAt.toIso8601String().substring(0, 10)}',
                                       style: libraryText(
                                         context,
                                         13,

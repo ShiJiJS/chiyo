@@ -48,6 +48,17 @@ extension _CredentialSnapshotValidation on EncryptedInformationRepository {
         [m.credentialId, m.version, jsonEncode(m.toStorageJson())],
       );
     }
+    if ((await _db
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type='table' AND name='credential_material_snapshots'",
+            )
+            .get())
+        .isNotEmpty) {
+      await _db.customStatement(
+        "DELETE FROM credential_material_snapshots WHERE credential_id NOT IN (SELECT id FROM managed_credentials WHERE json_extract(payload,'\$.purgedAt') IS NULL) OR json_extract(payload,'\$.material.retiredAt')<=?",
+        [_clock().toUtc().subtract(const Duration(days: 30)).toIso8601String()],
+      );
+    }
   }
 
   Future<List<ManagedCredential>> _storedCredentials() async =>

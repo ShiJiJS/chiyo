@@ -529,6 +529,7 @@ class _MacFiles {
   static (String, String) path(String value) {
     if (!value.startsWith('/') ||
         value.contains('\x00') ||
+        value.split('/').any((part) => part == '.' || part == '..') ||
         value.length > 32768) {
       throw const BackupPublicationFailure('invalid_path');
     }

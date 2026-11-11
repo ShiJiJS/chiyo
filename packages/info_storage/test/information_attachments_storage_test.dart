@@ -543,7 +543,7 @@ void main() {
     },
   );
   test(
-    'full format17 round trip restores current and revision originals under recipient key',
+    'full format23 round trip restores current and revision originals under recipient key',
     () async {
       final old = await create();
       final current = await replace(old, [5, 4, 3, 2]);
@@ -558,7 +558,7 @@ void main() {
       );
       addTearDown(target.close);
       final preview = await target.backups.inspect(path, key);
-      expect(preview.formatVersion, 17);
+      expect(preview.formatVersion, 23);
       expect(preview.attachmentCount, 2);
       expect(preview.attachmentBytes, 7);
       expect(preview.revisionCount, 1);

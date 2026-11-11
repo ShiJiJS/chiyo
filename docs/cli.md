@@ -1,10 +1,20 @@
 # 通用 CLI 申请与等待
 
-当前 Mac 服务端版按 [服务器接入说明](../integrations/codex/REMOTE-INTEGRATION.md) 取得设备配置，通用入口为 `info --connection <配置路径>`；Codex 使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际已接通的能力以 `capabilities` 为准，当前开发进度见[执行记录](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/planning/server-multidevice/execution.md)。以下各功能的历史说明不代表本轮远程入口已全部完成。
+当前 Mac 服务端版在 App 保存服务器连接后自动准备并复用设备配置。通用入口 `info` 默认发现当前连接，`info --connection <配置路径>` 可固定独立目标；隔离配置可设置 `CHIYO_CONNECTION_DIRECTORY`，步骤见[服务器接入说明](../integrations/codex/REMOTE-INTEGRATION.md)。Codex 使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际已接通的能力以 `capabilities` 为准，当前开发进度见[执行记录](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/planning/server-multidevice/execution.md)。以下各功能的历史说明不代表本轮远程入口已全部完成。
 
 远程文字新增和修改提案已接通，沿用以下模板查询和 import/update 命令。每次提交给稳定 operationId，结果不确定时查询原操作；用户在正常 App 预览类型、目录和内容后一次保存整份。App 关闭不停止服务器，重开后可处理待办。文件、密码和密钥仍按各自能力标记接续，不能把材料去掉后改报成功。
 
 远程整理也沿用 `organize-request`、`organize-status`、`organize-tasks`、`organize-metadata`、`organize-submit`：先在 App 批准限定资料，再获取这次任务的分类元数据及版本，最后提交该范围内的分类和标签变动。不能仅凭目录查询改动分类，不能混入未批准资料或字段内容。结果在 App 的录入提案中只读查看；普通重启保留有效范围和原期限，已到期、撤销或聊天结束的任务不会恢复。
+
+## 提交主题和来源
+
+新版 `info` 和 `info-codex` 的申请需要服务具备 `submission-metadata.v1`。`--help` 或 `{"command":"help"}` 可在未连接时查看用法。
+
+所有新申请填写 `purpose`；`import-submit`、`update-submit`、`delete-submit`、`organize-request` 还必须有 `title`。例如“补齐 NAS 应用清单”，而不是只写条数。每次申请的 `agentName` 是实际提交者名称，`externalChatId` 是实际聊天标识；它们只作说明，不能代替私密会话证明。`info-codex` 自动提供 Codex 和当前聊天标识。通用 CLI 在 `session` 提供 `externalChatId`，每次申请提供 `agentName`，也可以单次明确提供聊天标识。
+
+标题、名称、聊天标识各最多200字、不含换行；用途最多2000字。不要将密码、Token、私钥或资料正文放入这些说明。模板例子中的主题和来源都是虚构值，提交时替换为当前任务的信息；具体 `items`／`update` 结构仍从当前插件查询。
+
+缺少或超长时返回 `invalid_request`、`errorCode:invalid_submission_metadata` 和按字段给出的 `fieldErrors`，补齐原意图后再提交。CLI 自动附 `submissionVersion:1`；直接调用新版 API 时也提供该标记，服务端按相同规则核对。旧传输和旧库缺少的字段保留为空，App 使用原用途和聊天说明，不伪填 Agent 名称或历史标题。修订待审内容保留原提案的主题和来源；批准范围和整份保存规则不变。
 
 ## 查询完整资料目录（Mac 开发分支，#83）
 
@@ -128,11 +138,11 @@ CLI 使用标准输入逐行 JSON，标准输出每行一个结果。保持同�
 
 ```json
 {"command":"catalog"}
-{"command":"session","chatLabel":"当前聊天的说明"}
-{"command":"request","operationId":"inspect-host-01","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
+{"command":"session","chatLabel":"当前聊天的说明","externalChatId":"example-current-chat"}
+{"command":"request","agentName":"Example Agent","operationId":"inspect-host-01","purpose":"检查服务器地址","fields":[{"itemId":"demo-server","fieldId":"host"}]}
 ```
 
-保存 `request` 返回的 `requestId`。返回值还包括创建时间 `createdAt` 和待审批到期时间 `requestExpiresAt`，均为 UTC。默认待审批 30 分钟；用户可以在桌面设置中调整新请求的有效期，已提交请求的截止时间保持不变。
+保存 `request` 返回的 `requestId`。返回值还包括创建时间 `createdAt` 和待审批到期时间 `requestExpiresAt`，均为 UTC。默认待审批 2 小时（设置可选30分钟、1/2/4/8/24小时）；用户可以在桌面设置中调整新请求的有效期，已提交请求的截止时间保持不变。
 
 Mac 新开发源码（#71，尚未交付到当前预览）支持 `information-request-operations.v1`。
 新接入应为每个申请意图指定 `operationId`：1–128 个 ASCII 字符，以字母或数字开头，
@@ -189,7 +199,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 
 授权仅包含用户批准时选中的字段，新增信息或字段需要另行申请。已经批准的请求不能再取消；如需停止已有访问，由用户撤销授权。
 
-用户可能只批准一部分，也可能改选其他信息项或补选字段。`claim` 返回的 `fields` 才是最终可读范围，不应继续假定原申请范围已全部批准。`expiresAt` 是本次授权固定的 UTC 到期时间；默认从批准时起 8 小时，用户可在批准前调整，重复领取或读取不会延长。`scopeNotice` 明确说明新增信息项或字段需要新申请。上述输出不包含实际访问凭据；凭据仍由 CLI 进程保管。
+用户可能只批准一部分，也可能改选其他信息项或补选字段。`claim` 返回的 `fields` 才是最终可读范围，不应继续假定原申请范围已全部批准。`expiresAt` 是本次授权固定的 UTC 到期时间；默认从批准时起 2 小时（可选2/4/8/24小时），用户可在批准前调整，重复领取或读取不会延长。`scopeNotice` 明确说明新增信息项或字段需要新申请。上述输出不包含实际访问凭据；凭据仍由 CLI 进程保管。
 
 放弃尚未处理的申请时可显式发送：
 
@@ -206,7 +216,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 `catalog` 的每条信息包含当前 `version`。选择目标及基础版本，通过标准输入提交明确操作：
 
 ```json
-{"command":"update-submit","update":{"itemId":"ITEM_ID","baseVersion":1,"description":"修订后的公开描述","changes":[{"operation":"correct","fieldId":"FIELD_ID","value":"修正后的值"}]}}
+{"command":"update-submit","agentName":"Example Agent","title":"修正服务器地址","purpose":"更新用户指出的地址变化","update":{"itemId":"ITEM_ID","baseVersion":1,"description":"修订后的公开描述","changes":[{"operation":"correct","fieldId":"FIELD_ID","value":"修正后的值"}]}}
 {"command":"update-status","proposalId":"PROPOSAL_ID"}
 ```
 
@@ -228,7 +238,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 {"protocolVersion":2,"command":"request-use","purpose":"查看技能仓库信息","credentials":[{"alias":"github_token","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
 ```
 
-首条launch供用户理解用途。通过原requestId查询status/wait，用户批准不会自动执行。credentialUse.approved及当前state为available时，使用授权固定15/30分钟，期间每个操作独立提交完整launch和唯一operationId，不逐命令再审批；普通字段独立默认8小时，可由用户缩短。复用不续期，新增未批凭据或使用方式需要新申请。
+首条launch供用户理解用途。通过原requestId查询status/wait，用户批准不会自动执行。credentialUse.approved及当前state为available时，使用授权默认2小时，可选2/4/8/24小时；SSH还可由用户选择“本聊天内不限时”，期间每个操作独立提交完整launch和唯一operationId，不逐命令再审批；普通字段独立默认2小时，可选2/4/8/24小时。复用不续期，新增未批凭据或使用方式需要新申请。
 
 ```json
 {"protocolVersion":2,"command":"run-use","requestId":"REQUEST_ID","operationId":"repo-check-01","launch":{"receiver":"gh_token","executable":"C:/Program Files/GitHub CLI/gh.exe","argv":["repo","view","northstar/agent-skills"],"cwd":"C:/Work/northstar","env":{"GH_TOKEN":{"secret":"github_token"}}}}
@@ -252,7 +262,7 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 
 若另有`credential-focused-target.v1`，`{"protocolVersion":2,"command":"focus-target"}`可观察本机当前密码目标，仅返回ready/refused和就绪应用路径/SHA；不提供值、窗口句柄或PID，不预留焦点、不审批、不输入。批准后必须重新点击空密码框。详见[原生合同与当前验证范围](design/windows-focused-fill-native.md)。
 
-`request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及15/30分钟期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
+`request-use`提交一个字符串凭据引用和`fill`（应用绝对路径/字节摘要、仅供判断的网址），不同时提供`launch`，也不附带普通字段授权。请求格式见[填充合同](design/local-focused-fill-contract.md)。批准固定凭据版本、应用、方式及用户选择的2/4/8/24小时期限；批准不输入。Agent准备空密码框、重新点击目标，再后台调用：
 
 ```json
 {"protocolVersion":2,"command":"fill-use","requestId":"REQUEST_ID","operationId":"password-fill-01"}

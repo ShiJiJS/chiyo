@@ -43,6 +43,10 @@ Future<void> main(List<String> args) async {
         backups: repository.backups,
         backupDirectory: Directory('${config.dataDirectory}/backup-transfers'),
         policyState: repository,
+        replication: LibraryReplication(repository),
+        replicationDirectory: Directory(
+          '${config.dataDirectory}/replication-transfers',
+        ),
       );
       final stopped = Completer<void>();
       void stop(ProcessSignal _) {

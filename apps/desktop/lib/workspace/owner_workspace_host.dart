@@ -1,7 +1,5 @@
 import 'owner_workspace_hosts.dart';
 import 'dart:async';
-import 'package:info_cli/macos_agent_bundle.dart';
-import 'owner_workspace_agents.dart';
 import 'owner_workspace_settings.dart';
 import 'owner_workspace_runtime.dart';
 import 'owner_workspace_proposals.dart';
@@ -11,6 +9,20 @@ import 'owner_plugin_picker.dart';
 import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
+import '../connection_view.dart';
+import '../local_library_sync.dart';
+import '../local_library_sync_controller.dart';
+import '../local_sync_settings.dart';
+import '../server_request_connection.dart';
+import 'package:info_remote/agent_connection.dart';
+import 'package:info_remote/connection_profile.dart';
+import 'remote_workspace_approvals.dart';
+import 'remote_workspace_proposals.dart';
+import 'remote_workspace_history.dart';
+import 'package:info_remote/local_library_configuration.dart';
+import '../desktop_controls.dart';
+import '../ui_palette.dart';
+import 'library_widgets.dart';
 import 'owner_workspace_source.dart';
 import 'runtime_workspace_desktop.dart';
 import 'workspace_app.dart';
@@ -38,6 +50,9 @@ class OwnerWorkspaceHost extends StatefulWidget {
     this.backups,
     this.fileOutputs,
     this.fileOpens,
+    this.localConfiguration,
+    this.localConnection,
+    this.replication,
     this.backupPicker = const NativeBackupFilePicker(),
     this.filePicker = const NativeInformationFilePicker(),
     this.credentialFiles = const NativeCredentialFilePicker(),
@@ -47,6 +62,9 @@ class OwnerWorkspaceHost extends StatefulWidget {
   final InformationBackups? backups;
   final InformationFileOutputs? fileOutputs;
   final InformationFileOpens? fileOpens;
+  final LocalLibraryConfiguration? localConfiguration;
+  final AgentConnectionProfile? localConnection;
+  final LibraryReplication? replication;
   final BackupFilePicker backupPicker;
   final InformationFilePicker filePicker;
   final CredentialFilePicker credentialFiles;
@@ -57,7 +75,6 @@ class OwnerWorkspaceHost extends StatefulWidget {
 
 class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   late OwnerWorkspaceSource _source;
-  final _bundle = MacAgentBundle();
   late final RuntimeWorkspaceDesktop _desktop;
   StreamSubscription<WorkspaceRecordRef?>? _changes;
   OwnerWorkspaceBackups? _backups;
@@ -65,18 +82,122 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   late OwnerWorkspacePlugins _plugins;
   late OwnerWorkspaceHosts _hosts;
   late OwnerProposalPasswords _passwords;
+  ServerRequestConnection? _serverRequests;
+  LocalLibrarySync? _sync;
+  LocalLibrarySyncController? _syncController;
+  final _connectionSettingsRequests = ValueNotifier(0);
+  bool _syncBusy = false;
+  String _storageDescription = '本地模式';
   @override
   void initState() {
     super.initState();
     _desktop = RuntimeWorkspaceDesktop(widget.runtime);
+    if (widget.localConfiguration != null && widget.replication != null) {
+      _sync = LocalLibrarySync(
+        configuration: widget.localConfiguration!,
+        owner: widget.runtime.service.owner,
+        replication: widget.replication!,
+      );
+      _syncController = LocalLibrarySyncController(
+        sync: _sync!,
+        changed: () => _source.notifyExternalChange(),
+      );
+      unawaited(_restoreSyncDescription());
+    }
     _bind();
     widget.runtime.addListener(_runtimeChanged);
   }
 
   void _runtimeChanged() => _source.notifyExternalChange();
 
+  Future<void> _restoreSyncDescription() async {
+    try {
+      final stored = await _sync!.readConfiguration();
+      if (mounted) await _syncSaved(stored['enabled'] as bool);
+      await _syncController?.restore();
+    } on Object {
+      /* The settings pane exposes the original configuration error. */
+    }
+  }
+
+  Future<void> _syncSaved(bool enabled) async {
+    if (!mounted) return;
+    final stored = await _sync!.readConfiguration();
+    final profile = enabled
+        ? ConnectionProfile.fromJson(
+            Map<String, dynamic>.from(stored['server'] as Map),
+          )
+        : null;
+    final old = _serverRequests;
+    if (profile == null && old == null) {
+      if (widget.localConnection != null) {
+        await widget.localConfiguration!.publish(widget.localConnection!);
+      }
+      return;
+    }
+    await old?.close();
+    if (!mounted) return;
+    _serverRequests = profile == null
+        ? null
+        : ServerRequestConnection(
+            profile: profile,
+            configuration: widget.localConfiguration!,
+            changed: () {
+              if (mounted) _source.notifyExternalChange();
+            },
+          );
+    setState(() {
+      _storageDescription = enabled ? '服务器同步' : '本地模式';
+      _replaceSource();
+    });
+    if (_syncBusy) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _connectionSettingsRequests.value++;
+      });
+    }
+    if (_serverRequests != null) {
+      await _serverRequests!.activate();
+    } else if (widget.localConnection != null) {
+      await widget.localConfiguration!.publish(widget.localConnection!);
+    }
+  }
+
+  void _replaceSource() {
+    final old = _source,
+        plugins = _plugins,
+        hosts = _hosts,
+        passwords = _passwords,
+        backups = _backups;
+    unawaited(_changes?.cancel());
+    _bind();
+    // Old input widgets unmount on the next frame. Do not dispose their text
+    // controllers while Flutter is still reading the previous source.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(old.dispose());
+      plugins.dispose();
+      hosts.dispose();
+      passwords.dispose();
+      backups?.dispose();
+    });
+  }
+
+  void _serverProposalChanged() {
+    _source.notifyExternalChange();
+    unawaited(_syncController?.synchronize().catchError((Object _) {}));
+  }
+
+  void _syncBusyChanged(bool busy) {
+    if (!mounted) return;
+    setState(() => _syncBusy = busy);
+    unawaited(_desktop.setNavigationEnabled(!busy));
+    if (!busy) unawaited(_syncController?.restore());
+  }
+
   void _bind() {
-    _passwords = OwnerProposalPasswords(widget.runtime.service.owner);
+    final server = _serverRequests;
+    _passwords = server == null
+        ? OwnerProposalPasswords(widget.runtime.service.owner)
+        : OwnerProposalPasswords.remote(server);
     _plugins = OwnerWorkspacePlugins(
       owner: widget.runtime.service.owner,
       picker: widget.pluginPicker,
@@ -102,11 +223,19 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     }
     _source = OwnerWorkspaceSource(
       owner: widget.runtime.service.owner,
+      describeStorage: () => _storageDescription,
+      requestSummary: server?.summary,
+      approvals: server == null
+          ? null
+          : RemoteWorkspaceApprovals(
+              server,
+              onChanged: () => _source.notifyExternalChange(),
+            ),
+      grantHistory: server == null ? null : RemoteWorkspaceGrantHistory(server),
       plugins: _plugins,
       hosts: _hosts,
       legacyTemplates: OwnerWorkspaceLegacyTemplates(
         widget.runtime.service.owner,
-        _plugins,
       ),
       definitionsReader: () => _plugins.templates,
       templateState: _plugins.stateFor,
@@ -118,11 +247,13 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         picker: widget.filePicker,
       ),
       backups: _backups ?? const UnavailableWorkspaceBackup(),
-      proposals: OwnerWorkspaceProposals(
-        owner: widget.runtime.service.owner,
-        library: () => _source,
-        changed: () => _source.notifyExternalChange(),
-      ),
+      proposals: server != null
+          ? RemoteWorkspaceProposals(server, changed: _serverProposalChanged)
+          : OwnerWorkspaceProposals(
+              owner: widget.runtime.service.owner,
+              library: () => _source,
+              changed: () => _source.notifyExternalChange(),
+            ),
       runtime: OwnerWorkspaceRuntime(
         runtime: widget.runtime,
         changed: () => _source.notifyExternalChange(),
@@ -132,11 +263,8 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         runtime: widget.runtime,
         changed: () => _source.refreshFromOwner(),
       ),
-      agents: OwnerWorkspaceAgents(
-        owner: widget.runtime.service.owner,
-        readBundle: _bundle.read,
-      ),
     );
+    _desktop.bindSource(_source);
     _changes = _source.changes.listen((_) {
       if (!mounted ||
           _source.isCurrentLibrary ||
@@ -161,6 +289,9 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
 
   @override
   void dispose() {
+    unawaited(_serverRequests?.close());
+    _connectionSettingsRequests.dispose();
+    _syncController?.dispose();
     unawaited(_changes?.cancel());
     widget.runtime.removeListener(_runtimeChanged);
     unawaited(_source.dispose());
@@ -173,35 +304,78 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   }
 
   @override
-  Widget build(BuildContext context) => WorkspaceApp(
-    source: _source,
-    desktop: _desktop,
-    windowTitle: '知予',
-    inputsBuilder: (context) {
-      final source = _source;
-      return WorkspaceInputs(
-        proposalFile: (id, version, item, attachment, fileVersion) =>
-            showOwnerProposalFilePreview(
+  Widget build(BuildContext context) => ExcludeFocus(
+    excluding: _syncBusy,
+    child: AbsorbPointer(
+      absorbing: _syncBusy,
+      child: WorkspaceApp(
+        source: _source,
+        sync: _syncController,
+        desktop: _desktop,
+        windowTitle: '知予',
+        connectionSettingsRequests: _connectionSettingsRequests,
+        connectionBuilder: (context, onCancel) => _sync != null
+            ? LocalSyncSettings(
+                sync: _sync!,
+                onBack: onCancel,
+                onSaved: _syncSaved,
+                onBusy: _syncBusyChanged,
+                beforeSave: _syncController?.pause,
+              )
+            : ConnectionSurface(
+                embedded: true,
+                title: '存储与同步',
+                description: '资料保存在本机。',
+                icon: Icons.computer_outlined,
+                children: [
+                  Text('本地模式', style: libraryHeading(context, 16)),
+                  const SizedBox(height: 8),
+                  Text(
+                    '资料、文件和凭据加密保存在这台电脑。无需连接服务器，也能接收 AI 申请和审批。',
+                    style: libraryText(
+                      context,
+                      14,
+                      color: UiPalette.of(context).muted,
+                      height: 1.8,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  DesktopButton(
+                    kind: DesktopButtonKind.quiet,
+                    onPressed: onCancel,
+                    child: const Text('返回工作区'),
+                  ),
+                ],
+              ),
+        inputsBuilder: (context) {
+          final source = _source;
+          return WorkspaceInputs(
+            proposalFile: _serverRequests != null
+                ? null
+                : (id, version, item, attachment, fileVersion) =>
+                      showOwnerProposalFilePreview(
+                        context,
+                        widget.runtime.service.owner,
+                        id,
+                        version,
+                        item,
+                        attachment,
+                        fileVersion,
+                      ),
+            proposalPassword: _passwords,
+            backup: _backupFiles?.pick,
+            plugin: _plugins.pick,
+            hostFile: _hosts.pick,
+            file: source.selections.pick,
+            credential: (form) => showOwnerCredentialInput(
               context,
-              widget.runtime.service.owner,
-              id,
-              version,
-              item,
-              attachment,
-              fileVersion,
+              (source.credentials as OwnerWorkspaceCredentials).staging,
+              form,
+              files: widget.credentialFiles,
             ),
-        proposalPassword: _passwords,
-        backup: _backupFiles?.pick,
-        plugin: _plugins.pick,
-        hostFile: _hosts.pick,
-        file: source.selections.pick,
-        credential: (form) => showOwnerCredentialInput(
-          context,
-          (source.credentials as OwnerWorkspaceCredentials).staging,
-          form,
-          files: widget.credentialFiles,
-        ),
-      );
-    },
+          );
+        },
+      ),
+    ),
   );
 }

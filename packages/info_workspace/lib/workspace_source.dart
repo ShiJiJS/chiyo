@@ -14,8 +14,6 @@ import 'workspace_proposals.dart';
 import 'workspace_settings.dart';
 import 'workspace_backups.dart';
 import 'workspace_runtime.dart';
-import 'workspace_agents.dart';
-export 'workspace_agents.dart';
 export 'workspace_runtime.dart';
 export 'workspace_backups.dart';
 export 'workspace_settings.dart';
@@ -50,7 +48,6 @@ abstract interface class WorkspaceSource
   WorkspaceSettingsSource get settings;
   WorkspaceBackupSource get backups;
   WorkspaceRuntimeSource get runtime;
-  WorkspaceAgentsSource get agents;
   WorkspaceCredentialSource get credentials;
   WorkspaceApprovalSource get approvals;
   WorkspaceGrantHistorySource get grantHistory;
@@ -105,6 +102,7 @@ abstract interface class WorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   });
   Future<WorkspaceRecycleResults> queryRecycled({
     String keyword = '',
@@ -127,6 +125,7 @@ abstract interface class WorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   });
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input);

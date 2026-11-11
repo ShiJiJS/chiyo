@@ -180,7 +180,11 @@ void main() {
         }))['status'],
         'invalid_request',
       );
-      await command({'command': 'session', 'chatLabel': 'test'});
+      await command({
+        'command': 'session',
+        'externalChatId': 'synthetic-catalog-cli-test',
+        'chatLabel': 'test',
+      });
       final intent = <String, Object?>{
         'command': 'request',
         'operationId': 'cli-inspect-1',

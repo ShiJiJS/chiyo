@@ -1,5 +1,8 @@
 part of 'info_storage.dart';
 
+String _credentialArchiveId(Map<String, Object?> contents) =>
+    crypto.sha256.convert(utf8.encode(_syncJson(contents))).toString();
+
 // Explicit portable shapes: neither a future private field nor arbitrary
 // runtime registration can silently enter a portable backup.
 void _validateBackupCredentials(
@@ -7,6 +10,37 @@ void _validateBackupCredentials(
   required int formatVersion,
 }) {
   final credentials = <String, ManagedCredential>{};
+  final archived = <String>{};
+  for (final row
+      in tables['credential_material_snapshots'] ??
+          const <Map<String, Object?>>[]) {
+    try {
+      final content = _backupObject(_backupJson(row), {
+        'credential',
+        'material',
+      });
+      final c = ManagedCredential.fromJson(
+        Map<String, dynamic>.from(content['credential'] as Map),
+      );
+      final m = CredentialMaterial.fromStorageJson(
+        Map<String, dynamic>.from(content['material'] as Map),
+      );
+      if (c.id != row['credential_id'] ||
+          m.credentialId != c.id ||
+          m.version != row['version'] ||
+          m.version < 1 ||
+          m.version > c.version ||
+          m.bytes.isEmpty ||
+          m.bytes.length > (c.form == CredentialForm.file ? 1048576 : 65536) ||
+          _syncJson(c.toJson()) != _syncJson(content['credential']) ||
+          _syncJson(m.toStorageJson()) != _syncJson(content['material']) ||
+          _credentialArchiveId(content) != row['snapshot_id'] ||
+          !archived.add('${c.id}:${row['snapshot_id']}'))
+        _backupInvalid();
+    } on Object {
+      _backupInvalid();
+    }
+  }
   for (final row in tables['managed_credentials']!) {
     final j = _backupObject(
       _backupJson(row),
@@ -214,6 +248,12 @@ void _retainBackupCredentials(
     return j['retiredAt'] != null &&
         !_backupDate(j['retiredAt']).isAfter(cutoff);
   });
+  tables['credential_material_snapshots']?.removeWhere((row) {
+    final archived = _backupJson(row);
+    final material = archived['material'] as Map;
+    return material['retiredAt'] != null &&
+        !_backupDate(material['retiredAt']).isAfter(cutoff);
+  });
 }
 
 void _archiveCredentialRuntime(
@@ -301,6 +341,8 @@ void _validateBackupCredentialHistory(
       {
         'requestedPlan',
         'restoredAt',
+        'agentName',
+        'externalChatId',
         if (formatVersion >= 6) 'protocolVersion',
         if (formatVersion >= 22) 'credentialValidity',
       },
@@ -309,6 +351,7 @@ void _validateBackupCredentialHistory(
     if (row['id'] != id || requests.containsKey(id)) _backupInvalid();
     _backupId(j, 'credentialId');
     _backupText(j, 'chatLabel', 2000);
+    _backupSubmissionSource(j);
     _backupText(j, 'purpose', 2000, required: true);
     if (!RegExp(
       r'^[A-Za-z_][A-Za-z0-9_]{0,63}$',

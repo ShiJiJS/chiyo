@@ -526,12 +526,9 @@ class _SettingsPageState extends State<SettingsPage> {
         control: _select(
           _timeout,
           {
-            5: '5 分钟',
-            15: '15 分钟',
-            30: '30 分钟',
-            60: '1 小时',
-            120: '2 小时',
-            if (![5, 15, 30, 60, 120].contains(_timeout))
+            for (final n in AccessTiming.waitingMinutes)
+              n: n < 60 ? '$n 分钟' : '${n ~/ 60} 小时',
+            if (!AccessTiming.waitingMinutes.contains(_timeout))
               _timeout: '$_timeout 分钟',
           },
           (v) {
@@ -543,7 +540,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       SettingsRow(
         '授权期限',
-        '每次批准时单独选择，且只在申请方的当前会话中有效。整理资料的授权最长为 30 分钟。',
+        '每次批准时单独选择，且只在申请方的当前会话中有效。可选择2、4、8或24小时。',
         control: TextButton(
           onPressed: widget.onOpenApprovals,
           style: prototypeButton(

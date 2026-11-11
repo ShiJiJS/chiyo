@@ -40,6 +40,13 @@ final class DeviceCredentialRoutes {
   ) async {
     switch (path) {
       case '/credential-use/device/request':
+        final errors = submissionMetadataErrors(body);
+        if (errors.isNotEmpty)
+          return {
+            'status': 'invalid_request',
+            'errorCode': 'invalid_submission_metadata',
+            'fieldErrors': errors,
+          };
         final command = Map<String, dynamic>.from(body)
           ..remove('sessionSecret');
         final raw = command.remove('deviceLaunch');

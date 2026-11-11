@@ -165,13 +165,15 @@ void main() {
           isTrue,
         );
         now = now.add(const Duration(days: 2));
-        final history = (await t.runAsync(
+        final history = (await drive(
+          t,
           () => source.grantHistory.read('request:${saved.id}'),
         ))!;
         expect(history.credentialSessionBound, isTrue);
         expect(history.credentialExpiresAt, isNull);
         expect(history.canRevoke, isTrue);
-        final credentialHistory = (await t.runAsync(
+        final credentialHistory = (await drive(
+          t,
           () => source.credentials.history(
             WorkspaceRecordRef(
               WorkspaceRecordKind.credential,
@@ -180,9 +182,7 @@ void main() {
           ),
         ))!;
         expect(credentialHistory.single.expiresAt, isNull);
-        final detail = (await t.runAsync(
-          () => source.approvals.read(saved.id),
-        ))!;
+        final detail = (await drive(t, () => source.approvals.read(saved.id)))!;
         final revoke = WorkspaceApprovalChange(
           operationId: workspaceOperationId(),
           requestId: saved.id,
@@ -205,17 +205,17 @@ void main() {
       } finally {
         await t.pumpWidget(const SizedBox());
         model.dispose();
-        await t.runAsync(source.dispose);
+        await drive(t, source.dispose);
         var closed = false;
         final closing = f.service.close().then((_) => closed = true);
         for (var i = 0; i < 100 && !closed; i++) {
-          await t.runAsync(() => Future<void>.delayed(Duration.zero));
+          await drive(t, () => Future<void>.delayed(Duration.zero));
           await t.pump(const Duration(milliseconds: 10));
         }
         expect(closed, isTrue);
         await closing;
-        await t.runAsync(repo.close);
-        await t.runAsync(() => root.delete(recursive: true));
+        await drive(t, repo.close);
+        await drive(t, () => root.delete(recursive: true));
       }
     },
   );

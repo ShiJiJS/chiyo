@@ -290,6 +290,7 @@ void main() {
         await tap('credential-toggle');
         await tap('credential-toggle-submit');
         await until(() => !repo.managedCredentials.single.enabled);
+        await until(() => key('credential-toggle-submit').evaluate().isEmpty);
         await tap('library-create');
         await tap('library-new-type-credential');
         await tap('credential-edit-candidate');

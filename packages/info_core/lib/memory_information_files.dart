@@ -104,11 +104,14 @@ extension _MemoryInformationAttachments on MemoryInformationRepository {
       }
       final (stage, bytes) = _fileStages.stageBody(change.draftId, p.stageId);
       final v = p.version;
-      final latest = _informationFiles.keys
-          .where((r) => r.attachmentId == v.reference.attachmentId)
+      final latest = [..._informationFiles.values, ...promotions.values]
+          .map((value) => value.$1)
+          .where((old) => old.seriesId == v.seriesId)
           .fold<int>(
             0,
-            (n, r) => r.attachmentVersion > n ? r.attachmentVersion : n,
+            (n, old) => old.reference.attachmentVersion > n
+                ? old.reference.attachmentVersion
+                : n,
           );
       if (v.reference.attachmentVersion != latest + 1 ||
           stage.originalName != v.originalName ||

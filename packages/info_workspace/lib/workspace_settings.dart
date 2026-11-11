@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
@@ -8,7 +9,7 @@ class WorkspacePreferences {
     this.version = 1,
     this.theme = WorkspaceTheme.light,
     this.notifications = true,
-    this.requestMinutes = 30,
+    this.requestMinutes = AccessTiming.defaultMinutes,
     this.retentionDays = 180,
     this.background = true,
   });

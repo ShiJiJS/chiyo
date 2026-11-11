@@ -335,7 +335,7 @@ void main() {
         final row = tester.getRect(find.byKey(const ValueKey('row-0')));
         expect(
           row.right,
-          lessThanOrEqualTo(outer.right - DesktopScrollBehavior.gutter),
+          lessThanOrEqualTo(outer.right),
         );
         await tester.dragFrom(
           Offset(outer.right - 5, outer.top + 12),

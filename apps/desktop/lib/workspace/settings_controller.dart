@@ -3,14 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
 enum WorkspaceSettingsSection {
+  connection('存储与同步', '服务器地址与连接状态'),
   appearance('外观', '明亮与黑暗主题'),
   notifications('通知', '访问申请提醒'),
   records('请求与记录', '等待时间与记录保留'),
   plugins('插件', '资料模板与专属设置'),
   classifications('目录与标签', '归属层级与跨目录标记'),
   backups('备份与恢复', '独立密钥与完整资料恢复'),
-  runtime('应用运行', '本机服务与材料维护'),
-  agents('Agent 接入', '会话关联与接入状态');
+  runtime('应用运行', '本机服务与材料维护');
 
   const WorkspaceSettingsSection(this.label, this.description);
   final String label, description;

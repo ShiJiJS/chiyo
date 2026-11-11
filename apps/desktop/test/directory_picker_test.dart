@@ -85,12 +85,13 @@ void main() {
           ),
         ),
       );
-      expect(find.text('账号与服务 / 应用 / VPN'), findsOneWidget);
+      expect(find.text('账号与服务 › 应用 › VPN'), findsOneWidget);
       expect(find.text('账号与服务 · 已有'), findsOneWidget);
       expect(find.text('VPN · 将新建'), findsOneWidget);
-      await t.tap(find.text('查看完整目录树'));
+      await t.tap(find.text('账号与服务 › 应用 › VPN'));
       await t.pumpAndSettle();
-      expect(find.text('查看目录结构'), findsOneWidget);
+      expect(find.text('VPN'), findsOneWidget);
+      expect(find.text('更换目录'), findsNothing);
       expect(directoryPath(catalog, null), '未分类');
     },
   );

@@ -3,6 +3,7 @@ export 'owner_library_selection.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'package:info_storage/info_storage.dart' show StorageFailure;
 import 'workspace_source.dart';
+import 'owner_workspace_credentials.dart' show ownerCredentialRecycleId;
 
 WorkspaceDirectoryRecycleBatch workspaceDirectoryRecycleBatch(
   core.LibraryRecycleBatch batch,
@@ -115,7 +116,15 @@ class OwnerWorkspaceLibraryRecycle {
         (d) => WorkspaceDirectory(d.id, d.name, parentId: d.parentId),
       ),
       paths: p.directoryPaths,
-      records: workspaceLibraryRecords(p.records, c),
+      records: workspaceLibraryRecords(
+        p.records,
+        c,
+        informationEntries: batch.informationEntries,
+        credentialEntries: {
+          for (final e in batch.credentialRevisions.entries)
+            e.key: ownerCredentialRecycleId(e.key, e.value),
+        },
+      ),
       roots: batch.directories
           .where((d) => !ids.contains(d.parentId))
           .map((d) => d.id),

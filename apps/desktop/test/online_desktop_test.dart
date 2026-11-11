@@ -92,7 +92,7 @@ void main() {
       }
 
       Finder field(String label) => find.byWidgetPredicate(
-        (w) => w is TextField && w.decoration?.labelText == label,
+        (w) => w is DesktopTextField && w.decoration.labelText == label,
       );
       Future<void> connect(String profile) async {
         await t.pumpWidget(
@@ -104,10 +104,12 @@ void main() {
         await settle();
         await t.enterText(field('服务器地址'), 'https://127.0.0.1:${server.port}');
         await t.enterText(field('Token'), token);
-        await t.tap(find.text('证书设置（可选）'));
+        await t.tap(find.text('服务器证书'));
         await settle();
         await t.enterText(field('服务器 CA 证书'), certificate);
-        await t.runAsync(() => t.tap(find.text('连接')));
+        await t.runAsync(
+          () => t.tap(find.byKey(const ValueKey('connection-save'))),
+        );
         await settle();
         expect(
           find.byTooltip('添加资料'),
@@ -258,7 +260,14 @@ void main() {
         );
         await settle();
         expect(find.text('远程合成资料'), findsWidgets);
-        await t.runAsync(() => t.tap(find.byTooltip('连接设置')));
+        await t.runAsync(
+          () => t.tap(find.byKey(const ValueKey('workspace-nav-settings'))),
+        );
+        await settle();
+        await t.runAsync(
+          () =>
+              t.tap(find.byKey(const ValueKey('settings-section-connection'))),
+        );
         await settle();
         await t.runAsync(() async {
           final port = server.port;
@@ -273,11 +282,15 @@ void main() {
             port: port,
           );
         });
-        await t.runAsync(() => t.tap(find.text('连接')));
+        await t.runAsync(
+          () => t.tap(find.byKey(const ValueKey('connection-save'))),
+        );
         await settle();
         expect(find.text('Token 不正确，请重新填写。'), findsOneWidget);
         await t.enterText(field('Token'), token);
-        await t.runAsync(() => t.tap(find.text('连接')));
+        await t.runAsync(
+          () => t.tap(find.byKey(const ValueKey('connection-save'))),
+        );
         await settle();
         expect(find.text('远程合成资料'), findsWidgets);
         await t.runAsync(() async {
@@ -286,7 +299,14 @@ void main() {
           ).read();
           expect(saved!.token, token);
         });
-        await t.runAsync(() => t.tap(find.byTooltip('连接设置')));
+        await t.runAsync(
+          () => t.tap(find.byKey(const ValueKey('workspace-nav-settings'))),
+        );
+        await settle();
+        await t.runAsync(
+          () =>
+              t.tap(find.byKey(const ValueKey('settings-section-connection'))),
+        );
         await settle();
         await t.runAsync(() async {
           final port = server.port;
@@ -300,7 +320,9 @@ void main() {
             port: port,
           );
         });
-        await t.runAsync(() => t.tap(find.text('连接')));
+        await t.runAsync(
+          () => t.tap(find.byKey(const ValueKey('connection-save'))),
+        );
         await settle();
         expect(find.text('服务器身份已变化，请核对服务器地址。'), findsOneWidget);
         await t.runAsync(() => t.tap(find.text('确认连接新服务器')));

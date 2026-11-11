@@ -10,6 +10,32 @@ import 'workspace_source.dart';
 String ownerCredentialRecycleId(String id, int revision) =>
     'credential_${id}_$revision';
 
+String? _recycledCredentialDirectory(
+  core.OwnerAccess owner,
+  core.ManagedCredential credential,
+) {
+  if (owner.libraryRecycleSupported) {
+    final batch = owner.libraryRecycleBatches
+        .where(
+          (b) => b.credentialRevisions[credential.id] == credential.revision,
+        )
+        .firstOrNull;
+    final saved = batch?.directoryPaths[credential.directoryId];
+    if (saved != null) return saved.join(' / ');
+  }
+  final directories = {for (final d in owner.directories) d.id: d};
+  var id = credential.directoryId;
+  if (!directories.containsKey(id)) return null;
+  final names = <String>[], seen = <String>{};
+  while (id != null && seen.add(id)) {
+    final directory = directories[id];
+    if (directory == null) break;
+    names.add(directory.name);
+    id = directory.parentId;
+  }
+  return names.reversed.join(' / ');
+}
+
 WorkspaceRecycleEntry ownerCredentialRecycleEntry(
   core.OwnerAccess owner,
   core.ManagedCredential c,
@@ -31,10 +57,7 @@ WorkspaceRecycleEntry ownerCredentialRecycleEntry(
   version: c.revision,
   deletedAt: c.deletedAt!,
   expiresAt: c.deletedAt!.add(const Duration(days: 30)),
-  directoryName: owner.directories
-      .where((d) => d.id == c.directoryId)
-      .firstOrNull
-      ?.name,
+  directoryName: _recycledCredentialDirectory(owner, c),
 );
 
 /// Owner credential management. Secret staging is Host-owned; workspace DTOs

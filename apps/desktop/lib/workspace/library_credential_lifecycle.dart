@@ -563,6 +563,12 @@ class _RecycleState extends State<_Recycle> {
                           detail: d,
                           catalog: catalog!,
                           linkNames: names,
+                          directoryLabel: r == null
+                              ? null
+                              : r.entry.directoryName ??
+                                    (d.record.directoryId == null
+                                        ? '未分类'
+                                        : '原目录已移除'),
                         ),
                       ],
                       if (!deleting && !purge && r != null) ...[

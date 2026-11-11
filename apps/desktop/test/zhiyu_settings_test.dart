@@ -16,7 +16,6 @@ import 'package:info_desktop/workspace/settings_controller.dart';
 import 'package:info_desktop/workspace/classification_controller.dart';
 import 'package:info_desktop/workspace/backup_controller.dart';
 import 'package:info_desktop/workspace/runtime_controller.dart';
-import 'package:info_desktop/workspace/agents_controller.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/plugins_controller.dart';
@@ -54,8 +53,6 @@ void main() {
         sample.changes,
       );
       addTearDown(runtime.dispose);
-      final agents = WorkspaceAgentsController(sample.agents, sample.changes);
-      addTearDown(agents.dispose);
       addTearDown(classifications.dispose);
       addTearDown(settings.dispose);
       addTearDown(plugins.dispose);
@@ -72,7 +69,6 @@ void main() {
               classifications: classifications,
               backups: backups,
               runtime: runtime,
-              agents: agents,
               backupPicker: (_) async => null,
               onLibrary: () {},
               pluginBuilder: (_) => const SizedBox(),
@@ -302,12 +298,8 @@ void main() {
       await tap(t, find.byKey(const ValueKey('settings-notification-preview')));
       expect(find.textContaining('暂无待处理申请'), findsOneWidget);
       expect(
-        t
-            .widget<DesktopButton>(
-              find.byKey(const ValueKey('settings-notification-open')),
-            )
-            .onPressed,
-        isNull,
+        find.byKey(const ValueKey('settings-notification-open')),
+        findsNothing,
       );
     },
   );
@@ -344,10 +336,10 @@ void main() {
     (t) async {
       final s = await start(t);
       await tap(t, find.byKey(const ValueKey('settings-section-records')));
-      await select(t, 'settings-request-minutes', '5 分钟');
-      expect((await s.settings.read()).requestMinutes, 30);
+      await select(t, 'settings-request-minutes', '30 分钟');
+      expect((await s.settings.read()).requestMinutes, 120);
       await tap(t, find.byKey(const ValueKey('settings-records-save')));
-      expect((await s.settings.read()).requestMinutes, 5);
+      expect((await s.settings.read()).requestMinutes, 30);
       s.advanceApprovalClock(const Duration(days: 60));
       await ready(t);
       final total = (await s.grantHistory.query(
@@ -375,7 +367,7 @@ void main() {
       );
       await tap(t, find.byKey(const ValueKey('workspace-nav-library')));
       await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
-      expect(model(t).draft!.requestMinutes, 5);
+      expect(model(t).draft!.requestMinutes, 30);
       expect(model(t).draft!.retentionDays, 30);
     },
   );

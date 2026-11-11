@@ -55,7 +55,7 @@ void main() {
         final c = s.owner.credential(r.credentialId);
         switch (invalidation) {
           case 'expired':
-            now = now.add(const Duration(minutes: 15));
+            now = now.add(const Duration(hours: 2));
           case 'rotated':
             await s.owner.rotateStringCredential(
               c.id,
@@ -112,7 +112,7 @@ void main() {
       );
       switch (invalidation) {
         case 'expired':
-          now = now.add(const Duration(minutes: 15));
+          now = now.add(const Duration(hours: 2));
         case 'revoked':
           await s.owner.revokeCredentialUse(r.id);
         case 'ended':
@@ -145,7 +145,7 @@ void main() {
   }
 
   test(
-    'combined v2 decision defaults ordinary fields to eight hours independently',
+    'combined v2 decision defaults ordinary fields and credentials to two hours independently',
     () async {
       var now = DateTime.utc(2026, 10, 19);
       final (s, session, initial) = await tokenRequest(
@@ -172,18 +172,15 @@ void main() {
       final approved = s.owner.credentialUseRequests.firstWhere(
         (x) => x.id == r.id,
       );
-      expect(
-        approved.credentialExpiresAt,
-        now.add(const Duration(minutes: 15)),
-      );
-      expect(approved.fieldExpiresAt, now.add(const Duration(hours: 8)));
+      expect(approved.credentialExpiresAt, now.add(const Duration(hours: 2)));
+      expect(approved.fieldExpiresAt, now.add(const Duration(hours: 2)));
       final grant = s.agent.claim(session, r.id);
       await s.agent.beginCredentialUseOperation(session, operation(r, 'first'));
       await s.owner.revokeCredentialUse(r.id);
       expect(await s.agent.read(grant.token, field), 'example.invalid');
       now = now.add(const Duration(hours: 1));
       expect(await s.agent.read(grant.token, field), 'example.invalid');
-      now = now.add(const Duration(hours: 7));
+      now = now.add(const Duration(hours: 1));
       await expectLater(
         s.agent.read(grant.token, field),
         throwsA(isA<AccessFailure>()),
@@ -200,7 +197,7 @@ void main() {
         const FieldInput('Host', '', 'example.invalid'),
       ]);
       final field = FieldRef(item.id, item.fields.single.id);
-      for (final minutes in [15, 30, 60, 480]) {
+      for (final minutes in [15, 30, 60, ...AccessTiming.grantMinutes]) {
         final r = await s.agent.requestCredentialUse(
           session,
           CredentialUseInput.fromJson({

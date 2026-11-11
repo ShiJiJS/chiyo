@@ -55,9 +55,9 @@ class OwnerWorkspaceAdditionalApprovals {
         kind: r.isFocusedFill
             ? WorkspaceApprovalKind.focus
             : WorkspaceApprovalKind.credential,
-        agentClaim: '未提供 Agent 名称',
+        agentClaim: r.agentName,
         sessionId: owner.credentialRequestSessionId(r.id) ?? 'unlinked:${r.id}',
-        chatClaim: r.chatLabel,
+        chatClaim: core.submissionChatLabel(r.chatLabel, r.externalChatId),
         purpose: r.purpose,
         submittedAt: r.createdAt,
         requestExpiresAt: r.requestExpiresAt,
@@ -66,11 +66,11 @@ class OwnerWorkspaceAdditionalApprovals {
   WorkspaceApprovalSummary organizationSummary(core.OrganizationTask t) =>
       WorkspaceApprovalSummary(
         id: t.id,
-        title: '分类整理申请',
+        title: t.title.isEmpty ? '分类整理申请' : t.title,
         kind: WorkspaceApprovalKind.organization,
-        agentClaim: t.agentName.isEmpty ? '未提供 Agent 名称' : t.agentName,
+        agentClaim: t.agentName,
         sessionId: t.sessionBinding,
-        chatClaim: t.chatLabel,
+        chatClaim: core.submissionChatLabel(t.chatLabel, t.externalChatId),
         purpose: t.purpose,
         submittedAt: t.createdAt,
         requestExpiresAt: t.expiresAt,
@@ -342,16 +342,19 @@ class OwnerWorkspaceAdditionalApprovals {
               core.FieldRef(scopes[id]!.record.id, scopes[id]!.fieldId!),
         ];
         if (approve &&
-            ((c.credentialMinutes == null
-                    ? !r.supportsSessionValidity
-                    : !const [15, 30].contains(c.credentialMinutes)) ||
-                !(r.protocolVersion == 2
-                        ? const [15, 30, 60, 480]
-                        : const [15, 30])
-                    .contains(c.fieldMinutes))) {
+            (!core.AccessTiming.acceptsCredentialLifetime(
+                  c.credentialMinutes == null
+                      ? null
+                      : Duration(minutes: c.credentialMinutes!),
+                  sessionValidity: r.supportsSessionValidity,
+                ) ||
+                !core.AccessTiming.acceptsFieldLifetime(
+                  Duration(minutes: c.fieldMinutes),
+                  protocolVersion: r.protocolVersion,
+                ))) {
           throw const WorkspaceFailure(
             'invalid_scope',
-            '只有本聊天的SSH使用可选不限时；其他凭据支持15或30分钟。普通字段独立选择期限。',
+            '请选择2、4、8或24小时；只有本聊天的SSH使用可选不限时。普通字段独立选择期限。',
           );
         }
         await owner.decideCredentialUse(
@@ -376,8 +379,13 @@ class OwnerWorkspaceAdditionalApprovals {
         final t = _organization(c.requestId);
         switch (c.action) {
           case WorkspaceApprovalAction.approve:
-            if (c.fieldMinutes < 1 || c.fieldMinutes > 30) {
-              throw const WorkspaceFailure('invalid_scope', '整理权限最长30分钟。');
+            if (!core.AccessTiming.acceptsOrganizationLifetime(
+              Duration(minutes: c.fieldMinutes),
+            )) {
+              throw const WorkspaceFailure(
+                'invalid_scope',
+                '请选择2、4、8或24小时的整理期限。',
+              );
             }
             await owner.approveOrganization(
               t.id,

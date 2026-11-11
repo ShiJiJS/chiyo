@@ -3,20 +3,29 @@ import 'package:flutter/foundation.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_workspace/workspace_transport.dart';
 import 'package:info_workspace/plugin_transport.dart';
+import 'workspace_sync.dart';
 
 /// One connection's memory-only owner projection. A failed page never changes
 /// the published contents or cursor. Writes are never queued here.
-class RemoteLibraryCache extends ChangeNotifier {
+class RemoteLibraryCache extends ChangeNotifier implements WorkspaceSync {
   RemoteLibraryCache(this.client, this.changed);
   final OwnerClient client;
   final void Function() changed;
   Map<String, dynamic>? resources;
   String? _cursor;
+  @override
   DateTime? updatedAt;
+  @override
   Object? failure;
   Future<void>? _running;
   bool _closed = false;
+  @override
+  bool get enabled => true;
+  @override
+  bool get needsReview => false;
+  @override
   bool get busy => _running != null;
+  @override
   Future<void> synchronize({bool requireFresh = false}) {
     if (_closed) return Future.value();
     if (_running != null) {

@@ -310,7 +310,7 @@ void main() {
           expect(approved.approvedFields, [ref]);
           expect(
             approved.fieldExpiresAt!.difference(approved.decidedAt!),
-            const Duration(hours: 8),
+            const Duration(hours: 2),
           );
           await f.fetch(session, request.id, 'combined-file');
           expect(f.driver.bodies.values.single, [1, 2, 3, 4]);

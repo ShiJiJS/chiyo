@@ -243,11 +243,7 @@ class ApprovalsState extends State<Approvals> {
                   isExpanded: true,
                   items:
                       {
-                            5,
-                            15,
-                            30,
-                            60,
-                            120,
+                            ...AccessTiming.waitingMinutes,
                             widget.service.owner.requestLifetime.inMinutes,
                           }
                           .map(
@@ -475,7 +471,9 @@ class ApprovalsState extends State<Approvals> {
                             task: current.organization!,
                             remainingSeconds:
                                 current.organizationRemainingSeconds,
-                            minutes: _organizationMinutes[current.id] ?? 30,
+                            minutes:
+                                _organizationMinutes[current.id] ??
+                                AccessTiming.defaultMinutes,
                             onMinutesChanged: (value) => setState(
                               () => _organizationMinutes[current.id] = value,
                             ),
@@ -1368,10 +1366,10 @@ class ApprovalsState extends State<Approvals> {
     final busy =
         _busy.contains(request.id) || !widget.service.owner.serviceAvailable;
     final minutes = pending
-        ? (_grantMinutes[request.id] ?? 480)
+        ? (_grantMinutes[request.id] ?? AccessTiming.defaultMinutes)
         : (request.grantLifetime?.inMinutes ??
               _grantMinutes[request.id] ??
-              480);
+              AccessTiming.defaultMinutes);
     final Iterable<FieldRef> refs = pending
         ? selected
         : (request.approvedFields ?? <FieldRef>[]);
@@ -1472,10 +1470,10 @@ class ApprovalsState extends State<Approvals> {
                   isExpanded: true,
                   value: minutes,
                   items: [
-                    for (final n in {15, 30, 60, 480, minutes})
+                    for (final n in {...AccessTiming.grantMinutes, minutes})
                       DropdownMenuItem(
                         value: n,
-                        child: Text(n == 480 ? '8 小时（默认）' : _durationLabel(n)),
+                        child: Text(_durationLabel(n)),
                       ),
                     const DropdownMenuItem(value: -1, child: Text('自定义…')),
                   ],
@@ -1681,7 +1679,7 @@ class ApprovalsState extends State<Approvals> {
     final pending = request.state == AccessRequestState.pending;
     final busy =
         _busy.contains(request.id) || !widget.service.owner.serviceAvailable;
-    final minutes = _grantMinutes[request.id] ?? 480;
+    final minutes = _grantMinutes[request.id] ?? AccessTiming.defaultMinutes;
     final valid = minutes >= 1 && minutes <= 10080;
     final reviewedVersions = _reviewedVersions(selected);
     final scopeChange =

@@ -137,6 +137,10 @@ void main() {
       ]) => invoke('codex_info', {
         'association': association,
         'command': command,
+        if (command == 'import-submit' || command == 'update-submit') ...{
+          'title': command == 'import-submit' ? '新增合成关联文档' : '修改合成文档正文',
+          'purpose': '核对真实提案、原版本与保存结果',
+        },
         ...values,
       });
       final directories = await cli('directory-list');

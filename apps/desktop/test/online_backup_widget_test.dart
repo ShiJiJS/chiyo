@@ -142,6 +142,13 @@ void main() {
         expect(output.stages, 2);
         expect(t.takeException(), isNull);
         await ui.tap('backup-flow-close');
+        final savedStatus = await ui.resolve(() => live!.backups.status());
+        expect(savedStatus.latestArchiveLocation, archive);
+        expect(savedStatus.latestArchiveAt, isNotNull);
+        expect(savedStatus.latestArchive!.name, 'UI 完整备份.aimbackup');
+        await ui.until(
+          () => find.textContaining('位置：$archive').evaluate().isNotEmpty,
+        );
         await detach();
 
         final targetProfile = await ui.resolve(() async {

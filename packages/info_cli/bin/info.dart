@@ -2,12 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/agent_client.dart';
+import 'package:info_cli/agent_help.dart';
 import 'package:info_cli/desktop_control.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'package:info_remote/automatic_connection.dart';
 
 /// JSON-lines commands never carry or print session/grant credentials.
 Future<void> main(List<String> args) async {
+  if (args.length == 1 && args.single == '--help') {
+    stdout.writeln(jsonEncode(agentCommandHelp()));
+    return;
+  }
   if (args.isNotEmpty && args.first == 'app') {
     final result = await desktopControlCommand(args);
     stdout.writeln(jsonEncode(result.output));
@@ -16,12 +22,12 @@ Future<void> main(List<String> args) async {
   }
   var port = 47125;
   AgentConnectionProfile? connection;
+  File? connectionFile;
   if (args.isNotEmpty) {
     if (args.length == 2 && args.first == '--connection') {
       try {
-        connection = await AgentConnectionProfile.read(
-          File(args.last).absolute,
-        );
+        connectionFile = File(args.last).absolute;
+        connection = await AgentConnectionProfile.read(connectionFile);
       } on Object {
         stdout.writeln(jsonEncode({'status': 'connection_unavailable'}));
         exitCode = 64;
@@ -42,12 +48,19 @@ Future<void> main(List<String> args) async {
   }
   AgentClient client;
   try {
+    if (args.isEmpty) {
+      connectionFile = await discoverAgentConnection();
+      if (connectionFile != null) {
+        connection = await AgentConnectionProfile.read(connectionFile);
+      }
+    }
     client = connection == null
-        ? AgentClient(port)
+        ? AgentClient(port, requireSubmissionMetadata: true)
         : AgentClient.remote(
             connection,
+            requireSubmissionMetadata: true,
             deviceFileStateDirectory: Directory(
-              '${File(args.last).absolute.parent.path}/device-files',
+              '${connectionFile!.parent.path}/device-files',
             ),
           );
   } on Object {

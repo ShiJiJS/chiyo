@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'owner_runtime_materials.dart';
 import 'owner_agent_sessions.dart';
+import 'agent_sessions.dart';
 import 'server_runtime_observation.dart';
 import 'workspace_source.dart';
 

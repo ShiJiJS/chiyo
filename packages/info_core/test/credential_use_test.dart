@@ -107,7 +107,7 @@ void main() {
           if (scenario == 'revoked') {
             await service.owner.revokeCredentialUse(request.id);
           }
-          if (scenario == 'expired') now = now.add(const Duration(minutes: 15));
+          if (scenario == 'expired') now = now.add(const Duration(hours: 2));
           final caller = scenario == 'cross-session'
               ? service.agent.openSession('Another private session')
               : session;
@@ -146,7 +146,7 @@ void main() {
       addTearDown(service.close);
       final pending = service.agent.credentialUseStatus(session, request.id);
       expect(pending['createdAt'], '2026-10-17T00:00:00.123Z');
-      expect(pending['requestExpiresAt'], '2026-10-17T00:30:00.123Z');
+      expect(pending['requestExpiresAt'], '2026-10-17T02:00:00.123Z');
       await service.owner.decideCredentialUse(
         request.id,
         approveCredential: true,
@@ -156,7 +156,7 @@ void main() {
               as Map;
       expect(
         (decision['credentialUse'] as Map)['expiresAt'],
-        '2026-10-17T00:15:00.123Z',
+        '2026-10-17T02:00:00.123Z',
       );
     },
   );

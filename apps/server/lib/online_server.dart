@@ -1,4 +1,5 @@
 import 'owner_sync_routes.dart';
+import 'owner_replication_routes.dart';
 import 'agent_devices.dart';
 import 'agent_gateway.dart';
 import 'package:info_core/agent_server.dart';
@@ -28,10 +29,8 @@ import 'owner_history_routes.dart';
 import 'owner_backup_routes.dart';
 import 'owner_adoption_routes.dart';
 import 'owner_policy_routes.dart';
-import 'package:info_workspace/owner_agent_sessions.dart';
 import 'package:info_workspace/owner_runtime_observation.dart';
 import 'package:info_workspace/runtime_transport.dart';
-import 'package:info_workspace/agent_sessions_transport.dart';
 import 'package:info_storage/info_storage.dart';
 
 /// User management is a separate authenticated surface from the Agent API.
@@ -46,6 +45,7 @@ final class OnlineServer {
     this._backups,
     this._policyState,
     this._onRequestTiming,
+    this._replication,
   ) : _agents = AgentGateway(
         AgentProtocol(
           _runtime.service.agent,
@@ -69,7 +69,8 @@ final class OnlineServer {
           (_files?.needsCleanup != true &&
               _credentials?.needsCleanup != true &&
               _hosts?.needsCleanup != true &&
-              _backups?.needsCleanup != true))
+              _backups?.needsCleanup != true &&
+              _replication?.needsCleanup != true))
         return;
       _fileCleanup = _runtime
           .run(() async {
@@ -77,6 +78,7 @@ final class OnlineServer {
             await _credentials?.cleanup();
             await _hosts?.cleanup();
             await _backups?.cleanup();
+            await _replication?.cleanup();
           })
           .catchError((Object _) {
             /* Retry next sweep; shutdown also releases staging. */
@@ -105,6 +107,7 @@ final class OnlineServer {
   final AgentDeviceRegistry _devices;
   final AgentGateway _agents;
   final OwnerBackupRoutes? _backups;
+  final OwnerReplicationRoutes? _replication;
   final ServerStateRepository? _policyState;
   OwnerPolicyRoutes? _policyRoutesValue;
   OwnerPolicyRoutes get _policyRoutes {
@@ -117,9 +120,6 @@ final class OnlineServer {
   }
 
   OwnerRuntimeObservation? _runtimeObservation;
-  OwnerAgentSessions? _agentSessionsValue;
-  OwnerAgentSessions get _agentSessions =>
-      _agentSessionsValue ??= OwnerAgentSessions(_service.owner);
   OwnerWorkspaceApprovals _approvals;
   OwnerWorkspaceTemplatePackages _plugins;
   late OwnerLibraryScope _ownerScope;
@@ -170,7 +170,6 @@ final class OnlineServer {
     _adoptionRoutesValue = null;
     _policyRoutesValue?.dispose();
     _policyRoutesValue = null;
-    _agentSessionsValue = null;
     _runtimeObservation = null;
     _files = null;
     _credentials = null;
@@ -203,6 +202,8 @@ final class OnlineServer {
     Directory? backupDirectory,
     ServerStateRepository? policyState,
     void Function(Map<String, Object?>)? onRequestTiming,
+    LibraryReplication? replication,
+    Directory? replicationDirectory,
   }) async {
     if (!RegExp(r'^[A-Za-z0-9_-]{43,128}$').hasMatch(ownerToken) ||
         !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(serverId)) {
@@ -210,6 +211,24 @@ final class OnlineServer {
     }
     if ((backups == null) != (backupDirectory == null)) {
       throw const FormatException('Incomplete backup configuration');
+    }
+    if ((replication == null) != (replicationDirectory == null))
+      throw const FormatException('Incomplete replication configuration');
+    if (replicationDirectory != null) {
+      final type = await FileSystemEntity.type(
+        replicationDirectory.path,
+        followLinks: false,
+      );
+      if (type != FileSystemEntityType.notFound &&
+          type != FileSystemEntityType.directory)
+        throw const StorageFailure('sync_staging_failed');
+      await replicationDirectory.create(recursive: true);
+      if ((await Process.run('/bin/chmod', [
+            '700',
+            replicationDirectory.path,
+          ])).exitCode !=
+          0)
+        throw const StorageFailure('sync_staging_failed');
     }
     if (backupDirectory != null) {
       final type = await FileSystemEntity.type(
@@ -252,6 +271,13 @@ final class OnlineServer {
           (Platform.environment['CHIYO_REQUEST_TIMINGS'] == '1'
               ? (value) => stderr.writeln(jsonEncode(value))
               : null),
+      replication == null
+          ? null
+          : OwnerReplicationRoutes(
+              owner: runtime.service.owner,
+              replication: replication,
+              directory: replicationDirectory!,
+            ),
     );
   }
 
@@ -262,6 +288,7 @@ final class OnlineServer {
     try {
       await _files?.dispose();
       await _backups?.dispose();
+      await _replication?.dispose();
     } finally {
       _credentials?.dispose();
       _hosts?.dispose();
@@ -514,13 +541,13 @@ final class OnlineServer {
     if (!{'owner', 'agent'}.contains(path[1])) return 'other';
     const categories = {
       'sync',
+      'replication',
       'updates',
       'catalog',
       'summaries',
       'information',
       'settings',
       'runtime',
-      'agent-sessions',
       'approvals',
       'proposals',
       'history',
@@ -616,7 +643,23 @@ final class OnlineServer {
             'serverId': serverId,
             'workspaceObservation': await _observation(),
             'librarySort': _service.owner.libraryDisplayOrder.name,
+            if (_replication != null)
+              'replication': OwnerReplicationRoutes.capabilities,
           });
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/replication') {
+          final replication = _replication;
+          if (replication == null)
+            throw const WorkspaceFailure(
+              'unsupported_sync',
+              '服务器需要更新后才能同步本地资料库。',
+            );
+          final (code, value) = await replication.dispatch(
+            request.method,
+            path,
+            parsedBody,
+          );
+          await reply(code, value);
         } else if (request.method == 'GET' &&
             request.uri.path == '/v1/owner/runtime') {
           if (request.uri.hasQuery) throw const FormatException();
@@ -628,10 +671,6 @@ final class OnlineServer {
               )).read(),
             ),
           );
-        } else if (request.method == 'GET' &&
-            request.uri.path == '/v1/owner/agent-sessions') {
-          if (request.uri.hasQuery) throw const FormatException();
-          await reply(200, agentSessionsToJson(await _agentSessions.read()));
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/settings') {
           final (code, value) = await _policyRoutes.dispatch(

@@ -126,6 +126,7 @@ void main() {
     () => runtime.service.owner.decideCredentialUse(
       id,
       approveCredential: true,
+      lifetime: const Duration(minutes: 15),
       fields: [FieldRef(item.id, item.fields.first.id)],
       fieldLifetime: const Duration(minutes: 30),
     ),
@@ -242,7 +243,7 @@ void main() {
       await reopen();
       expect(decision(approved.id)['state'], 'expired');
       final pending = await request();
-      now = now.add(const Duration(hours: 1));
+      now = now.add(const Duration(hours: 2, minutes: 1));
       await runtime.run(
         () => expect(
           runtime.service.agent.credentialUseStatus(
@@ -252,7 +253,7 @@ void main() {
           'expired',
         ),
       );
-      now = now.subtract(const Duration(minutes: 59));
+      now = now.subtract(const Duration(hours: 2));
       await reopen();
       expect(
         runtime.service.agent.credentialUseStatus(

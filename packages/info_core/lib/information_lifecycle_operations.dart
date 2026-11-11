@@ -15,6 +15,7 @@ final class InformationLifecycleCommand {
     required this.action,
     required this.expectedVersion,
     this.revisionVersion,
+    this.snapshotId,
     this.entryId,
     this.expectedCatalogVersion,
     this.expectedCurrentVersion,
@@ -24,6 +25,11 @@ final class InformationLifecycleCommand {
         value.isNotEmpty &&
         value.length <= 200 &&
         !value.codeUnits.any((c) => c < 33 || c > 126);
+    if (snapshotId != null &&
+        (action != InformationLifecycleAction.restoreRevision ||
+            !RegExp(r'^[0-9a-f]{64}$').hasMatch(snapshotId!))) {
+      throw const AccessFailure('invalid_information');
+    }
     if (!validId(itemId) ||
         expectedVersion < 1 ||
         (revisionVersion != null && revisionVersion! < 1) ||
@@ -56,12 +62,14 @@ final class InformationLifecycleCommand {
   final int expectedVersion;
   final int? revisionVersion, expectedCatalogVersion, expectedCurrentVersion;
   final String? entryId;
+  final String? snapshotId;
   Map<String, Object?> toJson() => {
     'operationId': operationId,
     'itemId': itemId,
     'action': action.name,
     'expectedVersion': expectedVersion,
     'revisionVersion': revisionVersion,
+    if (snapshotId != null) 'snapshotId': snapshotId,
     'entryId': entryId,
     'expectedCatalogVersion': expectedCatalogVersion,
     'expectedCurrentVersion': expectedCurrentVersion,
@@ -69,7 +77,8 @@ final class InformationLifecycleCommand {
   String get digest =>
       sha256.convert(utf8.encode(jsonEncode(toJson()))).toString();
   factory InformationLifecycleCommand.fromJson(Map<String, dynamic> json) {
-    if (json.length != 8 ||
+    if (json.length != (json.containsKey('snapshotId') ? 9 : 8) ||
+        (json.containsKey('snapshotId') && json['snapshotId'] is! String) ||
         json['operationId'] is! String ||
         json['itemId'] is! String ||
         json['action'] is! String ||
@@ -95,6 +104,7 @@ final class InformationLifecycleCommand {
         ),
         expectedVersion: json['expectedVersion'] as int,
         revisionVersion: json['revisionVersion'] as int?,
+        snapshotId: json['snapshotId'] as String?,
         entryId: json['entryId'] as String?,
         expectedCatalogVersion: json['expectedCatalogVersion'] as int?,
         expectedCurrentVersion: json['expectedCurrentVersion'] as int?,

@@ -5,7 +5,8 @@ import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
 import 'record_mutation.dart';
-import 'library_entries.dart';
+import 'library_document.dart';
+import 'template_record_content.dart';
 
 Future<bool?> showLibraryHistory(
   BuildContext context,
@@ -83,51 +84,92 @@ Map<String, String> librarySnapshot(
   };
 }
 
-class LibrarySnapshotView extends StatelessWidget {
-  const LibrarySnapshotView({super.key, required this.archive});
+class LibrarySnapshotView extends StatefulWidget {
+  const LibrarySnapshotView({
+    super.key,
+    required this.archive,
+    this.fileBuilder,
+  });
   final WorkspaceArchive archive;
+  final Widget Function(String)? fileBuilder;
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      for (final e in librarySnapshot(
-        archive,
-        includeEntries: false,
-      ).entries.where((e) => e.key != '资料结构'))
-        Padding(
-          padding: const EdgeInsets.only(bottom: 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                e.key,
-                style: libraryText(
-                  context,
-                  13,
-                  color: UiPalette.of(context).muted,
-                ),
-              ),
-              const SizedBox(height: 5),
-              SelectableText(
-                e.value,
-                style: libraryText(context, 14, height: 1.7),
-              ),
-            ],
-          ),
-        ),
-      for (final field in workspaceFields(archive.detail).where(
-        (f) =>
-            f['type'] == 'entries' &&
-            archive.detail.values.containsKey(f['key']),
-      )) ...[
+  State<LibrarySnapshotView> createState() => _LibrarySnapshotViewState();
+}
+
+class _LibrarySnapshotViewState extends State<LibrarySnapshotView> {
+  final _reading = DocumentReadingController();
+  @override
+  void dispose() {
+    _reading.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final archive = widget.archive;
+    final detail = archive.detail;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(detail.record.name, style: libraryHeading(context, 20)),
+        const SizedBox(height: 8),
         Text(
-          field['label'] as String,
+          '${detail.record.type.name} · ${archive.directoryName ?? (detail.record.directoryId == null ? '未分类' : '原目录已移除')}',
           style: libraryText(context, 13, color: UiPalette.of(context).muted),
         ),
-        LibraryEntryTimeline(archive.detail.values[field['key']]),
+        Text(
+          '保存于 ${libraryLocalDateTime(archive.archivedAt)}',
+          style: libraryText(context, 12, color: UiPalette.of(context).muted),
+        ),
+        if (detail.record.description.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              detail.record.description,
+              style: libraryText(context, 14),
+            ),
+          ),
+        TemplateRecordContent(
+          detail: detail,
+          relations: _ArchiveRelations(archive),
+          onOpen: null,
+          documentController: _reading,
+          fileBuilder:
+              widget.fileBuilder ??
+              (key) {
+                final raw = detail.values[key];
+                final version = raw is Map ? raw['version'] : null;
+                final name = raw is Map ? raw['filename'] : null;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.insert_drive_file_outlined),
+                  title: Text(name is String ? name : detail.record.name),
+                  subtitle: Text(
+                    version == null ? '已保存的附件' : '附件 · 第 $version 版',
+                  ),
+                );
+              },
+          credentialBuilder: (_) => const Text('凭据内容不在历史预览中展示。'),
+        ),
       ],
-    ],
-  );
+    );
+  }
+}
+
+class _ArchiveRelations implements WorkspaceRelationSource {
+  _ArchiveRelations(this.archive);
+  final WorkspaceArchive archive;
+  @override
+  Future<List<WorkspaceRecordSummary>> readSummaries(
+    Iterable<WorkspaceRecordRef> refs,
+  ) async => [
+    for (final ref in refs)
+      if (archive.targets[ref] != null) archive.targets[ref]!,
+  ];
+  @override
+  Future<WorkspaceResults> queryRelationCandidates(
+    WorkspaceRelationQuery query,
+  ) async => WorkspaceResults(items: const [], total: 0, offset: 0);
 }
 
 class _HistoryDialog extends StatefulWidget {
@@ -221,6 +263,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
       final preview = await widget.source.previewRevision(
         widget.ref,
         revision.version,
+        snapshotId: revision.snapshotId,
         expectedVersion: _current!.version,
       );
       final catalog = await widget.source.loadCatalog();
@@ -282,6 +325,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
       expectedVersion: preview.current.version,
       expectedCatalogVersion: preview.catalogVersion,
       revisionVersion: preview.archive.detail.version,
+      snapshotId: preview.archive.snapshotId,
     );
     final result = await _mutation.submit(
       intent,
@@ -293,6 +337,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
           expectedCatalogVersion: preview.catalogVersion,
           action: WorkspaceRecordAction.restoreRevision,
           revisionVersion: preview.archive.detail.version,
+          snapshotId: preview.archive.snapshotId,
         ),
       ),
     );
@@ -433,7 +478,14 @@ class _HistoryDialogState extends State<_HistoryDialog> {
                     const Text('尚无历史版本。编辑保存后可在这里比较和恢复。'),
                   for (final r in _revisions ?? <WorkspaceRevision>[])
                     DesktopButton(
-                      key: ValueKey('library-version-${r.version}'),
+                      key: ValueKey(
+                        (_revisions ?? <WorkspaceRevision>[])
+                                    .where((v) => v.version == r.version)
+                                    .length >
+                                1
+                            ? 'library-version-${r.version}-${r.snapshotId}'
+                            : 'library-version-${r.version}',
+                      ),
                       kind: DesktopButtonKind.quiet,
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.symmetric(vertical: 14),

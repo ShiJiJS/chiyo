@@ -50,10 +50,15 @@ class WorkspaceLibraryRecycleRecord {
     required this.type,
     required this.directoryId,
     required Iterable<String> path,
+    this.recycleEntryId,
   }) : path = List.unmodifiable(path);
   final WorkspaceRecordRef ref;
   final String name, type;
   final String? directoryId;
+
+  /// Read-only retained origin, supplied only for a restore preview. Mutations
+  /// still target the whole batch and never this individual member.
+  final String? recycleEntryId;
   final List<String> path;
 }
 

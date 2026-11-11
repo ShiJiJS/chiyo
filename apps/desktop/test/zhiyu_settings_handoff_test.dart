@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/desktop_controls.dart';
-import 'package:info_desktop/workspace/agents_page.dart';
 import 'package:info_desktop/workspace/backup_page.dart';
 import 'package:info_desktop/workspace/classification_page.dart';
 import 'package:info_desktop/workspace/library_page.dart';
@@ -246,13 +245,17 @@ void main() {
             ).writeAsString(jsonEncode(geometry)),
           );
         }
-        for (final section in WorkspaceSettingsSection.values) {
+        for (final section in WorkspaceSettingsSection.values.where(
+          (s) => s != WorkspaceSettingsSection.connection,
+        )) {
           await tap(t, 'settings-section-${section.name}');
           final page = t.widget<WorkspaceSettingsPage>(
             find.byType(WorkspaceSettingsPage),
           );
           expect(page.controller.section, section);
           switch (section) {
+            case WorkspaceSettingsSection.connection:
+              fail('Connection section needs an online configuration host');
             case WorkspaceSettingsSection.appearance:
               expect(
                 find.byKey(const ValueKey('settings-theme-light')),
@@ -288,9 +291,6 @@ void main() {
             case WorkspaceSettingsSection.runtime:
               expect(find.byType(WorkspaceRuntimePage), findsOneWidget);
               expect(page.runtime.value!.closed, false);
-            case WorkspaceSettingsSection.agents:
-              expect(find.byType(WorkspaceAgentsPage), findsOneWidget);
-              expect(page.agents.value!.session.activeGrants, 0);
           }
           expect((await s.settings.read()).values, saved.values);
           observations[section.name] = {
@@ -354,7 +354,7 @@ void main() {
           (await s.approvals.query(const WorkspaceApprovalQuery())).total,
           before,
         );
-        expect((await s.agents.read()).session.activeGrants, 0);
+        expect((await s.runtime.previewQuit()).grants, 0);
         // Recreate the settings page through real top navigation, not a local widget copy.
         await tap(t, 'workspace-nav-library');
         await tap(t, 'workspace-nav-settings');
@@ -363,7 +363,7 @@ void main() {
               .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
               .controller
               .section,
-          WorkspaceSettingsSection.agents,
+          WorkspaceSettingsSection.runtime,
         );
         await tap(t, 'settings-section-notifications');
         expect(

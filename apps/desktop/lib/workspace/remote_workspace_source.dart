@@ -29,7 +29,6 @@ import 'remote_workspace_hosts.dart';
 import 'remote_workspace_history.dart';
 import 'remote_workspace_backups.dart';
 import 'remote_workspace_settings.dart';
-import 'remote_workspace_agents.dart';
 import 'remote_workspace_runtime.dart';
 import '../online_desktop_runtime.dart';
 import 'package:info_workspace/adoption_transport.dart';
@@ -39,6 +38,7 @@ import 'package:info_workspace/adoption_transport.dart';
 class RemoteWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceRecycledFiles,
         WorkspaceLibraryNotifications,
         WorkspaceStorageLocation,
         WorkspaceLibraryMove,
@@ -87,8 +87,6 @@ class RemoteWorkspaceSource
           changed: notifyConnectionChanged,
         );
   @override
-  late final WorkspaceAgentsSource agents = RemoteWorkspaceAgents(client);
-  @override
   late final RemoteWorkspaceSettings settings = RemoteWorkspaceSettings(
     client,
     directory: deviceFilesDirectory,
@@ -136,6 +134,7 @@ class RemoteWorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) =>
       _history.previewRevision(ref, version, expectedVersion: expectedVersion);
   @override
@@ -147,6 +146,12 @@ class RemoteWorkspaceSource
   @override
   Future<WorkspaceArchive> readRecycled(String entryId) =>
       _history.readRecycled(entryId);
+  @override
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  }) => _history.readRecycledFilePreview(entryId, fieldKey, page: page);
   @override
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
       _history.changeRecord(change);
@@ -187,8 +192,15 @@ class RemoteWorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
-  }) => files.preview(record, fieldKey, version: version, page: page);
+  }) => files.preview(
+    record,
+    fieldKey,
+    version: version,
+    exact: exact,
+    page: page,
+  );
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
       files.importFile(input);

@@ -36,7 +36,11 @@ void main() {
         return jsonDecode(lines.current) as Map<String, dynamic>;
       }
 
-      await command({'command': 'session', 'chatLabel': 'deleting chat'});
+      await command({
+        'command': 'session',
+        'externalChatId': 'synthetic-delete-cli-test',
+        'chatLabel': 'deleting chat',
+      });
       final requested = await command({
         'command': 'request',
         'purpose': 'read',
@@ -50,6 +54,8 @@ void main() {
       await command({'command': 'claim', 'requestId': requested['requestId']});
       final proposal = await command({
         'command': 'delete-submit',
+        'title': '合成资料变更',
+        'purpose': '执行合成验收的资料变更',
         'itemId': 'demo-server',
         'baseVersion': 1,
         'fieldId': 'host',

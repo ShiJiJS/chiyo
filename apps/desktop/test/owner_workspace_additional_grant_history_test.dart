@@ -71,6 +71,8 @@ void main() {
     final m = ApprovalsController(source.approvals, const Stream.empty());
     try {
       await m.open(id);
+      m.lifetime(240);
+      m.lifetime(120, credential: true);
       await m.decide(WorkspaceApprovalAction.approve);
       expect(m.writeFailure, isNull);
     } finally {
@@ -248,7 +250,7 @@ void main() {
         );
         final token = service.agent.claim(session, r.id).token;
         expect(await service.agent.read(token, field), 'PRIVATE-FIELD');
-        now = now.add(const Duration(minutes: 16));
+        now = now.add(const Duration(minutes: 121));
         await model.load();
         expect(
           model.detail!.summary.state,

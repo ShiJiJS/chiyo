@@ -6,16 +6,10 @@ import 'template_package_decoder.dart';
 import 'workspace_source.dart';
 
 class _PackageSelection {
-  _PackageSelection(
-    this.filename,
-    List<int> bytes, {
-    this.legacySource,
-    this.validate,
-  }) : bytes = List.unmodifiable(bytes);
+  _PackageSelection(this.filename, List<int> bytes)
+    : bytes = List.unmodifiable(bytes);
   final String filename;
   final List<int> bytes;
-  final Map<String, Object?>? legacySource;
-  final void Function()? validate;
 }
 
 /// Real declarative packages. Selection paths never enter workspace DTOs or
@@ -178,23 +172,6 @@ class OwnerWorkspaceTemplatePackages implements WorkspacePluginSource {
     for (final p in packages)
       for (final t in p.templates) '${p.id}/${t.id}',
   };
-  WorkspacePluginCandidate stageLegacy(
-    String filename,
-    List<int> bytes,
-    Map<String, Object?> provenance,
-    void Function() validate,
-  ) {
-    _check();
-    return _stage(
-      _PackageSelection(
-        filename,
-        bytes,
-        legacySource: workspaceImmutableMap(provenance),
-        validate: validate,
-      ),
-    );
-  }
-
   WorkspacePluginCandidate _stage(_PackageSelection input) {
     _check();
     if (_selections.length >= 32) {
@@ -228,15 +205,11 @@ class OwnerWorkspaceTemplatePackages implements WorkspacePluginSource {
     if (candidate == null) {
       throw const WorkspaceFailure('selection_changed', '原文件选择已释放，请重新选择。');
     }
-    candidate.validate?.call();
-    var p = TemplatePackageDecoder().decode(
+    final p = TemplatePackageDecoder().decode(
       candidate.bytes,
       origin: candidate.filename,
       knownTemplates: _known,
     );
-    if (candidate.legacySource != null) {
-      p = p.fromLegacy(candidate.legacySource!);
-    }
     return p;
   }
 
@@ -383,7 +356,6 @@ class OwnerWorkspaceTemplatePackages implements WorkspacePluginSource {
           enabled: true,
           origin: selection.filename,
           bytes: selection.bytes,
-          legacySource: selection.legacySource,
         );
       } else if (c.selectionId != null) {
         throw const WorkspaceFailure('validation', '启停和移除不应携带文件选择。');
@@ -404,7 +376,6 @@ class OwnerWorkspaceTemplatePackages implements WorkspacePluginSource {
             if (!identical(_selections[c.selectionId], selected)) {
               throw const WorkspaceFailure('selection_changed', '原选择已释放，尚未安装。');
             }
-            selected?.validate?.call();
           }
         },
       );

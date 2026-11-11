@@ -52,7 +52,7 @@ void main() async {
     },
   );
 
-  testWidgets('owner replaces a requested field and selects a shorter grant', (
+  testWidgets('owner replaces a requested field and changes its grant time', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1280, 800);
@@ -101,7 +101,7 @@ void main() async {
     await selectGrantMinutes(
       tester,
       find.byKey(ValueKey('grant-lifetime-${request.id}')),
-      30,
+      240,
     );
     await tester.ensureVisible(find.text('批准所选字段'));
     await tester.pumpAndSettle();
@@ -110,7 +110,7 @@ void main() async {
 
     final grant = core.agent.claim(session, request.id);
     expect(grant.fields, [replacement]);
-    expect(grant.expiresAt, DateTime.utc(2026, 10, 16, 0, 30));
+    expect(grant.expiresAt, DateTime.utc(2026, 10, 16, 4));
     expect(await core.agent.read(grant.token, replacement), 'Use test network');
     expect(
       () => core.agent.read(grant.token, requested),

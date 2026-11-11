@@ -184,6 +184,9 @@ final class OnlineInformationRuntime {
             'id': request.id,
             'session': request.session,
             'purpose': request.purpose,
+            if (request.agentName.isNotEmpty) 'agentName': request.agentName,
+            if (request.externalChatId.isNotEmpty)
+              'externalChatId': request.externalChatId,
             'operationId': request.operationId,
             'createdAt': request.createdAt.toUtc().toIso8601String(),
             'expiresAt': request.expiresAt.toUtc().toIso8601String(),
@@ -314,6 +317,12 @@ final class OnlineInformationRuntime {
           date(row['createdAt']),
           date(row['expiresAt']),
           operationId: operation as String?,
+          agentName: row['agentName'] == null
+              ? ''
+              : text(row['agentName'], 200),
+          externalChatId: row['externalChatId'] == null
+              ? ''
+              : text(row['externalChatId'], 200),
         );
         if (request.fields.isEmpty ||
             !request.expiresAt.isAfter(request.createdAt)) {

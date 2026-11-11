@@ -81,7 +81,7 @@ void main() {
       service.agent.request(session, 'inspect', [
         host,
       ], operationId: 'expire-1');
-      now = now.add(const Duration(hours: 1));
+      now = now.add(const Duration(hours: 2));
       service.agent.request(session, 'inspect', [
         host,
       ], operationId: 'expire-1');

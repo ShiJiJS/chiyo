@@ -29,13 +29,13 @@ extension OwnerOrganizationTasks on OwnerAccess {
   Future<void> approveOrganization(
     String id,
     List<String> selected, {
-    Duration lifetime = const Duration(minutes: 30),
+    Duration lifetime = AccessTiming.defaultLifetime,
   }) => _serialize(() async {
     final task = _organization(id);
     if (organizationState(task) != OrganizationTaskState.pending) {
       throw const AccessFailure('invalid_request');
     }
-    if (lifetime <= Duration.zero || lifetime > const Duration(minutes: 30)) {
+    if (!AccessTiming.acceptsOrganizationLifetime(lifetime)) {
       throw const AccessFailure('invalid_duration');
     }
     final ids = selected.toSet();
@@ -169,8 +169,18 @@ extension AgentOrganizationTasks on AgentAccess {
     String purpose,
     List<String> itemIds, {
     String agentName = '',
+    String title = '',
+    String externalChatId = '',
   }) => _service.owner._serialize(() async {
     _service._requireSession(session);
+    if (!validSubmissionMetadata(
+      title: title,
+      agentName: agentName,
+      purpose: purpose,
+      externalChatId: externalChatId,
+    )) {
+      throw const AccessFailure('invalid_submission_metadata');
+    }
     final ids = itemIds.toSet();
     if (purpose.trim().isEmpty ||
         purpose.length > 2000 ||
@@ -202,6 +212,8 @@ extension AgentOrganizationTasks on AgentAccess {
       chatLabel: _service._sessions[session]!,
       purpose: purpose.trim(),
       agentName: agentName.trim(),
+      title: title.trim(),
+      externalChatId: externalChatId.trim(),
       createdAt: now,
       expiresAt: now.add(_service._requestLifetime),
       state: OrganizationTaskState.pending,

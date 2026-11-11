@@ -9,6 +9,7 @@ import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/workspace/library_controller.dart';
 import 'package:info_desktop/workspace/library_page.dart';
+import 'package:info_desktop/workspace/library_widgets.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
 import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -227,9 +228,13 @@ void main() {
       await t.tap(find.text('编辑信息'));
       await t.pumpAndSettle();
       final tag = model.catalog!.tags.singleWhere((t) => t.name == '压力标签 099');
+      final tagSearch = find.byKey(const ValueKey('library-edit-tag-search'));
+      await t.ensureVisible(tagSearch);
+      await t.enterText(tagSearch, tag.name);
+      await t.pumpAndSettle();
       final tagChip = find.descendant(
         of: find.byType(DesktopDialog),
-        matching: find.text(tag.name),
+        matching: find.widgetWithText(LibraryTag, tag.name),
       );
       await t.ensureVisible(tagChip);
       await t.tap(tagChip);

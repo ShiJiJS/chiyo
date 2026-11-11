@@ -13,7 +13,15 @@ final class RemoteFailure implements Exception {
 
 /// Owns a client connection only, never the server process or a local library.
 /// Management credentials belong to the user App, not the Agent CLI.
-final class OwnerClient {
+abstract interface class OwnerTransport {
+  Future<Map<String, dynamic>> request(
+    String method,
+    String path, [
+    Object? body,
+  ]);
+}
+
+final class OwnerClient implements OwnerTransport {
   OwnerClient._(
     this.address,
     this._token,

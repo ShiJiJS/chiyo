@@ -7,13 +7,43 @@ import 'package:info_core/protocol_json.dart';
 /// Private device connection, not the user's management identity. Pin the
 /// intended server before sending a command; no discovery of owner credentials.
 final class AgentConnectionProfile {
-  AgentConnectionProfile({
-    required this.address,
-    required this.deviceToken,
-    required this.serverId,
-    this.certificate = '',
-  }) {
-    if (address.scheme != 'https' ||
+  factory AgentConnectionProfile({
+    required Uri address,
+    required String deviceToken,
+    required String serverId,
+    String certificate = '',
+  }) => AgentConnectionProfile._(
+    address,
+    deviceToken,
+    serverId,
+    certificate,
+    false,
+  );
+
+  factory AgentConnectionProfile.local({
+    required int port,
+    required String deviceToken,
+    required String libraryId,
+  }) => AgentConnectionProfile._(
+    Uri(scheme: 'http', host: '127.0.0.1', port: port),
+    deviceToken,
+    libraryId,
+    '',
+    true,
+  );
+
+  AgentConnectionProfile._(
+    this.address,
+    this.deviceToken,
+    this.serverId,
+    this.certificate,
+    this.isLocal,
+  ) {
+    if ((isLocal
+            ? address.scheme != 'http' ||
+                  address.host != '127.0.0.1' ||
+                  certificate.isNotEmpty
+            : address.scheme != 'https') ||
         address.host.isEmpty ||
         address.userInfo.isNotEmpty ||
         !const ['', '/'].contains(address.path) ||
@@ -29,11 +59,12 @@ final class AgentConnectionProfile {
       throw const FormatException('Invalid Agent connection');
     }
   }
+  final bool isLocal;
   final Uri address;
   final String deviceToken, serverId, certificate;
   Map<String, Object?> toPrivateJson() => {
-    'version': 1,
-    'role': 'agent',
+    'version': isLocal ? 2 : 1,
+    'role': isLocal ? 'local-agent' : 'agent',
     'address': address.toString(),
     'deviceToken': deviceToken,
     'serverId': serverId,
@@ -42,8 +73,8 @@ final class AgentConnectionProfile {
   factory AgentConnectionProfile.fromPrivateJson(Map<String, dynamic> j) {
     try {
       if (j.length != 6 ||
-          j['version'] != 1 ||
-          j['role'] != 'agent' ||
+          !(j['version'] == 1 && j['role'] == 'agent' ||
+              j['version'] == 2 && j['role'] == 'local-agent') ||
           j.keys.any(
             (k) => !const {
               'version',
@@ -55,6 +86,17 @@ final class AgentConnectionProfile {
             }.contains(k),
           )) {
         throw const FormatException();
+      }
+      if (j['role'] == 'local-agent') {
+        final address = Uri.parse(j['address'] as String);
+        final profile = AgentConnectionProfile.local(
+          port: address.port,
+          deviceToken: j['deviceToken'] as String,
+          libraryId: j['serverId'] as String,
+        );
+        if (address != profile.address || j['certificate'] != '')
+          throw const FormatException();
+        return profile;
       }
       return AgentConnectionProfile(
         address: Uri.parse(j['address'] as String),
@@ -172,7 +214,7 @@ final class AgentConnection {
     try {
       return await (() async {
         final request = active = await _http.postUrl(
-          profile.address.resolve('/v1/agent$path'),
+          profile.address.resolve(profile.isLocal ? path : '/v1/agent$path'),
         );
         if (expired) {
           request.abort();

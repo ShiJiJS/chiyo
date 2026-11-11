@@ -33,8 +33,8 @@ the secret or a secret-file path. Approval alone performs neither operation.
    request (`timeoutMs`0–300000) and continue unrelated work while pending.
    Approval does not start anything. Inspect `decision.credentialUse.approved`,
    current `state` and the returned validity; only `available` admits a new operation.
-   Timed credential use has a fixed `expiresAt` (normally15minutes, owner may
-   choose30). If `credential-ssh-session-validity.v1` is available for protocol2
+   Timed credential use has a fixed `expiresAt` (normally two hours; the user can choose
+   2, 4, 8 or 24 hours). If `credential-ssh-session-validity.v1` is available for protocol2
    `ssh_identity`, the user may instead choose “不限时（限本聊天）” in the App.
    The decision then returns `validity:"session"`, `expiresAt:null` and `sessionId`.
    Null expiry alone is not permission: check this capability, the explicit
@@ -184,7 +184,7 @@ not credentials for filling or process injection.
    intended site. Do not combine `fill` with `launch` or `readFields`. Keep its
    returned `requestId`, query `status`/bounded `wait`, and wait for
    `decision.credentialUse.approved` and current `state:available`. The grant
-   fixes this credential version, application and15/30minute deadline.
+   fixes this credential version, application and the user-approved 2/4/8/24-hour deadline.
 4. After approval, prepare an empty password box and click it again. Leave it
    masked and keep the intended application in the Windows foreground. A
    browser tool's DOM focus or visible panel alone may leave the approval app

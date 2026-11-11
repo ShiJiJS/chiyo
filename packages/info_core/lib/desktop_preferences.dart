@@ -270,7 +270,7 @@ extension OwnerPersistentDesktopPreferences on OwnerAccess {
         // Imported/older libraries can contain another valid duration. Keep
         // it when changing unrelated settings; only new duration choices use
         // the existing presets. Exact old receipts still replay unchanged.
-        if (![5, 15, 30, 60, 120].contains(desired.requestMinutes) &&
+        if (!AccessTiming.waitingMinutes.contains(desired.requestMinutes) &&
             desired.requestMinutes != desktopPreferences.requestMinutes) {
           throw const AccessFailure('invalid_preferences');
         }

@@ -92,6 +92,7 @@ class OwnerHistoryRoutes {
         final b = historyEnvelope(body, [
           'record',
           'revision',
+          if (workspaceObject(body).containsKey('snapshotId')) 'snapshotId',
           'expectedVersion',
         ]);
         return (
@@ -100,6 +101,7 @@ class OwnerHistoryRoutes {
             await history.previewRevision(
               recordRefFromJson(b['record']),
               historyInt(b['revision'], min: 1),
+              snapshotId: b['snapshotId'] as String?,
               expectedVersion: historyInt(b['expectedVersion'], min: 1),
             ),
           ),
@@ -118,6 +120,21 @@ class OwnerHistoryRoutes {
               offset: historyInt(b['offset']),
               limit: historyInt(b['limit'], min: 1, max: 500),
             ),
+          ),
+        );
+      }
+      if (tail.length == 1 &&
+          tail.single == 'recycled-file' &&
+          method == 'POST') {
+        final b = historyEnvelope(body, ['entryId', 'fieldKey']);
+        final ref = await history.resolveRecycledFile(
+          historyText(b['entryId']),
+          historyText(b['fieldKey']),
+        );
+        return (
+          200,
+          fileOriginalToJson(
+            await library.owner.readInformationAttachment(ref),
           ),
         );
       }

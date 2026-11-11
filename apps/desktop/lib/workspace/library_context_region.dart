@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../ui_palette.dart';
 
 /// Pointer and keyboard context menus share the same action callback. Control
 /// clicking must not also activate the underlying row when the pointer lifts.
@@ -82,5 +83,12 @@ Future<T?> showLibraryContextMenu<T>(
       Offset.zero & overlay.size,
     ),
     items: items,
+    color: UiPalette.of(context).paper,
+    surfaceTintColor: Colors.transparent,
+    shadowColor: Colors.black26,
+    elevation: 8,
+    menuPadding: const EdgeInsets.symmetric(vertical: 6),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    constraints: const BoxConstraints(minWidth: 190, maxWidth: 290),
   );
 }

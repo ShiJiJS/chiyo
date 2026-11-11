@@ -46,7 +46,7 @@ void main() {
       picker: picker,
       changed: () => source.notifyExternalChange(),
     );
-    legacy = OwnerWorkspaceLegacyTemplates(service.owner, plugins);
+    legacy = OwnerWorkspaceLegacyTemplates(service.owner);
     source = OwnerWorkspaceSource(
       owner: service.owner,
       fileSelections: OwnerWorkspaceFileSelections(
@@ -221,46 +221,6 @@ void main() {
       expect(
         (await plugins.receipt(installed.operationId))!.digest,
         installed.digest,
-      );
-    },
-  );
-  test(
-    'legacy source loads actual empty data, then converts a real retained definition with provenance',
-    () async {
-      expect(await legacy.load(), isEmpty);
-      final original = await service.owner.createTemplate('合成旧模板', '', [
-        const core.TemplateFieldInput('名称', ''),
-        const core.TemplateFieldInput('说明', '', kind: core.FieldKind.textNote),
-      ]);
-      final selected = await legacy.prepareConversion(
-        original.id,
-        original.version,
-      );
-      final preview = await plugins.previewInstall(selected.selectionId);
-      await plugins.change(
-        WorkspacePluginChange(
-          operationId: workspaceOperationId(),
-          action: WorkspacePluginAction.install,
-          packageId: preview.package.id,
-          expectedVersion: preview.catalogVersion,
-          selectionId: selected.selectionId,
-          expectedDigest: preview.package.digest,
-        ),
-      );
-      final p = (await plugins.load()).packages.singleWhere(
-        (p) => p.id == preview.package.id,
-      );
-      expect(p.legacySource!['templateId'], original.id);
-      final ref = await create(p.templates.single.type.id);
-      expect((await source.readDetail(ref)).record.name, '合成实例');
-      await close();
-      await open();
-      expect((await legacy.load()).single.fields.length, 2);
-      expect(
-        (await plugins.load()).packages
-            .singleWhere((p) => p.id == preview.package.id)
-            .legacySource!['version'],
-        original.version,
       );
     },
   );

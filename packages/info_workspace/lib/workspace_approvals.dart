@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_records.dart';
@@ -201,8 +202,8 @@ class WorkspaceApprovalChange {
     required this.action,
     Iterable<String> selected = const [],
     Map<String, int> fileVersions = const {},
-    this.fieldMinutes = 30,
-    this.credentialMinutes = 15,
+    this.fieldMinutes = AccessTiming.defaultMinutes,
+    this.credentialMinutes = AccessTiming.defaultMinutes,
   }) : selected = List.unmodifiable(selected),
        fileVersions = Map.unmodifiable(fileVersions);
   final String operationId, requestId, reviewToken;
@@ -243,6 +244,14 @@ class WorkspaceApprovalReceipt {
   final String operationId, requestId, reviewToken, commandDigest;
   final WorkspaceApprovalAction action;
   final int revision;
+
+  bool matches(WorkspaceApprovalChange change) =>
+      operationId == change.operationId &&
+      requestId == change.requestId &&
+      action == change.action &&
+      reviewToken == change.reviewToken &&
+      commandDigest == change.digest &&
+      revision >= 1;
 }
 
 abstract interface class WorkspaceApprovalSource {

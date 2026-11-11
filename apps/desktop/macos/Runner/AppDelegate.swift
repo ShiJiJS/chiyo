@@ -13,7 +13,7 @@ class AppDelegate: FlutterAppDelegate, NSMenuItemValidation {
   }
 
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-    return !(authorizationWindow?.desktopReady ?? false)
+    return !(authorizationWindow?.keepsRunningWithoutWindow ?? false)
   }
 
   private var authorizationWindow: MainFlutterWindow? {

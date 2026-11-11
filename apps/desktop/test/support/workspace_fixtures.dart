@@ -62,7 +62,6 @@ void _refresh(WidgetTester t) {
     unawaited(w.classifications.load());
     unawaited(w.backups.load());
     unawaited(w.runtime.load());
-    unawaited(w.agents.load());
   }
 }
 
@@ -149,9 +148,6 @@ Future<bool> prepareFixtureAction(WidgetTester t, Finder target) async {
       await _settings(t, WorkspaceSettingsSection.runtime);
     case 'preview-runtime-resume':
       s.runtime.resumePreview();
-    case 'preview-agents-ready':
-      await s.agents.setScenario(SampleAgentScenario.ready);
-      await _settings(t, WorkspaceSettingsSection.agents);
     case 'preview-approval-executions':
       final m = t.widget<ApprovalsPage>(find.byType(ApprovalsPage)).controller;
       s.demonstrateApprovalExecutions(m.selection!);
@@ -291,7 +287,6 @@ Future<void> settleFixture(WidgetTester t) async {
           w.controller.loading ||
           w.backups.loading ||
           w.runtime.loading ||
-          w.agents.loading ||
           w.plugins.loading;
     }
     if (!loading) {

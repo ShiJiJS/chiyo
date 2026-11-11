@@ -378,7 +378,7 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
                 _text(
                   context,
                   approve
-                      ? '允许当前会话在 ${draft.minutes} 分钟内，使用「$name」版本 ${r.version}，向「${_application(r.focusedFill!.application)}」的前台密码框填充。'
+                      ? '允许当前会话在 ${approvalDurationLabel(draft.minutes!)}内，使用「$name」版本 ${r.version}，向「${_application(r.focusedFill!.application)}」的前台密码框填充。'
                       : '本次申请将被拒绝，不提供凭据，也不发送按键。',
                   14,
                 ),
@@ -764,12 +764,15 @@ class _FocusedFillApprovalPanelState extends State<FocusedFillApprovalPanel> {
                   value: draft.minutes,
                   isExpanded: true,
                   items: [
-                    for (final n in [15, 30])
-                      DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                    for (final n in AccessTiming.grantMinutes)
+                      DropdownMenuItem(value: n, child: Text('${n ~/ 60} 小时')),
                   ],
                   onChanged: _busy
                       ? null
-                      : (v) => setState(() => draft.minutes = v ?? 15),
+                      : (v) => setState(
+                          () =>
+                              draft.minutes = v ?? AccessTiming.defaultMinutes,
+                        ),
                 )
               else
                 _text(context, '截止 ${_time(r.credentialExpiresAt)}', 12),

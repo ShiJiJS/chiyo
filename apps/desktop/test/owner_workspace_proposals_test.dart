@@ -71,6 +71,39 @@ void main() {
         : [],
   );
   test(
+    'submitted import title is searched and shown before and after admission and reopen',
+    () async {
+      final session = service.agent.openSession('合成标题聊天');
+      final id = await service.agent.submitImport(
+        session,
+        [
+          core.ImportItemInput('资料甲', '', [
+            const core.FieldInput('正文', '', '合成内容'),
+          ]),
+        ],
+        title: '新增 NAS 应用信息',
+        agentName: 'Synthetic Agent',
+        purpose: '补齐应用清单',
+      );
+      var detail = await source.read(id);
+      expect(detail.summary.title, '新增 NAS 应用信息');
+      expect(detail.summary.agentClaim, 'Synthetic Agent');
+      expect(
+        (await source.query(
+          const WorkspaceProposalQuery(keyword: 'NAS'),
+        )).items.single.id,
+        id,
+      );
+      await source.change(decision(detail));
+      await close();
+      await open();
+      detail = await source.read(id);
+      expect(detail.summary.title, '新增 NAS 应用信息');
+      expect(detail.summary.pending, false);
+      expect(detail.summary.agentClaim, 'Synthetic Agent');
+    },
+  );
+  test(
     'proposed directory levels reuse existing parents and save once for the whole proposal',
     () async {
       final parent = await service.owner.createDirectory('账号与服务');

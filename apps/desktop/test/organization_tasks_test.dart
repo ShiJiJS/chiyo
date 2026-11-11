@@ -25,7 +25,7 @@ void main() {
         find.byKey(ValueKey('organization-lifetime-${task.id}')),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('15 分钟').last);
+      await tester.tap(find.text('4 小时').last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('批准整理范围'));
       await tester.pumpAndSettle();
@@ -37,7 +37,7 @@ void main() {
         service.owner.organizationTasks.single.expiresAt.difference(
           service.owner.organizationTasks.single.approvedAt!,
         ),
-        const Duration(minutes: 15),
+        const Duration(hours: 4),
       );
       await service.agent.submitOrganization(session, task.id, [
         OrganizationChange(

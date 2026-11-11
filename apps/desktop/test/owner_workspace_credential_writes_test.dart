@@ -631,7 +631,8 @@ void main() {
           repo.credentialMaterials.last.bytes,
           utf8.encode('SYNTHETIC-native-replacement'),
         );
-        expect(find.textContaining('材料v2'), findsWidgets);
+        await tap(t, find.byKey(const ValueKey('credential-advanced')));
+        expect(find.textContaining('凭据版本 2'), findsOneWidget);
         expect(service.owner.credentialUseRequests, isEmpty);
         await capture(t, 'persisted-material-version');
         expect(t.takeException(), isNull);

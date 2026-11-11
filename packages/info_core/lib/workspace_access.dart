@@ -10,6 +10,7 @@ extension OwnerDesktopPreferences on OwnerAccess {
     final session = _service._credentialUseSessions[requestId];
     return session == null ? null : _service._sessionBindings[session];
   }
+
   bool get notificationsEnabled =>
       _service._repository.readSetting('desktopNotificationsEnabled') != 0;
   Future<void> setNotificationsEnabled(bool enabled) => _serialize(() async {
@@ -140,6 +141,8 @@ extension OwnerInbox on OwnerAccess {
         state: h.state,
         sessionId: h.sessionId,
         chatLabel: h.chatLabel,
+        agentName: h.agentName,
+        externalChatId: h.externalChatId,
         purpose: h.purpose,
         createdAt: h.createdAt,
         requestExpiresAt: h.requestExpiresAt,

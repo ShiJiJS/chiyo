@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
@@ -6,6 +7,7 @@ import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'approvals_controller.dart';
 import 'approval_executions.dart';
+import 'approval_directory_location.dart';
 import 'workspace_source.dart';
 
 class ApprovalsPage extends StatefulWidget {
@@ -14,10 +16,12 @@ class ApprovalsPage extends StatefulWidget {
     required this.controller,
     required this.onRecord,
     this.onSettings,
+    this.records,
     this.onHistory,
     this.onRetry,
   });
   final ApprovalsController controller;
+  final WorkspaceSource? records;
   final ValueChanged<WorkspaceRecordRef> onRecord;
   final VoidCallback? onSettings, onRetry;
   final ValueChanged<String>? onHistory;
@@ -129,7 +133,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
-          checked: checked,
+          checked: editable ? checked : null,
           child: DesktopButton(
             key: ValueKey('approval-scope-${scope.id}'),
             kind: DesktopButtonKind.quiet,
@@ -142,7 +146,13 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
-                  checked ? Icons.check_box : Icons.check_box_outline_blank,
+                  editable
+                      ? (checked
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank)
+                      : (checked
+                            ? Icons.check_circle_outline
+                            : Icons.remove_circle_outline),
                   size: 19,
                   color: checked ? c.accent : c.muted,
                 ),
@@ -173,40 +183,45 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         if (scope.kind == WorkspaceApprovalScopeKind.file && checked)
           Padding(
             padding: const EdgeInsets.only(left: 30, bottom: 16),
-            child: DesktopSelect<int>(
-              key: ValueKey('approval-file-${scope.id}'),
-              value: d.files[scope.id],
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: current.fileVersionPolicy == null
-                    ? '普通附件版本'
-                    : '当前附件版本',
-              ),
-              items: [
-                if (d.files[scope.id] != null &&
-                    !scope.fileVersions.any(
-                      (v) => v.ref.version == d.files[scope.id],
-                    ))
-                  DropdownMenuItem(
+            child: !editable
+                ? Text(
+                    '批准附件版本：v${d.files[scope.id]}',
+                    style: libraryText(context, 13, color: c.muted),
+                  )
+                : DesktopSelect<int>(
+                    key: ValueKey('approval-file-${scope.id}'),
                     value: d.files[scope.id],
-                    enabled: false,
-                    child: const Text('原选版本已不可用'),
-                  ),
-                for (final v in scope.fileVersions)
-                  DropdownMenuItem(
-                    value: v.ref.version,
-                    enabled: v.available,
-                    child: Text(
-                      'v${v.ref.version} · ${v.filename} · ${v.mediaType} · ${(v.byteLength / 1024).toStringAsFixed(1)} KB',
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: current.fileVersionPolicy == null
+                          ? '普通附件版本'
+                          : '当前附件版本',
                     ),
+                    items: [
+                      if (d.files[scope.id] != null &&
+                          !scope.fileVersions.any(
+                            (v) => v.ref.version == d.files[scope.id],
+                          ))
+                        DropdownMenuItem(
+                          value: d.files[scope.id],
+                          enabled: false,
+                          child: const Text('原选版本已不可用'),
+                        ),
+                      for (final v in scope.fileVersions)
+                        DropdownMenuItem(
+                          value: v.ref.version,
+                          enabled: v.available,
+                          child: Text(
+                            'v${v.ref.version} · ${v.filename} · ${v.mediaType} · ${(v.byteLength / 1024).toStringAsFixed(1)} KB',
+                          ),
+                        ),
+                    ],
+                    onChanged: editable && scope.available
+                        ? (v) {
+                            if (v != null) model.chooseFile(scope.id, v);
+                          }
+                        : null,
                   ),
-              ],
-              onChanged: editable && scope.available
-                  ? (v) {
-                      if (v != null) model.chooseFile(scope.id, v);
-                    }
-                  : null,
-            ),
           ),
         Divider(height: 1, color: c.line),
       ],
@@ -252,6 +267,12 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     weight: FontWeight.w600,
                   ),
                 ),
+                if (widget.records != null)
+                  ApprovalDirectoryLocation(
+                    key: ValueKey('approval-location-${e.key.$1.key}'),
+                    source: widget.records!,
+                    record: e.key.$1,
+                  ),
                 if (e.value.every((s) => s.entryId != null)) ...[
                   DesktopButton(
                     key: ValueKey('approval-expand-${e.value.first.entryId}'),
@@ -292,7 +313,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             ? '批准指定字段和附件版本后，Agent通过CLI领取受管副本。撤销或到期会阻止后续交付，但不能收回已经读到或上传的内容。普通附件与凭据文件分别管理。'
             : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
       WorkspaceApprovalKind.organization =>
-        '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。最长30分钟。',
+        '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
       WorkspaceApprovalKind.focus =>
         'Mac本机焦点填充尚未启用。本次只能查看申请与限制，不能批准填充。网页或工具的DOM焦点不代表系统前台焦点；未来真实能力由单独验收决定。',
       WorkspaceApprovalKind.credential =>
@@ -400,10 +421,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
         items: [
           if (credential && detail.credential?.supportsSessionValidity == true)
             const DropdownMenuItem(value: 'session', child: Text('不限时（限本聊天）')),
-          for (final m
-              in credential || r.kind == WorkspaceApprovalKind.organization
-                  ? [15, 30]
-                  : [15, 30, 60, 480])
+          for (final m in AccessTiming.grantMinutes)
             DropdownMenuItem(
               value: m.toString(),
               child: Text(m < 60 ? '$m 分钟' : '${m ~/ 60} 小时'),
@@ -467,7 +485,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             const SizedBox(height: 18),
             Text(
               r.kind == WorkspaceApprovalKind.organization
-                  ? '限定资料元数据与分类写入，最长30分钟。'
+                  ? '限定资料的目录与标签整理。'
                   : '仅当前会话有效；批准范围内可复用，不随以后新增内容扩大。',
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
@@ -603,7 +621,10 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                     : c.successSurface,
               ),
               Text(
-                '${d.request.agentClaim} · ${d.request.chatClaim}',
+                [
+                  d.request.agentClaim,
+                  d.request.chatClaim,
+                ].where((v) => v.isNotEmpty).join(' · '),
                 style: libraryText(context, 12, color: c.muted),
               ),
             ],
@@ -614,11 +635,6 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           Text(
             d.request.purpose,
             style: libraryText(context, 14, height: 1.95),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            '聊天名称和用途由 Agent 自述，仅供判断。',
-            style: libraryText(context, 12, color: c.muted),
           ),
           _section(context, '申请范围', _scopes(context)),
           _section(
@@ -798,7 +814,11 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                         Padding(
                           padding: const EdgeInsets.all(14),
                           child: Text(
-                            '没有匹配的请求。',
+                            model.keyword.isEmpty &&
+                                    model.filter ==
+                                        WorkspaceApprovalFilter.pending
+                                ? '暂无待处理申请'
+                                : '没有找到匹配的申请',
                             style: libraryText(context, 13, color: c.muted),
                           ),
                         ),
@@ -822,7 +842,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  r.agentClaim,
+                                  r.agentClaim.isEmpty
+                                      ? r.chatClaim
+                                      : r.agentClaim,
                                   style: libraryText(
                                     context,
                                     12,

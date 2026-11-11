@@ -293,6 +293,8 @@ extension FocusedFillAgentAccess on AgentAccess {
       protocolVersion: 2,
       id: _service._secret(),
       chatLabel: _service._sessions[session]!,
+      agentName: input.agentName,
+      externalChatId: input.externalChatId,
       purpose: input.purpose,
       alias: input.alias,
       credentialId: credential.id,

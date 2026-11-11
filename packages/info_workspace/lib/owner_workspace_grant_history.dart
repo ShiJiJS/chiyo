@@ -122,9 +122,14 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
         ? WorkspaceApprovalKind.file
         : WorkspaceApprovalKind.information,
     state: _state(e),
-    agentClaim: '未提供 Agent 名称',
-    chatClaim: e.request?.chatLabel ?? e.grant!.chatLabel,
-    purpose: e.request?.purpose ?? '原申请说明已不可用',
+    agentClaim: e.request?.agentName ?? e.grant!.agentName,
+    chatClaim: core.submissionChatLabel(
+      e.request?.chatLabel ?? e.grant!.chatLabel,
+      e.request?.externalChatId ?? e.grant!.externalChatId,
+    ),
+    purpose:
+        e.request?.purpose ??
+        (e.grant!.purpose.isEmpty ? '原申请说明已不可用' : e.grant!.purpose),
     recordedAt: e.at,
     operationCount: e.accesses.length + e.deliveries.length,
   );
@@ -210,26 +215,35 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
   core.InformationItem? _recordedItem(_Entry e, String itemId) {
     final version = e.grant?.itemVersions[itemId];
     if (version == null) return null;
-    return _recordedVersion(itemId, version);
+    return _recordedVersion(
+      itemId,
+      version,
+      snapshotId: e.grant?.itemSnapshots[itemId],
+    );
   }
 
-  core.InformationItem? _recordedVersion(String itemId, int version) {
-    return owner.information
-            .where((i) => i.id == itemId && i.version == version)
-            .firstOrNull ??
-        owner.informationRevisions
-            .where((r) => r.item.id == itemId && r.item.version == version)
-            .firstOrNull
-            ?.item ??
-        owner.recycleEntries
-            .where(
-              (r) =>
-                  r.wholeItem &&
-                  r.snapshot?.id == itemId &&
-                  r.snapshot?.version == version,
-            )
-            .firstOrNull
-            ?.snapshot;
+  core.InformationItem? _recordedVersion(
+    String itemId,
+    int version, {
+    String? snapshotId,
+  }) {
+    final matches = <String, core.InformationItem>{};
+    for (final item in [
+      ...owner.information,
+      ...owner.informationRevisions.map((r) => r.item),
+      ...owner.recycleEntries
+          .where((r) => r.wholeItem)
+          .map((r) => r.snapshot)
+          .whereType<core.InformationItem>(),
+    ].where((i) => i.id == itemId && i.version == version)) {
+      final identity = core.informationSnapshotId(item);
+      if (snapshotId == null || snapshotId == identity) {
+        matches[identity] = item;
+      }
+    }
+    // Legacy facts have no exact identity. A repeated label cannot be used as
+    // proof of which contents were approved on a different device.
+    return matches.length == 1 ? matches.values.single : null;
   }
 
   Future<core.InformationItem?> _snapshotItem(_Entry e, String itemId) async {

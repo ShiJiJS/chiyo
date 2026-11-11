@@ -42,12 +42,14 @@ final class InformationAttachmentVersion {
     required this.byteLength,
     required this.sha256,
     required this.createdAt,
+    String? seriesId,
     this.retiredAt,
     this.purgedAt,
     this.label = '',
     this.sourceNote = '',
-  }) {
-    if (label.length > 200 ||
+  }) : seriesId = seriesId ?? reference.attachmentId {
+    if (!_validInformationFileId(this.seriesId) ||
+        label.length > 200 ||
         sourceNote.length > 2000 ||
         !_validInformationFileMetadata(
           originalName,
@@ -63,6 +65,10 @@ final class InformationAttachmentVersion {
     }
   }
   final InformationAttachmentRef reference;
+
+  /// Stable file family; the immutable reference may belong to a newer intake
+  /// batch. Display version numbers alone cannot identify an offline branch.
+  final String seriesId;
   final String originalName, mediaType, sha256;
   final String label, sourceNote;
   final int byteLength;
@@ -74,6 +80,7 @@ final class InformationAttachmentVersion {
     required DateTime? purgedAt,
   }) => InformationAttachmentVersion(
     reference: reference,
+    seriesId: seriesId,
     originalName: originalName,
     mediaType: mediaType,
     byteLength: byteLength,
@@ -89,6 +96,7 @@ final class InformationAttachmentVersion {
 
   Map<String, Object?> toPrivateJson() => {
     ...reference.toJson(),
+    if (seriesId != reference.attachmentId) 'seriesId': seriesId,
     'originalName': originalName,
     'mediaType': mediaType,
     'byteLength': byteLength,
@@ -115,10 +123,12 @@ final class InformationAttachmentVersion {
             'purgedAt',
             'label',
             'sourceNote',
+            'seriesId',
           }.contains(k),
         ) ||
         json.length < 9 ||
-        json.length > 11 ||
+        json.length > 12 ||
+        json.containsKey('seriesId') && json['seriesId'] is! String ||
         json['attachmentId'] is! String ||
         json['attachmentVersion'] is! int ||
         json['originalName'] is! String ||
@@ -147,6 +157,7 @@ final class InformationAttachmentVersion {
         json['attachmentId'] as String,
         json['attachmentVersion'] as int,
       ),
+      seriesId: json['seriesId'] as String?,
       originalName: json['originalName'] as String,
       mediaType: json['mediaType'] as String,
       byteLength: json['byteLength'] as int,
@@ -170,11 +181,14 @@ List<InformationAttachmentVersion> retainInformationAttachments({
   required Set<InformationAttachmentRef> retained,
   required DateTime now,
 }) {
+  final all = versions.toList(growable: false);
+  final families = {for (final v in all) v.reference: v.seriesId};
   final owned = {
-    for (final ref in {...current, ...retained}) ref.attachmentId,
+    for (final ref in {...current, ...retained})
+      families[ref] ?? ref.attachmentId,
   };
   return List.unmodifiable(
-    versions.map((v) {
+    all.map((v) {
       if (!v.available) return v;
       if (current.contains(v.reference)) {
         return v.retiredAt == null
@@ -183,7 +197,7 @@ List<InformationAttachmentVersion> retainInformationAttachments({
       }
       final retired = v.retiredAt ?? now.toUtc();
       final purge =
-          !owned.contains(v.reference.attachmentId) &&
+          !owned.contains(v.seriesId) &&
           !now.isBefore(retired.add(const Duration(days: 30)));
       return v.withRetention(
         retiredAt: retired,

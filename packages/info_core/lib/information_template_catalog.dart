@@ -1,5 +1,12 @@
 part of 'info_core.dart';
 
+Map<String, Object?> _submissionDescription(String title) => {
+  'title': title,
+  'agentName': 'Example Agent',
+  'externalChatId': 'example-chat-id',
+  'purpose': '示例用途；提交时替换为当前任务的实际说明。',
+};
+
 /// The running application's current declarative forms. The CLI never loads
 /// packages, opens the database, or maintains another template registry.
 class InformationTemplateCatalog {
@@ -146,6 +153,7 @@ class InformationTemplateDescription {
     if (hasGuidance && recordKind == 'information')
       'submissionExample': {
         'command': 'import-submit',
+        ..._submissionDescription('新增示例资料'),
         'operationId': 'replace-with-unique-intake-id',
         'items': [
           {
@@ -195,6 +203,7 @@ class InformationTemplateDescription {
     ])
       {
         'command': 'update-submit',
+        ..._submissionDescription('更新示例资料文件'),
         'operationId': 'replace-with-unique-update-id',
         'update': {
           'itemId': 'exact-existing-catalog-item-id',
@@ -268,6 +277,7 @@ class InformationTemplateDescription {
     ];
     Map<String, Object?> example(Map<String, Object?> material) => {
       'command': 'import-submit',
+      ..._submissionDescription('新增示例登录凭据'),
       'operationId': 'replace-with-unique-intake-id',
       'items': [
         {

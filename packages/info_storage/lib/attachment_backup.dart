@@ -384,6 +384,10 @@ final class _AttachmentBackupManifest {
           20,
           21,
           22,
+          23,
+          24,
+          25,
+          26,
         }.contains(json['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -402,6 +406,10 @@ final class _AttachmentBackupManifest {
       if (row is! Map<String, dynamic>)
         throw const StorageFailure('invalid_backup');
       final v = InformationAttachmentVersion.fromPrivateJson(row);
+      if ((json['version'] as int) < 23 &&
+          v.seriesId != v.reference.attachmentId) {
+        throw const StorageFailure('unsupported_backup');
+      }
       if (!identities.add(v.reference))
         throw const StorageFailure('invalid_backup');
       if (v.available) bytes += v.byteLength;

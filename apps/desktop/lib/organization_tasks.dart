@@ -40,7 +40,7 @@ class OrganizationApprovalPanel extends StatefulWidget {
 
 class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
   bool _busy = false;
-  int _draftMinutes = 30;
+  int _draftMinutes = AccessTiming.defaultMinutes;
   int get _minutes => widget.minutes ?? _draftMinutes;
   void _chooseMinutes(int? value) {
     if (value == null) return;
@@ -398,9 +398,9 @@ class _OrganizationApprovalPanelState extends State<OrganizationApprovalPanel> {
                 isExpanded: true,
                 key: ValueKey('organization-lifetime-${task.id}'),
                 value: _minutes,
-                items: const [
-                  DropdownMenuItem(value: 15, child: Text('15 分钟')),
-                  DropdownMenuItem(value: 30, child: Text('30 分钟')),
+                items: [
+                  for (final n in AccessTiming.grantMinutes)
+                    DropdownMenuItem(value: n, child: Text('${n ~/ 60} 小时')),
                 ],
                 onChanged: pending && !disabled ? _chooseMinutes : null,
               ),

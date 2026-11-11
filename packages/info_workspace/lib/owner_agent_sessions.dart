@@ -2,7 +2,6 @@ import 'package:info_core/info_core.dart' as core;
 import 'agent_sessions.dart';
 import 'owner_workspace_approvals.dart';
 import 'owner_workspace_additional_approvals.dart';
-import 'workspace_agents.dart';
 import 'workspace_approvals.dart';
 import 'workspace_source.dart' show workspaceOperationId, WorkspaceFailure;
 
