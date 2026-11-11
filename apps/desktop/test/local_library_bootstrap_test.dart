@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_cli/agent_client.dart';
@@ -28,11 +27,15 @@ class _Keys implements DatabaseKeyStore {
 }
 
 Future<File> _dartExecutable() async {
-  final flutter = await Isolate.resolvePackageUri(
-    Uri.parse('package:flutter/widgets.dart'),
-  );
-  if (flutter == null) throw StateError('Flutter SDK could not be resolved.');
-  final sdk = File.fromUri(flutter).parent.parent.parent.parent;
+  final configuration = File('.dart_tool/package_config.json').absolute;
+  final packages =
+      (jsonDecode(await configuration.readAsString()) as Map)['packages']
+          as List;
+  final flutter =
+      packages.singleWhere((entry) => entry['name'] == 'flutter') as Map;
+  final sdk = Directory.fromUri(
+    configuration.uri.resolve(flutter['rootUri'] as String),
+  ).parent.parent;
   return File(
     '${sdk.path}/bin/cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
   );
