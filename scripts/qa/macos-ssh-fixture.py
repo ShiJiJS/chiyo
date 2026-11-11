@@ -69,8 +69,8 @@ def main():
                     elif len(argv) == 3 and argv[:2] == ['/usr/bin/printf', '%s']:
                         channel.sendall(argv[2].encode('utf-8'))
                         code = 0
-                    elif argv == ['/bin/sleep', '2']:
-                        time.sleep(2)
+                    elif argv in (['/bin/sleep', '2'], ['/bin/sleep', '6']):
+                        time.sleep(int(argv[1]))
                         code = 0
                     elif args.lifecycle_gate and argv == ['/fixture/wait']:
                         with counter_lock:
