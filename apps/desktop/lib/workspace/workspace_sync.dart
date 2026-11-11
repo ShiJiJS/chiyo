@@ -10,3 +10,13 @@ abstract interface class WorkspaceSync implements Listenable {
   Object? get failure;
   Future<void> synchronize();
 }
+
+/// Optional Owner-only conflict review for a persistent local replica.
+abstract interface class WorkspaceSyncReview {
+  Future<List<Map<String, Object?>>> reviewConflicts();
+  Future<void> resolveConflict(
+    Map<String, Object?> reviewed,
+    bool useIncoming,
+    String operationId,
+  );
+}

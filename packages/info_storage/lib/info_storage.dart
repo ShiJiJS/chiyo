@@ -58,6 +58,7 @@ part 'library_change_journal.dart';
 part 'library_sync_contents.dart';
 part 'library_incremental_storage.dart';
 part 'library_incremental_receive.dart';
+part 'library_sync_conflicts.dart';
 part 'library_delta_archive.dart';
 
 const _libraryFormat = 38;
@@ -89,6 +90,9 @@ const _libraryChangeJournalFormat = 57;
 const _libraryIncrementalFormat = 58;
 const _libraryDirectionalSyncFormat = 59;
 const _libraryFileBranchFormat = 60;
+const _libraryGrantSnapshotFormat = 61;
+const _libraryRevisionSnapshotFormat = 62;
+const _libraryCredentialArchiveFormat = 63;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -674,7 +678,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _libraryFileBranchFormat) {
+      if (headerVersion > _libraryCredentialArchiveFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -689,7 +693,8 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryFileBranchFormat ||
+            (marker.single['version'] as int) >
+                _libraryCredentialArchiveFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -698,7 +703,7 @@ class EncryptedInformationRepository
         final fileBranchState = native.select(
           "SELECT name FROM sqlite_master WHERE type='table' AND name='library_file_branch_format'",
         );
-        if (storedFormat == _libraryFileBranchFormat) {
+        if (storedFormat >= _libraryFileBranchFormat) {
           if (fileBranchState.length != 1)
             throw const StorageFailure('unsupported_schema');
           final base = native.select(
@@ -758,6 +763,18 @@ class EncryptedInformationRepository
                 .any((row) => row['name'] == 'uploaded_cursor')) {
           throw const StorageFailure('unsupported_schema');
         }
+        final snapshots = native.select(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='information_revision_snapshots'",
+        );
+        if ((storedFormat >= _libraryRevisionSnapshotFormat) !=
+            snapshots.isNotEmpty)
+          throw const StorageFailure('unsupported_schema');
+        final credentialArchives = native.select(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='credential_material_snapshots'",
+        );
+        if ((storedFormat >= _libraryCredentialArchiveFormat) !=
+            credentialArchives.isNotEmpty)
+          throw const StorageFailure('unsupported_schema');
         captureOnOpen = capabilityFormat >= _libraryChangeJournalFormat;
         // Preserve the portable-fill boundary across older receipt/layout
         // formats. Format38 adds local recovery-key operation receipts.
@@ -957,11 +974,7 @@ class EncryptedInformationRepository
       _updates[proposal.id] = proposal;
     }
     for (final row
-        in await _db
-            .customSelect(
-              'SELECT payload,replaced_at FROM information_revisions ORDER BY rowid',
-            )
-            .get()) {
+        in await _db.customSelect(await _revisionRowsQuery()).get()) {
       _revisions.add(
         InformationRevision(
           informationFromJson(
@@ -1111,20 +1124,25 @@ class EncryptedInformationRepository
   Future<void> saveGrantHistory(GrantHistory history) async {
     if (_closed) throw const StorageFailure('library_closed');
     try {
-      await _writeMetadata(
-        () => _db.customStatement(
-          'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-          [
-            history.id,
-            history.approvedAt.toUtc().millisecondsSinceEpoch,
-            jsonEncode(history.toJson()),
-          ],
-        ),
-      );
+      await _writeMetadata(() => _writeGrantHistory(history));
       _history[history.id] = history;
     } on Object {
       throw const StorageFailure('audit_save_failed');
     }
+  }
+
+  Future<void> _writeGrantHistory(GrantHistory history) async {
+    if (history.itemSnapshots.isNotEmpty) {
+      await _requireAdmissionFormat(_libraryGrantSnapshotFormat);
+    }
+    await _db.customStatement(
+      'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
+      [
+        history.id,
+        history.approvedAt.toUtc().millisecondsSinceEpoch,
+        jsonEncode(history.toJson()),
+      ],
+    );
   }
 
   @override
@@ -1549,7 +1567,17 @@ class EncryptedInformationRepository
         .customSelect('SELECT version FROM library_format WHERE singleton=1')
         .getSingle();
     final stored = marker.read<int>('version');
-    if (stored == _libraryFileBranchFormat &&
+    if (format >= _libraryCredentialArchiveFormat) {
+      await _db.customStatement(
+        'CREATE TABLE IF NOT EXISTS credential_material_snapshots(credential_id TEXT NOT NULL,version INTEGER NOT NULL,snapshot_id TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(credential_id,snapshot_id))',
+      );
+    }
+    if (format >= _libraryRevisionSnapshotFormat) {
+      await _db.customStatement(
+        'CREATE TABLE IF NOT EXISTS information_revision_snapshots(item_id TEXT NOT NULL,version INTEGER NOT NULL,snapshot_id TEXT NOT NULL,replaced_at TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(item_id,snapshot_id))',
+      );
+    }
+    if (stored >= _libraryFileBranchFormat &&
         format < _libraryFileBranchFormat) {
       final state = await _db
           .customSelect(
@@ -1563,7 +1591,7 @@ class EncryptedInformationRepository
         );
       }
     } else if (stored < _libraryFileBranchFormat &&
-        format == _libraryFileBranchFormat) {
+        format >= _libraryFileBranchFormat) {
       // File families are independent of optional server/sync tables. Keep
       // their exact prior capabilities rather than pretending those exist.
       await _db.customStatement(
@@ -1824,17 +1852,48 @@ class EncryptedInformationRepository
               purgedAt.toUtc().toIso8601String(),
             ],
           );
-          await _db.customStatement(
-            'DELETE FROM information_revisions WHERE item_id=? AND version=?',
-            [revision.item.id, revision.item.version],
-          );
+          final legacy = await _db
+              .customSelect(
+                'SELECT payload FROM information_revisions WHERE item_id=? AND version=?',
+                variables: [
+                  Variable(revision.item.id),
+                  Variable(revision.item.version),
+                ],
+              )
+              .get();
+          if (legacy.isNotEmpty &&
+              informationSnapshotId(
+                    informationFromJson(_backupJson(legacy.single.data)),
+                  ) ==
+                  informationSnapshotId(revision.item)) {
+            await _db.customStatement(
+              'DELETE FROM information_revisions WHERE item_id=? AND version=?',
+              [revision.item.id, revision.item.version],
+            );
+          }
+          if (await _hasRevisionSnapshots()) {
+            await _db.customStatement(
+              'DELETE FROM information_revision_snapshots WHERE item_id=? AND snapshot_id=?',
+              [revision.item.id, informationSnapshotId(revision.item)],
+            );
+          }
         }
         await _reconcileAttachmentRetention(purgedAt.toUtc());
       });
       for (final revision in expired) {
-        _revisionPurges.add(
-          RevisionPurgeFact(revision.item.id, revision.item.version, purgedAt),
-        );
+        if (!_revisionPurges.any(
+          (p) =>
+              p.itemId == revision.item.id &&
+              p.version == revision.item.version,
+        )) {
+          _revisionPurges.add(
+            RevisionPurgeFact(
+              revision.item.id,
+              revision.item.version,
+              purgedAt,
+            ),
+          );
+        }
       }
       _revisions.removeWhere((r) => !r.replacedAt.isAfter(cutoff));
     } catch (_) {
@@ -1886,13 +1945,54 @@ class EncryptedInformationRepository
     }
   }
 
+  Future<bool> _hasRevisionSnapshots() async =>
+      (await _db
+              .customSelect(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='information_revision_snapshots'",
+              )
+              .get())
+          .isNotEmpty;
+
+  Future<String> _revisionRowsQuery() async => await _hasRevisionSnapshots()
+      ? 'SELECT payload,replaced_at FROM information_revisions UNION ALL SELECT payload,replaced_at FROM information_revision_snapshots ORDER BY replaced_at'
+      : 'SELECT payload,replaced_at FROM information_revisions ORDER BY rowid';
+
   Future<void> _writeRevision(InformationRevision revision) async {
     await _checkItemAttachments(revision.item);
+    final existing = await _db
+        .customSelect(
+          'SELECT payload FROM information_revisions WHERE item_id=? AND version=?',
+          variables: [
+            Variable(revision.item.id),
+            Variable(revision.item.version),
+          ],
+        )
+        .get();
+    if (existing.isEmpty ||
+        informationSnapshotId(
+              informationFromJson(_backupJson(existing.single.data)),
+            ) ==
+            informationSnapshotId(revision.item)) {
+      await _db.customStatement(
+        'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?) '
+        'ON CONFLICT(item_id,version) DO UPDATE SET replaced_at=max(replaced_at,excluded.replaced_at)',
+        [
+          revision.item.id,
+          revision.item.version,
+          revision.replacedAt.toUtc().toIso8601String(),
+          jsonEncode(informationToJson(revision.item)),
+        ],
+      );
+      return;
+    }
+    await _requireAdmissionFormat(_libraryRevisionSnapshotFormat);
     await _db.customStatement(
-      'INSERT INTO information_revisions(item_id,version,replaced_at,payload) VALUES(?,?,?,?)',
+      'INSERT INTO information_revision_snapshots(item_id,version,snapshot_id,replaced_at,payload) VALUES(?,?,?,?,?) '
+      'ON CONFLICT(item_id,snapshot_id) DO UPDATE SET replaced_at=max(replaced_at,excluded.replaced_at)',
       [
         revision.item.id,
         revision.item.version,
+        informationSnapshotId(revision.item),
         revision.replacedAt.toUtc().toIso8601String(),
         jsonEncode(informationToJson(revision.item)),
       ],

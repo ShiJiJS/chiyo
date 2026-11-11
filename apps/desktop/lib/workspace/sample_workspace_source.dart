@@ -1869,6 +1869,7 @@ class SampleWorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) async {
     await _readable();
@@ -2120,7 +2121,8 @@ class SampleWorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
-  }) => _previewRevision(ref, version, expectedVersion: expectedVersion);
+    String? snapshotId,
+  }) => _previewRevision(ref, version, expectedVersion: expectedVersion, snapshotId: snapshotId);
   @override
   Future<WorkspaceRecycleResults> queryRecycled({
     String keyword = '',

@@ -4,6 +4,71 @@ part of 'local_library_sync.dart';
 /// A normal pass never replaces the library or its live approvals. Network
 /// awaits stay outside Owner's write barrier so local browsing remains usable.
 extension LocalLibraryIncrementalSync on LocalLibrarySync {
+  Future<T> _reviewConnection<T>(
+    Future<T> Function(LibraryIncrementalClient) action,
+  ) async {
+    final stored = await readConfiguration();
+    if (_busy || stored['enabled'] != true || stored['server'] == null) {
+      throw const RemoteFailure('sync_busy');
+    }
+    final profile = ConnectionProfile.fromJson(
+      Map<String, dynamic>.from(stored['server'] as Map),
+    );
+    final client = await _openConnection(profile);
+    try {
+      final remote = await LibraryIncrementalClient.connect(client);
+      if (remote.identity.libraryId != stored['libraryId'] ||
+          remote.identity.replicaId != stored['remoteReplicaId']) {
+        throw const RemoteFailure('sync_base_changed');
+      }
+      return await action(remote);
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<List<Map<String, Object?>>> reviewConflicts() => _reviewConnection((
+    remote,
+  ) async {
+    final server = await remote.conflicts();
+    if (server.isNotEmpty) {
+      return [
+        for (final e in server.take(1))
+          {...await remote.conflict(e['cursor'] as int), 'remote': true},
+      ];
+    }
+    return [
+      for (final e in await owner.exportLibrary(() => incremental.conflicts()))
+        {...e, 'remote': false},
+    ];
+  });
+
+  Future<void> resolveConflict(
+    Map<String, Object?> reviewed,
+    bool useIncoming,
+    String operationId,
+  ) async {
+    if (reviewed['remote'] == true) {
+      await _reviewConnection(
+        (remote) => remote.resolveConflict(
+          cursor: reviewed['cursor'] as int,
+          token: reviewed['token'] as String,
+          useIncoming: useIncoming,
+          operationId: operationId,
+        ),
+      );
+    } else {
+      await owner.exportLibrary(
+        () => incremental.resolveConflict(
+          cursor: reviewed['cursor'] as int,
+          token: reviewed['token'] as String,
+          useIncoming: useIncoming,
+          operationId: operationId,
+        ),
+      );
+    }
+  }
+
   File _baselineFile(Map<String, dynamic> pending) => File(
     '${_file(libraryReplicaId(pending['fileId'])).parent.path}/baseline.encrypted',
   );

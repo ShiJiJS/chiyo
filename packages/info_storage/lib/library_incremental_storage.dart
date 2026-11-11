@@ -62,6 +62,20 @@ final class LibraryIncremental {
         'digest TEXT PRIMARY KEY,byte_length INTEGER NOT NULL,body BLOB NOT NULL '
         'CHECK(length(body)=byte_length))',
       );
+      await _db.customStatement(
+        'CREATE TABLE IF NOT EXISTS library_sync_resolutions('
+        'conflict_cursor INTEGER PRIMARY KEY,resolution_source TEXT NOT NULL,'
+        'resolution_operation TEXT NOT NULL)',
+      );
+      await _db.customStatement(
+        'CREATE TABLE IF NOT EXISTS library_sync_parent_versions('
+        'kind TEXT NOT NULL,id TEXT NOT NULL,version TEXT NOT NULL,parent TEXT NOT NULL,'
+        'PRIMARY KEY(kind,id,version,parent))',
+      );
+      await _db.customStatement(
+        'CREATE TABLE IF NOT EXISTS library_sync_resolution_commands('
+        'operation_id TEXT PRIMARY KEY,cursor INTEGER NOT NULL,token TEXT NOT NULL,use_incoming INTEGER NOT NULL)',
+      );
       await _repo._requireAdmissionFormat(_libraryDirectionalSyncFormat);
       final previous = await _db
           .customSelect(
@@ -192,7 +206,7 @@ final class LibraryIncremental {
     final state = await _state();
     final counts = await _db
         .customSelect(
-          "SELECT coalesce(max(cursor),0) AS cursor,coalesce(sum(CASE WHEN outcome='conflict' THEN 1 ELSE 0 END),0) AS conflicts FROM library_sync_feed",
+          "SELECT coalesce(max(cursor),0) AS cursor,coalesce(sum(CASE WHEN outcome='conflict' AND NOT EXISTS(SELECT 1 FROM library_sync_resolutions r WHERE r.conflict_cursor=library_sync_feed.cursor) THEN 1 ELSE 0 END),0) AS conflicts FROM library_sync_feed",
         )
         .getSingle();
     return (
@@ -339,7 +353,13 @@ final class LibraryIncremental {
               operationId: operation,
               sequence: ++sequence,
               edits: edits,
+              dependencies: _dependenciesFor(edits, next),
+              dependencyVersions: {
+                for (final key in _dependenciesFor(edits, next).keys)
+                  key: units[key]!.$1,
+              },
             );
+            await _rememberParents(batch);
             for (final change in batch.changes) {
               await _saveUnit(change.key, change.version, change.content);
               units[change.key] = (change.version, change.content);

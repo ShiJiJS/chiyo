@@ -92,6 +92,7 @@ class OwnerHistoryRoutes {
         final b = historyEnvelope(body, [
           'record',
           'revision',
+          if (workspaceObject(body).containsKey('snapshotId')) 'snapshotId',
           'expectedVersion',
         ]);
         return (
@@ -100,6 +101,7 @@ class OwnerHistoryRoutes {
             await history.previewRevision(
               recordRefFromJson(b['record']),
               historyInt(b['revision'], min: 1),
+              snapshotId: b['snapshotId'] as String?,
               expectedVersion: historyInt(b['expectedVersion'], min: 1),
             ),
           ),

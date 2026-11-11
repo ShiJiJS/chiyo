@@ -95,6 +95,16 @@ extension _AuditService on InformationService {
         return RecordedField(item.id, field.id, item.name, field.name);
       }),
       events: [GrantEvent(GrantEventKind.approved, request.approvedAt!)],
+      itemVersions: {
+        for (final id in grant.fields.map((f) => f.itemId).toSet())
+          id: _repository.items.firstWhere((i) => i.id == id).version,
+      },
+      itemSnapshots: {
+        for (final id in grant.fields.map((f) => f.itemId).toSet())
+          id: informationSnapshotId(
+            _repository.items.firstWhere((i) => i.id == id),
+          ),
+      },
     );
     request.history = history;
     _enqueueAudit(() => _repository.saveGrantHistory(history));

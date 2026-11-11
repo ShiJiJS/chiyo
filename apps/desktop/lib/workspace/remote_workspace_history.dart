@@ -78,12 +78,14 @@ class RemoteWorkspaceHistory implements WorkspaceLibraryRecycle {
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) => _historyCall(() async {
     final result = revisionPreviewFromJson(
       await client.request('POST', '$prefix/preview', {
         'wireVersion': 1,
         'record': recordRefToJson(ref),
         'revision': version,
+        'snapshotId': ?snapshotId,
         'expectedVersion': expectedVersion,
       }),
     );

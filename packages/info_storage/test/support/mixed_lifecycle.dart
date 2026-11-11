@@ -494,6 +494,7 @@ class MixedLifecycle {
     await service.owner.decideCredentialUse(
       fillRequest!,
       approveCredential: true,
+      lifetime: const Duration(minutes: 15),
     );
     final command = await call({
       'command': 'request-use',
@@ -508,6 +509,7 @@ class MixedLifecycle {
     await service.owner.decideCredentialUse(
       commandRequest!,
       approveCredential: true,
+      lifetime: const Duration(minutes: 15),
     );
     await writeReceiver();
   }

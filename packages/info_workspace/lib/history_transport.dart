@@ -123,6 +123,7 @@ WorkspaceArchive _archive(Object? v) {
     'directoryName',
     'wholeItem',
     'targets',
+    if (workspaceObject(v).containsKey('snapshotId')) 'snapshotId',
   ]);
   _detail(a['detail']);
   _date(a['archivedAt']);
@@ -147,17 +148,24 @@ Map<String, Object?> revisionsToJson(List<WorkspaceRevision> values) => {
         'record': recordSummaryToJson(r.record),
         'version': r.version,
         'archivedAt': r.archivedAt.toUtc().toIso8601String(),
+        if (r.snapshotId != null) 'snapshotId': r.snapshotId,
       },
   ],
 };
 List<WorkspaceRevision> revisionsFromJson(Object? raw) => decodeWorkspace(() {
   final v = historyEnvelope(raw, ['items']);
   return _list(v['items']).map((r) {
-    final v = historyWire(r, ['record', 'version', 'archivedAt']);
+    final v = historyWire(r, [
+      'record',
+      'version',
+      'archivedAt',
+      if (workspaceObject(r).containsKey('snapshotId')) 'snapshotId',
+    ]);
     return WorkspaceRevision(
       _summary(v['record']),
       historyInt(v['version'], min: 1),
       _date(v['archivedAt']),
+      snapshotId: v['snapshotId'] == null ? null : _hash(v['snapshotId']),
     );
   }).toList();
 });
@@ -288,6 +296,7 @@ Map<String, Object?> recordChangeToJson(WorkspaceRecordChange c) => {
   'expectedVersion': c.expectedVersion,
   'action': c.action.name,
   'revisionVersion': c.revisionVersion,
+  if (c.snapshotId != null) 'snapshotId': c.snapshotId,
   'entryId': c.entryId,
   'expectedCatalogVersion': c.expectedCatalogVersion,
   'expectedCurrentVersion': c.expectedCurrentVersion,
@@ -299,6 +308,7 @@ WorkspaceRecordChange recordChangeFromJson(Object? raw) => decodeWorkspace(() {
     'expectedVersion',
     'action',
     'revisionVersion',
+    if (workspaceObject(raw).containsKey('snapshotId')) 'snapshotId',
     'entryId',
     'expectedCatalogVersion',
     'expectedCurrentVersion',
@@ -309,6 +319,7 @@ WorkspaceRecordChange recordChangeFromJson(Object? raw) => decodeWorkspace(() {
     expectedVersion: historyInt(c['expectedVersion'], min: 1),
     action: WorkspaceRecordAction.values.byName(historyText(c['action'])),
     revisionVersion: _optionalInt(c['revisionVersion']),
+    snapshotId: c['snapshotId'] == null ? null : _hash(c['snapshotId']),
     entryId: _optionalText(c['entryId']),
     expectedCatalogVersion: _optionalInt(c['expectedCatalogVersion'], min: 0),
     expectedCurrentVersion: _optionalInt(c['expectedCurrentVersion']),
@@ -340,6 +351,7 @@ Map<String, Object?> lifecycleReceiptToJson(WorkspaceOperationReceipt r) => {
       expectedVersion: r.intent.expectedVersion!,
       action: WorkspaceRecordAction.values.byName(r.intent.kind.name),
       revisionVersion: r.intent.revisionVersion,
+      snapshotId: r.intent.snapshotId,
       entryId: r.intent.entryId,
       expectedCatalogVersion: r.intent.expectedCatalogVersion,
       expectedCurrentVersion: r.intent.expectedCurrentVersion,

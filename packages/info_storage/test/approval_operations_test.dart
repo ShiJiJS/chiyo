@@ -497,7 +497,7 @@ void main() {
       final recovery = await enableTestBackups(repo.backups);
       final file = '${root.path}/versions.aimbackup';
       await repo.backups.exportTo(file);
-      expect((await repo.backups.inspect(file, recovery)).formatVersion, 13);
+      expect((await repo.backups.inspect(file, recovery)).formatVersion, 24);
       final target = await EncryptedInformationRepository.open(
         '${root.path}/version-target',
         TestKeyStore(),

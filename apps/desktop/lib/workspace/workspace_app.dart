@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'remote_workspace_source.dart';
 import 'workspace_sync.dart';
+import 'sync_conflicts_dialog.dart';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
 import '../desktop_controls.dart';
@@ -483,6 +484,14 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 onPressed: cache.busy
                     ? null
                     : () async {
+                        if (cache.needsReview && cache is WorkspaceSyncReview) {
+                          await showSyncConflicts(
+                            context,
+                            cache as WorkspaceSyncReview,
+                            _source,
+                          );
+                          return;
+                        }
                         try {
                           await cache.synchronize();
                         } catch (_) {

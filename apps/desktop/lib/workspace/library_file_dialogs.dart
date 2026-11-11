@@ -352,6 +352,7 @@ Future<bool?> showLibraryFileChange(
   WorkspaceFileHistory history, {
   WorkspaceFileCandidate? selected,
   int? restoreVersion,
+  WorkspaceFileRef? restoreRef,
 }) async {
   try {
     return await showDesktopDialog<bool>(
@@ -363,6 +364,7 @@ Future<bool?> showLibraryFileChange(
         history: history,
         selected: selected,
         restoreVersion: restoreVersion,
+        restoreRef: restoreRef,
       ),
     );
   } finally {
@@ -382,6 +384,7 @@ class _FileChange extends StatefulWidget {
     required this.history,
     this.selected,
     this.restoreVersion,
+    this.restoreRef,
   });
   final WorkspaceSource source;
   final WorkspaceRecordRef record;
@@ -389,6 +392,7 @@ class _FileChange extends StatefulWidget {
   final WorkspaceFileHistory history;
   final WorkspaceFileCandidate? selected;
   final int? restoreVersion;
+  final WorkspaceFileRef? restoreRef;
   @override
   State<_FileChange> createState() => _FileChangeState();
 }
@@ -398,10 +402,12 @@ class _FileChangeState extends State<_FileChange> {
   WorkspaceFailure? _failure;
   late WorkspaceFileHistory _history = widget.history;
   String? _operation, _submittedDigest;
-  late final WorkspaceFileRef? _restoreRef = widget.history.versions
-      .where((file) => file.ref.version == widget.restoreVersion)
-      .firstOrNull
-      ?.ref;
+  late final WorkspaceFileRef? _restoreRef =
+      widget.restoreRef ??
+      widget.history.versions
+          .where((file) => file.ref.version == widget.restoreVersion)
+          .firstOrNull
+          ?.ref;
   WorkspaceFileVersion? get _restoreTarget =>
       _history.versions.where((file) => file.ref == _restoreRef).firstOrNull;
   bool get _targetAvailable =>
@@ -424,6 +430,7 @@ class _FileChangeState extends State<_FileChange> {
             : WorkspaceFileChangeKind.restore,
         selectionId: widget.selected?.selectionId,
         restoreVersion: widget.restoreVersion,
+        restoreRef: _restoreRef,
       );
       _submittedDigest = command.digest;
       await widget.source.changeFile(command);
@@ -455,7 +462,6 @@ class _FileChangeState extends State<_FileChange> {
           if (receipt.commandDigest != null &&
               (receipt.commandDigest != _submittedDigest ||
                   receipt.record != widget.record ||
-                  receipt.file?.id != _history.current.ref.id ||
                   (receipt.file?.version ?? 0) <=
                       _history.current.ref.version)) {
             throw const WorkspaceFailure(

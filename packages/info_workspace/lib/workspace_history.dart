@@ -9,18 +9,25 @@ class WorkspaceArchive {
     required this.detail,
     required this.archivedAt,
     this.directoryName,
+    this.snapshotId,
     this.wholeItem = true,
     Map<WorkspaceRecordRef, WorkspaceRecordSummary> targets = const {},
   }) : targets = Map.unmodifiable(targets);
   final WorkspaceDetail detail;
   final DateTime archivedAt;
-  final String? directoryName;
+  final String? directoryName, snapshotId;
   final bool wholeItem;
   final Map<WorkspaceRecordRef, WorkspaceRecordSummary> targets;
 }
 
 class WorkspaceRevision {
-  const WorkspaceRevision(this.record, this.version, this.archivedAt);
+  const WorkspaceRevision(
+    this.record,
+    this.version,
+    this.archivedAt, {
+    this.snapshotId,
+  });
+  final String? snapshotId;
   final WorkspaceRecordSummary record;
   final int version;
   final DateTime archivedAt;
@@ -114,6 +121,7 @@ class WorkspaceOperationIntent {
     this.typeId,
     this.expectedVersion,
     this.revisionVersion,
+    this.snapshotId,
     this.entryId,
     this.expectedCatalogVersion,
     this.expectedCurrentVersion,
@@ -127,6 +135,7 @@ class WorkspaceOperationIntent {
         ref: change.ref,
         expectedVersion: change.expectedVersion,
         revisionVersion: change.revisionVersion,
+        snapshotId: change.snapshotId,
         entryId: change.entryId,
         expectedCatalogVersion: change.expectedCatalogVersion,
         expectedCurrentVersion: change.expectedCurrentVersion,
@@ -134,7 +143,7 @@ class WorkspaceOperationIntent {
   final WorkspaceOperationKind kind;
   final WorkspaceRecordRef? ref;
   final String? typeId, entryId, planId;
-  final String? legacyTemplateId;
+  final String? legacyTemplateId, snapshotId;
   final int? legacyTemplateVersion;
   final int? expectedVersion, revisionVersion, expectedCatalogVersion;
   final int? expectedCurrentVersion;
@@ -149,6 +158,7 @@ class WorkspaceOperationIntent {
       entryId == other.entryId &&
       expectedVersion == other.expectedVersion &&
       revisionVersion == other.revisionVersion &&
+      snapshotId == other.snapshotId &&
       expectedCatalogVersion == other.expectedCatalogVersion &&
       expectedCurrentVersion == other.expectedCurrentVersion;
 }
@@ -172,6 +182,7 @@ class WorkspaceRecordChange {
     required this.expectedVersion,
     required this.action,
     this.revisionVersion,
+    this.snapshotId,
     this.entryId,
     this.expectedCatalogVersion,
     this.expectedCurrentVersion,
@@ -182,7 +193,7 @@ class WorkspaceRecordChange {
   final WorkspaceRecordAction action;
   final int? revisionVersion, expectedCatalogVersion;
   final int? expectedCurrentVersion;
-  final String? entryId;
+  final String? entryId, snapshotId;
 }
 
 /// Content-free operation receipt; source adapters must not cache erased body

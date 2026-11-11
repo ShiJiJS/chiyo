@@ -322,6 +322,7 @@ class UnavailableWorkspaceSource implements WorkspaceSource {
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) => _unavailable();
   @override
   Future<WorkspaceRecycleResults> queryRecycled({
@@ -353,6 +354,7 @@ class UnavailableWorkspaceSource implements WorkspaceSource {
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) => _unavailable();
   @override

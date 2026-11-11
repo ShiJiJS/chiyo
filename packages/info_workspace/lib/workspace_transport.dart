@@ -236,6 +236,7 @@ WorkspaceArchive workspaceArchiveFromJson(Object? value) => decodeWorkspace(() {
   return WorkspaceArchive(
     detail: workspaceDetailFromJson(a['detail']),
     archivedAt: DateTime.parse(a['archivedAt'] as String),
+    snapshotId: a['snapshotId'] as String?,
     directoryName: a['directoryName'] as String?,
     wholeItem: a['wholeItem'] as bool,
     targets: {

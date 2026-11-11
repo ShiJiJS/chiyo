@@ -255,7 +255,7 @@ final class OwnerFileRoutes {
         (k) => !{
           'record',
           'fieldKey',
-          if (path.last == 'read') 'version',
+          if (path.last == 'read') ...{'version', 'exact'},
         }.contains(k),
       ))
         throw const FormatException();
@@ -266,7 +266,14 @@ final class OwnerFileRoutes {
       return (
         200,
         fileOriginalToJson(
-          await reads.read(record, key, version: body['version'] as int?),
+          await reads.read(
+            record,
+            key,
+            version: body['version'] as int?,
+            exact: body['exact'] == null
+                ? null
+                : WorkspaceFileRef.fromJson(body['exact']),
+          ),
         ),
       );
     }

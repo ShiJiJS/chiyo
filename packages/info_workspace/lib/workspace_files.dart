@@ -137,6 +137,7 @@ class WorkspaceFileChange {
     required this.kind,
     this.selectionId,
     this.restoreVersion,
+    this.restoreRef,
   });
   final String operationId, fieldKey;
   final WorkspaceRecordRef record;
@@ -144,6 +145,7 @@ class WorkspaceFileChange {
   final WorkspaceFileChangeKind kind;
   final String? selectionId;
   final int? restoreVersion;
+  final WorkspaceFileRef? restoreRef;
   String get digest => crypto.sha256
       .convert(
         utf8.encode(
@@ -155,6 +157,7 @@ class WorkspaceFileChange {
             'fileVersion': expectedFileVersion,
             'selection': selectionId,
             'restoreVersion': restoreVersion,
+            if (restoreRef != null) 'restoreRef': restoreRef!.toJson(),
           }),
         ),
       )

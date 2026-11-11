@@ -149,7 +149,9 @@ class GrantHistory {
     required Iterable<GrantEvent> events,
     this.restoredAt,
     Map<String, int> itemVersions = const {},
+    Map<String, String> itemSnapshots = const {},
   }) : itemVersions = Map.unmodifiable(itemVersions),
+       itemSnapshots = Map.unmodifiable(itemSnapshots),
        fields = List.unmodifiable(fields),
        events = List.unmodifiable(events) {
     final ids = this.fields.map((f) => f.itemId).toSet();
@@ -160,11 +162,22 @@ class GrantHistory {
             itemVersions.values.any((v) => v < 1 || v > 9007199254740991))) {
       throw const FormatException('Invalid grant item versions');
     }
+    if (this.itemSnapshots.isNotEmpty &&
+        (this.itemSnapshots.length != this.itemVersions.length ||
+            !this.itemVersions.keys.toSet().containsAll(
+              this.itemSnapshots.keys,
+            ) ||
+            this.itemSnapshots.values.any(
+              (id) => !RegExp(r'^[0-9a-f]{64}$').hasMatch(id),
+            ))) {
+      throw const FormatException('Invalid grant item snapshots');
+    }
   }
 
   /// Approval-time provenance only. Empty for legacy grants without evidence;
   /// never infer an original snapshot from a current item or matching name.
   final Map<String, int> itemVersions;
+  final Map<String, String> itemSnapshots;
   final String id, requestId, sessionId, chatLabel;
   final String agentName, externalChatId, purpose;
   final DateTime approvedAt, expiresAt;
@@ -187,6 +200,7 @@ class GrantHistory {
     expiresAt: expiresAt,
     fields: fields,
     itemVersions: itemVersions,
+    itemSnapshots: itemSnapshots,
     events: events,
     restoredAt: at,
   );
@@ -202,6 +216,7 @@ class GrantHistory {
     expiresAt: expiresAt,
     fields: fields,
     itemVersions: itemVersions,
+    itemSnapshots: itemSnapshots,
     events: [...events, GrantEvent(kind, at)],
     restoredAt: restoredAt,
   );
@@ -218,6 +233,7 @@ class GrantHistory {
     'fields': fields.map((f) => f.toJson()).toList(),
     'events': events.map((e) => e.toJson()).toList(),
     if (itemVersions.isNotEmpty) 'itemVersions': itemVersions,
+    if (itemSnapshots.isNotEmpty) 'itemSnapshots': itemSnapshots,
     if (restoredAt != null) 'restoredAt': restoredAt!.toUtc().toIso8601String(),
   };
   factory GrantHistory.fromJson(Map<String, dynamic> json) => GrantHistory(
@@ -238,6 +254,9 @@ class GrantHistory {
     ),
     itemVersions: json.containsKey('itemVersions')
         ? Map<String, int>.from(json['itemVersions'] as Map)
+        : const {},
+    itemSnapshots: json.containsKey('itemSnapshots')
+        ? Map<String, String>.from(json['itemSnapshots'] as Map)
         : const {},
     restoredAt: json['restoredAt'] == null
         ? null

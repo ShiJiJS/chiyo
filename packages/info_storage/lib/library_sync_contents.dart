@@ -143,7 +143,7 @@ final class LibraryReplicaContents {
 
   Map<String, Object?> _document(DateTime now) {
     final tables = <String, List<Map<String, Object?>>>{
-      for (final name in InformationBackups._v21Columns.keys) name: [],
+      for (final name in InformationBackups._v26Columns.keys) name: [],
     };
     final attachments = <Object?>[];
     for (final unit in units.values) {
@@ -168,7 +168,7 @@ final class LibraryReplicaContents {
     }
     return {
       'format': InformationBackups._format,
-      'version': 23,
+      'version': 26,
       'createdAt': now.toUtc().toIso8601String(),
       'tables': tables,
       'attachments': attachments,
@@ -193,7 +193,7 @@ extension LibraryReplicationContents on LibraryReplication {
       );
       final normalized = {
         ...document,
-        'version': 23,
+        'version': 26,
         'tables': tables,
         'attachments': document['attachments'] ?? <Object?>[],
       };
@@ -214,7 +214,7 @@ extension LibraryReplicationContents on LibraryReplication {
 
 final class _LibrarySyncProjection {
   static Map<String, List<Map<String, Object?>>> normalizeTables(Map raw) => {
-    for (final table in InformationBackups._v21Columns.entries)
+    for (final table in InformationBackups._v26Columns.entries)
       table.key: table.key == 'settings'
           ? []
           : [
@@ -286,6 +286,7 @@ final class _LibrarySyncProjection {
           'information_fields' ||
           'information_item_tags' ||
           'information_revisions' ||
+          'information_revision_snapshots' ||
           'revision_purge_facts' => information(row['item_id']),
           'information_file_fields' => information(
             fieldOwners[row['field_id']],
@@ -296,7 +297,8 @@ final class _LibrarySyncProjection {
             LibrarySyncKind.credential,
             row['id'] as String,
           ),
-          'credential_materials' => LibrarySyncKey(
+          'credential_materials' ||
+          'credential_material_snapshots' => LibrarySyncKey(
             LibrarySyncKind.credential,
             row['credential_id'] as String,
           ),
@@ -343,7 +345,7 @@ final class _LibrarySyncProjection {
           ),
         };
         add(key, table.key, {
-          for (final column in InformationBackups._v21Columns[table.key]!)
+          for (final column in InformationBackups._v26Columns[table.key]!)
             column: column == 'payload'
                 ? preserveLocalMarkers
                       ? _syncJson(jsonDecode(row[column] as String))

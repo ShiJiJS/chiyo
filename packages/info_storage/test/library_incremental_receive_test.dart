@@ -563,4 +563,259 @@ void main() {
       }
     },
   );
+  test(
+    'owner resolution retains both ordinal-two histories and reconverges with original receipts',
+    () async {
+      final pair = await _Pair.create();
+      try {
+        final ref = FieldRef(pair.initial.id, pair.initial.fields.single.id);
+        await pair.a.service.owner.correctValue(ref, 'SYNTHETIC_BRANCH_A');
+        await pair.b.service.owner.correctValue(ref, 'SYNTHETIC_BRANCH_B');
+        final a = (await pair.a.after(0)).single;
+        final b = (await pair.b.after(0)).single;
+        final rejectedB = await pair.a.receive(b.batch);
+        final rejectedA = await pair.b.receive(a.batch);
+        expect(rejectedA.conflict && rejectedB.conflict, true);
+        final review = (await pair.a.incremental.conflicts()).single;
+        final choice = await pair.a.service.owner.exportLibrary(
+          () => pair.a.incremental.resolveConflict(
+            cursor: review['cursor'] as int,
+            token: review['token'] as String,
+            useIncoming: true,
+            operationId: 'choose-branch-b',
+          ),
+        );
+        expect(choice.conflict, false);
+        expect(pair.a.repo.items.single.version, 3);
+        expect(
+          pair.a.repo.items.single.fields.single.value,
+          'SYNTHETIC_BRANCH_B',
+        );
+        final resolution = (await pair.a.after(a.cursor)).single.batch;
+        expect((await pair.b.receive(resolution)).conflict, false);
+        for (final device in [pair.a, pair.b]) {
+          expect((await device.incremental.status()).conflicts, 0);
+          final histories = await device.service.owner.revisionsFor(
+            pair.initial.id,
+          );
+          final twos = histories.where((r) => r.item.version == 2).toList();
+          expect(twos.map((r) => r.item.fields.single.value).toSet(), {
+            'SYNTHETIC_BRANCH_A',
+            'SYNTHETIC_BRANCH_B',
+          });
+          await expectLater(
+            Future.sync(
+              () => device.service.owner.previewRevision(pair.initial.id, 2, 3),
+            ),
+            throwsA(isA<AccessFailure>()),
+          );
+          final exact = device.service.owner.previewRevision(
+            pair.initial.id,
+            2,
+            3,
+            snapshotId: informationSnapshotId(twos.first.item),
+          );
+          expect(
+            exact.revision.item.fields.single.value,
+            twos.first.item.fields.single.value,
+          );
+        }
+        expect((await pair.a.receive(b.batch)).toJson(), rejectedB.toJson());
+        expect((await pair.b.receive(a.batch)).toJson(), rejectedA.toJson());
+        expect(
+          (await pair.a.incremental.resolveConflict(
+            cursor: review['cursor'] as int,
+            token: review['token'] as String,
+            useIncoming: true,
+            operationId: 'choose-branch-b',
+          )).toJson(),
+          choice.toJson(),
+        );
+        await expectLater(
+          pair.a.incremental.resolveConflict(
+            cursor: review['cursor'] as int,
+            token: review['token'] as String,
+            useIncoming: false,
+            operationId: 'choose-branch-b',
+          ),
+          throwsA(isA<StorageFailure>()),
+        );
+      } finally {
+        await pair.close();
+      }
+    },
+  );
+
+  test(
+    'reviewed choices reject intervening edits without losing the held candidate',
+    () async {
+      final pair = await _Pair.create();
+      try {
+        final ref = FieldRef(pair.initial.id, pair.initial.fields.single.id);
+        await pair.a.service.owner.correctValue(ref, 'SYNTHETIC_A');
+        await pair.b.service.owner.correctValue(ref, 'SYNTHETIC_B');
+        await pair.a.receive((await pair.b.after(0)).single.batch);
+        final old = (await pair.a.incremental.conflicts()).single;
+        await pair.a.service.owner.correctValue(ref, 'SYNTHETIC_NEWER_A');
+        await expectLater(
+          pair.a.incremental.resolveConflict(
+            cursor: old['cursor'] as int,
+            token: old['token'] as String,
+            useIncoming: true,
+            operationId: 'stale-choice',
+          ),
+          throwsA(
+            isA<StorageFailure>().having(
+              (e) => e.code,
+              'code',
+              'sync_conflict_changed',
+            ),
+          ),
+        );
+        expect(
+          pair.a.repo.items.single.fields.single.value,
+          'SYNTHETIC_NEWER_A',
+        );
+        final fresh = (await pair.a.incremental.conflicts()).single;
+        await pair.a.incremental.resolveConflict(
+          cursor: fresh['cursor'] as int,
+          token: fresh['token'] as String,
+          useIncoming: false,
+          operationId: 'fresh-choice',
+        );
+        expect((await pair.a.incremental.status()).conflicts, 0);
+      } finally {
+        await pair.close();
+      }
+    },
+  );
+
+  test(
+    'credential choices never expose values in previews and retain both protected materials',
+    () async {
+      final pair = await _Pair.create();
+      try {
+        final c = await pair.a.service.owner.createStringCredential(
+          name: '合成密码',
+          publicPurpose: '合成用途',
+          secret: 'SYNTHETIC_CREDENTIAL_BASE',
+        );
+        final base = (await pair.a.after(0)).single;
+        expect((await pair.b.receive(base.batch)).conflict, false);
+        await pair.a.service.owner.rotateStringCredential(
+          c.id,
+          c.revision,
+          'SYNTHETIC_CREDENTIAL_A',
+        );
+        await pair.b.service.owner.rotateStringCredential(
+          c.id,
+          c.revision,
+          'SYNTHETIC_CREDENTIAL_B',
+        );
+        final a = (await pair.a.after(base.cursor)).single;
+        final b = (await pair.b.after(1)).single;
+        expect((await pair.a.receive(b.batch)).conflict, true);
+        expect((await pair.b.receive(a.batch)).conflict, true);
+        final review = (await pair.a.incremental.conflicts()).single;
+        expect(jsonEncode(review), isNot(contains('SYNTHETIC_CREDENTIAL')));
+        expect(
+          jsonEncode(review),
+          isNot(contains(base64Encode(utf8.encode('SYNTHETIC_CREDENTIAL_A')))),
+        );
+        await pair.a.incremental.resolveConflict(
+          cursor: review['cursor'] as int,
+          token: review['token'] as String,
+          useIncoming: true,
+          operationId: 'choose-credential',
+        );
+        final result = (await pair.a.after(a.cursor)).single.batch;
+        expect((await pair.b.receive(result)).conflict, false);
+        for (final device in [pair.a, pair.b]) {
+          expect(device.repo.managedCredentials.single.version, 3);
+          expect(
+            utf8.decode(
+              device.repo.credentialMaterials
+                  .singleWhere((m) => m.version == 3)
+                  .bytes,
+            ),
+            'SYNTHETIC_CREDENTIAL_B',
+          );
+          final db = device.inspect();
+          try {
+            final archives = db
+                .select('SELECT payload FROM credential_material_snapshots')
+                .map((r) => r['payload'] as String)
+                .join();
+            expect(
+              archives,
+              contains(base64Encode(utf8.encode('SYNTHETIC_CREDENTIAL_A'))),
+            );
+            expect(
+              archives,
+              contains(base64Encode(utf8.encode('SYNTHETIC_CREDENTIAL_B'))),
+            );
+          } finally {
+            db.close();
+          }
+          final snapshot = await LibraryReplication(
+            device.repo,
+          ).snapshotContents();
+          snapshot.validate(DateTime.now().toUtc());
+        }
+      } finally {
+        await pair.close();
+      }
+    },
+  );
+  test(
+    'deleted directory dependency is held and reviewed with its information while unrelated changes continue',
+    () async {
+      final pair = await _Pair.create();
+      try {
+        final dir = await pair.a.service.owner.createDirectory('合成目录');
+        final base = (await pair.a.after(0)).single;
+        expect((await pair.b.receive(base.batch)).conflict, false);
+        await pair.a.service.owner.deleteDirectory(dir.id, dir.version);
+        final deletion = (await pair.a.after(base.cursor)).single;
+        await pair.b.service.owner.organizeInformation(
+          pair.initial.id,
+          directoryId: dir.id,
+          expectedVersion: 1,
+        );
+        final b = (await pair.b.after(1)).single;
+        expect(
+          b.batch.dependencies.keys,
+          contains(LibrarySyncKey(LibrarySyncKind.directory, dir.id)),
+        );
+        expect((await pair.a.receive(b.batch)).conflict, true);
+        await pair.b.service.owner.createInformation('不相关资料', '', [
+          const FieldInput('正文', '', 'INDEPENDENT'),
+        ]);
+        final independent = (await pair.b.after(b.cursor)).single;
+        expect((await pair.a.receive(independent.batch)).conflict, false);
+        final review = (await pair.a.incremental.conflicts()).single;
+        expect(review['items'] as List, hasLength(2));
+        await pair.a.incremental.resolveConflict(
+          cursor: review['cursor'] as int,
+          token: review['token'] as String,
+          useIncoming: true,
+          operationId: 'restore-dependency',
+        );
+        final resolved = (await pair.a.after(
+          deletion.cursor,
+        )).where((e) => e.batch.operationId == 'restore-dependency').single;
+        expect((await pair.b.receive(resolved.batch)).conflict, false);
+        expect(
+          pair.a.repo.items
+              .singleWhere((i) => i.id == pair.initial.id)
+              .directoryId,
+          dir.id,
+        );
+        expect(pair.a.repo.directories.single.id, dir.id);
+        expect((await pair.a.incremental.status()).conflicts, 0);
+      } finally {
+        await pair.close();
+      }
+    },
+  );
 }

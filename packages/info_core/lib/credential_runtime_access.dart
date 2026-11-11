@@ -1094,6 +1094,16 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
             approvedAt: now,
             expiresAt: now.add(effectiveFieldLifetime),
             fields: recorded,
+            itemVersions: {
+              for (final id in fields.map((f) => f.itemId).toSet())
+                id: information.firstWhere((i) => i.id == id).version,
+            },
+            itemSnapshots: {
+              for (final id in fields.map((f) => f.itemId).toSet())
+                id: informationSnapshotId(
+                  information.firstWhere((i) => i.id == id),
+                ),
+            },
             events: [GrantEvent(GrantEventKind.approved, now)],
           );
     final fieldRequest = fields.isEmpty

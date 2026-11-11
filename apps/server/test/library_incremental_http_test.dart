@@ -322,6 +322,82 @@ void main() {
           (await b.service.owner.exportLibrary(b.incremental.status)).conflicts,
           greaterThan(0),
         );
+        final pending = (await remote.conflicts()).single;
+        final preview = await remote.conflict(pending['cursor'] as int);
+        final chosen = await remote.resolveConflict(
+          cursor: preview['cursor'] as int,
+          token: preview['token'] as String,
+          useIncoming: true,
+          operationId: 'choose-b-files',
+        );
+        expect(chosen.conflict, false);
+        expect((await remote.status()).conflicts, 0);
+        expect(
+          (await remote.resolveConflict(
+            cursor: preview['cursor'] as int,
+            token: preview['token'] as String,
+            useIncoming: true,
+            operationId: 'choose-b-files',
+          )).toJson(),
+          chosen.toJson(),
+        );
+        for (final summary in await remote.changes(cursor)) {
+          final export = await remote.prepareDelta(summary);
+          final file = File(
+            '${b.root.path}/resolved-${summary.cursor}.encrypted',
+          );
+          try {
+            await remote.transport.download(export.contents, file);
+            final result = await b.service.owner.exportLibrary(
+              () => b.incremental.installDelta(
+                path: file.path,
+                transferKey: export.contents.transferKey,
+                transfer: export.transfer,
+              ),
+            );
+            expect(result.conflict, false);
+            cursor = summary.cursor;
+          } finally {
+            await remote.transport.release(export.contents);
+            if (await file.exists()) await file.delete();
+          }
+        }
+        expect((await b.incremental.status()).conflicts, 0);
+        expect(
+          b.repo.items
+              .singleWhere((i) => i.id == changedB.id)
+              .fields
+              .single
+              .attachment,
+          metaB.reference,
+        );
+        final resolvedFamily = await b.repo.informationAttachmentVersions(
+          metaB.reference.attachmentId,
+        );
+        expect(
+          resolvedFamily.map((v) => v.reference),
+          containsAll([initialReference, metaA.reference, metaB.reference]),
+        );
+        expect(
+          await b.repo.readInformationAttachmentChunk(metaA.reference, 0, 3),
+          [4, 5, 6],
+        );
+        expect(
+          await b.repo.readInformationAttachmentChunk(metaB.reference, 0, 3),
+          [7, 8, 9],
+        );
+        await host.reopen();
+        remote = await LibraryIncrementalClient.connect(host.owner);
+        expect((await remote.status()).conflicts, 0);
+        expect(
+          (await remote.resolveConflict(
+            cursor: preview['cursor'] as int,
+            token: preview['token'] as String,
+            useIncoming: true,
+            operationId: 'choose-b-files',
+          )).toJson(),
+          chosen.toJson(),
+        );
       } finally {
         await a.close();
         await b.close();

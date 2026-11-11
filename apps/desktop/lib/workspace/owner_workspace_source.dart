@@ -477,11 +477,13 @@ class OwnerWorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) => _read(
     () => _history.previewRevision(
       ref,
       version,
       expectedVersion: expectedVersion,
+      snapshotId: snapshotId,
     ),
   );
   @override
@@ -554,9 +556,16 @@ class OwnerWorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) => _read(
-    () => _files.preview(record, fieldKey, version: version, page: page),
+    () => _files.preview(
+      record,
+      fieldKey,
+      version: version,
+      exact: exact,
+      page: page,
+    ),
   );
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>

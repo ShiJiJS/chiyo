@@ -106,6 +106,73 @@ extension _OwnerIncrementalRoutes on OwnerReplicationRoutes {
     Object? raw,
   ) async {
     await _readyIncremental();
+    if (tail.length == 2 &&
+        tail[0] == 'changes' &&
+        tail[1] == 'conflicts' &&
+        method == 'GET') {
+      final entries = await owner.exportLibrary(
+        () => _incremental.conflictCursors(),
+      );
+      return (
+        200,
+        {
+          'wireVersion': 2,
+          'identity': (await replication.identity()).toJson(),
+          'conflicts': [
+            for (final cursor in entries) {'cursor': cursor},
+          ],
+        },
+      );
+    }
+    if (tail.length == 3 &&
+        tail[0] == 'changes' &&
+        tail[1] == 'conflicts' &&
+        method == 'GET') {
+      final cursor = int.tryParse(tail[2]);
+      if (cursor == null || cursor < 1) throw const FormatException();
+      return (
+        200,
+        {
+          'wireVersion': 2,
+          'identity': (await replication.identity()).toJson(),
+          'conflict': await owner.exportLibrary(
+            () => _incremental.conflict(cursor),
+          ),
+        },
+      );
+    }
+    if (tail.length == 3 &&
+        tail[0] == 'changes' &&
+        tail[1] == 'conflicts' &&
+        tail[2] == 'resolve' &&
+        method == 'POST') {
+      final input = _input(raw, {
+        'cursor',
+        'token',
+        'useIncoming',
+        'operationId',
+      }, version: 2);
+      if (input['cursor'] is! int ||
+          (input['cursor'] as int) < 1 ||
+          input['useIncoming'] is! bool)
+        throw const FormatException();
+      final receipt = await owner.exportLibrary(
+        () => _incremental.resolveConflict(
+          cursor: input['cursor'] as int,
+          token: replicaDigest(input['token']),
+          useIncoming: input['useIncoming'] as bool,
+          operationId: replicaOperationId(input['operationId']),
+        ),
+      );
+      return (
+        200,
+        {
+          'wireVersion': 2,
+          'identity': (await replication.identity()).toJson(),
+          'receipt': receipt.toJson(),
+        },
+      );
+    }
     if (tail.length == 1 && tail[0] == 'changes' && method == 'GET') {
       final status = await owner.exportLibrary(_incremental.status);
       return (

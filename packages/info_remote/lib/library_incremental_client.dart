@@ -84,6 +84,51 @@ final class LibraryIncrementalClient {
     );
   }
 
+  Future<List<Map<String, dynamic>>> conflicts() async {
+    final result = await _client.request('GET', '$_base/changes/conflicts');
+    _v2(result);
+    _sameIdentity(result['identity']);
+    return _decode(
+      () => (result['conflicts'] as List)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList(),
+    );
+  }
+
+  Future<Map<String, dynamic>> conflict(int cursor) async {
+    if (cursor < 1) throw ArgumentError.value(cursor);
+    final result = await _client.request(
+      'GET',
+      '$_base/changes/conflicts/$cursor',
+    );
+    _v2(result);
+    _sameIdentity(result['identity']);
+    return _decode(() => Map<String, dynamic>.from(result['conflict'] as Map));
+  }
+
+  Future<LibrarySyncReceipt> resolveConflict({
+    required int cursor,
+    required String token,
+    required bool useIncoming,
+    required String operationId,
+  }) async {
+    final result = await _client
+        .request('POST', '$_base/changes/conflicts/resolve', {
+          'wireVersion': 2,
+          'cursor': cursor,
+          'token': replicaDigest(token),
+          'useIncoming': useIncoming,
+          'operationId': replicaOperationId(operationId),
+        });
+    _v2(result);
+    _sameIdentity(result['identity']);
+    return _decode(
+      () => LibrarySyncReceipt.fromJson(
+        Map<String, dynamic>.from(result['receipt'] as Map),
+      ),
+    );
+  }
+
   Future<({int cursor, int conflicts, bool empty})> status() async {
     final result = await _client.request('GET', '$_base/changes');
     _v2(result);

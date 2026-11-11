@@ -39,17 +39,29 @@ extension OwnerRevisions on OwnerAccess {
   RevisionPreview previewRevision(
     String itemId,
     int revisionVersion,
-    int expectedVersion,
-  ) {
+    int expectedVersion, {
+    String? snapshotId,
+  }) {
     if (_service._closed) throw const AccessFailure('service_unavailable');
     final current = information.where((i) => i.id == itemId).firstOrNull;
     if (current == null) throw const AccessFailure('recycle_restore_required');
     if (current.version != expectedVersion) {
       throw const AccessFailure('revision_conflict');
     }
-    final revision = informationRevisions
-        .where((r) => r.item.id == itemId && r.item.version == revisionVersion)
-        .firstOrNull;
+    final candidates = informationRevisions
+        .where(
+          (r) =>
+              r.item.id == itemId &&
+              r.item.version == revisionVersion &&
+              (snapshotId == null ||
+                  informationSnapshotId(r.item) == snapshotId),
+        )
+        .toList();
+    if (candidates.map((r) => informationSnapshotId(r.item)).toSet().length >
+        1) {
+      throw const AccessFailure('revision_conflict');
+    }
+    final revision = candidates.firstOrNull;
     if (revision == null) throw const AccessFailure('revision_unavailable');
     final old = revision.item;
     final resolved = {
@@ -105,7 +117,12 @@ extension OwnerRevisions on OwnerAccess {
     void Function()? validate,
   }) async {
     await _purgeRevisions();
-    final preview = previewRevision(itemId, revisionVersion, expectedVersion);
+    final preview = previewRevision(
+      itemId,
+      revisionVersion,
+      expectedVersion,
+      snapshotId: command?.snapshotId,
+    );
     if (preview.requiresRecycleRestore) {
       throw const AccessFailure('recycle_restore_required');
     }

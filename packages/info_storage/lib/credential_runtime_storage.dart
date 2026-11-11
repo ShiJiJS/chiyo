@@ -166,14 +166,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
           );
         }
         if (fieldGrant != null) {
-          await _db.customStatement(
-            'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-            [
-              fieldGrant.id,
-              fieldGrant.approvedAt.toUtc().millisecondsSinceEpoch,
-              jsonEncode(fieldGrant.toJson()),
-            ],
-          );
+          await _writeGrantHistory(fieldGrant);
         }
         if (fieldRequest != null) {
           await _db.customStatement(

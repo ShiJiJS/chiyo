@@ -26,12 +26,18 @@ class OwnerWorkspaceFiles {
     WorkspaceRecordRef record,
     String key, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) async {
     if (page < 0 || (version != null && version < 1)) {
       throw const WorkspaceFailure('invalid_request', '页码或文件版本无效。');
     }
-    final ref = await _reads.reference(record, key, version: version);
+    final ref = await _reads.reference(
+      record,
+      key,
+      version: version,
+      exact: exact,
+    );
     return OwnerWorkspaceAttachmentPreview(
       owner,
       pdf: pdf,
