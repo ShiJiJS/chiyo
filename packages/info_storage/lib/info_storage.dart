@@ -11,6 +11,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:info_core/protocol_json.dart';
 import 'package:info_core/server_state.dart';
 import 'package:info_core/library_replication.dart';
+import 'package:info_core/library_sync_changes.dart';
 import 'backup_publish.dart';
 import 'macos_backup_publication.dart';
 import 'platform_keys.dart';
@@ -54,6 +55,9 @@ part 'template_packages_storage.dart';
 part 'server_state_storage.dart';
 part 'library_replication_storage.dart';
 part 'library_change_journal.dart';
+part 'library_sync_contents.dart';
+part 'library_incremental_storage.dart';
+part 'library_incremental_receive.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -81,6 +85,7 @@ const _deviceDeliveryLibraryFormat = 54;
 const _copyCleanupLibraryFormat = 55;
 const _libraryReplicationFormat = 56;
 const _libraryChangeJournalFormat = 57;
+const _libraryIncrementalFormat = 58;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -665,7 +670,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _libraryChangeJournalFormat) {
+      if (headerVersion > _libraryIncrementalFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -680,7 +685,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryChangeJournalFormat ||
+            (marker.single['version'] as int) > _libraryIncrementalFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -709,6 +714,15 @@ class EncryptedInformationRepository
                 journalTables.length != 3) ||
             (storedFormat < _libraryChangeJournalFormat &&
                 journalTables.isNotEmpty)) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        final incrementalTables = native.select(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_sync_projection','library_sync_units','library_sync_feed','library_sync_progress','library_sync_blobs')",
+        );
+        if ((storedFormat >= _libraryIncrementalFormat &&
+                incrementalTables.length != 5) ||
+            (storedFormat < _libraryIncrementalFormat &&
+                incrementalTables.isNotEmpty)) {
           throw const StorageFailure('unsupported_schema');
         }
         // Preserve the portable-fill boundary across older receipt/layout
@@ -2029,6 +2043,7 @@ class _InformationDatabase extends GeneratedDatabase {
   final int _openingFormat;
   bool syncJournalEnabled = false;
   final _syncTransactionZone = Object();
+  final _syncIncomingZone = Object();
 
   @override
   Future<T> transaction<T>(

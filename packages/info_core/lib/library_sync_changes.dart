@@ -18,6 +18,8 @@ enum LibrarySyncKind {
   order,
   recycle,
   history,
+  attachment,
+  sshTrust,
 }
 
 final class LibrarySyncKey {
@@ -127,7 +129,9 @@ final class LibrarySyncBatch {
     }
   }
 
-  static const maxChanges = 4096;
+  // Match the portable repository row ceiling; a valid large proposal must
+  // remain one transaction. The independent byte budget still bounds input.
+  static const maxChanges = 500000;
   static const maxBytes = 64 * 1024 * 1024;
   final String libraryId, sourceReplicaId, operationId;
   final int sequence;
@@ -240,6 +244,71 @@ final class LibrarySyncDecision {
   const LibrarySyncDecision._(this.action, this.conflictingKeys);
   final LibrarySyncAction action;
   final List<LibrarySyncKey> conflictingKeys;
+}
+
+/// Durable owner-only receipt; it acknowledges a saved result, not a usable
+/// authorization. A conflict receipt means both candidates are retained.
+final class LibrarySyncReceipt {
+  LibrarySyncReceipt({
+    required this.libraryId,
+    required this.receiverReplicaId,
+    required this.sourceReplicaId,
+    required this.operationId,
+    required this.digest,
+    required this.cursor,
+    required this.conflict,
+  }) {
+    libraryReplicaId(libraryId);
+    libraryReplicaId(receiverReplicaId);
+    libraryReplicaId(sourceReplicaId);
+    replicaOperationId(operationId);
+    replicaDigest(digest);
+    if (cursor < 1)
+      throw const FormatException('Invalid synchronization receipt');
+  }
+  final String libraryId,
+      receiverReplicaId,
+      sourceReplicaId,
+      operationId,
+      digest;
+  final int cursor;
+  final bool conflict;
+  Map<String, Object?> toJson() => {
+    'wireVersion': 2,
+    'libraryId': libraryId,
+    'receiverReplicaId': receiverReplicaId,
+    'sourceReplicaId': sourceReplicaId,
+    'operationId': operationId,
+    'digest': digest,
+    'cursor': cursor,
+    'outcome': conflict ? 'conflict' : 'applied',
+  };
+  factory LibrarySyncReceipt.fromJson(Map<String, dynamic> value) {
+    _fields(value, {
+      'wireVersion',
+      'libraryId',
+      'receiverReplicaId',
+      'sourceReplicaId',
+      'operationId',
+      'digest',
+      'cursor',
+      'outcome',
+    });
+    if (value['wireVersion'] != 2 ||
+        value['cursor'] is! int ||
+        !{'applied', 'conflict'}.contains(value['outcome'])) {
+      throw const FormatException('Invalid synchronization receipt');
+    }
+    return LibrarySyncReceipt(
+      libraryId: libraryReplicaId(value['libraryId']),
+      receiverReplicaId: libraryReplicaId(value['receiverReplicaId']),
+      sourceReplicaId: libraryReplicaId(value['sourceReplicaId']),
+      operationId: replicaOperationId(value['operationId']),
+      digest: replicaDigest(value['digest']),
+      cursor: value['cursor'] as int,
+      conflict: value['outcome'] == 'conflict',
+    );
+  }
 }
 
 void _fields(Map<String, Object?> value, Set<String> fields) {
