@@ -638,6 +638,9 @@ class InformationBackups {
                 'server_runtime_state',
                 'library_replica_state',
                 'library_replica_receipts',
+                'library_sync_change_state',
+                'library_sync_dirty',
+                'library_sync_changes',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -925,6 +928,9 @@ class InformationBackups {
                     'server_runtime_state',
                     'library_replica_state',
                     'library_replica_receipts',
+                    'library_sync_change_state',
+                    'library_sync_dirty',
+                    'library_sync_changes',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -939,6 +945,18 @@ class InformationBackups {
         // invalidated by a successful restore. A failed restore keeps them.
         // Ordering alone is not recipient content. Replace it even when an
         // older archive has no ordering table; never retain the previous IDs.
+        // An initial copy or restored library starts a new common base. Remove
+        // the capture scope first so imported rows do not become local edits.
+        final names = existingTables.map((r) => r.read<String>('name')).toSet();
+        for (final name in [
+          'library_sync_change_state',
+          'library_sync_dirty',
+          'library_sync_changes',
+        ]) {
+          if (names.contains(name)) {
+            await _repository._db.customStatement('DELETE FROM $name');
+          }
+        }
         await _repository._invalidateServerState();
         await _repository._db.customStatement(
           'DELETE FROM library_order_state',
