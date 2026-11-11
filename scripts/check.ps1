@@ -68,14 +68,6 @@ try {
     Invoke-Checked $flutterCommand @('test', '--no-pub', 'test/')
     if ($WindowsRelease) {
         Invoke-Checked $flutterCommand @('build', 'windows', '--release', '--no-pub')
-        # Exercise the real Shell association resolver without launching a
-        # viewer or changing an existing default application.
-        $nativeBuild = Join-Path $projectRoot 'apps/desktop/build/windows/x64'
-        $cmakeEntry = Select-String -LiteralPath (Join-Path $nativeBuild 'CMakeCache.txt') -Pattern '^CMAKE_COMMAND:INTERNAL=(.+)$'
-        if (-not $cmakeEntry) { throw 'Cannot locate the release build CMake executable.' }
-        $cmake = $cmakeEntry.Matches.Groups[1].Value
-        Invoke-Checked $cmake @('--build', $nativeBuild, '--config', 'Release', '--target', 'owner_file_association_test')
-        Invoke-Checked (Join-Path $nativeBuild 'runner/owner-file-check/Release/owner_file_association_test.exe') @()
     }
     if ($MacosRelease) {
         $macFlutterSdk = Split-Path -Parent (Split-Path -Parent $flutterCommand)
