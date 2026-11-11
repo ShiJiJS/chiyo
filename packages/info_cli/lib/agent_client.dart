@@ -33,7 +33,12 @@ class AgentClient {
     this.deviceFileStateDirectory,
   }) : _session = sessionSecret,
        _externalChatId = externalChatId,
-       _remote = connection == null ? null : AgentConnection(connection),
+       _remote = connection == null || connection.isLocal
+           ? null
+           : AgentConnection(connection),
+       _local = connection != null && connection.isLocal
+           ? AgentConnection(connection)
+           : null,
        _runtimeWorkerExecutable = runtimeWorkerExecutable,
        _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
@@ -83,7 +88,7 @@ class AgentClient {
           workerExecutable: _runtimeWorkerExecutable,
         ).maintain()
       : Future<void>.value();
-  final AgentConnection? _remote;
+  final AgentConnection? _remote, _local;
   final bool hostedCredentialExecutions;
   final String? _runtimeWorkerExecutable;
   final CredentialProcessStarter _credentialProcessStarter;
@@ -132,6 +137,7 @@ class AgentClient {
     _endCapability = null;
     _http.close(force: true);
     _remote?.close();
+    _local?.close();
   }
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
@@ -574,8 +580,9 @@ class AgentClient {
     Map<String, dynamic> data, {
     Duration? timeout,
   }) async {
-    if (_remote != null) {
-      return _remote.call(
+    final transport = _remote ?? _local;
+    if (transport != null) {
+      return transport.call(
         path,
         data,
         timeout: timeout ?? AgentConnection.defaultRequestTimeout,

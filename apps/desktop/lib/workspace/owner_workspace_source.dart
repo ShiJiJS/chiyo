@@ -37,7 +37,11 @@ class OwnerWorkspaceSource
         WorkspaceFileSelectionReleaser,
         WorkspaceAttachmentSeparation,
         WorkspaceFileActionRecovery,
-        WorkspaceFileOpenRecovery {
+        WorkspaceFileOpenRecovery,
+        WorkspaceStorageLocation {
+  @override
+  String get storageDescription => '本地模式';
+
   OwnerWorkspaceSource({
     required this.owner,
     InformationFileOutputs? fileOutputs,

@@ -74,6 +74,27 @@ class WindowsDatabaseKeyStore implements DatabaseKeyStore {
 /// No key is passed to a shell or shared with the agent transport.
 class MacOsDatabaseKeyStore implements DatabaseKeyStore {
   MacOsDatabaseKeyStore(this.invoke);
+
+  factory MacOsDatabaseKeyStore.forLibrary(
+    String libraryId,
+    Future<Object?> Function(String method, Object? arguments) invoke, {
+    bool requestKeyAccess = false,
+  }) {
+    if (!RegExp(r'^[A-Za-z0-9_-]{32}$').hasMatch(libraryId)) {
+      throw const StorageFailure('invalid_key');
+    }
+    return MacOsDatabaseKeyStore(
+      (method, value) => invoke(
+        method == 'create'
+            ? 'createLocal'
+            : requestKeyAccess
+            ? 'readLocalWithInteraction'
+            : 'readLocal',
+        {'libraryId': libraryId, if (method == 'create') 'key': value},
+      ),
+    );
+  }
+
   final Future<Object?> Function(String method, Object? arguments) invoke;
   @override
   Future<List<int>?> read() async {

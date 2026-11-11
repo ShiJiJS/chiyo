@@ -32,10 +32,18 @@ abstract final class PrivateConnectionFiles {
     }
   }
 
-  static Future<void> write(File target, Map<String, Object?> value) async {
+  static Future<void> write(
+    File target,
+    Map<String, Object?> value, {
+    bool replace = true,
+  }) async {
     if (Platform.isWindows) {
       try {
-        WindowsPrivateFiles.writeSecret(target, jsonEncode(value));
+        WindowsPrivateFiles.writeSecret(
+          target,
+          jsonEncode(value),
+          replace: replace,
+        );
         return;
       } on Object {
         throw const RemoteFailure('profile_store_unavailable');
@@ -62,7 +70,22 @@ abstract final class PrivateConnectionFiles {
         throw const RemoteFailure('profile_store_unavailable');
       }
       await file.writeAsString(jsonEncode(value), flush: true);
-      await file.rename(target.absolute.path);
+      if (replace) {
+        await file.rename(target.absolute.path);
+      } else {
+        // A hard link publishes the fully flushed file only if no other first
+        // launch has already created this identity. Removing staging leaves
+        // the single durable target; a rename could overwrite the winner.
+        if (await FileSystemEntity.type(target.path, followLinks: false) !=
+                FileSystemEntityType.notFound ||
+            (await Process.run('ln', [
+                  file.path,
+                  target.absolute.path,
+                ])).exitCode !=
+                0) {
+          throw const RemoteFailure('profile_store_unavailable');
+        }
+      }
     } finally {
       await staging.delete(recursive: true);
     }
