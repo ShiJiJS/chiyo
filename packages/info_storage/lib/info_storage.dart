@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -52,6 +53,7 @@ part 'additional_approval_storage.dart';
 part 'template_packages_storage.dart';
 part 'server_state_storage.dart';
 part 'library_replication_storage.dart';
+part 'library_change_journal.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -78,6 +80,7 @@ const _serverRuntimeLibraryFormat = 53;
 const _deviceDeliveryLibraryFormat = 54;
 const _copyCleanupLibraryFormat = 55;
 const _libraryReplicationFormat = 56;
+const _libraryChangeJournalFormat = 57;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -662,7 +665,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _libraryReplicationFormat) {
+      if (headerVersion > _libraryChangeJournalFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -677,7 +680,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _libraryReplicationFormat ||
+            (marker.single['version'] as int) > _libraryChangeJournalFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -697,6 +700,15 @@ class EncryptedInformationRepository
                 replicaTables.length != 2) ||
             (storedFormat < _libraryReplicationFormat &&
                 replicaTables.isNotEmpty)) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        final journalTables = native.select(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_sync_change_state','library_sync_dirty','library_sync_changes')",
+        );
+        if ((storedFormat >= _libraryChangeJournalFormat &&
+                journalTables.length != 3) ||
+            (storedFormat < _libraryChangeJournalFormat &&
+                journalTables.isNotEmpty)) {
           throw const StorageFailure('unsupported_schema');
         }
         // Preserve the portable-fill boundary across older receipt/layout
@@ -735,6 +747,13 @@ class EncryptedInformationRepository
       } else {
         db = _InformationDatabase(NativeDatabase.opened(native), openingFormat);
         native = null; // Drift owns the handle now.
+      }
+      if (openingFormat >= _libraryChangeJournalFormat) {
+        // Open/migrate first: beforeOpen itself must not recursively open a
+        // transaction through the capture wrapper. Resume before maintenance
+        // writes in _load so restart cannot leave ungrouped committed changes.
+        await db.customSelect('SELECT 1').get();
+        db.syncJournalEnabled = true;
       }
       final repository = EncryptedInformationRepository._(
         db,
@@ -2008,6 +2027,35 @@ class EncryptedInformationRepository
 class _InformationDatabase extends GeneratedDatabase {
   _InformationDatabase(super.executor, this._openingFormat);
   final int _openingFormat;
+  bool syncJournalEnabled = false;
+  final _syncTransactionZone = Object();
+
+  @override
+  Future<T> transaction<T>(
+    Future<T> Function() action, {
+    bool requireNew = false,
+  }) {
+    final outermost = Zone.current[_syncTransactionZone] != true;
+    return super.transaction(
+      () => runZoned(() async {
+        final result = await action();
+        if (outermost && syncJournalEnabled) await _flushSyncChanges();
+        return result;
+      }, zoneValues: {_syncTransactionZone: true}),
+      requireNew: requireNew,
+    );
+  }
+
+  @override
+  Future<void> customStatement(String statement, [List<Object?>? args]) {
+    // Most business writes already use a transaction. Keep any single-statement
+    // write in the same commit as its journal entry too; reads use customSelect.
+    if (syncJournalEnabled && Zone.current[_syncTransactionZone] != true) {
+      return transaction(() => super.customStatement(statement, args));
+    }
+    return super.customStatement(statement, args);
+  }
+
   @override
   int get schemaVersion => _openingFormat;
   @override
