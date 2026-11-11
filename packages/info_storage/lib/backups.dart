@@ -636,6 +636,8 @@ class InformationBackups {
                 'backup_operations',
                 'backup_operation_state',
                 'server_runtime_state',
+                'library_replica_state',
+                'library_replica_receipts',
               }.contains(name),
             )) {
       final quoted = table.replaceAll('"', '""');
@@ -853,6 +855,9 @@ class InformationBackups {
     BackupContents contents, {
     AttachmentBackupReader? reader,
     _BackupRestoreIntent? intent,
+    bool preserveHistory = false,
+    bool preserveSettings = false,
+    Future<void> Function()? commitReplication,
   }) async {
     _checkOpen();
     if (_repository.managedCredentials.isNotEmpty) {
@@ -863,7 +868,23 @@ class InformationBackups {
         contents,
         _repository._clock().toUtc(),
         restored: true,
+        preserveHistory: preserveHistory,
       );
+      if (preserveSettings) {
+        final settings = await _repository._db
+            .customSelect('SELECT name,value FROM settings')
+            .get();
+        contents = BackupContents._(
+          {
+            ...contents._tables,
+            'settings': settings.map((r) => r.data).toList(),
+          },
+          contents.createdAt,
+          contents.formatVersion,
+          attachments: contents.attachments,
+          origin: contents._origin,
+        );
+      }
       // Construct all models before committing; cache publication cannot fail
       // afterward due to a payload decode or a second database read.
       final install = _prepareInstall(contents);
@@ -902,6 +923,8 @@ class InformationBackups {
                     'backup_operations',
                     'backup_operation_state',
                     'server_runtime_state',
+                    'library_replica_state',
+                    'library_replica_receipts',
                   }.contains(name),
                 )) {
           final quoted = table.replaceAll('"', '""');
@@ -1059,6 +1082,7 @@ class InformationBackups {
         }
         await _repository._checkAttachmentBackupBudget();
         if (intent != null) await _commitRestoreReceipt(intent, contents);
+        if (commitReplication != null) await commitReplication();
       });
       install();
       return contents;

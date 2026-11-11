@@ -5,10 +5,10 @@ publish_to: none
 environment:
   sdk: '>=3.10.0 <4.0.0'
 dependencies:
+  crypto: ^3.0.6
   info_core:
     path: ../info_core
 dev_dependencies:
-  crypto: ^3.0.6
   info_server:
     path: ../../apps/server
   info_storage:

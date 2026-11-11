@@ -492,6 +492,7 @@ extension _CompleteBackups on InformationBackups {
     BackupContents contents,
     DateTime now, {
     bool restored = false,
+    bool preserveHistory = false,
   }) {
     if (contents.createdAt.isAfter(now.add(const Duration(minutes: 5)))) {
       _backupInvalid();
@@ -500,6 +501,55 @@ extension _CompleteBackups on InformationBackups {
       for (final table in contents._tables.entries)
         table.key: table.value.toList(),
     };
+    if (preserveHistory) {
+      // Replication carries all still-retained facts and file versions. Backup
+      // retention is not a synchronization deletion policy.
+      if (restored) {
+        _retainBackupCredentialHistory(tables, DateTime.utc(1), now);
+        tables['request_history'] = [
+          for (final row in tables['request_history']!)
+            {
+              ...row,
+              'payload': jsonEncode(
+                RequestHistory.fromJson(
+                  _backupJson(row),
+                ).asRestored(now).toJson(),
+              ),
+            },
+        ];
+        tables['grant_history'] = [
+          for (final row in tables['grant_history']!)
+            {
+              ...row,
+              'payload': jsonEncode(
+                GrantHistory.fromJson(
+                  _backupJson(row),
+                ).asRestored(now).toJson(),
+              ),
+            },
+        ];
+        if (tables.containsKey('information_deliveries')) {
+          tables['information_deliveries'] = [
+            for (final row in tables['information_deliveries']!)
+              {
+                'id': row['id'],
+                'payload': jsonEncode(
+                  _deliveryArchive(row).changed({
+                    'restoredAt': now.toIso8601String(),
+                  }).toArchiveJson(),
+                ),
+              },
+          ];
+        }
+      }
+      return BackupContents._(
+        tables,
+        contents.createdAt,
+        contents.formatVersion,
+        attachments: contents.attachments,
+        origin: contents._origin,
+      );
+    }
     final cutoff = now.subtract(const Duration(days: 30));
     _retainBackupCredentials(tables, cutoff);
     final purges = {
