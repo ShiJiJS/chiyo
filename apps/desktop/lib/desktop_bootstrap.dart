@@ -221,7 +221,10 @@ class DesktopBootstrap extends ChangeNotifier {
       if (localConfiguration != null) {
         final connection = AgentConnection(profile!);
         try {
-          if ((await connection.call('/capabilities', {}))['status'] != 'ok') {
+          // Complete tool verification can involve thousands of package files.
+          // Prove this authenticated loopback host is reachable independently;
+          // capability queries still verify tools before advertising them.
+          if ((await connection.call('/health', {}))['status'] != 'ok') {
             throw const RemoteFailure('local_connection_unavailable');
           }
         } finally {
