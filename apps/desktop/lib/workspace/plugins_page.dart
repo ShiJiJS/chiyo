@@ -10,8 +10,6 @@ import 'plugins_controller.dart';
 import 'workspace_source.dart';
 import 'host_settings.dart';
 import 'host_import_dialog.dart';
-import 'legacy_templates_controller.dart';
-import 'legacy_templates_panel.dart';
 import 'plugin_authoring_guide.dart';
 
 /// Settings owns this entry; no package gets an everyday navigation destination.
@@ -28,8 +26,6 @@ class PluginsPage extends StatefulWidget {
     this.hostChanges,
     this.hostFilePicker,
     this.onRecord,
-    this.legacy,
-    this.onLegacyCreate,
     this.embedded = false,
   });
   final PluginsController controller;
@@ -41,8 +37,6 @@ class PluginsPage extends StatefulWidget {
   final Stream<WorkspaceRecordRef?>? hostChanges;
   final WorkspaceHostFilePicker? hostFilePicker;
   final ValueChanged<WorkspaceRecordRef>? onRecord;
-  final LegacyTemplatesController? legacy;
-  final ValueChanged<WorkspaceLegacyTemplate>? onLegacyCreate;
   final bool embedded;
   @override
   State<PluginsPage> createState() => _PluginsPageState();
@@ -727,26 +721,15 @@ class _PluginsPageState extends State<PluginsPage> {
                     ),
                     const SizedBox(height: 24),
                     DesktopButton(
-                      selected: !model.showingLegacy,
+                      selected: true,
                       alignment: Alignment.centerLeft,
                       leading: const PrototypeIcon(PrototypeIconGlyph.plugin),
                       onPressed: () {
                         _top();
-                        model.showLegacy(false);
                         model.setFilter(PluginFilter.all);
                       },
                       child: const Text('插件'),
                     ),
-                    if (widget.legacy != null) ...[
-                      const SizedBox(height: 10),
-                      DesktopButton(
-                        key: const ValueKey('legacy-menu'),
-                        selected: model.showingLegacy,
-                        alignment: Alignment.centerLeft,
-                        onPressed: () => model.showLegacy(true),
-                        child: const Text('旧版模板'),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -772,15 +755,10 @@ class _PluginsPageState extends State<PluginsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                model.showingLegacy ? '旧版模板' : '插件',
-                                style: libraryHeading(context, 25),
-                              ),
+                              Text('插件', style: libraryHeading(context, 25)),
                               const SizedBox(height: 7),
                               Text(
-                                model.showingLegacy
-                                    ? '继续使用旧录入辅助，或明确转换为声明式插件。'
-                                    : '管理资料模板与插件专属设置。已有资料始终由信息库保存。',
+                                '管理资料模板与插件专属设置。已有资料始终由信息库保存。',
                                 style: libraryText(context, 12, color: c.muted),
                               ),
                             ],
@@ -810,35 +788,33 @@ class _PluginsPageState extends State<PluginsPage> {
                               },
                               child: const Text('Agent 制作指引'),
                             ),
-                            if (!model.showingLegacy)
-                              DesktopButton(
-                                key: const ValueKey('plugin-install'),
-                                fontSize: 12,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 6,
-                                ),
-                                kind: DesktopButtonKind.primary,
-                                leading: const PrototypeIcon(
-                                  PrototypeIconGlyph.plus,
-                                ),
-                                onPressed:
-                                    widget.picker == null ||
-                                        model.loading ||
-                                        model.failure != null
-                                    ? null
-                                    : () => _operation(
-                                        WorkspacePluginAction.install,
-                                      ),
-                                child: const Text('安装插件包'),
+                            DesktopButton(
+                              key: const ValueKey('plugin-install'),
+                              fontSize: 12,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
                               ),
+                              kind: DesktopButtonKind.primary,
+                              leading: const PrototypeIcon(
+                                PrototypeIconGlyph.plus,
+                              ),
+                              onPressed:
+                                  widget.picker == null ||
+                                      model.loading ||
+                                      model.failure != null
+                                  ? null
+                                  : () => _operation(
+                                      WorkspacePluginAction.install,
+                                    ),
+                              child: const Text('安装插件包'),
+                            ),
                           ],
                         ),
                       ],
                     ),
                     const SizedBox(height: 40),
-                    if (model.failure case final failure?
-                        when !model.showingLegacy) ...[
+                    if (model.failure case final failure?) ...[
                       PluginFailureView(failure),
                       Align(
                         alignment: Alignment.centerLeft,
@@ -848,55 +824,39 @@ class _PluginsPageState extends State<PluginsPage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                    ] else if (!model.showingLegacy && model.loading)
+                    ] else if (model.loading)
                       const Padding(
                         padding: EdgeInsets.only(bottom: 12),
                         child: Text('正在刷新插件…'),
                       ),
                     Expanded(
                       child: Container(
-                        key: ValueKey(
-                          model.showingLegacy
-                              ? 'legacy-workspace'
-                              : 'plugin-workspace',
-                        ),
+                        key: const ValueKey('plugin-workspace'),
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
                           color: c.paper,
                           border: Border.all(color: c.line),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: model.showingLegacy && widget.legacy != null
-                            ? LegacyTemplatesPanel(
-                                controller: widget.legacy!,
-                                catalog: model.catalog,
-                                plugins: model.source,
-                                onCreate: widget.onLegacyCreate,
-                                onConverted: (id) async {
-                                  await model.load();
-                                  if (mounted) model.select(id);
-                                },
-                                onModalChanged: widget.onModalChanged,
-                              )
-                            : Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  SizedBox(
-                                    width: widget.embedded
-                                        ? 250
-                                        : bounds.maxWidth <= 1300
-                                        ? 200
-                                        : 225,
-                                    child: _list(context),
-                                  ),
-                                  VerticalDivider(
-                                    width: 1,
-                                    thickness: 1,
-                                    color: c.line,
-                                  ),
-                                  Expanded(child: _detail(context)),
-                                ],
-                              ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(
+                              width: widget.embedded
+                                  ? 250
+                                  : bounds.maxWidth <= 1300
+                                  ? 200
+                                  : 225,
+                              child: _list(context),
+                            ),
+                            VerticalDivider(
+                              width: 1,
+                              thickness: 1,
+                              color: c.line,
+                            ),
+                            Expanded(child: _detail(context)),
+                          ],
+                        ),
                       ),
                     ),
                   ],

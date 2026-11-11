@@ -265,32 +265,6 @@ void main() {
   );
 
   testWidgets(
-    'legacy definition identity changes do not carry old text into a new meaning, and reloading never creates records',
-    (t) async {
-      final m = await start(t);
-      await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
-      await tap(t, find.byKey(const ValueKey('legacy-menu')));
-      await tap(t, find.byKey(const ValueKey('legacy-create')));
-      await enter(t, 'library-edit-name', '保留的旧版草稿');
-      m.source.reviseLegacyTemplate('legacy-resource');
-      await t.pumpAndSettle();
-      await tap(t, find.byKey(const ValueKey('library-edit-save')));
-      await tap(t, find.byKey(const ValueKey('library-edit-review-current')));
-      expect(
-        find.byKey(const ValueKey('library-edit-review-keep')),
-        findsNothing,
-      );
-      await tap(t, find.byKey(const ValueKey('library-edit-review-reload')));
-      expect((await m.source.loadSummary()).records, 31);
-      await enter(t, 'library-edit-name', '重新核对的旧版录入');
-      await tap(t, find.byKey(const ValueKey('library-edit-save')));
-      expect(m.library.detail!.definition['legacyTemplateVersion'], 2);
-      expect(m.library.detail!.values.values, everyElement(''));
-      expect((await m.source.loadSummary()).records, 32);
-    },
-  );
-
-  testWidgets(
     'removed profile entry identities cannot be revived by retaining an old editor draft',
     (t) async {
       final m = await start(t);

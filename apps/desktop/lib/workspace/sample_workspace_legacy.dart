@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_source.dart';
-import 'sample_workspace_plugins.dart';
 
 const sampleLegacyInputs = [
   (
@@ -54,7 +53,6 @@ class SampleWorkspaceLegacy implements WorkspaceLegacyTemplateSource {
   SampleWorkspaceLegacy({
     required this.readable,
     required this.changed,
-    required this.plugins,
     Iterable<SampleLegacyInput> inputs = sampleLegacyInputs,
   }) {
     for (final i in inputs) {
@@ -64,7 +62,6 @@ class SampleWorkspaceLegacy implements WorkspaceLegacyTemplateSource {
   }
   final Future<void> Function() readable;
   final void Function() changed;
-  final SampleWorkspacePlugins plugins;
   final _initial = <String, WorkspaceLegacyTemplate>{},
       _current = <String, WorkspaceLegacyTemplate>{};
   Map<String, WorkspaceLegacyTemplate> capturePortable() =>
@@ -123,13 +120,6 @@ class SampleWorkspaceLegacy implements WorkspaceLegacyTemplateSource {
       description: description,
       version: version,
       fields: fields,
-      packageId: 'local.legacy.p${_hash(id).substring(0, 24)}',
-      conversionProblem:
-          fields.any((f) => f.kind == WorkspaceLegacyFieldKind.file)
-          ? '当前声明包格式不支持普通附件字段，不能转换此模板；旧版录入仍可继续使用。'
-          : fields.length > 40
-          ? '当前声明包每个模板最多40个字段，不能截断转换；旧版录入仍可继续使用。'
-          : null,
       definition: {
         'name': name,
         'fields': descriptor,
@@ -156,67 +146,6 @@ class SampleWorkspaceLegacy implements WorkspaceLegacyTemplateSource {
   Future<WorkspaceLegacyTemplate> read(String id) async {
     await readable();
     return current(id);
-  }
-
-  @override
-  Future<WorkspacePluginCandidate> prepareConversion(
-    String id,
-    int expectedVersion,
-  ) async {
-    await readable();
-    final template = current(id);
-    if (template.version != expectedVersion) {
-      throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新读取并核对。');
-    }
-    if (template.conversionProblem case final reason?) {
-      throw WorkspaceFailure('conversion_unsupported', reason);
-    }
-    final fields = [
-      for (final f in template.definition['fields'] as List)
-        {
-          'key': f['key'],
-          'label': f['label'],
-          'type': f['type'],
-          'required': false,
-        },
-    ];
-    final package = {
-      'id': template.packageId,
-      'name': template.name,
-      'version': '1.${template.version}.0',
-      'hostApi': 1,
-      'author': '旧版模板转换',
-      'description': template.description,
-      'templates': [
-        {
-          'id': 'record',
-          'name': template.name,
-          'icon': 'file',
-          'fields': fields,
-          'sections': template.definition['sections'],
-          'relations': <Object?>[],
-          'instructions': [
-            '先核对字段含义。模板不授予信息访问或凭据使用许可。',
-            for (final f in template.fields) '${f.name}：${f.description}',
-          ].join('\n'),
-        },
-      ],
-    };
-    final provenance = {
-      'templateId': template.id,
-      'version': template.version,
-      'definitionIds': template.definition['legacyDefinitionIds'],
-    };
-    return plugins.stageLegacyConversion(
-      '旧版模板-${_hash(id).substring(0, 12)}.json',
-      utf8.encode(jsonEncode(package)),
-      provenance,
-      () {
-        if (current(id).version != expectedVersion) {
-          throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新预览转换结果。');
-        }
-      },
-    );
   }
 
   void reset() {

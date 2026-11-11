@@ -72,7 +72,7 @@ final class _PreviewNetwork extends HttpOverrides {
 
 void main() {
   testWidgets(
-    'Mac preview composition, plugins, adoption and legacy conversion avoid production channels, network and personal paths',
+    'Mac preview composition, plugins, adoption and retained definitions avoid production channels, network and personal paths',
     (t) async {
       final previousIo = IOOverrides.current,
           previousHttp = HttpOverrides.current;
@@ -296,51 +296,17 @@ void main() {
       expect(controller.detail!.fieldIds['domain'], domainIdentity);
       await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const ValueKey('legacy-menu')));
-      await t.pumpAndSettle();
+      expect(find.byKey(const ValueKey('legacy-menu')), findsNothing);
       final legacy = await source.legacyTemplates.read('legacy-resource');
-      final fields = legacy.definition['fields'] as List;
-      await t.ensureVisible(find.byKey(const ValueKey('legacy-create')));
-      await t.tap(find.byKey(const ValueKey('legacy-create')));
+      expect(legacy.fields, isNotEmpty);
+      await t.tap(find.byKey(const ValueKey('settings-section-plugins')));
       await t.pumpAndSettle();
-      await t.enterText(
-        find.byKey(const ValueKey('library-edit-name')),
-        '隔离检查旧版录入',
-      );
-      for (final f in fields) {
-        final input = find.byKey(ValueKey('library-edit-${f['key']}'));
-        await t.ensureVisible(input);
-        await t.enterText(input, '虚构的旧版字段内容');
-      }
-      await t.tap(find.byKey(const ValueKey('library-edit-save')));
-      await t.pumpAndSettle();
-      expect(controller.detail!.record.type.id, 'generic');
-      expect(controller.detail!.definition, legacy.definition);
-      expect(
-        controller.detail!.fieldIds.values.toSet().intersection(
-          legacy.fields.map((f) => f.id).toSet(),
-        ),
-        isEmpty,
-      );
-      final legacyRecord = controller.detail!;
-      await t.tap(find.byKey(const ValueKey('workspace-nav-settings')));
-      await t.pumpAndSettle();
-      await t.ensureVisible(find.byKey(const ValueKey('legacy-convert')));
-      await t.tap(find.byKey(const ValueKey('legacy-convert')));
-      await t.pumpAndSettle();
-      await t.tap(find.byKey(const ValueKey('plugin-change-submit')));
-      await t.pumpAndSettle();
-      expect((await source.plugins.load()).packages, hasLength(5));
-      expect(
-        (await source.readDetail(legacyRecord.record.ref)).definition,
-        legacyRecord.definition,
-      );
       await t.tap(find.byKey(const ValueKey('plugin-authoring-guide')));
       await t.pumpAndSettle();
       expect(find.textContaining('生成后调用只读校验'), findsOneWidget);
       await t.tap(find.byKey(const ValueKey('plugin-authoring-close')));
       await t.pumpAndSettle();
-      expect((await source.loadSummary()).records, 33);
+      expect((await source.loadSummary()).records, 32);
       final historyBefore = await source.credentials.history(ssh);
       await t.tap(find.byKey(const ValueKey('workspace-nav-approvals')));
       await t.pumpAndSettle();
@@ -721,26 +687,6 @@ void main() {
       await backup.write(WorkspaceBackupAction.restore);
       expect(backup.result!.action, WorkspaceBackupAction.restore);
       await t.pumpAndSettle();
-      final agents = t
-          .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
-          .agents;
-      await agents.load();
-      agents.open(WorkspaceAgentView.diagnostics);
-      await agents.readDetails();
-      expect(agents.report, isNotNull);
-      agents.close();
-      await source.agents.setScenario(SampleAgentScenario.bindingMismatch);
-      await agents.load();
-      agents.open(WorkspaceAgentView.session);
-      await agents.readDetails();
-      expect(agents.session!.requests, isEmpty);
-      expect(
-        agents.session!.session.state,
-        WorkspaceAgentSessionState.mismatch,
-      );
-      agents.close();
-      await source.agents.setScenario(SampleAgentScenario.ready);
-      await agents.load();
       var preparedRuntime = false;
       final preparingRuntime = source.prepareRuntimeMaintenance().then(
         (_) => preparedRuntime = true,

@@ -19,19 +19,13 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   LibraryController controller, {
   WorkspaceDetail? detail,
   WorkspaceType? selectedType,
-  WorkspaceLegacyTemplate? legacyTemplate,
   WorkspaceFilePicker? filePicker,
   WorkspaceCredentialPicker? credentialPicker,
   VoidCallback? onOpenPlugins,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
-  var type =
-      detail?.record.type ??
-      selectedType ??
-      (legacyTemplate == null
-          ? null
-          : catalog.types.where((t) => t.id == 'generic').firstOrNull);
+  var type = detail?.record.type ?? selectedType;
   if (type == null) {
     final choice = await showDesktopDialog<LibraryCreateChoice>(
       context,
@@ -84,19 +78,9 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   }
   Map<String, Object?> definition;
   try {
-    if (legacyTemplate != null) {
-      final current = await controller.source.legacyTemplates.read(
-        legacyTemplate.id,
-      );
-      if (current.version != legacyTemplate.version) {
-        throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新读取并核对。');
-      }
-      definition = current.definition;
-    } else {
-      definition = detail == null
-          ? await controller.source.loadTemplate(type.id)
-          : workspaceEditingDefinition(detail);
-    }
+    definition = detail == null
+        ? await controller.source.loadTemplate(type.id)
+        : workspaceEditingDefinition(detail);
   } on WorkspaceFailure catch (failure) {
     if (!context.mounted) return null;
     await showDesktopDialog<void>(

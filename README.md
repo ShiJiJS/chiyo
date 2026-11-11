@@ -53,7 +53,7 @@
 
 运行中的 App、CLI 与 `agent-info-access` Skill 配合使用。Skill 说明如何查询模板、提交提案、申请资料及查看处理结果，CLI 负责与 App 通信。模板与例子来自 App 当前安装的插件。
 
-在 App 的「设置 → Agent 接入」查看接入说明和诊断。首次接入 Codex 需要按说明配置会话连接；仅打开 App 尚不足以为任意聊天建立连接。已有连接的聊天按 Skill 使用。
+在 App 的「设置 → 存储与同步」连接服务器后，会自动准备本机 CLI 的受限设备配置。首次接入聊天按同版本 Skill 建立未授权会话，再申请资料；已有连接的聊天继续使用原关联。
 
 详细步骤见 [Mac 接入说明](integrations/codex/MACOS-INTEGRATION.md)。
 

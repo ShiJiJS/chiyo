@@ -1,13 +1,13 @@
 # Windows 联网版 Codex 接入
 
-先使用同包 App 连接现有 NAS，在“AI 接入”登记本机设备。App 显示独立 agent-connection.json 的位置；配置只提供 Agent 接入能力，审批仍由主人在 App 中完成。
+先使用同包 App 在设置中连接现有 NAS。连接校验及首次加载成功后自动准备本机受限设备配置，CLI 默认发现当前连接；审批仍由用户在 App 完成。
 
 ## 准备运行目录
 
 从完整同版本包调用，选择一个全新且稳定的输出目录：
 
 ```powershell
-& 'C:\知予完整包\cli\info-prepare-codex.exe' --connection 'C:\本机私有配置\agent-connection.json' --state-root 'C:\本机私有状态\codex' 'C:\知予运行目录'
+& 'C:\知予完整包\cli\info-prepare-codex.exe' --state-root 'C:\本机私有状态\codex' 'C:\知予运行目录'
 ```
 
 生成器复制实际 Codex CLI、hook、worker，生成 hooks.json 和 skills/agent-info-access 下的模板及引用，拒绝覆盖已有目录。它不会安装、合并个人配置或自动授予 hook 信任。GH/AWS 工具保留在原完整包；准备目录通过公开指针核对匹配的完整包和二进制，保留原完整包的位置。
@@ -19,12 +19,12 @@
 公开能力查询不创建批准范围：
 
 ```powershell
-'{"command":"capabilities"}' | & 'C:\知予完整包\cli\info.exe' --connection 'C:\本机私有配置\agent-connection.json'
+'{"command":"capabilities"}' | & 'C:\知予完整包\cli\info.exe'
 ```
 
 联网版的 credentialToolScope=current_device 表示工具观察来自当前电脑。GH/AWS 使用返回的完整随包路径，SSH 使用返回的系统路径；不可用或版本不符时先修复工具，不退回个人登录配置。
 
-正式宿主启动事件或显式接入为新聊天建立未批准的关联；主/子身份按原会话范围核对。访问或凭据使用仍须申请和主人批准，提交提案不等于已保存。App 可以关闭，CLI 仍连接 NAS。
+正式宿主启动事件或显式接入为新聊天建立未批准的关联；主/子身份按原会话范围核对。访问或凭据使用仍须申请和用户批准，提交提案不等于已保存。App 可以关闭，CLI 仍连接 NAS。
 
 关联引用是该聊天的私密能力，只使用当前上下文已经收到的引用，并通过独立 stdin 交给 CLI。不要放入 shell 命令、argv、日志或仓库。引用丢失时重新连接；公开聊天 ID、请求 ID 或结束索引不能恢复读取关联。
 

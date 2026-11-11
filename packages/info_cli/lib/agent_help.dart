@@ -1,6 +1,8 @@
 /// Public usage metadata, available without connecting or opening a session.
 Map<String, dynamic> agentCommandHelp() => {
   'status': 'ok',
+  'connection':
+      'App 在设置中保存连接后自动准备设备配置；CLI 默认发现当前目标。--connection 可指定独立设备配置，CHIYO_CONNECTION_DIRECTORY 可指定隔离连接目录。管理 Token 留在 App；连接不代表批准资料。',
   'submissionCapability': 'submission-metadata.v1',
   'submissionFields': {
     'agentName': '当前 Agent 名称，最多200字。Codex 同包入口自动填写，也可明确提供。',

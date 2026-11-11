@@ -22,7 +22,6 @@ import 'owner_workspace_file_selections.dart';
 import 'owner_workspace_file_changes.dart';
 import 'owner_pdf_preview.dart';
 import 'owner_workspace_approvals.dart';
-import 'owner_workspace_agents.dart';
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
@@ -55,7 +54,6 @@ class OwnerWorkspaceSource
     this.settings = const UnavailableWorkspaceSettings(),
     this.backups = const UnavailableWorkspaceBackup(),
     this.runtime = const UnavailableWorkspaceRuntime(),
-    WorkspaceAgentsSource? agents,
     WorkspaceCredentialSource? credentials,
     WorkspaceApprovalSource? approvals,
     WorkspaceGrantHistorySource? grantHistory,
@@ -66,7 +64,6 @@ class OwnerWorkspaceSource
   }) : _scope = owner.captureLibraryScope() {
     this.credentials =
         credentials ?? OwnerWorkspaceCredentials(owner, onChanged: _changed);
-    this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     this.grantHistory =
         grantHistory ??
@@ -164,8 +161,6 @@ class OwnerWorkspaceSource
   final WorkspaceBackupSource backups;
   @override
   final WorkspaceRuntimeSource runtime;
-  @override
-  late final WorkspaceAgentsSource agents;
   @override
   late final WorkspaceCredentialSource credentials;
   @override

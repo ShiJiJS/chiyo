@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
-import 'package:info_cli/agent_bundle.dart';
 import 'package:info_cli/windows_agent_bundle.dart';
 import 'package:test/test.dart';
 
@@ -61,7 +60,7 @@ void main() {
         sha256.convert(await file('manifest.json').readAsBytes()).toString(),
       );
       root = await root.rename('${root.path} 中文 空格');
-      final moved = await AgentBundle(
+      final moved = await WindowsAgentBundle(
         executable: file(WindowsAgentBundle.appExecutable).path,
       ).read();
       expect(moved.verified, isTrue);

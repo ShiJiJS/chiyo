@@ -5,18 +5,17 @@ App 和 CLI 使用同一个独立服务器，审批由用户在 App 完成。AI 
 ## 准备材料
 
 1. 打开同版本 App，填写 HTTPS 服务器地址和用户 Token。私人 CA 的 PEM 在连接页面填写，不关闭证书校验。
-2. 点击顶部「AI 接入」，输入设备名称并生成配置。App 显示私有配置文件位置，不显示设备接入凭证。
+2. 保存连接并完成首次加载后，App 自动准备 CLI 设备配置。新聊天自动发现当前服务器，重启复用原设备；不需要额外的接入按钮。
 3. 从完整包运行以下命令，输出目录必须是新的稳定位置：
 
 ```sh
 ./cli/info-prepare-codex \
-  --connection "<App 显示的连接配置路径>" \
   "<新的稳定运行目录>"
 ```
 
 独立 App 的配套生成器位于 `chiyo.app/Contents/Resources/AgentIntegration/cli/info-prepare-codex`。可加 `--state-root <独立私有状态目录>`；从其他位置调用时，可加 `--source-bundle <同版本CLI目录>`。移动运行目录后重新生成和审查路径，不把长期配置留在准备清理的构建目录。
 
-生成器只准备同版本程序、`hooks.json` 和 `skills/agent-info-access`，不改个人 Codex 配置、不安装或信任 hooks。把生成 Skill 交给对应 Agent，说明末尾带准确程序和连接位置，可以按说明手动关联。要启用 hooks 时，保留已有项目配置，按当前 Codex 的正式入口审查并信任准确的 SessionStart、SubagentStart、SessionEnd 定义；材料存在、项目受信任或当前能连接都不能替代具体 hook 的安装和信任。
+生成器只准备同版本程序、`hooks.json` 和 `skills/agent-info-access`，不改个人 Codex 配置、不安装或信任 hooks。把生成 Skill 交给对应 Agent，说明末尾带准确程序位置，可以按说明手动关联。要启用 hooks 时，保留已有项目配置，按当前 Codex 的正式入口审查并信任准确的 SessionStart、SubagentStart、SessionEnd 定义；材料存在、项目受信任或当前能连接都不能替代具体 hook 的安装和信任。
 
 Mac 运行目录还保存一份公开的配套 App 工具引用，不复制整套大型工具。CLI 的 capabilities 会核对该 App 与自己的版本，再返回当前设备可用的工具位置。保留原 App 的稳定位置；移动或更换版本后重新准备运行目录。该引用没有连接 Token 或凭据内容。
 
@@ -29,7 +28,7 @@ Mac 运行目录还保存一份公开的配套 App 工具引用，不复制整�
 - App 退出后 CLI 仍可申请和使用仍有效的原许可；服务器正常重启不延长原期限。根聊天结束、撤销或到期后停止后续访问，恢复备份不恢复旧聊天许可。
 - 失败先核对服务器地址、证书、设备状态和原操作结果；不关闭 TLS 验证、不回退到旧本机端口、不换操作编号重复未知结果。
 
-在设置的 Agent 接入诊断核对同版本清单和实际文件。它只证明所列材料一致，不证明个人宿主已安装 Skill 或信任 hooks。会话页展示服务器会话及各类申请统计，同名聊天按公开身份区分；名称和用途是 Agent 自述。
+使用随包 CLI 的 capabilities 核对服务和实际工具；这不代表个人宿主已安装 Skill 或信任 hooks。申请和授权历史展示 Agent 提交的名称、聊天说明和用途，身份名称不作为授权证明。
 
 正式生成后使用以下参考：
 

@@ -14,7 +14,6 @@ import 'library_page.dart';
 import 'plugins_controller.dart';
 import 'plugins_page.dart';
 import 'library_edit_dialog.dart';
-import 'legacy_templates_controller.dart';
 import 'approvals_controller.dart';
 import 'approvals_page.dart';
 import 'grant_history_controller.dart';
@@ -24,7 +23,6 @@ import 'settings_page.dart';
 import 'classification_controller.dart';
 import 'backup_controller.dart';
 import 'runtime_controller.dart';
-import 'agents_controller.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -43,14 +41,12 @@ class WorkspaceApp extends StatelessWidget {
     this.connectionBuilder,
     this.connectionSettingsRequests,
     this.onConnectionSettingsVisible,
-    this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
   final Widget Function(BuildContext context, VoidCallback onCancel)?
   connectionBuilder;
   final ValueListenable<int>? connectionSettingsRequests;
   final ValueChanged<bool>? onConnectionSettingsVisible;
-  final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -70,7 +66,6 @@ class WorkspaceApp extends StatelessWidget {
     connectionBuilder: connectionBuilder,
     connectionSettingsRequests: connectionSettingsRequests,
     onConnectionSettingsVisible: onConnectionSettingsVisible,
-    onAgentConnectionSetup: onAgentConnectionSetup,
   );
 }
 
@@ -89,14 +84,12 @@ class _WorkspaceSession extends StatefulWidget {
     this.connectionBuilder,
     this.connectionSettingsRequests,
     this.onConnectionSettingsVisible,
-    this.onAgentConnectionSetup,
   });
   final WorkspaceSource source;
   final Widget Function(BuildContext context, VoidCallback onCancel)?
   connectionBuilder;
   final ValueListenable<int>? connectionSettingsRequests;
   final ValueChanged<bool>? onConnectionSettingsVisible;
-  final Future<void> Function(BuildContext)? onAgentConnectionSetup;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -112,7 +105,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   late final WorkspaceController _controller;
   late final LibraryController _library;
   late final PluginsController _plugins;
-  late final LegacyTemplatesController _legacy;
   late final ApprovalsController _approvals;
   late final GrantHistoryController _history;
   bool _historyFrozen = false;
@@ -124,7 +116,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   late final BackupController _backups;
   bool _backupFrozen = false;
   late final WorkspaceRuntimeController _runtime;
-  late final WorkspaceAgentsController _agents;
   bool _runtimeFrozen = false, _runtimeGate = false;
   bool _quitRequested = false;
   late final void Function(WorkspacePage) _desktopNavigation;
@@ -168,13 +159,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _runtime = WorkspaceRuntimeController(_source.runtime, _source.changes)
       ..addListener(_runtimeChanged);
     unawaited(_runtime.load());
-    _agents = WorkspaceAgentsController(_source.agents, _source.changes);
-    unawaited(_agents.load());
     _plugins = PluginsController(_source.plugins, _source.changes);
-    _legacy = LegacyTemplatesController(
-      _source.legacyTemplates,
-      _source.changes,
-    );
     _settings = WorkspaceSettingsController(
       _source.settings,
       _source.changes,
@@ -183,7 +168,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
       ),
     )..addListener(_settingsChanged);
     unawaited(_settings.load());
-    unawaited(_legacy.load());
     unawaited(_plugins.load());
     _summaryChanges = _source.changes.listen(
       (_) => unawaited(_controller.refresh()),
@@ -353,13 +337,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _settings.dispose();
     _backups.dispose();
     _runtime.dispose();
-    _agents.dispose();
     _classifications.dispose();
     widget.connectionSettingsRequests?.removeListener(_openConnectionSettings);
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
-    _legacy.dispose();
     unawaited(_summaryChanges?.cancel());
     if (identical(widget.desktop?.onNavigate, _desktopNavigation)) {
       widget.desktop?.onNavigate = null;
@@ -398,28 +380,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _controller.navigate(WorkspacePage.library);
   }
 
-  Future<void> _createWithLegacy(
-    BuildContext context,
-    WorkspaceLegacyTemplate template,
-  ) async {
-    _modalChanged(true);
-    try {
-      await _library.load(_library.query);
-      if (!context.mounted) return;
-      final ref = await showLibraryEditor(
-        context,
-        _library,
-        legacyTemplate: template,
-        filePicker: widget.inputsBuilder?.call(context).file,
-      );
-      if (!context.mounted || ref == null) return;
-      await _library.openRelated(ref);
-    } finally {
-      _modalChanged(false);
-    }
-    if (mounted) _controller.navigate(WorkspacePage.library);
-  }
-
   void _navigate(WorkspacePage page, String id) {
     if (_deferNavigation(() => _navigate(page, id))) return;
     if (page == WorkspacePage.approvals) unawaited(_approvals.open(id));
@@ -429,8 +389,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
       _settings.select(
         id == 'connection'
             ? WorkspaceSettingsSection.connection
-            : id == 'agents'
-            ? WorkspaceSettingsSection.agents
             : id == 'runtime'
             ? WorkspaceSettingsSection.runtime
             : id == 'backups'
@@ -520,21 +478,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
               );
             },
           ),
-        if (widget.onAgentConnectionSetup != null)
-          IconButton(
-            tooltip: 'AI 接入',
-            icon: const Icon(Icons.smart_toy_outlined),
-            onPressed: _controller.navigationLocked
-                ? null
-                : () async {
-                    _modalChanged(true);
-                    try {
-                      await widget.onAgentConnectionSetup!(context);
-                    } finally {
-                      _modalChanged(false);
-                    }
-                  },
-          ),
         ListenableBuilder(
           listenable: _backups,
           builder: (context, _) => !_backups.uncertain
@@ -618,7 +561,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 classifications: _classifications,
                 backups: _backups,
                 runtime: _runtime,
-                agents: _agents,
                 backupPicker:
                     widget.inputsBuilder?.call(context).backup ??
                     unavailableBackupInput,
@@ -628,9 +570,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 pluginBuilder: (context) => PluginsPage(
                   embedded: true,
                   controller: _plugins,
-                  legacy: _legacy,
-                  onLegacyCreate: (t) =>
-                      unawaited(_createWithLegacy(context, t)),
                   hosts: _source.hosts,
                   hostChanges: _source.changes,
                   hostFilePicker:

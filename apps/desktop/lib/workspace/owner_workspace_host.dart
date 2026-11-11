@@ -1,7 +1,5 @@
 import 'owner_workspace_hosts.dart';
 import 'dart:async';
-import 'package:info_cli/macos_agent_bundle.dart';
-import 'owner_workspace_agents.dart';
 import 'owner_workspace_settings.dart';
 import 'owner_workspace_runtime.dart';
 import 'owner_workspace_proposals.dart';
@@ -57,7 +55,6 @@ class OwnerWorkspaceHost extends StatefulWidget {
 
 class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   late OwnerWorkspaceSource _source;
-  final _bundle = MacAgentBundle();
   late final RuntimeWorkspaceDesktop _desktop;
   StreamSubscription<WorkspaceRecordRef?>? _changes;
   OwnerWorkspaceBackups? _backups;
@@ -106,7 +103,6 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
       hosts: _hosts,
       legacyTemplates: OwnerWorkspaceLegacyTemplates(
         widget.runtime.service.owner,
-        _plugins,
       ),
       definitionsReader: () => _plugins.templates,
       templateState: _plugins.stateFor,
@@ -131,10 +127,6 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         owner: widget.runtime.service.owner,
         runtime: widget.runtime,
         changed: () => _source.refreshFromOwner(),
-      ),
-      agents: OwnerWorkspaceAgents(
-        owner: widget.runtime.service.owner,
-        readBundle: _bundle.read,
       ),
     );
     _changes = _source.changes.listen((_) {

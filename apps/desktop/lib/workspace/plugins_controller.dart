@@ -37,15 +37,8 @@ class PluginsController extends ChangeNotifier {
   PluginTab tab = PluginTab.preview;
   String? selection, templateId;
   double scrollOffset = 0;
-  bool showingLegacy = false;
-  void showLegacy(bool value) {
-    showingLegacy = value;
-    notifyListeners();
-  }
-
   WorkspaceHostTarget? pendingHost;
   void showHostSettings(WorkspaceHostTarget? target) {
-    showingLegacy = false;
     filter = PluginFilter.all;
     selection = 'builtin.server';
     templateId = null;
@@ -110,7 +103,6 @@ class PluginsController extends ChangeNotifier {
 
   void select(String id) {
     if (_closed) return;
-    showingLegacy = false;
     selection = id;
     templateId = null;
     tab = PluginTab.preview;

@@ -434,13 +434,19 @@ void main() {
         await harness.until(() => find.text('原生连接验收资料').evaluate().isNotEmpty);
         final source = t.widget<WorkspaceApp>(find.byType(WorkspaceApp)).source;
         live = source as RemoteWorkspaceSource;
+        expect(find.byTooltip('AI 接入'), findsNothing);
         await harness.tap('workspace-nav-settings');
+        expect(find.text('Agent 接入'), findsNothing);
+        expect(find.text('旧版模板'), findsNothing);
         await harness.tap('settings-section-connection');
         final settings = t
             .widget<WorkspaceSettingsPage>(find.byType(WorkspaceSettingsPage))
             .controller;
         Finder field(String label) => find.byWidgetPredicate(
           (w) => w is DesktopTextField && w.decoration.labelText == label,
+        );
+        await harness.until(
+          () => settings.value != null && !settings.loading && !settings.frozen,
         );
         for (final width in [1440.0, 1000.0]) {
           await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
@@ -456,7 +462,17 @@ void main() {
                 dark ? WorkspaceTheme.dark : WorkspaceTheme.light,
               ),
             );
+            await harness.until(() => !settings.loading && !settings.frozen);
             await t.pumpAndSettle();
+            expect(settings.writeFailure, isNull);
+            expect(
+              settings.value!.theme,
+              dark ? WorkspaceTheme.dark : WorkspaceTheme.light,
+            );
+            expect(
+              Theme.of(t.element(field('服务器地址'))).brightness,
+              dark ? Brightness.dark : Brightness.light,
+            );
             expect(find.text('已核验'), findsOneWidget);
             expect(find.byTooltip('连接设置'), findsNothing);
             final render =
