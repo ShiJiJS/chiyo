@@ -1,0 +1,5 @@
+# Storage integration files create independent native-asset packages and real
+# crash workers. Serialize files so their setup cannot compete with another
+# integration file's process deadline, as in info_cli's process tests.
+# Keep each test's assertions and explicit timeouts unchanged.
+concurrency: 1

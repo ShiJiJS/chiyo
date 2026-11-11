@@ -168,7 +168,7 @@ void main() {
         final history = (await drive(
           t,
           () => source.grantHistory.read('request:${saved.id}'),
-        ))!;
+        ));
         expect(history.credentialSessionBound, isTrue);
         expect(history.credentialExpiresAt, isNull);
         expect(history.canRevoke, isTrue);
@@ -180,9 +180,9 @@ void main() {
               saved.credentialId,
             ),
           ),
-        ))!;
+        ));
         expect(credentialHistory.single.expiresAt, isNull);
-        final detail = (await drive(t, () => source.approvals.read(saved.id)))!;
+        final detail = await drive(t, () => source.approvals.read(saved.id));
         final revoke = WorkspaceApprovalChange(
           operationId: workspaceOperationId(),
           requestId: saved.id,

@@ -11,11 +11,12 @@ void main() {
     'both CLI help entry points work without a connection or private association',
     () async {
       for (final entry in ['info.dart', 'codex_info.dart']) {
-        final result = await Process.run(Platform.resolvedExecutable, [
-          'run',
-          'bin/$entry',
-          '--help',
-        ]);
+        final result = await Process.run(
+          Platform.resolvedExecutable,
+          ['run', 'bin/$entry', '--help'],
+          stdoutEncoding: utf8,
+          stderrEncoding: utf8,
+        );
         expect(result.exitCode, 0);
         final help = jsonDecode(result.stdout as String) as Map;
         expect(help['status'], 'ok');
