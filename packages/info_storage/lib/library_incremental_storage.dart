@@ -42,14 +42,27 @@ final class LibraryIncremental {
       );
       await _db.customStatement(
         'CREATE TABLE IF NOT EXISTS library_sync_progress('
-        'peer_id TEXT PRIMARY KEY,cursor INTEGER NOT NULL CHECK(cursor>=0))',
+        'peer_id TEXT PRIMARY KEY,cursor INTEGER NOT NULL CHECK(cursor>=0),'
+        'uploaded_cursor INTEGER NOT NULL DEFAULT 0 CHECK(uploaded_cursor>=0))',
       );
+      // Development format 58 had only a pull cursor. Preserve it while adding
+      // an independent acknowledgement of our own feed at this physical peer.
+      final progressColumns = await _db
+          .customSelect('PRAGMA table_info(library_sync_progress)')
+          .get();
+      if (!progressColumns.any(
+        (row) => row.read<String>('name') == 'uploaded_cursor',
+      )) {
+        await _db.customStatement(
+          'ALTER TABLE library_sync_progress ADD COLUMN uploaded_cursor INTEGER NOT NULL DEFAULT 0 CHECK(uploaded_cursor>=0)',
+        );
+      }
       await _db.customStatement(
         'CREATE TABLE IF NOT EXISTS library_sync_blobs('
         'digest TEXT PRIMARY KEY,byte_length INTEGER NOT NULL,body BLOB NOT NULL '
         'CHECK(length(body)=byte_length))',
       );
-      await _repo._requireAdmissionFormat(_libraryIncrementalFormat);
+      await _repo._requireAdmissionFormat(_libraryDirectionalSyncFormat);
       final previous = await _db
           .customSelect(
             'SELECT library_id,replica_id,initial_baseline_digest FROM library_sync_projection',
@@ -161,16 +174,16 @@ final class LibraryIncremental {
     );
   }
 
-  Future<int> progress(String peerReplicaId) async {
+  Future<int> progress(String peerReplicaId, {bool outgoing = false}) async {
     libraryReplicaId(peerReplicaId);
     await _state();
     final rows = await _db
         .customSelect(
-          'SELECT cursor FROM library_sync_progress WHERE peer_id=?',
+          'SELECT ${outgoing ? 'uploaded_cursor' : 'cursor'} AS n FROM library_sync_progress WHERE peer_id=?',
           variables: [Variable(peerReplicaId)],
         )
         .get();
-    return rows.isEmpty ? 0 : rows.single.read<int>('cursor');
+    return rows.isEmpty ? 0 : rows.single.read<int>('n');
   }
 
   Future<({LibraryReplicaIdentity identity, int cursor, int conflicts})>
@@ -196,18 +209,21 @@ final class LibraryIncremental {
     String peerReplicaId, {
     required int expected,
     required int next,
+    bool outgoing = false,
   }) async {
     libraryReplicaId(peerReplicaId);
-    if (expected < 0 || next < expected)
+    if (expected < 0 || next < expected || next > 9007199254740991)
       throw ArgumentError('Invalid synchronization progress');
     await _db.transaction(() async {
-      final current = await progress(peerReplicaId);
+      final current = await progress(peerReplicaId, outgoing: outgoing);
       if (current == next) return;
       if (current != expected)
         throw const StorageFailure('sync_progress_changed');
+      final column = outgoing ? 'uploaded_cursor' : 'cursor';
       await _db.customStatement(
-        'INSERT INTO library_sync_progress(peer_id,cursor) VALUES(?,?) ON CONFLICT(peer_id) DO UPDATE SET cursor=excluded.cursor',
-        [peerReplicaId, next],
+        'INSERT INTO library_sync_progress(peer_id,cursor,uploaded_cursor) VALUES(?,?,?) '
+        'ON CONFLICT(peer_id) DO UPDATE SET $column=excluded.$column',
+        [peerReplicaId, outgoing ? 0 : next, outgoing ? next : 0],
       );
     });
   }

@@ -4,12 +4,15 @@ import 'dart:math';
 
 import 'package:info_core/info_core.dart';
 import 'package:info_core/library_replication.dart';
+import 'package:info_core/library_sync_changes.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/library_replication_client.dart';
 import 'package:info_remote/local_library_configuration.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_remote/private_connection_files.dart';
 import 'package:info_storage/info_storage.dart';
+
+part 'local_library_incremental.dart';
 
 /// Owner-private pending transfer, protected like connection configuration.
 /// Keeping its exact manifest/key allows process-restart reconciliation without
@@ -24,6 +27,7 @@ final class LocalLibrarySync {
   final OwnerAccess owner;
   final LibraryReplication replication;
   bool _busy = false;
+  LibraryIncremental get incremental => LibraryIncremental(replication);
   File get _configuration =>
       File('${configuration.directory}/library-sync.json');
   Directory get _staging =>
@@ -84,12 +88,15 @@ final class LocalLibrarySync {
       throw const RemoteFailure('invalid_sync_file');
     }
     final pending = stored['pending'] as Map?;
-    final retained = pending == null
-        ? null
-        : libraryReplicaId(pending['fileId']);
+    final retained = <String>{
+      if (pending != null) libraryReplicaId(pending['fileId']),
+      if (stored['delta'] is Map)
+        libraryReplicaId((stored['delta'] as Map)['fileId']),
+    };
     await for (final entity in _staging.list(followLinks: false)) {
       final name = entity.uri.pathSegments.where((s) => s.isNotEmpty).last;
-      if (name == retained || !RegExp(r'^[A-Za-z0-9_-]{32}$').hasMatch(name)) {
+      if (retained.contains(name) ||
+          !RegExp(r'^[A-Za-z0-9_-]{32}$').hasMatch(name)) {
         continue;
       }
       if (await FileSystemEntity.type(entity.path, followLinks: false) ==
@@ -114,7 +121,9 @@ final class LocalLibrarySync {
     final local = await replication.identity();
     final raw = stored['pending'];
     if (raw == null) {
-      if (stored['server'] == null || stored['initialSnapshotId'] is! String) {
+      if (stored['syncVersion'] != 2 ||
+          stored['server'] == null ||
+          stored['initialSnapshotId'] is! String) {
         return false;
       }
       return _sameServer(
@@ -129,6 +138,7 @@ final class LocalLibrarySync {
     final pending = Map<String, dynamic>.from(raw as Map);
     if (pending['direction'] != 'pull' ||
         pending['transfer'] == null ||
+        pending['baseline'] == null ||
         pending['localReplicaId'] != local.replicaId ||
         !_sameServer(
           ConnectionProfile.fromJson(
@@ -141,9 +151,12 @@ final class LocalLibrarySync {
     final transfer = LibraryInitialTransfer.fromJson(
       Map<String, dynamic>.from(pending['transfer'] as Map),
     );
-    final receipt = await replication.receipt(
-      replicaOperationId(pending['operationId']),
-      transfer,
+    final receipt = await incremental.initialReceiptManifest(
+      operationId: replicaOperationId(pending['operationId']),
+      transfer: transfer,
+      baseline: LibrarySyncBaselineManifest.fromJson(
+        Map<String, dynamic>.from(pending['baseline'] as Map),
+      ),
     );
     if (receipt == null ||
         receipt.identity.replicaId != local.replicaId ||
@@ -159,6 +172,7 @@ final class LocalLibrarySync {
       'localReplicaId': local.replicaId,
       'remoteReplicaId': pending['remoteReplicaId'],
       'initialSnapshotId': transfer.snapshotId,
+      'syncVersion': 2,
     });
     await _settleStaging(pending);
     return true;
@@ -176,21 +190,7 @@ final class LocalLibrarySync {
     try {
       var stored = await readConfiguration();
       await _cleanupUnusedStaging(stored);
-      final client =
-          connection ??
-          (opened = await OwnerClient.connect(
-            address: Uri.parse(profile.address),
-            token: profile.token,
-            expectedServerId: profile.serverId.isEmpty
-                ? null
-                : profile.serverId,
-            trust: profile.certificate.isEmpty
-                ? null
-                : (SecurityContext(withTrustedRoots: false)
-                    ..setTrustedCertificatesBytes(
-                      utf8.encode(profile.certificate),
-                    )),
-          ));
+      final client = connection ?? (opened = await _openConnection(profile));
       if (client.serverId != profile.serverId && profile.serverId.isNotEmpty ||
           client.address.toString() != Uri.parse(profile.address).toString()) {
         throw const RemoteFailure('server_changed');
@@ -201,8 +201,8 @@ final class LocalLibrarySync {
         serverId: client.serverId,
         certificate: profile.certificate,
       );
-      final remote = LibraryReplicationClient(client);
-      final peer = await remote.status();
+      final remote = await LibraryIncrementalClient.connect(client);
+      final peer = (identity: remote.identity, empty: remote.empty);
       var local = await replication.identity();
       var pending = stored['pending'] == null
           ? null
@@ -216,22 +216,37 @@ final class LocalLibrarySync {
           throw const RemoteFailure('sync_pending_other_library');
         }
       } else {
+        final knownLink =
+            stored['syncVersion'] == 2 &&
+            stored['libraryId'] == local.libraryId &&
+            stored['localReplicaId'] == local.replicaId &&
+            stored['remoteReplicaId'] == peer.identity.replicaId &&
+            stored['server'] != null &&
+            _sameServer(
+              ConnectionProfile.fromJson(
+                Map<String, dynamic>.from(stored['server'] as Map),
+              ),
+              confirmedProfile,
+            );
+        if (knownLink) {
+          await owner.exportLibrary(incremental.start);
+          await PrivateConnectionFiles.write(_configuration, {
+            ...stored,
+            'enabled': enabled,
+            'server': confirmedProfile.toJson(),
+          });
+          return local;
+        }
+        if (stored['delta'] != null) {
+          throw const RemoteFailure('sync_pending_other_library');
+        }
         final localEmpty = await replication.empty();
         if (!localEmpty && !peer.empty) {
           if (local.libraryId != peer.identity.libraryId) {
             throw const RemoteFailure('different_libraries');
           }
-          // Only the initial link is already present. Incremental work uses the
-          // saved common base in #131; no whole-library replacement is allowed.
-          await PrivateConnectionFiles.write(_configuration, {
-            ...stored,
-            'enabled': enabled,
-            'server': confirmedProfile.toJson(),
-            'libraryId': local.libraryId,
-            'localReplicaId': local.replicaId,
-            'remoteReplicaId': peer.identity.replicaId,
-          });
-          return local;
+          // Equal logical IDs alone cannot establish a common base.
+          throw const RemoteFailure('sync_base_changed');
         }
         pending = {
           'direction': peer.empty ? 'push' : 'pull',
@@ -252,26 +267,31 @@ final class LocalLibrarySync {
         await file.parent.create(recursive: true);
         LibraryInitialTransfer manifest;
         String key;
+        LibrarySyncBaseline baseline;
         if (pending['direction'] == 'push') {
           // No upload starts until the prepared key and manifest commit. A
           // crashed preparation may leave only an unusable encrypted file.
           if (await file.exists()) await file.delete();
           final prepared = await owner.exportLibrary(
-            () => replication.exportInitial(file.path),
+            () => incremental.exportInitialWithBaseline(file.path),
           );
-          manifest = prepared.transfer;
-          key = prepared.transferKey;
+          manifest = prepared.initial.transfer;
+          key = prepared.initial.transferKey;
+          baseline = prepared.baseline;
         } else {
-          final prepared = await remote.prepareExport(
+          final prepared = await remote.prepareInitial(
             replicaOperationId(pending['operationId']),
           );
-          manifest = prepared.transfer;
-          key = prepared.transferKey;
+          manifest = prepared.contents.transfer;
+          key = prepared.contents.transferKey;
+          baseline = await remote.readBaseline(prepared);
         }
+        await _saveBaseline(pending, baseline, key);
         pending = {
           ...pending,
           'transfer': manifest.toJson(),
           'transferKey': key,
+          'baseline': LibrarySyncBaselineManifest.of(baseline).toJson(),
         };
         stored = {...stored, 'pending': pending};
         await PrivateConnectionFiles.write(_configuration, stored);
@@ -282,53 +302,89 @@ final class LocalLibrarySync {
       final operation = replicaOperationId(pending['operationId']);
       final file = _file(libraryReplicaId(pending['fileId']));
       var key = pending['transferKey'] as String;
+      var header = LibrarySyncBaselineManifest.fromJson(
+        Map<String, dynamic>.from(pending['baseline'] as Map),
+      );
       if (pending['direction'] == 'push') {
-        final receipt = await remote.upload(
-          file: file,
-          transfer: transfer,
-          transferKey: key,
-          operationId: operation,
-          progress: progress,
-        );
+        // Query the original result before touching possibly cleaned files.
+        var receipt = await remote.initialReceipt(operation, transfer, header);
+        if (receipt == null) {
+          final baseline = await _readBaseline(pending, header, key);
+          receipt = await remote.uploadInitial(
+            file: file,
+            transfer: transfer,
+            transferKey: key,
+            baseline: baseline,
+            operationId: operation,
+            progress: progress,
+          );
+        }
         if (receipt.identity.replicaId != peer.identity.replicaId) {
           throw const RemoteFailure('server_changed');
         }
+        // The initial snapshot already includes all our feed through this
+        // cursor. This is an upload acknowledgement, not a server-feed cursor.
+        await owner.exportLibrary(() async {
+          await incremental.advanceProgress(
+            peer.identity.replicaId,
+            expected: 0,
+            next: header.cursor,
+            outgoing: true,
+          );
+        });
       } else if (pending['direction'] == 'pull') {
-        final known = await replication.receipt(operation, transfer);
+        final known = await incremental.initialReceiptManifest(
+          operationId: operation,
+          transfer: transfer,
+          baseline: header,
+        );
         if (known == null) {
-          // Reuse the immutable export while retained. If the service itself
-          // restarted, only an empty, still-uncommitted target may start a fresh
-          // snapshot of that same logical library.
-          final prepared = await remote.prepareExport(operation);
-          if (jsonEncode(prepared.transfer.toJson()) !=
+          final prepared = await remote.prepareInitial(operation);
+          if (jsonEncode(prepared.contents.transfer.toJson()) !=
                   jsonEncode(transfer.toJson()) ||
-              prepared.transferKey != key) {
+              prepared.contents.transferKey != key ||
+              prepared.baseline.digest != header.digest) {
             if (!await replication.empty() ||
-                prepared.transfer.libraryId != transfer.libraryId) {
+                prepared.contents.transfer.libraryId != transfer.libraryId) {
               throw const RemoteFailure('sync_pending_other_library');
             }
             if (await file.exists()) await file.delete();
-            transfer = prepared.transfer;
-            key = prepared.transferKey;
+            transfer = prepared.contents.transfer;
+            key = prepared.contents.transferKey;
+            header = prepared.baseline;
+            final baseline = await remote.readBaseline(prepared);
+            await _saveBaseline(pending, baseline, key);
             pending = {
               ...pending,
               'transfer': transfer.toJson(),
               'transferKey': key,
+              'baseline': header.toJson(),
             };
             stored = {...stored, 'pending': pending};
             await PrivateConnectionFiles.write(_configuration, stored);
           }
-          await remote.download(prepared, file, progress: progress);
+          await remote.transport.download(
+            prepared.contents,
+            file,
+            progress: progress,
+          );
+          final baseline = await _readBaseline(pending, header, key);
           await owner.restoreLibraryOnce(
-            previous: () => replication.receipt(operation, transfer),
-            restore: () => replication.installInitial(
+            previous: () => incremental.initialReceiptManifest(
+              operationId: operation,
+              transfer: transfer,
+              baseline: header,
+            ),
+            restore: () => incremental.installInitialWithBaseline(
               path: file.path,
               transferKey: key,
               operationId: operation,
               transfer: transfer,
+              baseline: baseline,
+              expectedSourceReplicaId: peer.identity.replicaId,
             ),
           );
-          await remote.release(prepared);
+          await remote.transport.release(prepared.contents);
         }
         local = await replication.identity();
       } else {
@@ -343,6 +399,7 @@ final class LocalLibrarySync {
         'localReplicaId': local.replicaId,
         'remoteReplicaId': peer.identity.replicaId,
         'initialSnapshotId': transfer.snapshotId,
+        'syncVersion': 2,
       });
       await _settleStaging(pending);
       return local;

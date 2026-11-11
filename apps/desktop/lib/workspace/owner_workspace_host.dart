@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
 import '../connection_view.dart';
 import '../local_library_sync.dart';
+import '../local_library_sync_controller.dart';
 import '../local_sync_settings.dart';
 import 'package:info_remote/local_library_configuration.dart';
 import '../desktop_controls.dart';
@@ -74,6 +75,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   late OwnerWorkspaceHosts _hosts;
   late OwnerProposalPasswords _passwords;
   LocalLibrarySync? _sync;
+  LocalLibrarySyncController? _syncController;
   bool _syncBusy = false;
   String _storageDescription = '本地模式';
   @override
@@ -85,6 +87,10 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         configuration: widget.localConfiguration!,
         owner: widget.runtime.service.owner,
         replication: widget.replication!,
+      );
+      _syncController = LocalLibrarySyncController(
+        sync: _sync!,
+        changed: () => _source.notifyExternalChange(),
       );
       unawaited(_restoreSyncDescription());
     }
@@ -98,6 +104,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     try {
       final stored = await _sync!.readConfiguration();
       if (mounted) _syncSaved(stored['enabled'] as bool);
+      await _syncController?.restore();
     } on Object {
       /* The settings pane exposes the original configuration error. */
     }
@@ -113,6 +120,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     if (!mounted) return;
     setState(() => _syncBusy = busy);
     unawaited(_desktop.setNavigationEnabled(!busy));
+    if (!busy) unawaited(_syncController?.restore());
   }
 
   void _bind() {
@@ -198,6 +206,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
 
   @override
   void dispose() {
+    _syncController?.dispose();
     unawaited(_changes?.cancel());
     widget.runtime.removeListener(_runtimeChanged);
     unawaited(_source.dispose());
@@ -216,6 +225,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
       absorbing: _syncBusy,
       child: WorkspaceApp(
         source: _source,
+        sync: _syncController,
         desktop: _desktop,
         windowTitle: '知予',
         connectionBuilder: (context, onCancel) => _sync != null
@@ -224,6 +234,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
                 onBack: onCancel,
                 onSaved: _syncSaved,
                 onBusy: _syncBusyChanged,
+                beforeSave: _syncController?.pause,
               )
             : ConnectionSurface(
                 embedded: true,

@@ -112,8 +112,9 @@ class AgentServer extends AgentProtocol {
     final supplied = request.headers.value('authorization') ?? '';
     final expected = 'Bearer $token';
     if (supplied.length != expected.length ||
-        request.headers.value('x-chiyo-server-id') != _libraryId)
+        request.headers.value('x-chiyo-server-id') != _libraryId) {
       return false;
+    }
     var difference = 0;
     for (var i = 0; i < expected.length; i++) {
       difference |= expected.codeUnitAt(i) ^ supplied.codeUnitAt(i);
@@ -130,8 +131,9 @@ class AgentServer extends AgentProtocol {
     final runtime = request.uri.path.startsWith('/credential-use/');
     final informationFile = request.uri.path.startsWith('/information-file/');
     var protocolVersion = 1;
-    if (_libraryId != null)
-      request.response.headers.set('x-chiyo-server-id', _libraryId!);
+    if (_libraryId != null) {
+      request.response.headers.set('x-chiyo-server-id', _libraryId);
+    }
     try {
       if (!_acceptsConnection(request) ||
           request.method != 'POST' ||
