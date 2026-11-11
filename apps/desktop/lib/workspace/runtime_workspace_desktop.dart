@@ -1,20 +1,76 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../desktop_runtime.dart';
 import '../desktop_scroll.dart';
+import '../mac_pending_menu.dart';
 import 'workspace_desktop.dart';
 import 'workspace_source.dart';
 
 /// Uses the already running native lifecycle; never initializes another method
 /// channel handler or bypasses the service's save/stop/terminate sequence.
 class RuntimeWorkspaceDesktop
-    implements WorkspaceDesktop, WorkspaceRequestNavigation {
+    implements
+        WorkspaceDesktop,
+        WorkspaceRequestNavigation,
+        WorkspaceMenuNavigation {
   RuntimeWorkspaceDesktop(this.runtime)
     : scrollbarStyle = ValueNotifier(runtime.availability.scrollbarStyle),
       _navigationRevision = runtime.navigationRevision {
     runtime.addListener(_changed);
     _pending = _destination(runtime.lastNavigationEvent);
     _pendingRequestId = _requestDestination();
+    if (runtime.platform case final DesktopPendingMenuPlatform native
+        when native.supportsPendingMenu) {
+      final menu = _menu = MacPendingMenu(
+        publish: native.updatePendingMenu,
+        canAct: () =>
+            !_disposed && _enabled && !runtime.quitting && !runtime.stopped,
+        theme: () => _theme,
+        open: (page, id) async {
+          await runtime.showWorkingWindow();
+          if (_disposed || !_enabled || runtime.quitting || runtime.stopped) {
+            return;
+          }
+          if (id == null) {
+            _navigate?.call(page);
+          } else {
+            onOpenMenuDetail?.call(page, id);
+          }
+        },
+      );
+      native.setPendingMenuHandler(menu.handle);
+    }
   }
+
+  MacPendingMenu? _menu;
+  WorkspaceSource? _source;
+  StreamSubscription<WorkspaceRecordRef?>? _changes;
+  WorkspaceTheme _theme = WorkspaceTheme.light;
+  @override
+  void Function(WorkspacePage, String)? onOpenMenuDetail;
+
+  void bindSource(WorkspaceSource source) {
+    _source = source;
+    _menu?.bind(source, location: '本地模式');
+    unawaited(_changes?.cancel());
+    _changes = source.changes.listen((_) => unawaited(_refreshMenu(source)));
+    unawaited(_refreshMenu(source));
+  }
+
+  Future<void> _refreshMenu(WorkspaceSource source) async {
+    if (_menu == null || _disposed || runtime.quitting || runtime.stopped) {
+      return;
+    }
+    try {
+      final preferences = await source.settings.read();
+      if (!identical(source, _source) || _disposed) return;
+      _theme = preferences.theme;
+      await _menu?.refresh();
+    } on Object {
+      // The normal workspace exposes its original read failure.
+    }
+  }
+
   final DesktopRuntime runtime;
   @override
   final ValueNotifier<DesktopScrollbarStyle> scrollbarStyle;
@@ -68,6 +124,7 @@ class RuntimeWorkspaceDesktop
   void _changed() {
     if (_disposed) return;
     scrollbarStyle.value = runtime.availability.scrollbarStyle;
+    if (runtime.quitting || runtime.stopped) _menu?.dispose();
     if (_navigationRevision != runtime.navigationRevision) {
       _navigationRevision = runtime.navigationRevision;
       // Native commands received during an editor/modal are rejected. They
@@ -111,6 +168,12 @@ class RuntimeWorkspaceDesktop
     runtime.removeListener(_changed);
     _navigate = null;
     onOpenRequest = null;
+    onOpenMenuDetail = null;
+    _menu?.dispose();
+    unawaited(_changes?.cancel());
+    if (runtime.platform case final DesktopPendingMenuPlatform native) {
+      native.setPendingMenuHandler(null);
+    }
     _pending = null;
     _pendingRequestId = null;
     scrollbarStyle.dispose();

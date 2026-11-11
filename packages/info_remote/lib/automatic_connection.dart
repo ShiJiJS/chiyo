@@ -110,12 +110,12 @@ final class AutomaticConnectionStore {
       final active = await agentFile();
       if (active != null && await active.exists()) {
         final candidate = await AgentConnectionProfile.read(active);
-        if (candidate.serverId == id) existing = active;
+        if (!candidate.isLocal && candidate.serverId == id) existing = active;
       } else {
         final legacy = File('$directory/agent/agent-connection.json');
         if (await legacy.exists()) {
           final candidate = await AgentConnectionProfile.read(legacy);
-          if (candidate.serverId == id) existing = legacy;
+          if (!candidate.isLocal && candidate.serverId == id) existing = legacy;
         }
       }
     }

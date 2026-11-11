@@ -109,17 +109,28 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           DispatchQueue.main.async { result(value) }
         }
         do {
-          if call.method == "read" || call.method == "readWithInteraction" {
-            if let data = try databaseKeys.read(allowInteraction: call.method == "readWithInteraction") {
+          let scoped = ["readLocal", "readLocalWithInteraction", "createLocal"].contains(call.method)
+          let arguments = call.arguments as? [String: Any]
+          let keys: NativeDatabaseKeyStore
+          if scoped {
+            guard let id = arguments?["libraryId"] as? String,
+                  id.range(of: "^[A-Za-z0-9_-]{32}$", options: .regularExpression) != nil else {
+              throw DatabaseKeyFailure(code: "invalid_key", status: nil)
+            }
+            keys = NativeDatabaseKeyStore(account: "local-library-\(id)")
+          } else { keys = databaseKeys }
+          if ["read", "readWithInteraction", "readLocal", "readLocalWithInteraction"].contains(call.method) {
+            let interactive = call.method == "readWithInteraction" || call.method == "readLocalWithInteraction"
+            if let data = try keys.read(allowInteraction: interactive) {
               reply(FlutterStandardTypedData(bytes: data))
             } else {
               reply(nil)
             }
-          } else if call.method == "create" {
-            guard let data = call.arguments as? FlutterStandardTypedData else {
+          } else if call.method == "create" || call.method == "createLocal" {
+            guard let data = (scoped ? arguments?["key"] : call.arguments) as? FlutterStandardTypedData else {
               throw DatabaseKeyFailure(code: "invalid_key", status: nil)
             }
-            try databaseKeys.create(data.data)
+            try keys.create(data.data)
             reply(nil)
           } else {
             reply(FlutterMethodNotImplemented)

@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'package:info_remote/agent_connection.dart';
+import 'package:info_remote/local_library_configuration.dart';
+import 'package:info_remote/owner_client.dart';
 import 'package:info_cli/credential_execution_host.dart';
 import 'package:info_cli/macos_bundled_tools.dart';
 import 'package:info_cli/windows_bundled_tools.dart';
@@ -38,6 +41,7 @@ class DesktopBootstrap extends ChangeNotifier {
     this.credentialWorkerExecutable,
     this.openLibraryWithKeyAccess,
     this.openAppControl,
+    this.localConfiguration,
   });
   final Future<DesktopLibrary> Function() openLibrary;
 
@@ -45,6 +49,8 @@ class DesktopBootstrap extends ChangeNotifier {
   final Future<DesktopLibrary> Function()? openLibraryWithKeyAccess;
   final DesktopPlatform platform;
   final int port;
+  final LocalLibraryConfiguration? localConfiguration;
+  AgentConnectionProfile? localConnection;
   final String? credentialWorkerExecutable;
   final Future<MacDesktopControlHost> Function(
     String Function() state,
@@ -145,13 +151,20 @@ class DesktopBootstrap extends ChangeNotifier {
       templateOwner.configureInformationTemplates(
         () => currentAgentTemplates(templateOwner),
       );
+      final transport = localConfiguration?.connection(1);
       _server = await AgentServer.start(
         library!.service.agent,
         port: port,
+        connectionToken: transport?.deviceToken,
+        libraryId: transport?.serverId,
         enableReusableCredentialUse: Platform.isWindows || Platform.isMacOS,
         enableFocusedFill: Platform.isWindows,
         enableInformationFiles: Platform.isWindows || Platform.isMacOS,
-        credentialTools: Platform.isWindows ? WindowsBundledTools().read : Platform.isMacOS ? MacBundledTools().read : null,
+        credentialTools: Platform.isWindows
+            ? WindowsBundledTools().read
+            : Platform.isMacOS
+            ? MacBundledTools().read
+            : null,
         credentialExecutionHandler: (session, input) {
           final host = _credentialExecutions;
           return host == null
@@ -165,8 +178,17 @@ class DesktopBootstrap extends ChangeNotifier {
       );
       boundPort = _server!.port;
       final server = _server!;
+      final profile = transport == null
+          ? null
+          : AgentConnectionProfile.local(
+              port: boundPort!,
+              deviceToken: transport.deviceToken,
+              libraryId: transport.serverId,
+            );
+      localConnection = profile;
       final host = CredentialExecutionHost(
         port: boundPort!,
+        connection: profile,
         workerExecutable:
             credentialWorkerExecutable ??
             '${File(Platform.resolvedExecutable).parent.path}/info-runtime-worker${Platform.isWindows ? '.exe' : ''}',
@@ -193,6 +215,17 @@ class DesktopBootstrap extends ChangeNotifier {
       );
       await runtime!.start();
       await library!.service.owner.retryAuditStorage();
+      if (localConfiguration != null) {
+        final connection = AgentConnection(profile!);
+        try {
+          if ((await connection.call('/capabilities', {}))['status'] != 'ok') {
+            throw const RemoteFailure('local_connection_unavailable');
+          }
+        } finally {
+          connection.close();
+        }
+        await localConfiguration!.publish(profile);
+      }
       state = DesktopStartupState.ready;
     } on Object catch (error) {
       applicationFilesInvalid = error is FocusedFillBundleFailure;
@@ -287,6 +320,20 @@ class DesktopBootstrap extends ChangeNotifier {
     };
   }
 
+  Future<void>? _closing;
+  Future<void> close() => _closing ??= _close();
+
+  Future<void> _close() async {
+    try {
+      _keyAccessQuitRequested = true;
+      await _startupSettled?.future;
+      await _release();
+    } on Object {
+      _closing = null;
+      rethrow;
+    }
+  }
+
   Future<void> _release() async {
     if (runtime case final active?) {
       await active.stop();
@@ -301,6 +348,8 @@ class DesktopBootstrap extends ChangeNotifier {
     }
     runtime = null;
     _server = null;
+    boundPort = null;
+    localConnection = null;
     _credentialExecutions = null;
     library = null;
     cleanupPending = false;

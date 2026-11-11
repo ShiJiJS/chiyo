@@ -9,6 +9,10 @@ import 'owner_plugin_picker.dart';
 import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
+import '../connection_view.dart';
+import '../desktop_controls.dart';
+import '../ui_palette.dart';
+import 'library_widgets.dart';
 import 'owner_workspace_source.dart';
 import 'runtime_workspace_desktop.dart';
 import 'workspace_app.dart';
@@ -129,6 +133,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
         changed: () => _source.refreshFromOwner(),
       ),
     );
+    _desktop.bindSource(_source);
     _changes = _source.changes.listen((_) {
       if (!mounted ||
           _source.isCurrentLibrary ||
@@ -169,6 +174,31 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     source: _source,
     desktop: _desktop,
     windowTitle: '知予',
+    connectionBuilder: (context, onCancel) => ConnectionSurface(
+      embedded: true,
+      title: '存储与同步',
+      description: '资料保存在本机。',
+      icon: Icons.computer_outlined,
+      children: [
+        Text('本地模式', style: libraryHeading(context, 16)),
+        const SizedBox(height: 8),
+        Text(
+          '资料、文件和凭据加密保存在这台电脑。无需连接服务器，也能接收 AI 申请和审批。',
+          style: libraryText(
+            context,
+            14,
+            color: UiPalette.of(context).muted,
+            height: 1.8,
+          ),
+        ),
+        const SizedBox(height: 24),
+        DesktopButton(
+          kind: DesktopButtonKind.quiet,
+          onPressed: onCancel,
+          child: const Text('返回工作区'),
+        ),
+      ],
+    ),
     inputsBuilder: (context) {
       final source = _source;
       return WorkspaceInputs(

@@ -1,3 +1,5 @@
+import '../ui_palette.dart';
+import 'library_widgets.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'remote_workspace_source.dart';
@@ -490,6 +492,19 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 ),
               );
             },
+          ),
+        if (_source is WorkspaceStorageLocation &&
+            _source is! RemoteWorkspaceSource)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              (_source as WorkspaceStorageLocation).storageDescription,
+              style: libraryText(
+                context,
+                13,
+                color: UiPalette.of(context).muted,
+              ),
+            ),
           ),
         ListenableBuilder(
           listenable: _backups,

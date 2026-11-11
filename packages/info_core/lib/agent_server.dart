@@ -58,6 +58,8 @@ class AgentServer extends AgentProtocol {
     bool focused,
     bool files,
     Future<List<CredentialToolLocation>> Function()? credentialTools,
+    this._connectionToken,
+    this._libraryId,
   ) : super(
         agent,
         credentialExecutionHandler: credentialExecutionHandler,
@@ -69,6 +71,7 @@ class AgentServer extends AgentProtocol {
     _server.listen(_handle);
   }
   final HttpServer _server;
+  final String? _connectionToken, _libraryId;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
@@ -78,15 +81,46 @@ class AgentServer extends AgentProtocol {
     bool enableFocusedFill = false,
     bool enableInformationFiles = false,
     Future<List<CredentialToolLocation>> Function()? credentialTools,
-  }) async => AgentServer._(
-    await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
-    agent,
-    credentialExecutionHandler,
-    enableReusableCredentialUse,
-    enableFocusedFill,
-    enableInformationFiles,
-    credentialTools,
-  );
+    String? connectionToken,
+    String? libraryId,
+  }) async {
+    if ((connectionToken == null) != (libraryId == null) ||
+        connectionToken != null &&
+            !RegExp(
+              r'^[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}$',
+            ).hasMatch(connectionToken) ||
+        libraryId != null &&
+            !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(libraryId)) {
+      throw const AccessFailure('invalid_request');
+    }
+    return AgentServer._(
+      await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
+      agent,
+      credentialExecutionHandler,
+      enableReusableCredentialUse,
+      enableFocusedFill,
+      enableInformationFiles,
+      credentialTools,
+      connectionToken,
+      libraryId,
+    );
+  }
+
+  bool _acceptsConnection(HttpRequest request) {
+    final token = _connectionToken;
+    if (token == null) return true;
+    final supplied = request.headers.value('authorization') ?? '';
+    final expected = 'Bearer $token';
+    if (supplied.length != expected.length ||
+        request.headers.value('x-chiyo-server-id') != _libraryId)
+      return false;
+    var difference = 0;
+    for (var i = 0; i < expected.length; i++) {
+      difference |= expected.codeUnitAt(i) ^ supplied.codeUnitAt(i);
+    }
+    return difference == 0;
+  }
+
   Future<void> close() async {
     await _server.close(force: true);
   }
@@ -96,8 +130,11 @@ class AgentServer extends AgentProtocol {
     final runtime = request.uri.path.startsWith('/credential-use/');
     final informationFile = request.uri.path.startsWith('/information-file/');
     var protocolVersion = 1;
+    if (_libraryId != null)
+      request.response.headers.set('x-chiyo-server-id', _libraryId!);
     try {
-      if (request.method != 'POST' ||
+      if (!_acceptsConnection(request) ||
+          request.method != 'POST' ||
           request.headers.value('origin') != null ||
           request.headers.host != '127.0.0.1' ||
           request.headers.port != port ||
