@@ -1,4 +1,6 @@
-import 'online_desktop_launcher.dart';
+import 'connection_view.dart';
+import 'workspace/zhiyu_theme.dart';
+import 'storage_desktop_launcher.dart';
 import 'online_connection_location.dart';
 import 'package:info_core/macos_desktop_control.dart';
 import 'package:info_remote/connection_profile.dart';
@@ -23,7 +25,6 @@ import 'history.dart';
 import 'desktop_shell.dart';
 import 'ui.dart';
 import 'window_frame.dart';
-import 'prototype_dialog.dart';
 import 'workspace/owner_workspace_host.dart';
 import 'desktop_fonts.dart';
 
@@ -44,8 +45,10 @@ Future<void> main(List<String> arguments) async {
       : '$base/Chiyo/online';
   final directory = onlineConnectionDirectory(defaultDirectory, arguments);
   runApp(
-    OnlineDesktopLauncher(
+    StorageDesktopLauncher(
       profiles: PrivateConnectionProfileStore(directory),
+      localBuilder: (bootstrap) =>
+          DesktopLauncher(bootstrap: bootstrap, useWorkspace: true),
       appControlDirectory: Platform.isMacOS
           ? MacDesktopControl.defaultDirectory(
               profile: arguments.isEmpty ? null : arguments.last,
@@ -118,6 +121,9 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                 backups: startup.library!.backups,
                 fileOutputs: startup.library!.fileOutputs,
                 fileOpens: startup.library!.fileOpens,
+                localConfiguration: startup.localConfiguration,
+                localConnection: startup.localConnection,
+                replication: startup.library!.replication,
               );
             }
             return InformationApp(
@@ -129,73 +135,60 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
           },
         );
       }
+      final failed = startup.state == DesktopStartupState.failed;
+      final pendingKey = startup.keyAccessPending;
       return MaterialApp(
-        theme: informationTheme(),
+        theme: zhiyuTheme(Brightness.light),
         builder: (_, child) => DesktopWindowFrame(child: child!),
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(
-            child: startup.keyAccessPending
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      const Text('请在系统提示中确认钥匙串访问。取消后可重新尝试。'),
-                      if (startup.keyAccessExitFailed)
-                        const Text('应用未能退出，请重试退出。'),
-                      TextButton(
-                        onPressed: startup.quitKeyAccess,
-                        child: Text(
-                          startup.keyAccessExitFailed ? '重试退出' : '退出应用',
-                        ),
-                      ),
-                    ],
-                  )
-                : startup.state != DesktopStartupState.failed
-                ? const CircularProgressIndicator()
-                : Padding(
-                    padding: const EdgeInsets.all(28),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 620),
-                      child: FormSection(
-                        title: '无法打开信息库',
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              startup.applicationFilesInvalid
-                                  ? '应用文件不完整或版本不匹配。请将桌面程序与辅助程序整包替换后重试。尚未打开信息库，原有资料不会被重建或覆盖。'
-                                  : startup.systemKeyUnavailable
-                                  ? '无法访问系统钥匙串中的信息库密钥。请确认钥匙串已解锁；如果刚更新应用，请先用原版本导出备份，再处理新版本的钥匙串访问。原有资料不会被重建或覆盖。'
-                                  : '信息库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留信息库与密钥文件。',
-                            ),
-                            if (startup.cleanupPending)
-                              const Text(
-                                '访问服务已停止，但记录尚未保存或信息库尚未关闭。请保留此窗口，修复存储后重试；记录保存成功后才会重新启动。',
-                              ),
-                            const SizedBox(height: 16),
-                            if (startup.canRequestKeyAccess) ...[
-                              const Text(
-                                '可点击下方按钮，请系统重新请求访问现有密钥。是否允许由你在系统提示中决定；拒绝或密钥缺失不会替换原密钥。',
-                              ),
-                              TextButton(
-                                onPressed: startup.requestKeyAccess,
-                                child: const Text('请求钥匙串访问'),
-                              ),
-                            ],
-                            TextButton(
-                              style: prototypePrimary(context),
-                              onPressed: startup.start,
-                              child: Text(
-                                startup.cleanupPending ? '重试保存并启动' : '重试启动',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+          body: ConnectionSurface(
+            title: pendingKey
+                ? '等待钥匙串确认'
+                : failed
+                ? '无法打开信息库'
+                : '正在打开本地资料库…',
+            description: pendingKey
+                ? '请在系统提示中确认钥匙串访问。取消后可重新尝试。'
+                : !failed
+                ? ''
+                : startup.applicationFilesInvalid
+                ? '应用文件不完整或版本不匹配。请将桌面程序与辅助程序整包替换后重试。尚未打开信息库，原有资料不会被重建或覆盖。'
+                : startup.systemKeyUnavailable
+                ? '无法访问系统钥匙串中的信息库密钥。请确认钥匙串已解锁；如果刚更新应用，请先用原版本导出备份，再处理新版本的钥匙串访问。原有资料不会被重建或覆盖。'
+                : '信息库或本机服务无法启动。请检查系统密钥是否可用、应用是否已运行。原有资料不会被重建或覆盖；请保留信息库与密钥文件。',
+            loading: pendingKey || !failed,
+            icon: Icons.storage_outlined,
+            children: [
+              if (pendingKey) ...[
+                if (startup.keyAccessExitFailed) const Text('应用未能退出，请重试退出。'),
+                DesktopButton(
+                  onPressed: startup.quitKeyAccess,
+                  child: Text(startup.keyAccessExitFailed ? '重试退出' : '退出应用'),
+                ),
+              ] else if (failed) ...[
+                if (startup.cleanupPending)
+                  const Text(
+                    '访问服务已停止，但记录尚未保存或信息库尚未关闭。请保留此窗口，修复存储后重试；记录保存成功后才会重新启动。',
                   ),
+                if (startup.canRequestKeyAccess) ...[
+                  const Text(
+                    '可点击下方按钮，请系统重新请求访问现有密钥。是否允许由你在系统提示中决定；拒绝或密钥缺失不会替换原密钥。',
+                  ),
+                  const SizedBox(height: 16),
+                  DesktopButton(
+                    onPressed: startup.requestKeyAccess,
+                    child: const Text('请求钥匙串访问'),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                DesktopButton(
+                  kind: DesktopButtonKind.primary,
+                  onPressed: startup.start,
+                  child: Text(startup.cleanupPending ? '重试保存并启动' : '重试启动'),
+                ),
+              ],
+            ],
           ),
         ),
       );

@@ -58,6 +58,8 @@ class AgentServer extends AgentProtocol {
     bool focused,
     bool files,
     Future<List<CredentialToolLocation>> Function()? credentialTools,
+    this._connectionToken,
+    this._libraryId,
   ) : super(
         agent,
         credentialExecutionHandler: credentialExecutionHandler,
@@ -69,6 +71,7 @@ class AgentServer extends AgentProtocol {
     _server.listen(_handle);
   }
   final HttpServer _server;
+  final String? _connectionToken, _libraryId;
   int get port => _server.port;
   static Future<AgentServer> start(
     AgentAccess agent, {
@@ -78,15 +81,47 @@ class AgentServer extends AgentProtocol {
     bool enableFocusedFill = false,
     bool enableInformationFiles = false,
     Future<List<CredentialToolLocation>> Function()? credentialTools,
-  }) async => AgentServer._(
-    await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
-    agent,
-    credentialExecutionHandler,
-    enableReusableCredentialUse,
-    enableFocusedFill,
-    enableInformationFiles,
-    credentialTools,
-  );
+    String? connectionToken,
+    String? libraryId,
+  }) async {
+    if ((connectionToken == null) != (libraryId == null) ||
+        connectionToken != null &&
+            !RegExp(
+              r'^[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}$',
+            ).hasMatch(connectionToken) ||
+        libraryId != null &&
+            !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(libraryId)) {
+      throw const AccessFailure('invalid_request');
+    }
+    return AgentServer._(
+      await HttpServer.bind(InternetAddress.loopbackIPv4, port, shared: false),
+      agent,
+      credentialExecutionHandler,
+      enableReusableCredentialUse,
+      enableFocusedFill,
+      enableInformationFiles,
+      credentialTools,
+      connectionToken,
+      libraryId,
+    );
+  }
+
+  bool _acceptsConnection(HttpRequest request) {
+    final token = _connectionToken;
+    if (token == null) return true;
+    final supplied = request.headers.value('authorization') ?? '';
+    final expected = 'Bearer $token';
+    if (supplied.length != expected.length ||
+        request.headers.value('x-chiyo-server-id') != _libraryId) {
+      return false;
+    }
+    var difference = 0;
+    for (var i = 0; i < expected.length; i++) {
+      difference |= expected.codeUnitAt(i) ^ supplied.codeUnitAt(i);
+    }
+    return difference == 0;
+  }
+
   Future<void> close() async {
     await _server.close(force: true);
   }
@@ -96,8 +131,12 @@ class AgentServer extends AgentProtocol {
     final runtime = request.uri.path.startsWith('/credential-use/');
     final informationFile = request.uri.path.startsWith('/information-file/');
     var protocolVersion = 1;
+    if (_libraryId != null) {
+      request.response.headers.set('x-chiyo-server-id', _libraryId);
+    }
     try {
-      if (request.method != 'POST' ||
+      if (!_acceptsConnection(request) ||
+          request.method != 'POST' ||
           request.headers.value('origin') != null ||
           request.headers.host != '127.0.0.1' ||
           request.headers.port != port ||
@@ -263,6 +302,31 @@ class AgentProtocol {
     String path,
     Map<String, dynamic> body,
   ) async {
+    if (const {
+      '/request',
+      '/credential-use/request',
+      '/organization/request',
+      '/import/submit',
+      '/update/submit',
+      '/delete/submit',
+    }.contains(path)) {
+      final errors = submissionMetadataErrors(
+        body,
+        proposal: const {
+          '/organization/request',
+          '/import/submit',
+          '/update/submit',
+          '/delete/submit',
+        }.contains(path),
+      );
+      if (errors.isNotEmpty) {
+        return {
+          'status': 'invalid_request',
+          'errorCode': 'invalid_submission_metadata',
+          'fieldErrors': errors,
+        };
+      }
+    }
     switch (path) {
       case '/capabilities':
         if (body.isNotEmpty) throw const CredentialUseFailure('unknown_field');
@@ -273,6 +337,7 @@ class AgentProtocol {
           'protocolVersions': [1, if (enableReusableCredentialUse) 2],
           'capabilities': [
             'information-request-operations.v1',
+            'submission-metadata.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
             if (enableReusableCredentialUse)
               'credential-ssh-session-validity.v1',
@@ -287,6 +352,7 @@ class AgentProtocol {
               'information-import-admission.v1',
             if (_agent.credentialImportAvailable) 'credential-import.v1',
             'information-import-operations.v1',
+            'import-proposal-title.v1',
             'information-update-operations.v1',
             'information-directory-discovery.v1',
             if (_agent.informationImportFilesAvailable)
@@ -733,6 +799,8 @@ class AgentProtocol {
           _text(body, 'purpose'),
           ids.cast<String>(),
           agentName: agentName,
+          title: _optionalMetadata(body, 'title'),
+          externalChatId: _optionalMetadata(body, 'externalChatId'),
         );
         return _agent.organizationStatus(_text(body, 'sessionSecret'), task.id);
       case '/organization/status':
@@ -886,6 +954,8 @@ class AgentProtocol {
           _text(body, 'purpose'),
           fields,
           operationId: body['operationId'] as String?,
+          agentName: _optionalMetadata(body, 'agentName'),
+          externalChatId: _optionalMetadata(body, 'externalChatId'),
         );
         return {
           ..._agent.status(_text(body, 'sessionSecret'), receipt.id),
@@ -941,10 +1011,13 @@ class AgentProtocol {
         raw.any((i) => i is! Map<String, dynamic>)) {
       throw const AccessFailure('invalid_request');
     }
-    for (final key in ['agentName', 'purpose']) {
+    for (final key in ['agentName', 'purpose', 'title', 'externalChatId']) {
       if (body.containsKey(key) && body[key] is! String) {
         throw const AccessFailure('invalid_request');
       }
+    }
+    if (body.containsKey('title') && (body['title'] as String).trim().isEmpty) {
+      throw const AccessFailure('proposal_title_required');
     }
     final session = _text(body, 'sessionSecret');
     final items = raw
@@ -954,6 +1027,8 @@ class AgentProtocol {
       session,
       items,
       agentName: body['agentName'] is String ? body['agentName'] as String : '',
+      title: body['title'] as String? ?? '',
+      externalChatId: body['externalChatId'] as String? ?? '',
       purpose: body['purpose'] is String ? body['purpose'] as String : '',
       operationId: body['operationId'] as String?,
     );
@@ -969,6 +1044,10 @@ class AgentProtocol {
     final id = await _agent.submitUpdate(
       session,
       UpdateInput.fromJson(raw),
+      title: _optionalMetadata(body, 'title'),
+      agentName: _optionalMetadata(body, 'agentName'),
+      purpose: _optionalMetadata(body, 'purpose'),
+      externalChatId: _optionalMetadata(body, 'externalChatId'),
       operationId: body['operationId'] == null
           ? null
           : _text(body, 'operationId'),
@@ -988,8 +1067,21 @@ class AgentProtocol {
       _text(body, 'itemId'),
       version,
       fieldId: body['fieldId'] == null ? null : _text(body, 'fieldId'),
+      title: _optionalMetadata(body, 'title'),
+      agentName: _optionalMetadata(body, 'agentName'),
+      purpose: _optionalMetadata(body, 'purpose'),
+      externalChatId: _optionalMetadata(body, 'externalChatId'),
     );
     return _agent.deleteStatus(session, id);
+  }
+
+  String _optionalMetadata(Map<String, dynamic> body, String key) {
+    final value = body[key];
+    if (!body.containsKey(key)) return '';
+    if (value is! String) {
+      throw const AccessFailure('invalid_submission_metadata');
+    }
+    return value;
   }
 
   String _text(Map<String, dynamic> body, String key) {

@@ -143,7 +143,10 @@ void main() {
       );
       final localKey = await repo.backups.recoveryKey();
       final p = await preview();
-      expect(p.formatVersion, 7); // Legacy memory-only snapshots use this path.
+      expect(
+        p.formatVersion,
+        24,
+      ); // Legacy memory-only snapshots use this path.
       final scope = service.owner.captureLibraryScope();
       final oldSession = service.agent.openSession('old');
       final receipt = await service.owner.restoreLibraryOnce(

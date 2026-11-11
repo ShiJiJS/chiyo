@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../prototype_icons.dart';
@@ -8,8 +9,6 @@ import 'backup_controller.dart';
 import 'backup_page.dart';
 import 'runtime_controller.dart';
 import 'runtime_page.dart';
-import 'agents_controller.dart';
-import 'agents_page.dart';
 import 'classification_page.dart';
 import 'plugins_controller.dart';
 import 'settings_controller.dart';
@@ -24,24 +23,24 @@ class WorkspaceSettingsPage extends StatefulWidget {
     required this.classifications,
     required this.backups,
     required this.runtime,
-    required this.agents,
     required this.backupPicker,
     required this.onLibrary,
     required this.pluginBuilder,
     required this.onRequest,
     this.onModalChanged,
+    this.connectionBuilder,
   });
   final WorkspaceSettingsController controller;
   final PluginsController plugins;
   final ClassificationController classifications;
   final BackupController backups;
   final WorkspaceRuntimeController runtime;
-  final WorkspaceAgentsController agents;
   final WorkspaceBackupPicker backupPicker;
   final VoidCallback onLibrary;
   final WidgetBuilder pluginBuilder;
   final ValueChanged<String> onRequest;
   final ValueChanged<bool>? onModalChanged;
+  final WidgetBuilder? connectionBuilder;
   @override
   State<WorkspaceSettingsPage> createState() => _WorkspaceSettingsPageState();
 }
@@ -318,22 +317,6 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           ),
         ),
       ),
-      const SizedBox(height: 32),
-      SettingsCard(
-        children: [
-          SettingsPreferenceRow(
-            title: '阅读层次',
-            description: '背景、列表和详情用不同明度区分；强调色用于当前选择与主要操作。',
-            control: const PrototypeIcon(PrototypeIconGlyph.layers),
-          ),
-          SettingsPreferenceRow(
-            title: '资料识别',
-            divider: false,
-            description: '保留服务器、文件和凭据的图标色，并始终显示类型名称。',
-            control: const PrototypeIcon(PrototypeIconGlyph.file),
-          ),
-        ],
-      ),
     ],
   );
   Widget _records(BuildContext context) {
@@ -354,11 +337,16 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                       value: m.draft!.requestMinutes,
                       items: [
                         for (final n in {
-                          ...[5, 15, 30, 60, 120],
+                          ...AccessTiming.waitingMinutes,
                           m.draft!.requestMinutes,
                           if (m.value != null) m.value!.requestMinutes,
                         }.toList()..sort())
-                          DropdownMenuItem(value: n, child: Text('$n 分钟')),
+                          DropdownMenuItem(
+                            value: n,
+                            child: Text(
+                              n < 60 || n % 60 != 0 ? '$n 分钟' : '${n ~/ 60} 小时',
+                            ),
+                          ),
                       ],
                       onChanged: !enabled
                           ? null
@@ -509,7 +497,11 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                   child: Text('设置', style: libraryHeading(context, 24)),
                 ),
                 const SizedBox(height: 23),
-                for (final section in WorkspaceSettingsSection.values) ...[
+                for (final section in WorkspaceSettingsSection.values.where(
+                  (s) =>
+                      s != WorkspaceSettingsSection.connection ||
+                      widget.connectionBuilder != null,
+                )) ...[
                   DesktopButton(
                     key: ValueKey('settings-section-${section.name}'),
                     kind: DesktopButtonKind.quiet,
@@ -521,6 +513,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                     leadingGap: 11,
                     alignment: Alignment.centerLeft,
                     leading: PrototypeIcon(switch (section) {
+                      WorkspaceSettingsSection.connection =>
+                        PrototypeIconGlyph.server,
                       WorkspaceSettingsSection.appearance =>
                         PrototypeIconGlyph.layers,
                       WorkspaceSettingsSection.notifications =>
@@ -535,13 +529,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         PrototypeIconGlyph.shield,
                       WorkspaceSettingsSection.runtime =>
                         PrototypeIconGlyph.tune,
-                      WorkspaceSettingsSection.agents =>
-                        PrototypeIconGlyph.link,
                     }),
-                    selected:
-                        m.section == section &&
-                        (section != WorkspaceSettingsSection.plugins ||
-                            !widget.plugins.showingLegacy),
+                    selected: m.section == section,
                     onPressed:
                         m.frozen ||
                             widget.backups.frozen ||
@@ -550,9 +539,6 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         ? null
                         : () {
                             m.select(section);
-                            if (section == WorkspaceSettingsSection.plugins) {
-                              widget.plugins.showLegacy(false);
-                            }
                           },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,33 +565,14 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  if (section == WorkspaceSettingsSection.plugins) ...[
-                    DesktopButton(
-                      key: const ValueKey('legacy-menu'),
-                      alignment: Alignment.centerLeft,
-                      selected:
-                          m.section == section && widget.plugins.showingLegacy,
-                      kind: DesktopButtonKind.quiet,
-                      onPressed:
-                          m.frozen ||
-                              widget.backups.frozen ||
-                              widget.runtime.frozen ||
-                              widget.runtime.shutdownGate
-                          ? null
-                          : () {
-                              m.select(section);
-                              widget.plugins.showLegacy(true);
-                            },
-                      child: const Text('旧版模板'),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
                 ],
               ],
             ),
           ),
           Expanded(
-            child: m.section == WorkspaceSettingsSection.plugins
+            child: m.section == WorkspaceSettingsSection.connection
+                ? widget.connectionBuilder!(context)
+                : m.section == WorkspaceSettingsSection.plugins
                 ? widget.pluginBuilder(context)
                 : m.section == WorkspaceSettingsSection.classifications
                 ? ClassificationPage(
@@ -623,12 +590,6 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                 ? WorkspaceRuntimePage(
                     controller: widget.runtime,
                     preferences: m,
-                    onRequest: widget.onRequest,
-                    onModalChanged: widget.onModalChanged,
-                  )
-                : m.section == WorkspaceSettingsSection.agents
-                ? WorkspaceAgentsPage(
-                    controller: widget.agents,
                     onRequest: widget.onRequest,
                     onModalChanged: widget.onModalChanged,
                   )
@@ -857,18 +818,19 @@ class _NotificationPreviewState extends State<_NotificationPreview> {
           const SizedBox(height: 15),
           Text(p.description, style: libraryText(context, 14, height: 1.8)),
           const SizedBox(height: 15),
-          const Text('仅显示申请概况；点击后进入对应申请，不会自动批准。'),
+          if (p.requestId != null) const Text('点击可查看申请详情。'),
         ],
       ],
     ),
     actions: [
-      DesktopButton(
-        key: const ValueKey('settings-notification-open'),
-        onPressed: _preview?.requestId == null
-            ? null
-            : () => Navigator.pop(context, _preview!.requestId),
-        child: const Text('前往对应申请'),
-      ),
+      if (_preview?.requestId != null)
+        DesktopButton(
+          key: const ValueKey('settings-notification-open'),
+          onPressed: _preview?.requestId == null
+              ? null
+              : () => Navigator.pop(context, _preview!.requestId),
+          child: const Text('前往对应申请'),
+        ),
       DesktopButton(
         onPressed: () => Navigator.pop(context),
         child: const Text('关闭'),

@@ -16,6 +16,44 @@ void main() {
     operationCount: 1,
   );
   test(
+    'batch member origins are optional metadata and reject unknown values',
+    () {
+      WorkspaceLibraryRecyclePreview preview({String? entryId}) =>
+          WorkspaceLibraryRecyclePreview(
+            token: 'a' * 64,
+            directories: const [],
+            paths: const {},
+            records: [
+              WorkspaceLibraryRecycleRecord(
+                ref: ref,
+                name: 'Synthetic',
+                type: '资料',
+                directoryId: null,
+                path: const [],
+                recycleEntryId: entryId,
+              ),
+            ],
+          );
+      expect(
+        batchPreviewFromJson(
+          batchPreviewToJson(preview()),
+        ).records.single.recycleEntryId,
+        isNull,
+      );
+      final json = batchPreviewToJson(preview(entryId: 'retained-origin'));
+      expect(
+        batchPreviewFromJson(json).records.single.recycleEntryId,
+        'retained-origin',
+      );
+      (json['records'] as List).single['recycleEntryId'] = 42;
+      expect(() => batchPreviewFromJson(json), throwsFormatException);
+      (json['records'] as List).single['recycleEntryId'] = 'retained-origin';
+      (json['records'] as List).single['materialBytes'] =
+          'SYNTHETIC_NOT_METADATA';
+      expect(() => batchPreviewFromJson(json), throwsFormatException);
+    },
+  );
+  test(
     'history preserves legacy zero versions and an off-page kept selection',
     () {
       final detail = WorkspaceGrantDetail(

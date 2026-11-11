@@ -1,5 +1,10 @@
+import '../ui_palette.dart';
+import 'library_widgets.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'remote_workspace_source.dart';
+import 'workspace_sync.dart';
+import 'sync_conflicts_dialog.dart';
 import 'package:flutter/material.dart';
 import '../desktop_scroll.dart';
 import '../desktop_controls.dart';
@@ -13,7 +18,6 @@ import 'library_page.dart';
 import 'plugins_controller.dart';
 import 'plugins_page.dart';
 import 'library_edit_dialog.dart';
-import 'legacy_templates_controller.dart';
 import 'approvals_controller.dart';
 import 'approvals_page.dart';
 import 'grant_history_controller.dart';
@@ -23,7 +27,6 @@ import 'settings_page.dart';
 import 'classification_controller.dart';
 import 'backup_controller.dart';
 import 'runtime_controller.dart';
-import 'agents_controller.dart';
 import 'proposals_controller.dart';
 import 'proposals_page.dart';
 
@@ -34,17 +37,22 @@ class WorkspaceApp extends StatelessWidget {
     super.key,
     required this.source,
     required this.windowTitle,
+    this.sync,
     this.initialSelection,
     this.initialQuery,
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
-    this.onConnectionSettings,
-    this.onAgentConnectionSetup,
+    this.connectionBuilder,
+    this.connectionSettingsRequests,
+    this.onConnectionSettingsVisible,
   });
   final WorkspaceSource source;
-  final VoidCallback? onConnectionSettings;
-  final Future<void> Function(BuildContext)? onAgentConnectionSetup;
+  final WorkspaceSync? sync;
+  final Widget Function(BuildContext context, VoidCallback onCancel)?
+  connectionBuilder;
+  final ValueListenable<int>? connectionSettingsRequests;
+  final ValueChanged<bool>? onConnectionSettingsVisible;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -55,14 +63,16 @@ class WorkspaceApp extends StatelessWidget {
   Widget build(BuildContext context) => _WorkspaceSession(
     key: ValueKey((source, desktop)),
     source: source,
+    sync: sync,
     windowTitle: windowTitle,
     initialSelection: initialSelection,
     initialQuery: initialQuery,
     pageBuilder: pageBuilder,
     desktop: desktop,
     inputsBuilder: inputsBuilder,
-    onConnectionSettings: onConnectionSettings,
-    onAgentConnectionSetup: onAgentConnectionSetup,
+    connectionBuilder: connectionBuilder,
+    connectionSettingsRequests: connectionSettingsRequests,
+    onConnectionSettingsVisible: onConnectionSettingsVisible,
   );
 }
 
@@ -73,17 +83,22 @@ class _WorkspaceSession extends StatefulWidget {
     super.key,
     required this.source,
     required this.windowTitle,
+    this.sync,
     this.initialSelection,
     this.initialQuery,
     this.pageBuilder,
     this.desktop,
     this.inputsBuilder,
-    this.onConnectionSettings,
-    this.onAgentConnectionSetup,
+    this.connectionBuilder,
+    this.connectionSettingsRequests,
+    this.onConnectionSettingsVisible,
   });
   final WorkspaceSource source;
-  final VoidCallback? onConnectionSettings;
-  final Future<void> Function(BuildContext)? onAgentConnectionSetup;
+  final WorkspaceSync? sync;
+  final Widget Function(BuildContext context, VoidCallback onCancel)?
+  connectionBuilder;
+  final ValueListenable<int>? connectionSettingsRequests;
+  final ValueChanged<bool>? onConnectionSettingsVisible;
   final String windowTitle;
   final WorkspaceRecordRef? initialSelection;
   final WorkspaceQuery? initialQuery;
@@ -99,7 +114,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   late final WorkspaceController _controller;
   late final LibraryController _library;
   late final PluginsController _plugins;
-  late final LegacyTemplatesController _legacy;
   late final ApprovalsController _approvals;
   late final GrantHistoryController _history;
   bool _historyFrozen = false;
@@ -111,20 +125,26 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   late final BackupController _backups;
   bool _backupFrozen = false;
   late final WorkspaceRuntimeController _runtime;
-  late final WorkspaceAgentsController _agents;
   bool _runtimeFrozen = false, _runtimeGate = false;
   bool _quitRequested = false;
   late final void Function(WorkspacePage) _desktopNavigation;
   late final void Function(String) _desktopRequestNavigation;
+  late final void Function(WorkspacePage, String) _desktopMenuNavigation;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   int _modalDepth = 0;
+  WorkspaceLocation _beforeConnection = const WorkspaceLocation(
+    WorkspacePage.library,
+  );
+  bool _connectionVisible = false;
   bool? _nativeNavigationEnabled;
   VoidCallback? _pendingUiNavigation;
   @override
   void initState() {
     super.initState();
     _source = widget.source;
-    _controller = WorkspaceController(_source);
+    _controller = WorkspaceController(_source)
+      ..addListener(_connectionLocationChanged);
+    widget.connectionSettingsRequests?.addListener(_openConnectionSettings);
     _approvals = ApprovalsController(_source.approvals, _source.changes)
       ..addListener(_approvalChanged);
     unawaited(_approvals.load());
@@ -149,13 +169,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _runtime = WorkspaceRuntimeController(_source.runtime, _source.changes)
       ..addListener(_runtimeChanged);
     unawaited(_runtime.load());
-    _agents = WorkspaceAgentsController(_source.agents, _source.changes);
-    unawaited(_agents.load());
     _plugins = PluginsController(_source.plugins, _source.changes);
-    _legacy = LegacyTemplatesController(
-      _source.legacyTemplates,
-      _source.changes,
-    );
     _settings = WorkspaceSettingsController(
       _source.settings,
       _source.changes,
@@ -164,7 +178,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
       ),
     )..addListener(_settingsChanged);
     unawaited(_settings.load());
-    unawaited(_legacy.load());
     unawaited(_plugins.load());
     _summaryChanges = _source.changes.listen(
       (_) => unawaited(_controller.refresh()),
@@ -181,11 +194,59 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     if (widget.desktop case final WorkspaceRequestNavigation desktop) {
       desktop.onOpenRequest = _desktopRequestNavigation;
     }
+    _desktopMenuNavigation = (page, id) {
+      if (_controller.navigationLocked) return;
+      _navigate(page, id);
+    };
+    if (widget.desktop case final WorkspaceMenuNavigation desktop) {
+      desktop.onOpenMenuDetail = _desktopMenuNavigation;
+    }
     widget.desktop?.onNavigate = _desktopNavigation;
     unawaited(_controller.refresh());
     unawaited(
       _library.load(_library.query, keepSelection: widget.initialSelection),
     );
+  }
+
+  void _openConnectionSettings() {
+    if (_deferNavigation(_openConnectionSettings)) return;
+    _navigate(WorkspacePage.settings, 'connection');
+  }
+
+  void _connectionLocationChanged() {
+    if (_controller.location.page != WorkspacePage.settings) {
+      _beforeConnection = _controller.location;
+    }
+    final visible =
+        _controller.location.page == WorkspacePage.settings &&
+        _settings.section == WorkspaceSettingsSection.connection;
+    if (visible == _connectionVisible) return;
+    _connectionVisible = visible;
+    scheduleMicrotask(() {
+      if (mounted) widget.onConnectionSettingsVisible?.call(_connectionVisible);
+    });
+  }
+
+  void _cancelConnectionSettings() {
+    final prior = _beforeConnection;
+    _controller.navigate(
+      prior.page,
+      objectId: prior.objectId,
+      query: prior.query,
+      scrollOffset: prior.scrollOffset,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _WorkspaceSession oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.connectionSettingsRequests !=
+        widget.connectionSettingsRequests) {
+      oldWidget.connectionSettingsRequests?.removeListener(
+        _openConnectionSettings,
+      );
+      widget.connectionSettingsRequests?.addListener(_openConnectionSettings);
+    }
   }
 
   void _approvalChanged() {
@@ -206,6 +267,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   }
 
   void _settingsChanged() {
+    _connectionLocationChanged();
     _settingsFrozen = _settings.frozen;
     if (_settingsFrozen) _pendingUiNavigation = null;
     _syncNavigation();
@@ -292,12 +354,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _settings.dispose();
     _backups.dispose();
     _runtime.dispose();
-    _agents.dispose();
     _classifications.dispose();
+    widget.connectionSettingsRequests?.removeListener(_openConnectionSettings);
     _controller.dispose();
     _library.dispose();
     _plugins.dispose();
-    _legacy.dispose();
     unawaited(_summaryChanges?.cancel());
     if (identical(widget.desktop?.onNavigate, _desktopNavigation)) {
       widget.desktop?.onNavigate = null;
@@ -305,6 +366,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     if (widget.desktop case final WorkspaceRequestNavigation desktop) {
       if (identical(desktop.onOpenRequest, _desktopRequestNavigation)) {
         desktop.onOpenRequest = null;
+      }
+    }
+    if (widget.desktop case final WorkspaceMenuNavigation desktop) {
+      if (identical(desktop.onOpenMenuDetail, _desktopMenuNavigation)) {
+        desktop.onOpenMenuDetail = null;
       }
     }
     super.dispose();
@@ -336,28 +402,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     _controller.navigate(WorkspacePage.library);
   }
 
-  Future<void> _createWithLegacy(
-    BuildContext context,
-    WorkspaceLegacyTemplate template,
-  ) async {
-    _modalChanged(true);
-    try {
-      await _library.load(_library.query);
-      if (!context.mounted) return;
-      final ref = await showLibraryEditor(
-        context,
-        _library,
-        legacyTemplate: template,
-        filePicker: widget.inputsBuilder?.call(context).file,
-      );
-      if (!context.mounted || ref == null) return;
-      await _library.openRelated(ref);
-    } finally {
-      _modalChanged(false);
-    }
-    if (mounted) _controller.navigate(WorkspacePage.library);
-  }
-
   void _navigate(WorkspacePage page, String id) {
     if (_deferNavigation(() => _navigate(page, id))) return;
     if (page == WorkspacePage.approvals) unawaited(_approvals.open(id));
@@ -365,8 +409,8 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     if (page == WorkspacePage.proposals) unawaited(_proposals.open(id));
     if (page == WorkspacePage.settings) {
       _settings.select(
-        id == 'agents'
-            ? WorkspaceSettingsSection.agents
+        id == 'connection'
+            ? WorkspaceSettingsSection.connection
             : id == 'runtime'
             ? WorkspaceSettingsSection.runtime
             : id == 'backups'
@@ -418,6 +462,18 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     );
   }
 
+  WorkspaceSync? get _synchronization =>
+      widget.sync ?? (_source is RemoteWorkspaceSource ? _source.cache : null);
+
+  Widget _localStorageLabel(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    child: Text(
+      '本地模式',
+      key: const ValueKey('workspace-storage-mode'),
+      style: libraryText(context, 13, color: UiPalette.of(context).muted),
+    ),
+  );
+
   Widget _buildApp() => ZhiyuApp(
     controller: _controller,
     windowTitle: widget.windowTitle,
@@ -426,57 +482,61 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     trailingBuilder: (context) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_source is RemoteWorkspaceSource)
+        if (_synchronization case final cache?)
           ListenableBuilder(
-            listenable: _source.cache,
+            listenable: cache,
             builder: (context, _) {
-              final cache = _source.cache;
+              if (!cache.enabled) {
+                return _source is WorkspaceStorageLocation &&
+                        _source is! RemoteWorkspaceSource
+                    ? _localStorageLabel(context)
+                    : const SizedBox.shrink();
+              }
               final at = cache.updatedAt;
               return TextButton.icon(
                 key: const ValueKey('workspace-sync'),
                 onPressed: cache.busy
                     ? null
                     : () async {
+                        if (cache.needsReview && cache is WorkspaceSyncReview) {
+                          await showSyncConflicts(
+                            context,
+                            cache as WorkspaceSyncReview,
+                            _source,
+                          );
+                          return;
+                        }
                         try {
                           await cache.synchronize();
                         } catch (_) {
                           /* shown below */
                         }
                       },
-                icon: const Icon(Icons.sync, size: 18),
+                icon: cache.busy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync, size: 18),
                 label: Text(
                   cache.busy
                       ? '同步中…'
                       : cache.failure != null
                       ? '同步失败，重试'
+                      : cache.needsReview
+                      ? '同步 · 需处理冲突'
                       : at == null
-                      ? '同步'
-                      : '同步 · 更新于 ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
+                      ? '服务器同步'
+                      : '服务器同步 · ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
                 ),
               );
             },
           ),
-        if (widget.onAgentConnectionSetup != null)
-          IconButton(
-            tooltip: 'AI 接入',
-            icon: const Icon(Icons.smart_toy_outlined),
-            onPressed: _controller.navigationLocked
-                ? null
-                : () async {
-                    _modalChanged(true);
-                    try {
-                      await widget.onAgentConnectionSetup!(context);
-                    } finally {
-                      _modalChanged(false);
-                    }
-                  },
-          ),
-        if (widget.onConnectionSettings != null)
-          IconButton(
-            tooltip: '连接设置',
-            onPressed: widget.onConnectionSettings,
-            icon: const Icon(Icons.dns_outlined),
-          ),
+        if (_synchronization == null &&
+            _source is WorkspaceStorageLocation &&
+            _source is! RemoteWorkspaceSource)
+          _localStorageLabel(context),
         ListenableBuilder(
           listenable: _backups,
           builder: (context, _) => !_backups.uncertain
@@ -505,11 +565,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
         (context, location) => location.page == WorkspacePage.library
             ? LibraryPage(
                 controller: _library,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 workspaceNavigationEnabled: !_controller.navigationLocked,
                 filePicker: widget.inputsBuilder?.call(context).file,
                 credentialPicker: widget.inputsBuilder
@@ -521,6 +576,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
               )
             : location.page == WorkspacePage.approvals
             ? ApprovalsPage(
+                records: _source,
                 controller: _approvals,
                 onHistory: (id) =>
                     _navigate(WorkspacePage.history, 'request:$id'),
@@ -544,11 +600,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
             : location.page == WorkspacePage.history
             ? GrantHistoryPage(
                 controller: _history,
-                onWorkspaceBack: _controller.canGoBack
-                    ? _controller.goBack
-                    : null,
-                workspaceBackLabel:
-                    '返回${_controller.previousPage?.label ?? ''}',
                 onProposal: (id) => _navigate(WorkspacePage.proposals, id),
                 onRecord: (ref) => unawaited(_hostRecord(ref)),
                 onRequest: (id) => _navigate(WorkspacePage.approvals, id),
@@ -558,12 +609,17 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 },
               )
             : WorkspaceSettingsPage(
+                connectionBuilder: widget.connectionBuilder == null
+                    ? null
+                    : (context) => widget.connectionBuilder!(
+                        context,
+                        _cancelConnectionSettings,
+                      ),
                 controller: _settings,
                 plugins: _plugins,
                 classifications: _classifications,
                 backups: _backups,
                 runtime: _runtime,
-                agents: _agents,
                 backupPicker:
                     widget.inputsBuilder?.call(context).backup ??
                     unavailableBackupInput,
@@ -573,9 +629,6 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                 pluginBuilder: (context) => PluginsPage(
                   embedded: true,
                   controller: _plugins,
-                  legacy: _legacy,
-                  onLegacyCreate: (t) =>
-                      unawaited(_createWithLegacy(context, t)),
                   hosts: _source.hosts,
                   hostChanges: _source.changes,
                   hostFilePicker:

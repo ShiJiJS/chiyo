@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -31,7 +32,6 @@ part 'sample_workspace_retention.dart';
 part 'sample_workspace_classification.dart';
 part 'sample_workspace_backup.dart';
 part 'sample_workspace_runtime.dart';
-part 'sample_workspace_agents.dart';
 
 enum SampleWorkspaceScenario { ready, empty, waiting, failure }
 
@@ -77,8 +77,6 @@ class SampleWorkspaceSource
   late final SampleWorkspaceBackups backups = SampleWorkspaceBackups(this);
   @override
   late final SampleWorkspaceRuntime runtime = SampleWorkspaceRuntime(this);
-  @override
-  late final SampleWorkspaceAgents agents = SampleWorkspaceAgents(this);
   late final _approvals = _SampleApprovals(this);
   @override
   late final SampleWorkspaceSettings settings = SampleWorkspaceSettings(
@@ -199,7 +197,6 @@ class SampleWorkspaceSource
   late final _legacy = SampleWorkspaceLegacy(
     readable: _readable,
     changed: () => _changes.add(null),
-    plugins: _plugins,
     inputs: _legacyInputs ?? sampleLegacyInputs,
   );
   @override
@@ -1872,6 +1869,7 @@ class SampleWorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) async {
     await _readable();
@@ -2123,7 +2121,8 @@ class SampleWorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
-  }) => _previewRevision(ref, version, expectedVersion: expectedVersion);
+    String? snapshotId,
+  }) => _previewRevision(ref, version, expectedVersion: expectedVersion, snapshotId: snapshotId);
   @override
   Future<WorkspaceRecycleResults> queryRecycled({
     String keyword = '',
@@ -2161,7 +2160,6 @@ class SampleWorkspaceSource
   Future<void> replaceFixture(String fixtureJson) async {
     _restoredTypeDefinitions.clear();
     runtime.resetCurrent();
-    agents.resetCurrent();
     setScenario(SampleWorkspaceScenario.ready);
     _fixtureJson = fixtureJson;
     _loading = null;
@@ -2199,7 +2197,6 @@ class SampleWorkspaceSource
   void reset() {
     _restoredTypeDefinitions.clear();
     runtime.resetCurrent();
-    agents.resetCurrent();
     setScenario(SampleWorkspaceScenario.ready);
     _files.reset();
     _credentialLinks.reset();

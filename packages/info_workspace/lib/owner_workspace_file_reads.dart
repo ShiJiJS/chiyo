@@ -73,16 +73,47 @@ class OwnerWorkspaceFileReads {
     WorkspaceRecordRef record,
     String key, {
     int? version,
+    WorkspaceFileRef? exact,
   }) async {
-    if (version != null && version < 1) {
+    return owner.readInformationAttachment(
+      await reference(record, key, version: version, exact: exact),
+    );
+  }
+
+  /// Version labels can repeat after independent edits. Resolve within the
+  /// current file's family and require its exact reference when ambiguous.
+  Future<core.InformationAttachmentRef> reference(
+    WorkspaceRecordRef record,
+    String key, {
+    int? version,
+    WorkspaceFileRef? exact,
+  }) async {
+    if (version != null && version < 1 ||
+        exact != null && version != null && exact.version != version) {
       throw const WorkspaceFailure('invalid_request', '文件版本无效。');
     }
     final resolved = await resolve(record, key);
-    return owner.readInformationAttachment(
-      core.InformationAttachmentRef(
-        resolved.ref.attachmentId,
-        version ?? resolved.ref.attachmentVersion,
-      ),
+    if (version == null && exact == null) return resolved.ref;
+    final versions = await owner.informationAttachmentVersions(
+      resolved.ref.attachmentId,
     );
+    final candidates = versions
+        .where(
+          (v) => exact != null
+              ? v.reference.attachmentId == exact.id &&
+                    v.reference.attachmentVersion == exact.version
+              : v.reference.attachmentVersion == version,
+        )
+        .toList();
+    if (candidates.isEmpty) {
+      throw const WorkspaceFailure('attachment_missing', '该版本原文已不可用。');
+    }
+    if (candidates.length != 1) {
+      throw const WorkspaceFailure(
+        'ambiguous_file_version',
+        '此编号有多份文件，请从版本列表选择具体文件。',
+      );
+    }
+    return candidates.single.reference;
   }
 }

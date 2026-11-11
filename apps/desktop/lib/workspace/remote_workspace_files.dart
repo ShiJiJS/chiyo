@@ -201,16 +201,19 @@ class RemoteWorkspaceFiles {
   Future<WorkspaceFileOriginal> original(
     WorkspaceRecordRef record,
     String key,
-    int? version,
-  ) => _read(() async {
+    int? version, {
+    WorkspaceFileRef? exact,
+  }) => _read(() async {
     final original = fileOriginalFromJson(
       await client.request('POST', '/v1/owner/files/read', {
         'record': recordRefToJson(record),
         'fieldKey': key,
         'version': version,
+        if (exact != null) 'exact': exact.toJson(),
       }),
     );
-    if (version != null && original.file.ref.version != version) {
+    if (version != null && original.file.ref.version != version ||
+        exact != null && original.file.ref != exact) {
       throw const FormatException('Mismatched original version');
     }
     return original;
@@ -219,9 +222,10 @@ class RemoteWorkspaceFiles {
     WorkspaceRecordRef record,
     String key, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) => _read(() async {
-    final content = await original(record, key, version);
+    final content = await original(record, key, version, exact: exact);
     return renderer.renderContent(content.file, content.bytes, page: page);
   });
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>

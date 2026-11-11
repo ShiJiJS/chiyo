@@ -12,6 +12,8 @@ void main() {
     await s.approvals.change(
       WorkspaceApprovalChange(
         operationId: workspaceOperationId(),
+        fieldMinutes: 240,
+        credentialMinutes: 120,
         requestId: 'server',
         reviewToken: d.reviewToken,
         action: WorkspaceApprovalAction.approve,
@@ -104,12 +106,12 @@ void main() {
         (await s.approvals.read('server')).credentialExpiresAt,
         granted.credentialExpiresAt,
       );
-      s.advanceApprovalClock(const Duration(minutes: 16));
+      s.advanceApprovalClock(const Duration(minutes: 121));
       final mixed = await s.approvals.read('server');
       expect(
         mixed.request.state,
         WorkspaceApprovalState.approved,
-      ); // Ordinary fields last 30min.
+      ); // Ordinary fields last four hours.
       expect(
         mixed.scopes
             .singleWhere((x) => x.kind == WorkspaceApprovalScopeKind.credential)

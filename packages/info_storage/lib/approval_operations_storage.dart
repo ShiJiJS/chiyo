@@ -142,14 +142,7 @@ extension _EncryptedApprovalOperations on EncryptedInformationRepository {
           ],
         );
         if (change.grant case final grant?) {
-          await _db.customStatement(
-            'INSERT INTO grant_history(id,approved_at,payload) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
-            [
-              grant.id,
-              grant.approvedAt.toUtc().millisecondsSinceEpoch,
-              jsonEncode(grant.toJson()),
-            ],
-          );
+          await _writeGrantHistory(grant);
         }
         await _db.customStatement(
           'INSERT INTO information_approval_operations(operation_id,request_id,revision,payload) VALUES(?,?,?,?)',

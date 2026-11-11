@@ -136,7 +136,7 @@ void main() {
               r.id,
               approveCredential: true,
               fields: [fields.first],
-              fieldLifetime: const Duration(minutes: 30),
+              fieldLifetime: const Duration(hours: 4),
             );
             ClaimedGrant? original;
             if (revoke) {
@@ -246,7 +246,7 @@ void main() {
                 ),
               );
             } else if (terminal == 'expired') {
-              now = now.add(const Duration(hours: 1));
+              now = now.add(const Duration(hours: 4));
             }
             if (terminal != 'none') {
               await runtime.close();
@@ -323,7 +323,7 @@ void main() {
               expect(grant.fields, [fields.first]);
               expect(
                 grant.expiresAt,
-                DateTime.utc(2026, 11, 8).add(const Duration(minutes: 30)),
+                DateTime.utc(2026, 11, 8).add(const Duration(hours: 4)),
               );
               if (original != null) expect(grant.token, original.token);
               expect(
@@ -345,7 +345,7 @@ void main() {
                 'available',
               );
               // Receipt readback and reopen do not extend either original deadline.
-              now = DateTime.utc(2026, 11, 8).add(const Duration(minutes: 16));
+              now = DateTime.utc(2026, 11, 8).add(const Duration(minutes: 121));
               await runtime.close();
               runtime = await OnlineInformationRuntime.open(
                 repository: repo,

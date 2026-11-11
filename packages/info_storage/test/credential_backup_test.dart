@@ -88,6 +88,8 @@ void main() {
             session,
             CredentialUseInput.fromJson({
               'command': 'request-use',
+              'agentName': 'Synthetic credential backup Agent',
+              'externalChatId': 'synthetic-credential-backup-chat',
               'readFields': [
                 {'itemId': info.id, 'fieldId': info.fields.single.id},
               ],
@@ -146,6 +148,10 @@ void main() {
         restored.owner.credentialUseRequests.map((r) => r.id),
         unorderedEquals([unused.id, used.id]),
       );
+      for (final record in restored.owner.credentialUseRequests) {
+        expect(record.agentName, 'Synthetic credential backup Agent');
+        expect(record.externalChatId, 'synthetic-credential-backup-chat');
+      }
       expect(
         restored.owner.credentialUseRequests.any((r) => r.id == pending.id),
         isFalse,

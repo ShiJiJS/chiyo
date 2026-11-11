@@ -38,6 +38,8 @@ final class AgentGateway {
     '/update/submit',
     '/update/revise',
     '/update/status',
+    '/delete/submit',
+    '/delete/status',
     '/organization/request',
     '/organization/status',
     '/organization/tasks',
@@ -143,6 +145,7 @@ final class AgentGateway {
         // Files and credentials follow their own tickets.
         'capabilities': [
           'information-request-operations.v1',
+          'submission-metadata.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
           if (_deviceCredentials != null) ...[
@@ -157,6 +160,7 @@ final class AgentGateway {
               'credential-ssh-session-validity.v1',
           ],
           'information-import-operations.v1',
+          'import-proposal-title.v1',
           'information-update-operations.v1',
           if ((result['capabilities'] as List).contains('credential-import.v1'))
             'credential-import.v1',

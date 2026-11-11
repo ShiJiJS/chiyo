@@ -56,9 +56,9 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
     id: r.id,
     title: file ? '文件与字段申请' : '资料读取申请',
     kind: file ? WorkspaceApprovalKind.file : WorkspaceApprovalKind.information,
-    agentClaim: '未提供 Agent 名称',
+    agentClaim: r.agentName,
     sessionId: r.sessionId,
-    chatClaim: r.chatLabel,
+    chatClaim: core.submissionChatLabel(r.chatLabel, r.externalChatId),
     purpose: r.purpose,
     submittedAt: r.createdAt,
     requestExpiresAt: r.requestExpiresAt,
@@ -151,6 +151,7 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
                     r.chatClaim,
                     r.purpose,
                     r.title,
+                    r.agentClaim,
                   ].any((s) => s.toLowerCase().contains(needle)),
             )
             .toList();

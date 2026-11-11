@@ -148,5 +148,13 @@ extension _EncryptedServerState on EncryptedInformationRepository {
   Future<void> _invalidateServerState() async {
     if (await _hasServerStateTable())
       await _db.customStatement('DELETE FROM server_runtime_state');
+    final replicas = await _db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_replica_state','library_replica_receipts')",
+        )
+        .get();
+    for (final table in replicas) {
+      await _db.customStatement('DELETE FROM ${table.read<String>('name')}');
+    }
   }
 }

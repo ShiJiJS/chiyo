@@ -58,18 +58,6 @@ class UnavailableWorkspaceRuntime implements WorkspaceRuntimeSource {
       _unavailable();
 }
 
-class UnavailableWorkspaceAgents implements WorkspaceAgentsSource {
-  const UnavailableWorkspaceAgents();
-  @override
-  Future<WorkspaceAgentOverview> read({String? sessionId}) => _unavailable();
-  @override
-  Future<WorkspaceAgentOverview> diagnose(int expectedVersion) =>
-      _unavailable();
-  @override
-  Future<WorkspaceAgentSessionDetail> currentSession(int expectedVersion) =>
-      _unavailable();
-}
-
 class UnavailableWorkspaceCredential implements WorkspaceCredentialSource {
   const UnavailableWorkspaceCredential();
   @override
@@ -249,11 +237,6 @@ class UnavailableWorkspaceLegacyTemplate
   Future<List<WorkspaceLegacyTemplate>> load() => _unavailable();
   @override
   Future<WorkspaceLegacyTemplate> read(String id) => _unavailable();
-  @override
-  Future<WorkspacePluginCandidate> prepareConversion(
-    String id,
-    int expectedVersion,
-  ) => _unavailable();
 }
 
 /// Explicit typed boundaries while a remote module is being connected.
@@ -265,8 +248,6 @@ class UnavailableWorkspaceSource implements WorkspaceSource {
   WorkspaceBackupSource get backups => const UnavailableWorkspaceBackup();
   @override
   WorkspaceRuntimeSource get runtime => const UnavailableWorkspaceRuntime();
-  @override
-  WorkspaceAgentsSource get agents => const UnavailableWorkspaceAgents();
   @override
   WorkspaceCredentialSource get credentials =>
       const UnavailableWorkspaceCredential();
@@ -341,6 +322,7 @@ class UnavailableWorkspaceSource implements WorkspaceSource {
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) => _unavailable();
   @override
   Future<WorkspaceRecycleResults> queryRecycled({
@@ -372,6 +354,7 @@ class UnavailableWorkspaceSource implements WorkspaceSource {
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) => _unavailable();
   @override

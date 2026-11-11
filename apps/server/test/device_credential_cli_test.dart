@@ -6,6 +6,7 @@ import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/device_credential_journal.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_workspace/approval_transport.dart';
+import 'package:info_workspace/history_transport.dart';
 import 'package:info_workspace/workspace_source.dart';
 import 'package:test/test.dart';
 import 'support/device_credential_fixture.dart';
@@ -52,6 +53,9 @@ void main() {
         );
         final client = AgentClient.remote(
           f.profiles.first,
+          requireSubmissionMetadata: true,
+          sourceAgent: 'Synthetic credential Agent',
+          externalChatId: 'synthetic-credential-chat',
           deviceFileStateDirectory: Directory(
             '${root.path}/device-private/device-files',
           ),
@@ -126,6 +130,8 @@ void main() {
         final detail = approvalDetailFromJson(
           await f.owner.request('GET', '/v1/owner/approvals/details/$request'),
         );
+        expect(detail.request.agentClaim, 'Synthetic credential Agent');
+        expect(detail.request.chatClaim, contains('synthetic-credential-chat'));
         await f.owner.request(
           'POST',
           '/v1/owner/approvals/decisions',
@@ -147,6 +153,27 @@ void main() {
           'operationId': 'native-once',
           'launch': launch,
         };
+        if (scenario == 'token') await f.reopen();
+        final savedApproval = approvalDetailFromJson(
+          await f.owner.request('GET', '/v1/owner/approvals/details/$request'),
+        );
+        expect(savedApproval.request.agentClaim, 'Synthetic credential Agent');
+        expect(
+          savedApproval.request.chatClaim,
+          contains('synthetic-credential-chat'),
+        );
+        final history = grantResultsFromJson(
+          await f.owner.request(
+            'POST',
+            '/v1/owner/grant-history/query',
+            grantQueryToJson(const WorkspaceGrantQuery()),
+          ),
+        );
+        final recorded = history.items.singleWhere(
+          (h) => h.requestId == request,
+        );
+        expect(recorded.agentClaim, 'Synthetic credential Agent');
+        expect(recorded.chatClaim, contains('synthetic-credential-chat'));
         Process? child;
         final childOutput = <String>[];
         final childErrors = <String>[];

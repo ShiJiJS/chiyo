@@ -62,7 +62,7 @@ class RemoteWorkspaceProposals
     }
     return _renderer.renderContent(content.file, content.bytes, page: page);
   });
-  final OwnerClient client;
+  final OwnerTransport client;
   final void Function() changed;
   static const _prefix = '/v1/owner/proposals';
   String _path(String id) => '$_prefix/${Uri.encodeComponent(id)}';

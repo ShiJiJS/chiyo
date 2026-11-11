@@ -5,6 +5,7 @@ import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/codex_association.dart';
 import 'package:info_cli/codex_end_index.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'package:info_remote/automatic_connection.dart';
 
 /// Receives documented SessionStart JSON on stdin. Never reads transcripts.
 Future<void> main(List<String> args) async {
@@ -93,6 +94,9 @@ Future<void> main(List<String> args) async {
     final chat = input['session_id'];
     if (chat is! String || !validChatId(chat)) {
       throw const FormatException();
+    }
+    if (connectionFile == null && !explicitPort) {
+      connectionFile = (await discoverAgentConnection())?.path;
     }
     final connection = connectionFile == null
         ? null

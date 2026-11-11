@@ -6,6 +6,7 @@ import 'directory_picker.dart';
 import 'library_batch_recycle_controller.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'library_recycled_member.dart';
 
 Future<WorkspaceLibraryRecycleReceipt?> showLibraryBatchRecycle(
   BuildContext context,
@@ -184,7 +185,18 @@ class _BatchRecycleDialogState extends State<_BatchRecycleDialog> {
                                 .join('\n'),
                           ),
                         ),
-                      LibrarySelectionScope(preview: p, catalog: m.catalog),
+                      LibrarySelectionScope(
+                        preview: p,
+                        catalog: m.catalog,
+                        onPreview: !m.restoring || m.frozen || m.reading
+                            ? null
+                            : (record) => showLibraryRecycledMember(
+                                context,
+                                widget.source,
+                                record,
+                                m.catalog!,
+                              ),
+                      ),
                       if (m.restoring && p.directories.isNotEmpty)
                         _locations(p),
                       for (final warning in p.warnings)

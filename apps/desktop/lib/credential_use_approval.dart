@@ -214,8 +214,8 @@ class _CredentialUseApprovalPanelState
                               ? reusable
                                     ? draft.minutes == null
                                           ? '不限时（限本聊天）'
-                                          : '${draft.minutes} 分钟内可重复使用，不续期'
-                                    : '${draft.minutes} 分钟内允许启动一次'
+                                          : '${approvalDurationLabel(draft.minutes!)}内可重复使用，不续期'
+                                    : '${approvalDurationLabel(draft.minutes!)}内允许启动一次'
                               : r.credentialValidity ==
                                     CredentialUseValidity.session
                               ? '不限时（限本聊天）'
@@ -226,7 +226,7 @@ class _CredentialUseApprovalPanelState
                     fact(
                       '字段许可',
                       pending
-                          ? '$selectedFieldCount 个字段 · ${reusable && draft.fieldMinutes == 480 ? '8 小时' : '${reusable ? draft.fieldMinutes : draft.minutes} 分钟'}（独立许可）'
+                          ? '$selectedFieldCount 个字段 · ${approvalDurationLabel(reusable ? draft.fieldMinutes : draft.minutes!)}（独立许可）'
                           : '$selectedFieldCount 个字段 · 截止 ${_time(r.fieldExpiresAt)}（独立许可）',
                     ),
                   for (final field in fileFields) ...[
@@ -1129,17 +1129,19 @@ class _CredentialUseApprovalPanelState
                           value: 'session',
                           child: Text('不限时（限本聊天）'),
                         ),
-                      for (final n in [15, 30])
+                      for (final n in AccessTiming.grantMinutes)
                         DropdownMenuItem(
                           value: n.toString(),
-                          child: Text('$n 分钟'),
+                          child: Text('${n ~/ 60} 小时'),
                         ),
                     ],
                     onChanged: pending
                         ? (v) => setState(
                             () => draft.minutes = v == 'session'
                                 ? null
-                                : int.parse(v ?? '15'),
+                                : int.parse(
+                                    v ?? AccessTiming.defaultMinutes.toString(),
+                                  ),
                           )
                         : null,
                   ),
@@ -1161,15 +1163,18 @@ class _CredentialUseApprovalPanelState
                     value: draft.fieldMinutes,
                     isExpanded: true,
                     items: [
-                      for (final n in [15, 30, 60, 480])
+                      for (final n in AccessTiming.grantMinutes)
                         DropdownMenuItem(
                           value: n,
-                          child: Text(n == 480 ? '8 小时' : '$n 分钟'),
+                          child: Text('${n ~/ 60} 小时'),
                         ),
                     ],
                     onChanged: draft.fields.isEmpty
                         ? null
-                        : (v) => setState(() => draft.fieldMinutes = v ?? 480),
+                        : (v) => setState(
+                            () => draft.fieldMinutes =
+                                v ?? AccessTiming.defaultMinutes,
+                          ),
                   )
                 else
                   Text(

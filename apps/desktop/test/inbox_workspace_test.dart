@@ -351,7 +351,7 @@ void main() {
       await selectGrantMinutes(
         tester,
         find.byKey(ValueKey('grant-lifetime-${ids.last}')),
-        15,
+        240,
       );
       await tester.tap(find.byKey(const ValueKey('field-host')));
       await tester.tap(find.byTooltip('下一页请求'));

@@ -14,6 +14,8 @@ extension _AuditService on InformationService {
       id: request.id,
       sessionId: _sessionBindings[request.session]!,
       chatLabel: _sessions[request.session]!,
+      agentName: request.agentName,
+      externalChatId: request.externalChatId,
       purpose: request.purpose,
       createdAt: request.createdAt,
       requestExpiresAt: request.expiresAt,
@@ -82,6 +84,9 @@ extension _AuditService on InformationService {
       requestId: request.id,
       sessionId: _sessionBindings[request.session]!,
       chatLabel: _sessions[request.session]!,
+      agentName: request.agentName,
+      externalChatId: request.externalChatId,
+      purpose: request.purpose,
       approvedAt: request.approvedAt!,
       expiresAt: grant.expiresAt,
       fields: grant.fields.map((ref) {
@@ -90,6 +95,16 @@ extension _AuditService on InformationService {
         return RecordedField(item.id, field.id, item.name, field.name);
       }),
       events: [GrantEvent(GrantEventKind.approved, request.approvedAt!)],
+      itemVersions: {
+        for (final id in grant.fields.map((f) => f.itemId).toSet())
+          id: _repository.items.firstWhere((i) => i.id == id).version,
+      },
+      itemSnapshots: {
+        for (final id in grant.fields.map((f) => f.itemId).toSet())
+          id: informationSnapshotId(
+            _repository.items.firstWhere((i) => i.id == id),
+          ),
+      },
     );
     request.history = history;
     _enqueueAudit(() => _repository.saveGrantHistory(history));

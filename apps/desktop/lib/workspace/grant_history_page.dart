@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_motion.dart';
+import '../anchored_surface.dart';
+import 'grant_history_filters.dart';
 import '../ui_palette.dart';
 import 'approval_executions.dart';
 import 'grant_history_controller.dart';
@@ -38,6 +40,9 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
   late ScrollController _list, _detail;
   String? _selection;
   String _queryKey = '';
+  bool _filters = false;
+  final _filterPopup = AnchoredSurfaceController();
+  final _expandedSnapshots = <String>{};
   WorkspaceGrantState? _state;
   @override
   void initState() {
@@ -81,6 +86,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
 
   @override
   void dispose() {
+    _filterPopup.close?.call();
     m.removeListener(_changed);
     _search.dispose();
     _list.dispose();
@@ -114,7 +120,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
           label:
               contentLabel ??
               (scopeId == null
-                  ? '${target.name} · 当时资料v${target.version}'
+                  ? '${target.name} · 审批时的内容'
                   : '${target.name} · 批准附件v$fileVersion'),
           scopeId: scopeId,
         ),
@@ -124,109 +130,125 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
     }
   }
 
+  Future<void> _showFilters(BuildContext trigger) async {
+    if (_filters || m.frozen) return;
+    setState(() => _filters = true);
+    widget.onModalChanged?.call(true);
+    try {
+      final choice = await showAnchoredSurface<GrantHistoryFilters>(
+        trigger,
+        controller: _filterPopup,
+        alignToEnd: true,
+        width: 360,
+        height: 460 * MediaQuery.textScalerOf(context).scale(1),
+        builder: (_) => GrantHistoryFiltersPopup(
+          initial: (state: m.filter, kind: m.kind, days: m.lastDays),
+        ),
+      );
+      if (mounted && choice != null) {
+        await m.setFilters(
+          filter: choice.state,
+          kind: choice.kind,
+          lastDays: choice.days,
+        );
+      }
+    } finally {
+      widget.onModalChanged?.call(false);
+      if (mounted) setState(() => _filters = false);
+    }
+  }
+
   Widget _header(BuildContext context, bool large) {
     final c = UiPalette.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 30, 28, 16),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text('授权历史', style: libraryHeading(context, 25)),
-                    const SizedBox(height: 7),
-                    if (!large)
-                      Text(
-                        '查看批准范围、重复使用与结束原因',
-                        style: libraryText(context, 14, color: c.muted),
-                      ),
-                  ],
+              Expanded(child: Text('授权历史', style: libraryHeading(context, 24))),
+              Builder(
+                builder: (trigger) => IconButton(
+                  key: const ValueKey('grant-filter-popup'),
+                  tooltip: '筛选记录',
+                  isSelected:
+                      _filters ||
+                      m.filter != WorkspaceGrantFilter.all ||
+                      m.kind != null ||
+                      m.lastDays != null,
+                  onPressed: m.frozen ? null : () => _showFilters(trigger),
+                  icon: const Icon(Icons.tune, size: 19),
                 ),
               ),
-              if (widget.onWorkspaceBack != null)
-                DesktopButton(
-                  key: const ValueKey('workspace-back'),
-                  kind: DesktopButtonKind.quiet,
-                  onPressed: m.frozen ? null : widget.onWorkspaceBack,
-                  child: Text(widget.workspaceBackLabel),
-                ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           DesktopTextField(
             key: const ValueKey('grant-history-search'),
             controller: _search,
             enabled: !m.frozen,
             onChanged: m.search,
-            decoration: const InputDecoration(labelText: '搜索请求与用途'),
+            decoration: const InputDecoration(
+              hintText: '搜索申请或用途',
+              prefixIcon: Icon(Icons.search, size: 18),
+              isDense: true,
+            ),
           ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final f in WorkspaceGrantFilter.values)
-                DesktopButton(
-                  key: ValueKey('grant-filter-${f.name}'),
-                  selected: m.filter == f,
-                  kind: DesktopButtonKind.quiet,
-                  onPressed: m.frozen ? null : () => m.setFilter(f),
-                  child: Text(switch (f) {
-                    WorkspaceGrantFilter.all => '全部',
-                    WorkspaceGrantFilter.active => '有效',
-                    WorkspaceGrantFilter.ended => '已结束',
-                  }),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              SizedBox(
-                width: large ? 190 : 220,
-                child: DesktopSelect<String>(
-                  key: const ValueKey('grant-kind'),
-                  value: m.kind?.name ?? 'all',
-                  items: [
-                    const DropdownMenuItem(value: 'all', child: Text('所有类型')),
-                    for (final k in WorkspaceApprovalKind.values)
-                      DropdownMenuItem(value: k.name, child: Text(k.label)),
-                  ],
-                  onChanged: m.frozen
+          if (m.filter != WorkspaceGrantFilter.all ||
+              m.kind != null ||
+              m.lastDays != null) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                if (m.filter != WorkspaceGrantFilter.all)
+                  InputChip(
+                    key: const ValueKey('grant-applied-state'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text(grantFilterLabel(m.filter)),
+                    onDeleted: m.frozen
+                        ? null
+                        : () => m.setFilter(WorkspaceGrantFilter.all),
+                  ),
+                if (m.kind != null)
+                  InputChip(
+                    key: const ValueKey('grant-applied-kind'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text(m.kind!.label),
+                    onDeleted: m.frozen ? null : () => m.setKind(null),
+                  ),
+                if (m.lastDays != null)
+                  InputChip(
+                    key: const ValueKey('grant-applied-days'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text('最近${m.lastDays}天'),
+                    onDeleted: m.frozen ? null : () => m.setDays(null),
+                  ),
+                TextButton(
+                  key: const ValueKey('grant-filters-clear'),
+                  onPressed: m.frozen
                       ? null
-                      : (v) => m.setKind(
-                          v == 'all'
-                              ? null
-                              : WorkspaceApprovalKind.values.byName(v!),
+                      : () => m.setFilters(
+                          filter: WorkspaceGrantFilter.all,
+                          kind: null,
+                          lastDays: null,
                         ),
+                  child: const Text('清除筛选'),
                 ),
+              ],
+            ),
+          ],
+          if (widget.onWorkspaceBack != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: m.frozen ? null : widget.onWorkspaceBack,
+                icon: const Icon(Icons.arrow_back, size: 16),
+                label: Text(widget.workspaceBackLabel),
               ),
-              SizedBox(
-                width: large ? 190 : 180,
-                child: DesktopSelect<int>(
-                  key: const ValueKey('grant-days'),
-                  value: m.lastDays ?? 0,
-                  items: [
-                    for (final day in [0, 1, 7, 30])
-                      DropdownMenuItem(
-                        value: day,
-                        child: Text(day == 0 ? '所有时间' : '最近$day天'),
-                      ),
-                  ],
-                  onChanged: m.frozen
-                      ? null
-                      : (v) => m.setDays(v == 0 ? null : v),
-                ),
-              ),
-            ],
-          ),
+            ),
           if (m.notice != null)
             Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -297,26 +319,6 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ...heading,
-        Container(
-          margin: const EdgeInsets.only(left: 20, right: 29),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-          decoration: BoxDecoration(
-            color: c.rail,
-            border: Border(top: BorderSide(color: c.line)),
-          ),
-          child: DefaultTextStyle(
-            style: libraryText(context, 12, color: c.muted),
-            child: const Row(
-              children: [
-                Expanded(child: Text('请求与用途')),
-                SizedBox(width: 15),
-                SizedBox(width: 95, child: Text('状态')),
-                SizedBox(width: 15),
-                SizedBox(width: 105, child: Text('批准时间')),
-              ],
-            ),
-          ),
-        ),
         Expanded(
           child: r == null || r.items.isEmpty
               ? Center(child: empty)
@@ -341,10 +343,15 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(h.title, style: libraryText(context, 14, weight: FontWeight.w600)),
+        Text(
+          h.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: libraryText(context, 14, weight: FontWeight.w600),
+        ),
         const SizedBox(height: 8),
         Text(
-          '${h.kind.label} · ${h.agentClaim}',
+          [h.kind.label, h.agentClaim].where((v) => v.isNotEmpty).join(' · '),
           style: libraryText(context, 12, color: c.muted, height: 1.7),
         ),
       ],
@@ -373,22 +380,21 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
         selected: m.selection == h.id,
         alignment: Alignment.centerLeft,
         radius: 5,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 21),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         onPressed: m.frozen ? null : () => m.select(h.id),
-        child: large
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [title, const SizedBox(height: 8), status, date],
-              )
-            : Row(
-                children: [
-                  Expanded(child: title),
-                  const SizedBox(width: 15),
-                  SizedBox(width: 95, child: status),
-                  const SizedBox(width: 15),
-                  SizedBox(width: 105, child: date),
-                ],
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            title,
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [status, date],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -488,12 +494,11 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              '${h.agentClaim} · ${h.chatClaim}',
+              [
+                h.agentClaim,
+                h.chatClaim,
+              ].where((v) => v.isNotEmpty).join(' · '),
               style: libraryText(context, 13, color: c.muted, height: 1.8),
-            ),
-            Text(
-              '名称和用途为Agent自述。',
-              style: libraryText(context, 12, color: c.muted),
             ),
             const SizedBox(height: 10),
             Text(h.purpose, style: libraryText(context, 14, height: 1.9)),
@@ -515,7 +520,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
             _section(context, '批准范围', [
               if (d.scopes.isEmpty)
                 Text(
-                  '本次没有批准任何范围。',
+                  '本次没有批准任何资料。',
                   style: libraryText(context, 14, color: c.muted),
                 ),
               for (final scope in d.scopes)
@@ -524,6 +529,25 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (d.scopes
+                              .firstWhere((s) => s.record == scope.record)
+                              .id ==
+                          scope.id)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            d.targets
+                                    .where((t) => t.record == scope.record)
+                                    .firstOrNull
+                                    ?.name ??
+                                '关联资料',
+                            style: libraryText(
+                              context,
+                              14,
+                              weight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       Text(
                         '• ${scope.label}${scope.fileVersion == null ? '' : ' · 附件v${scope.fileVersion}'}',
                         style: libraryText(context, 14, height: 1.8),
@@ -567,7 +591,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                     (s) => s.kind == WorkspaceApprovalScopeKind.field,
                   ))
                 Text(
-                  d.scopeNotice ?? '批准成员固定；有效期内读取这些字段的最新内容。附件版本另外固定。',
+                  d.scopeNotice ?? '可读取以上字段的最新内容；以后新增的字段需要另行申请。',
                   style: libraryText(context, 12, color: c.muted, height: 1.8),
                 ),
             ]),
@@ -577,12 +601,19 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
               ApprovalExecutions(controller: m.decision),
             if (d.events.isNotEmpty)
               _section(context, '访问与使用事件', [
-                for (final e in d.events)
+                for (final (index, e) in d.events.indexed)
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
+                      if (index < d.events.length - 1)
+                        Positioned(
+                          left: 5.5,
+                          top: 6,
+                          bottom: -6,
+                          child: Container(width: 1, color: c.line),
+                        ),
                       Positioned(
-                        left: -3.5,
+                        left: 2.5,
                         top: 6,
                         child: Container(
                           width: 7,
@@ -594,10 +625,8 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.only(left: 17, bottom: 26),
-                        decoration: BoxDecoration(
-                          border: Border(left: BorderSide(color: c.line)),
-                        ),
+                        padding: const EdgeInsets.only(left: 24, bottom: 26),
+
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -650,15 +679,10 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
             else if (h.operationCount == 0)
               _section(context, '访问与使用事件', [
                 Text(
-                  '尚无访问或使用记录；批准不等于已经读取或执行。',
+                  'AI 尚未使用这次授权。',
                   style: libraryText(context, 13, color: c.muted, height: 1.9),
                 ),
               ]),
-            if (d.legacyNotice != null)
-              Text(
-                d.legacyNotice!,
-                style: libraryText(context, 12, color: c.muted, height: 1.8),
-              ),
             _section(context, '关联资料', [
               for (final t in d.targets)
                 Padding(
@@ -666,51 +690,118 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        t.name,
-                        style: libraryText(
-                          context,
-                          14,
-                          weight: FontWeight.w600,
-                        ),
-                      ),
-                      if (!t.exists)
-                        Text(
-                          '当前对象已删除或不可用。历史名称与身份仍保留。',
-                          style: libraryText(
-                            context,
-                            13,
-                            color: c.muted,
-                            height: 1.8,
+                      Tooltip(
+                        message: t.exists ? '在信息库中打开' : '资料已删除或不可用',
+                        child: DesktopButton(
+                          key: ValueKey('grant-current-${t.record.key}'),
+                          kind: DesktopButtonKind.link,
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          onPressed: m.frozen || !t.exists
+                              ? null
+                              : () => widget.onRecord(t.record),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: c.selected,
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: Icon(
+                                  t.record.kind ==
+                                          WorkspaceRecordKind.credential
+                                      ? Icons.key_outlined
+                                      : Icons.description_outlined,
+                                  size: 18,
+                                  color: t.exists ? c.accent : c.muted,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t.name,
+                                      style: libraryText(
+                                        context,
+                                        14,
+                                        weight: FontWeight.w600,
+                                        color: t.exists ? c.ink : c.muted,
+                                      ),
+                                    ),
+                                    if (!t.exists)
+                                      Text(
+                                        '资料已删除或不可用',
+                                        style: libraryText(
+                                          context,
+                                          12,
+                                          color: c.muted,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Icon(Icons.open_in_new, size: 16, color: c.muted),
+                            ],
                           ),
                         ),
+                      ),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          DesktopButton(
-                            key: ValueKey('grant-current-${t.record.key}'),
-                            kind: DesktopButtonKind.quiet,
-                            onPressed: m.frozen || !t.exists
-                                ? null
-                                : () => widget.onRecord(t.record),
-                            child: const Text('查看当前资料'),
-                          ),
                           if (t.record.kind == WorkspaceRecordKind.information)
                             DesktopButton(
                               key: ValueKey('grant-snapshot-${t.record.key}'),
                               kind: DesktopButtonKind.quiet,
+                              leading: Icon(
+                                _expandedSnapshots.contains(
+                                      '${h.id}/${t.record.key}',
+                                    )
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
+                                size: 18,
+                              ),
                               onPressed: m.frozen || !t.snapshotAvailable
                                   ? null
-                                  : () => _content(t),
+                                  : () => setState(() {
+                                      final key = '${h.id}/${t.record.key}';
+                                      if (!_expandedSnapshots.add(key)) {
+                                        _expandedSnapshots.remove(key);
+                                      }
+                                    }),
                               child: Text(
-                                t.version > 0
-                                    ? '查看当时资料v${t.version}'
-                                    : '当时资料版本未知',
+                                _expandedSnapshots.contains(
+                                      '${h.id}/${t.record.key}',
+                                    )
+                                    ? '收起审批时的内容'
+                                    : '展开审批时的内容',
                               ),
                             ),
                         ],
                       ),
+                      if (_expandedSnapshots.contains(
+                        '${h.id}/${t.record.key}',
+                      ))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: GrantHistoryContentDialog(
+                            key: ValueKey('inline-${h.id}/${t.record.key}'),
+                            source: m.source,
+                            changes: m.changes,
+                            historyId: h.id,
+                            record: t.record,
+                            label: '审批时的内容',
+                            inline: true,
+                          ),
+                        ),
                       if (t.record.kind == WorkspaceRecordKind.information &&
                           !t.snapshotAvailable)
                         Text(
@@ -734,7 +825,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
               DesktopButton(
                 key: const ValueKey('grant-revoke'),
                 onPressed: m.canRevoke ? m.revoke : null,
-                child: const Text('撤销本次请求全部范围'),
+                child: const Text('撤销这次授权'),
               ),
             if (m.linkedDecision && m.decision.notice != null)
               Padding(
@@ -758,13 +849,6 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                 onPressed: m.decision.busy ? null : m.reconcile,
                 child: const Text('核对本次撤销'),
               ),
-            const SizedBox(height: 12),
-            DesktopButton(
-              key: const ValueKey('grant-refresh'),
-              kind: DesktopButtonKind.quiet,
-              onPressed: m.frozen ? null : () => m.load(review: true),
-              child: const Text('重新读取记录'),
-            ),
           ],
         ),
       ),
@@ -776,18 +860,14 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
     builder: (context, bounds) {
       final c = UiPalette.of(context),
           large = MediaQuery.textScalerOf(context).scale(14) > 20;
-      final right = large
-          ? (bounds.maxWidth - 460).clamp(380.0, bounds.maxWidth)
-          : MediaQuery.sizeOf(context).width <= 1300
-          ? 335.0
-          : 365.0;
+      final left = large ? 420.0 : 350.0;
       final list = ColoredBox(
-            color: c.paper,
+            color: c.rail,
             child: _listPane(context, large || bounds.maxWidth < 900),
           ),
           detail = Container(
             decoration: BoxDecoration(
-              color: c.rail,
+              color: c.paper,
               border: Border(left: BorderSide(color: c.line)),
             ),
             child: _detailPane(context),
@@ -802,8 +882,8 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
           : Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: list),
-                SizedBox(width: right, child: detail),
+                SizedBox(width: left, child: list),
+                Expanded(child: detail),
               ],
             );
     },

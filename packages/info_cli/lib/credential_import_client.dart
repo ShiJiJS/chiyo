@@ -6,6 +6,19 @@ extension _CredentialImportClient on AgentClient {
     required bool revise,
   }) async {
     if (_session == null) return {'status': 'unauthorized'};
+    if (input.containsKey('title')) {
+      final title = input['title'];
+      if (revise ||
+          title is! String ||
+          title.trim().isEmpty ||
+          title.length > 200 ||
+          title.contains(RegExp(r'[\x00-\x1f\x7f]'))) {
+        return {
+          'status': 'invalid_proposal_title',
+          'message': '请填写一句不超过200字的提案主题，不含换行、密码或 Token。',
+        };
+      }
+    }
     final raw = input['items'];
     if (raw is! List ||
         raw.isEmpty ||
@@ -28,9 +41,21 @@ extension _CredentialImportClient on AgentClient {
             ).hasMatch(input['operationId'] as String))) {
       return {'status': 'invalid_operation_id'};
     }
-    if (hasCredential || hasFiles || input.containsKey('operationId')) {
+    if (hasCredential ||
+        hasFiles ||
+        input.containsKey('operationId') ||
+        input.containsKey('title')) {
       final capabilities = await _call('/capabilities', {});
       if (capabilities['status'] != 'ok') return capabilities;
+      if (input.containsKey('title') &&
+          !(capabilities['capabilities'] as List? ?? []).contains(
+            'import-proposal-title.v1',
+          )) {
+        return {
+          'status': 'unsupported_capability',
+          'message': '服务器暂不支持提案主题，请更新服务器后重试。',
+        };
+      }
       if (hasFiles &&
           !(capabilities['capabilities'] as List? ?? []).contains(
             'information-file-upload.v1',
@@ -134,6 +159,7 @@ extension _CredentialImportClient on AgentClient {
         'version': input['version'],
       } else ...{
         'agentName': input['agentName'] ?? sourceAgent,
+        ..._submissionFields(input, proposal: true),
         if (input.containsKey('purpose')) 'purpose': input['purpose'],
         if (input.containsKey('operationId'))
           'operationId': input['operationId'],

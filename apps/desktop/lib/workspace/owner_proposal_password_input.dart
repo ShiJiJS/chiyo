@@ -15,7 +15,7 @@ class OwnerProposalPasswords extends ProposalPasswords {
     : _owner = owner,
       _scope = owner.captureLibraryScope(),
       _remote = null;
-  OwnerProposalPasswords.remote(OwnerClient client)
+  OwnerProposalPasswords.remote(OwnerTransport client)
     : _owner = null,
       _scope = null,
       _remote = RemoteProposalPasswordStore(client);
@@ -282,32 +282,29 @@ class _InlinePassword extends StatefulWidget {
 class _InlinePasswordState extends State<_InlinePassword> {
   bool _visible = false;
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(
-        child: DesktopTextField(
-          key: ValueKey('proposal-owner-password-${widget.itemId}'),
-          controller: widget.controller,
-          enabled: widget.enabled,
-          obscureText: !_visible,
-          inlineSecret: true,
-          enableSuggestions: false,
-          autocorrect: false,
-          maxLength: 65536,
-          onChanged: (_) => widget.changed(),
-          decoration: const InputDecoration(labelText: '密码'),
-        ),
-      ),
-      const SizedBox(width: 10),
-      DesktopButton(
+  Widget build(BuildContext context) => DesktopTextField(
+    key: ValueKey('proposal-owner-password-${widget.itemId}'),
+    controller: widget.controller,
+    enabled: widget.enabled,
+    obscureText: !_visible,
+    inlineSecret: true,
+    enableSuggestions: false,
+    autocorrect: false,
+    maxLength: 65536,
+    onChanged: (_) => widget.changed(),
+    decoration: InputDecoration(
+      labelText: '密码',
+      suffixIcon: IconButton(
         key: ValueKey('proposal-password-visible-${widget.itemId}'),
-        kind: DesktopButtonKind.quiet,
+        tooltip: _visible ? '隐藏密码' : '显示密码',
         onPressed: widget.enabled
             ? () => setState(() => _visible = !_visible)
             : null,
-        child: Text(_visible ? '隐藏密码' : '显示密码'),
+        icon: Icon(
+          _visible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+          size: 18,
+        ),
       ),
-    ],
+    ),
   );
 }

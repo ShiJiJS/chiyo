@@ -32,7 +32,7 @@ void main() {
         version: version,
         dark: true,
         notifications: false,
-        requestMinutes: 15,
+        requestMinutes: 120,
         retentionDays: days,
         background: false,
       );
@@ -125,7 +125,7 @@ void main() {
       final receipt = await save();
       expect(receipt.preferences.settings, desired().settings);
       expect(service.owner.notificationsEnabled, isFalse);
-      expect(service.owner.requestLifetime, const Duration(minutes: 15));
+      expect(service.owner.requestLifetime, const Duration(hours: 2));
       expect(service.owner.auditRetentionDays, 90);
       await close();
       await open();

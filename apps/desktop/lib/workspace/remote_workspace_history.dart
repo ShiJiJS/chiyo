@@ -78,12 +78,14 @@ class RemoteWorkspaceHistory implements WorkspaceLibraryRecycle {
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) => _historyCall(() async {
     final result = revisionPreviewFromJson(
       await client.request('POST', '$prefix/preview', {
         'wireVersion': 1,
         'record': recordRefToJson(ref),
         'revision': version,
+        'snapshotId': ?snapshotId,
         'expectedVersion': expectedVersion,
       }),
     );
@@ -108,6 +110,25 @@ class RemoteWorkspaceHistory implements WorkspaceLibraryRecycle {
       }),
     ),
   );
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  }) => _historyCall(() async {
+    if (page < 0) throw const WorkspaceFailure('invalid_request', '页码无效。');
+    final content = fileOriginalFromJson(
+      await client.request('POST', '$prefix/recycled-file', {
+        'wireVersion': 1,
+        'entryId': entryId,
+        'fieldKey': fieldKey,
+      }),
+    );
+    return const WorkspaceAttachmentRenderer().renderContent(
+      content.file,
+      content.bytes,
+      page: page,
+    );
+  });
   Future<WorkspaceArchive> readRecycled(String entryId) => _historyCall(
     () async => historyArchiveFromJson(
       await client.request(
@@ -212,7 +233,7 @@ class RemoteWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
     this.client, {
     this.renderer = const WorkspaceAttachmentRenderer(),
   });
-  final OwnerClient client;
+  final OwnerTransport client;
   final WorkspaceAttachmentRenderer renderer;
   static const prefix = '/v1/owner/grant-history';
   @override

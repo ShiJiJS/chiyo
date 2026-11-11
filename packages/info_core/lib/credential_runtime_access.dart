@@ -551,6 +551,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       protocolVersion: input.protocolVersion,
       id: _service._secret(),
       chatLabel: _service._sessions[session]!,
+      agentName: input.agentName,
+      externalChatId: input.externalChatId,
       purpose: input.purpose,
       alias: input.alias,
       credentialId: c.id,
@@ -1009,7 +1011,7 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     String id, {
     required bool approveCredential,
     List<FieldRef> fields = const [],
-    Duration? lifetime = const Duration(minutes: 15),
+    Duration? lifetime = AccessTiming.defaultLifetime,
     Duration? fieldLifetime,
     Map<FieldRef, int>? reviewedVersions,
   }) => _serialize(() async {
@@ -1020,20 +1022,20 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
     if (_service._useState(r) != 'pending') {
       throw const CredentialUseFailure('request_terminal');
     }
-    final fieldDurations = r.protocolVersion == 2
-        ? const [15, 30, 60, 480]
-        : const [15, 30];
-    if ((lifetime == null
-            ? !r.supportsSessionValidity
-            : lifetime != const Duration(minutes: 15) &&
-                  lifetime != const Duration(minutes: 30)) ||
+    if (!AccessTiming.acceptsCredentialLifetime(
+          lifetime,
+          sessionValidity: r.supportsSessionValidity,
+        ) ||
         fieldLifetime != null &&
-            !fieldDurations.any((m) => fieldLifetime == Duration(minutes: m))) {
+            !AccessTiming.acceptsFieldLifetime(
+              fieldLifetime,
+              protocolVersion: r.protocolVersion,
+            )) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final effectiveFieldLifetime =
         fieldLifetime ??
-        (r.protocolVersion == 2 ? const Duration(hours: 8) : lifetime!);
+        (r.protocolVersion == 2 ? AccessTiming.defaultLifetime : lifetime!);
     if (fields.toSet().length != fields.length ||
         fields.any(
           (f) => !r.fields.contains(f) || _service._field(f) == null,
@@ -1086,9 +1088,22 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
             requestId: id,
             sessionId: _service._sessionBindings[session]!,
             chatLabel: r.chatLabel,
+            agentName: r.agentName,
+            externalChatId: r.externalChatId,
+            purpose: r.purpose,
             approvedAt: now,
             expiresAt: now.add(effectiveFieldLifetime),
             fields: recorded,
+            itemVersions: {
+              for (final id in fields.map((f) => f.itemId).toSet())
+                id: information.firstWhere((i) => i.id == id).version,
+            },
+            itemSnapshots: {
+              for (final id in fields.map((f) => f.itemId).toSet())
+                id: informationSnapshotId(
+                  information.firstWhere((i) => i.id == id),
+                ),
+            },
             events: [GrantEvent(GrantEventKind.approved, now)],
           );
     final fieldRequest = fields.isEmpty
@@ -1097,6 +1112,8 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
             id: id,
             sessionId: _service._sessionBindings[session]!,
             chatLabel: r.chatLabel,
+            agentName: r.agentName,
+            externalChatId: r.externalChatId,
             purpose: r.purpose,
             createdAt: r.createdAt,
             requestExpiresAt: r.requestExpiresAt,
@@ -1135,6 +1152,8 @@ extension CredentialRuntimeOwnerAccess on OwnerAccess {
                 Set.unmodifiable(r.fields),
                 r.createdAt,
                 r.requestExpiresAt,
+                agentName: r.agentName,
+                externalChatId: r.externalChatId,
               )
               ..approvedAt = now
               ..recordedFields = recorded

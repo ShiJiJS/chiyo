@@ -196,7 +196,10 @@ void main() {
           b = saved.fields.single.attachment!;
       expect(saved.fields.single.id, old.fields.last.id);
       expect(saved.fields.single.version, 2);
-      expect(a.attachmentId, b.attachmentId);
+      expect(a.attachmentId, isNot(b.attachmentId));
+      final family = await repo.informationAttachmentVersions(b.attachmentId);
+      expect(family.map((v) => v.reference), containsAll([a, b]));
+      expect(family.map((v) => v.seriesId).toSet(), {a.attachmentId});
       expect(b.attachmentVersion, 2);
       expect(await repo.readInformationAttachmentChunk(a, 0, 3), [0, 255, 7]);
       expect(await repo.readInformationAttachmentChunk(b, 0, 2), [9, 8]);

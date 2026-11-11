@@ -19,19 +19,13 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   LibraryController controller, {
   WorkspaceDetail? detail,
   WorkspaceType? selectedType,
-  WorkspaceLegacyTemplate? legacyTemplate,
   WorkspaceFilePicker? filePicker,
   WorkspaceCredentialPicker? credentialPicker,
   VoidCallback? onOpenPlugins,
 }) async {
   final catalog = controller.catalog;
   if (catalog == null) return null;
-  var type =
-      detail?.record.type ??
-      selectedType ??
-      (legacyTemplate == null
-          ? null
-          : catalog.types.where((t) => t.id == 'generic').firstOrNull);
+  var type = detail?.record.type ?? selectedType;
   if (type == null) {
     final choice = await showDesktopDialog<LibraryCreateChoice>(
       context,
@@ -84,19 +78,9 @@ Future<WorkspaceRecordRef?> showLibraryEditor(
   }
   Map<String, Object?> definition;
   try {
-    if (legacyTemplate != null) {
-      final current = await controller.source.legacyTemplates.read(
-        legacyTemplate.id,
-      );
-      if (current.version != legacyTemplate.version) {
-        throw const WorkspaceFailure('conflict', '旧版模板已变化，请重新读取并核对。');
-      }
-      definition = current.definition;
-    } else {
-      definition = detail == null
-          ? await controller.source.loadTemplate(type.id)
-          : workspaceEditingDefinition(detail);
-    }
+    definition = detail == null
+        ? await controller.source.loadTemplate(type.id)
+        : workspaceEditingDefinition(detail);
   } on WorkspaceFailure catch (failure) {
     if (!context.mounted) return null;
     await showDesktopDialog<void>(
@@ -151,6 +135,7 @@ class _EditorState extends State<_Editor> {
   late WorkspaceCatalog _catalog;
   WorkspaceDetail? _detail;
   bool _reviewing = false, _reviewOpen = false;
+  String _tagSearch = '';
   final _fields = <String, TextEditingController>{};
   Set<String> get _documentFormats => {
     for (final section in _definition['sections'] as List? ?? [])
@@ -594,38 +579,6 @@ class _EditorState extends State<_Editor> {
               ),
             ),
             const SizedBox(height: 18),
-            LibraryDirectorySelect(
-              catalog: catalog,
-              value: _directory,
-              onChanged: _locked
-                  ? null
-                  : (value) => setState(() {
-                      _directory = value;
-                      _dirty = true;
-                    }),
-            ),
-            const SizedBox(height: 18),
-            Text('标签', style: libraryText(context, 13, color: c.muted)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 7,
-              runSpacing: 7,
-              children: [
-                for (final tag in catalog.tags)
-                  LibraryTag(
-                    tag.name,
-                    selected: _tags.contains(tag.id),
-                    onPressed: _locked
-                        ? null
-                        : () => setState(() {
-                            _tags.contains(tag.id)
-                                ? _tags.remove(tag.id)
-                                : _tags.add(tag.id);
-                            _dirty = true;
-                          }),
-                  ),
-              ],
-            ),
             for (final field in _definition['fields'] as List? ?? [])
               if (field['type'] == 'file') ...[
                 const SizedBox(height: 18),
@@ -779,6 +732,54 @@ class _EditorState extends State<_Editor> {
                   ),
                 ),
               ],
+            const SizedBox(height: 24),
+            LibraryDirectorySelect(
+              catalog: catalog,
+              value: _directory,
+              onChanged: _locked
+                  ? null
+                  : (value) => setState(() {
+                      _directory = value;
+                      _dirty = true;
+                    }),
+            ),
+            const SizedBox(height: 18),
+            Text('标签', style: libraryText(context, 13, color: c.muted)),
+            TextField(
+              key: const ValueKey('library-edit-tag-search'),
+              decoration: const InputDecoration(
+                hintText: '查找标签',
+                prefixIcon: Icon(Icons.search, size: 16),
+              ),
+              onChanged: (value) => setState(() => _tagSearch = value),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: [
+                for (final tag in catalog.tags.where(
+                  (t) =>
+                      _tags.contains(t.id) ||
+                      (_tagSearch.isNotEmpty &&
+                          t.name.toLowerCase().contains(
+                            _tagSearch.toLowerCase(),
+                          )),
+                ))
+                  LibraryTag(
+                    tag.name,
+                    selected: _tags.contains(tag.id),
+                    onPressed: _locked
+                        ? null
+                        : () => setState(() {
+                            _tags.contains(tag.id)
+                                ? _tags.remove(tag.id)
+                                : _tags.add(tag.id);
+                            _dirty = true;
+                          }),
+                  ),
+              ],
+            ),
             for (final rule in _definition['relations'] as List? ?? []) ...[
               const SizedBox(height: 24),
               LibraryRelationPicker(

@@ -13,6 +13,7 @@ import 'device_information_files.dart';
 import 'device_credential_journal.dart';
 import 'runtime_worker_command.dart';
 import 'device_credential_host.dart';
+import 'agent_help.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';
@@ -23,13 +24,21 @@ class AgentClient {
     this.port, {
     String? sessionSecret,
     this.sourceAgent = '通用 CLI',
+    this.requireSubmissionMetadata = false,
+    String externalChatId = '',
     CredentialProcessStarter? credentialProcessStarter,
     this.hostedCredentialExecutions = false,
     String? runtimeWorkerExecutable,
     AgentConnectionProfile? connection,
     this.deviceFileStateDirectory,
   }) : _session = sessionSecret,
-       _remote = connection == null ? null : AgentConnection(connection),
+       _externalChatId = externalChatId,
+       _remote = connection == null || connection.isLocal
+           ? null
+           : AgentConnection(connection),
+       _local = connection != null && connection.isLocal
+           ? AgentConnection(connection)
+           : null,
        _runtimeWorkerExecutable = runtimeWorkerExecutable,
        _usesDefaultCredentialStarter = credentialProcessStarter == null,
        _credentialProcessStarter =
@@ -45,6 +54,8 @@ class AgentClient {
     AgentConnectionProfile profile, {
     String? sessionSecret,
     String sourceAgent = '通用 CLI',
+    bool requireSubmissionMetadata = false,
+    String externalChatId = '',
     bool hostedCredentialExecutions = false,
     Directory? deviceFileStateDirectory,
     String? runtimeWorkerExecutable,
@@ -52,6 +63,8 @@ class AgentClient {
     profile.address.port,
     sessionSecret: sessionSecret,
     sourceAgent: sourceAgent,
+    requireSubmissionMetadata: requireSubmissionMetadata,
+    externalChatId: externalChatId,
     hostedCredentialExecutions: hostedCredentialExecutions,
     connection: profile,
     deviceFileStateDirectory: deviceFileStateDirectory,
@@ -75,7 +88,7 @@ class AgentClient {
           workerExecutable: _runtimeWorkerExecutable,
         ).maintain()
       : Future<void>.value();
-  final AgentConnection? _remote;
+  final AgentConnection? _remote, _local;
   final bool hostedCredentialExecutions;
   final String? _runtimeWorkerExecutable;
   final CredentialProcessStarter _credentialProcessStarter;
@@ -84,6 +97,11 @@ class AgentClient {
   Future<void> drainCredentialExecutions() => _credentialExecutions.drain();
   final int port;
   final String sourceAgent;
+
+  /// Shipping CLI entry points require current submission metadata. Embedders
+  /// may retain the legacy protocol while migrating their existing commands.
+  final bool requireSubmissionMetadata;
+  String _externalChatId;
   final _http = HttpClient()..connectionTimeout = const Duration(seconds: 3);
   String? _session;
   String? _endCapability;
@@ -119,9 +137,13 @@ class AgentClient {
     _endCapability = null;
     _http.close(force: true);
     _remote?.close();
+    _local?.close();
   }
 
   Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
+    if (input['command'] == 'help' && input.length == 1) {
+      return agentCommandHelp();
+    }
     try {
       await _deviceFileMaintenance;
     } on Object {
@@ -135,6 +157,53 @@ class AgentClient {
       // launch or turn unrelated catalog queries into material delivery.
     }
     final command = input['command'];
+    const submissions = {
+      'request',
+      'request-use',
+      'organize-request',
+      'import-submit',
+      'update-submit',
+      'delete-submit',
+    };
+    if (_session != null &&
+        (requireSubmissionMetadata || input.containsKey('submissionVersion')) &&
+        submissions.contains(command)) {
+      input = {
+        ...input,
+        'submissionVersion': input.containsKey('submissionVersion')
+            ? input['submissionVersion']
+            : 1,
+        'agentName': input['agentName'] ?? sourceAgent,
+        'externalChatId': input['externalChatId'] ?? _externalChatId,
+      };
+      final errors = submissionMetadataErrors(
+        input,
+        proposal: const {
+          'organize-request',
+          'import-submit',
+          'update-submit',
+          'delete-submit',
+        }.contains(command),
+      );
+      if (errors.isNotEmpty) {
+        return {
+          'status': 'invalid_request',
+          'errorCode': 'invalid_submission_metadata',
+          'message': '请补齐提交说明；标题和说明中不要填写密码或 Token。',
+          'fieldErrors': errors,
+        };
+      }
+      final support = await _call('/capabilities', {});
+      if (support['status'] != 'ok') return support;
+      if (!(support['capabilities'] as List? ?? []).contains(
+        'submission-metadata.v1',
+      )) {
+        return {
+          'status': 'unsupported_capability',
+          'message': '服务器暂不支持新的提交说明，请更新服务器后重试。',
+        };
+      }
+    }
     if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {
       return _executeInformationFileCommand(input);
     }
@@ -255,6 +324,7 @@ class AgentClient {
           'purpose': input['purpose'],
           'itemIds': input['itemIds'],
           'agentName': input['agentName'] ?? sourceAgent,
+          ..._submissionFields(input, proposal: true),
         });
       case 'organize-status':
         if (_session == null) return {'status': 'unauthorized'};
@@ -306,6 +376,7 @@ class AgentClient {
           'sessionSecret': _session,
           'itemId': input['itemId'],
           'baseVersion': input['baseVersion'],
+          ..._submissionFields(input, proposal: true),
           if (input['fieldId'] != null) 'fieldId': input['fieldId'],
         });
       case 'delete-status':
@@ -381,12 +452,27 @@ class AgentClient {
         });
       case 'session':
         if (_session != null) return {'status': 'invalid_request'};
+        if (input.containsKey('externalChatId') &&
+            (input['externalChatId'] is! String ||
+                !validSubmissionMetadata(
+                  externalChatId: input['externalChatId'] as String,
+                ))) {
+          return {
+            'status': 'invalid_request',
+            'fieldErrors': {'externalChatId': '聊天标识格式无效。'},
+          };
+        }
         final result = await _call('/session', {
           'chatLabel': input['chatLabel'],
         });
         final secret = result.remove('sessionSecret');
         final endCapability = result.remove('endCapability');
-        if (result['status'] == 'ok' && secret is String) _session = secret;
+        if (result['status'] == 'ok' && secret is String) {
+          _session = secret;
+          if (input['externalChatId'] is String) {
+            _externalChatId = input['externalChatId'] as String;
+          }
+        }
         if (result['status'] == 'ok' && endCapability is String) {
           _endCapability = endCapability;
         }
@@ -428,6 +514,7 @@ class AgentClient {
           'sessionSecret': _session,
           'purpose': input['purpose'],
           'fields': input['fields'],
+          ..._submissionFields(input),
           if (hasOperation) 'operationId': operation,
         });
         if (result['status'] == 'service_unavailable') {
@@ -493,8 +580,9 @@ class AgentClient {
     Map<String, dynamic> data, {
     Duration? timeout,
   }) async {
-    if (_remote != null) {
-      return _remote.call(
+    final transport = _remote ?? _local;
+    if (transport != null) {
+      return transport.call(
         path,
         data,
         timeout: timeout ?? AgentConnection.defaultRequestTimeout,
@@ -514,4 +602,18 @@ class AgentClient {
       return {'status': 'service_unavailable'};
     }
   }
+
+  Map<String, dynamic> _submissionFields(
+    Map<String, dynamic> input, {
+    bool proposal = false,
+  }) => {
+    for (final key in [
+      'submissionVersion',
+      'agentName',
+      'externalChatId',
+      if (proposal) 'title',
+      if (proposal) 'purpose',
+    ])
+      if (input.containsKey(key)) key: input[key],
+  };
 }

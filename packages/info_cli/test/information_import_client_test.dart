@@ -36,6 +36,7 @@ void main() {
       final input = <String, dynamic>{
         'command': 'import-submit',
         'operationId': 'originals-once',
+        'title': '整理后端岗位简历',
         'items': [
           {
             'key': 'resume',
@@ -70,12 +71,18 @@ void main() {
       };
       final submitted = await cli.execute(input);
       expect(submitted['status'], 'pending');
+      expect(submitted['title'], '整理后端岗位简历');
       expect(jsonEncode(submitted), isNot(contains(root.path)));
       expect(repo.items, isEmpty);
       final id = submitted['proposalId'] as String;
       expect((await cli.execute(input))['proposalId'], id);
       expect(repo.importProposals.length, 1);
       final p = repo.importProposals.single;
+      expect(p.title, '整理后端岗位简历');
+      expect(
+        (await cli.execute({...input, 'title': '另一份申请'}))['status'],
+        'operation_conflict',
+      );
       final originals = p.items.single.attachments.single.versions;
       expect(originals.first.upload!.byteLength, informationFileByteLimit);
       expect(originals.first.upload!.mediaType, 'application/pdf');

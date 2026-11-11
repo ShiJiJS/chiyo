@@ -11,11 +11,11 @@ void main() {
     await tester.pumpWidget(InformationApp(service: core, port: 47125));
     await tester.tap(find.text('请求设置'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('timeout-30')));
+    await tester.tap(find.byKey(const ValueKey('timeout-120')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('5 分钟').last);
+    await tester.tap(find.text('30 分钟').last);
     await tester.pumpAndSettle();
-    expect(core.owner.requestLifetime, const Duration(minutes: 5));
+    expect(core.owner.requestLifetime, const Duration(minutes: 30));
     await tester.pumpWidget(const SizedBox());
     core.close();
   });
@@ -44,7 +44,7 @@ void main() {
           .first,
     );
     expect(find.text('Need host'), findsOneWidget);
-    expect(find.text('还剩 30 分钟'), findsOneWidget);
+    expect(find.text('还剩 120 分钟'), findsOneWidget);
     await tester.ensureVisible(find.text('拒绝请求'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('拒绝请求'));

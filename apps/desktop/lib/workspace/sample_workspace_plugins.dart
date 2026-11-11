@@ -19,25 +19,6 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   final Map<String, int> Function() recordCounts;
   final Map<String, ({String filename, List<int> bytes})> inputs;
   final _selections = <String, ({String filename, List<int> bytes})>{};
-  final _legacySelections =
-      <String, ({Map<String, Object?> source, void Function() validate})>{};
-  WorkspacePluginCandidate stageLegacyConversion(
-    String filename,
-    List<int> bytes,
-    Map<String, Object?> source,
-    void Function() validate,
-  ) {
-    if (_selections.length >= 100) {
-      throw const WorkspaceFailure('selection_busy', '待核对的选择过多，请先关闭已有表单。');
-    }
-    final candidate = _stage((filename: filename, bytes: bytes));
-    _legacySelections[candidate.selectionId] = (
-      source: workspaceImmutableMap(source),
-      validate: validate,
-    );
-    return candidate;
-  }
-
   final _current = <String, WorkspacePlugin>{},
       _initial = <String, WorkspacePlugin>{};
   final _bundledUpdates = <String, WorkspacePlugin>{};
@@ -51,7 +32,6 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   void installPortable(Map<String, WorkspacePlugin> values) {
     _hostSelections.clear();
     _selections.clear();
-    _legacySelections.clear();
     _operations.clear();
     _current
       ..clear()
@@ -167,7 +147,6 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   void clear() {
     _hostSelections.clear();
     _bundledUpdates.clear();
-    _legacySelections.clear();
     _selections.clear();
     _current.clear();
     _initial.clear();
@@ -179,7 +158,6 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
 
   void reset() {
     _hostSelections.clear();
-    _legacySelections.clear();
     _selections.clear();
     _current
       ..clear()
@@ -241,7 +219,6 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
   Future<void> releaseCandidate(String selectionId) async {
     _hostSelections.remove(selectionId);
     _selections.remove(selectionId);
-    _legacySelections.remove(selectionId);
   }
 
   @override
@@ -302,8 +279,6 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
     if (input == null) {
       throw const WorkspaceFailure('selection_unavailable', '所选插件包已不可用，请重新选择。');
     }
-    final legacy = _legacySelections[selectionId];
-    legacy?.validate();
     final decoded = TemplatePackageDecoder().decode(
       input.bytes,
       origin: input.filename,
@@ -312,7 +287,7 @@ class SampleWorkspacePlugins implements WorkspacePluginSource {
           for (final t in p.templates) '${p.id}/${t.id}',
       },
     );
-    return legacy == null ? decoded : decoded.fromLegacy(legacy.source);
+    return decoded;
   }
 
   int _compareVersions(String a, String b) {

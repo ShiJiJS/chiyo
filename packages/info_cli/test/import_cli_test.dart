@@ -39,9 +39,15 @@ void main() {
         return jsonDecode(output.current) as Map<String, dynamic>;
       }
 
-      await command({'command': 'session', 'chatLabel': 'CLI import'});
+      await command({
+        'command': 'session',
+        'externalChatId': 'synthetic-import-cli-test',
+        'chatLabel': 'CLI import',
+      });
       final receipt = await command({
         'command': 'import-submit',
+        'title': '合成资料变更',
+        'purpose': '执行合成验收的资料变更',
         'items': [
           {
             'name': 'First',
@@ -127,6 +133,8 @@ void main() {
       );
       final denied = await command({
         'command': 'import-submit',
+        'title': '合成资料变更',
+        'purpose': '执行合成验收的资料变更',
         'items': [
           {
             'name': 'Rejected',

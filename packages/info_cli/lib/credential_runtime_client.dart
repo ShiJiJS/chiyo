@@ -280,6 +280,9 @@ extension _CredentialRuntimeClient on AgentClient {
           'launch',
           'readFields',
           'fill',
+          'agentName',
+          'externalChatId',
+          'submissionVersion',
         },
         'fill-use' || 'fill-status' => {
           'protocolVersion',
@@ -596,6 +599,7 @@ extension _CredentialRuntimeClient on AgentClient {
         port,
         '/credential-use/operation',
       );
+      _authenticateLocalCredentialRequest(request);
       request.headers.contentType = ContentType.json;
       request.followRedirects = false;
       final supervisor = _usesDefaultCredentialStarter
@@ -622,6 +626,7 @@ extension _CredentialRuntimeClient on AgentClient {
       final response = await request.close().timeout(
         const Duration(seconds: 5),
       );
+      _verifyLocalCredentialResponse(response);
       final bytes = <int>[];
       await for (final chunk in response.timeout(const Duration(seconds: 5))) {
         if (bytes.length + chunk.length > 4194304) {
@@ -676,6 +681,7 @@ extension _CredentialRuntimeClient on AgentClient {
         port,
         '/credential-use/consume',
       );
+      _authenticateLocalCredentialRequest(request);
       request.headers.contentType = ContentType.json;
       request.followRedirects = false;
       final supervisor = _usesDefaultCredentialStarter
@@ -702,6 +708,7 @@ extension _CredentialRuntimeClient on AgentClient {
       final response = await request.close().timeout(
         const Duration(seconds: 5),
       );
+      _verifyLocalCredentialResponse(response);
       final bytes = <int>[];
       await for (final chunk in response.timeout(const Duration(seconds: 5))) {
         if (bytes.length + chunk.length > 4194304) {
@@ -728,6 +735,24 @@ extension _CredentialRuntimeClient on AgentClient {
         mayBeConsumed ? 'material_claim_failed' : 'service_unavailable',
         attemptConsumed: mayBeConsumed,
       );
+    }
+  }
+
+  void _authenticateLocalCredentialRequest(HttpClientRequest request) {
+    final profile = _local?.profile;
+    if (profile == null) return;
+    request.headers.set(
+      HttpHeaders.authorizationHeader,
+      'Bearer ${profile.deviceToken}',
+    );
+    request.headers.set('x-chiyo-server-id', profile.serverId);
+  }
+
+  void _verifyLocalCredentialResponse(HttpClientResponse response) {
+    final profile = _local?.profile;
+    if (profile != null &&
+        response.headers.value('x-chiyo-server-id') != profile.serverId) {
+      throw const FormatException('Local library identity mismatch');
     }
   }
 

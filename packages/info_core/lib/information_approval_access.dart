@@ -12,7 +12,7 @@ final class InformationApprovalCommand {
     Iterable<FieldRef> fields = const [],
     Map<String, int> itemVersions = const {},
     Map<FieldRef, InformationAttachmentRef> expectedFiles = const {},
-    this.lifetime = const Duration(minutes: 30),
+    this.lifetime = AccessTiming.defaultLifetime,
   }) : fields = List.unmodifiable(fields),
        itemVersions = Map.unmodifiable(itemVersions),
        expectedFiles = Map.unmodifiable(expectedFiles) {
@@ -169,6 +169,8 @@ final class _InformationDecision {
         id: original.id,
         sessionId: original.sessionId,
         chatLabel: original.chatLabel,
+        agentName: original.agentName,
+        externalChatId: original.externalChatId,
         purpose: original.purpose,
         createdAt: original.createdAt,
         requestExpiresAt: original.requestExpiresAt,
@@ -354,6 +356,9 @@ extension OwnerInformationApprovals on OwnerAccess {
           requestId: request.id,
           sessionId: _service._sessionBindings[request.session]!,
           chatLabel: _service._sessions[request.session]!,
+          agentName: request.agentName,
+          externalChatId: request.externalChatId,
+          purpose: request.purpose,
           approvedAt: now,
           expiresAt: now.add(command.lifetime),
           fields: command.fields.map((ref) {
@@ -362,6 +367,12 @@ extension OwnerInformationApprovals on OwnerAccess {
             return RecordedField(item.id, field.id, item.name, field.name);
           }),
           itemVersions: command.itemVersions,
+          itemSnapshots: {
+            for (final id in command.itemVersions.keys)
+              id: informationSnapshotId(
+                information.firstWhere((i) => i.id == id),
+              ),
+          },
           events: [GrantEvent(GrantEventKind.approved, now)],
         );
       } else if (command.action == InformationApprovalAction.revoke) {
@@ -381,6 +392,8 @@ extension OwnerInformationApprovals on OwnerAccess {
           id: request.id,
           sessionId: _service._sessionBindings[request.session]!,
           chatLabel: _service._sessions[request.session]!,
+          agentName: request.agentName,
+          externalChatId: request.externalChatId,
           purpose: request.purpose,
           createdAt: request.createdAt,
           requestExpiresAt: request.expiresAt,

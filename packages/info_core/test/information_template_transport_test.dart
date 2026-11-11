@@ -71,6 +71,16 @@ void main() {
       expect(definition['status'], 'ok');
       final description = definition['template'] as Map;
       final example = description['submissionExample'] as Map;
+      expect(example['title'], isA<String>());
+      expect(example['agentName'], 'Example Agent');
+      expect(example['externalChatId'], 'example-chat-id');
+      expect(
+        submissionMetadataErrors(
+          Map<String, dynamic>.from(example)..['submissionVersion'] = 1,
+          proposal: true,
+        ),
+        isEmpty,
+      );
       expect(example['operationId'], isA<String>());
       expect((example['items'] as List).single['key'], 'example-item');
       expect((description['candidateIdentity'] as Map)['field'], 'items[].key');

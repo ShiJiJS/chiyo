@@ -43,6 +43,9 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
   Future<void> _reconcileAttachmentRetention(DateTime now) async {
     final versions = await _allAttachmentVersions();
     if (versions.isEmpty) return;
+    if (versions.any((v) => v.seriesId != v.reference.attachmentId)) {
+      await _requireAdmissionFormat(_libraryFileBranchFormat);
+    }
     await _requireAdmissionFormat(_longTermAttachmentLibraryFormat);
     if (versions.any((v) => v.label.isNotEmpty || v.sourceNote.isNotEmpty)) {
       await _requireAdmissionFormat(_informationImportFileLibraryFormat);
@@ -68,10 +71,7 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
       );
     }
 
-    for (final r
-        in await _db
-            .customSelect('SELECT payload FROM information_revisions')
-            .get()) {
+    for (final r in await _db.customSelect(await _revisionRowsQuery()).get()) {
       keep(
         informationFromJson(
           jsonDecode(r.read<String>('payload')) as Map<String, dynamic>,
@@ -169,8 +169,8 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     if (_closed) throw const StorageFailure('library_closed');
     final rows = await _db
         .customSelect(
-          'SELECT attachment_id,version,metadata,byte_length,typeof(body) AS body_type,length(body) AS body_size FROM information_attachment_versions WHERE attachment_id=? ORDER BY version LIMIT 10001',
-          variables: [Variable(id)],
+          "SELECT attachment_id,version,metadata,byte_length,typeof(body) AS body_type,length(body) AS body_size FROM information_attachment_versions WHERE coalesce(json_extract(metadata,'\$.seriesId'),attachment_id)=coalesce((SELECT coalesce(json_extract(metadata,'\$.seriesId'),attachment_id) FROM information_attachment_versions WHERE attachment_id=? LIMIT 1),?) ORDER BY version,attachment_id LIMIT 10001",
+          variables: [Variable(id), Variable(id)],
         )
         .get();
     if (rows.length > AttachmentBackupContainer.maxVersions)
@@ -290,6 +290,11 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     final templates = await _db
         .customSelect('SELECT fields_json FROM field_templates')
         .get();
+    final exactGrantHistory = await _db
+        .customSelect(
+          'SELECT 1 FROM grant_history WHERE instr(payload,\'"itemSnapshots":\')>0 LIMIT 1',
+        )
+        .get();
     final layoutContent = await _db
         .customSelect(
           'SELECT 1 FROM information_items WHERE layout_json IS NOT NULL '
@@ -298,7 +303,31 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
           'UNION ALL SELECT 1 FROM library_recycle_batches LIMIT 1',
         )
         .get();
-    if (exists.isEmpty &&
+    final retainedSnapshots =
+        await _hasRevisionSnapshots() &&
+        (await _db
+                .customSelect(
+                  'SELECT 1 FROM information_revision_snapshots LIMIT 1',
+                )
+                .get())
+            .isNotEmpty;
+    final protectedSnapshots =
+        (await _db
+                .customSelect(
+                  "SELECT name FROM sqlite_master WHERE type='table' AND name='credential_material_snapshots'",
+                )
+                .get())
+            .isNotEmpty &&
+        (await _db
+                .customSelect(
+                  'SELECT 1 FROM credential_material_snapshots LIMIT 1',
+                )
+                .get())
+            .isNotEmpty;
+    if (!protectedSnapshots &&
+        !retainedSnapshots &&
+        exists.isEmpty &&
+        exactGrantHistory.isEmpty &&
         layoutContent.isEmpty &&
         !templates.any(
           (r) => (jsonDecode(r.read<String>('fields_json')) as List).any(
@@ -369,7 +398,7 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
             throw const AccessFailure('stage_unavailable');
           final stage = await _informationStage(change.draftId, p.stageId),
               v = p.version;
-          final versions = await _attachmentVersions(v.reference.attachmentId);
+          final versions = await _attachmentVersions(v.seriesId);
           final latest = versions.fold<int>(
             0,
             (n, v) => max(n, v.reference.attachmentVersion),

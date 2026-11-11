@@ -230,6 +230,7 @@ extension _SampleWorkspaceHistory on SampleWorkspaceSource {
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) async {
     await _readable();
     return _buildRevisionPreview(

@@ -196,10 +196,12 @@ void main() {
                             as String,
                       )
                       as Map<String, dynamic>;
-              expect(payload['version'], 17);
+              expect(payload['version'], 24);
               payload['version'] = format;
               final tables = payload['tables'] as Map<String, dynamic>;
               expect(tables.remove('template_packages'), isEmpty);
+              expect(tables.remove('library_recycle_batches'), isEmpty);
+              expect(tables.remove('library_order_state'), isEmpty);
               if (format == 8)
                 expect(tables.remove('information_deliveries'), isEmpty);
               for (final row in tables['information_items'] as List) {
@@ -210,6 +212,7 @@ void main() {
                     jsonDecode(row['payload'] as String)
                         as Map<String, dynamic>;
                 history.remove('itemVersions');
+                history.remove('itemSnapshots');
                 row['payload'] = jsonEncode(history);
               }
               legacy.execute('UPDATE backup_snapshot SET payload=?', [
@@ -381,7 +384,7 @@ void main() {
             expect(target.accessRecords, isEmpty);
             expect(target.informationFileDeliveries, isEmpty);
             final preview = await target.backups.inspect(backup.path, recovery);
-            expect(preview.formatVersion, format);
+            expect(preview.formatVersion, format < 17 ? format : 24);
             expect(preview.attachmentCount, 10);
             expect(preview.attachmentBytes, 80 * 1024 * 1024);
             await restored.owner.restoreLibrary(

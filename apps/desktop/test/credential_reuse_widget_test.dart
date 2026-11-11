@@ -34,7 +34,7 @@ void viewport(WidgetTester tester, {double scale = 1}) {
 
 void main() {
   testWidgets(
-    'v2 approval displays reusable scope and defaults independent fields to eight hours',
+    'v2 approval displays reusable scope and defaults independent fields to two hours',
     (tester) async {
       viewport(tester);
       final (service, session, request) = (await tester.runAsync(
@@ -45,11 +45,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('批准期限内使用'), findsOneWidget);
       expect(find.text('连接字段读取期限（独立）'), findsOneWidget);
-      expect(find.text('8 小时'), findsOneWidget);
+      expect(find.text('2 小时'), findsWidgets);
       await tester.tap(find.byKey(const ValueKey('credential-use-approve')));
       await tester.pumpAndSettle();
-      expect(find.textContaining('15 分钟内可重复使用'), findsOneWidget);
-      expect(find.textContaining('8 小时（独立许可）'), findsOneWidget);
+      expect(find.textContaining('2 小时内可重复使用'), findsOneWidget);
+      expect(find.textContaining('2 小时（独立许可）'), findsOneWidget);
       await tester.ensureVisible(find.text('确认批准'));
       await tester.tap(find.text('确认批准'));
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
@@ -57,11 +57,11 @@ void main() {
       final r = service.owner.credentialUseRequests.single;
       expect(
         r.credentialExpiresAt!.difference(r.decidedAt!),
-        const Duration(minutes: 15),
+        const Duration(hours: 2),
       );
       expect(
         r.fieldExpiresAt!.difference(r.decidedAt!),
-        const Duration(hours: 8),
+        const Duration(hours: 2),
       );
       expect(service.agent.claim(session, request.id).fields, request.fields);
       expect(find.text('使用授权有效 · 可重复使用'), findsOneWidget);
@@ -78,7 +78,7 @@ void main() {
         () => fixture(protocolVersion: 2),
       ))!;
       addTearDown(service.close);
-      final draft = CredentialUseApprovalDraft(request.fields)..minutes = 30;
+      final draft = CredentialUseApprovalDraft(request.fields)..minutes = 240;
       await tester.pumpWidget(
         MaterialApp(
           theme: informationTheme(),
@@ -95,9 +95,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('credential-field-lifetime')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('60 分钟').last);
+      await tester.tap(find.text('2 小时').last);
       await tester.pumpAndSettle();
-      expect(draft.fieldMinutes, 60);
+      expect(draft.fieldMinutes, 120);
       await tester.ensureVisible(
         find.byKey(const ValueKey('credential-use-approve')),
       );
@@ -109,11 +109,11 @@ void main() {
       final r = service.owner.credentialUseRequests.single;
       expect(
         r.credentialExpiresAt!.difference(r.decidedAt!),
-        const Duration(minutes: 30),
+        const Duration(hours: 4),
       );
       expect(
         r.fieldExpiresAt!.difference(r.decidedAt!),
-        const Duration(hours: 1),
+        const Duration(hours: 2),
       );
       await tester.pumpWidget(const SizedBox());
     },

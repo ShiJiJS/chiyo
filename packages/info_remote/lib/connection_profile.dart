@@ -1,8 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:info_core/info_core.dart';
-import 'package:info_core/protocol_json.dart';
 import 'owner_client.dart';
+import 'automatic_connection.dart';
+import 'private_connection_files.dart';
 
 final class ConnectionProfile {
   const ConnectionProfile({
@@ -47,65 +46,31 @@ final class PrivateConnectionProfileStore implements ConnectionProfileStore {
   @override
   Future<ConnectionProfile?> read() async {
     await _supported();
-    final file = File('$directory/connection.json');
-    if (Platform.isWindows) {
-      try {
-        final value = WindowsPrivateFiles.readSecret(file);
-        if (value == null) return null;
-        return ConnectionProfile.fromJson(
-          decodeProtocolObject(value, maxBytes: 131072),
-        );
-      } on Object {
-        throw const RemoteFailure('invalid_profile');
-      }
-    }
-    final type = await FileSystemEntity.type(file.path, followLinks: false);
-    if (type == FileSystemEntityType.notFound) return null;
-    final stat = await file.stat();
-    if (type != FileSystemEntityType.file ||
-        stat.mode & 0xE3F != 0 ||
-        stat.size > 131072) {
-      throw const RemoteFailure('invalid_profile');
-    }
-    return ConnectionProfile.fromJson(
-      jsonDecode(await file.readAsString()) as Map<String, dynamic>,
-    );
+    final value =
+        await AutomaticConnectionStore(directory).readOwner() ??
+        await PrivateConnectionFiles.read(File('$directory/connection.json'));
+    return value == null ? null : ConnectionProfile.fromJson(value);
   }
 
   @override
   Future<void> save(ConnectionProfile profile) async {
     await _supported();
-    if (Platform.isWindows) {
-      try {
-        WindowsPrivateFiles.writeSecret(
-          File('$directory/connection.json'),
-          jsonEncode(profile.toJson()),
-        );
-        return;
-      } on Object {
-        throw const RemoteFailure('profile_store_unavailable');
-      }
+    final active = AutomaticConnectionStore(directory);
+    if (await active.readOwner() != null) {
+      await active.publish(profile.toJson(), null);
+    } else {
+      await PrivateConnectionFiles.write(
+        File('$directory/connection.json'),
+        profile.toJson(),
+      );
     }
-    final folder = Directory(directory).absolute;
-    final type = await FileSystemEntity.type(folder.path, followLinks: false);
-    if (type != FileSystemEntityType.notFound &&
-        type != FileSystemEntityType.directory)
-      throw const RemoteFailure('invalid_profile');
-    await folder.create(recursive: true);
-    if ((await Process.run('chmod', ['700', folder.path])).exitCode != 0)
-      throw const RemoteFailure('profile_store_unavailable');
-    final staging = await folder.createTemp('.connection-');
-    try {
-      if ((await Process.run('chmod', ['700', staging.path])).exitCode != 0)
-        throw const RemoteFailure('profile_store_unavailable');
-      final file = File('${staging.path}/profile');
-      await file.create(exclusive: true);
-      if ((await Process.run('chmod', ['600', file.path])).exitCode != 0)
-        throw const RemoteFailure('profile_store_unavailable');
-      await file.writeAsString(jsonEncode(profile.toJson()), flush: true);
-      await file.rename('${folder.path}/connection.json');
-    } finally {
-      await staging.delete(recursive: true);
-    }
+  }
+
+  Future<void> saveConnected(
+    ConnectionProfile profile,
+    OwnerClient client,
+  ) async {
+    await _supported();
+    await AutomaticConnectionStore(directory).connect(client, profile.toJson());
   }
 }

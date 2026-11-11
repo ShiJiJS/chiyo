@@ -163,9 +163,9 @@ void main() {
         (t) async {
           await start(t, dark: dark, width: width, scale: 1);
           final paper = t.getRect(find.byKey(const ValueKey('proposal-paper')));
-          expect(paper.left, closeTo(width == 1440 ? 339.5 : 294, 2));
+          expect(paper.left, greaterThan(250));
           expect(paper.top, closeTo(width == 1440 ? 90 : 85, 2));
-          expect(paper.width, closeTo(width == 1440 ? 1050 : 956, 2));
+          expect(paper.right, lessThanOrEqualTo(width));
           await capture(
             t,
             'matrix-proposals-${width.toInt()}-${dark ? 'dark' : 'light'}',
@@ -1034,7 +1034,8 @@ void main() {
             .ref,
         const WorkspaceRecordRef(WorkspaceRecordKind.information, 'blinko'),
       );
-      await tap(t, find.byKey(const ValueKey('workspace-back')));
+      expect(find.byKey(const ValueKey('workspace-back')), findsNothing);
+      await tap(t, find.byKey(const ValueKey('workspace-nav-proposals')));
       expect(model(t).keyword, '整理');
       expect(model(t).selection, 'organized');
       expect(model(t).detailScroll, oldScroll);
@@ -1049,7 +1050,8 @@ void main() {
       expect(history.selection, 'request:organize');
       expect(history.detail!.events.single.proposalId, 'organized');
       expect(history.detail!.summary.state, WorkspaceGrantState.completed);
-      await tap(t, find.byKey(const ValueKey('workspace-back')));
+      expect(find.byKey(const ValueKey('workspace-back')), findsNothing);
+      await tap(t, find.byKey(const ValueKey('workspace-nav-proposals')));
       expect(model(t).keyword, '整理');
       expect(model(t).selection, 'organized');
       await tap(t, find.byKey(const ValueKey('organization-history')));

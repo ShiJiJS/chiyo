@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
@@ -25,8 +26,8 @@ class ApprovalDraft {
   final Set<String> selected;
   final Map<String, int> files;
   final Set<String> expanded = {};
-  int fieldMinutes = 30;
-  int? credentialMinutes = 15;
+  int fieldMinutes = AccessTiming.defaultMinutes;
+  int? credentialMinutes = AccessTiming.defaultMinutes;
   bool dirty = false;
 }
 
@@ -390,12 +391,7 @@ class ApprovalsController extends ChangeNotifier {
 
   WorkspaceApprovalReceipt _check(WorkspaceApprovalReceipt r) {
     final c = _command!;
-    if (r.operationId != c.operationId ||
-        r.requestId != c.requestId ||
-        r.action != c.action ||
-        r.reviewToken != c.reviewToken ||
-        r.commandDigest != c.digest ||
-        r.revision < 1) {
+    if (!r.matches(c)) {
       throw const WorkspaceFailure('unknown_outcome', '回执与本次决定不符，请继续核对。');
     }
     return r;

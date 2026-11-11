@@ -11,10 +11,19 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
   private var statusItemVisibility: NSKeyValueObservation?
+  private let pendingPopover = NSPopover()
+  private var pendingState: [String: Any] = [:]
+  private var pendingShowingProposals = false
   private var statusEntryAvailable: Bool {
     statusItem?.button != nil && statusItem?.isVisible == true
   }
   private(set) var desktopReady = false
+  var keepsRunningWithoutWindow: Bool {
+#if DEBUG
+    if interfacePreview && statusItem != nil { return true }
+#endif
+    return desktopReady
+  }
   private var previewReady = false
   // The built entry point, not a Dart runtime request, selects isolation before
   // any production service or saved security-scoped bookmark is constructed.
@@ -100,17 +109,28 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           DispatchQueue.main.async { result(value) }
         }
         do {
-          if call.method == "read" || call.method == "readWithInteraction" {
-            if let data = try databaseKeys.read(allowInteraction: call.method == "readWithInteraction") {
+          let scoped = ["readLocal", "readLocalWithInteraction", "createLocal"].contains(call.method)
+          let arguments = call.arguments as? [String: Any]
+          let keys: NativeDatabaseKeyStore
+          if scoped {
+            guard let id = arguments?["libraryId"] as? String,
+                  id.range(of: "^[A-Za-z0-9_-]{32}$", options: .regularExpression) != nil else {
+              throw DatabaseKeyFailure(code: "invalid_key", status: nil)
+            }
+            keys = NativeDatabaseKeyStore(account: "local-library-\(id)")
+          } else { keys = databaseKeys }
+          if ["read", "readWithInteraction", "readLocal", "readLocalWithInteraction"].contains(call.method) {
+            let interactive = call.method == "readWithInteraction" || call.method == "readLocalWithInteraction"
+            if let data = try keys.read(allowInteraction: interactive) {
               reply(FlutterStandardTypedData(bytes: data))
             } else {
               reply(nil)
             }
-          } else if call.method == "create" {
-            guard let data = call.arguments as? FlutterStandardTypedData else {
+          } else if call.method == "create" || call.method == "createLocal" {
+            guard let data = (scoped ? arguments?["key"] : call.arguments) as? FlutterStandardTypedData else {
               throw DatabaseKeyFailure(code: "invalid_key", status: nil)
             }
-            try databaseKeys.create(data.data)
+            try keys.create(data.data)
             reply(nil)
           } else {
             reply(FlutterMethodNotImplemented)
@@ -350,6 +370,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
           self.observeDesktopLifecycle()
         }
         self.readAvailability(result)
+      case "updatePendingMenu":
+        if let state = call.arguments as? [String: Any] { self.updatePendingMenu(state) }
+        result(nil)
       case "availability": self.readAvailability(result)
       case "setNavigationEnabled":
         guard let enabled = call.arguments as? Bool else {
@@ -392,6 +415,9 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         self.desktopReady = false
         self.navigationEnabled = false
         self.removeLifecycleObservers()
+        self.pendingPopover.performClose(nil)
+        self.pendingPopover.contentViewController = nil
+        self.pendingState.removeAll()
         self.statusItemVisibility?.invalidate()
         self.statusItemVisibility = nil
         if let item = self.statusItem { NSStatusBar.system.removeStatusItem(item) }
@@ -460,6 +486,23 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         }
         self.navigationEnabled = enabled && self.previewReady
         result(nil)
+#if DEBUG
+      case "updatePendingMenu":
+        guard self.previewReady, let state = call.arguments as? [String: Any] else {
+          result(FlutterMethodNotImplemented); return
+        }
+        if self.statusItem == nil {
+          self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+          self.statusItem?.menu = NSMenu()
+        }
+        self.updatePendingMenu(state)
+        result(nil)
+      case "testPendingMenu":
+        guard self.previewReady, let options = call.arguments as? [String: Any] else {
+          result(FlutterMethodNotImplemented); return
+        }
+        self.testPendingMenu(options, result)
+#endif
       case "createEvidenceDirectory":
         do {
           let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ZhiyuUI-\(UUID().uuidString)")
@@ -656,6 +699,282 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         result(FlutterMethodNotImplemented)
       }
     }
+  }
+
+#if DEBUG
+  /// Native integration tests drive the same NSButtons and scroll view as the
+  /// production popover, inside the isolated preview bundle.
+  private func testPendingMenu(_ options: [String: Any], _ result: FlutterResult) {
+    switch options["action"] as? String {
+    case "show":
+      if !pendingPopover.isShown { togglePendingPopover(nil) }
+      result(pendingPopover.isShown)
+    case "hideWindow":
+      orderOut(nil)
+      result(!isVisible)
+    case "showWindow":
+      showApprovalsWindow()
+      result(isVisible)
+    case "reset":
+      pendingPopover.performClose(nil)
+      pendingPopover.contentViewController = nil
+      if let item = statusItem { NSStatusBar.system.removeStatusItem(item) }
+      statusItem = nil
+      pendingState.removeAll()
+      result(nil)
+    case "bottom":
+      guard let view = pendingPopover.contentViewController?.view as? NSScrollView else {
+        result(false); return
+      }
+      view.contentView.scroll(to: .zero)
+      view.reflectScrolledClipView(view.contentView)
+      result(true)
+    case "capture":
+      guard pendingPopover.isShown,
+            let view = pendingPopover.contentViewController?.view as? NSScrollView,
+            let document = view.documentView,
+            let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
+        result(nil); return
+      }
+      view.cacheDisplay(in: view.bounds, to: bitmap)
+      guard let png = bitmap.representation(using: .png, properties: [:]) else { result(nil); return }
+      result(["png": FlutterStandardTypedData(bytes: png),
+              "visibleHeight": view.documentVisibleRect.height,
+              "documentHeight": document.bounds.height,
+              "topInset": document.bounds.maxY - view.documentVisibleRect.maxY,
+              "bottomInset": view.documentVisibleRect.minY - document.bounds.minY])
+    case "activate":
+      guard pendingPopover.isShown, let title = options["title"] as? String,
+            let root = pendingPopover.contentViewController?.view else { result(false); return }
+      func findButton(_ view: NSView) -> NSButton? {
+        if let button = view as? NSButton, button.title == title && button.isEnabled { return button }
+        return view.subviews.lazy.compactMap(findButton).first
+      }
+      guard let button = findButton(root), let action = button.action else { result(false); return }
+      result(NSApp.sendAction(action, to: button.target, from: button))
+    default: result(FlutterMethodNotImplemented)
+    }
+  }
+#endif
+
+  @objc private func togglePendingPopover(_ sender: Any?) {
+    guard let button = statusItem?.button else { return }
+    if pendingPopover.isShown { pendingPopover.performClose(nil); return }
+    rebuildPendingPopover()
+    NSApp.activate(ignoringOtherApps: true)
+    pendingPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    pendingPopover.contentViewController?.view.window?.makeKey()
+    desktopChannel?.invokeMethod("pendingMenuRefresh", arguments: nil)
+  }
+
+  private func rebuildPendingPopover() {
+    // Colors come from Flutter's UiPalette, including the selected dark theme.
+    func color(_ key: String, _ fallback: UInt32) -> NSColor {
+      let value = pendingColors[key]?.uint32Value ?? fallback
+      return NSColor(srgbRed: CGFloat((value >> 16) & 255) / 255,
+                     green: CGFloat((value >> 8) & 255) / 255,
+                     blue: CGFloat(value & 255) / 255, alpha: 1)
+    }
+    let accent = color("accent", 0x66528e), ink = color("ink", 0x242936)
+    let muted = color("muted", 0x586477), paper = color("paper", 0xffffff)
+    let rail = color("rail", 0xf7f8fa), line = color("line", 0xdce1e8)
+    let onAccent = color("onAccent", 0xffffff)
+    func label(_ value: String, size: CGFloat = 13, strong: Bool = false) -> NSTextField {
+      let text = NSTextField(wrappingLabelWithString: value)
+      text.font = .systemFont(ofSize: size, weight: strong ? .semibold : .regular)
+      text.textColor = strong ? ink : muted
+      text.preferredMaxLayoutWidth = 332
+      return text
+    }
+    func button(_ title: String, action: Selector, primary: Bool = false) -> NSButton {
+      let button = NSButton(title: title, target: self, action: action)
+      button.isBordered = false; button.wantsLayer = true
+      button.layer?.cornerRadius = 7
+      button.layer?.backgroundColor = (primary ? accent : paper).cgColor
+      button.layer?.borderWidth = primary ? 0 : 1
+      button.layer?.borderColor = line.cgColor
+      let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
+      button.attributedTitle = NSAttributedString(string: title, attributes: [
+        .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+        .foregroundColor: primary ? onAccent : ink, .paragraphStyle: paragraph,
+      ])
+      button.heightAnchor.constraint(equalToConstant: 32).isActive = true
+      button.widthAnchor.constraint(equalToConstant: max(64, CGFloat(title.count * 14 + 24))).isActive = true
+      return button
+    }
+    let installed = pendingPopover.contentViewController
+    let controller = installed ?? NSViewController()
+    let ready = pendingState["ready"] as? Bool == true
+    let dark = pendingState["dark"] as? Bool == true
+    let presentation = pendingState["presentation"] as? Int ?? 0
+    let content = NSStackView()
+    content.orientation = .vertical; content.alignment = .leading; content.spacing = 16
+    content.edgeInsets = NSEdgeInsets(top: 20, left: 18, bottom: 18, right: 18)
+    content.wantsLayer = true; content.layer?.backgroundColor = rail.cgColor
+    let header = NSStackView(); header.orientation = .horizontal; header.spacing = 10
+    header.addArrangedSubview(label("知予", size: 20, strong: true))
+    if ready {
+      let count = label("待处理 \(pendingApprovalCount + pendingProposalCount)", size: 13)
+      count.textColor = accent; header.addArrangedSubview(count)
+    }
+    content.addArrangedSubview(header)
+    content.addArrangedSubview(label(pendingState["location"] as? String ?? "未连接服务器", size: 12))
+    let tabs = NSStackView(); tabs.orientation = .horizontal; tabs.spacing = 8
+    let approvalTab = ready ? "访问审批 \(pendingApprovalCount)" : "访问审批"
+    let proposalTab = ready ? "录入提案 \(pendingProposalCount)" : "录入提案"
+    for (index, title) in [approvalTab, proposalTab].enumerated() {
+      let tab = button(title, action: #selector(selectPendingCategory(_:)),
+                       primary: (index == 1) == pendingShowingProposals)
+      tab.tag = index
+      tabs.addArrangedSubview(tab)
+    }
+    content.addArrangedSubview(tabs)
+    let category = pendingShowingProposals ? "proposals" : "approvals"
+    let rows = pendingShowingProposals ? pendingProposals : pendingRequests
+    if ready && rows.isEmpty {
+      content.addArrangedSubview(label(pendingShowingProposals ? "暂无待处理录入提案" : "暂无待处理访问申请"))
+    }
+    if let notice = pendingState["notice"] as? String, !notice.isEmpty {
+      content.addArrangedSubview(label(notice))
+    }
+    if pendingState["checkResult"] as? Bool == true {
+      let check = button("核对结果", action: #selector(checkPendingResult(_:)))
+      check.tag = presentation
+      content.addArrangedSubview(check)
+    }
+    for row in rows.prefix(3) {
+      let card = NSStackView(); card.orientation = .vertical; card.alignment = .leading; card.spacing = 8
+      card.edgeInsets = NSEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
+      card.wantsLayer = true; card.layer?.cornerRadius = 8
+      card.layer?.backgroundColor = paper.cgColor
+      card.layer?.borderWidth = 1; card.layer?.borderColor = line.cgColor
+      for (key, size, strong) in [("title", CGFloat(15), true), ("agent", CGFloat(12), false), ("purpose", CGFloat(13), false), ("scope", CGFloat(12), false)] {
+        guard let value = row[key] as? String, !value.isEmpty else { continue }
+        let text = label(value, size: size, strong: strong)
+        // Do not clip the scope of an action that can be approved here.
+        text.maximumNumberOfLines = 0
+        card.addArrangedSubview(text)
+        text.widthAnchor.constraint(equalToConstant: 332).isActive = true
+      }
+      let actions = NSStackView(); actions.orientation = .horizontal; actions.spacing = 8
+      if !pendingShowingProposals && row["quick"] as? Bool == true {
+        card.addArrangedSubview(label(row["duration"] as? String ?? "", size: 12))
+        for (title, action) in [("批准", "approve"), ("拒绝", "deny")] {
+          let control = button(title, action: #selector(pendingDecision(_:)), primary: action == "approve")
+          control.identifier = NSUserInterfaceItemIdentifier("\(row["id"] as? String ?? "")|\(action)")
+          control.tag = presentation
+          actions.addArrangedSubview(control)
+        }
+      }
+      let detail = button(pendingShowingProposals ? "查看提案" : "查看申请", action: #selector(openPendingRequest(_:)))
+      let id = row["id"] as? String ?? ""
+      detail.identifier = NSUserInterfaceItemIdentifier("\(category)|\(id)")
+      detail.tag = presentation
+      actions.addArrangedSubview(detail)
+      card.addArrangedSubview(actions); content.addArrangedSubview(card)
+      card.widthAnchor.constraint(equalToConstant: 360).isActive = true
+    }
+    let footer = NSStackView(); footer.orientation = .horizontal; footer.spacing = 8
+    if ready {
+      let all = button(pendingShowingProposals ? "查看全部录入提案" : "查看全部访问申请", action: #selector(openPendingRequest(_:)))
+      all.tag = presentation
+      all.identifier = NSUserInterfaceItemIdentifier(category)
+      footer.addArrangedSubview(all)
+    } else {
+      footer.addArrangedSubview(button("打开知予", action: #selector(openPendingWorkspace(_:))))
+    }
+    footer.addArrangedSubview(button("完全退出", action: #selector(quitPendingMenu(_:))))
+    content.addArrangedSubview(footer)
+    content.widthAnchor.constraint(equalToConstant: 396).isActive = true
+    content.layoutSubtreeIfNeeded()
+    let scroll = (installed?.view as? NSScrollView) ?? NSScrollView()
+    scroll.hasVerticalScroller = true
+    scroll.scrollerStyle = .overlay; scroll.autohidesScrollers = true
+    scroll.drawsBackground = true; scroll.backgroundColor = rail
+    scroll.documentView = content
+    let screenHeight = statusItem?.button?.window?.screen?.visibleFrame.height ?? 800
+    let height = min(680, max(150, screenHeight - 24), content.fittingSize.height)
+    content.setFrameSize(NSSize(width: 396, height: content.fittingSize.height))
+    scroll.frame = NSRect(x: 0, y: 0, width: 396, height: height)
+    scroll.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+    if installed == nil {
+      controller.view = scroll
+      pendingPopover.contentViewController = controller
+    }
+    pendingPopover.contentSize = NSSize(width: 396, height: height)
+    scroll.contentView.scroll(to: NSPoint(x: 0, y: max(0, content.frame.height - height)))
+    scroll.reflectScrolledClipView(scroll.contentView)
+  }
+
+  @objc private func selectPendingCategory(_ sender: NSButton) {
+    pendingShowingProposals = sender.tag == 1
+    rebuildPendingPopover()
+  }
+
+  private var pendingApprovalCount: Int { pendingState["approvalCount"] as? Int ?? 0 }
+  private var pendingProposalCount: Int { pendingState["proposalCount"] as? Int ?? 0 }
+  private var pendingRequests: [[String: Any]] { pendingState["requests"] as? [[String: Any]] ?? [] }
+  private var pendingProposals: [[String: Any]] { pendingState["proposals"] as? [[String: Any]] ?? [] }
+  private var pendingColors: [String: NSNumber] { pendingState["colors"] as? [String: NSNumber] ?? [:] }
+
+  private func updatePendingMenu(_ state: [String: Any]) {
+    guard let button = statusItem?.button else { return }
+    let changed = !(pendingState as NSDictionary).isEqual(to: state)
+    pendingState = state
+    if statusItem?.menu != nil {
+      statusItem?.menu = nil
+      statusItem?.length = NSStatusItem.variableLength
+      button.title = ""
+      button.image = NSImage(systemSymbolName: "square.stack.3d.up", accessibilityDescription: "知予待办")
+      button.image?.isTemplate = true
+      button.imagePosition = .imageLeading
+      button.target = self
+      button.action = #selector(togglePendingPopover(_:))
+      pendingPopover.behavior = .transient
+    }
+    let total = pendingApprovalCount + pendingProposalCount
+    button.title = total > 0 ? String(total) : ""
+    button.toolTip = total > 0 ? "知予 · 待处理 \(total)" : "知予"
+    if changed && pendingPopover.isShown { rebuildPendingPopover() }
+  }
+
+  @objc private func pendingDecision(_ sender: NSButton) {
+    guard navigationEnabled, attachedSheet == nil, let raw = sender.identifier?.rawValue else { return }
+    let parts = raw.split(separator: "|").map(String.init)
+    guard parts.count == 2 else { return }
+    sender.isEnabled = false
+    desktopChannel?.invokeMethod("pendingMenuDecision", arguments: [
+      "id": parts[0], "approve": parts[1] == "approve", "presentation": sender.tag
+    ]) { [weak self] _ in
+      if self?.pendingPopover.isShown == true { self?.rebuildPendingPopover() }
+    }
+  }
+
+  @objc private func checkPendingResult(_ sender: NSButton) {
+    guard navigationEnabled, attachedSheet == nil else { return }
+    sender.isEnabled = false
+    desktopChannel?.invokeMethod("pendingMenuCheck", arguments: ["presentation": sender.tag]) { [weak self] _ in
+      if self?.pendingPopover.isShown == true { self?.rebuildPendingPopover() }
+    }
+  }
+
+  @objc private func openPendingRequest(_ sender: NSButton) {
+    guard navigationEnabled, attachedSheet == nil else { return }
+    pendingPopover.performClose(nil)
+    guard let route = sender.identifier?.rawValue.split(separator: "|", maxSplits: 1), !route.isEmpty else { return }
+    var arguments: [String: Any] = ["category": String(route[0]), "presentation": sender.tag]
+    if route.count == 2 { arguments["id"] = String(route[1]) }
+    desktopChannel?.invokeMethod("pendingMenuOpen", arguments: arguments)
+  }
+
+  @objc private func openPendingWorkspace(_ sender: NSButton) {
+    pendingPopover.performClose(nil)
+    showApprovalsWindow()
+  }
+
+  @objc private func quitPendingMenu(_ sender: NSButton) {
+    pendingPopover.performClose(nil)
+    quitFromMenu()
   }
 
   private func showApprovalsWindow() {

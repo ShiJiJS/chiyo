@@ -64,6 +64,13 @@ void main() {
   Future<void> tap(WidgetTester t, String key, {bool pending = false}) async {
     if (await prepareFixtureAction(t, find.byKey(ValueKey(key)))) return;
     final f = find.byKey(ValueKey(key));
+    if ((key == 'runtime-materials' || key == 'runtime-attachments') &&
+        f.evaluate().isEmpty) {
+      final advanced = find.byKey(const ValueKey('runtime-maintenance'));
+      await t.ensureVisible(advanced);
+      await t.tap(advanced);
+      await t.pumpAndSettle();
+    }
     await t.ensureVisible(f);
     await t.pump();
     await t.tap(f);

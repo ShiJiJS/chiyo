@@ -22,7 +22,6 @@ import 'owner_workspace_file_selections.dart';
 import 'owner_workspace_file_changes.dart';
 import 'owner_pdf_preview.dart';
 import 'owner_workspace_approvals.dart';
-import 'owner_workspace_agents.dart';
 import 'unavailable_workspace_sources.dart';
 import 'workspace_source.dart';
 
@@ -32,14 +31,23 @@ import 'workspace_source.dart';
 class OwnerWorkspaceSource
     implements
         WorkspaceSource,
+        WorkspaceRecycledFiles,
         WorkspaceLibraryRecycle,
         WorkspaceLibraryMove,
         WorkspaceFileSelectionReleaser,
         WorkspaceAttachmentSeparation,
         WorkspaceFileActionRecovery,
-        WorkspaceFileOpenRecovery {
+        WorkspaceFileOpenRecovery,
+        WorkspaceStorageLocation {
+  @override
+  String get storageDescription => describeStorage?.call() ?? '本地模式';
+  final String Function()? describeStorage;
+  final Future<WorkspaceSummary> Function(int localRecords)? requestSummary;
+
   OwnerWorkspaceSource({
     required this.owner,
+    this.describeStorage,
+    this.requestSummary,
     InformationFileOutputs? fileOutputs,
     InformationFileOpens? fileOpens,
     OwnerFileOpenDispatcher openDispatcher =
@@ -54,7 +62,6 @@ class OwnerWorkspaceSource
     this.settings = const UnavailableWorkspaceSettings(),
     this.backups = const UnavailableWorkspaceBackup(),
     this.runtime = const UnavailableWorkspaceRuntime(),
-    WorkspaceAgentsSource? agents,
     WorkspaceCredentialSource? credentials,
     WorkspaceApprovalSource? approvals,
     WorkspaceGrantHistorySource? grantHistory,
@@ -65,7 +72,6 @@ class OwnerWorkspaceSource
   }) : _scope = owner.captureLibraryScope() {
     this.credentials =
         credentials ?? OwnerWorkspaceCredentials(owner, onChanged: _changed);
-    this.agents = agents ?? OwnerWorkspaceAgents(owner: owner);
     this.approvals = approvals ?? OwnerWorkspaceApprovals(owner: owner);
     this.grantHistory =
         grantHistory ??
@@ -163,8 +169,6 @@ class OwnerWorkspaceSource
   final WorkspaceBackupSource backups;
   @override
   final WorkspaceRuntimeSource runtime;
-  @override
-  late final WorkspaceAgentsSource agents;
   @override
   late final WorkspaceCredentialSource credentials;
   @override
@@ -356,8 +360,10 @@ class OwnerWorkspaceSource
     if (!owner.serviceAvailable) {
       throw const WorkspaceFailure('unavailable', '资料服务尚未就绪。');
     }
+    final records = owner.information.length + owner.credentials.length;
+    if (requestSummary != null) return requestSummary!(records);
     return WorkspaceSummary(
-      records: owner.information.length + owner.credentials.length,
+      records: records,
       pending: owner.queryInbox(limit: 1).pendingCount,
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );
@@ -475,11 +481,13 @@ class OwnerWorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) => _read(
     () => _history.previewRevision(
       ref,
       version,
       expectedVersion: expectedVersion,
+      snapshotId: snapshotId,
     ),
   );
   @override
@@ -494,6 +502,15 @@ class OwnerWorkspaceSource
   @override
   Future<WorkspaceArchive> readRecycled(String entryId) =>
       _read(() => _history.readRecycled(entryId));
+  @override
+  Future<WorkspaceFilePreview> readRecycledFilePreview(
+    String entryId,
+    String fieldKey, {
+    int page = 0,
+  }) => _read(() async {
+    final ref = await _history.resolveRecycledFile(entryId, fieldKey);
+    return OwnerWorkspaceAttachmentPreview(owner).read(ref, page: page);
+  });
   @override
   Future<WorkspaceRecordReceipt> changeRecord(WorkspaceRecordChange change) =>
       _read(() => _history.changeRecord(change));
@@ -543,9 +560,16 @@ class OwnerWorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   }) => _read(
-    () => _files.preview(record, fieldKey, version: version, page: page),
+    () => _files.preview(
+      record,
+      fieldKey,
+      version: version,
+      exact: exact,
+      page: page,
+    ),
   );
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>

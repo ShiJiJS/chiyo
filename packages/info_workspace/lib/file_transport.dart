@@ -162,6 +162,7 @@ Map<String, Object?> fileChangeToJson(WorkspaceFileChange c) => {
   'kind': c.kind.name,
   'selectionId': c.selectionId,
   'restoreVersion': c.restoreVersion,
+  if (c.restoreRef != null) 'restoreRef': c.restoreRef!.toJson(),
 };
 WorkspaceFileChange fileChangeFromJson(Map<String, dynamic> c) =>
     decodeWorkspace(() {
@@ -175,6 +176,7 @@ WorkspaceFileChange fileChangeFromJson(Map<String, dynamic> c) =>
           'kind',
           'selectionId',
           'restoreVersion',
+          'restoreRef',
         }.contains(k),
       )) {
         throw const FormatException();
@@ -188,6 +190,9 @@ WorkspaceFileChange fileChangeFromJson(Map<String, dynamic> c) =>
         kind: WorkspaceFileChangeKind.values.byName(c['kind'] as String),
         selectionId: c['selectionId'] as String?,
         restoreVersion: c['restoreVersion'] as int?,
+        restoreRef: c['restoreRef'] == null
+            ? null
+            : WorkspaceFileRef.fromJson(c['restoreRef']),
       );
     });
 Map<String, Object?> fileReceiptToJson(WorkspaceFileOperationReceipt r) => {

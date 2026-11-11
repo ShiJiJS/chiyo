@@ -183,6 +183,12 @@ void main() {
       final session = service.agent.openSession('legacy');
       final r = service.agent.request(session, 'legacy', refs(item));
       service.owner.approve(r.id, refs(item));
+      await service.owner.retryAuditStorage();
+      final history = repo.grantHistory.single;
+      final legacy = Map<String, dynamic>.from(history.toJson())
+        ..remove('itemVersions')
+        ..remove('itemSnapshots');
+      await repo.saveGrantHistory(core.GrantHistory.fromJson(legacy));
       final d = await source.grantHistory.read('request:${r.id}');
       expect(d.targets.single.version, 0);
       expect(d.targets.single.snapshotAvailable, isFalse);

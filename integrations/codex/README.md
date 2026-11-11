@@ -64,12 +64,12 @@ SessionEnd；Stop、Interrupt、SubagentStop、CLI 结束及切换聊天均不�
 
 ## 生成可审查安装材料
 
-Windows 联网版从完整同版本包使用 `cli/info.exe`、`info-codex.exe`、`info-codex-hook.exe` 和 `info-prepare-codex.exe`。App 的“AI 接入”登记本机独立 Agent 设备，使用自己的 `agent-connection.json`；不要把 App 的管理 Token 当作 Agent 配置。Windows 连接文件由当前用户 DPAPI 保护，不能复制 Mac 连接文件或另一用户的加密文件代替登记。
+Windows 联网版从完整同版本包使用 `cli/info.exe`、`info-codex.exe`、`info-codex-hook.exe` 和 `info-prepare-codex.exe`。App 连接成功后自动登记并复用本机独立 Agent 设备，CLI 默认发现当前配置；不要把 App 的管理 Token 当作 Agent 配置。Windows 连接文件由当前用户 DPAPI 保护，不能复制 Mac 连接文件或另一用户的加密文件代替登记。
 
 公开能力检查可在 PowerShell 运行（替换两个路径）：
 
 ```powershell
-'{"command":"capabilities"}' | & 'C:\完整包\cli\info.exe' --connection 'C:\本机私有配置\agent-connection.json'
+'{"command":"capabilities"}' | & 'C:\完整包\cli\info.exe'
 ```
 
 生成待审查材料时，将 `--connection <该私有配置文件>` 和 `--state-root <该设备的私有会话目录>` 传给 `info-prepare-codex.exe`，输出目录须为全新、稳定的目录。生成不会安装或信任 hooks。实际资料调用仍必须使用本聊天已经收到的私有引用，经独立 stdin 输入；不要把引用写入 PowerShell 命令、参数或 here-string。引用缺失时重新连接，不能按聊天 ID 搜索恢复。

@@ -324,16 +324,11 @@ class _ClassificationPageState extends State<ClassificationPage> {
             );
       return DesktopEntrance(
         child: Padding(
-          // Normal text keeps the header outside the list scroller; reserve
-          // ZhiyuApp's 9px lane here so it shares the other settings headings.
-          // Large text scrolls the header too, so that scroller owns the lane.
-          padding:
-              SettingsPageContent.paddingOf(context) +
-              EdgeInsets.only(right: large ? 0 : 9),
+          padding: SettingsPageContent.paddingOf(context),
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: large ? 1029 : 1020),
+              constraints: const BoxConstraints(maxWidth: 1020),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

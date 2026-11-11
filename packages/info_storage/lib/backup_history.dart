@@ -32,6 +32,19 @@ String _backupText(
 
 String _backupId(Map<String, dynamic> row, String key) =>
     _backupText(row, key, 200, required: true);
+
+void _backupSubmissionSource(Map<String, dynamic> row) {
+  String optional(String key, int limit) =>
+      row.containsKey(key) ? _backupText(row, key, limit) : '';
+  if (!validSubmissionMetadata(
+    agentName: optional('agentName', 200),
+    externalChatId: optional('externalChatId', 200),
+    purpose: optional('purpose', 2000),
+  )) {
+    _backupInvalid();
+  }
+}
+
 int _backupVersion(Map<String, dynamic> row, [String key = 'version']) {
   final value = row[key];
   if (value is! int || value < 1 || value > 2147483647) _backupInvalid();
@@ -74,6 +87,7 @@ void _validateBackupHistory(
   bool allowRemovedOrganization = false,
   bool allowLayouts = false,
   bool allowGrantVersions = false,
+  bool allowGrantSnapshots = false,
 }) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
@@ -193,6 +207,18 @@ void _validateBackupHistory(
     }
     recordedDate(row['replaced_at']);
   }
+  final snapshotIds = <String>{};
+  for (final row
+      in tables['information_revision_snapshots'] ??
+          const <Map<String, Object?>>[]) {
+    final item = snapshot(_backupJson(row));
+    if (item.id != row['item_id'] ||
+        item.version != row['version'] ||
+        row['snapshot_id'] != informationSnapshotId(item) ||
+        !snapshotIds.add('${item.id}:${row['snapshot_id']}'))
+      _backupInvalid();
+    recordedDate(row['replaced_at']);
+  }
   final entryIds = <String>{};
   for (final row in tables['recycle_entries']!) {
     final j = _backupObject(
@@ -309,11 +335,12 @@ void _validateBackupHistory(
         'sessionEnded',
         'applicationClosed',
       },
-      {'restoredAt'},
+      {'restoredAt', 'agentName', 'externalChatId'},
     );
     final id = _backupId(j, 'id');
     _backupId(j, 'sessionId');
     _backupText(j, 'chatLabel', 200, required: true);
+    _backupSubmissionSource(j);
     _backupText(j, 'purpose', 2000, required: true);
     final created = recordedDate(j['createdAt']);
     final expires = _backupDate(j['requestExpiresAt']);
@@ -363,12 +390,20 @@ void _validateBackupHistory(
         'fields',
         'events',
       },
-      {'restoredAt', if (allowGrantVersions) 'itemVersions'},
+      {
+        'restoredAt',
+        'agentName',
+        'externalChatId',
+        'purpose',
+        if (allowGrantVersions) 'itemVersions',
+        if (allowGrantSnapshots) 'itemSnapshots',
+      },
     );
     final id = _backupId(j, 'id');
     _backupId(j, 'requestId');
     _backupId(j, 'sessionId');
     _backupText(j, 'chatLabel', 200, required: true);
+    _backupSubmissionSource(j);
     final approvedAt = recordedDate(j['approvedAt']);
     final expiresAt = _backupDate(j['expiresAt']);
     if (id != row['id'] ||
@@ -410,6 +445,15 @@ void _validateBackupHistory(
         _backupInvalid();
       }
       count(versions.length);
+    }
+    if (j.containsKey('itemSnapshots')) {
+      try {
+        final history = GrantHistory.fromJson(j);
+        if (history.itemSnapshots.isEmpty) _backupInvalid();
+        count(history.itemSnapshots.length);
+      } on Object {
+        _backupInvalid();
+      }
     }
     final events = _backupList(j['events'], 2);
     if (events.isEmpty) _backupInvalid();
@@ -471,6 +515,7 @@ extension _CompleteBackups on InformationBackups {
     BackupContents contents,
     DateTime now, {
     bool restored = false,
+    bool preserveHistory = false,
   }) {
     if (contents.createdAt.isAfter(now.add(const Duration(minutes: 5)))) {
       _backupInvalid();
@@ -479,23 +524,77 @@ extension _CompleteBackups on InformationBackups {
       for (final table in contents._tables.entries)
         table.key: table.value.toList(),
     };
+    if (preserveHistory) {
+      // Replication carries all still-retained facts and file versions. Backup
+      // retention is not a synchronization deletion policy.
+      if (restored) {
+        _retainBackupCredentialHistory(tables, DateTime.utc(1), now);
+        tables['request_history'] = [
+          for (final row in tables['request_history']!)
+            {
+              ...row,
+              'payload': jsonEncode(
+                RequestHistory.fromJson(
+                  _backupJson(row),
+                ).asRestored(now).toJson(),
+              ),
+            },
+        ];
+        tables['grant_history'] = [
+          for (final row in tables['grant_history']!)
+            {
+              ...row,
+              'payload': jsonEncode(
+                GrantHistory.fromJson(
+                  _backupJson(row),
+                ).asRestored(now).toJson(),
+              ),
+            },
+        ];
+        if (tables.containsKey('information_deliveries')) {
+          tables['information_deliveries'] = [
+            for (final row in tables['information_deliveries']!)
+              {
+                'id': row['id'],
+                'payload': jsonEncode(
+                  _deliveryArchive(row).changed({
+                    'restoredAt': now.toIso8601String(),
+                  }).toArchiveJson(),
+                ),
+              },
+          ];
+        }
+      }
+      return BackupContents._(
+        tables,
+        contents.createdAt,
+        contents.formatVersion,
+        attachments: contents.attachments,
+        origin: contents._origin,
+      );
+    }
     final cutoff = now.subtract(const Duration(days: 30));
     _retainBackupCredentials(tables, cutoff);
     final purges = {
       for (final row in tables['revision_purge_facts']!)
         jsonEncode([row['item_id'], row['version']]),
     };
-    tables['information_revisions']!.removeWhere((row) {
-      if (_backupDate(row['replaced_at']).isAfter(cutoff)) return false;
-      if (purges.add(jsonEncode([row['item_id'], row['version']]))) {
-        tables['revision_purge_facts']!.add({
-          'item_id': row['item_id'],
-          'version': row['version'],
-          'purged_at': now.toIso8601String(),
-        });
-      }
-      return true;
-    });
+    for (final table in [
+      'information_revisions',
+      'information_revision_snapshots',
+    ]) {
+      tables[table]?.removeWhere((row) {
+        if (_backupDate(row['replaced_at']).isAfter(cutoff)) return false;
+        if (purges.add(jsonEncode([row['item_id'], row['version']]))) {
+          tables['revision_purge_facts']!.add({
+            'item_id': row['item_id'],
+            'version': row['version'],
+            'purged_at': now.toIso8601String(),
+          });
+        }
+        return true;
+      });
+    }
     tables['recycle_entries'] = tables['recycle_entries']!.map((row) {
       final entry = RecycleEntry.fromJson(_backupJson(row));
       if (entry.state != RecycleState.available ||
@@ -649,7 +748,10 @@ extension _CompleteBackups on InformationBackups {
       );
     }
 
-    for (final row in tables['information_revisions']!) {
+    for (final row in [
+      ...tables['information_revisions']!,
+      ...?tables['information_revision_snapshots'],
+    ]) {
       keep(informationFromJson(_backupJson(row)));
     }
     for (final row in tables['recycle_entries']!) {
@@ -666,7 +768,10 @@ extension _CompleteBackups on InformationBackups {
     );
   }
 
-  void Function() _prepareInstall(BackupContents contents) {
+  void Function() _prepareInstall(
+    BackupContents contents, {
+    Set<LibrarySyncKey>? syncKeys,
+  }) {
     final tables = contents._tables;
     final recycleBatches = [
       for (final row
@@ -736,14 +841,18 @@ extension _CompleteBackups on InformationBackups {
     final requests = tables['request_history']!
         .map((r) => RequestHistory.fromJson(_backupJson(r)))
         .toList();
-    final revisions = tables['information_revisions']!
-        .map(
-          (r) => InformationRevision(
-            informationFromJson(_backupJson(r)),
-            _backupDate(r['replaced_at']),
-          ),
-        )
-        .toList();
+    final revisions =
+        [
+              ...tables['information_revisions']!,
+              ...?tables['information_revision_snapshots'],
+            ]
+            .map(
+              (r) => InformationRevision(
+                informationFromJson(_backupJson(r)),
+                _backupDate(r['replaced_at']),
+              ),
+            )
+            .toList();
     final recycle = tables['recycle_entries']!
         .map((r) => RecycleEntry.fromJson(_backupJson(r)))
         .toList();
@@ -788,6 +897,150 @@ extension _CompleteBackups on InformationBackups {
       contents.attachments,
     );
     return () {
+      if (syncKeys != null) {
+        final byKind = <LibrarySyncKind, Set<String>>{
+          for (final kind in LibrarySyncKind.values)
+            kind: syncKeys
+                .where((k) => k.kind == kind)
+                .map((k) => k.id)
+                .toSet(),
+        };
+        final informationIds = byKind[LibrarySyncKind.information]!;
+        final credentialIds = byKind[LibrarySyncKind.credential]!;
+        void map<T>(
+          Map<String, T> target,
+          Iterable<T> values,
+          String Function(T) id,
+          Set<String> selected,
+        ) {
+          for (final key in selected) {
+            target.remove(key);
+          }
+          target.addEntries(
+            values
+                .where((v) => selected.contains(id(v)))
+                .map((v) => MapEntry(id(v), v)),
+          );
+        }
+
+        void list<T>(
+          List<T> target,
+          Iterable<T> values,
+          bool Function(T) selected,
+        ) {
+          target.removeWhere(selected);
+          target.addAll(values.where(selected));
+        }
+
+        map(_repository._items, items, (i) => i.id, informationIds);
+        map(
+          _repository._directories,
+          directories,
+          (d) => d.id,
+          byKind[LibrarySyncKind.directory]!,
+        );
+        map(_repository._tags, tags, (t) => t.id, byKind[LibrarySyncKind.tag]!);
+        map(
+          _repository._templates,
+          templates,
+          (t) => t.id,
+          byKind[LibrarySyncKind.template]!,
+        );
+        map(
+          _repository._templatePackages,
+          packages,
+          (p) => p.id,
+          byKind[LibrarySyncKind.plugin]!,
+        );
+        list(
+          _repository._revisions,
+          revisions,
+          (r) => informationIds.contains(r.item.id),
+        );
+        _repository._recycle.removeWhere(
+          (_, r) => informationIds.contains(r.itemId),
+        );
+        _repository._recycle.addEntries(
+          recycle
+              .where((r) => informationIds.contains(r.itemId))
+              .map((r) => MapEntry(r.id, r)),
+        );
+        list(
+          _repository._recycleFacts,
+          facts,
+          (f) => informationIds.contains(f.itemId),
+        );
+        list(
+          _repository._revisionPurges,
+          revisionPurges,
+          (p) => informationIds.contains(p.itemId),
+        );
+        list(
+          _repository._credentials,
+          credentials,
+          (c) => credentialIds.contains(c.id),
+        );
+        list(
+          _repository._credentialMaterials,
+          materials,
+          (m) => credentialIds.contains(m.credentialId),
+        );
+        map(
+          _repository._libraryRecycleBatches,
+          recycleBatches,
+          (b) => b.id,
+          byKind[LibrarySyncKind.recycle]!,
+        );
+        if (byKind[LibrarySyncKind.order]!.isNotEmpty)
+          _repository._libraryOrder = libraryOrder;
+        if (byKind[LibrarySyncKind.sshTrust]!.isNotEmpty)
+          _repository._sshHostTrust = trust;
+        Set<String> histories(String table) => byKind[LibrarySyncKind.history]!
+            .where((id) => id.startsWith('$table:'))
+            .map((id) => id.substring(table.length + 1))
+            .toSet();
+        map(
+          _repository._history,
+          history,
+          (h) => h.id,
+          histories('grant_history'),
+        );
+        map(
+          _repository._accesses,
+          accesses,
+          (a) => a.id,
+          histories('access_records'),
+        );
+        map(
+          _repository._requestHistory,
+          requests,
+          (r) => r.id,
+          histories('request_history'),
+        );
+        map(
+          _repository._fileDeliveries,
+          deliveries,
+          (d) => d.id,
+          histories('information_deliveries'),
+        );
+        final requestIds = histories('credential');
+        list(
+          _repository._credentialUseRequests,
+          useRequests,
+          (r) => requestIds.contains(r.id),
+        );
+        list(
+          _repository._credentialExecutions,
+          executions,
+          (e) => requestIds.contains(e.requestId),
+        );
+        list(
+          _repository._focusedFillOperations,
+          fills,
+          (f) => requestIds.contains(f.requestId),
+        );
+        return;
+      }
       _repository._libraryOrder = libraryOrder;
       _repository._libraryRecycleBatches
         ..clear()

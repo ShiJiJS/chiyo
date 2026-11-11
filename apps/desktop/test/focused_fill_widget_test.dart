@@ -66,15 +66,15 @@ void main() {
       await click(tester, 'fill-tip-02');
       expect(find.textContaining('相同应用中的其他页面'), findsOneWidget);
       await click(tester, 'focused-fill-lifetime');
-      await tester.tap(find.text('30 分钟').last);
+      await tester.tap(find.text('4 小时').last);
       await tester.pumpAndSettle();
       await click(tester, 'focused-fill-approve');
-      expect(find.textContaining('30 分钟内'), findsOneWidget);
+      expect(find.textContaining('4 小时内'), findsOneWidget);
       await click(tester, 'fill-confirm-decision');
       final request = f.owner.credentialUseRequests.single;
       expect(
         request.credentialExpiresAt!.difference(request.decidedAt!),
-        const Duration(minutes: 30),
+        const Duration(hours: 4),
       );
       expect(request.approvedFields, isEmpty);
       expect(f.driver.sends, 0);

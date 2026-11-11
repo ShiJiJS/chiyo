@@ -70,8 +70,6 @@ Map<String, Object?> legacyTemplateToJson(WorkspaceLegacyTemplate t) => {
   'description': t.description,
   'version': t.version,
   'definition': t.definition,
-  'packageId': t.packageId,
-  'conversionProblem': t.conversionProblem,
   'fields': [
     for (final f in t.fields)
       {
@@ -91,8 +89,6 @@ WorkspaceLegacyTemplate legacyTemplateFromJson(Object? value) =>
         description: v['description'] as String,
         version: v['version'] as int,
         definition: workspaceObject(v['definition']),
-        packageId: v['packageId'] as String,
-        conversionProblem: v['conversionProblem'] as String?,
         fields: [
           for (final raw in v['fields'] as List)
             (() {

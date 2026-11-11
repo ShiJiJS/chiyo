@@ -4,6 +4,7 @@ library;
 // Real OnlineServer fixture uses POSIX secret mounts. Windows behavior is
 // exercised by the explicit existing-NAS tests, without relaxing that boundary.
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,10 @@ import 'package:info_desktop/workspace/remote_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 import 'package:info_remote/connection_profile.dart';
+import 'package:info_remote/owner_client.dart';
+import 'package:info_workspace/file_transport.dart';
+import 'package:info_desktop/workspace/recycled_attachment_preview.dart';
+import 'package:info_desktop/workspace/library_file.dart';
 import '../../server/test/support/device_credential_fixture.dart';
 import 'support/online_ui_harness.dart';
 
@@ -187,6 +192,107 @@ void main() {
         if (live != null) await ui.resolve(live.dispose);
         if (f != null) await ui.resolve(() => f!.dispose());
         debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
+  testWidgets(
+    'real recycled file preview renders exact bytes and clears when its entry is purged',
+    (t) async {
+      final ui = OnlineUiHarness(t);
+      final f = (await ui.resolve(DeviceCredentialFixture.create));
+      RemoteWorkspaceSource? source;
+      try {
+        source = await ui.resolve(
+          () async => RemoteWorkspaceSource(
+            await OwnerClient.connect(
+              address: f.owner.address,
+              token: f.token,
+              trust: f.trust,
+            ),
+          ),
+        );
+        final candidate = await ui.resolve(
+          () async => fileCandidateFromJson(
+            (await f.owner.request('POST', '/v1/owner/files/uploads', {
+              'operationId': 'recycled-ui-input',
+              'originalName': 'recycled-ui.txt',
+              'mediaType': 'text/plain',
+              'bytes': base64Encode(utf8.encode('SYNTHETIC_RECYCLED_UI')),
+            }))['candidate'],
+          ),
+        );
+        final record = await ui.resolve(
+          () => source!.importFile(
+            WorkspaceFileImport(
+              operationId: 'recycled-ui-create',
+              selectionId: candidate.selectionId,
+              name: 'Synthetic recycled file',
+            ),
+          ),
+        );
+        final detail = await ui.resolve(() => source!.readDetail(record));
+        final deletion = await ui.resolve(
+          () => source!.changeRecord(
+            WorkspaceRecordChange(
+              operationId: 'recycled-ui-delete',
+              ref: record,
+              expectedVersion: detail.version,
+              action: WorkspaceRecordAction.recycle,
+            ),
+          ),
+        );
+        final entry = (await ui.resolve(
+          () => source!.queryRecycled(),
+        )).items.single;
+        expect(entry.id, deletion.entryId);
+        await t.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: RecycledAttachmentPreview(
+                  source: source!,
+                  entryId: entry.id,
+                  fieldKey: detail.fieldIds.keys.single,
+                ),
+              ),
+            ),
+          ),
+        );
+        await ui.until(
+          () => find.byType(LibraryFilePreviewView).evaluate().isNotEmpty,
+        );
+        expect(find.textContaining('recycled-ui.txt'), findsOneWidget);
+        expect(
+          t
+              .widget<LibraryFilePreviewView>(
+                find.byType(LibraryFilePreviewView),
+              )
+              .preview
+              .text,
+          'SYNTHETIC_RECYCLED_UI',
+        );
+        await ui.resolve(
+          () => source!.changeRecord(
+            WorkspaceRecordChange(
+              operationId: 'recycled-ui-purge',
+              ref: record,
+              expectedVersion: entry.version,
+              entryId: entry.id,
+              action: WorkspaceRecordAction.purge,
+            ),
+          ),
+        );
+        await ui.until(
+          () =>
+              find.byType(LibraryFilePreviewView).evaluate().isEmpty &&
+              find.text('重新读取附件').evaluate().isNotEmpty,
+        );
+        expect(find.textContaining('SYNTHETIC_RECYCLED_UI'), findsNothing);
+        expect(t.takeException(), isNull);
+      } finally {
+        await t.pumpWidget(const SizedBox());
+        if (source != null) await ui.resolve(source.dispose);
+        await ui.resolve(f.dispose);
       }
     },
   );

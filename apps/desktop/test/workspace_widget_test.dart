@@ -42,7 +42,7 @@ void main() {
         await selectGrantMinutes(
           tester,
           find.byKey(ValueKey('grant-lifetime-${request.id}')),
-          15,
+          240,
         );
         await tester.pumpAndSettle();
         expect(approve.hitTestable(), findsOneWidget);
@@ -79,7 +79,7 @@ void main() {
       await selectGrantMinutes(
         tester,
         find.byKey(ValueKey('grant-lifetime-${first.id}')),
-        15,
+        240,
       );
       await tester.tap(find.byKey(ValueKey('request-${second.id}')));
       await tester.pumpAndSettle();
@@ -95,7 +95,7 @@ void main() {
               find.byKey(ValueKey('grant-lifetime-${first.id}')),
             )
             .value,
-        15,
+        240,
       );
       expect(
         tester

@@ -165,6 +165,7 @@ Map<String, Object?> _record(WorkspaceLibraryRecycleRecord r) => {
   'type': r.type,
   'directoryId': r.directoryId,
   'path': r.path,
+  if (r.recycleEntryId != null) 'recycleEntryId': r.recycleEntryId,
 };
 WorkspaceLibraryRecycleRecord _readRecord(Object? value) {
   final r = workspaceObject(value);
@@ -174,6 +175,7 @@ WorkspaceLibraryRecycleRecord _readRecord(Object? value) {
     type: r['type'] as String,
     directoryId: r['directoryId'] as String?,
     path: (r['path'] as List).cast<String>(),
+    recycleEntryId: r['recycleEntryId'] as String?,
   );
 }
 

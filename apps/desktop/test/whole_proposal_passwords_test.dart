@@ -160,7 +160,7 @@ void main() {
         await t.pumpAndSettle();
       }
 
-      final changeLocation = find.text('查看目录树 / 更换位置');
+      final changeLocation = find.text('更换目录');
       await t.ensureVisible(changeLocation);
       await t.tap(changeLocation);
       await t.pumpAndSettle();

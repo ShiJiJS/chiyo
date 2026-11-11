@@ -93,6 +93,14 @@ extension _EncryptedInformationPurge on EncryptedInformationRepository {
             [fact.itemId, fact.version],
           );
         }
+        if (await _hasRevisionSnapshots()) {
+          for (final fact in change.revisions) {
+            await _db.customStatement(
+              'DELETE FROM information_revision_snapshots WHERE item_id=? AND version=?',
+              [fact.itemId, fact.version],
+            );
+          }
+        }
         await _writeRecycle(change.entries, change.facts);
         for (final proposal in change.updates) {
           await _writeUpdate(proposal);

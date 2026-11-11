@@ -34,6 +34,7 @@ class DeviceCredentialFixture {
   HttpServer? proxy;
   HttpClient? upstream;
   int claimPosts = 0;
+  bool replicationEnabled = false;
   Future<void> importHostTrust(List<int> bytes) async {
     final upload = await owner.request('POST', '/v1/owner/ssh-hosts/inputs', {
       'version': 1,
@@ -63,6 +64,7 @@ class DeviceCredentialFixture {
 
   static Future<DeviceCredentialFixture> create({
     bool loseFirstClaim = false,
+    bool replication = false,
     DateTime Function()? clock,
   }) async {
     final root = await Directory.systemTemp.createTemp(
@@ -86,6 +88,7 @@ class DeviceCredentialFixture {
       await File(files.ca).readAsString(),
       clock,
     );
+    f.replicationEnabled = replication;
     await f.open();
     if (loseFirstClaim) await f._proxy();
     for (var i = 0; i < 2; i++) {
@@ -252,6 +255,10 @@ class DeviceCredentialFixture {
       backups: repo.backups,
       backupDirectory: Directory('${root.path}/backup-transfers'),
       policyState: repo,
+      replication: replicationEnabled ? LibraryReplication(repo) : null,
+      replicationDirectory: replicationEnabled
+          ? Directory('${root.path}/replication-transfers')
+          : null,
     );
     owner = await OwnerClient.connect(
       address: Uri.parse('https://127.0.0.1:${server.port}'),

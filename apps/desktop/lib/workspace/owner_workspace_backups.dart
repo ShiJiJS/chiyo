@@ -138,6 +138,8 @@ class OwnerWorkspaceBackups
           recipientEmpty: empty,
           blockers: empty ? const [] : const ['已有资料、设置以外的记录或历史'],
           cleanupCount: await backups.pendingOutputCleanupCount(),
+          latestArchiveAt: latest?.completedAt,
+          latestArchiveLocation: latest?.destination,
           latestArchive: latest == null
               ? null
               : _outputReceipt(latest).resource,

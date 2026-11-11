@@ -16,6 +16,8 @@ class RequestHistory {
     required this.id,
     required this.sessionId,
     required this.chatLabel,
+    this.agentName = '',
+    this.externalChatId = '',
     required this.purpose,
     required this.createdAt,
     required this.requestExpiresAt,
@@ -28,6 +30,7 @@ class RequestHistory {
     this.restoredAt,
   }) : fields = List.unmodifiable(fields);
   final String id, sessionId, chatLabel, purpose;
+  final String agentName, externalChatId;
   final DateTime createdAt, requestExpiresAt, recordedAt;
   final AccessRequestState state;
   final List<RecordedField> fields;
@@ -38,6 +41,8 @@ class RequestHistory {
     id: id,
     sessionId: sessionId,
     chatLabel: chatLabel,
+    agentName: agentName,
+    externalChatId: externalChatId,
     purpose: purpose,
     createdAt: createdAt,
     requestExpiresAt: requestExpiresAt,
@@ -53,6 +58,8 @@ class RequestHistory {
     'id': id,
     'sessionId': sessionId,
     'chatLabel': chatLabel,
+    if (agentName.isNotEmpty) 'agentName': agentName,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
     'purpose': purpose,
     'createdAt': createdAt.toUtc().toIso8601String(),
     'requestExpiresAt': requestExpiresAt.toUtc().toIso8601String(),
@@ -68,6 +75,8 @@ class RequestHistory {
     id: j['id'] as String,
     sessionId: j['sessionId'] as String,
     chatLabel: j['chatLabel'] as String,
+    agentName: j['agentName'] as String? ?? '',
+    externalChatId: j['externalChatId'] as String? ?? '',
     purpose: j['purpose'] as String,
     createdAt: DateTime.parse(j['createdAt'] as String),
     requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
@@ -131,13 +140,18 @@ class GrantHistory {
     required this.requestId,
     required this.sessionId,
     required this.chatLabel,
+    this.agentName = '',
+    this.externalChatId = '',
+    this.purpose = '',
     required this.approvedAt,
     required this.expiresAt,
     required Iterable<RecordedField> fields,
     required Iterable<GrantEvent> events,
     this.restoredAt,
     Map<String, int> itemVersions = const {},
+    Map<String, String> itemSnapshots = const {},
   }) : itemVersions = Map.unmodifiable(itemVersions),
+       itemSnapshots = Map.unmodifiable(itemSnapshots),
        fields = List.unmodifiable(fields),
        events = List.unmodifiable(events) {
     final ids = this.fields.map((f) => f.itemId).toSet();
@@ -148,12 +162,24 @@ class GrantHistory {
             itemVersions.values.any((v) => v < 1 || v > 9007199254740991))) {
       throw const FormatException('Invalid grant item versions');
     }
+    if (this.itemSnapshots.isNotEmpty &&
+        (this.itemSnapshots.length != this.itemVersions.length ||
+            !this.itemVersions.keys.toSet().containsAll(
+              this.itemSnapshots.keys,
+            ) ||
+            this.itemSnapshots.values.any(
+              (id) => !RegExp(r'^[0-9a-f]{64}$').hasMatch(id),
+            ))) {
+      throw const FormatException('Invalid grant item snapshots');
+    }
   }
 
   /// Approval-time provenance only. Empty for legacy grants without evidence;
   /// never infer an original snapshot from a current item or matching name.
   final Map<String, int> itemVersions;
+  final Map<String, String> itemSnapshots;
   final String id, requestId, sessionId, chatLabel;
+  final String agentName, externalChatId, purpose;
   final DateTime approvedAt, expiresAt;
 
   /// Imported facts never represent a live permission in this installation.
@@ -167,10 +193,14 @@ class GrantHistory {
     requestId: requestId,
     sessionId: sessionId,
     chatLabel: chatLabel,
+    agentName: agentName,
+    externalChatId: externalChatId,
+    purpose: purpose,
     approvedAt: approvedAt,
     expiresAt: expiresAt,
     fields: fields,
     itemVersions: itemVersions,
+    itemSnapshots: itemSnapshots,
     events: events,
     restoredAt: at,
   );
@@ -179,10 +209,14 @@ class GrantHistory {
     requestId: requestId,
     sessionId: sessionId,
     chatLabel: chatLabel,
+    agentName: agentName,
+    externalChatId: externalChatId,
+    purpose: purpose,
     approvedAt: approvedAt,
     expiresAt: expiresAt,
     fields: fields,
     itemVersions: itemVersions,
+    itemSnapshots: itemSnapshots,
     events: [...events, GrantEvent(kind, at)],
     restoredAt: restoredAt,
   );
@@ -191,11 +225,15 @@ class GrantHistory {
     'requestId': requestId,
     'sessionId': sessionId,
     'chatLabel': chatLabel,
+    if (agentName.isNotEmpty) 'agentName': agentName,
+    if (externalChatId.isNotEmpty) 'externalChatId': externalChatId,
+    if (purpose.isNotEmpty) 'purpose': purpose,
     'approvedAt': approvedAt.toUtc().toIso8601String(),
     'expiresAt': expiresAt.toUtc().toIso8601String(),
     'fields': fields.map((f) => f.toJson()).toList(),
     'events': events.map((e) => e.toJson()).toList(),
     if (itemVersions.isNotEmpty) 'itemVersions': itemVersions,
+    if (itemSnapshots.isNotEmpty) 'itemSnapshots': itemSnapshots,
     if (restoredAt != null) 'restoredAt': restoredAt!.toUtc().toIso8601String(),
   };
   factory GrantHistory.fromJson(Map<String, dynamic> json) => GrantHistory(
@@ -203,6 +241,9 @@ class GrantHistory {
     requestId: json['requestId'] as String,
     sessionId: json['sessionId'] as String,
     chatLabel: json['chatLabel'] as String,
+    agentName: json['agentName'] as String? ?? '',
+    externalChatId: json['externalChatId'] as String? ?? '',
+    purpose: json['purpose'] as String? ?? '',
     approvedAt: DateTime.parse(json['approvedAt'] as String),
     expiresAt: DateTime.parse(json['expiresAt'] as String),
     fields: (json['fields'] as List).map(
@@ -213,6 +254,9 @@ class GrantHistory {
     ),
     itemVersions: json.containsKey('itemVersions')
         ? Map<String, int>.from(json['itemVersions'] as Map)
+        : const {},
+    itemSnapshots: json.containsKey('itemSnapshots')
+        ? Map<String, String>.from(json['itemSnapshots'] as Map)
         : const {},
     restoredAt: json['restoredAt'] == null
         ? null

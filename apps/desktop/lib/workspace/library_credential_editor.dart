@@ -611,20 +611,23 @@ class CredentialCurrentMetadata extends StatelessWidget {
     required this.detail,
     required this.catalog,
     this.linkNames = const {},
+    this.directoryLabel,
   });
   final WorkspaceCredentialDetail detail;
   final WorkspaceCatalog catalog;
   final Map<WorkspaceRecordRef, String> linkNames;
+  final String? directoryLabel;
   @override
   Widget build(BuildContext context) => SelectableText(
     [
       '名称：${detail.record.name}',
       '用途：${detail.record.description}',
+      if (detail.account.isNotEmpty) '账号：${detail.account}',
       '私有备注：${detail.privateNote}',
       '引用名：${detail.binding}',
       '材料：${detail.format} · v${detail.materialVersion} · ${detail.filename ?? '字符串'}',
       '状态：${detail.enabled ? '已启用' : '已停用'}',
-      '目录：${catalog.directories.where((d) => d.id == detail.record.directoryId).firstOrNull?.name ?? '未分类'}',
+      '目录：${directoryLabel ?? catalog.directories.where((d) => d.id == detail.record.directoryId).firstOrNull?.name ?? '未分类'}',
       '标签：${detail.record.tags.map((t) => t.name).join('、')}',
       '关联资料：${detail.linkedInformation.map((r) => linkNames[r] ?? '已不可用的关联资料').join('、')}',
     ].join('\n'),

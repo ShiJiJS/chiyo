@@ -124,6 +124,7 @@ class _LibraryFileState extends State<LibraryFile> {
         widget.detail.record.ref,
         widget.fieldKey,
         version: _history?.current.ref.version,
+        exact: _history?.current.ref,
         page: _page,
       );
       if (mounted && generation == _generation) {
@@ -935,7 +936,7 @@ class _FileVersions extends StatefulWidget {
 
 class _FileVersionsState extends State<_FileVersions> {
   late WorkspaceFileHistory _history = widget.history;
-  late int _version = widget.history.current.ref.version;
+  late WorkspaceFileRef _version = widget.history.current.ref;
   int _page = 0, _generation = 0;
   bool _loading = true;
   bool _restoring = false;
@@ -963,15 +964,16 @@ class _FileVersionsState extends State<_FileVersions> {
         );
         if (!mounted || generation != _generation) return;
         _history = history;
-        if (!_history.versions.any((v) => v.ref.version == _version)) {
-          _version = _history.current.ref.version;
+        if (!_history.versions.any((v) => v.ref == _version)) {
+          _version = _history.current.ref;
           _page = 0;
         }
       }
       final value = await widget.source.readFilePreview(
         widget.record,
         widget.fieldKey,
-        version: _version,
+        version: _version.version,
+        exact: _version,
         page: _page,
       );
       if (mounted && generation == _generation) {
@@ -1002,7 +1004,8 @@ class _FileVersionsState extends State<_FileVersions> {
         widget.record,
         widget.fieldKey,
         _history,
-        restoreVersion: _version,
+        restoreVersion: _version.version,
+        restoreRef: _version,
       );
       if (restored == true && mounted) Navigator.pop(context, true);
     } finally {
@@ -1010,9 +1013,8 @@ class _FileVersionsState extends State<_FileVersions> {
     }
   }
 
-  WorkspaceFileVersion? get _selectedVersion => _history.versions
-      .where((file) => file.ref.version == _version)
-      .firstOrNull;
+  WorkspaceFileVersion? get _selectedVersion =>
+      _history.versions.where((file) => file.ref == _version).firstOrNull;
 
   @override
   Widget build(BuildContext context) => DesktopDialog(
@@ -1029,12 +1031,19 @@ class _FileVersionsState extends State<_FileVersions> {
           children: [
             for (final file in _history.versions)
               DesktopButton(
-                key: ValueKey('library-file-version-${file.ref.version}'),
-                selected: _version == file.ref.version,
+                key: ValueKey(
+                  _history.versions
+                              .where((v) => v.ref.version == file.ref.version)
+                              .length >
+                          1
+                      ? 'library-file-version-${file.ref.id}-${file.ref.version}'
+                      : 'library-file-version-${file.ref.version}',
+                ),
+                selected: _version == file.ref,
                 kind: DesktopButtonKind.quiet,
                 onPressed: () {
-                  if (_version == file.ref.version) return;
-                  _version = file.ref.version;
+                  if (_version == file.ref) return;
+                  _version = file.ref;
                   _page = 0;
                   unawaited(_read());
                 },
@@ -1104,7 +1113,7 @@ class _FileVersionsState extends State<_FileVersions> {
         onPressed: () => Navigator.pop(context),
         child: const Text('关闭'),
       ),
-      if (_version != _history.current.ref.version)
+      if (_version != _history.current.ref)
         DesktopButton(
           key: const ValueKey('library-file-restore'),
           kind: DesktopButtonKind.primary,

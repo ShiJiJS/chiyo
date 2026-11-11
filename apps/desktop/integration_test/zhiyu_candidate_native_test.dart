@@ -225,7 +225,9 @@ void main() {
     expect(settings.writeFailure!.code, 'disk_full');
     await press('settings-save');
     expect((await source.settings.read()).theme, WorkspaceTheme.dark);
-    for (final section in WorkspaceSettingsSection.values) {
+    for (final section in WorkspaceSettingsSection.values.where(
+      (s) => s != WorkspaceSettingsSection.connection,
+    )) {
       final target = key('settings-section-${section.name}');
       if (target.evaluate().isEmpty) {
         await t.scrollUntilVisible(
@@ -249,7 +251,7 @@ void main() {
         expect((await source.settings.read()).notifications, enabled);
       }
     }
-    await stage('u07-settings-failure-retry-eight-sections');
+    await stage('u07-settings-failure-retry-current-sections');
     for (final destination in [
       'library',
       'approvals',
@@ -259,7 +261,7 @@ void main() {
     ]) {
       await press('workspace-nav-$destination');
     }
-    expect(settings.section, WorkspaceSettingsSection.agents);
+    expect(settings.section, WorkspaceSettingsSection.runtime);
     await stage('all-primary-destinations-return');
     await File('$directory/native-checks.json').writeAsString(
       const JsonEncoder.withIndent('  ').convert({

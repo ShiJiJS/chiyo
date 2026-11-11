@@ -55,6 +55,7 @@ extension _InformationImportClient on AgentClient {
     return _call(revise ? '/update/revise' : '/update/submit', {
       'sessionSecret': _session,
       'update': update,
+      if (!revise) ..._submissionFields(input, proposal: true),
       if (revise) ...{
         'proposalId': input['proposalId'],
         'version': input['version'],

@@ -1,3 +1,4 @@
+import 'package:info_core/access_timing.dart';
 import 'workspace_source.dart';
 
 class SampleRetentionScope {
@@ -85,7 +86,8 @@ class SampleWorkspaceSettings implements WorkspaceSettingsSource {
       throw const WorkspaceFailure('conflict', '设置已在别处变化，原选择保留，请先核对。');
     }
     final d = c.desired;
-    if (![5, 15, 30, 60, 120].contains(d.requestMinutes) ||
+    if (!AccessTiming.waitingMinutes.contains(d.requestMinutes) &&
+            d.requestMinutes != _value.requestMinutes ||
         ![30, 90, 180, 365].contains(d.retentionDays)) {
       throw const WorkspaceFailure('validation', '请核对等待时间和记录保留期限。');
     }
