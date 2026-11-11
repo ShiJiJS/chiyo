@@ -27,8 +27,9 @@ final class InformationLifecycleCommand {
         !value.codeUnits.any((c) => c < 33 || c > 126);
     if (snapshotId != null &&
         (action != InformationLifecycleAction.restoreRevision ||
-            !RegExp(r'^[0-9a-f]{64}$').hasMatch(snapshotId!)))
+            !RegExp(r'^[0-9a-f]{64}$').hasMatch(snapshotId!))) {
       throw const AccessFailure('invalid_information');
+    }
     if (!validId(itemId) ||
         expectedVersion < 1 ||
         (revisionVersion != null && revisionVersion! < 1) ||

@@ -66,7 +66,7 @@ void main() {
           {'itemId': 'demo-server', 'fieldId': 'host'},
         ],
       });
-      now = now.add(const Duration(minutes: 30));
+      now = now.add(core.owner.requestLifetime + const Duration(seconds: 1));
       expect(
         (await client.execute({
           'command': 'wait',
