@@ -136,7 +136,7 @@ class OwnerWorkspaceBackups
           keyCreated: await backups.recoveryKey() != null,
           keySaved: await backups.recoveryKeySaved(),
           recipientEmpty: empty,
-          blockers: empty ? const [] : const ['已有资料、设置以外的记录或历史'],
+          blockers: empty ? const [] : const ['资料、设置以外的记录或历史'],
           cleanupCount: await backups.pendingOutputCleanupCount(),
           latestArchiveAt: latest?.completedAt,
           latestArchiveLocation: latest?.destination,
