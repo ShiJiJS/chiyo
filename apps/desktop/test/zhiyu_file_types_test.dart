@@ -16,7 +16,7 @@ import 'package:info_desktop/workspace/workspace_source.dart';
 void main() {
   const output = String.fromEnvironment('UI_EVIDENCE_DIR');
   setUpAll(() async {
-    if (!Platform.isMacOS) return;
+    if (!Platform.isMacOS && !Platform.isWindows) return;
     await loadDesktopFonts();
     await (FontLoader(
       'MaterialIcons',
@@ -140,7 +140,7 @@ void main() {
         expect(t.takeException(), isNull);
         await t.pumpWidget(const SizedBox());
       },
-      skip: !Platform.isMacOS,
+      skip: !Platform.isMacOS && !Platform.isWindows,
     );
   }
 }

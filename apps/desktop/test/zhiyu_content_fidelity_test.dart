@@ -274,7 +274,7 @@ void main() {
               debugDisableShadows = shadows;
             }
           },
-          skip: !Platform.isMacOS,
+          skip: !Platform.isMacOS && !Platform.isWindows,
         );
       }
     }
