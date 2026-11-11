@@ -10,6 +10,9 @@ import 'package:info_core/info_core.dart' show OwnerInbox;
 import 'package:flutter/material.dart';
 import '../desktop_runtime.dart';
 import '../connection_view.dart';
+import '../local_library_sync.dart';
+import '../local_sync_settings.dart';
+import 'package:info_remote/local_library_configuration.dart';
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
@@ -40,6 +43,8 @@ class OwnerWorkspaceHost extends StatefulWidget {
     this.backups,
     this.fileOutputs,
     this.fileOpens,
+    this.localConfiguration,
+    this.replication,
     this.backupPicker = const NativeBackupFilePicker(),
     this.filePicker = const NativeInformationFilePicker(),
     this.credentialFiles = const NativeCredentialFilePicker(),
@@ -49,6 +54,8 @@ class OwnerWorkspaceHost extends StatefulWidget {
   final InformationBackups? backups;
   final InformationFileOutputs? fileOutputs;
   final InformationFileOpens? fileOpens;
+  final LocalLibraryConfiguration? localConfiguration;
+  final LibraryReplication? replication;
   final BackupFilePicker backupPicker;
   final InformationFilePicker filePicker;
   final CredentialFilePicker credentialFiles;
@@ -66,15 +73,47 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   late OwnerWorkspacePlugins _plugins;
   late OwnerWorkspaceHosts _hosts;
   late OwnerProposalPasswords _passwords;
+  LocalLibrarySync? _sync;
+  bool _syncBusy = false;
+  String _storageDescription = '本地模式';
   @override
   void initState() {
     super.initState();
     _desktop = RuntimeWorkspaceDesktop(widget.runtime);
+    if (widget.localConfiguration != null && widget.replication != null) {
+      _sync = LocalLibrarySync(
+        configuration: widget.localConfiguration!,
+        owner: widget.runtime.service.owner,
+        replication: widget.replication!,
+      );
+      unawaited(_restoreSyncDescription());
+    }
     _bind();
     widget.runtime.addListener(_runtimeChanged);
   }
 
   void _runtimeChanged() => _source.notifyExternalChange();
+
+  Future<void> _restoreSyncDescription() async {
+    try {
+      final stored = await _sync!.readConfiguration();
+      if (mounted) _syncSaved(stored['enabled'] as bool);
+    } on Object {
+      /* The settings pane exposes the original configuration error. */
+    }
+  }
+
+  void _syncSaved(bool enabled) {
+    if (!mounted) return;
+    setState(() => _storageDescription = enabled ? '本地 · 同步已开启' : '本地模式');
+    _source.notifyExternalChange();
+  }
+
+  void _syncBusyChanged(bool busy) {
+    if (!mounted) return;
+    setState(() => _syncBusy = busy);
+    unawaited(_desktop.setNavigationEnabled(!busy));
+  }
 
   void _bind() {
     _passwords = OwnerProposalPasswords(widget.runtime.service.owner);
@@ -103,6 +142,7 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
     }
     _source = OwnerWorkspaceSource(
       owner: widget.runtime.service.owner,
+      describeStorage: () => _storageDescription,
       plugins: _plugins,
       hosts: _hosts,
       legacyTemplates: OwnerWorkspaceLegacyTemplates(
@@ -170,60 +210,73 @@ class _OwnerWorkspaceHostState extends State<OwnerWorkspaceHost> {
   }
 
   @override
-  Widget build(BuildContext context) => WorkspaceApp(
-    source: _source,
-    desktop: _desktop,
-    windowTitle: '知予',
-    connectionBuilder: (context, onCancel) => ConnectionSurface(
-      embedded: true,
-      title: '存储与同步',
-      description: '资料保存在本机。',
-      icon: Icons.computer_outlined,
-      children: [
-        Text('本地模式', style: libraryHeading(context, 16)),
-        const SizedBox(height: 8),
-        Text(
-          '资料、文件和凭据加密保存在这台电脑。无需连接服务器，也能接收 AI 申请和审批。',
-          style: libraryText(
-            context,
-            14,
-            color: UiPalette.of(context).muted,
-            height: 1.8,
-          ),
-        ),
-        const SizedBox(height: 24),
-        DesktopButton(
-          kind: DesktopButtonKind.quiet,
-          onPressed: onCancel,
-          child: const Text('返回工作区'),
-        ),
-      ],
-    ),
-    inputsBuilder: (context) {
-      final source = _source;
-      return WorkspaceInputs(
-        proposalFile: (id, version, item, attachment, fileVersion) =>
-            showOwnerProposalFilePreview(
+  Widget build(BuildContext context) => ExcludeFocus(
+    excluding: _syncBusy,
+    child: AbsorbPointer(
+      absorbing: _syncBusy,
+      child: WorkspaceApp(
+        source: _source,
+        desktop: _desktop,
+        windowTitle: '知予',
+        connectionBuilder: (context, onCancel) => _sync != null
+            ? LocalSyncSettings(
+                sync: _sync!,
+                onBack: onCancel,
+                onSaved: _syncSaved,
+                onBusy: _syncBusyChanged,
+              )
+            : ConnectionSurface(
+                embedded: true,
+                title: '存储与同步',
+                description: '资料保存在本机。',
+                icon: Icons.computer_outlined,
+                children: [
+                  Text('本地模式', style: libraryHeading(context, 16)),
+                  const SizedBox(height: 8),
+                  Text(
+                    '资料、文件和凭据加密保存在这台电脑。无需连接服务器，也能接收 AI 申请和审批。',
+                    style: libraryText(
+                      context,
+                      14,
+                      color: UiPalette.of(context).muted,
+                      height: 1.8,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  DesktopButton(
+                    kind: DesktopButtonKind.quiet,
+                    onPressed: onCancel,
+                    child: const Text('返回工作区'),
+                  ),
+                ],
+              ),
+        inputsBuilder: (context) {
+          final source = _source;
+          return WorkspaceInputs(
+            proposalFile: (id, version, item, attachment, fileVersion) =>
+                showOwnerProposalFilePreview(
+                  context,
+                  widget.runtime.service.owner,
+                  id,
+                  version,
+                  item,
+                  attachment,
+                  fileVersion,
+                ),
+            proposalPassword: _passwords,
+            backup: _backupFiles?.pick,
+            plugin: _plugins.pick,
+            hostFile: _hosts.pick,
+            file: source.selections.pick,
+            credential: (form) => showOwnerCredentialInput(
               context,
-              widget.runtime.service.owner,
-              id,
-              version,
-              item,
-              attachment,
-              fileVersion,
+              (source.credentials as OwnerWorkspaceCredentials).staging,
+              form,
+              files: widget.credentialFiles,
             ),
-        proposalPassword: _passwords,
-        backup: _backupFiles?.pick,
-        plugin: _plugins.pick,
-        hostFile: _hosts.pick,
-        file: source.selections.pick,
-        credential: (form) => showOwnerCredentialInput(
-          context,
-          (source.credentials as OwnerWorkspaceCredentials).staging,
-          form,
-          files: widget.credentialFiles,
-        ),
-      );
-    },
+          );
+        },
+      ),
+    ),
   );
 }

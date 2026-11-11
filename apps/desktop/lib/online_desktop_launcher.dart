@@ -30,6 +30,7 @@ class OnlineDesktopLauncher extends StatefulWidget {
     this.outputPicker = const NativeBackupFilePicker(),
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
     this.credentialFiles = const NativeCredentialFilePicker(),
+    this.onSaveStorage,
   });
   final ConnectionProfileStore profiles;
   final InformationFilePicker? filePicker;
@@ -39,6 +40,8 @@ class OnlineDesktopLauncher extends StatefulWidget {
   final BackupFilePicker outputPicker;
   final OwnerFileOpenDispatcher openDispatcher;
   final CredentialFilePicker credentialFiles;
+  final Future<void> Function(ConnectionProfile, OwnerClient, bool)?
+  onSaveStorage;
   @override
   State<OnlineDesktopLauncher> createState() => _OnlineDesktopLauncherState();
 }
@@ -55,6 +58,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   bool _connecting = false, _connectionView = false;
   final _connectionSettingsRequests = ValueNotifier<int>(0);
   bool _offline = false, _probing = false;
+  bool _storageSyncEnabled = true;
   int _failedHealthChecks = 0;
   RemoteWorkspaceSource? _updatingSource;
   Timer? _connectionTimer, _syncTimer;
@@ -162,6 +166,50 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           client,
         )
       : widget.profiles.save(profile);
+
+  Future<void> _saveStorage({bool confirmServer = false}) async {
+    final save = widget.onSaveStorage;
+    if (save == null) {
+      await _connect(confirmServer: confirmServer);
+      return;
+    }
+    if (_storageSyncEnabled) {
+      await _connect(confirmServer: confirmServer);
+      if (!mounted || _error != null || _serverChanged) return;
+    }
+    final source = _source, profile = _previous;
+    if (source == null || profile == null) return;
+    setState(() => _busy = true);
+    await _desktop.setNavigationEnabled(false);
+    try {
+      final updates = await source.client.request('GET', '/v1/owner/updates');
+      final summary = updates['summary'] as Map;
+      if ((summary['pending'] as int) != 0 ||
+          (summary['proposals'] as int) != 0) {
+        throw const RemoteFailure('pending_server_requests');
+      }
+      await save(profile, source.client, _storageSyncEnabled);
+    } on RemoteFailure catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = switch (error.code) {
+            'unsupported_sync' => '服务器需要更新后才能把完整资料保存到本机。当前服务器资料已保留。',
+            'different_libraries' => '本机和服务器已有不同的资料。已保留双方，请先备份并选择空的目标资料库。',
+            'pending_server_requests' =>
+              '请先处理服务器上的访问申请和录入提案，再切换到本地资料库。待办不会自动转到本机。',
+            _ => '尚未完成本地资料的保存，当前服务器资料已保留，可以重试。',
+          },
+        );
+      }
+    } on Object {
+      if (mounted) setState(() => _error = '尚未完成本地资料的保存，当前服务器资料已保留，可以重试。');
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+        await _desktop.setNavigationEnabled(true);
+      }
+    }
+  }
 
   Future<void> _connect({bool confirmServer = false}) async {
     if (_connecting || _desktop.quitting || confirmServer && !_serverChanged) {
@@ -515,10 +563,15 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                       certificateStatus: _certificateStatus,
                       busy: _busy,
                       error: _error,
-                      onConnect: _connect,
+                      syncEnabled: widget.onSaveStorage == null
+                          ? null
+                          : _storageSyncEnabled,
+                      onSyncChanged: (value) =>
+                          setState(() => _storageSyncEnabled = value),
+                      onConnect: _saveStorage,
                       onCancel: onCancel,
                       onConfirmServer: _serverChanged
-                          ? () => _connect(confirmServer: true)
+                          ? () => _saveStorage(confirmServer: true)
                           : null,
                     ),
                   ),

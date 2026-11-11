@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 import 'storage_test.dart' show TestKeyStore;
 
@@ -143,9 +144,7 @@ void main() {
         final recycled = await service.owner.createInformation('可恢复资料', '', [
           const FieldInput('正文', '', 'SYNTHETIC_RECYCLE_CONTENT'),
         ]);
-        final trash = LibrarySelection(
-          informationIds: [recycled.id],
-        );
+        final trash = LibrarySelection(informationIds: [recycled.id]);
         final review = await service.owner.previewLibraryRecycle(trash);
         await service.owner.recycleLibrarySelection(
           'recycle-sync-fixture',
@@ -324,6 +323,39 @@ void main() {
           before,
         );
 
+        void sql(String statement) {
+          final db = sqlite.sqlite3.open('${root.path}/target/library.db');
+          try {
+            db.execute(
+              'PRAGMA key = "x\'${targetKeys.key!.map((b) => b.toRadixString(16).padLeft(2, '0')).join()}\'"',
+            );
+            db.execute(statement);
+          } finally {
+            db.close();
+          }
+        }
+
+        sql(
+          "CREATE TRIGGER fail_initial_receipt BEFORE INSERT ON library_replica_receipts BEGIN SELECT RAISE(ABORT,'synthetic write failure'); END",
+        );
+        await expectLater(
+          targetService.owner.restoreLibraryOnce(
+            previous: () => recipient.receipt('initial-1', prepared.transfer),
+            restore: () => recipient.installInitial(
+              path: path,
+              transferKey: prepared.transferKey,
+              operationId: 'initial-1',
+              transfer: prepared.transfer,
+            ),
+          ),
+          throwsA(isA<StorageFailure>()),
+        );
+        expect(target.items, isEmpty);
+        expect(target.managedCredentials, isEmpty);
+        expect((await recipient.identity()).toJson(), targetIdentity.toJson());
+        expect(await recipient.lookupReceipt('initial-1'), isNull);
+        sql('DROP TRIGGER fail_initial_receipt');
+
         final receipt = await targetService.owner.restoreLibraryOnce(
           previous: () => recipient.receipt('initial-1', prepared.transfer),
           restore: () => recipient.installInitial(
@@ -413,6 +445,40 @@ void main() {
             ),
           ),
         );
+        final recovery = await target.backups.enable();
+        await target.backups.saveRecoveryKeyTo('${root.path}/recovery.txt');
+        await targetService.owner.exportLibrary(
+          () => target.backups.exportTo('${root.path}/after-sync.backup'),
+        );
+        final restored = await EncryptedInformationRepository.open(
+          '${root.path}/restored',
+          TestKeyStore(),
+        );
+        final restoreService = InformationService(repository: restored);
+        try {
+          final beforeRestore = await LibraryReplication(restored).identity();
+          await restoreService.owner.restoreLibrary(
+            () => restored.backups.restoreFrom(
+              '${root.path}/after-sync.backup',
+              recovery,
+            ),
+          );
+          final afterRestore = await LibraryReplication(restored).identity();
+          expect(afterRestore.libraryId, isNot(beforeRestore.libraryId));
+          expect(afterRestore.libraryId, isNot(receipt.identity.libraryId));
+          expect(
+            await LibraryReplication(restored).lookupReceipt('initial-1'),
+            isNull,
+          );
+          expect(restored.items, hasLength(2));
+          expect(
+            utf8.decode(restored.credentialMaterials.single.bytes),
+            'SYNTHETIC_SYNC_PASSWORD',
+          );
+        } finally {
+          await restoreService.close();
+          await restored.close();
+        }
         for (final file in [
           File('${root.path}/source/library.db'),
           File('${root.path}/target/library.db'),

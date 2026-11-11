@@ -2,7 +2,7 @@
 
 备份、停止后升级、数据及运行密钥恢复步骤见 [维护说明](OPERATIONS.md)。
 
-首轮使用同一用户的一台 Mac 连接独立服务器。资料、审批、提案、动态模板、附件、凭据、目录、历史及备份均已接入；统一候选与完整试用继续由 #102 验证。Dockerfile 的 `verify` 阶段供源码测试，默认 `runtime` 阶段是 AOT 服务，不含 SDK、源码、资料或私有密钥。生产运行使用方法见下节；真实部署及资料迁移留 #103。
+服务器为同一用户保存一份加密资料库，供 App 选择同步；App 不连接服务器时也能独立使用本地库。资料同步不转移聊天许可和进行中的操作。Dockerfile 的 `verify` 阶段供源码测试，默认 `runtime` 阶段是 AOT 服务，不含 SDK、源码、资料或私有密钥。生产运行使用方法见下节，正式替换与真实资料迁移应集中进行。
 
 ## Docker 运行
 
@@ -46,7 +46,7 @@ docker run -d --name chiyo-server --user "$(id -u):$(id -g)" \
   chiyo-server:local
 ```
 
-以上占位路径需替换为绝对路径，运行身份须能读取这些私有文件。App 使用的 Token 是 `owner.token` 原始32字节的无填充 Base64URL 表示，可在可信终端用 `openssl base64 -A -in <私有目录>/secrets/owner.token | tr '/+' '_-' | tr -d '='` 获取后直接填入 App，不放进聊天、截图或普通日志。私人 CA 填入 App 连接页，不能把服务器私钥交给客户端。AI 的设备配置通过 App「AI 接入」另行生成。
+以上占位路径需替换为绝对路径，运行身份须能读取这些私有文件。App 使用的 Token 是 `owner.token` 原始32字节的无填充 Base64URL 表示，可在可信终端用 `openssl base64 -A -in <私有目录>/secrets/owner.token | tr '/+' '_-' | tr -d '='` 获取后直接填入 App，不放进聊天、截图或普通日志。私人 CA 填入 App 连接页，不能把服务器私钥交给客户端。App 自动准备当前库的受限 CLI 配置，无需手动生成。
 
 正常停止用 `docker stop --time 30 chiyo-server`，检查退出码0后再维护。后续重开使用原密钥和持久目录，不再次初始化。完整备份、迁移及失败回退见 [维护说明](OPERATIONS.md)。镜像不包含任何用户资料、私有密钥或预置 Token。
 
@@ -86,6 +86,10 @@ dart run bin/server.dart serve /absolute/private/server.json
 协议版本为 1，所有接口均为 HTTPS，禁止浏览器 Origin。管理接口要求 `Authorization: Bearer <用户接入 Token>`，身份不合法返回 401；当前没有为 Agent 开放管理接口。
 
 - `GET /v1/server`：协议与服务器身份。
+- `GET /v1/owner/replication`：副本身份、目标是否为空及首次同步能力。`GET /v1/server` 中的 `replication` 能力必须先核对，旧服务不支持时不能退回覆盖整库。
+- `POST /v1/owner/replication/exports`：以稳定 operationId 准备完整加密内容；包含保留版本、文件、凭据、目录标签、顺序、回收及插件。设备设置、接入凭证和活动许可不进入内容包。
+- `POST /v1/owner/replication/imports`、`POST .../transfers/{id}/read`、`write`、`commit`：最多512 KiB一块传输加密文件；空目标验证全部内容后原子入库。原操作回执用 `GET .../operations/{operationId}` 查询，丢失回复不生成重复资料。
+- 初次传输使用独立的临时传输密钥，不要求开启手动备份或提供恢复密钥。服务最多保留2份传输、各最多256 MiB，30分钟后清理；重启后过期的加密暂存会清理。App 将未完成操作保存在本用户私有配置中，以便重新打开后核对和续传。
 - `GET /v1/owner/catalog`：目录层级、标签、当前启用的内置及插件模板，以及实际待办数量。
 - `GET /v1/owner/summaries`：不含正文字段的资料摘要，供列表与关联名称查询。
 - `GET /v1/owner/information/{id}`：指定资料的完整内容和冻结模板布局。

@@ -46,5 +46,6 @@ Future<DesktopLibrary> openLocalLibrary(
     backups: repository.backups,
     fileOutputs: repository.fileOutputs,
     fileOpens: repository.fileOpens,
+    replication: LibraryReplication(repository),
   );
 }

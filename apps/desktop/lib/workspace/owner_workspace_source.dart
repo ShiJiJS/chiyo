@@ -40,10 +40,12 @@ class OwnerWorkspaceSource
         WorkspaceFileOpenRecovery,
         WorkspaceStorageLocation {
   @override
-  String get storageDescription => '本地模式';
+  String get storageDescription => describeStorage?.call() ?? '本地模式';
+  final String Function()? describeStorage;
 
   OwnerWorkspaceSource({
     required this.owner,
+    this.describeStorage,
     InformationFileOutputs? fileOutputs,
     InformationFileOpens? fileOpens,
     OwnerFileOpenDispatcher openDispatcher =

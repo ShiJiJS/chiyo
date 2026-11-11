@@ -42,7 +42,7 @@ void main() {
       await ui.resolve(
         () => store.save(
           ConnectionProfile(
-          address: 'https://127.0.0.1:1',
+            address: 'https://127.0.0.1:1',
             token: 'synthetic-owner-token',
             serverId: 'existing-server-library',
           ),
@@ -128,7 +128,9 @@ void main() {
 
         await ui.tap('workspace-nav-settings');
         await ui.tap('settings-section-connection');
-        await ui.until(() => find.text('资料保存在本机。').evaluate().isNotEmpty);
+        await ui.until(
+          () => find.text('资料保存在本机，可选择同步到自己的服务器。').evaluate().isNotEmpty,
+        );
         expect(find.text('服务器地址'), findsNothing);
         await t.tap(find.text('返回工作区'));
         await t.pumpAndSettle();

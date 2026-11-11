@@ -10,7 +10,9 @@ import 'device_credential_fixture.dart';
 
 Future<void> main(List<String> arguments) async {
   final menu = arguments.contains('--pending-menu');
-  final f = await DeviceCredentialFixture.create();
+  final f = await DeviceCredentialFixture.create(
+    replication: arguments.contains('--local-sync'),
+  );
   final (request, proposalId) = await f.runtime.run(() async {
     final item = await f.runtime.service.owner
         .createInformation('原生连接验收资料', '', [
