@@ -372,6 +372,15 @@ class InformationBackups {
     }
   }
 
+  static Future<Directory> _createStaging(String parent, String prefix) async {
+    final directory = await Directory(parent).createTemp(prefix);
+    // Inherited Windows ACLs do not satisfy the protected descriptor required
+    // by the retained-original publisher. Protect before registration or bytes.
+    return Platform.isWindows
+        ? WindowsPrivateFiles.directory(directory)
+        : directory;
+  }
+
   Future<BackupContents> _snapshot() async {
     return _repository._db.transaction(() async {
       final document = await _rawSnapshotDocument();
@@ -754,9 +763,10 @@ class InformationBackups {
       // Registering from the attachment writer inside that transaction would
       // only create a savepoint and could leave crash-time files unregistered.
       if (onStagingCreated != null) {
-        staging = await Directory(
+        staging = await _createStaging(
           stagingParent ?? File(path).parent.path,
-        ).createTemp('.agent-info-backup-');
+          '.agent-info-backup-',
+        );
         await onStagingCreated(staging.path);
       }
       final snapshot = await _repository._db.transaction(() async {
@@ -798,10 +808,12 @@ class InformationBackups {
           FileSystemEntityType.notFound) {
         throw const StorageFailure('output_exists');
       }
-      staging ??= await Directory(
+      staging ??= await _createStaging(
         stagingParent ?? output.parent.path,
-      ).createTemp('.agent-info-backup-');
+        '.agent-info-backup-',
+      );
       final temporary = File('${staging.path}/backup.partial');
+      if (Platform.isWindows) WindowsPrivateFiles.reserve(temporary);
       db = sqlite.sqlite3.open(temporary.path);
       _key(db, key);
       db.execute(
