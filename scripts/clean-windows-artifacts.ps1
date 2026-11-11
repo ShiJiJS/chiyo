@@ -1,9 +1,20 @@
 [CmdletBinding(SupportsShouldProcess)]
-param([string]$InstallDirectory = 'C:\Software\AgentInfoManage')
+param(
+    [string]$InstallDirectory = 'C:\Software\AgentInfoManage',
+    [string[]]$KeepPath = @()
+)
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $project = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
+$keptPaths = @($KeepPath | ForEach-Object {
+    $candidate = if ([IO.Path]::IsPathRooted($_)) { $_ } else { Join-Path $project $_ }
+    $full = [IO.Path]::GetFullPath($candidate).TrimEnd([IO.Path]::DirectorySeparatorChar)
+    if ($full -ne $project -and -not $full.StartsWith("$project\", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "KeepPath must name a path in this checkout: $full"
+    }
+    $full
+})
 $install = [IO.Path]::GetFullPath($InstallDirectory)
 if ($install.StartsWith("$project\", [StringComparison]::OrdinalIgnoreCase)) { throw 'Keep the installation outside the source checkout.' }
 $receipt = Get-Content -LiteralPath (Join-Path $install 'installation.json') -Raw | ConvertFrom-Json
@@ -44,13 +55,25 @@ function Assert-Contained([string]$Path) {
 function Add-Target([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) { return }
     $full = Assert-Contained $Path
+    # SDK-based tools can be using a build/cache without their executable being
+    # inside it. Callers retain those known working paths explicitly.
+    if ($keptPaths | Where-Object {
+        $_ -eq $full -or $_.StartsWith("$full\", [StringComparison]::OrdinalIgnoreCase) -or
+        $full.StartsWith("$_\", [StringComparison]::OrdinalIgnoreCase)
+    }) {
+        Write-Warning "Keep requested artifact: $full"
+        return
+    }
     if ($running | Where-Object { $_ -eq $full -or $_.StartsWith("$full\", [StringComparison]::OrdinalIgnoreCase) }) {
         Write-Warning "Keep running artifact: $full"
         return
     }
     $targets.Add($full)
 }
-foreach ($item in Get-ChildItem -LiteralPath (Join-Path $project 'build') -Directory -Force) {
+$buildDirectories = if (Test-Path -LiteralPath (Join-Path $project 'build') -PathType Container) {
+    @(Get-ChildItem -LiteralPath (Join-Path $project 'build') -Directory -Force)
+} else { @() }
+foreach ($item in $buildDirectories) {
     # Only application packaging directories. Keep Codex integration materials and QA evidence.
     if ($item.Name -like 'windows-*') { Add-Target $item.FullName }
 }
@@ -71,7 +94,7 @@ function Find-CompiledFiles([string]$Folder) {
         }
     }
 }
-foreach ($item in Get-ChildItem -LiteralPath (Join-Path $project 'build') -Directory -Force) {
+foreach ($item in $buildDirectories) {
     if ($item.Name -like 'qa-*' -or $item.Name -eq 'library-ux') { Find-CompiledFiles $item.FullName }
 }
 Find-CompiledFiles (Join-Path $project '.scratch')
