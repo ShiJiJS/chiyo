@@ -229,7 +229,7 @@ extension _EncryptedImportFiles on EncryptedInformationRepository {
       final upload = await _importFileUpload(promotion.upload.id),
           version = promotion.version;
       final latest = (await _attachmentVersions(
-        version.reference.attachmentId,
+        version.seriesId,
       )).fold(0, (n, v) => max(n, v.reference.attachmentVersion));
       if (upload == null ||
           upload.consumed ||

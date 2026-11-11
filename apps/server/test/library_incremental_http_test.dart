@@ -27,12 +27,20 @@ class _Local {
   final EncryptedInformationRepository repo;
   final InformationService service;
   final LibraryIncremental incremental;
-  static Future<_Local> open() async {
+  static Future<_Local> open({DateTime Function()? clock}) async {
     final root = await Directory.systemTemp.createTemp(
       'http-incremental-local-',
     );
-    final repo = await EncryptedInformationRepository.open(root.path, _Keys());
-    return _Local(root, repo, InformationService(repository: repo));
+    final repo = await EncryptedInformationRepository.open(
+      root.path,
+      _Keys(),
+      clock: clock,
+    );
+    return _Local(
+      root,
+      repo,
+      InformationService(repository: repo, clock: clock),
+    );
   }
 
   Future<void> close() async {
@@ -140,15 +148,22 @@ void main() {
   test(
     'two real clients retain distinct originals with the same display version and keep receiving independent data',
     () async {
-      final host = await DeviceCredentialFixture.create(replication: true);
-      final a = await _Local.open(), b = await _Local.open();
+      DateTime clock() => DateTime.utc(2026, 11, 11);
+      final host = await DeviceCredentialFixture.create(
+        replication: true,
+        clock: clock,
+      );
+      final a = await _Local.open(clock: clock),
+          b = await _Local.open(clock: clock),
+          c = await _Local.open(clock: clock);
       try {
         await host.runtime.run(
           () => saveFile(host.runtime.service.owner, host.root.path, [1, 2, 3]),
         );
-        final remote = await LibraryIncrementalClient.connect(host.owner);
+        var remote = await LibraryIncrementalClient.connect(host.owner);
         await initializeLocal(remote, a, 'initial-a');
         await initializeLocal(remote, b, 'initial-b');
+        final initialReference = a.repo.items.single.fields.single.attachment!;
         final changedA = await saveFile(a.service.owner, a.root.path, [
           4,
           5,
@@ -170,6 +185,10 @@ void main() {
           metaB.reference.attachmentVersion,
         );
         expect(metaA.sha256, isNot(metaB.sha256));
+        expect(metaA.createdAt, metaB.createdAt);
+        expect(metaA.reference, isNot(metaB.reference));
+        expect(metaA.seriesId, initialReference.attachmentId);
+        expect(metaB.seriesId, metaA.seriesId);
         for (final entry in await a.service.owner.exportLibrary(
           () => a.incremental.after(0),
         )) {
@@ -211,6 +230,16 @@ void main() {
           await file.delete();
         }
         expect(conflicted, true);
+        final family = await host.repo.informationAttachmentVersions(
+          initialReference.attachmentId,
+        );
+        expect(family.map((v) => v.reference), contains(metaA.reference));
+        expect(
+          family.map((v) => v.reference),
+          isNot(contains(metaB.reference)),
+          reason:
+              'The conflicting proposal remains held as a whole, not partly admitted into file history.',
+        );
         final server = LibraryIncremental(LibraryReplication(host.repo));
         expect(
           await host.runtime.run(
@@ -228,6 +257,23 @@ void main() {
           ),
           [7, 8, 9],
         );
+        final versionedCopy = await remote.prepareInitial('initial-c');
+        expect(versionedCopy.contents.transfer.contentFormat, 23);
+        await initializeLocal(remote, c, 'initial-c');
+        expect(
+          await c.repo.readInformationAttachmentChunk(metaA.reference, 0, 3),
+          [4, 5, 6],
+        );
+        final copiedFamily = await c.repo.informationAttachmentVersions(
+          metaA.reference.attachmentId,
+        );
+        expect(
+          copiedFamily.map((v) => v.reference),
+          containsAll([initialReference, metaA.reference]),
+        );
+        expect(copiedFamily.every((v) => v.seriesId == metaA.seriesId), true);
+        await host.reopen();
+        remote = await LibraryIncrementalClient.connect(host.owner);
         final independent = await host.runtime.run(
           () => host.runtime.service.owner.createInformation('独立资料', '', [
             const FieldInput('正文', '', 'SYNTHETIC_UNRELATED'),
@@ -279,6 +325,7 @@ void main() {
       } finally {
         await a.close();
         await b.close();
+        await c.close();
         await host.dispose();
       }
     },

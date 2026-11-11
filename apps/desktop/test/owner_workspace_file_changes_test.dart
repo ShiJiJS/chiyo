@@ -384,7 +384,7 @@ void main() {
       );
       final changed = await source.changeFile(command);
       expect(changed.version, 2);
-      expect(changed.id, file.attachment!.attachmentId);
+      expect(changed.id, isNot(file.attachment!.attachmentId));
       item = service.owner.information.single;
       expect(item.fields.last.id, text.id);
       expect(item.fields.last.value, 'retained-text');
@@ -401,7 +401,7 @@ void main() {
       );
       final restored = await source.changeFile(restore);
       expect(restored.version, 3);
-      expect(restored.id, changed.id);
+      expect(restored.id, isNot(changed.id));
       expect(
         (await source.readFilePreview(record, 'file')).text,
         'version-one',

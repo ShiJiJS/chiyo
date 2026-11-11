@@ -696,11 +696,21 @@ class MemoryInformationRepository
   @override
   Future<List<InformationAttachmentVersion>> informationAttachmentVersions(
     String id,
-  ) async => List.unmodifiable(
-    _informationFiles.values
-        .where((v) => v.$1.reference.attachmentId == id)
-        .map((v) => v.$1),
-  );
+  ) async {
+    final family =
+        _informationFiles.values
+            .where((v) => v.$1.reference.attachmentId == id)
+            .firstOrNull
+            ?.$1
+            .seriesId ??
+        id;
+    return List.unmodifiable(
+      _informationFiles.values
+          .map((v) => v.$1)
+          .where((v) => v.seriesId == family),
+    );
+  }
+
   @override
   Future<InformationAttachmentUsage> informationAttachmentUsage() async {
     final stages = await informationFileStagingUsage();

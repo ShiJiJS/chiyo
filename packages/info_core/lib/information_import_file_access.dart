@@ -143,13 +143,16 @@ extension OwnerImportFiles on OwnerAccess {
           throw const AccessFailure('proposal_conflict');
         }
       }
-      final attachmentId = old?.attachment?.attachmentId ?? _service._secret();
-      if (!usedSeries.add(attachmentId)) {
-        throw const AccessFailure('invalid_proposal');
-      }
+      final attachmentId = _service._secret();
       final history = old == null
           ? <InformationAttachmentVersion>[]
-          : await _attachments.informationAttachmentVersions(attachmentId);
+          : await _attachments.informationAttachmentVersions(
+              old.attachment!.attachmentId,
+            );
+      final seriesId = history.firstOrNull?.seriesId ?? attachmentId;
+      if (!usedSeries.add(seriesId)) {
+        throw const AccessFailure('invalid_proposal');
+      }
       final latest = history.fold(
         0,
         (n, v) => max(n, v.reference.attachmentVersion),
@@ -173,6 +176,7 @@ extension OwnerImportFiles on OwnerAccess {
                 attachmentId,
                 latest + index + 1,
               ),
+              seriesId: seriesId,
               originalName: upload.originalName,
               mediaType: upload.mediaType,
               byteLength: upload.byteLength,

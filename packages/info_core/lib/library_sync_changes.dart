@@ -324,7 +324,7 @@ final class LibraryDeltaTransfer {
   }) {
     libraryReplicaId(sourceReplicaId);
     replicaOperationId(operationId);
-    if (archive.contentFormat != 22) {
+    if (archive.contentFormat != 22 && archive.contentFormat != 23) {
       throw const FormatException('Unsupported delta content format');
     }
     if (sequence < 1 || sequence > 9007199254740991) {

@@ -17,6 +17,50 @@ InformationAttachmentVersion version({bool purged = false}) =>
 
 void main() {
   test(
+    'distinct immutable references can share a display version within one retained file family',
+    () {
+      InformationAttachmentVersion branch(String id, String digest) =>
+          InformationAttachmentVersion(
+            reference: InformationAttachmentRef(id, 2),
+            seriesId: 'original-family',
+            originalName: 'file.txt',
+            mediaType: 'text/plain',
+            byteLength: 1,
+            sha256: digest * 64,
+            createdAt: DateTime.utc(2026),
+          );
+      final a = branch('independent-intake-a', 'a'),
+          b = branch('independent-intake-b', 'b');
+      expect(a.reference, isNot(b.reference));
+      expect(a.reference.attachmentVersion, b.reference.attachmentVersion);
+      final copy = InformationAttachmentVersion.fromPrivateJson(
+        Map<String, dynamic>.from(b.toPrivateJson()),
+      );
+      expect(copy.seriesId, a.seriesId);
+      expect(
+        copy
+            .withRetention(retiredAt: DateTime.utc(2026, 2), purgedAt: null)
+            .seriesId,
+        a.seriesId,
+      );
+      final retained = retainInformationAttachments(
+        versions: [a, b],
+        current: {a.reference},
+        retained: {},
+        now: DateTime.utc(2029),
+      );
+      expect(retained.every((v) => v.available), true);
+      expect(
+        () => InformationAttachmentVersion.fromPrivateJson({
+          ...b.toPrivateJson(),
+          'seriesId': null,
+        }),
+        throwsA(isA<AccessFailure>()),
+      );
+    },
+  );
+
+  test(
     'an owned series pins all versions, recovery snapshots keep its history, and purged bytes never reappear',
     () {
       final old = InformationAttachmentVersion(
