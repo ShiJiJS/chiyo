@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
+
+import 'support/windows_probe_sqlcipher.dart';
 
 class _Keys implements DatabaseKeyStore {
   @override
@@ -22,14 +25,14 @@ void main() {
       );
       addTearDown(() => root.delete(recursive: true));
       final probe = await Directory('${root.path}/probe').create();
+      final cipher = await copyPinnedWindowsProbeSqlcipher(probe);
       final storage = Directory.current.absolute.path;
       final core = Directory('../info_core').absolute.path;
       await File('${probe.path}/pubspec.yaml').writeAsString(
-        'name: delivery_crash_probe\npublish_to: none\nenvironment:\n  sdk: ">=3.10.0 <4.0.0"\ndependencies:\n  info_storage:\n    path: ${jsonEncode(storage)}\n  info_core:\n    path: ${jsonEncode(core)}\nhooks:\n  user_defines:\n    sqlite3:\n      source: sqlcipher\n',
+        'name: delivery_crash_probe\npublish_to: none\nenvironment:\n  sdk: ">=3.10.0 <4.0.0"\ndependencies:\n  info_storage:\n    path: ${jsonEncode(storage)}\n  info_core:\n    path: ${jsonEncode(core)}\nhooks:\n  user_defines:\n    sqlite3:\n      source: system\n      name: ${jsonEncode(cipher.absolute.uri.toString())}\n',
       );
-      await File(
-        'test/fixtures/file_delivery_crash_child.dart',
-      ).copy('${probe.path}/worker.dart');
+      await File('test/fixtures/file_delivery_crash_child.dart')
+          .copy('${probe.path}/worker.dart');
       final sourceLock = (await File(
         'pubspec.lock',
       ).readAsString()).replaceAll('\r\n', '\n');
@@ -89,11 +92,11 @@ void main() {
             }
           });
       final errors = child.stderr.transform(utf8.decoder).join();
-      child.exitCode.then((code) {
+      child.exitCode.then((code) async {
         ended = true;
         if (!prepared.isCompleted)
           prepared.completeError(
-            StateError('Fixture exited before prepared ($code)'),
+            StateError('Fixture exited before prepared ($code): ${await errors}'),
           );
       });
       addTearDown(() async {

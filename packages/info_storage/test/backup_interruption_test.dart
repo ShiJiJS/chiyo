@@ -1,10 +1,14 @@
 import 'backup_setup.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
+
+import 'support/windows_probe_sqlcipher.dart';
 
 class _Keys implements DatabaseKeyStore {
   List<int>? key;
@@ -63,20 +67,19 @@ void main() {
         targetPath,
         keys,
       );
-      await InformationService(
-        repository: recipient,
-      ).owner.setRequestLifetime(const Duration(minutes: 15));
+      await InformationService(repository: recipient).owner
+          .setRequestLifetime(const Duration(minutes: 15));
       await recipient.close();
       // A separate package also gives the child its own native-asset directory;
       // Windows cannot re-bundle a DLL already loaded by this test process.
       final probe = await Directory('${root.path}/probe').create();
+      final cipher = await copyPinnedWindowsProbeSqlcipher(probe);
       final sourcePackage = Directory.current.absolute.path;
       await File('${probe.path}/pubspec.yaml').writeAsString(
-        'name: backup_restore_probe\npublish_to: none\nenvironment:\n  sdk: ">=3.10.0 <4.0.0"\ndependencies:\n  info_storage:\n    path: ${jsonEncode(sourcePackage)}\nhooks:\n  user_defines:\n    sqlite3:\n      source: sqlcipher\n',
+        'name: backup_restore_probe\npublish_to: none\nenvironment:\n  sdk: ">=3.10.0 <4.0.0"\ndependencies:\n  info_storage:\n    path: ${jsonEncode(sourcePackage)}\nhooks:\n  user_defines:\n    sqlite3:\n      source: system\n      name: ${jsonEncode(cipher.absolute.uri.toString())}\n',
       );
-      await File(
-        'test/fixtures/restore_child.dart',
-      ).copy('${probe.path}/restore_child.dart');
+      await File('test/fixtures/restore_child.dart')
+          .copy('${probe.path}/restore_child.dart');
       final resolution = await Process.run(Platform.resolvedExecutable, [
         'pub',
         'get',
@@ -115,7 +118,7 @@ void main() {
       child.exitCode.then((code) async {
         if (!ready.isCompleted)
           ready.completeError(
-            StateError('Backup fixture startup failed ($code).'),
+            StateError('Backup fixture startup failed ($code): ${await errors}'),
           );
       });
       child.stdin.writeln(
