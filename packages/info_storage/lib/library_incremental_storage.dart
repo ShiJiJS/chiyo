@@ -173,6 +173,25 @@ final class LibraryIncremental {
     return rows.isEmpty ? 0 : rows.single.read<int>('cursor');
   }
 
+  Future<({LibraryReplicaIdentity identity, int cursor, int conflicts})>
+  status() async {
+    await project();
+    final state = await _state();
+    final counts = await _db
+        .customSelect(
+          "SELECT coalesce(max(cursor),0) AS cursor,coalesce(sum(CASE WHEN outcome='conflict' THEN 1 ELSE 0 END),0) AS conflicts FROM library_sync_feed",
+        )
+        .getSingle();
+    return (
+      identity: LibraryReplicaIdentity(
+        libraryId: state.read<String>('library_id'),
+        replicaId: state.read<String>('replica_id'),
+      ),
+      cursor: counts.read<int>('cursor'),
+      conflicts: counts.read<int>('conflicts'),
+    );
+  }
+
   Future<void> advanceProgress(
     String peerReplicaId, {
     required int expected,

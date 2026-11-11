@@ -90,6 +90,10 @@ dart run bin/server.dart serve /absolute/private/server.json
 - `POST /v1/owner/replication/exports`：以稳定 operationId 准备完整加密内容；包含保留版本、文件、凭据、目录标签、顺序、回收及插件。设备设置、接入凭证和活动许可不进入内容包。
 - `POST /v1/owner/replication/imports`、`POST .../transfers/{id}/read`、`write`、`commit`：最多512 KiB一块传输加密文件；空目标验证全部内容后原子入库。原操作回执用 `GET .../operations/{operationId}` 查询，丢失回复不生成重复资料。
 - 初次传输使用独立的临时传输密钥，不要求开启手动备份或提供恢复密钥。服务最多保留2份传输、各最多256 MiB，30分钟后清理；重启后过期的加密暂存会清理。App 将未完成操作保存在本用户私有配置中，以便重新打开后核对和续传。
+- 增量扩展要求 `replication.incrementalWireVersion: 2` 和 `versionedInitial: true`。`GET .../changes` 读取副本与变化状态，`POST .../changes/feed` 分页返回不含正文的变化摘要；目录点击不调用这些接口。
+- `POST .../versioned-exports`、`versioned-imports` 为首次内容配套同一快照的版本表与变化起点。版本表通过 `.../transfers/{id}/baseline/read`、`baseline/write` 分块传送，不塞进单次大响应或落成明文文件；每份最多64 MiB，共用2份资源配额，因此这部分缓冲最多128 MiB。
+- `POST .../delta-exports`、`delta-imports` 准备单个已提交业务变化的加密文件包；正文及原文继续使用已有 `read`、`write`、`commit` 分块接口。增量接收不清空本机审批和聊天。所有版本表、增量状态及操作均只供用户管理接口使用，不向 Agent 开放。
+- `POST .../changes/receipts`、`changes/initial-receipts` 核对原始提交结果，包括版本表摘要；失去回复、清理传输文件或服务重启后，先查回执再决定是否重新传输。同操作编号换内容会拒绝；冲突回执表示双方候选已保存，不能当作已自动选择了一方。
 - `GET /v1/owner/catalog`：目录层级、标签、当前启用的内置及插件模板，以及实际待办数量。
 - `GET /v1/owner/summaries`：不含正文字段的资料摘要，供列表与关联名称查询。
 - `GET /v1/owner/information/{id}`：指定资料的完整内容和冻结模板布局。

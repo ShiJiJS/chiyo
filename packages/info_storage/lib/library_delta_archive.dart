@@ -38,6 +38,32 @@ extension LibraryIncrementalArchives on LibraryIncremental {
     required LibrarySyncBaseline baseline,
     required String expectedSourceReplicaId,
   }) async {
+    final prior = await initialReceipt(
+      operationId: operationId,
+      transfer: transfer,
+      baseline: baseline,
+      expectedSourceReplicaId: expectedSourceReplicaId,
+    );
+    if (prior != null) return prior;
+    if (!await replication.empty())
+      throw const StorageFailure('recipient_not_empty');
+    await start();
+    return replication.installInitial(
+      path: path,
+      transferKey: transferKey,
+      operationId: operationId,
+      transfer: transfer,
+      initializeIncremental: (contents) =>
+          start(initialContents: contents, baseline: baseline),
+    );
+  }
+
+  Future<LibraryInitialReceipt?> initialReceipt({
+    required String operationId,
+    required LibraryInitialTransfer transfer,
+    required LibrarySyncBaseline baseline,
+    required String expectedSourceReplicaId,
+  }) async {
     if (baseline.sourceReplicaId != expectedSourceReplicaId ||
         baseline.libraryId != transfer.libraryId ||
         baseline.snapshotId != transfer.snapshotId) {
@@ -52,17 +78,27 @@ extension LibraryIncrementalArchives on LibraryIncremental {
       }
       return prior;
     }
-    if (!await replication.empty())
-      throw const StorageFailure('recipient_not_empty');
-    await start();
-    return replication.installInitial(
-      path: path,
-      transferKey: transferKey,
-      operationId: operationId,
-      transfer: transfer,
-      initializeIncremental: (contents) =>
-          start(initialContents: contents, baseline: baseline),
-    );
+    return null;
+  }
+
+  /// Query the exact installed content and baseline digest without requiring
+  /// an already-cleaned archive or retransmitting its potentially large map.
+  Future<LibraryInitialReceipt?> initialReceiptManifest({
+    required String operationId,
+    required LibraryInitialTransfer transfer,
+    required LibrarySyncBaselineManifest baseline,
+  }) async {
+    if (baseline.libraryId != transfer.libraryId ||
+        baseline.snapshotId != transfer.snapshotId) {
+      throw const StorageFailure('sync_base_changed');
+    }
+    final prior = await replication.receipt(operationId, transfer);
+    if (prior == null) return null;
+    final state = await _state();
+    if (state.readNullable<String>('initial_baseline_digest') !=
+        baseline.digest)
+      throw const StorageFailure('sync_operation_conflict');
+    return prior;
   }
 
   /// Caller holds Owner's snapshot barrier. Reuse the existing encrypted,
