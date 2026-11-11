@@ -87,7 +87,8 @@ void main() {
         await File('${root.path}/$name').writeAsString('''
 import 'dart:io';
 void main() {
-  File('started.txt').writeAsStringSync('$name\\n', mode: FileMode.append);
+  final started = File('started-\$pid.txt')..createSync(exclusive: true);
+  started.writeAsStringSync('$name\\n', flush: true);
   stdout.writeln('operation-$name');
   stdout.writeln(Platform.environment['GH_TOKEN']);
   ${name == 'repo' ? 'exit(7);' : ''}
@@ -112,6 +113,22 @@ void main() {
         await removeFixture(root);
       });
       final responses = <Map<String, dynamic>>[];
+      // Separate workers can open an append file at the same EOF and overwrite
+      // one another on Windows. One exclusive marker per actual process keeps
+      // the exact launch count without weakening the no-replay assertion.
+      Future<List<String>> starts() async {
+        final values = <String>[];
+        await for (final entry in root.list()) {
+          if (entry is File &&
+              RegExp(
+                r'^started-\d+\.txt$',
+              ).hasMatch(entry.uri.pathSegments.last)) {
+            values.add(await entry.readAsString());
+          }
+        }
+        return values..sort();
+      }
+
       Future<Map<String, dynamic>> command(Map<String, Object?> input) async {
         cli.stdin.writeln(jsonEncode(input));
         expect(
@@ -226,15 +243,13 @@ void main() {
         h.service.owner.credentialUseRequests.single.credentialExpiresAt,
         expires,
       );
-      expect((await File('${root.path}/started.txt').readAsLines())..sort(), [
-        'api',
-        'repo',
-      ]);
+      expect(await starts(), ['api\n', 'repo\n']);
       expect(
         (await command(run('json-a', ['api', 'user'])))['duplicate'],
         isTrue,
       );
       expect(h.service.owner.credentialExecutions, hasLength(2));
+      expect(await starts(), ['api\n', 'repo\n']);
       expect(jsonEncode(responses), isNot(contains('synthetic-token')));
     },
     skip: !Platform.isWindows,

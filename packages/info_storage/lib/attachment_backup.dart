@@ -72,11 +72,13 @@ final class AttachmentBackupContainer {
           throw const StorageFailure('backup_staging_failed');
         }
       } else {
-        staging = await Directory(
+        staging = await InformationBackups._createStaging(
           stagingParent ?? output.parent.path,
-        ).createTemp('.agent-info-backup8-');
+          '.agent-info-backup8-',
+        );
       }
       final temporary = File('${staging.path}/backup.partial');
+      if (Platform.isWindows) WindowsPrivateFiles.reserve(temporary);
       db = sqlite.sqlite3.open(temporary.path);
       InformationBackups._key(db, recoveryKey);
       db.execute('PRAGMA journal_mode=DELETE');

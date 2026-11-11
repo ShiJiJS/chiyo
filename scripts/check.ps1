@@ -10,6 +10,8 @@ if ($WindowsRelease -and $MacosRelease) {
     throw 'Choose the release target matching this host.'
 }
 $projectRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'windows-test-environment.ps1')
+Initialize-WindowsTestEnvironment
 if ($FlutterBin) {
     $env:PATH = "$FlutterBin;$env:PATH"
 }
@@ -68,6 +70,12 @@ try {
     Invoke-Checked $flutterCommand @('test', '--no-pub', 'test/')
     if ($WindowsRelease) {
         Invoke-Checked $flutterCommand @('build', 'windows', '--release', '--no-pub')
+        $nativeBuild = Join-Path $projectRoot 'apps/desktop/build/windows/x64'
+        $cmakeEntry = Select-String -LiteralPath (Join-Path $nativeBuild 'CMakeCache.txt') -Pattern '^CMAKE_COMMAND:INTERNAL=(.+)$'
+        if (-not $cmakeEntry) { throw 'Cannot locate the release build CMake executable.' }
+        $cmake = $cmakeEntry.Matches.Groups[1].Value
+        Invoke-Checked $cmake @('--build', $nativeBuild, '--config', 'Release', '--target', 'desktop_instance_test')
+        Invoke-Checked (Join-Path $nativeBuild 'runner/instance-check/Release/desktop_instance_test.exe') @()
     }
     if ($MacosRelease) {
         $macFlutterSdk = Split-Path -Parent (Split-Path -Parent $flutterCommand)

@@ -163,4 +163,18 @@ void main() {
       expect((await probe.read()).status, 'bundle_invalid');
     },
   );
+
+  test('bounded verification checks late files and can recover after rejection', () async {
+    final original = 'SYNTHETIC_PAYLOAD_' * 512;
+    for (var index = 0; index < 32; index++) {
+      await declare('tools/synthetic/payload-$index.dat', original);
+    }
+    await writeManifest();
+    expect((await probe.read(rehash: true)).verified, isTrue);
+    final late = file('tools/synthetic/payload-31.dat');
+    await late.writeAsString('X' * original.length);
+    expect((await probe.read(rehash: true)).status, 'bundle_invalid');
+    await late.writeAsString(original);
+    expect((await probe.read(rehash: true)).verified, isTrue);
+  });
 }

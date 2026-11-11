@@ -19,7 +19,7 @@ WorkspaceRecordSummary summary(
 );
 
 void main() {
-  test('Mac Chinese names sort by locale, not Unicode code points', () {
+  test('desktop Chinese names sort by locale, not Unicode code points', () {
     final records = [
       summary('z', 'Zoo'),
       summary('c', '长沙'),
@@ -28,8 +28,15 @@ void main() {
       summary('l', '阿里云'),
     ];
     sortWorkspaceSummaries(records, WorkspaceSort.name);
-    expect(records.map((r) => r.name), ['阿里云', '北京', '长沙', 'Alpha', 'Zoo']);
-  }, skip: !Platform.isMacOS);
+    // Each platform retains its native Chinese/Latin grouping; both collate
+    // Chinese names by pronunciation rather than their Unicode code points.
+    expect(
+      records.map((r) => r.name),
+      Platform.isWindows
+          ? ['Alpha', 'Zoo', '阿里云', '北京', '长沙']
+          : ['阿里云', '北京', '长沙', 'Alpha', 'Zoo'],
+    );
+  }, skip: !Platform.isMacOS && !Platform.isWindows);
 
   test(
     'canonical equivalents use typed-ID ties and remain stable on reuse',
@@ -49,7 +56,7 @@ void main() {
         ]);
       }
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
 
   test(
@@ -70,8 +77,22 @@ void main() {
       expect(ids.indexOf('supp-z'), lessThan(ids.indexOf('supp-a')));
       expect(ids.indexOf('10'), lessThan(ids.indexOf('2')));
     },
-    skip: !Platform.isMacOS,
+    skip: !Platform.isMacOS && !Platform.isWindows,
   );
+
+  test('empty names collate before text and keep typed-ID ties', () {
+    final records = [
+      summary('text', '北京'),
+      summary('same', ''),
+      summary('same', '', kind: WorkspaceRecordKind.credential),
+    ];
+    sortWorkspaceSummaries(records, WorkspaceSort.name);
+    expect(records.map((r) => r.ref.key), [
+      'credential:same',
+      'information:same',
+      'information:text',
+    ]);
+  }, skip: !Platform.isMacOS && !Platform.isWindows);
 
   test('updated-date ties retain typed-ID order independently of locale', () {
     final records = [

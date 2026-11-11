@@ -70,6 +70,12 @@ if (-not (Test-Path $flutter)) { throw 'Run .\scripts\dev-windows.ps1 setup firs
 $actualRevision = & git -C $sdkRoot rev-parse HEAD
 if ($LASTEXITCODE -ne 0 -or $actualRevision -ne $revision) { throw "Flutter revision mismatch: expected $revision, got $actualRevision" }
 
+. (Join-Path $PSScriptRoot 'windows-test-environment.ps1')
+if ($Command -in @('setup', 'test', 'smoke') -or
+    ($Command -in @('flutter', 'dart') -and $ToolArguments -contains 'test')) {
+    Initialize-WindowsTestEnvironment
+}
+
 switch ($Command) {
     'setup' {
         Invoke-Checked $flutter @('--version')

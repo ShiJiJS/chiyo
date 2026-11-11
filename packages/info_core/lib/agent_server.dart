@@ -328,6 +328,11 @@ class AgentProtocol {
       }
     }
     switch (path) {
+      case '/health':
+        if (body.isNotEmpty) throw const AccessFailure('invalid_request');
+        // Transport readiness is authenticated by AgentServer. It must not
+        // depend on optional tool inventory or inspect any library contents.
+        return {'protocolVersion': 1, 'status': 'ok'};
       case '/capabilities':
         if (body.isNotEmpty) throw const CredentialUseFailure('unknown_field');
         final tools = await _credentialTools?.call();
