@@ -490,6 +490,56 @@ void main() {
     },
   );
   test(
+    'unchanged refresh preserves the confirmed quit scope and submits only once',
+    () async {
+      final changes = StreamController<WorkspaceRecordRef?>.broadcast(
+        sync: true,
+      );
+      final port = RuntimePort(s.runtime);
+      final m = WorkspaceRuntimeController(port, changes.stream);
+      addTearDown(changes.close);
+      addTearDown(m.dispose);
+      await m.load();
+      await m.prepareQuit();
+      final preview = m.quitPreview!;
+      // Owner metadata and periodic maintenance can announce a refresh without
+      // changing any session, material, copy or native-window fact.
+      changes.add(null);
+      expect(m.canQuit, isFalse); // Fresh observation is still required.
+      await m.load();
+      expect(m.quitPreview, same(preview));
+      expect(m.failure, isNull);
+      expect(port.releases, isEmpty);
+      await m.write(WorkspaceRuntimeAction.quit);
+      expect(port.writes.length, 1);
+      expect(m.value!.phase, WorkspaceRuntimePhase.stopped);
+    },
+  );
+  test(
+    'changed runtime facts invalidate quit confirmation before another submission',
+    () async {
+      final changes = StreamController<WorkspaceRecordRef?>.broadcast(
+        sync: true,
+      );
+      final port = RuntimePort(s.runtime);
+      final m = WorkspaceRuntimeController(port, changes.stream);
+      addTearDown(changes.close);
+      addTearDown(m.dispose);
+      await m.load();
+      await m.prepareQuit();
+      final preview = m.quitPreview!;
+      await write(WorkspaceRuntimeAction.hideWindow);
+      changes.add(null);
+      expect(m.canQuit, isFalse);
+      await m.load();
+      expect(m.quitPreview, isNull);
+      expect(m.failure!.code, 'quit_changed');
+      expect(port.releases, [preview.token]);
+      await m.write(WorkspaceRuntimeAction.quit);
+      expect(port.writes, isEmpty);
+    },
+  );
+  test(
     'quit receipt counts must match original confirmation; lookup never substitutes a different scope or repeats quit',
     () async {
       await s.prepareRuntimeMaintenance();
