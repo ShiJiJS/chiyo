@@ -84,6 +84,9 @@ void main() {
           previous.execute(
             'ALTER TABLE library_sync_progress DROP COLUMN uploaded_cursor',
           );
+          previous.execute('DROP TABLE information_revision_snapshots');
+          previous.execute('DROP TABLE credential_material_snapshots');
+          previous.execute('DROP TABLE library_file_branch_format');
           previous.execute('UPDATE library_format SET version=58');
           previous.execute('PRAGMA user_version=58');
         } finally {

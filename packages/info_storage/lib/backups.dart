@@ -34,7 +34,9 @@ class BackupContents {
             n +
             (_templatePackageFromRow(row).definition?.templates.length ?? 0),
       );
-  int get revisionCount => _tables['information_revisions']!.length;
+  int get revisionCount =>
+      _tables['information_revisions']!.length +
+      (_tables['information_revision_snapshots']?.length ?? 0);
   int get recycleCount => _tables['recycle_entries']!
       .where((r) => jsonDecode(r['payload'] as String)['state'] == 'available')
       .length;
@@ -42,7 +44,9 @@ class BackupContents {
   int get accessRecordCount => _tables['access_records']!.length;
   int get requestHistoryCount => _tables['request_history']!.length;
   int get credentialCount => _tables['managed_credentials']!.length;
-  int get credentialVersionCount => _tables['credential_materials']!.length;
+  int get credentialVersionCount =>
+      _tables['credential_materials']!.length +
+      (_tables['credential_material_snapshots']?.length ?? 0);
   int get credentialUseHistoryCount =>
       _tables['credential_use_requests']!.length;
   int get credentialExecutionCount => _tables['credential_executions']!.length;
@@ -188,6 +192,27 @@ class InformationBackups {
   static final _v21Columns = Map<String, List<String>>.unmodifiable({
     ..._v20Columns,
     'library_order_state': ['id', 'payload'],
+  });
+
+  static final _v25Columns = Map<String, List<String>>.unmodifiable({
+    ..._v21Columns,
+    'information_revision_snapshots': [
+      'item_id',
+      'version',
+      'snapshot_id',
+      'replaced_at',
+      'payload',
+    ],
+  });
+
+  static final _v26Columns = Map<String, List<String>>.unmodifiable({
+    ..._v25Columns,
+    'credential_material_snapshots': [
+      'credential_id',
+      'version',
+      'snapshot_id',
+      'payload',
+    ],
   });
 
   // Portable formats 1–7 keep their table keys independent of the schema17+
@@ -466,6 +491,9 @@ class InformationBackups {
       final hasGrantVersions = tables['grant_history']!.any(
         (r) => _backupJson(r).containsKey('itemVersions'),
       );
+      final hasGrantSnapshots = tables['grant_history']!.any(
+        (r) => _backupJson(r).containsKey('itemSnapshots'),
+      );
       final credentialClassification = tables['managed_credentials']!.any(
         (r) =>
             _backupJson(r).containsKey('directoryId') ||
@@ -477,6 +505,27 @@ class InformationBackups {
       final accountMetadata = tables['managed_credentials']!.any(
         (r) => (_backupJson(r)['account'] as String? ?? '').isNotEmpty,
       );
+      final hasRevisionSnapshots =
+          await _repository._hasRevisionSnapshots() &&
+          (await _repository._db
+                  .customSelect(
+                    'SELECT 1 FROM information_revision_snapshots LIMIT 1',
+                  )
+                  .get())
+              .isNotEmpty;
+      final hasCredentialSnapshots =
+          (await _repository._db
+                  .customSelect(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='credential_material_snapshots'",
+                  )
+                  .get())
+              .isNotEmpty &&
+          (await _repository._db
+                  .customSelect(
+                    'SELECT 1 FROM credential_material_snapshots LIMIT 1',
+                  )
+                  .get())
+              .isNotEmpty;
       final longTermAttachments = versions.isNotEmpty;
       final fileBranches = versions.any(
         (v) => v.seriesId != v.reference.attachmentId,
@@ -502,6 +551,9 @@ class InformationBackups {
                   .get())
               .isNotEmpty;
       final extendedColumns =
+          hasCredentialSnapshots ||
+          hasRevisionSnapshots ||
+          hasGrantSnapshots ||
           fileBranches ||
           sessionSshGrants ||
           orderedLibrary ||
@@ -514,7 +566,13 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = fileBranches
+        formatVersion = hasCredentialSnapshots
+            ? 26
+            : hasRevisionSnapshots
+            ? 25
+            : hasGrantSnapshots
+            ? 24
+            : fileBranches
             ? 23
             : sessionSshGrants
             ? 22
@@ -542,7 +600,14 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (fileBranches || sessionSshGrants || orderedLibrary
+            in (hasCredentialSnapshots
+                    ? _v26Columns
+                    : hasRevisionSnapshots
+                    ? _v25Columns
+                    : hasGrantSnapshots ||
+                          fileBranches ||
+                          sessionSshGrants ||
+                          orderedLibrary
                     ? _v21Columns
                     : directoryRecycle
                     ? _v20Columns
@@ -652,6 +717,9 @@ class InformationBackups {
                 'library_sync_feed',
                 'library_sync_progress',
                 'library_sync_blobs',
+                'library_sync_resolutions',
+                'library_sync_parent_versions',
+                'library_sync_resolution_commands',
                 'library_file_branch_format',
               }.contains(name),
             )) {
@@ -948,6 +1016,9 @@ class InformationBackups {
                     'library_sync_feed',
                     'library_sync_progress',
                     'library_sync_blobs',
+                    'library_sync_resolutions',
+                    'library_sync_parent_versions',
+                    'library_sync_resolution_commands',
                     'library_file_branch_format',
                   }.contains(name),
                 )) {
@@ -972,6 +1043,9 @@ class InformationBackups {
           'library_sync_feed',
           'library_sync_progress',
           'library_sync_blobs',
+          'library_sync_resolutions',
+          'library_sync_parent_versions',
+          'library_sync_resolution_commands',
           'library_sync_change_state',
           'library_sync_dirty',
           'library_sync_changes',
@@ -1081,14 +1155,33 @@ class InformationBackups {
         if (contents.formatVersion >= 23) {
           await _repository._requireAdmissionFormat(_libraryFileBranchFormat);
         }
+        if (contents.formatVersion >= 24) {
+          await _repository._requireAdmissionFormat(
+            _libraryGrantSnapshotFormat,
+          );
+        }
         // Directory parents may appear after a moved child in source row order.
         await _repository._db.customStatement('PRAGMA defer_foreign_keys = ON');
         if (contents.formatVersion >= 8) {
           if (reader == null) throw const StorageFailure('invalid_backup');
           await _installAttachmentBodies(contents, reader);
         }
+        if (contents.formatVersion >= 26) {
+          await _repository._requireAdmissionFormat(
+            _libraryCredentialArchiveFormat,
+          );
+        }
+        if (contents.formatVersion >= 25) {
+          await _repository._requireAdmissionFormat(
+            _libraryRevisionSnapshotFormat,
+          );
+        }
         for (final table
-            in (contents.formatVersion >= 21
+            in (contents.formatVersion >= 26
+                    ? _v26Columns
+                    : contents.formatVersion >= 25
+                    ? _v25Columns
+                    : contents.formatVersion >= 21
                     ? _v21Columns
                     : contents.formatVersion >= 20
                     ? _v20Columns
@@ -1165,6 +1258,9 @@ class InformationBackups {
           21,
           22,
           23,
+          24,
+          25,
+          26,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1187,7 +1283,9 @@ class InformationBackups {
       12 || 13 || 14 => _v12Columns,
       15 || 16 || 17 || 18 || 19 => _v15Columns,
       20 => _v20Columns,
-      21 || 22 || 23 => _v21Columns,
+      21 || 22 || 23 || 24 => _v21Columns,
+      25 => _v25Columns,
+      26 => _v26Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1407,6 +1505,7 @@ class InformationBackups {
       allowRemovedOrganization: (decoded['version'] as int) >= 10,
       allowLayouts: (decoded['version'] as int) >= 12,
       allowGrantVersions: (decoded['version'] as int) >= 13,
+      allowGrantSnapshots: (decoded['version'] as int) >= 24,
     );
     _validateBackupCredentials(
       tables,

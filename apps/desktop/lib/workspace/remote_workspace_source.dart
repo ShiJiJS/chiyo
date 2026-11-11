@@ -134,6 +134,7 @@ class RemoteWorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) =>
       _history.previewRevision(ref, version, expectedVersion: expectedVersion);
   @override
@@ -191,8 +192,15 @@ class RemoteWorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
-  }) => files.preview(record, fieldKey, version: version, page: page);
+  }) => files.preview(
+    record,
+    fieldKey,
+    version: version,
+    exact: exact,
+    page: page,
+  );
   @override
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input) =>
       files.importFile(input);

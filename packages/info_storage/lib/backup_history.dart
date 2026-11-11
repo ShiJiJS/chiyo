@@ -87,6 +87,7 @@ void _validateBackupHistory(
   bool allowRemovedOrganization = false,
   bool allowLayouts = false,
   bool allowGrantVersions = false,
+  bool allowGrantSnapshots = false,
 }) {
   final directories = tables['information_directories']!
       .map((r) => r['id'])
@@ -204,6 +205,18 @@ void _validateBackupHistory(
         !revisionPairs.add(jsonEncode([item.id, item.version]))) {
       _backupInvalid();
     }
+    recordedDate(row['replaced_at']);
+  }
+  final snapshotIds = <String>{};
+  for (final row
+      in tables['information_revision_snapshots'] ??
+          const <Map<String, Object?>>[]) {
+    final item = snapshot(_backupJson(row));
+    if (item.id != row['item_id'] ||
+        item.version != row['version'] ||
+        row['snapshot_id'] != informationSnapshotId(item) ||
+        !snapshotIds.add('${item.id}:${row['snapshot_id']}'))
+      _backupInvalid();
     recordedDate(row['replaced_at']);
   }
   final entryIds = <String>{};
@@ -383,6 +396,7 @@ void _validateBackupHistory(
         'externalChatId',
         'purpose',
         if (allowGrantVersions) 'itemVersions',
+        if (allowGrantSnapshots) 'itemSnapshots',
       },
     );
     final id = _backupId(j, 'id');
@@ -431,6 +445,15 @@ void _validateBackupHistory(
         _backupInvalid();
       }
       count(versions.length);
+    }
+    if (j.containsKey('itemSnapshots')) {
+      try {
+        final history = GrantHistory.fromJson(j);
+        if (history.itemSnapshots.isEmpty) _backupInvalid();
+        count(history.itemSnapshots.length);
+      } on Object {
+        _backupInvalid();
+      }
     }
     final events = _backupList(j['events'], 2);
     if (events.isEmpty) _backupInvalid();
@@ -556,17 +579,22 @@ extension _CompleteBackups on InformationBackups {
       for (final row in tables['revision_purge_facts']!)
         jsonEncode([row['item_id'], row['version']]),
     };
-    tables['information_revisions']!.removeWhere((row) {
-      if (_backupDate(row['replaced_at']).isAfter(cutoff)) return false;
-      if (purges.add(jsonEncode([row['item_id'], row['version']]))) {
-        tables['revision_purge_facts']!.add({
-          'item_id': row['item_id'],
-          'version': row['version'],
-          'purged_at': now.toIso8601String(),
-        });
-      }
-      return true;
-    });
+    for (final table in [
+      'information_revisions',
+      'information_revision_snapshots',
+    ]) {
+      tables[table]?.removeWhere((row) {
+        if (_backupDate(row['replaced_at']).isAfter(cutoff)) return false;
+        if (purges.add(jsonEncode([row['item_id'], row['version']]))) {
+          tables['revision_purge_facts']!.add({
+            'item_id': row['item_id'],
+            'version': row['version'],
+            'purged_at': now.toIso8601String(),
+          });
+        }
+        return true;
+      });
+    }
     tables['recycle_entries'] = tables['recycle_entries']!.map((row) {
       final entry = RecycleEntry.fromJson(_backupJson(row));
       if (entry.state != RecycleState.available ||
@@ -720,7 +748,10 @@ extension _CompleteBackups on InformationBackups {
       );
     }
 
-    for (final row in tables['information_revisions']!) {
+    for (final row in [
+      ...tables['information_revisions']!,
+      ...?tables['information_revision_snapshots'],
+    ]) {
       keep(informationFromJson(_backupJson(row)));
     }
     for (final row in tables['recycle_entries']!) {
@@ -810,14 +841,18 @@ extension _CompleteBackups on InformationBackups {
     final requests = tables['request_history']!
         .map((r) => RequestHistory.fromJson(_backupJson(r)))
         .toList();
-    final revisions = tables['information_revisions']!
-        .map(
-          (r) => InformationRevision(
-            informationFromJson(_backupJson(r)),
-            _backupDate(r['replaced_at']),
-          ),
-        )
-        .toList();
+    final revisions =
+        [
+              ...tables['information_revisions']!,
+              ...?tables['information_revision_snapshots'],
+            ]
+            .map(
+              (r) => InformationRevision(
+                informationFromJson(_backupJson(r)),
+                _backupDate(r['replaced_at']),
+              ),
+            )
+            .toList();
     final recycle = tables['recycle_entries']!
         .map((r) => RecycleEntry.fromJson(_backupJson(r)))
         .toList();

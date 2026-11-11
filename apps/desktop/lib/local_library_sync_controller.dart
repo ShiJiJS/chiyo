@@ -7,7 +7,7 @@ import 'workspace/workspace_sync.dart';
 /// Lifecycle for the real local replica: one startup pass, explicit toolbar
 /// refresh and bounded periodic polling. Folder selection never triggers it.
 class LocalLibrarySyncController extends ChangeNotifier
-    implements WorkspaceSync {
+    implements WorkspaceSync, WorkspaceSyncReview {
   LocalLibrarySyncController({
     required this.sync,
     required this.changed,
@@ -114,6 +114,28 @@ class LocalLibrarySyncController extends ChangeNotifier
       }
     }());
     return completer.future;
+  }
+
+  @override
+  Future<List<Map<String, Object?>>> reviewConflicts() async {
+    await _running;
+    return sync.reviewConflicts();
+  }
+
+  @override
+  Future<void> resolveConflict(
+    Map<String, Object?> reviewed,
+    bool useIncoming,
+    String operationId,
+  ) async {
+    await pause();
+    try {
+      await sync.resolveConflict(reviewed, useIncoming, operationId);
+      changed();
+    } finally {
+      await restore();
+    }
+    await synchronize();
   }
 
   @override

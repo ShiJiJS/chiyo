@@ -22,6 +22,8 @@ extension _EncryptedLifecycle on EncryptedInformationRepository {
 
   Future<void> _validateLifecycle(InformationLifecycleReceipt receipt) async {
     final command = receipt.command;
+    if (command.snapshotId != null)
+      await _requireAdmissionFormat(_libraryCredentialArchiveFormat);
     if (await _lifecycleReceipt(command.operationId) != null)
       throw const AccessFailure('operation_conflict');
     if (command.expectedCatalogVersion != null &&

@@ -102,6 +102,7 @@ abstract interface class WorkspaceSource
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   });
   Future<WorkspaceRecycleResults> queryRecycled({
     String keyword = '',
@@ -124,6 +125,7 @@ abstract interface class WorkspaceSource
     WorkspaceRecordRef record,
     String fieldKey, {
     int? version,
+    WorkspaceFileRef? exact,
     int page = 0,
   });
   Future<WorkspaceRecordRef> importFile(WorkspaceFileImport input);

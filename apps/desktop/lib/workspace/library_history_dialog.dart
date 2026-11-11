@@ -263,6 +263,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
       final preview = await widget.source.previewRevision(
         widget.ref,
         revision.version,
+        snapshotId: revision.snapshotId,
         expectedVersion: _current!.version,
       );
       final catalog = await widget.source.loadCatalog();
@@ -324,6 +325,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
       expectedVersion: preview.current.version,
       expectedCatalogVersion: preview.catalogVersion,
       revisionVersion: preview.archive.detail.version,
+      snapshotId: preview.archive.snapshotId,
     );
     final result = await _mutation.submit(
       intent,
@@ -335,6 +337,7 @@ class _HistoryDialogState extends State<_HistoryDialog> {
           expectedCatalogVersion: preview.catalogVersion,
           action: WorkspaceRecordAction.restoreRevision,
           revisionVersion: preview.archive.detail.version,
+          snapshotId: preview.archive.snapshotId,
         ),
       ),
     );
@@ -475,7 +478,14 @@ class _HistoryDialogState extends State<_HistoryDialog> {
                     const Text('尚无历史版本。编辑保存后可在这里比较和恢复。'),
                   for (final r in _revisions ?? <WorkspaceRevision>[])
                     DesktopButton(
-                      key: ValueKey('library-version-${r.version}'),
+                      key: ValueKey(
+                        (_revisions ?? <WorkspaceRevision>[])
+                                    .where((v) => v.version == r.version)
+                                    .length >
+                                1
+                            ? 'library-version-${r.version}-${r.snapshotId}'
+                            : 'library-version-${r.version}',
+                      ),
                       kind: DesktopButtonKind.quiet,
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.symmetric(vertical: 14),

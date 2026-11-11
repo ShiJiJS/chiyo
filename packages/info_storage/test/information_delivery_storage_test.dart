@@ -492,10 +492,10 @@ void main() {
       final key = await enableTestBackups(repo.backups),
           path = '${root.path}/archive.aimbackup';
       await service.owner.exportLibrary(() => repo.backups.exportTo(path));
-      await checkOldReaders(path, key, 17);
+      await checkOldReaders(path, key, 24);
       final reader = await AttachmentBackupContainer.openValidated(path, key);
       try {
-        expect(reader.formatVersion, 17);
+        expect(reader.formatVersion, 24);
         final fact =
             jsonDecode(
                   reader.tables['information_deliveries']!.single['payload']
@@ -529,7 +529,7 @@ void main() {
         await target.close();
       });
       final preview = await target.backups.inspect(path, key);
-      expect(preview.formatVersion, 17);
+      expect(preview.formatVersion, 24);
       expect(preview.fileDeliveryCount, 1);
       await restoredService.owner.restoreLibrary(
         () => target.backups.restore(preview),
@@ -759,6 +759,10 @@ void main() {
       final pending = await cli.command({
         'command': 'request',
         'purpose': '合成文件及文字',
+        'operationId': 'synthetic-mixed-files',
+        'submissionVersion': 1,
+        'agentName': 'Synthetic CLI',
+        'externalChatId': 'synthetic-mixed-chat',
         'fields': [
           {'itemId': item.id, 'fieldId': item.fields.single.id},
           for (final f in text.fields) {'itemId': text.id, 'fieldId': f.id},
@@ -990,7 +994,7 @@ void main() {
         final after = '${root.path}/after.aimbackup';
         await repo.backups.exportTo(after);
         final checked = await repo.backups.inspect(after, recovery);
-        expect(checked.formatVersion, 17);
+        expect(checked.formatVersion, 24);
         expect(checked.fileDeliveryCount, 1);
         expect(checked.attachmentBytes, data.length);
       } finally {

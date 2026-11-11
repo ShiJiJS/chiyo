@@ -344,7 +344,7 @@ void main() {
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
             .join();
         db.execute('PRAGMA key = "x\'$key\'"');
-        expect(db.select('PRAGMA user_version').single.values.single, 55);
+        expect(db.select('PRAGMA user_version').single.values.single, 61);
       } finally {
         db.close();
       }

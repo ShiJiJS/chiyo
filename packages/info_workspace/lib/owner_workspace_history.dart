@@ -63,6 +63,7 @@ class OwnerWorkspaceHistory {
       archivedAt: at,
       wholeItem: wholeItem,
       directoryName: directoryName ?? _directory(item),
+      snapshotId: core.informationSnapshotId(item),
       targets: {for (final target in targets) target.ref: target},
     );
   }
@@ -77,6 +78,7 @@ class OwnerWorkspaceHistory {
             _codec.summary(revision.item, tagNames: _tagNames),
             revision.item.version,
             revision.replacedAt,
+            snapshotId: core.informationSnapshotId(revision.item),
           ),
       ];
     } on core.AccessFailure catch (e) {
@@ -88,13 +90,19 @@ class OwnerWorkspaceHistory {
     WorkspaceRecordRef ref,
     int version, {
     required int expectedVersion,
+    String? snapshotId,
   }) async {
     _ordinary(ref);
     try {
       // Enforce retention before looking up the historical body.
       await owner.revisionsFor(ref.id);
       final catalog = await owner.informationClassificationSnapshot();
-      final preview = owner.previewRevision(ref.id, version, expectedVersion);
+      final preview = owner.previewRevision(
+        ref.id,
+        version,
+        expectedVersion,
+        snapshotId: snapshotId,
+      );
       return WorkspaceRevisionPreview(
         current: _codec.decode(preview.current, tagNames: _tagNames),
         archive: await _archive(
@@ -267,6 +275,7 @@ class OwnerWorkspaceHistory {
           ),
           expectedVersion: change.expectedVersion,
           revisionVersion: change.revisionVersion,
+          snapshotId: change.snapshotId,
           entryId: change.entryId,
           expectedCatalogVersion: change.expectedCatalogVersion,
           expectedCurrentVersion: change.expectedCurrentVersion,
@@ -308,6 +317,7 @@ class OwnerWorkspaceHistory {
         ref: ref,
         expectedVersion: command.expectedVersion,
         revisionVersion: command.revisionVersion,
+        snapshotId: command.snapshotId,
         entryId: command.entryId,
         expectedCatalogVersion: command.expectedCatalogVersion,
         expectedCurrentVersion: command.expectedCurrentVersion,

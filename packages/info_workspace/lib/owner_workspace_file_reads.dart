@@ -73,9 +73,10 @@ class OwnerWorkspaceFileReads {
     WorkspaceRecordRef record,
     String key, {
     int? version,
+    WorkspaceFileRef? exact,
   }) async {
     return owner.readInformationAttachment(
-      await reference(record, key, version: version),
+      await reference(record, key, version: version, exact: exact),
     );
   }
 

@@ -165,7 +165,8 @@ extension LibraryIncrementalReceive on LibraryIncremental {
         });
         var conflict =
             decision.action == LibrarySyncAction.conflict ||
-            _ownsActiveHistory(batch);
+            _ownsActiveHistory(batch) ||
+            _dependencyConflict(current.replacing(batch));
         // Originals are staged even for conflicts so both candidates survive
         // disconnection and future local purging of the other version.
         for (final change in batch.changes.where(
@@ -198,6 +199,8 @@ extension LibraryIncrementalReceive on LibraryIncremental {
             await _saveUnit(change.key, change.version, change.content);
           }
         }
+        await _rememberParents(batch);
+        if (!conflict) await _settleConflicts(batch);
         await _db.customStatement(
           'INSERT INTO library_sync_feed(source_id,operation_id,sequence,digest,payload,outcome,local_candidate) VALUES(?,?,?,?,?,?,?)',
           [
@@ -389,7 +392,15 @@ extension LibraryIncrementalReceive on LibraryIncremental {
       );
       return;
     }
-    final columns = InformationBackups._v21Columns[portable]!;
+    if (portable == 'information_revision_snapshots')
+      await _repo._requireAdmissionFormat(_libraryRevisionSnapshotFormat);
+    if (portable == 'credential_material_snapshots')
+      await _repo._requireAdmissionFormat(_libraryCredentialArchiveFormat);
+    if (portable == 'grant_history') {
+      await _repo._writeGrantHistory(GrantHistory.fromJson(_backupJson(row)));
+      return;
+    }
+    final columns = InformationBackups._v26Columns[portable]!;
     final values = columns.map((c) => row[c]).toList();
     final update = columns
         .where((c) => !keys.contains(c))

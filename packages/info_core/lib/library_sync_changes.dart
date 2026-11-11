@@ -98,12 +98,35 @@ final class LibrarySyncBatch {
     required this.operationId,
     required this.sequence,
     required Iterable<LibrarySyncEdit> edits,
-  }) {
+    Map<LibrarySyncKey, Set<String>> acceptedBases = const {},
+    Map<LibrarySyncKey, Map<String, Object?>> dependencies = const {},
+    Map<LibrarySyncKey, String> dependencyVersions = const {},
+  }) : dependencyVersions = Map.unmodifiable(dependencyVersions),
+       dependencies = Map.unmodifiable({
+         for (final e in dependencies.entries) e.key: _object(e.value),
+       }),
+       acceptedBases = Map.unmodifiable({
+         for (final e in acceptedBases.entries)
+           e.key: Set<String>.unmodifiable(e.value),
+       }) {
     libraryReplicaId(libraryId);
     libraryReplicaId(sourceReplicaId);
     replicaOperationId(operationId);
     if (sequence < 1 || sequence > 9007199254740991) {
       throw const FormatException('Invalid synchronization sequence');
+    }
+    if (this.dependencies.length > maxChanges ||
+        this.dependencies.keys.any(
+          (k) =>
+              k.kind != LibrarySyncKind.directory &&
+              k.kind != LibrarySyncKind.tag,
+        ))
+      throw const FormatException('Invalid synchronization dependencies');
+    if (dependencies.length != dependencyVersions.length ||
+        dependencies.keys.any((k) => !dependencyVersions.containsKey(k)))
+      throw const FormatException('Missing dependency versions');
+    for (final v in dependencyVersions.values) {
+      replicaDigest(v);
     }
     final input = edits.toList();
     if (input.isEmpty || input.length > maxChanges) {
@@ -111,6 +134,19 @@ final class LibrarySyncBatch {
     }
     if (input.map((e) => e.key).toSet().length != input.length) {
       throw const FormatException('Duplicate synchronization entity');
+    }
+    if (this.acceptedBases.keys.any(
+          (key) => !input.any((edit) => edit.key == key),
+        ) ||
+        this.acceptedBases.values.any(
+          (values) => values.isEmpty || values.length > 2,
+        )) {
+      throw const FormatException('Invalid resolution parents');
+    }
+    for (final values in this.acceptedBases.values) {
+      for (final value in values) {
+        replicaDigest(value);
+      }
     }
     input.sort((a, b) {
       final kind = a.key.kind.index.compareTo(b.key.kind.index);
@@ -135,6 +171,9 @@ final class LibrarySyncBatch {
   static const maxBytes = 64 * 1024 * 1024;
   final String libraryId, sourceReplicaId, operationId;
   final int sequence;
+  final Map<LibrarySyncKey, Set<String>> acceptedBases;
+  final Map<LibrarySyncKey, Map<String, Object?>> dependencies;
+  final Map<LibrarySyncKey, String> dependencyVersions;
   late final List<LibrarySyncChange> changes;
   late final String digest;
   Map<String, Object?> get _identity => {
@@ -143,6 +182,24 @@ final class LibrarySyncBatch {
     'sourceReplicaId': sourceReplicaId,
     'operationId': operationId,
     'sequence': sequence,
+    if (dependencies.isNotEmpty)
+      'dependencies': [
+        for (final e
+            in (dependencies.entries.toList()
+              ..sort((a, b) => a.key.toString().compareTo(b.key.toString()))))
+          {
+            'key': e.key.toJson(),
+            'version': dependencyVersions[e.key],
+            'content': e.value,
+          },
+      ],
+    if (acceptedBases.isNotEmpty)
+      'acceptedBases': [
+        for (final entry
+            in (acceptedBases.entries.toList()
+              ..sort((a, b) => a.key.toString().compareTo(b.key.toString()))))
+          {'key': entry.key.toJson(), 'versions': entry.value.toList()..sort()},
+      ],
   };
   Map<String, Object?> get _body => {
     ..._identity,
@@ -163,6 +220,8 @@ final class LibrarySyncBatch {
       'sequence',
       'changes',
       'digest',
+      if (value.containsKey('acceptedBases')) 'acceptedBases',
+      if (value.containsKey('dependencies')) 'dependencies',
     });
     if (value['wireVersion'] != 2 ||
         value['sequence'] is! int ||
@@ -193,7 +252,49 @@ final class LibrarySyncBatch {
       );
       versions[key] = replicaDigest(change['version']);
     }
+    final parents = <LibrarySyncKey, Set<String>>{};
+    if (value.containsKey('acceptedBases')) {
+      final rawParents = value['acceptedBases'];
+      if (rawParents is! List ||
+          rawParents.isEmpty ||
+          rawParents.length > raw.length)
+        throw const FormatException('Invalid resolution parents');
+      for (final value in rawParents) {
+        final entry = _object(value);
+        _fields(entry, {'key', 'versions'});
+        final key = LibrarySyncKey.fromJson(_object(entry['key']));
+        final versions = entry['versions'];
+        if (versions is! List ||
+            versions.isEmpty ||
+            versions.length > 2 ||
+            parents.containsKey(key))
+          throw const FormatException('Invalid resolution parents');
+        final values = versions.map(replicaDigest).toSet();
+        if (values.length != versions.length)
+          throw const FormatException('Duplicate resolution parent');
+        parents[key] = values;
+      }
+    }
+    final dependencies = <LibrarySyncKey, Map<String, Object?>>{};
+    final dependencyVersions = <LibrarySyncKey, String>{};
+    if (value.containsKey('dependencies')) {
+      final list = value['dependencies'];
+      if (list is! List || list.isEmpty || list.length > maxChanges)
+        throw const FormatException('Invalid synchronization dependencies');
+      for (final raw in list) {
+        final entry = _object(raw);
+        _fields(entry, {'key', 'version', 'content'});
+        final key = LibrarySyncKey.fromJson(_object(entry['key']));
+        if (dependencies.containsKey(key))
+          throw const FormatException('Duplicate synchronization dependency');
+        dependencies[key] = _object(entry['content']);
+        dependencyVersions[key] = replicaDigest(entry['version']);
+      }
+    }
     final batch = LibrarySyncBatch(
+      dependencies: dependencies,
+      dependencyVersions: dependencyVersions,
+      acceptedBases: parents,
       libraryId: libraryReplicaId(value['libraryId']),
       sourceReplicaId: libraryReplicaId(value['sourceReplicaId']),
       operationId: replicaOperationId(value['operationId']),
@@ -225,7 +326,12 @@ final class LibrarySyncBatch {
     }
     final conflicts = [
       for (final change in changes)
-        if (currentVersions[change.key] != change.baseVersion) change.key,
+        if (currentVersions[change.key] != change.baseVersion &&
+            !(acceptedBases[change.key]?.contains(
+                  currentVersions[change.key],
+                ) ??
+                false))
+          change.key,
     ];
     return LibrarySyncDecision._(
       conflicts.isEmpty ? LibrarySyncAction.apply : LibrarySyncAction.conflict,
@@ -324,7 +430,7 @@ final class LibraryDeltaTransfer {
   }) {
     libraryReplicaId(sourceReplicaId);
     replicaOperationId(operationId);
-    if (archive.contentFormat != 22 && archive.contentFormat != 23) {
+    if (archive.contentFormat < 22 || archive.contentFormat > 26) {
       throw const FormatException('Unsupported delta content format');
     }
     if (sequence < 1 || sequence > 9007199254740991) {

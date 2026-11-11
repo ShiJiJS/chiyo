@@ -59,6 +59,7 @@ final class LibraryChangeJournal {
           state.single.read<String>('replica_id') != identity.replicaId) {
         throw const StorageFailure('sync_base_changed');
       }
+      await _repo._requireAdmissionFormat(_libraryCredentialArchiveFormat);
       for (final entry in _tables.entries) {
         await _capture(entry.key, entry.value);
       }
@@ -68,7 +69,7 @@ final class LibraryChangeJournal {
 
   // All names/columns below are repository-owned constants, never peer input.
   static final _tables = <String, List<String>>{
-    for (final entry in InformationBackups._v21Columns.entries)
+    for (final entry in InformationBackups._v26Columns.entries)
       if (entry.key != 'settings')
         InformationBackups._physicalTables[entry.key] ?? entry.key: entry.value,
     'information_attachment_versions': [
@@ -82,9 +83,11 @@ final class LibraryChangeJournal {
     'information_fields': ['id'],
     'information_item_tags': ['item_id', 'tag_id'],
     'information_revisions': ['item_id', 'version'],
+    'information_revision_snapshots': ['item_id', 'snapshot_id'],
     'recycle_facts': ['payload'],
     'revision_purge_facts': ['item_id', 'version'],
     'credential_materials': ['credential_id', 'version'],
+    'credential_material_snapshots': ['credential_id', 'snapshot_id'],
     'information_file_fields': ['field_id'],
     'information_attachment_versions': ['attachment_id', 'version'],
   };

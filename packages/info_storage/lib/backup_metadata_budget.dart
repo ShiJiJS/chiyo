@@ -48,7 +48,10 @@ void _checkBackupAdmissionCounts(
         1 + (item['fields'] as List).length + (item['tagIds'] as List).length;
   }
 
-  for (final row in tables['information_revisions']!) {
+  for (final row in [
+    ...tables['information_revisions']!,
+    ...?tables['information_revision_snapshots'],
+  ]) {
     snapshot(_backupJson(row));
   }
   for (final row in tables['recycle_entries']!) {
@@ -79,11 +82,13 @@ void _checkBackupAdmissionCounts(
     final grant = _backupJson(row);
     nested += (grant['fields'] as List).length;
     nested += (grant['itemVersions'] as Map?)?.length ?? 0;
+    nested += (grant['itemSnapshots'] as Map?)?.length ?? 0;
   }
   // Expiring revisions replace one row with one purge fact. Recycling keeps
   // its entry and adds a fact. Reserve these slots before automatic retention.
   if (tables['revision_purge_facts']!.length +
-              tables['information_revisions']!.length >
+              tables['information_revisions']!.length +
+              (tables['information_revision_snapshots']?.length ?? 0) >
           _maximumBackupRows('revision_purge_facts') ||
       tables['recycle_facts']!.length + availableRecycle >
           _maximumBackupRows('recycle_facts') ||

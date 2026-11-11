@@ -71,10 +71,7 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
       );
     }
 
-    for (final r
-        in await _db
-            .customSelect('SELECT payload FROM information_revisions')
-            .get()) {
+    for (final r in await _db.customSelect(await _revisionRowsQuery()).get()) {
       keep(
         informationFromJson(
           jsonDecode(r.read<String>('payload')) as Map<String, dynamic>,
@@ -293,6 +290,11 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
     final templates = await _db
         .customSelect('SELECT fields_json FROM field_templates')
         .get();
+    final exactGrantHistory = await _db
+        .customSelect(
+          'SELECT 1 FROM grant_history WHERE instr(payload,\'"itemSnapshots":\')>0 LIMIT 1',
+        )
+        .get();
     final layoutContent = await _db
         .customSelect(
           'SELECT 1 FROM information_items WHERE layout_json IS NOT NULL '
@@ -301,7 +303,31 @@ extension _EncryptedInformationAttachments on EncryptedInformationRepository {
           'UNION ALL SELECT 1 FROM library_recycle_batches LIMIT 1',
         )
         .get();
-    if (exists.isEmpty &&
+    final retainedSnapshots =
+        await _hasRevisionSnapshots() &&
+        (await _db
+                .customSelect(
+                  'SELECT 1 FROM information_revision_snapshots LIMIT 1',
+                )
+                .get())
+            .isNotEmpty;
+    final protectedSnapshots =
+        (await _db
+                .customSelect(
+                  "SELECT name FROM sqlite_master WHERE type='table' AND name='credential_material_snapshots'",
+                )
+                .get())
+            .isNotEmpty &&
+        (await _db
+                .customSelect(
+                  'SELECT 1 FROM credential_material_snapshots LIMIT 1',
+                )
+                .get())
+            .isNotEmpty;
+    if (!protectedSnapshots &&
+        !retainedSnapshots &&
+        exists.isEmpty &&
+        exactGrantHistory.isEmpty &&
         layoutContent.isEmpty &&
         !templates.any(
           (r) => (jsonDecode(r.read<String>('fields_json')) as List).any(

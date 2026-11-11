@@ -927,7 +927,7 @@ void main() {
       final path = '${root.path}/complete.aimbackup';
       await source.backups.exportTo(path);
       final payload = _payload(path, key);
-      expect(payload['version'], 7);
+      expect(payload['version'], 24);
       final tables = payload['tables'] as Map<String, dynamic>;
       expect(tables.keys.toSet(), {
         'information_directories',
@@ -950,6 +950,11 @@ void main() {
         'credential_use_requests',
         'credential_executions',
         'credential_focused_fills',
+        'information_file_fields',
+        'information_deliveries',
+        'template_packages',
+        'library_recycle_batches',
+        'library_order_state',
       });
       final encoded = jsonEncode(payload);
       for (final excluded in [

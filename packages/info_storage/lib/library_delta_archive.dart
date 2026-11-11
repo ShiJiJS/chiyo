@@ -120,8 +120,7 @@ extension LibraryIncrementalArchives on LibraryIncremental {
     if (rows.isEmpty) throw const StorageFailure('sync_change_missing');
     final batch = LibrarySyncBatch.decode(rows.single.read<String>('payload'));
     final versions = _deltaVersions(batch);
-    final contentFormat =
-        versions.any((v) => v.seriesId != v.reference.attachmentId) ? 23 : 22;
+    const contentFormat = 26;
     final random = Random.secure();
     final key =
         'aim-recovery-v1:${base64Url.encode(List.generate(32, (_) => random.nextInt(256)))}';
