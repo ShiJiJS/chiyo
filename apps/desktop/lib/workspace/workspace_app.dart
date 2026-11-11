@@ -120,6 +120,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   bool _quitRequested = false;
   late final void Function(WorkspacePage) _desktopNavigation;
   late final void Function(String) _desktopRequestNavigation;
+  late final void Function(WorkspacePage, String) _desktopMenuNavigation;
   StreamSubscription<WorkspaceRecordRef?>? _summaryChanges;
   int _modalDepth = 0;
   WorkspaceLocation _beforeConnection = const WorkspaceLocation(
@@ -183,6 +184,13 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     };
     if (widget.desktop case final WorkspaceRequestNavigation desktop) {
       desktop.onOpenRequest = _desktopRequestNavigation;
+    }
+    _desktopMenuNavigation = (page, id) {
+      if (_controller.navigationLocked) return;
+      _navigate(page, id);
+    };
+    if (widget.desktop case final WorkspaceMenuNavigation desktop) {
+      desktop.onOpenMenuDetail = _desktopMenuNavigation;
     }
     widget.desktop?.onNavigate = _desktopNavigation;
     unawaited(_controller.refresh());
@@ -349,6 +357,11 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     if (widget.desktop case final WorkspaceRequestNavigation desktop) {
       if (identical(desktop.onOpenRequest, _desktopRequestNavigation)) {
         desktop.onOpenRequest = null;
+      }
+    }
+    if (widget.desktop case final WorkspaceMenuNavigation desktop) {
+      if (identical(desktop.onOpenMenuDetail, _desktopMenuNavigation)) {
+        desktop.onOpenMenuDetail = null;
       }
     }
     super.dispose();

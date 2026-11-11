@@ -57,11 +57,7 @@ final class RemoteWorkspaceApprovals implements WorkspaceApprovalSource {
           approvalChangeToJson(change),
         ),
       );
-      if (receipt.operationId != change.operationId ||
-          receipt.requestId != change.requestId ||
-          receipt.action != change.action ||
-          receipt.reviewToken != change.reviewToken ||
-          receipt.commandDigest != change.digest) {
+      if (!receipt.matches(change)) {
         throw const FormatException('Mismatched approval receipt');
       }
       onChanged();

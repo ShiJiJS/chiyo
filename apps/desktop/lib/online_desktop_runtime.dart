@@ -3,6 +3,7 @@ import 'package:info_core/macos_desktop_control.dart';
 import 'package:flutter/foundation.dart';
 import 'desktop_runtime.dart';
 import 'desktop_scroll.dart';
+import 'mac_pending_menu.dart';
 import 'workspace/remote_workspace_source.dart';
 import 'workspace/workspace_desktop.dart';
 import 'workspace/workspace_source.dart';
@@ -10,7 +11,10 @@ import 'workspace/workspace_source.dart';
 /// Owns this App's native window and connections, never the independent server,
 /// Agent sessions, credential executor, or another device's files/processes.
 class OnlineDesktopRuntime extends ChangeNotifier
-    implements WorkspaceDesktop, WorkspaceRequestNavigation {
+    implements
+        WorkspaceDesktop,
+        WorkspaceRequestNavigation,
+        WorkspaceMenuNavigation {
   OnlineDesktopRuntime({
     required this.platform,
     required this.beforeExit,
@@ -39,6 +43,30 @@ class OnlineDesktopRuntime extends ChangeNotifier
   final ValueNotifier<DesktopScrollbarStyle> scrollbarStyle = ValueNotifier(
     DesktopScrollbarStyle.legacy,
   );
+  MacPendingMenu? _menu;
+  @override
+  void Function(WorkspacePage, String)? onOpenMenuDetail;
+
+  void setMenuOffline(bool offline) => _menu?.setOffline(offline);
+
+  Future<void> _openMenuDetail(WorkspacePage page, String? id) async {
+    final intent = ++_navigationIntent;
+    final binding = _binding;
+    await showWindow();
+    if (_disposed ||
+        quitting ||
+        !_enabled ||
+        binding != _binding ||
+        intent != _navigationIntent) {
+      return;
+    }
+    if (id == null) {
+      _navigate?.call(page);
+    } else {
+      onOpenMenuDetail?.call(page, id);
+    }
+  }
+
   RemoteWorkspaceSource? _source;
   StreamSubscription<WorkspaceRecordRef?>? _changes;
   Future<void>? _starting, _refreshing, _quitting;
@@ -87,7 +115,21 @@ class OnlineDesktopRuntime extends ChangeNotifier
       final value = await platform
           .initialize(handleEvent)
           .timeout(const Duration(seconds: 5));
-      if (!_disposed) _availability(value);
+      if (!_disposed) {
+        _availability(value);
+        if (platform case final DesktopPendingMenuPlatform menuPlatform
+            when menuPlatform.supportsPendingMenu) {
+          final menu = _menu = MacPendingMenu(
+            publish: menuPlatform.updatePendingMenu,
+            open: _openMenuDetail,
+            canAct: () => !_disposed && !quitting && _enabled,
+            theme: () => preferences?.theme ?? WorkspaceTheme.light,
+          );
+          menuPlatform.setPendingMenuHandler(menu.handle);
+          final source = _source;
+          menu.bind(source, location: _menuLocation(source));
+        }
+      }
     } on Object {
       if (!_disposed) _availability(DesktopAvailability.unavailable);
     }
@@ -113,6 +155,9 @@ class OnlineDesktopRuntime extends ChangeNotifier
     _controlStarted = true;
   }
 
+  String _menuLocation(RemoteWorkspaceSource? source) =>
+      source == null ? '未连接服务器' : '已连接 · ${source.client.address.host}';
+
   Future<void> bind(RemoteWorkspaceSource? source) async {
     final binding = ++_binding;
     _navigationIntent++;
@@ -124,6 +169,7 @@ class OnlineDesktopRuntime extends ChangeNotifier
     preferences = null;
     _baseline = false;
     _seen.clear();
+    _menu?.bind(source, location: _menuLocation(source));
     if (_disposed || binding != _binding || source == null) return;
     _changes = source.changes.listen((_) => unawaited(refresh()));
     // Wait for any old binding's read, without treating an observation timeout
@@ -167,6 +213,7 @@ class OnlineDesktopRuntime extends ChangeNotifier
       }
       if (_disposed || binding != _binding || quitting) return;
       preferences = saved;
+      unawaited(_menu?.refresh());
       notificationReadFailed = false;
       final baseline = _baseline;
       _baseline = true;
@@ -378,7 +425,9 @@ class OnlineDesktopRuntime extends ChangeNotifier
     _changed();
     try {
       await start();
+      _menu?.dispose();
       await _refreshing;
+      await _menu?.idle;
       if (!resourcesClosed) {
         await beforeExit();
         resourcesClosed = true;
@@ -408,6 +457,11 @@ class OnlineDesktopRuntime extends ChangeNotifier
     unawaited(_changes?.cancel());
     _navigate = null;
     _openRequest = null;
+    onOpenMenuDetail = null;
+    _menu?.dispose();
+    if (platform case final DesktopPendingMenuPlatform menuPlatform) {
+      menuPlatform.setPendingMenuHandler(null);
+    }
     if (platform case final NativeDesktopPlatform native) {
       if (identical(native.commitAppControlExit, _commitControlExit)) {
         native.commitAppControlExit = null;

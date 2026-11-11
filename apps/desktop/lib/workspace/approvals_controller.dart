@@ -391,12 +391,7 @@ class ApprovalsController extends ChangeNotifier {
 
   WorkspaceApprovalReceipt _check(WorkspaceApprovalReceipt r) {
     final c = _command!;
-    if (r.operationId != c.operationId ||
-        r.requestId != c.requestId ||
-        r.action != c.action ||
-        r.reviewToken != c.reviewToken ||
-        r.commandDigest != c.digest ||
-        r.revision < 1) {
+    if (!r.matches(c)) {
       throw const WorkspaceFailure('unknown_outcome', '回执与本次决定不符，请继续核对。');
     }
     return r;

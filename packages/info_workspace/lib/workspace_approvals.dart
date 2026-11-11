@@ -244,6 +244,14 @@ class WorkspaceApprovalReceipt {
   final String operationId, requestId, reviewToken, commandDigest;
   final WorkspaceApprovalAction action;
   final int revision;
+
+  bool matches(WorkspaceApprovalChange change) =>
+      operationId == change.operationId &&
+      requestId == change.requestId &&
+      action == change.action &&
+      reviewToken == change.reviewToken &&
+      commandDigest == change.digest &&
+      revision >= 1;
 }
 
 abstract interface class WorkspaceApprovalSource {

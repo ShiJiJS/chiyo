@@ -217,6 +217,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           _offline = false;
           _failedHealthChecks = 0;
         });
+        _desktop.setMenuOffline(false);
         _source!.notifyConnectionChanged();
         return;
       }
@@ -304,6 +305,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       if (!mounted || !identical(source, _source)) return;
       _failedHealthChecks = 0;
       if (mounted && identical(source, _source) && _offline) {
+        _desktop.setMenuOffline(false);
         source.notifyConnectionChanged();
         setState(() => _offline = false);
       }
@@ -318,6 +320,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
           identical(source, _source) &&
           !_offline) {
         setState(() => _offline = true);
+        _desktop.setMenuOffline(true);
         source.notifyConnectionChanged();
       }
     } finally {

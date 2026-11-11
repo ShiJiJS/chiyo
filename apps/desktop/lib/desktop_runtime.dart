@@ -54,8 +54,28 @@ abstract interface class DesktopNavigationPlatform {
   Future<void> setNavigationEnabled(bool enabled);
 }
 
+abstract interface class DesktopPendingMenuPlatform {
+  bool get supportsPendingMenu;
+  void setPendingMenuHandler(Future<void> Function(String, Object?)? handler);
+  Future<void> updatePendingMenu(Map<String, Object?> state);
+}
+
 class NativeDesktopPlatform
-    implements DesktopPlatform, DesktopNavigationPlatform {
+    implements
+        DesktopPlatform,
+        DesktopNavigationPlatform,
+        DesktopPendingMenuPlatform {
+  Future<void> Function(String, Object?)? _pendingMenuHandler;
+  @override
+  bool get supportsPendingMenu => defaultTargetPlatform == TargetPlatform.macOS;
+
+  @override
+  void setPendingMenuHandler(Future<void> Function(String, Object?)? handler) =>
+      _pendingMenuHandler = handler;
+
+  @override
+  Future<void> updatePendingMenu(Map<String, Object?> state) =>
+      _channel.invokeMethod<void>('updatePendingMenu', state);
   Future<void> Function()? commitAppControlExit;
   @override
   String? openedRequestId;
@@ -81,6 +101,10 @@ class NativeDesktopPlatform
     Future<void> Function(DesktopEvent) onEvent,
   ) async {
     _channel.setMethodCallHandler((call) async {
+      if (call.method.startsWith('pendingMenu')) {
+        await _pendingMenuHandler?.call(call.method, call.arguments);
+        return;
+      }
       if (call.method == 'open') {
         openedRequestId = call.arguments is String
             ? call.arguments as String
