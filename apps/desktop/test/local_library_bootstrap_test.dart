@@ -39,7 +39,7 @@ void main() {
         _Keys(),
       );
       final executable = File(
-        '../../.tools/flutter/bin/cache/dart-sdk/bin/dart',
+        '../../.tools/flutter/bin/cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
       ).absolute;
       final stat = await executable.stat();
       final digest = 'sha256:${sha256.convert(await executable.readAsBytes())}';
@@ -177,9 +177,6 @@ void main() {
         await root.delete(recursive: true);
       }
     },
-    skip: Platform.isWindows
-        ? 'Uses a POSIX credential subprocess fixture.'
-        : false,
   );
   test(
     'encrypted local bootstrap publishes a restricted CLI, persists records and restores a complete backup',
