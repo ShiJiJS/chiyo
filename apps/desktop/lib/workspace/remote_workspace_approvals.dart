@@ -6,7 +6,7 @@ import 'workspace_source.dart';
 /// authenticated HTTPS. No approval logic or information body is cached here.
 final class RemoteWorkspaceApprovals implements WorkspaceApprovalSource {
   RemoteWorkspaceApprovals(this.client, {required this.onChanged});
-  final OwnerClient client;
+  final OwnerTransport client;
   final void Function() onChanged;
   Future<T> _read<T>(Future<T> Function() action) async {
     try {

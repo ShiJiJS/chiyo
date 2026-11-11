@@ -420,6 +420,28 @@ void main() {
         expect(ui.key('workspace-storage-mode'), findsNothing);
         await ui.resolve(host.close);
         serverClosed = true;
+        await ui.tap('workspace-nav-settings');
+        await ui.tap('settings-section-connection');
+        await ui.until(
+          () =>
+              ui.key('connection-mode').evaluate().isNotEmpty &&
+              field('服务器地址').evaluate().isNotEmpty,
+        );
+        proxy.failGetPrefix = '/v1/';
+        final requests = jsonEncode(proxy.requests);
+        await ui.tap('connection-mode-local');
+        await ui.until(
+          () =>
+              find.text('本地模式').evaluate().isNotEmpty &&
+              field('服务器地址').evaluate().isEmpty &&
+              ui.key('connection-save').evaluate().isEmpty &&
+              ui
+                  .key('workspace-nav-library')
+                  .hitTestable()
+                  .evaluate()
+                  .isNotEmpty,
+        );
+        expect(jsonEncode(proxy.requests), requests);
         await ui.resolve(() async {
           final found = (await discoverAgentConnection(
             environment: {'CHIYO_CONNECTION_DIRECTORY': root.path},
@@ -470,23 +492,6 @@ void main() {
             client.close();
           }
         });
-        await ui.tap('workspace-nav-settings');
-        await ui.tap('settings-section-connection');
-        await ui.until(
-          () =>
-              ui.key('connection-mode').evaluate().isNotEmpty &&
-              field('服务器地址').evaluate().isNotEmpty,
-        );
-        proxy.failGetPrefix = '/v1/';
-        final requests = jsonEncode(proxy.requests);
-        await ui.tap('connection-mode-local');
-        await ui.until(
-          () =>
-              find.text('本地模式').evaluate().isNotEmpty &&
-              field('服务器地址').evaluate().isEmpty &&
-              ui.key('connection-save').evaluate().isEmpty,
-        );
-        expect(jsonEncode(proxy.requests), requests);
         expect(boot!.library!.service.owner.information, hasLength(2));
         expect(t.takeException(), isNull);
       } finally {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_motion.dart';
+import '../anchored_surface.dart';
+import 'grant_history_filters.dart';
 import '../ui_palette.dart';
 import 'approval_executions.dart';
 import 'grant_history_controller.dart';
@@ -39,6 +41,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
   String? _selection;
   String _queryKey = '';
   bool _filters = false;
+  final _filterPopup = AnchoredSurfaceController();
   final _expandedSnapshots = <String>{};
   WorkspaceGrantState? _state;
   @override
@@ -83,6 +86,7 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
 
   @override
   void dispose() {
+    _filterPopup.close?.call();
     m.removeListener(_changed);
     _search.dispose();
     _list.dispose();
@@ -126,6 +130,34 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
     }
   }
 
+  Future<void> _showFilters(BuildContext trigger) async {
+    if (_filters || m.frozen) return;
+    setState(() => _filters = true);
+    widget.onModalChanged?.call(true);
+    try {
+      final choice = await showAnchoredSurface<GrantHistoryFilters>(
+        trigger,
+        controller: _filterPopup,
+        alignToEnd: true,
+        width: 360,
+        height: 460 * MediaQuery.textScalerOf(context).scale(1),
+        builder: (_) => GrantHistoryFiltersPopup(
+          initial: (state: m.filter, kind: m.kind, days: m.lastDays),
+        ),
+      );
+      if (mounted && choice != null) {
+        await m.setFilters(
+          filter: choice.state,
+          kind: choice.kind,
+          lastDays: choice.days,
+        );
+      }
+    } finally {
+      widget.onModalChanged?.call(false);
+      if (mounted) setState(() => _filters = false);
+    }
+  }
+
   Widget _header(BuildContext context, bool large) {
     final c = UiPalette.of(context);
     return Padding(
@@ -136,11 +168,18 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
           Row(
             children: [
               Expanded(child: Text('授权历史', style: libraryHeading(context, 24))),
-              IconButton(
-                tooltip: _filters ? '收起筛选' : '筛选记录',
-                isSelected: _filters,
-                onPressed: () => setState(() => _filters = !_filters),
-                icon: const Icon(Icons.tune, size: 19),
+              Builder(
+                builder: (trigger) => IconButton(
+                  key: const ValueKey('grant-filter-popup'),
+                  tooltip: '筛选记录',
+                  isSelected:
+                      _filters ||
+                      m.filter != WorkspaceGrantFilter.all ||
+                      m.kind != null ||
+                      m.lastDays != null,
+                  onPressed: m.frozen ? null : () => _showFilters(trigger),
+                  icon: const Icon(Icons.tune, size: 19),
+                ),
               ),
             ],
           ),
@@ -156,76 +195,51 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
               isDense: true,
             ),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final f in WorkspaceGrantFilter.values)
-                DesktopButton(
-                  key: ValueKey('grant-filter-${f.name}'),
-                  selected: m.filter == f,
-                  kind: DesktopButtonKind.quiet,
-                  onPressed: m.frozen ? null : () => m.setFilter(f),
-                  minimumSize: const Size(0, 32),
-                  child: Text(switch (f) {
-                    WorkspaceGrantFilter.all => '全部',
-                    WorkspaceGrantFilter.active => '有效',
-                    WorkspaceGrantFilter.ended => '已结束',
-                  }),
-                ),
-            ],
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 180),
-            alignment: Alignment.topCenter,
-            child: !_filters
-                ? const SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Column(
-                      children: [
-                        DesktopSelect<String>(
-                          key: const ValueKey('grant-kind'),
-                          value: m.kind?.name ?? 'all',
-                          items: [
-                            const DropdownMenuItem(
-                              value: 'all',
-                              child: Text('所有类型'),
-                            ),
-                            for (final k in WorkspaceApprovalKind.values)
-                              DropdownMenuItem(
-                                value: k.name,
-                                child: Text(k.label),
-                              ),
-                          ],
-                          onChanged: m.frozen
-                              ? null
-                              : (v) => m.setKind(
-                                  v == 'all'
-                                      ? null
-                                      : WorkspaceApprovalKind.values.byName(v!),
-                                ),
-                        ),
-                        const SizedBox(height: 8),
-                        DesktopSelect<int>(
-                          key: const ValueKey('grant-days'),
-                          value: m.lastDays ?? 0,
-                          items: [
-                            for (final day in [0, 1, 7, 30])
-                              DropdownMenuItem(
-                                value: day,
-                                child: Text(day == 0 ? '所有时间' : '最近$day天'),
-                              ),
-                          ],
-                          onChanged: m.frozen
-                              ? null
-                              : (v) => m.setDays(v == 0 ? null : v),
-                        ),
-                      ],
-                    ),
+          if (m.filter != WorkspaceGrantFilter.all ||
+              m.kind != null ||
+              m.lastDays != null) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                if (m.filter != WorkspaceGrantFilter.all)
+                  InputChip(
+                    key: const ValueKey('grant-applied-state'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text(grantFilterLabel(m.filter)),
+                    onDeleted: m.frozen
+                        ? null
+                        : () => m.setFilter(WorkspaceGrantFilter.all),
                   ),
-          ),
+                if (m.kind != null)
+                  InputChip(
+                    key: const ValueKey('grant-applied-kind'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text(m.kind!.label),
+                    onDeleted: m.frozen ? null : () => m.setKind(null),
+                  ),
+                if (m.lastDays != null)
+                  InputChip(
+                    key: const ValueKey('grant-applied-days'),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    label: Text('最近${m.lastDays}天'),
+                    onDeleted: m.frozen ? null : () => m.setDays(null),
+                  ),
+                TextButton(
+                  key: const ValueKey('grant-filters-clear'),
+                  onPressed: m.frozen
+                      ? null
+                      : () => m.setFilters(
+                          filter: WorkspaceGrantFilter.all,
+                          kind: null,
+                          lastDays: null,
+                        ),
+                  child: const Text('清除筛选'),
+                ),
+              ],
+            ),
+          ],
           if (widget.onWorkspaceBack != null)
             Align(
               alignment: Alignment.centerLeft,

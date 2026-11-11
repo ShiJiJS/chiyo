@@ -185,31 +185,24 @@ class GrantHistoryController extends ChangeNotifier {
     await load();
   }
 
-  Future<void> setFilter(WorkspaceGrantFilter value) async {
-    if (frozen || _closed) return;
-    filter = value;
-    _explicitTarget = null;
-    selection = null;
-    offset = 0;
-    listScroll = 0;
-    notice = null;
-    await load();
-  }
+  Future<void> setFilter(WorkspaceGrantFilter value) =>
+      setFilters(filter: value, kind: kind, lastDays: lastDays);
 
-  Future<void> setKind(WorkspaceApprovalKind? value) async {
-    if (frozen || _closed) return;
-    kind = value;
-    _explicitTarget = null;
-    selection = null;
-    offset = 0;
-    listScroll = 0;
-    notice = null;
-    await load();
-  }
+  Future<void> setKind(WorkspaceApprovalKind? value) =>
+      setFilters(filter: filter, kind: value, lastDays: lastDays);
 
-  Future<void> setDays(int? value) async {
+  Future<void> setDays(int? value) =>
+      setFilters(filter: filter, kind: kind, lastDays: value);
+
+  Future<void> setFilters({
+    required WorkspaceGrantFilter filter,
+    required WorkspaceApprovalKind? kind,
+    required int? lastDays,
+  }) async {
     if (frozen || _closed) return;
-    lastDays = value;
+    this.filter = filter;
+    this.kind = kind;
+    this.lastDays = lastDays;
     _explicitTarget = null;
     selection = null;
     offset = 0;

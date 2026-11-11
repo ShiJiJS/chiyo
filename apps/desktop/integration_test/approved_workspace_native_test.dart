@@ -109,6 +109,20 @@ void main() {
               '${width.toInt()}-${dark ? 'dark' : 'light'}-$page-directory',
             );
           }
+          if (page == 'history') {
+            await tap(find.byKey(const ValueKey('grant-filter-popup')));
+            await capture(
+              '${width.toInt()}-${dark ? 'dark' : 'light'}-history-filter-popup',
+            );
+            await tap(find.widgetWithText(ChoiceChip, '有效'));
+            await tap(find.widgetWithText(ChoiceChip, '字段读取'));
+            await tap(find.widgetWithText(ChoiceChip, '最近7天'));
+            await tap(find.byKey(const ValueKey('grant-filters-apply')));
+            await capture(
+              '${width.toInt()}-${dark ? 'dark' : 'light'}-history-filter-applied',
+            );
+            await tap(find.byKey(const ValueKey('grant-filters-clear')));
+          }
           if (page == 'library') {
             await t
                 .widget<LibraryPage>(find.byType(LibraryPage))

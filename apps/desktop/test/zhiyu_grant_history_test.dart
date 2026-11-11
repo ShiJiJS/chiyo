@@ -111,6 +111,65 @@ void main() {
     });
   }
 
+  testWidgets(
+    'history filters use an anchored draft and removable applied chips',
+    (t) async {
+      await start(t, width: 1280, scale: 1);
+      await history(t);
+      final m = model(t);
+      expect(find.text('所有类型'), findsNothing);
+      expect(find.text('所有时间'), findsNothing);
+      await tap(t, find.byKey(const ValueKey('grant-filter-popup')));
+      expect(
+        find.byKey(const ValueKey('grant-filters-popover')),
+        findsOneWidget,
+      );
+      await tap(t, find.widgetWithText(ChoiceChip, '有效'));
+      await tap(t, find.widgetWithText(ChoiceChip, '字段读取'));
+      await tap(t, find.widgetWithText(ChoiceChip, '最近7天'));
+      expect(m.filter, WorkspaceGrantFilter.all);
+      expect(m.kind, isNull);
+      expect(m.lastDays, isNull);
+      await tap(t, find.byKey(const ValueKey('grant-filters-apply')));
+      expect(find.byKey(const ValueKey('grant-filters-popover')), findsNothing);
+      expect(m.filter, WorkspaceGrantFilter.active);
+      expect(m.kind, WorkspaceApprovalKind.information);
+      expect(m.lastDays, 7);
+      for (final id in ['state', 'kind', 'days']) {
+        final chip = find.byKey(ValueKey('grant-applied-$id'));
+        expect(chip, findsOneWidget);
+        expect(
+          t.getTopLeft(chip).dy,
+          greaterThan(
+            t
+                .getBottomLeft(
+                  find.byKey(const ValueKey('grant-history-search')),
+                )
+                .dy,
+          ),
+        );
+      }
+      await tap(t, find.byKey(const ValueKey('grant-filter-popup')));
+      await tap(t, find.widgetWithText(ChoiceChip, '已结束'));
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await ready(t);
+      expect(m.filter, WorkspaceGrantFilter.active);
+      final kind = find.byKey(const ValueKey('grant-applied-kind'));
+      await tap(
+        t,
+        find.descendant(of: kind, matching: find.byIcon(Icons.close)),
+      );
+      expect(m.kind, isNull);
+      expect(m.lastDays, 7);
+      await tap(t, find.byKey(const ValueKey('grant-filters-clear')));
+      expect(m.filter, WorkspaceGrantFilter.all);
+      expect(m.kind, isNull);
+      expect(m.lastDays, isNull);
+      expect(find.byType(InputChip), findsNothing);
+      expect(t.takeException(), isNull);
+    },
+  );
+
   for (final width in [1440.0, 1280.0]) {
     for (final dark in [false, true]) {
       testWidgets(
@@ -419,7 +478,9 @@ void main() {
       await m.open('request:server');
       await ready(t);
       await capture(t, 'history-1280-dark200-grant');
-      await tap(t, find.byKey(const ValueKey('grant-filter-ended')));
+      await tap(t, find.byKey(const ValueKey('grant-filter-popup')));
+      await tap(t, find.widgetWithText(ChoiceChip, '已结束'));
+      await tap(t, find.byKey(const ValueKey('grant-filters-apply')));
       expect(m.detail!.legacyNotice, isNotNull);
       await capture(t, 'history-1280-dark200-legacy');
       await t.enterText(
