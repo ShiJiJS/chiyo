@@ -156,22 +156,30 @@ class WindowsAgentBundle {
           !actualTemplate.containsAll(expectedTemplate)) {
         throw const FormatException('Undeclared or missing Skill references');
       }
-      for (final entry in declared.entries) {
-        final file = await _file(root, entry.key), before = await file.stat();
-        if (before.size != entry.value['bytes']) {
-          throw const FormatException('Package size');
+      final entries = declared.entries.iterator;
+      Future<void> verifyFiles() async {
+        while (entries.moveNext()) {
+          final entry = entries.current;
+          final file = await _file(root, entry.key), before = await file.stat();
+          if (before.size != entry.value['bytes']) {
+            throw const FormatException('Package size');
+          }
+          final stamp = _stamp(before), cached = _hashes[file.path];
+          final hash = !rehash && cached?.$1 == stamp
+              ? cached!.$2
+              : (await sha256.bind(file.openRead(0, before.size + 1)).first)
+                    .toString();
+          if (hash != entry.value['sha256'] ||
+              _stamp(await file.stat()) != stamp) {
+            throw const FormatException('Package hash or identity changed');
+          }
+          _hashes[file.path] = (stamp, hash);
         }
-        final stamp = _stamp(before), cached = _hashes[file.path];
-        final hash = !rehash && cached?.$1 == stamp
-            ? cached!.$2
-            : (await sha256.bind(file.openRead(0, before.size + 1)).first)
-                  .toString();
-        if (hash != entry.value['sha256'] ||
-            _stamp(await file.stat()) != stamp) {
-          throw const FormatException('Package hash or identity changed');
-        }
-        _hashes[file.path] = (stamp, hash);
       }
+
+      // Bound open handles while overlapping metadata and file reads. Await
+      // every worker before returning or clearing failed verification state.
+      await Future.wait([for (var i = 0; i < 8; i++) verifyFiles()]);
       return AgentBundleObservation(
         status: 'verified',
         directory: root,
