@@ -92,7 +92,10 @@ foreach ($file in [System.IO.Directory]::GetFiles($env:INFO_PRIVATE_DIR, '*.json
       });
     },
   );
-  final compiled = Platform.environment['D6_COMPILED_CLI'];
+  final delivery = Platform.environment['INFO_TEST_DELIVERY'];
+  final compiled = delivery == null
+      ? Platform.environment['D6_COMPILED_CLI']
+      : '$delivery/cli/info.exe';
   test(
     'compiled lifecycle startup creates a usable association in an owned Modify-only directory',
     () async {
