@@ -9,6 +9,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:info_core/protocol_json.dart';
 import 'package:info_core/server_state.dart';
+import 'package:info_core/library_replication.dart';
 import 'backup_publish.dart';
 import 'macos_backup_publication.dart';
 import 'platform_keys.dart';
@@ -50,6 +51,7 @@ part 'proposal_operations_storage.dart';
 part 'additional_approval_storage.dart';
 part 'template_packages_storage.dart';
 part 'server_state_storage.dart';
+part 'library_replication_storage.dart';
 
 const _libraryFormat = 38;
 // A content-triggered extension, not the default format of ordinary libraries.
@@ -75,6 +77,7 @@ const _serverRuntimeLibraryFormat = 53;
 // Server deliveries have device-side copies instead of a host-native lease.
 const _deviceDeliveryLibraryFormat = 54;
 const _copyCleanupLibraryFormat = 55;
+const _libraryReplicationFormat = 56;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -659,7 +662,7 @@ class EncryptedInformationRepository
       final headerVersion =
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
-      if (headerVersion > _copyCleanupLibraryFormat) {
+      if (headerVersion > _libraryReplicationFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -674,7 +677,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _copyCleanupLibraryFormat ||
+            (marker.single['version'] as int) > _libraryReplicationFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -685,6 +688,15 @@ class EncryptedInformationRepository
             )
             .isNotEmpty;
         if (hasServerState != (storedFormat >= _serverRuntimeLibraryFormat)) {
+          throw const StorageFailure('unsupported_schema');
+        }
+        final replicaTables = native.select(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('library_replica_state','library_replica_receipts')",
+        );
+        if ((storedFormat >= _libraryReplicationFormat &&
+                replicaTables.length != 2) ||
+            (storedFormat < _libraryReplicationFormat &&
+                replicaTables.isNotEmpty)) {
           throw const StorageFailure('unsupported_schema');
         }
         // Preserve the portable-fill boundary across older receipt/layout
