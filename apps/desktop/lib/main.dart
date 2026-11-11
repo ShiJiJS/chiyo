@@ -122,6 +122,7 @@ class _DesktopLauncherState extends State<DesktopLauncher> {
                 fileOutputs: startup.library!.fileOutputs,
                 fileOpens: startup.library!.fileOpens,
                 localConfiguration: startup.localConfiguration,
+                localConnection: startup.localConnection,
                 replication: startup.library!.replication,
               );
             }

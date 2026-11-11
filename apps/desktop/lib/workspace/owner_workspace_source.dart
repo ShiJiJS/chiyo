@@ -42,10 +42,12 @@ class OwnerWorkspaceSource
   @override
   String get storageDescription => describeStorage?.call() ?? '本地模式';
   final String Function()? describeStorage;
+  final Future<WorkspaceSummary> Function(int localRecords)? requestSummary;
 
   OwnerWorkspaceSource({
     required this.owner,
     this.describeStorage,
+    this.requestSummary,
     InformationFileOutputs? fileOutputs,
     InformationFileOpens? fileOpens,
     OwnerFileOpenDispatcher openDispatcher =
@@ -358,8 +360,10 @@ class OwnerWorkspaceSource
     if (!owner.serviceAvailable) {
       throw const WorkspaceFailure('unavailable', '资料服务尚未就绪。');
     }
+    final records = owner.information.length + owner.credentials.length;
+    if (requestSummary != null) return requestSummary!(records);
     return WorkspaceSummary(
-      records: owner.information.length + owner.credentials.length,
+      records: records,
       pending: owner.queryInbox(limit: 1).pendingCount,
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );

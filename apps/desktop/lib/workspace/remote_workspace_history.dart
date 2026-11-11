@@ -233,7 +233,7 @@ class RemoteWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
     this.client, {
     this.renderer = const WorkspaceAttachmentRenderer(),
   });
-  final OwnerClient client;
+  final OwnerTransport client;
   final WorkspaceAttachmentRenderer renderer;
   static const prefix = '/v1/owner/grant-history';
   @override

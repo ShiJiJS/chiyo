@@ -7,7 +7,7 @@ import 'workspace_source.dart';
 /// ordinary mutation commands. Retry metadata contains no plaintext.
 final class RemoteProposalPasswordStore {
   RemoteProposalPasswordStore(this.client);
-  final OwnerClient client;
+  final OwnerTransport client;
   final _pending = <(String, int), core.OwnerPasswordFillReceipt>{};
   final _knownAbsent = <(String, int)>{};
   String _path(String proposal) =>

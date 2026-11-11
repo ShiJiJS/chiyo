@@ -10,7 +10,7 @@ class RemoteWorkspaceRelations implements WorkspaceRelationSource {
     this.prefix = '/v1/owner/relations',
     this.binding = const {},
   });
-  final OwnerClient client;
+  final OwnerTransport client;
   final String prefix;
   final Map<String, Object?> binding;
   Future<T> _read<T>(Future<T> Function() action) async {

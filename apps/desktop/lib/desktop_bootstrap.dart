@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'local_library_sync.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/local_library_configuration.dart';
 import 'package:info_remote/owner_client.dart';
@@ -226,7 +227,18 @@ class DesktopBootstrap extends ChangeNotifier {
         } finally {
           connection.close();
         }
-        await localConfiguration!.publish(profile);
+        final replica = library!.replication;
+        final serverMode =
+            replica != null &&
+            (await LocalLibrarySync(
+                  configuration: localConfiguration!,
+                  owner: library!.service.owner,
+                  replication: replica,
+                ).readConfiguration())['enabled'] ==
+                true;
+        // Opening the replica does not select its approval service. Keep the
+        // server target until the Host prepares that mode's request connection.
+        if (!serverMode) await localConfiguration!.publish(profile);
       }
       state = DesktopStartupState.ready;
     } on Object catch (error) {

@@ -69,5 +69,8 @@ final class LocalLibraryConfiguration {
     await AutomaticConnectionStore(
       directory,
     ).publish({'mode': 'local', 'libraryId': libraryId}, connection);
+    // Compatibility entry for already-installed integrations. Immutable chat
+    // associations keep their own original connection; this affects new chats.
+    await connection.saveIn(Directory(directory));
   }
 }

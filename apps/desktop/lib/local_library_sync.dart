@@ -71,7 +71,7 @@ final class LocalLibrarySync {
   bool _sameServer(ConnectionProfile a, ConnectionProfile b) =>
       a.address == b.address &&
       a.serverId == b.serverId &&
-      a.certificate == b.certificate;
+      a.certificate.trim() == b.certificate.trim();
 
   Future<void> _removePendingFile(Map<String, dynamic> pending) async {
     final file = _file(libraryReplicaId(pending['fileId']));

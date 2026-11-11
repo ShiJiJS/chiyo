@@ -15,7 +15,7 @@ class OwnerProposalPasswords extends ProposalPasswords {
     : _owner = owner,
       _scope = owner.captureLibraryScope(),
       _remote = null;
-  OwnerProposalPasswords.remote(OwnerClient client)
+  OwnerProposalPasswords.remote(OwnerTransport client)
     : _owner = null,
       _scope = null,
       _remote = RemoteProposalPasswordStore(client);

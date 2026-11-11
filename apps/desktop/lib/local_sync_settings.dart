@@ -17,7 +17,8 @@ class LocalSyncSettings extends StatefulWidget {
   });
   final LocalLibrarySync sync;
   final VoidCallback onBack;
-  final ValueChanged<bool> onSaved, onBusy;
+  final Future<void> Function(bool) onSaved;
+  final ValueChanged<bool> onBusy;
   final Future<void> Function()? beforeSave;
   @override
   State<LocalSyncSettings> createState() => _LocalSyncSettingsState();
@@ -127,7 +128,7 @@ class _LocalSyncSettingsState extends State<LocalSyncSettings> {
         await widget.sync.disable();
       }
       _activeEnabled = _enabled;
-      widget.onSaved(_activeEnabled);
+      await widget.onSaved(_activeEnabled);
       final stored = await widget.sync.readConfiguration();
       if (mounted && stored['server'] != null) {
         _saved = ConnectionProfile.fromJson(
