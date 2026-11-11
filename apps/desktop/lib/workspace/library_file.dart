@@ -271,7 +271,7 @@ class _LibraryFileState extends State<LibraryFile> {
           context,
           action == WorkspaceFileAction.saveAs
               ? '已另存 ${result.filename}'
-              : '已交给本机程序打开 ${result.filename}',
+              : '已向系统发送打开请求 ${result.filename}',
         );
       }
     } catch (error) {

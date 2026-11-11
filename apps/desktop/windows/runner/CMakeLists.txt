@@ -12,7 +12,6 @@ add_executable(${BINARY_NAME} WIN32
   "owner_pdf_renderer.cpp"
   "owner_pdf_previews.cpp"
   "owner_file_opener.cpp"
-  "owner_file_association.cpp"
   "owner_file_open_channel.cpp"
   "main.cpp"
   "utils.cpp"
@@ -43,7 +42,6 @@ target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "comdlg32.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "shell32.lib")
-target_link_libraries(${BINARY_NAME} PRIVATE "shlwapi.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "windowsapp.lib")
 target_link_libraries(${BINARY_NAME} PRIVATE "bcrypt.lib" "advapi32.lib")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
@@ -72,14 +70,6 @@ target_compile_definitions(owner_file_opener_test PRIVATE NOMINMAX)
 target_compile_options(owner_file_opener_test PRIVATE /utf-8)
 target_link_libraries(owner_file_opener_test PRIVATE bcrypt.lib advapi32.lib)
 set_target_properties(owner_file_opener_test PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/owner-file-check")
-
-add_executable(owner_file_association_test EXCLUDE_FROM_ALL "owner_file_association_test.cpp" "owner_file_association.cpp")
-apply_standard_settings(owner_file_association_test)
-target_compile_definitions(owner_file_association_test PRIVATE NOMINMAX)
-target_compile_options(owner_file_association_test PRIVATE /utf-8)
-target_link_libraries(owner_file_association_test PRIVATE shlwapi.lib advapi32.lib)
-set_target_properties(owner_file_association_test PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/owner-file-check")
 
 add_executable(desktop_control_fixture EXCLUDE_FROM_ALL "desktop_control_fixture.cpp")
