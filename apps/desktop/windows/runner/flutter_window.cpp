@@ -324,7 +324,10 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
-  if (DesktopInstance::HandleActivation(hwnd, message, wparam, lparam)) return 1;
+  if (DesktopInstance::HandleActivation(hwnd, message, wparam, lparam)) {
+    SendDesktopEvent("shown");
+    return 1;
+  }
   if (pdf_previews_ && pdf_previews_->HandleMessage(message)) return 0;
   if (control_message_ != 0 && message == control_message_) {
     if (wparam != GetCurrentProcessId() || (lparam != 0 && lparam != 1)) return 0;

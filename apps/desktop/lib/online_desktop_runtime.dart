@@ -371,6 +371,9 @@ class OnlineDesktopRuntime extends ChangeNotifier
       return;
     }
     switch (event) {
+      case DesktopEvent.windowShown:
+        windowHidden = false;
+        _changed();
       case DesktopEvent.closeWindow:
         if (preferences?.background != true) {
           if (_enabled) await quit();
