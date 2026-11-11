@@ -7,6 +7,7 @@ import 'desktop_scroll.dart';
 
 enum DesktopEvent {
   closeWindow,
+  windowShown,
   openApprovals,
   openSettings,
   searchApprovals,
@@ -112,6 +113,7 @@ class NativeDesktopPlatform
       }
       final event = switch (call.method) {
         'close' => DesktopEvent.closeWindow,
+        'shown' => DesktopEvent.windowShown,
         'open' => DesktopEvent.openApprovals,
         'openSettings' => DesktopEvent.openSettings,
         'searchApprovals' => DesktopEvent.searchApprovals,
@@ -461,6 +463,11 @@ class DesktopRuntime extends ChangeNotifier {
     // replace platform.openedRequestId while this one is still awaiting Cocoa.
     final requestedId = platform.openedRequestId;
     switch (event) {
+      case DesktopEvent.windowShown:
+        // The native window is already visible. Do not navigate or issue a
+        // second show; an edit dialog can still own the workspace.
+        windowHidden = false;
+        notifyListeners();
       case DesktopEvent.closeWindow:
         if (shutdownFailed || !service.owner.desktopPreferences.background) {
           await quit();
