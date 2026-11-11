@@ -2,9 +2,12 @@
 
 Run with a NEW project-local directory. Requires the QA venv's paramiko.
 Prints the loopback port after generating keys; Ctrl-C stops the fixture.
+On Windows, select the native ssh-keygen with --ssh-keygen. With --stop-file,
+creating directory/stop ends the fixture normally after callers finish.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 import shlex
 import socket
@@ -18,15 +21,25 @@ import paramiko
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('directory', type=Path)
+    parser.add_argument('--ssh-keygen', type=Path)
+    parser.add_argument('--stop-file', action='store_true',
+                        help='Stop when the owned directory/stop marker exists')
     parser.add_argument('--lifecycle-gate', action='store_true',
                         help='Allow one synthetic wait command until the owned release file exists')
     parser.add_argument('--audit-commands', action='store_true', help='Record only fixed synthetic true/false command receipts, never secrets')
     args = parser.parse_args()
+    keygen = (args.ssh_keygen or (
+        Path(os.environ.get('SystemRoot', r'C:\Windows')) /
+        'System32/OpenSSH/ssh-keygen.exe'
+        if os.name == 'nt' else Path('/usr/bin/ssh-keygen')
+    )).resolve(strict=True)
+    if not keygen.is_file():
+        raise ValueError('ssh-keygen must be a file')
     root = args.directory.resolve()
     root.mkdir(exist_ok=False)
     root.chmod(0o700)
     for name in ('client', 'wrong-client'):
-        subprocess.run(['/usr/bin/ssh-keygen', '-q', '-t', 'ed25519', '-N', '',
+        subprocess.run([str(keygen), '-q', '-t', 'ed25519', '-N', '',
                         '-f', str(root / name)], check=True)
     host = paramiko.RSAKey.generate(2048)
     (root / 'host.pub').write_text(f'{host.get_name()} {host.get_base64()} synthetic\n')
@@ -101,8 +114,13 @@ def main():
         facts = {'directory': str(root), 'port': listener.getsockname()[1]}
         (root / 'fixture.json').write_text(json.dumps(facts))
         print(json.dumps(facts), flush=True)
-        while True:
-            client, _ = listener.accept()
+        if args.stop_file:
+            listener.settimeout(0.25)
+        while not (args.stop_file and (root / 'stop').exists()):
+            try:
+                client, _ = listener.accept()
+            except socket.timeout:
+                continue
             threading.Thread(target=connection, args=(client,), daemon=True).start()
 
 

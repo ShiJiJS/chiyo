@@ -139,13 +139,6 @@ void main() {
           'fixtureRoot': fixture.root.path,
           'windowKeptVisible': keepWindowVisible,
         });
-        expect(before['queryHresult'], 0);
-        expect(
-          before['userState'],
-          5,
-          reason:
-              'OS is not accepting notifications; do not post a probe in a blocked state.',
-        );
         if (evidencePath.isNotEmpty) {
           final waitDeadline = DateTime.now().add(const Duration(minutes: 2));
           while (await tester.runAsync(
@@ -160,6 +153,21 @@ void main() {
             );
           }
         }
+        // The operator can change the foreground/window geometry while arming.
+        // Check the actual OS state immediately before the one permitted send,
+        // rather than authorizing it with the earlier ready-state snapshot.
+        final dispatchState = await snapshot();
+        await phase('dispatch-state', {
+          'native': dispatchState,
+          'requestId': target.id,
+        });
+        expect(dispatchState['queryHresult'], 0);
+        expect(
+          dispatchState['userState'],
+          5,
+          reason:
+              'OS is not accepting notifications; do not post a probe in a blocked state.',
+        );
         final deadline = DateTime.now().add(const Duration(seconds: 60));
         debugPrint('D1_NOTIFICATION_DISPATCH requestId=${target.id}');
         final delivered = await tester.runAsync(
