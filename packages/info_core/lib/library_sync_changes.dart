@@ -120,11 +120,13 @@ final class LibrarySyncBatch {
           (k) =>
               k.kind != LibrarySyncKind.directory &&
               k.kind != LibrarySyncKind.tag,
-        ))
+        )) {
       throw const FormatException('Invalid synchronization dependencies');
+    }
     if (dependencies.length != dependencyVersions.length ||
-        dependencies.keys.any((k) => !dependencyVersions.containsKey(k)))
+        dependencies.keys.any((k) => !dependencyVersions.containsKey(k))) {
       throw const FormatException('Missing dependency versions');
+    }
     for (final v in dependencyVersions.values) {
       replicaDigest(v);
     }
@@ -257,8 +259,9 @@ final class LibrarySyncBatch {
       final rawParents = value['acceptedBases'];
       if (rawParents is! List ||
           rawParents.isEmpty ||
-          rawParents.length > raw.length)
+          rawParents.length > raw.length) {
         throw const FormatException('Invalid resolution parents');
+      }
       for (final value in rawParents) {
         final entry = _object(value);
         _fields(entry, {'key', 'versions'});
@@ -267,11 +270,13 @@ final class LibrarySyncBatch {
         if (versions is! List ||
             versions.isEmpty ||
             versions.length > 2 ||
-            parents.containsKey(key))
+            parents.containsKey(key)) {
           throw const FormatException('Invalid resolution parents');
+        }
         final values = versions.map(replicaDigest).toSet();
-        if (values.length != versions.length)
+        if (values.length != versions.length) {
           throw const FormatException('Duplicate resolution parent');
+        }
         parents[key] = values;
       }
     }
@@ -279,14 +284,16 @@ final class LibrarySyncBatch {
     final dependencyVersions = <LibrarySyncKey, String>{};
     if (value.containsKey('dependencies')) {
       final list = value['dependencies'];
-      if (list is! List || list.isEmpty || list.length > maxChanges)
+      if (list is! List || list.isEmpty || list.length > maxChanges) {
         throw const FormatException('Invalid synchronization dependencies');
+      }
       for (final raw in list) {
         final entry = _object(raw);
         _fields(entry, {'key', 'version', 'content'});
         final key = LibrarySyncKey.fromJson(_object(entry['key']));
-        if (dependencies.containsKey(key))
+        if (dependencies.containsKey(key)) {
           throw const FormatException('Duplicate synchronization dependency');
+        }
         dependencies[key] = _object(entry['content']);
         dependencyVersions[key] = replicaDigest(entry['version']);
       }
