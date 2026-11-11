@@ -222,13 +222,17 @@ final class OnlineServer {
       if (type != FileSystemEntityType.notFound &&
           type != FileSystemEntityType.directory)
         throw const StorageFailure('sync_staging_failed');
-      await replicationDirectory.create(recursive: true);
-      if ((await Process.run('/bin/chmod', [
-            '700',
-            replicationDirectory.path,
-          ])).exitCode !=
-          0)
-        throw const StorageFailure('sync_staging_failed');
+      if (Platform.isWindows) {
+        WindowsPrivateFiles.directory(replicationDirectory);
+      } else {
+        await replicationDirectory.create(recursive: true);
+        if ((await Process.run('/bin/chmod', [
+              '700',
+              replicationDirectory.path,
+            ])).exitCode !=
+            0)
+          throw const StorageFailure('sync_staging_failed');
+      }
     }
     if (backupDirectory != null) {
       final type = await FileSystemEntity.type(
@@ -239,13 +243,17 @@ final class OnlineServer {
           type != FileSystemEntityType.directory) {
         throw const StorageFailure('backup_staging_failed');
       }
-      await backupDirectory.create(recursive: true);
-      if ((await Process.run('/bin/chmod', [
-            '700',
-            backupDirectory.path,
-          ])).exitCode !=
-          0) {
-        throw const StorageFailure('backup_staging_failed');
+      if (Platform.isWindows) {
+        WindowsPrivateFiles.directory(backupDirectory);
+      } else {
+        await backupDirectory.create(recursive: true);
+        if ((await Process.run('/bin/chmod', [
+              '700',
+              backupDirectory.path,
+            ])).exitCode !=
+            0) {
+          throw const StorageFailure('backup_staging_failed');
+        }
       }
     }
     final http = await HttpServer.bindSecure(

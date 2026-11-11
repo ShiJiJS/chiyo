@@ -1,6 +1,3 @@
-@TestOn('!windows')
-library;
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
@@ -407,9 +404,7 @@ void main() {
         observerA.execute(
           'PRAGMA key = "x\'${a.keys.key!.map((b) => b.toRadixString(16).padLeft(2, '0')).join()}\'"',
         );
-        final serverKey = await File(
-          '${host.root.path}/secrets/database.key',
-        ).readAsBytes();
+        final serverKey = (await host.databaseKeys.read())!;
         observerServer = sqlite.sqlite3.open(
           '${host.root.path}/data/library.db',
         );

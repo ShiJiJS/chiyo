@@ -33,7 +33,7 @@ Python 构建工具可通过 uv 安装到项目的 `.tools/python`，uv 缓存�
 
 ## 联网与交付
 
-正常入口连接独立 HTTPS 服务。Windows 连接配置保存在当前用户的 `%APPDATA%/Chiyo/online`，使用 DPAPI 和私有 ACL；各设备独立登记，不复制其他设备的加密状态。
+正常入口支持本地加密资料库和独立 HTTPS 服务同步。Windows 连接配置保存在当前用户的 `%APPDATA%/Chiyo/online`，本地库及其 DPAPI 密钥位于该配置下的 `local` 目录；配置和密钥使用私有 ACL。各设备独立登记，不复制其他设备的加密状态。已有 NAS 配置在初次同步完成前继续连接原服务。
 
 - [服务部署](../../apps/server/README.md)与[维护](../../apps/server/OPERATIONS.md)
 - [Windows 打包、安装和清理](windows-delivery.md)

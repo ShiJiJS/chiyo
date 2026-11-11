@@ -1,6 +1,3 @@
-@TestOn('!windows')
-library;
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -180,6 +177,9 @@ void main() {
         await root.delete(recursive: true);
       }
     },
+    skip: Platform.isWindows
+        ? 'Uses a POSIX credential subprocess fixture.'
+        : false,
   );
   test(
     'encrypted local bootstrap publishes a restricted CLI, persists records and restores a complete backup',
@@ -469,7 +469,7 @@ void main() {
       ]) async {
         final child = await Process.start(
           File(
-            '../../.tools/flutter/bin/cache/dart-sdk/bin/dart',
+            '../../.tools/flutter/bin/cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
           ).absolute.path,
           ['run', 'bin/$entry.dart', ...args],
           workingDirectory: directory,
