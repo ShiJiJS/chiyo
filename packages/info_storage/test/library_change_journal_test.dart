@@ -99,7 +99,11 @@ void main() {
             restarted.single.changes.single['table'],
             'information_directories',
           );
-          for (final file in root.listSync().whereType<File>()) {
+          // Windows holds the empty lock file exclusively while the library is
+          // open. Scan the database and journals that actually store content.
+          for (final file in root.listSync().whereType<File>().where(
+            (file) => !file.path.endsWith('.lock'),
+          )) {
             expect(
               String.fromCharCodes(file.readAsBytesSync()),
               isNot(contains('SYNTHETIC_JOURNAL_PRIVATE')),
