@@ -1,4 +1,5 @@
 #include "owner_file_open_channel.h"
+#include "owner_file_association.h"
 #include <shellapi.h>
 #include <flutter/standard_method_codec.h>
 
@@ -21,6 +22,10 @@ int64_t Length(const Map& values) {
 }
 OwnerFileOpenChannel::OwnerFileOpenChannel(flutter::BinaryMessenger* messenger, HWND owner)
     : opener_([owner](const std::wstring& path) {
+      // Without an association the Shell can accept an OpenWith broker launch
+      // even though no application opened the document. Keep the recorded
+      // outcome conclusive and let the existing notOpened flow release the copy.
+      if (!HasDefaultOwnerFileHandler(path)) return false;
       SHELLEXECUTEINFOW launch{};
       launch.cbSize = sizeof(launch);
       launch.fMask = SEE_MASK_FLAG_NO_UI | SEE_MASK_NOCLOSEPROCESS | SEE_MASK_ASYNCOK;
