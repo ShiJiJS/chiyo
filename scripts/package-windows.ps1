@@ -13,7 +13,7 @@ if ($env:OS -ne 'Windows_NT' -or -not [Environment]::Is64BitProcess) {
     throw 'Build this x64 preview on 64-bit Windows.'
 }
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$output = [IO.Path]::GetFullPath($OutputDirectory)
+$output = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputDirectory)
 if (Test-Path -LiteralPath $output) { throw 'Output directory already exists.' }
 $env:PATH = "$FlutterBin;$env:PATH"
 $flutter = (Get-Command flutter -ErrorAction Stop).Source
@@ -150,7 +150,9 @@ try {
     Copy-Item -LiteralPath 'apps/desktop/assets/fonts/OFL.txt' -Destination (Join-Path $notices 'NotoSansSC-OFL.txt')
     $packages = @{}
     foreach ($package in @('packages/info_cli', 'packages/info_core', 'packages/info_storage', 'apps/desktop')) {
-        $configPath = [IO.Path]::GetFullPath((Join-Path $package '.dart_tool/package_config.json'))
+        # .NET's current directory need not follow PowerShell's location (for
+        # example when this script is called from a different worktree).
+        $configPath = Join-Path $projectRoot "$package/.dart_tool/package_config.json"
         $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
         foreach ($dependency in $config.packages) {
             $uri = [Uri]::new([Uri]$configPath, $dependency.rootUri)
