@@ -75,7 +75,11 @@ void main() {
       final publicFields = (listed['fields'] as List)
           .cast<Map<String, dynamic>>();
       expect(publicFields.last['kind'], 'textNote');
-      await command({'command': 'session', 'chatLabel': 'encrypted fixture'});
+      await command({
+        'command': 'session',
+        'chatLabel': 'encrypted fixture',
+        'externalChatId': 'synthetic-encrypted-cli',
+      });
       final ref = FieldRef(
         listed['id'] as String,
         publicFields.first['id'] as String,
@@ -85,6 +89,7 @@ void main() {
         'purpose': 'test',
         'fields': [ref.toJson()],
       });
+      expect(request['status'], 'pending', reason: jsonEncode(request));
       final id = request['requestId'] as String;
       service.owner.approve(id, [ref]);
       await command({'command': 'claim', 'requestId': id});

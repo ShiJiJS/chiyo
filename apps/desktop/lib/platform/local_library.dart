@@ -27,6 +27,7 @@ Future<DesktopLibrary> openLocalLibrary(
   } else if (Platform.isWindows) {
     keys = WindowsDatabaseKeyStore(
       '${configuration.libraryDirectory}/database-key.dpapi',
+      privateFile: true,
     );
   } else {
     throw const StorageFailure('platform_unsupported');

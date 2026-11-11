@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/owner_client.dart';
@@ -35,6 +36,9 @@ class DeviceCredentialFixture {
   HttpClient? upstream;
   int claimPosts = 0;
   bool replicationEnabled = false;
+  DatabaseKeyStore? _testKeys;
+  DatabaseKeyStore get databaseKeys =>
+      _testKeys ?? MountedDatabaseKeyStore('${root.path}/secrets/database.key');
   Future<void> importHostTrust(List<int> bytes) async {
     final upload = await owner.request('POST', '/v1/owner/ssh-hosts/inputs', {
       'version': 1,
@@ -70,7 +74,15 @@ class DeviceCredentialFixture {
     final root = await Directory.systemTemp.createTemp(
       'device-credential-operation-',
     );
-    await initializeServerSecrets('${root.path}/secrets');
+    // Windows client tests use an isolated, real DPAPI key provider. The
+    // production NAS mounted-key provider remains restricted to POSIX hosts.
+    final DatabaseKeyStore? testKeys = Platform.isWindows
+        ? WindowsDatabaseKeyStore(
+            '${root.path}/fixture-key.dpapi',
+            privateFile: true,
+          )
+        : null;
+    if (testKeys == null) await initializeServerSecrets('${root.path}/secrets');
     final files = await createTlsFixture(root);
     final tls = SecurityContext()
       ..useCertificateChain(files.certificate)
@@ -78,7 +90,11 @@ class DeviceCredentialFixture {
     final trust = SecurityContext(withTrustedRoots: false)
       ..setTrustedCertificates(files.ca);
     final token = base64Url
-        .encode(await File('${root.path}/secrets/owner.token').readAsBytes())
+        .encode(
+          testKeys == null
+              ? await File('${root.path}/secrets/owner.token').readAsBytes()
+              : List.generate(32, (_) => Random.secure().nextInt(256)),
+        )
         .replaceAll('=', '');
     final f = DeviceCredentialFixture(
       root,
@@ -89,6 +105,7 @@ class DeviceCredentialFixture {
       clock,
     );
     f.replicationEnabled = replication;
+    f._testKeys = testKeys;
     await f.open();
     if (loseFirstClaim) await f._proxy();
     for (var i = 0; i < 2; i++) {
@@ -238,7 +255,7 @@ class DeviceCredentialFixture {
   Future<void> open([int port = 0]) async {
     repo = await EncryptedInformationRepository.openOnline(
       '${root.path}/data',
-      MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
+      databaseKeys,
       clock: clock,
     );
     runtime = await OnlineInformationRuntime.open(
