@@ -14,6 +14,7 @@ add_executable(${BINARY_NAME} WIN32
   "owner_file_opener.cpp"
   "owner_file_open_channel.cpp"
   "main.cpp"
+  "desktop_instance.cpp"
   "utils.cpp"
   "win32_window.cpp"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
@@ -50,6 +51,14 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 add_dependencies(${BINARY_NAME} flutter_assemble)
 
 # Native adapter contract check; explicitly built with --target notification_queue_test.
+add_executable(desktop_instance_test EXCLUDE_FROM_ALL "desktop_instance_test.cpp" "desktop_instance.cpp")
+apply_standard_settings(desktop_instance_test)
+target_compile_definitions(desktop_instance_test PRIVATE NOMINMAX)
+target_compile_options(desktop_instance_test PRIVATE /utf-8)
+target_link_libraries(desktop_instance_test PRIVATE bcrypt.lib advapi32.lib)
+set_target_properties(desktop_instance_test PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/instance-check")
+
 add_executable(notification_queue_test EXCLUDE_FROM_ALL "notification_queue_test.cpp")
 apply_standard_settings(notification_queue_test)
 target_compile_options(notification_queue_test PRIVATE /utf-8)

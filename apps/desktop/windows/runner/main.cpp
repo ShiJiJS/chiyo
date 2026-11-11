@@ -4,6 +4,7 @@
 
 #include "flutter_window.h"
 #include "utils.h"
+#include "desktop_instance.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
@@ -22,6 +23,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
 
+  const auto scope = DesktopInstance::CurrentScope(command_line_arguments);
+  if (!scope) { ::CoUninitialize(); return EXIT_FAILURE; }
+  DesktopInstance application(*scope);
+  if (application.result() != DesktopInstance::Result::primary) {
+    ::CoUninitialize();
+    return application.result() == DesktopInstance::Result::activated ? EXIT_SUCCESS : EXIT_FAILURE;
+  }
+
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);
@@ -30,6 +39,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   if (!window.Create(L"\u77e5\u4e88", origin, size)) {
     return EXIT_FAILURE;
   }
+  if (!application.Attach(window.GetHandle())) return EXIT_FAILURE;
   window.SetQuitOnClose(true);
 
   ::MSG msg;
