@@ -24,6 +24,10 @@
 
 `analyze` 检查全部模块；`smoke` 运行加密存储、连接与界面控制器检查；`test` 运行各模块测试。部分集成场景需要 Linux/macOS 服务宿主或特定平台，按测试声明在对应环境执行，不以跳过代替通过。
 
+原生 SSH 凭据检查可复用 `scripts/qa/macos-ssh-fixture.py` 的临时回环夹具，QA Python 环境使用现有的 `paramiko==5.1.0`。Windows 默认使用系统 OpenSSH 的 `ssh-keygen.exe`，也可通过 `--ssh-keygen` 指定准确路径；不需要 WSL 或 NAS 服务变更。传入全新的 `build/` 子目录，使用生成的 `fixture.json` 设置 `D7_SSH_FIXTURE`、`D7_SSH_PORT`，并将 `D7_SSH_EXE` 指向系统 `ssh.exe`，运行 `packages/info_cli/test/ssh_receiver_native_test.dart`。夹具仅接受本次合成密钥和固定测试命令。
+
+夹具加 `--stop-file` 启动后，在调用方检查及材料清理结束时创建该夹具目录内的 `stop` 文件，等待正常退出，再清理本次合成文件；不停止系统 SSH 服务或使用个人密钥。
+
 直接调用固定 SDK：
 
 ```powershell
