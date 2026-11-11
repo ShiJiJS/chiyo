@@ -19,3 +19,9 @@ abstract interface class WorkspaceRequestNavigation {
   void Function(String requestId)? get onOpenRequest;
   set onOpenRequest(void Function(String requestId)? callback);
 }
+
+/// A menu row selects the matching queue and object in the workspace.
+abstract interface class WorkspaceMenuNavigation {
+  void Function(WorkspacePage page, String id)? get onOpenMenuDetail;
+  set onOpenMenuDetail(void Function(WorkspacePage page, String id)? callback);
+}
