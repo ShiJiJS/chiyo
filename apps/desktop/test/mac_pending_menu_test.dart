@@ -184,7 +184,9 @@ void main() {
       );
 
       theme = WorkspaceTheme.dark;
+      menu.setLocation('服务器同步');
       await menu.refresh();
+      expect(latest()['location'], '服务器同步');
       expect(latest()['dark'], true);
       menu.setOffline(true);
       await menu.idle;

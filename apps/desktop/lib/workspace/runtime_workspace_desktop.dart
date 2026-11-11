@@ -65,6 +65,11 @@ class RuntimeWorkspaceDesktop
       final preferences = await source.settings.read();
       if (!identical(source, _source) || _disposed) return;
       _theme = preferences.theme;
+      if (source is WorkspaceStorageLocation) {
+        _menu?.setLocation(
+          (source as WorkspaceStorageLocation).storageDescription,
+        );
+      }
       await _menu?.refresh();
     } on Object {
       // The normal workspace exposes its original read failure.

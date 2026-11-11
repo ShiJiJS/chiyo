@@ -66,6 +66,8 @@ class MacPendingMenu {
     }
   }
 
+  void setLocation(String location) => _location = location;
+
   Future<void> _send(Map<String, Object?> state) async {
     if (_closed) return;
     final content = jsonEncode([

@@ -126,34 +126,44 @@ class _ConnectionFormState extends State<ConnectionForm> {
       loading: w.busy,
       children: [
         if (w.syncEnabled != null) ...[
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('同步到服务器', style: libraryHeading(context, 16)),
-                    const SizedBox(height: 6),
-                    Text(
-                      '关闭后，仅在这台电脑上保存资料和处理审批。',
-                      style: libraryText(context, 13, color: c.muted),
-                    ),
-                  ],
-                ),
+          SegmentedButton<bool>(
+            key: const ValueKey('connection-mode'),
+            expandedInsets: EdgeInsets.zero,
+            segments: const [
+              ButtonSegment(
+                value: false,
+                icon: Icon(Icons.computer_outlined),
+                label: Text('本地模式', key: ValueKey('connection-mode-local')),
               ),
-              const SizedBox(width: 20),
-              DesktopToggle(
-                key: const ValueKey('connection-sync-toggle'),
-                value: w.syncEnabled!,
-                onChanged: w.busy ? null : w.onSyncChanged,
+              ButtonSegment(
+                value: true,
+                icon: Icon(Icons.cloud_sync_outlined),
+                label: Text('服务器同步', key: ValueKey('connection-mode-server')),
               ),
             ],
+            selected: {w.syncEnabled!},
+            onSelectionChanged: w.busy || w.onSyncChanged == null
+                ? null
+                : (value) => w.onSyncChanged!(value.single),
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) =>
+                    states.contains(WidgetState.selected) ? c.accent : c.muted,
+              ),
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? c.selected
+                    : c.paper,
+              ),
+              side: WidgetStatePropertyAll(BorderSide(color: c.line)),
+              padding: const WidgetStatePropertyAll(
+                EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
           ),
           const SizedBox(height: 28),
         ],
         if (w.syncEnabled == false) ...[
-          Text('本地模式', style: libraryHeading(context, 16)),
-          const SizedBox(height: 8),
           Text(
             '资料、文件和凭据加密保存在这台电脑。无需连接服务器，也能接收 AI 申请和审批。',
             style: libraryText(context, 14, color: c.muted, height: 1.8),
@@ -264,28 +274,24 @@ class _ConnectionFormState extends State<ConnectionForm> {
             ),
           ),
         const SizedBox(height: 24),
-        if (w.onConfirmServer != null) ...[
+        if (w.syncEnabled != false)
           DesktopButton(
-            onPressed: w.busy ? null : w.onConfirmServer,
-            child: const Text('确认连接新服务器'),
+            kind: DesktopButtonKind.primary,
+            key: const ValueKey('connection-save'),
+            busy: w.busy,
+            onPressed: w.busy ? null : w.onConfirmServer ?? w.onConnect,
+            child: Text(
+              w.busy
+                  ? '正在连接…'
+                  : w.onConfirmServer != null
+                  ? '确认连接新服务器'
+                  : w.syncEnabled == true
+                  ? '连接并开启同步'
+                  : w.embedded
+                  ? '保存并连接'
+                  : '连接',
+            ),
           ),
-          const SizedBox(height: 12),
-        ],
-        DesktopButton(
-          kind: DesktopButtonKind.primary,
-          key: const ValueKey('connection-save'),
-          busy: w.busy,
-          onPressed: w.busy ? null : w.onConnect,
-          child: Text(
-            w.busy
-                ? '正在连接…'
-                : w.syncEnabled == false
-                ? '使用本地模式'
-                : w.embedded
-                ? '保存并连接'
-                : '连接',
-          ),
-        ),
         if (w.onCancel != null) ...[
           const SizedBox(height: 12),
           DesktopButton(

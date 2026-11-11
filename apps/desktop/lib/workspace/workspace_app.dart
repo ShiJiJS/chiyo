@@ -465,6 +465,15 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
   WorkspaceSync? get _synchronization =>
       widget.sync ?? (_source is RemoteWorkspaceSource ? _source.cache : null);
 
+  Widget _localStorageLabel(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    child: Text(
+      '本地模式',
+      key: const ValueKey('workspace-storage-mode'),
+      style: libraryText(context, 13, color: UiPalette.of(context).muted),
+    ),
+  );
+
   Widget _buildApp() => ZhiyuApp(
     controller: _controller,
     windowTitle: widget.windowTitle,
@@ -477,7 +486,12 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
           ListenableBuilder(
             listenable: cache,
             builder: (context, _) {
-              if (!cache.enabled) return const SizedBox.shrink();
+              if (!cache.enabled) {
+                return _source is WorkspaceStorageLocation &&
+                        _source is! RemoteWorkspaceSource
+                    ? _localStorageLabel(context)
+                    : const SizedBox.shrink();
+              }
               final at = cache.updatedAt;
               return TextButton.icon(
                 key: const ValueKey('workspace-sync'),
@@ -513,25 +527,16 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
                       : cache.needsReview
                       ? '同步 · 需处理冲突'
                       : at == null
-                      ? '同步'
-                      : '同步 · 更新于 ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
+                      ? '服务器同步'
+                      : '服务器同步 · ${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}',
                 ),
               );
             },
           ),
-        if (_source is WorkspaceStorageLocation &&
+        if (_synchronization == null &&
+            _source is WorkspaceStorageLocation &&
             _source is! RemoteWorkspaceSource)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              (_source as WorkspaceStorageLocation).storageDescription,
-              style: libraryText(
-                context,
-                13,
-                color: UiPalette.of(context).muted,
-              ),
-            ),
-          ),
+          _localStorageLabel(context),
         ListenableBuilder(
           listenable: _backups,
           builder: (context, _) => !_backups.uncertain
