@@ -118,7 +118,7 @@ try {
             } finally { Pop-Location }
         }
     }
-    Invoke-LockedPackageTests -Package 'packages/info_cli' -Tests @('test/bundle_preparation_test.dart', 'test/cli_test.dart', 'test/codex_process_test.dart', 'test/codex_focused_fill_test.dart', 'test/codex_information_files_test.dart')
+    Invoke-LockedPackageTests -Package 'packages/info_cli' -Tests @('test/bundle_preparation_test.dart', 'test/cli_test.dart', 'test/codex_process_test.dart', 'test/codex_focused_fill_test.dart', 'test/codex_information_files_test.dart', 'test/codex_association_windows_test.dart')
     # Actual extracted CLI/worker with encrypted source-side owner/Job tests;
     # focused input and executable classification remain controlled fixtures.
     Invoke-LockedPackageTests -Package 'packages/info_storage' -Tests @('test/mixed_lifecycle_windows_test.dart')
