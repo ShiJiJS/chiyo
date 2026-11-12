@@ -160,6 +160,7 @@ class AgentClient {
     const submissions = {
       'request',
       'request-use',
+      'request-reveal',
       'organize-request',
       'import-submit',
       'update-submit',
@@ -203,6 +204,28 @@ class AgentClient {
           'message': '服务器暂不支持新的提交说明，请更新服务器后重试。',
         };
       }
+    }
+    if (command == 'request-reveal' || command == 'read-reveal') {
+      if (_session == null) return {'status': 'unauthorized'};
+      final capabilities = await _call('/capabilities', {});
+      if (!(capabilities['capabilities'] as List? ?? []).contains(
+        'credential-reveal.v1',
+      )) {
+        return Map<String, dynamic>.from(
+          const CredentialUseFailure(
+            'unsupported_capability',
+          ).toJson(protocolVersion: 2),
+        );
+      }
+      if (utf8.encode(jsonEncode(input)).length > 16384) {
+        return {'status': 'invalid_request', 'errorCode': 'limit_exceeded'};
+      }
+      return _call(
+        command == 'request-reveal'
+            ? '/credential-reveal/request'
+            : '/credential-reveal/read',
+        {...input, 'sessionSecret': _session},
+      );
     }
     if ({'file-fetch', 'file-status', 'file-release'}.contains(command)) {
       return _executeInformationFileCommand(input);
@@ -257,6 +280,13 @@ class AgentClient {
             'capabilities': [
               ...result['capabilities'] as List,
               'credential-tools.v1',
+            ],
+            'supportedCredentialReceivers': [
+              for (final receiver in CredentialLaunchPlan.supportedReceivers)
+                if ((result['supportedCredentialReceivers'] as List? ??
+                        const [])
+                    .contains(receiver))
+                  receiver,
             ],
             'credentialToolScope': 'current_device',
             'credentialTools': tools.map((t) => t.toJson()).toList(),

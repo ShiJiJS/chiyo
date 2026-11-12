@@ -42,7 +42,7 @@ extension _CredentialRuntimeService on InformationService {
     if (r.isFocusedFill && credential.form != CredentialForm.string) {
       throw const CredentialUseFailure('invalid_reference');
     }
-    if (!r.isFocusedFill &&
+    if (r.isCommand &&
         r.plan.receiver == 'ssh_identity' &&
         (r.plan.sshTrustSnapshotId == null ||
             r.plan.sshTrustSnapshotId != _sshHostTrust?.id ||
@@ -164,7 +164,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     CredentialOperationInput input,
   ) {
     final r = _service._sessionUseRequest(session, input.requestId);
-    if (r.isFocusedFill) throw const CredentialUseFailure('scope_not_approved');
+    if (!r.isCommand) throw const CredentialUseFailure('scope_not_approved');
     _service._rejectFocusedOperationCollision(session, input.operationId);
     if (r.protocolVersion != 2) {
       throw const CredentialUseFailure('unsupported_protocol');
@@ -236,6 +236,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       ),
       credential,
     );
+    plan.requireApprovedProgramScope(r.plan);
     validate();
     final operationTime = DateTime.fromMillisecondsSinceEpoch(
       _service._clock().millisecondsSinceEpoch,
@@ -491,7 +492,13 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     ManagedCredential credential,
   ) {
     final CredentialLaunchPlan launch;
-    if (input.launch.receiver == 'aws_shared_credentials') {
+    if (input.launch.isProgramReceiver) {
+      if (input.protocolVersion != 2) {
+        throw const CredentialUseFailure('unsupported_protocol');
+      }
+      input.launch.validateProgramBindings(input.alias, credential.form);
+      launch = input.launch;
+    } else if (input.launch.receiver == 'aws_shared_credentials') {
       launch = _service._validateAwsReceiver(input, credential);
     } else if (input.launch.receiver == 'ssh_identity') {
       launch = _service._validateSshReceiver(input, credential);
@@ -743,6 +750,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       'requestExpiresAt': _useTimestamp(r.requestExpiresAt),
       'planHash': r.usePlanHash,
       if (r.isFocusedFill) 'useKind': 'focused_fill',
+      if (r.isReveal) 'useKind': 'credential_reveal',
       if (r.state != 'pending')
         'decision': {
           'credentialUse': {
@@ -761,7 +769,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
                 'attemptsConsumed': r.attemptConsumed ? 1 : 0,
               } else ...{
                 'reusable': true,
-                'operationCount': r.isFocusedFill
+                'operationCount': r.isReveal
+                    ? r.revealReads.length
+                    : r.isFocusedFill
                     ? (_service._runtimeRepository
                               as FocusedFillRuntimeRepository)
                           .focusedFillOperations
@@ -794,6 +804,9 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
     final r = _service._sessionUseRequest(session, id);
     if (r.protocolVersion != 1) {
       throw const CredentialUseFailure('operation_required');
+    }
+    if (!r.isFocusedFill && !r.isReveal && r.plan.isProgramReceiver) {
+      throw const CredentialUseFailure('unsupported_protocol');
     }
     if (r.attemptConsumed) {
       throw CredentialUseFailure(
@@ -874,7 +887,7 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
       if (material.bytes.isEmpty) {
         throw const CredentialUseFailure('material_prepare_failed');
       }
-      if (c.form == CredentialForm.file) {
+      if (plan.requiresMaterialFiles) {
         lease = ManagedCredentialFiles.create();
         await _service._saveUse(
           execution: execution.changed({

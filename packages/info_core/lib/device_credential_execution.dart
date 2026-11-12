@@ -127,6 +127,7 @@ extension DeviceCredentialExecutionAgentAccess on AgentAccess {
       credential,
     );
     final plan = delivery.resolved(resolved.executable, resolved.cwd);
+    plan.requireApprovedProgramScope(r.plan);
     final now = DateTime.fromMillisecondsSinceEpoch(
       _service._clock().millisecondsSinceEpoch,
       isUtc: true,
@@ -140,9 +141,7 @@ extension DeviceCredentialExecutionAgentAccess on AgentAccess {
       operationPlan: plan,
       createdAt: now,
       jobName: jobName,
-      cleanupState: credential.form == CredentialForm.file
-          ? 'pending'
-          : 'not_needed',
+      cleanupState: plan.requiresMaterialFiles ? 'pending' : 'not_needed',
     );
     validate();
     final value = _service._currentCredentialMaterial(credential);
@@ -217,6 +216,7 @@ extension DeviceCredentialExecutionAgentAccess on AgentAccess {
     final r = _service._useRequest(record.requestId);
     _service._requireReusableUseGrant(r, _service._credentialUseSessions[r.id]);
     final names = switch (record.operationPlan!.receiver) {
+      'program_file' => {'credential.bin'},
       'aws_shared_credentials' => {'credential.bin', 'aws-config'},
       'ssh_identity' => {
         'credential.bin',
@@ -264,7 +264,7 @@ extension DeviceCredentialExecutionAgentAccess on AgentAccess {
         proof.workerPid != null &&
             (proof.workerPid != workerPid ||
                 proof.workerIdentity != identity) ||
-        record.operationPlan!.receiver != 'gh_token' &&
+        record.operationPlan!.requiresMaterialFiles &&
             proof.materialDigest == null) {
       throw const CredentialUseFailure('invalid_plan');
     }
@@ -307,7 +307,7 @@ extension DeviceCredentialExecutionAgentAccess on AgentAccess {
       throw const CredentialUseFailure('cleanup_busy', attemptConsumed: true);
     }
     final changed = record.changed({
-      'cleanupState': record.operationPlan!.receiver == 'gh_token'
+      'cleanupState': !record.operationPlan!.requiresMaterialFiles
           ? 'not_needed'
           : 'complete',
     });

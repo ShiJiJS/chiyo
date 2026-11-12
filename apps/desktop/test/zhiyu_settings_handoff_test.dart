@@ -10,6 +10,7 @@ import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/workspace/backup_page.dart';
 import 'package:info_desktop/workspace/classification_page.dart';
+import 'package:info_desktop/workspace/credential_fill_settings.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/plugins_page.dart';
 import 'package:info_desktop/workspace/preview_workspace.dart';
@@ -279,6 +280,8 @@ void main() {
                 find.byKey(const ValueKey('settings-request-minutes')),
                 findsOneWidget,
               );
+            case WorkspaceSettingsSection.credentialFill:
+              expect(find.byType(CredentialFillSettings), findsOneWidget);
             case WorkspaceSettingsSection.plugins:
               expect(find.byType(PluginsPage), findsOneWidget);
               expect(page.plugins.catalog!.packages, isNotEmpty);

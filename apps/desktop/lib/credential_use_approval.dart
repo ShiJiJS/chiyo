@@ -9,6 +9,7 @@ import 'credential_operations.dart';
 import 'credential_delivery.dart';
 import 'credential_use_draft.dart';
 import 'focused_fill_ui.dart';
+import 'credential_reveal_ui.dart';
 import 'information_file_summary.dart';
 export 'credential_use_draft.dart';
 
@@ -463,11 +464,7 @@ class _CredentialUseApprovalPanelState
               if (tip == 'injection') ...[
                 const Spacer(),
                 Text(
-                  r.plan.receiver == 'gh_token'
-                      ? '秘密值 → 环境变量'
-                      : r.plan.receiver == 'ssh_identity'
-                      ? '临时文件路径 → 命令参数'
-                      : '临时文件路径 → 环境变量',
+                  credentialInjectionFact(r),
                   textAlign: TextAlign.right,
                   style: prototypeText(context, 12, color: c.muted),
                 ),
@@ -793,7 +790,7 @@ class _CredentialUseApprovalPanelState
                         ),
                       ],
                     ),
-                    if (r.plan.receiver != 'gh_token')
+                    if (r.plan.requiresMaterialFiles)
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: Wrap(
@@ -1302,7 +1299,7 @@ class _CredentialUseApprovalPanelState
                 '到期或撤销只阻止新启动，不能收回已读内容，也不会终止进程。',
                 style: prototypeText(context, 11, height: 1.9, color: c.muted),
               ),
-              if (r.plan.receiver != 'gh_token') ...[
+              if (r.plan.requiresMaterialFiles) ...[
                 const SizedBox(height: 12),
                 Text(
                   '进程组结束后核对身份并尝试清理临时文件。',
@@ -1322,7 +1319,13 @@ class _CredentialUseApprovalPanelState
   }
 
   @override
-  Widget build(BuildContext context) => r.isFocusedFill
+  Widget build(BuildContext context) => r.isReveal
+      ? CredentialRevealPanel(
+          owner: widget.owner,
+          request: r,
+          onChanged: widget.onChanged,
+        )
+      : r.isFocusedFill
       ? FocusedFillApprovalPanel(
           key: ValueKey('focused-fill-${r.id}'),
           owner: widget.owner,

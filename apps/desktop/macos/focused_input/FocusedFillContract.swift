@@ -66,3 +66,29 @@ struct MacFocusReply {
     return value
   }
 }
+
+/// Helper-owned OS permission status, independent of target discovery.
+struct MacFocusPermissionStatus {
+  let state: String
+  var errorCode: String? = nil
+  var wire: [String: Any] {
+    var value: [String: Any] = ["format": 1, "state": state, "platform": "macos"]
+    if let errorCode { value["errorCode"] = errorCode }
+    return value
+  }
+  static let unavailable = MacFocusPermissionStatus(state: "unavailable", errorCode: "session_unavailable")
+  static func decode(_ data: Data) -> MacFocusPermissionStatus? {
+    guard data.count <= 1024,
+          let value = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+          value["format"] as? Int == 1, value["platform"] as? String == "macos",
+          let state = value["state"] as? String else { return nil }
+    if state == "ready", Set(value.keys) == ["format", "state", "platform"] {
+      return MacFocusPermissionStatus(state: state)
+    }
+    guard Set(value.keys) == ["format", "state", "platform", "errorCode"],
+          let code = value["errorCode"] as? String,
+          (state == "permission_required" && code == "permission_required") ||
+          (state == "unavailable" && ["session_unavailable", "busy"].contains(code)) else { return nil }
+    return MacFocusPermissionStatus(state: state, errorCode: code)
+  }
+}

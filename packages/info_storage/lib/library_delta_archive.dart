@@ -120,7 +120,17 @@ extension LibraryIncrementalArchives on LibraryIncremental {
     if (rows.isEmpty) throw const StorageFailure('sync_change_missing');
     final batch = LibrarySyncBatch.decode(rows.single.read<String>('payload'));
     final versions = _deltaVersions(batch);
-    const contentFormat = 26;
+    final contentFormat =
+        batch.changes.any((change) {
+          final tables = change.content?['tables'] as Map?;
+          final rows = tables?['credential_use_requests'] as List?;
+          return rows != null &&
+              _hasCredentialDeliveryRows(
+                rows.map((row) => Map<String, Object?>.from(row as Map)),
+              );
+        })
+        ? 27
+        : 26;
     final random = Random.secure();
     final key =
         'aim-recovery-v1:${base64Url.encode(List.generate(32, (_) => random.nextInt(256)))}';

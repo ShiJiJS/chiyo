@@ -3,9 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:info_core/info_core.dart';
 
-/// Candidate owner-side Adapter. Not loaded by main/bootstrap: native helper
-/// packaging, validated desktop policy and an explicit storage-format migration
-/// must precede capability activation. No permission request or input on create.
+/// Owner-side bridge to the separately packaged native helper. Constructing it
+/// never requests permission or sends input; each operation verifies its target.
 class MacOSFocusedFillDriver implements FocusedFillDiscoveryDriver {
   MacOSFocusedFillDriver({
     MethodChannel? channel,

@@ -92,9 +92,10 @@ final class DeviceCredentialLaunch {
       'ssh_identity' => {'ssh', 'ssh.exe'},
       _ => <String>{},
     };
-    if (!names.contains(
-      executable.path.split(RegExp(r'[/\\]')).last.toLowerCase(),
-    )) {
+    if (!requested.isProgramReceiver &&
+        !names.contains(
+          executable.path.split(RegExp(r'[/\\]')).last.toLowerCase(),
+        )) {
       throw const CredentialUseFailure('unsupported_tool_version');
     }
     return requested.resolved(executable, cwd);

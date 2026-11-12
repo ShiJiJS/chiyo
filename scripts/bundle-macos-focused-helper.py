@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Reconcile a disabled focused-fill candidate in an owned Mac BUILD product.
+"""Embed the focused-fill XPC helper in an owned Mac BUILD product.
 
-Default: remove only a previously recorded, byte-matching candidate. Opt in with
---with-focused-fill-candidate to build/embed/sign one. Never launch anything,
-touch an installed app, request TCC, or activate the Dart/Agent capability.
+Default: build/embed/sign the helper. --without-focused-fill removes only a
+previously recorded, byte-matching helper. Never launch anything, touch an
+installed app or request TCC. Keep the owner and worker sandbox entitlements.
 """
 
 import argparse
@@ -54,9 +54,9 @@ def app_path(requested, *, readonly=False):
 
 
 def verify_helper(bundle, receipt):
-    if (not isinstance(receipt, dict) or receipt.get("format") != 1 or receipt.get("kind") != "macos-focused-fill-xpc-candidate"
-            or receipt.get("complete") is not True or receipt.get("capabilityEnabled") is not False
-            or receipt.get("supportedSessions") != [] or receipt.get("declaredEntitlements") != {}
+    if (not isinstance(receipt, dict) or receipt.get("format") != 1 or receipt.get("kind") not in {"macos-focused-fill-xpc-candidate", "macos-focused-fill-xpc-helper"}
+            or receipt.get("complete") is not True or receipt.get("capabilityEnabled") is not (receipt.get("kind") == "macos-focused-fill-xpc-helper")
+            or receipt.get("supportedSessions") != (["local-console"] if receipt.get("capabilityEnabled") else []) or receipt.get("declaredEntitlements") != {}
             or receipt.get("architecture") != "arm64" or receipt.get("binaryMinimumMacOS") != "14.0"
             or receipt.get("helperExecuted") is not False or receipt.get("embeddedInApp") is not False):
         raise ValueError("Unexpected candidate receipt")
@@ -94,11 +94,13 @@ def inspect(requested):
         raise ValueError("Unmanaged focused-fill helper in build output")
     value = json.loads(record.read_text())
     if (not isinstance(value, dict) or set(value) != {"format", "kind", "ownerBundleIdentifier", "capabilityEnabled", "helper"}
-            or value["format"] != 1 or value["kind"] != "macos-focused-fill-embedded-candidate"
-            or value["ownerBundleIdentifier"] != "com.example.infoDesktop" or value["capabilityEnabled"] is not False
+            or value["format"] != 1 or value["kind"] not in {"macos-focused-fill-embedded-candidate", "macos-focused-fill-embedded-helper"}
+            or value["ownerBundleIdentifier"] != "com.example.infoDesktop" or value["capabilityEnabled"] is not (value["kind"] == "macos-focused-fill-embedded-helper")
             or not isinstance(value["helper"], dict)):
         raise ValueError("Unmanaged focused-fill build record")
     verify_helper(helper, value["helper"])
+    if value["capabilityEnabled"] is not value["helper"]["capabilityEnabled"]:
+        raise ValueError("Embedded helper capability differs from its payload receipt")
     return value
 
 
@@ -120,7 +122,7 @@ def seal(app, parent, worker, worker_digest, worker_rights):
         raise RuntimeError("App sealing changed owner/worker sandbox metadata or worker bytes")
 
 
-def assemble(requested, *, enabled=False, build_helper=None):
+def assemble(requested, *, enabled=True, build_helper=None):
     app = app_path(requested)
     previous = inspect(app)
     if not enabled and previous is None:
@@ -170,8 +172,8 @@ def assemble(requested, *, enabled=False, build_helper=None):
             if previous is not None:
                 shutil.rmtree(helper)
             os.replace(staged, helper)
-            value = {"format": 1, "kind": "macos-focused-fill-embedded-candidate",
-                     "ownerBundleIdentifier": "com.example.infoDesktop", "capabilityEnabled": False,
+            value = {"format": 1, "kind": "macos-focused-fill-embedded-helper",
+                     "ownerBundleIdentifier": "com.example.infoDesktop", "capabilityEnabled": True,
                      "helper": receipt}
             record.parent.mkdir(parents=True, exist_ok=True)
             temporary = record.with_name("manifest-" + uuid.uuid4().hex + ".tmp")
@@ -184,7 +186,7 @@ def assemble(requested, *, enabled=False, build_helper=None):
         # existing entitlements/requirements/flags. Never deep-sign other code.
         seal(app, parent, worker, worker_digest, worker_rights)
         inspect(app)
-        return {"included": True, "modified": True, "capabilityEnabled": False,
+        return {"included": True, "modified": True, "capabilityEnabled": True,
                 "helperSourceCommit": receipt["sourceCommit"], "helperExecuted": False}
     finally:
         if staged.exists():
@@ -195,9 +197,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("app", type=Path)
     parser.add_argument("--with-focused-fill-candidate", action="store_true")
+    parser.add_argument("--without-focused-fill", action="store_true")
     args = parser.parse_args()
     try:
-        result = assemble(args.app, enabled=args.with_focused_fill_candidate)
+        result = assemble(args.app, enabled=not args.without_focused_fill)
     except (ValueError, RuntimeError, OSError, subprocess.SubprocessError) as error:
         parser.exit(1, str(error) + "\n")
     print(json.dumps(result, indent=2))

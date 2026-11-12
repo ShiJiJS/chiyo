@@ -6,6 +6,8 @@ import 'package:info_remote/local_library_configuration.dart';
 import 'package:info_storage/info_storage.dart';
 
 import '../desktop_bootstrap.dart';
+import '../bundled_focused_fill.dart';
+import '../macos_focused_fill.dart';
 
 /// Opens only the explicitly selected library. Its persisted identity selects
 /// its system key, including when another library has the same display name.
@@ -36,9 +38,24 @@ Future<DesktopLibrary> openLocalLibrary(
     configuration.libraryDirectory,
     keys,
   );
+  FocusedFillDriver? fill;
+  if (Platform.isMacOS) {
+    // Constructing the driver is inert. Permission is requested only from
+    // Settings, and every actual fill rechecks the native helper and target.
+    fill = MacOSFocusedFillDriver();
+  } else if (Platform.isWindows) {
+    try {
+      fill = await loadBundledFocusedFill();
+    } on FocusedFillBundleFailure {
+      // A missing optional helper must not prevent opening the user's library.
+      // A null driver leaves the capability unavailable instead of pretending
+      // a request can be fulfilled.
+    }
+  }
   return DesktopLibrary(
     service: InformationService(
       repository: repository,
+      focusedFillDriver: fill,
       informationDeliveryFiles: Platform.isWindows
           ? WindowsInformationDeliveryFiles()
           : NativeInformationDeliveryFiles(),

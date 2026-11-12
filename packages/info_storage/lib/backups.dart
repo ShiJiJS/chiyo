@@ -559,7 +559,10 @@ class InformationBackups {
                   .customSelect('SELECT id FROM library_order_state LIMIT 1')
                   .get())
               .isNotEmpty;
+      final hasCredentialDeliveryExtensions = _repository.credentialUseRequests
+          .any((r) => r.isReveal || r.isCommand && r.plan.isProgramReceiver);
       final extendedColumns =
+          hasCredentialDeliveryExtensions ||
           hasCredentialSnapshots ||
           hasRevisionSnapshots ||
           hasGrantSnapshots ||
@@ -575,7 +578,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = hasCredentialSnapshots
+        formatVersion = hasCredentialDeliveryExtensions
+            ? 27
+            : hasCredentialSnapshots
             ? 26
             : hasRevisionSnapshots
             ? 25
@@ -609,7 +614,7 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (hasCredentialSnapshots
+            in (hasCredentialDeliveryExtensions || hasCredentialSnapshots
                     ? _v26Columns
                     : hasRevisionSnapshots
                     ? _v25Columns
@@ -1178,6 +1183,11 @@ class InformationBackups {
           if (reader == null) throw const StorageFailure('invalid_backup');
           await _installAttachmentBodies(contents, reader);
         }
+        if (contents.formatVersion >= 27) {
+          await _repository._requireAdmissionFormat(
+            _credentialDeliveryLibraryFormat,
+          );
+        }
         if (contents.formatVersion >= 26) {
           await _repository._requireAdmissionFormat(
             _libraryCredentialArchiveFormat,
@@ -1273,6 +1283,7 @@ class InformationBackups {
           24,
           25,
           26,
+          27,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1297,7 +1308,7 @@ class InformationBackups {
       20 => _v20Columns,
       21 || 22 || 23 || 24 => _v21Columns,
       25 => _v25Columns,
-      26 => _v26Columns,
+      26 || 27 => _v26Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

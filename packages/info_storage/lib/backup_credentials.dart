@@ -310,6 +310,7 @@ void _validateBackupCredentialHistory(
   final requests = <String, CredentialUseRequest>{};
   for (final row in tables['credential_use_requests']!) {
     final raw = _backupJson(row);
+    final reveal = formatVersion >= 27 && raw['useKind'] == 'credential_reveal';
     final fill = formatVersion >= 7 && raw['useKind'] == 'focused_fill';
     final j = _backupObject(
       raw,
@@ -321,7 +322,15 @@ void _validateBackupCredentialHistory(
         'credentialId',
         'version',
         'useGeneration',
-        if (fill) ...{'useKind', 'fill'} else 'plan',
+        if (reveal) ...{
+          'useKind',
+          'fallbackReason',
+          'revealReads',
+        } else if (fill) ...{
+          'useKind',
+          'fill',
+        } else
+          'plan',
         'createdAt',
         'requestExpiresAt',
         'fields',
@@ -458,7 +467,7 @@ void _validateBackupCredentialHistory(
         !requests.containsKey(request) ||
         requests[request]!.protocolVersion != (v2 ? 2 : 1) ||
         !requests[request]!.credentialApproved ||
-        requests[request]!.isFocusedFill ||
+        !requests[request]!.isCommand ||
         !v2 &&
             (!legacyRequests.add(request) ||
                 requests[request]!.executionId != id))
