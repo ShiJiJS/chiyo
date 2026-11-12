@@ -7,6 +7,7 @@ import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/main.dart';
 import 'package:info_desktop/platform/local_library.dart';
 import 'package:info_desktop/storage_desktop_launcher.dart';
+import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_remote/local_library_configuration.dart';
 import 'package:info_desktop/local_library_sync.dart';
@@ -240,7 +241,15 @@ void main() {
         await ui.until(
           () =>
               boot?.library?.service.owner.information.length == 1 &&
-              find.byTooltip('添加资料').evaluate().isNotEmpty,
+              find.byTooltip('添加资料').evaluate().isNotEmpty &&
+              find.textContaining('服务器同步 ·').evaluate().isNotEmpty,
+        );
+        await ui.resolve(
+          () => t
+              .widget<LibraryPage>(find.byType(LibraryPage))
+              .controller
+              .source
+              .loadSummary(),
         );
         expect(
           boot!.library!.service.owner.information.single.name,
@@ -258,7 +267,15 @@ void main() {
         await ui.until(
           () =>
               boot?.library?.service.owner.information.length == 1 &&
-              find.byTooltip('添加资料').evaluate().isNotEmpty,
+              find.byTooltip('添加资料').evaluate().isNotEmpty &&
+              find.textContaining('服务器同步 ·').evaluate().isNotEmpty,
+        );
+        await ui.resolve(
+          () => t
+              .widget<LibraryPage>(find.byType(LibraryPage))
+              .controller
+              .source
+              .loadSummary(),
         );
         expect(ui.key('setup-continue'), findsNothing);
         expect(
