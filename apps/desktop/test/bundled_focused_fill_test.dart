@@ -176,7 +176,7 @@ void main() {
   );
   for (final enabled in [false, true]) {
     test(
-      'bootstrap advertises focused target only on Windows with a configured driver: $enabled',
+      'bootstrap advertises focused target on Mac and Windows with a configured driver: $enabled',
       () async {
         final driver = _Discovery();
         final service = InformationService(
@@ -200,7 +200,7 @@ void main() {
         final capabilities =
             (await client.execute({'command': 'capabilities'}))['capabilities']
                 as List;
-        final supported = Platform.isWindows && enabled;
+        final supported = (Platform.isWindows || Platform.isMacOS) && enabled;
         expect(capabilities.contains('credential-focused-fill.v1'), supported);
         expect(
           capabilities.contains('credential-focused-target.v1'),
