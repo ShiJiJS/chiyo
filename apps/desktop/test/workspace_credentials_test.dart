@@ -89,7 +89,7 @@ void main() {
         ),
       );
       expect(focus.canRequestUse, isFalse);
-      expect(focus.unavailableReason, contains('Mac'));
+      expect(focus.unavailableReason, contains('预览不执行实际密码填写'));
       final stored = await source.credentials.read(
         const WorkspaceRecordRef(WorkspaceRecordKind.credential, 'tgsession'),
       );
