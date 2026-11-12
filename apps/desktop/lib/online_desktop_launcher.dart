@@ -33,8 +33,10 @@ class OnlineDesktopLauncher extends StatefulWidget {
     this.openDispatcher = const NativeOwnerFileOpenDispatcher(),
     this.credentialFiles = const NativeCredentialFilePicker(),
     this.onSaveStorage,
+    this.closeDeviceFocusedFillHost,
   });
   final ConnectionProfileStore profiles;
+  final Future<void> Function()? closeDeviceFocusedFillHost;
   final InformationFilePicker? filePicker;
   final String? deviceFilesDirectory;
   final DesktopPlatform? desktopPlatform;
@@ -465,6 +467,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   }
 
   Future<void> _closeForExit() async {
+    await widget.closeDeviceFocusedFillHost?.call();
     _connectionTimer?.cancel();
     _syncTimer?.cancel();
     // Unmount data-backed widgets before their client and private device

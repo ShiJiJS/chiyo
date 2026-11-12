@@ -137,6 +137,11 @@ extension _CredentialHistoryService on InformationService {
         } on Object {
           throw const CredentialUseFailure('audit_unavailable');
         }
+        if (repo is FocusedFillRuntimeRepository) {
+          _deviceFocusedFills.removeWhere(
+            (id, _) => !repo.focusedFillOperations.any((o) => o.id == id),
+          );
+        }
         for (final id in ids) {
           _credentialUseSessions.remove(id);
           _deviceCredentialRequests.remove(id);

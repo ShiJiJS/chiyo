@@ -338,10 +338,14 @@ extension _CredentialRuntimeClient on AgentClient {
         await _requireReusableCredentialCapability(
           focusedFill: filling,
           focusedTarget: command == 'focus-target',
+          focusedStatus: command == 'fill-status',
         );
       }
       if (command == 'focus-target') {
         FocusedFillTargetQuery.fromJson(input);
+        if (_remote != null) {
+          return await _focusedFillHost.execute(_session, input);
+        }
         final result = await _call('/credential-use/focus-target', {
           'sessionSecret': _session,
           ...input,
@@ -355,6 +359,9 @@ extension _CredentialRuntimeClient on AgentClient {
       if (command == 'request-use') {
         if (filling) {
           FocusedFillInput.fromJson(input);
+          if (_remote != null) {
+            return await _focusedFillHost.execute(_session, input);
+          }
         } else {
           CredentialUseInput.fromJson(input);
         }
@@ -376,8 +383,13 @@ extension _CredentialRuntimeClient on AgentClient {
       }
       if (command == 'fill-use' || command == 'fill-status') {
         FocusedFillOperationInput.fromJson(input);
+        if (_remote != null && command == 'fill-use') {
+          return await _focusedFillHost.execute(_session, input);
+        }
         final result = await _call(
-          command == 'fill-use'
+          _remote != null
+              ? '/credential-use/device/fill/status'
+              : command == 'fill-use'
               ? '/credential-use/fill'
               : '/credential-use/fill/status',
           {'sessionSecret': _session, ...input},
@@ -513,6 +525,7 @@ extension _CredentialRuntimeClient on AgentClient {
   Future<void> _requireReusableCredentialCapability({
     bool focusedFill = false,
     bool focusedTarget = false,
+    bool focusedStatus = false,
   }) async {
     final result = await _call('/capabilities', {});
     if (result['status'] == 'service_unavailable') {
@@ -529,13 +542,33 @@ extension _CredentialRuntimeClient on AgentClient {
         ) ||
         focusedFill &&
             !(result['capabilities'] as List).contains(
-              'credential-focused-fill.v1',
+              _remote == null
+                  ? 'credential-focused-fill.v1'
+                  : 'credential-device-focused-fill.v1',
             ) ||
         focusedTarget &&
+            _remote == null &&
             !(result['capabilities'] as List).contains(
               'credential-focused-target.v1',
             )) {
       throw const CredentialUseFailure('unsupported_capability');
+    }
+    if (_remote != null && focusedFill && !focusedStatus) {
+      final local = await _focusedFillHost.execute(null, {
+        'command': 'capabilities',
+      });
+      if (local['status'] != 'ok') {
+        throw const CredentialUseFailure('service_unavailable');
+      }
+      if (!(local['capabilities'] as List? ?? const []).contains(
+            'credential-focused-fill.v1',
+          ) ||
+          focusedTarget &&
+              !(local['capabilities'] as List? ?? const []).contains(
+                'credential-focused-target.v1',
+              )) {
+        throw const CredentialUseFailure('unsupported_capability');
+      }
     }
   }
 

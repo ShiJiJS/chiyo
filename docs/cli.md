@@ -254,7 +254,7 @@ accepted只表示登记操作；根据processStarted、executionState、实际ex
 
 Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH的-i后独立参数`{"file":"alias"}`接收临时路径；AWS_SHARED_CREDENTIALS_FILE接收`{"file":"alias"}`路径。通用方式分别使用 `launch.stdin:{"secret":"alias"}`、显式环境变量中的 `{"secret":"alias"}`，或参数/环境变量中的 `{"file":"alias"}`；普通文本占位符不替换。批准后程序身份、接收方式及凭据放置位置固定。stdin按原UTF-8字节交付后关闭，不自动加换行，也不能据此认为SSH会读取它作为登录密码。
 
-密码框填写是独立的 `local-focused-fill.v1` 能力，需要本机App和系统填写权限。当前NAS批准后交由本机App填写的桥接尚未实现；不能把服务器具有其他凭据能力当作支持本机填写。
+密码框填写需要 `credential-focused-fill.v1` 和 `credential-focused-target.v1`，以及本机App的填写模块和必要系统权限。服务器模式下，本机App必须运行并连接同一服务器；CLI自动发现它的私有填写入口，由NAS审批、本机App核对目标并填写。App缺失或连接不匹配时明确拒绝，不能把服务器具有其他凭据能力当作支持本机填写。密码框填写不需要把用户管理Token交给CLI。
 
 直接使用不可行时，另行提交 `request-reveal`，包含 `protocolVersion:2`、`credentialId`、`version`、`purpose` 和 `fallbackReason`。用户明确批准“AI读取凭据原文”后，才可用 `read-reveal`（`protocolVersion:2`、`requestId`、唯一 `operationId`）取得字符串凭据；原文将进入聊天。原有使用许可不能代替这次批准，文件凭据不支持此入口。相同读取操作不能重复交付；撤销不能删除已经交付的原文。
 

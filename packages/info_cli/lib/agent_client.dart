@@ -13,6 +13,7 @@ import 'device_information_files.dart';
 import 'device_credential_journal.dart';
 import 'runtime_worker_command.dart';
 import 'device_credential_host.dart';
+import 'device_focused_fill_host.dart';
 import 'agent_help.dart';
 part 'credential_runtime_client.dart';
 part 'information_file_client.dart';
@@ -31,6 +32,7 @@ class AgentClient {
     String? runtimeWorkerExecutable,
     AgentConnectionProfile? connection,
     this.deviceFileStateDirectory,
+    this.focusedFillHostDirectory,
   }) : _session = sessionSecret,
        _externalChatId = externalChatId,
        _remote = connection == null || connection.isLocal
@@ -58,6 +60,7 @@ class AgentClient {
     String externalChatId = '',
     bool hostedCredentialExecutions = false,
     Directory? deviceFileStateDirectory,
+    Directory? focusedFillHostDirectory,
     String? runtimeWorkerExecutable,
   }) => AgentClient(
     profile.address.port,
@@ -68,9 +71,15 @@ class AgentClient {
     hostedCredentialExecutions: hostedCredentialExecutions,
     connection: profile,
     deviceFileStateDirectory: deviceFileStateDirectory,
+    focusedFillHostDirectory: focusedFillHostDirectory,
     runtimeWorkerExecutable: runtimeWorkerExecutable,
   );
   final Directory? deviceFileStateDirectory;
+  final Directory? focusedFillHostDirectory;
+  DeviceFocusedFillClient get _focusedFillHost => DeviceFocusedFillClient(
+    _remote!.profile,
+    directory: focusedFillHostDirectory,
+  );
   DeviceCredentialJournal? get _deviceCredentialJournal =>
       _remote != null && deviceFileStateDirectory != null
       ? DeviceCredentialJournal(
@@ -272,6 +281,9 @@ class AgentClient {
         if (_remote != null &&
             (Platform.isMacOS || Platform.isWindows) &&
             result['status'] == 'ok') {
+          final focused = await _focusedFillHost.execute(null, {
+            'command': 'capabilities',
+          });
           final tools = Platform.isWindows
               ? await WindowsBundledTools().read()
               : await MacBundledTools().read();
@@ -279,6 +291,7 @@ class AgentClient {
             ...result,
             'capabilities': [
               ...result['capabilities'] as List,
+              ...focused['capabilities'] as List? ?? const [],
               'credential-tools.v1',
             ],
             'supportedCredentialReceivers': [

@@ -197,30 +197,9 @@ final class AutomaticConnectionStore {
 Future<File?> discoverAgentConnection({
   Map<String, String>? environment,
 }) async {
-  final env = environment ?? Platform.environment;
-  final override = env['CHIYO_CONNECTION_DIRECTORY'];
-  final List<String> roots;
-  if (override != null) {
-    if (!Directory(override).isAbsolute)
-      throw const RemoteFailure('invalid_profile');
-    roots = [override];
-  } else if (Platform.isMacOS) {
-    final home = env['HOME'];
-    if (home == null || home.isEmpty) return null;
-    const container = '/Library/Containers/com.example.infoDesktop/Data';
-    roots = home.endsWith(container)
-        ? ['$home/Library/Application Support/Chiyo/online']
-        : [
-            '$home$container/Library/Application Support/Chiyo/online',
-            '$home/Library/Application Support/Chiyo/online',
-          ];
-  } else if (Platform.isWindows) {
-    final base = env['APPDATA'];
-    if (base == null || base.isEmpty) return null;
-    roots = ['$base/Chiyo/online'];
-  } else {
-    return null;
-  }
+  final roots = automaticConnectionDirectories(environment: environment);
+  final override =
+      (environment ?? Platform.environment)['CHIYO_CONNECTION_DIRECTORY'];
   for (final root in roots) {
     final active = await AutomaticConnectionStore(root).agentFile();
     if (active != null) {
@@ -232,4 +211,36 @@ Future<File?> discoverAgentConnection({
   }
   if (override != null) throw const RemoteFailure('connection_unavailable');
   return null;
+}
+
+/// Known configuration roots only; shared by automatic Agent connection and
+/// the App-owned local execution locator. An explicit named root stays isolated.
+List<String> automaticConnectionDirectories({
+  Map<String, String>? environment,
+}) {
+  final env = environment ?? Platform.environment;
+  final override = env['CHIYO_CONNECTION_DIRECTORY'];
+  final List<String> roots;
+  if (override != null) {
+    if (!Directory(override).isAbsolute)
+      throw const RemoteFailure('invalid_profile');
+    roots = [override];
+  } else if (Platform.isMacOS) {
+    final home = env['HOME'];
+    if (home == null || home.isEmpty) return const [];
+    const container = '/Library/Containers/com.example.infoDesktop/Data';
+    roots = home.endsWith(container)
+        ? ['$home/Library/Application Support/Chiyo/online']
+        : [
+            '$home$container/Library/Application Support/Chiyo/online',
+            '$home/Library/Application Support/Chiyo/online',
+          ];
+  } else if (Platform.isWindows) {
+    final base = env['APPDATA'];
+    if (base == null || base.isEmpty) return const [];
+    roots = ['$base/Chiyo/online'];
+  } else {
+    return const [];
+  }
+  return roots;
 }
