@@ -295,7 +295,7 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
               'credential-reveal:${read.operationId}',
               read.at,
               'AI 读取凭据原文 · 材料v${r.version}',
-              '原文读取已放行；不确认对方是否收到。记录不保留秘密内容。',
+              '已允许本次读取。使用记录不保存密码或凭据内容。',
             ),
           if (r.decidedAt != null)
             WorkspaceGrantEvent(
