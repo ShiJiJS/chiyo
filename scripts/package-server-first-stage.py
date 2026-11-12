@@ -93,7 +93,7 @@ def main():
         archive(['docker', 'save', tag], server / 'image.tar.gz')
         # Rebuild the service without relying on this checkout's ignored cache.
         archive(['git', 'archive', '--format=tar', '--prefix=source/', commit,
-                 '.dockerignore', 'apps/server', 'packages/info_core',
+                 '.dockerignore', 'deploy', 'apps/server', 'packages/info_core',
                  'packages/info_storage', 'packages/info_workspace',
                  'packages/info_remote', 'packages/info_cli', 'integrations/codex',
                  'third_party/SQLCipher-LICENSE.md', 'scripts/qa/check-server-container.py'],

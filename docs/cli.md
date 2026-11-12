@@ -1,6 +1,6 @@
 # 通用 CLI 申请与等待
 
-当前 Mac 服务端版在 App 保存服务器连接后自动准备并复用设备配置。通用入口 `info` 默认发现当前连接，`info --connection <配置路径>` 可固定独立目标；隔离配置可设置 `CHIYO_CONNECTION_DIRECTORY`，步骤见[服务器接入说明](../integrations/codex/REMOTE-INTEGRATION.md)。Codex 使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际已接通的能力以 `capabilities` 为准，当前开发进度见[执行记录](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/planning/server-multidevice/execution.md)。以下各功能的历史说明不代表本轮远程入口已全部完成。
+App 根据当前本地或服务器模式自动准备并复用受限设备配置。通用入口 `info` 默认发现当前连接，`info --connection <配置路径>` 可固定独立目标；隔离配置可设置 `CHIYO_CONNECTION_DIRECTORY`，接入入口见 [AI 与 CLI 接入](../integrations/codex/README.md)。Mac / Windows 均使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际可用能力以 `capabilities` 为准，不按开发分支或旧下载包推测。
 
 远程文字新增和修改提案已接通，沿用以下模板查询和 import/update 命令。每次提交给稳定 operationId，结果不确定时查询原操作；用户在正常 App 预览类型、目录和内容后一次保存整份。App 关闭不停止服务器，重开后可处理待办。文件、密码和密钥仍按各自能力标记接续，不能把材料去掉后改报成功。
 
@@ -16,7 +16,7 @@
 
 缺少或超长时返回 `invalid_request`、`errorCode:invalid_submission_metadata` 和按字段给出的 `fieldErrors`，补齐原意图后再提交。CLI 自动附 `submissionVersion:1`；直接调用新版 API 时也提供该标记，服务端按相同规则核对。旧传输和旧库缺少的字段保留为空，App 使用原用途和聊天说明，不伪填 Agent 名称或历史标题。修订待审内容保留原提案的主题和来源；批准范围和整份保存规则不变。
 
-## 查询完整资料目录（Mac 开发分支，#83）
+## 查询完整资料目录
 
 能力查询中的 `information-directory-discovery.v1` 表示支持
 `{"command":"directory-list"}`。结果一次返回全部当前目录，含空目录，
@@ -27,21 +27,21 @@
 联网模式目录数据来自当前服务器；新建、移动、重命名或删除后重新查询即可取得最新结构。
 录入建议可复用目录 ID，可发现普通资料和凭据的元数据包含 `directoryId`。
 此查询不返回正文、文件内容、凭据材料或待审批资料，不创建整理任务，也不授予写入能力。
-目录写入及整理继续按原审批流程。Skill 的相关引导依照本轮要求暂缓修改。
+目录写入及整理继续按原审批流程。
 
-## 查询当前插件和资料模板（Mac 开发分支）
+## 查询当前插件和资料模板
 
 App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}`；后者支持 `packageId`、`offset`、`limit`。选择启用的模板后发送 `{"command":"template-read","templateId":"查询所得ID"}`，按返回的 `definition` 和 `submissionExample` 填写，不能把固定模板列表抄进 Skill。插件安装、更新、启停和移除在下一次查询中生效。没有适合的模板就建议用户补充并暂缓，不自行生成安装插件。
 
-新增通过 `import-submit` 的 `items` 提供 `name`、`description`、`templateId`、`templateVersion`、`templateDigest`、`values`，与主人审批共用原入口。按模板修改仍走 `update-submit`，在 `update` 中提供已有 `itemId`、`baseVersion`、相同三个模板标识和完整 `values`，不要与平面 `changes` 混用。类型和格式不再降为通用文字。
+新增通过 `import-submit` 的 `items` 提供 `name`、`description`、`templateId`、`templateVersion`、`templateDigest`、`values`，与用户审批共用原入口。按模板修改仍走 `update-submit`，在 `update` 中提供已有 `itemId`、`baseVersion`、相同三个模板标识和完整 `values`，不要与平面 `changes` 混用。类型和格式不再降为通用文字。
 
-模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。普通资料与凭据的待入库引用已接入，文件新建提案已接入，已有资料的附件修改已接入 #80 的开发分支，详见[实现进度](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/ai-template-ingestion.md)。
+模板变化返回 `template_changed`，停用返回 `template_unavailable`，移除返回 `template_missing`。字段不合格式返回 `validation_failed` 和不含字段值的 `fieldErrors`；核对最新模板后重新提交，不静默换用其他模板。普通资料与凭据的待入库引用已接入，文件新建提案已接入，已有资料的附件修改通过下述 `information-file-update.v1` 能力核对。
 
-## 普通文件新建录入（Mac 开发分支）
+## 普通文件新建录入
 
 先核对`information-file-upload.v1`，按`template-read`返回的`fileInput`及`submissionExample`填写。CLI的`attachments[].versions[].filePath`接收用户给定原文件路径，`values`中的声明文件字段填匹配的附件key，`templateField`标明声明字段；新文件必须绑定声明字段，原件有独立用途时建立文件资料并关联，不追加未绑定来源副本。每组用从1开始数的`currentVersion`选择当前原文，并填写`label`与`sourceNote`说明来源。单份文件上限10MiB，原文不会进入Agent的响应或普通字段。
 
-新建文件提案须给稳定`operationId`，不确定时先用`import-status`按此编号核对；CLI另报上传编号时用`import-file-status`查询原文收件情况。提案待审批、已批准待引用与真正入库分别报告。主人可预览待审原文，批准时原文、资料、版本与回执一起保存。已有资料文件修改另核对`information-file-update.v1`，按动态`fileUpdateExamples`走`update-submit`：在`update`中给准确itemId、baseVersion及attachments；新文件绑定templateField所指的声明文件字段，已有附件加版本指定现有文件字段fieldId（包括旧的额外附件）。只补历史时currentVersion为null，原当前选择不变。只补文件可省略templateId和values，无关正文保持；完整模板修改则对已有文件提供`{"retain":true}`，其他values仍完整。修改的稳定operationId可用`update-status`查询，发生冲突要重新核对原资料并审批；详见[实现进度](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/ordinary-file-ingestion.md)。
+新建文件提案须给稳定`operationId`，不确定时先用`import-status`按此编号核对；CLI另报上传编号时用`import-file-status`查询原文收件情况。提案待审批、已批准待引用与真正入库分别报告。用户可预览待审原文，批准时原文、资料、版本与回执一起保存。已有资料文件修改另核对`information-file-update.v1`，按动态`fileUpdateExamples`走`update-submit`：在`update`中给准确itemId、baseVersion及attachments；新文件绑定templateField所指的声明文件字段，已有附件加版本指定现有文件字段fieldId（包括旧的额外附件）。只补历史时currentVersion为null，原当前选择不变。只补文件可省略templateId和values，无关正文保持；完整模板修改则对已有文件提供`{"retain":true}`，其他values仍完整。修改的稳定operationId可用`update-status`查询，发生冲突要重新核对原资料并审批。
 
 ## 登记已准备好的 Codex 运行包
 
@@ -49,9 +49,11 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json`，Windows 位于 `%LOCALAPPDATA%/AgentInfo/Codex/integration.json`。更新运行包须重新核对和登记，不能把旧描述当作新版已就绪。当前登记与定位的故障检查在 Mac 上运行；未据此宣称 Windows 原生安装验收通过。
 
-新增资料现可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。新回执还给出 `savedLocation: {directoryId, path}`，其中 `path` 为保存时的完整目录名称数组，未分类为 `directoryId:null, path:[]`；这是保存当时的位置，之后移动或改名不回写。旧回执没有这一字段时不推测其历史位置。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
+## 同批资料与提案引用
 
-`update-submit` 也支持上述待录入普通资料关联，必须提供目标的 `proposalId`。批准但未具备保存条件时，保留审核结果，原资料不变。`update-status` 返回提案 `version`，以及等待／待处理状态，真正保存后才返回 `result`。`update-revise` 携带 `proposalId`、当前 `version`、修订的 `update`，保留原资料ID，可以更新 `baseVersion`，修订后清除旧批准并重新审批。按模板修改的 `values` 要包含模板所有字段，不能靠省略来清空字段；补充字段保持不变。待审批凭据已在 Mac 开发分支接入共同流程，尚未替换本机预览；见[凭据录入](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/credential-intake.md)。
+新增资料可在 `relations` 中用 `{"kind":"information","itemKey":"条目key"}` 关联同批待审批条目；跨提案加同一会话中已提交的 `proposalId`。`import-status` 返回每条 `key`、审批状态和真正入库后的ID。新回执还给出 `savedLocation: {directoryId, path}`，其中 `path` 为保存时的完整目录名称数组，未分类为 `directoryId:null, path:[]`；这是保存当时的位置，之后移动或改名不回写。旧回执没有这一字段时不推测其历史位置。已批准但有未获批引用时状态为 `approved_awaiting_admission`；被引用内容拒绝后为 `needs_attention`，不是入库成功或自动拒绝。`import-revise` 携带 `proposalId`、当前 `version` 和待修改 `items`（保留原 `key`），修改后要重新审批。
+
+`update-submit` 也支持上述待录入普通资料关联，必须提供目标的 `proposalId`。批准但未具备保存条件时，保留审核结果，原资料不变。`update-status` 返回提案 `version`，以及等待／待处理状态，真正保存后才返回 `result`。`update-revise` 携带 `proposalId`、当前 `version`、修订的 `update`，保留原资料ID，可以更新 `baseVersion`，修订后清除旧批准并重新审批。按模板修改的 `values` 要包含模板所有字段，不能靠省略来清空字段；补充字段保持不变。待审批凭据也遵循整份提案保存规则，具体输入格式从当前动态模板取得。
 
 ## 分类名称与整理兼容（0.4.1+13）
 
@@ -60,7 +62,7 @@ Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json
 目录同级名称、标签全局名称在去除首尾空白后忽略大小写判重；名称上限仍为200。
 旧库中包含斜杠的名称保留原义，不自动拆分；原名不变的移动兼容旧名称，改名按新规则校验。
 这些限制不扩大Agent整理权限：仍只能按同一获批任务的最终信息身份及版本提交；
-目录／标签删除是所有者界面操作。详细规则见[分类与导航约定](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/design/library-ux-20261021.md)。
+目录／标签删除由用户在 App 操作。使用方式见[整理与查找](usage.md#整理与查找)，目录整批回收见 [ADR0022](adr/0022-recycle-directory-batches.md)。
 
 ## Windows 应用状态与正常退出（0.4.0+11起）
 
@@ -86,7 +88,7 @@ Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json
 显式PID不存在或不可确认不会伪装成成功；旧版 `unsupported_version` 需按原有托盘入口退出。
 
 入口使用同一本机桌面的Windows消息、程序身份及进程句柄；消息只含目标PID和状态/退出操作。
-不向公开HTTP添加主人接口，不靠请求编号退出应用，也不是同一Windows用户进程之间的安全沙箱。
+不向公开HTTP添加用户管理接口，不靠请求编号退出应用，也不是同一Windows用户进程之间的安全沙箱。
 运行中的已启动命令仍遵守原有生命周期规则；退出不会擅自杀死它们，材料可能待下次启动核查回收。
 
 ## Mac 应用状态与正常退出
@@ -160,7 +162,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 查询只返回同一私密会话的原请求状态，不创建请求、不返回会话秘密或访问凭据。
 `not_found` 只是当前未找到，不证明之前在途的提交不会稍后到达；不要自动换编号重发。
 页面重开或有效会话重连可找回原申请；服务关闭、会话结束或资料库恢复后，旧会话不再有效，
-不能凭公开请求/操作编号恢复能力。主人可查看保留的无正文历史，异常中止无法确认的结果仍属未知。
+不能凭公开请求/操作编号恢复能力。用户可查看保留的无正文历史，异常中止无法确认的结果仍属未知。
 
 同一开发源码的 `catalog` 支持 `query`、`typeId`、`tagId`、`offset`、`limit`（1–100，默认20），
 保留已有 `directoryId` 过滤。返回分页 `items`、`total`、`nextOffset`，以及全部当前标签 `tags`（ID和名称，含尚未使用的标签）；
@@ -209,7 +211,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 
 桌面上的聊天名称及用途是 agent 自述，不能作为可信身份凭据。CLI 没有批准或拒绝入口。收到拒绝或过期时，agent 不得自动循环重提、自动扩展范围，或将重新提交当作轮询手段。
 
-自动化已覆盖核心公开接口、真实 CLI 子进程及 Flutter 无窗口组件测试。真实桌面手动执行“等待超时后批准，再查询原结果”的验收仍需用户配合；本任务没有操作用户桌面。
+自动化覆盖核心公开接口、真实 CLI 子进程及 Flutter 无窗口组件；实际宿主事件和系统输入需独立验证。当前任务状态见 [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues)。
 
 ## 修改提案
 
@@ -226,7 +228,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 
 用户在“录入提案”中查看修改前后信息和公开描述，明确确认或拒绝。状态为 `confirmed`、`rejected` 或 `conflicted`；版本冲突不会覆盖当前资料。冲突后根据当前目录版本和用户要求重新准备提案，避免自动重提。用户确认修正后，仍有效的原字段授权可读取最新值。确认操作可安全重试，不会重复增加版本或历史。
 
-## 凭据使用（Windows开发分支，协议v2）
+## 凭据使用（协议v2）
 
 先查询`capabilities`；新版CLI的request-use/run-use/operation-status省略协议版本时按2处理，必须共同支持`credential-use-reuse.v1`。旧服务返回unsupported_capability，不能静默降级或重提单次申请。其他查询可按执行事实返回原版本。旧v1记录与明确的v1调用保留一次尝试，不能升级旧许可；这不是用户的单次/多次模式开关。
 
@@ -256,9 +258,9 @@ Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH�
 
 完整协议、兼容和边界见[协议v2](design/runtime-protocol-v2.md)，Agent流程见[随包凭据使用说明](../integrations/codex/skills/agent-info-access/references/credential-use.md)。
 
-## 开发中的本机焦点填充（#35）
+## 平台相关的本机焦点填充
 
-核心/CLI、Flutter及Windows构建绑定入口已接通，见[整包检查点](https://github.com/ShiJiJS/chiyo/issues/35)。源码/QA包按束校验条件启用；用户原0.4.0+8包未启用，正向GUI及内置浏览器仍待验收。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。
+本功能按平台及实际运行包能力提供，不因源码中有接口就默认启用。必须同时协商协议2、`credential-use-reuse.v1`和`credential-focused-fill.v1`，未提供时停止，不退回返回密码原文。需要私密会话，不能只凭请求ID使用。实际输入与拒绝规则见下列原生合同。
 
 若另有`credential-focused-target.v1`，`{"protocolVersion":2,"command":"focus-target"}`可观察本机当前密码目标，仅返回ready/refused和就绪应用路径/SHA；不提供值、窗口句柄或PID，不预留焦点、不审批、不输入。批准后必须重新点击空密码框。详见[原生合同与当前验证范围](design/windows-focused-fill-native.md)。
 
