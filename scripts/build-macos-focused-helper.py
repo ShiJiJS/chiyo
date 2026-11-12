@@ -92,7 +92,10 @@ def build(requested):
 
     def run(name, command):
         with (logs / (name + ".txt")).open("wb") as log:
-            result = subprocess.run(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=log, timeout=60)
+            # A clean Swift module cache can take over a minute alongside the
+            # application build. Keep short bounds for inspection/signing tools.
+            result = subprocess.run(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=log,
+                                    timeout=180 if name == "compile" else 60)
             log.write(result.stdout)
         report["phases"].append({"name": name, "exit": result.returncode})
         if result.returncode:

@@ -94,6 +94,15 @@ void main() {
     }
     final library = t.widget<LibraryPage>(find.byType(LibraryPage)).controller;
     await tap(t, find.byKey(const ValueKey('workspace-nav-settings')));
+    // At 200% text scale the settings list now needs to scroll to Plugins.
+    await t.scrollUntilVisible(
+      find.byKey(const ValueKey('settings-section-plugins')),
+      180,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('settings-sidebar-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tap(t, find.byKey(const ValueKey('settings-section-plugins')));
     final plugins = t.widget<PluginsPage>(find.byType(PluginsPage)).controller;
     return (
