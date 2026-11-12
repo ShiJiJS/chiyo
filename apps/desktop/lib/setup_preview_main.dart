@@ -47,12 +47,8 @@ class _SetupPreviewAppState extends State<SetupPreviewApp> {
           sync: _draft,
           desktop: widget.desktop,
           windowTitle: MacPreviewDesktop.windowTitle,
-          connectionBuilder: (context, onBack) => SetupConfigurationPreview(
-            draft: _draft,
-            embedded: true,
-            onComplete: onBack,
-            onBack: onBack,
-          ),
+          connectionBuilder: (context, onBack) =>
+              StorageSettingsPreview(draft: _draft, onBack: onBack),
         )
       : SetupConfigurationPreview(
           draft: _draft,
