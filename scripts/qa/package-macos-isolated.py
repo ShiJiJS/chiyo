@@ -54,6 +54,7 @@ def main():
         (source / '.cache/pub').symlink_to(ROOT / '.cache/pub', target_is_directory=True)
         # Downloads remain verified by bundle-macos-tools.py. Sharing this known
         # cache does not expose untracked source or alter the installed payload.
+        (ROOT / '.downloads').mkdir(exist_ok=True)
         (source / '.downloads').symlink_to(ROOT / '.downloads', target_is_directory=True)
         launcher = str(source / 'scripts/dev-macos.sh')
         for package in ['info_core', 'info_cli', 'info_storage']:
