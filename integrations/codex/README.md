@@ -1,18 +1,39 @@
-# Codex 接入开发预览（Issue #6、#7）
+# AI 与 CLI 接入
 
-## 服务端版接入
+知予通过通用 CLI 向 AI 提供目录查询、动态模板、提案和访问申请。Skill 是调用说明，不授予权限；新增和修改由用户核对，读取或使用凭据另行申请。随包还提供 Codex 聊天适配器，用于关联当前聊天及处理结束事件。
 
-当前 Mac 服务端版的接入按 [服务器连接说明](REMOTE-INTEGRATION.md)，使用 App 生成的受限设备配置。下面保留早期本机接入的开发记录；不能据此将用户管理 Token 或旧回环端口用于新的服务端版。
+## 选择同版本说明
 
-这份接入用官方 SessionStart hook 提供当前聊天的私密关联。用户不需要
-手工生成 token。它仍须真实桌面两聊天验收；当前实现不等于已安装或已验收。
-来源：[OpenAI Hooks 文档](https://learn.chatgpt.com/docs/hooks)，2026-10-16 核对。
+| 场景 | 入口 |
+| --- | --- |
+| Mac 运行包与 Codex | [Mac 接入](MACOS-INTEGRATION.md) |
+| Windows 运行包与 Codex | [Windows 接入](../../docs/development/windows-codex-integration.md) |
+| NAS 服务器及设备配置 | [服务器接入](REMOTE-INTEGRATION.md) |
+| 通用 JSON 命令 | [CLI 参考](../../docs/cli.md) |
+| AI 整理资料的调用方法 | [Skill 模板](skills/agent-info-access/SKILL.md) |
+| 凭据与普通文件 | [凭据使用](skills/agent-info-access/references/credential-use.md) · [文件领取](skills/agent-info-access/references/information-files.md) |
 
-Windows开发分支的凭据调用已接协议v2：先申请固定期限，再以逐次operationId和完整launch调用持续宿主，同一批准范围内的不同命令不重复审批。CLI省略协议版本时默认2，旧服务明确拒绝；旧v1事实保持单次语义。调用流程及类型化注入见[随包凭据使用说明](skills/agent-info-access/references/credential-use.md)。当前已交付0.4.0+8仍是旧v1，须使用同一新版整包的应用、CLI、worker和模板，不能只更新Skill。
+平台接入文档同时作为打包模板，其中 `cli/` 等相对路径指解压后的完整运行包。使用同一版本的 App、CLI、worker 和 Skill，不把某个单独程序换进旧包；可用能力以运行中 `capabilities` 为准。
 
-#35的Windows焦点输入及#34普通附件已完成各自验收，先以实际capabilities判断安装版本的能力。Skill包括[先授权、再点击和后台填充](skills/agent-info-access/references/credential-use.md#focused-password-input)和[普通文件申请、领取与释放](skills/agent-info-access/references/information-files.md)。文件副本可交给同机文档工具或浏览器上传工具；凭据文件仍由命令宿主注入，不作为普通附件领取。各自实测范围见[#35完成记录](https://github.com/ShiJiJS/chiyo/issues/35)和[#38完成记录](https://github.com/ShiJiJS/chiyo/issues/38)。#30继续跟踪三功能联合及真实Codex安装/信任，不把受控关联文件测试当成真实Codex事件；用户旧0.4.0+8包仍未替换。
+App 根据设置自动准备本地或服务器模式的受限连接。新聊天发现当前连接；已有聊天保留原服务。服务器模式中 App 退出后 NAS 仍可接收申请，本地模式完全退出 App 会关闭本机服务。服务器正常重启不延长原批准期限，也不单独结束仍有效的原许可。
 
-## 凭据边界
+**App 的管理 Token 不交给 CLI 或 AI。** 设备配置只能连接、查询公开目录并提交申请，不能审批。模板及填写例子从当前服务查询，不把模板清单复制进 Skill。
+
+## 准备聊天接入
+
+完整包中的 `info-prepare-codex`（Windows 为 `.exe`）向新的稳定目录生成程序、Skill 和 `hooks.json`。准备不修改个人配置，也不自动安装或信任 hooks；需要启用时按对应平台说明审查准确路径和命令，保留已有配置。
+
+聊天关联引用是私密能力，只通过独立 stdin 交给当前聊天的 CLI，不放进 shell 命令、参数、日志或仓库。公开聊天 ID、请求 ID 和 Agent 名称都不是访问凭证。引用丢失时明确重新连接，不能按 ID 搜索磁盘恢复。
+
+常规恢复或压缩保留有效的原引用，不延长许可。根聊天结束、撤销或到期后停止后续访问；普通 CLI 退出、切换聊天和子调用结束不自动结束根聊天。相关取舍见 [ADR0005](../../docs/adr/0005-end-only-codex-lifecycle.md)。
+
+## 开发与验证
+
+源码工具位于 `packages/info_cli/tool/`。`scripts/prepare-codex-acceptance.py` 可从已核对的同版本交付包生成独立测试项目，不操作已有项目或创建真实聊天。只使用合成资料；CLI 子进程测试不等于真实宿主事件已验证。任务及验收状态由 [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues) 维护，不在接入说明中保留旧版本的待办列表。
+
+下面保留本机适配器的凭据与结束索引规则，供实现和兼容维护。它描述本地服务生命周期；NAS 的持续运行和重启规则按上面的服务器说明执行。
+
+## 本机聊天关联的实现约束
 
 - 随机 256-bit 文件名指向不可变的会话凭据文件；文件在用户私有状态目录，
   Windows 设置仅当前用户继承 ACL，macOS 目录模式 700。创建权限失败则不交付关联。
@@ -53,7 +74,7 @@ SessionEnd 使用独立随机 256-bit 仅撤销能力，由私有 `end-only/` �
 
 服务验证仅撤销凭据后先不可逆结束内存会话，再异步保存历史。等待访问记录写入
 的读取在交付前再次检查结束状态，结束先发生时不交付内容。已拒绝、已过期等
-既有终态保持不变，拥有者仍能看到聊天标签及“会话已结束”的历史。
+既有终态保持不变，用户仍能看到聊天标签及“会话已结束”的历史。
 
 已确认的 [ADR 0005](../../docs/adr/0005-end-only-codex-lifecycle.md) 允许仿造或
 延迟的本机公开 ID 结束事件导致提前断开；这只产生撤销，不能获取资料或审批。
@@ -61,104 +82,3 @@ SessionEnd 使用独立随机 256-bit 仅撤销能力，由私有 `end-only/` �
 目录、执行 ACL 设置、启动 UI 或等待审计存储。失败保留仅撤销索引以便重试，
 未送达事件依靠固定到期兜底。生成材料只注册 SessionStart、SubagentStart 和
 SessionEnd；Stop、Interrupt、SubagentStop、CLI 结束及切换聊天均不结束根会话。
-
-## 生成可审查安装材料
-
-Windows 联网版从完整同版本包使用 `cli/info.exe`、`info-codex.exe`、`info-codex-hook.exe` 和 `info-prepare-codex.exe`。App 连接成功后自动登记并复用本机独立 Agent 设备，CLI 默认发现当前配置；不要把 App 的管理 Token 当作 Agent 配置。Windows 连接文件由当前用户 DPAPI 保护，不能复制 Mac 连接文件或另一用户的加密文件代替登记。
-
-公开能力检查可在 PowerShell 运行（替换两个路径）：
-
-```powershell
-'{"command":"capabilities"}' | & 'C:\完整包\cli\info.exe'
-```
-
-生成待审查材料时，将 `--connection <该私有配置文件>` 和 `--state-root <该设备的私有会话目录>` 传给 `info-prepare-codex.exe`，输出目录须为全新、稳定的目录。生成不会安装或信任 hooks。实际资料调用仍必须使用本聊天已经收到的私有引用，经独立 stdin 输入；不要把引用写入 PowerShell 命令、参数或 here-string。引用缺失时重新连接，不能按聊天 ID 搜索恢复。
-
-Windows 开发预览 ZIP 还提供无需 SDK 的 `cli/info-prepare-codex.exe`。它把编译的
-CLI/hook 及 `info-runtime-worker.exe` 复制到用户选定的新稳定目录，生成最终路径的 hook 和 Skill，拒绝覆盖
-已有目录；安装/信任仍需单独配合。详见 [Windows 交付说明](../../docs/development/windows-delivery.md)。
-
-从 `packages/info_cli` 执行（先 `dart pub get`）：
-
-```text
-dart run tool/prepare_codex.dart ../../build/codex-preview
-```
-
-生成本机可执行文件、hooks.json 和 Skill。命令不会修改任何用户或项目的
-`.codex`、不会信任 hook，也不会打开桌面。输出路径应选稳定位置，生成后
-移动目录必须重新生成 hook 命令。Windows 命令编码只是安全传参，不含秘密。
-
-准备用户实测时，再经用户明确授权：
-
-1. 保留已有配置，只把 bundle 的 SessionStart、SubagentStart、SessionEnd 条目合入测试项目的
-   `.codex/hooks.json`。先确认没有同一 hook 的重复安装。不要覆盖现有 hook。
-2. 将 bundle `skills/agent-info-access` 放到测试项目 `.agents/skills/`，或按
-   当前 Codex 的技能安装流程安装此目录。检查 Skill 中的可执行文件绝对路径。
-3. 在 Codex 审查并信任准确的 hook 定义；官方 CLI 文档提供 `/hooks`。桌面端
-   实际信任入口待用户现场验证，不能据此宣称桌面安装成功，也不要绕过信任。
-4. 用户启动信息应用后，新建一个测试聊天。默认服务端口 47125。
-   若服务尚未启动，hook 明确报告失败；启动后需重新连接，不能按聊天 ID 补领。
-   已存在的聊天若从未收到引用，用户明确要求重新连接后运行 bundle 的
-   `info-codex-hook --connect`，它使用当前 CODEX_THREAD_ID 创建未授权会话并交付
-   hook 格式上下文；不读取历史，不查询旧凭据。普通 resume 保留已有引用。
-
-目前不会自动执行上述安装步骤。用户只需要配合真实 UI 验证，不要求透露 token。
-
-### 准备独立验收项目（开发者工具）
-
-已审查的同版本bundle还可生成一个全新的、尚未在客户端注册/信任的测试项目：
-
-```text
-python scripts/prepare-codex-acceptance.py --delivery <AgentInfoManage目录> --bundle <已生成bundle> --workspace <不存在的新项目目录>
-```
-
-工具按随包 manifest 区分 Windows x64 与 Mac ARM64，核对同源 AOT/Skill/引用、
-两种 shell 的准确 hook 命令、事件/匹配器/超时，再仅在新目录准备
-`.codex/hooks.json`、`.agents/skills/agent-info-access`、README.txt及 13 项未运行的验收清单。
-已存在的目录直接拒绝，不合并既有配置。这个Python工具用于开发者准备材料，不是
-预览包或用户实际接入的额外运行依赖；已生成项目由用户直接在客户端打开。
-项目仍引用原bundle的固定绝对路径，不能先删除/移动该bundle。
-
-这只是待用户开启的独立项目布局，不注册Codex项目、不授予信任、不运行hook，也不
-创建聊天或子Agent。先在原开发会话安排独立虚构资料库的应用，再由用户正式审查/信任
-并启动测试聊天；不要在没有服务时抢先启动。实际客户端事件/会话隔离与结束恢复仍须
-单独验收，生成器和文件哈希核对不能代替它们。
-
-## 用户配合的两聊天验收
-
-只用虚构资料，避免把关联引用、文件内容和 token 放入报告或截图。
-
-1. 新资料库为空，用户先在“信息库”创建一条虚构服务器信息，包含“地址”和
-   “用户名”两个字段。聊天 A 用 catalog 获取实际生成的信息项及字段 ID，再请求
-   这两个字段。用户确认桌面展示聊天关联、用途及字段，仅批准“地址”。记录公开
-   请求 ID、字段及到期时间；不要假设固定的 demo-server/host ID 存在。
-2. A 退出一次 CLI 进程后，再启动 CLI 两次读取同一字段，应成功且无新审批，
-   到期时间不变；读取未批准的“用户名”字段应失败。
-3. 聊天 B 独立启动，只提供 A 的公开请求 ID 和聊天 ID，领取/读取均应失败。
-   B 自己提交请求后应出现独立审批。不得把 A 的私密引用交给 B 做演示。
-4. A 正常恢复聊天时有效引用仍可使用且不续期；手动撤销后再次读取应失败。
-   恢复已撤销/过期会话或 fork 成新的聊天后不能复活原授权。
-   自动压缩后验证原引用保留；丢失时应明确重新连接，不静默扩大访问。
-5. 完全退出信息应用后读取失败；重启再用旧引用/请求 ID 仍失败。重新连接后
-   新申请才能获准。记录 Windows/macOS、Codex 版本、信任入口和实际结果。
-
-CLI 一次 stdin JSON 的内容见 Skill。通用 `info` 仍支持 JSON-lines；Codex 适配
-独立于业务命令。wait/cancel 由 #4 提供；主子 agent 与结束适配的实际 Codex 验收
-使用 [Issue #7 检查清单](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/chat-lifecycle.md)。
-
-## 已验证与未验证
-
-Windows 自动化测试启动真实 Dart CLI 子进程、核心服务和 hook payload，覆盖多次
-CLI 的复用、固定到期、撤销、已知 ID 无法领取、同 ID 重新启动不复活、其他
-聊天引用误用、缺失/错误关联、服务端会话失效、不读取 transcript_path。
-这些测试不创建真实 Codex 聊天，不打开应用窗口。
-
-真实 CLI 子进程还覆盖子引用委托、同一范围与固定到期、多个启动代际结束、
-结束后子读取失败、忽略非根结束事件，以及服务无响应时的预算和失败后重试。
-这些是适配器和受控 payload 验证，不代表真实 Codex 发送过事件。
-
-尚未验证：真实 Windows Codex 桌面安装/信任、两聊天及压缩体验、主子 agent
-上下文交付、SessionEnd 送达/顺序与 fork 上下文。用户自有 Mac 已在独立
-Mac 分支按 #49 准备同版本验收项目及 stdin 传输检查，真实客户端信任与聊天
-仍未通过；两平台分别留证，不运行托管 macOS 验证。Issue #6/#7 的真实接入验收在必要
-用户步骤完成前保持未完成。

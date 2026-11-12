@@ -23,9 +23,9 @@ collector = module('native_collector', 'collect-zhiyu-native.py')
 
 class ProfileGuards(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='profile-guards-', dir=ROOT / '.cache/tmp')
+        self.temp = tempfile.TemporaryDirectory(prefix='profile-guards-')
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
 
     def test_foreign_identity_is_rejected_before_native_tools(self):
         app = self.root / 'foreign.app'
@@ -49,12 +49,12 @@ class ProfileGuards(unittest.TestCase):
         self.assertTrue(other.exists())
 
     def test_existing_output_is_rejected_without_inspecting_or_rebuilding_app(self):
-        temporary = tempfile.TemporaryDirectory(prefix='profile-guards-', dir=ROOT / 'build/zhiyu-ui')
-        self.addCleanup(temporary.cleanup)
-        output = Path(temporary.name)
+        output = self.root / 'build/zhiyu-ui/existing'
+        output.mkdir(parents=True)
         sentinel = output / 'keep.txt'
         sentinel.write_text('keep')
-        with patch.object(runner, 'inspect_app') as inspect:
+        with patch.object(runner, 'ROOT', self.root), \
+                patch.object(runner, 'inspect_app') as inspect:
             with self.assertRaises(ValueError):
                 runner.run(output, False, 'python3', 1)
             inspect.assert_not_called()

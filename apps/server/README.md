@@ -2,53 +2,20 @@
 
 备份、停止后升级、数据及运行密钥恢复步骤见 [维护说明](OPERATIONS.md)。
 
-服务器为同一用户保存一份加密资料库，供 App 选择同步；App 不连接服务器时也能独立使用本地库。资料同步不转移聊天许可和进行中的操作。Dockerfile 的 `verify` 阶段供源码测试，默认 `runtime` 阶段是 AOT 服务，不含 SDK、源码、资料或私有密钥。生产运行使用方法见下节，正式替换与真实资料迁移应集中进行。
+服务器为同一用户保存一份加密资料库，供 App 选择同步；App 不连接服务器时也能独立使用本地库。资料同步不转移聊天许可和进行中的操作。Dockerfile 的 `verify` 阶段供源码测试，默认 `runtime` 阶段是 AOT 服务，不含 SDK、源码、资料或私有密钥。
 
-## Docker 运行
+## 部署与使用
 
-从仓库根目录构建默认 AOT 运行镜像；`--target verify` 才是源码测试阶段。以下是部署说明，不表示本轮已经替换日常服务。
+桌面安装、Compose 配置、局域网证书及 App 连接步骤见[部署手册](../../docs/deployment.md)（[English](../../docs/deployment.en.md)）；示例位于仓库 `deploy/`。已有资料的升级、密钥保管、备份及恢复见[维护说明](OPERATIONS.md)。
+
+从仓库根目录单独构建服务运行镜像：
 
 ```sh
 docker build -f apps/server/Dockerfile --target runtime \
   --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -t chiyo-server:local .
 ```
 
-在选定的独立私有目录中准备 `data`、`config` 和 `tls` 三个子目录，目录权限700；TLS 证书及私钥放在 `tls`，私钥权限600。证书须覆盖实际局域网连接地址。使用运行镜像一次性初始化尚不存在的 `secrets` 子目录：
-
-```sh
-docker run --rm --user "$(id -u):$(id -g)" \
-  --mount "type=bind,source=<私有目录绝对路径>,target=/setup" \
-  chiyo-server:local init-secrets /setup/secrets
-```
-
-`config/server.json` 内容如下。路径是容器里的路径，不是电脑路径；端口也可按实际部署调整。
-
-```json
-{
-  "dataDirectory": "/data",
-  "secretsDirectory": "/secrets",
-  "tlsCertificate": "/tls/server.pem",
-  "tlsPrivateKey": "/tls/server.key",
-  "address": "0.0.0.0",
-  "port": 47126
-}
-```
-
-启动时只给资料目录写入权限，配置、密钥和证书只读挂载：
-
-```sh
-docker run -d --name chiyo-server --user "$(id -u):$(id -g)" \
-  -p "<局域网监听地址>:47126:47126" \
-  --mount "type=bind,source=<私有目录>/data,target=/data" \
-  --mount "type=bind,source=<私有目录>/config,target=/config,readonly" \
-  --mount "type=bind,source=<私有目录>/secrets,target=/secrets,readonly" \
-  --mount "type=bind,source=<私有目录>/tls,target=/tls,readonly" \
-  chiyo-server:local
-```
-
-以上占位路径需替换为绝对路径，运行身份须能读取这些私有文件。App 使用的 Token 是 `owner.token` 原始32字节的无填充 Base64URL 表示，可在可信终端用 `openssl base64 -A -in <私有目录>/secrets/owner.token | tr '/+' '_-' | tr -d '='` 获取后直接填入 App，不放进聊天、截图或普通日志。私人 CA 填入 App 连接页，不能把服务器私钥交给客户端。App 自动准备当前库的受限 CLI 配置，无需手动生成。
-
-正常停止用 `docker stop --time 30 chiyo-server`，检查退出码0后再维护。后续重开使用原密钥和持久目录，不再次初始化。完整备份、迁移及失败回退见 [维护说明](OPERATIONS.md)。镜像不包含任何用户资料、私有密钥或预置 Token。
+下文面向服务开发和协议维护。源码测试使用 `verify` 阶段，默认运行镜像为 AOT 程序，不含 SDK、资料或私有密钥。
 
 ## 源码启动
 
@@ -58,7 +25,7 @@ docker run -d --name chiyo-server --user "$(id -u):$(id -g)" \
 dart run bin/server.dart init-secrets /absolute/private/secrets
 ```
 
-此操作生成三份互相独立的 32 字节材料：数据库密钥、用户接入 Token、服务器身份。目录必须不存在；重复初始化会拒绝，启动和重启不会自动重建丢失的密钥。文件权限为 600，目录为 700；应单独持久保管，不复制进镜像或源码。Token 的传输形式为原始字节的无填充 Base64URL，CLI 不得领取这个管理身份。受限 Agent 连接已由 #93 接通，不能使用管理 Token。
+此操作生成三份互相独立的 32 字节材料：数据库密钥、用户接入 Token、服务器身份。目录必须不存在；重复初始化会拒绝，启动和重启不会自动重建丢失的密钥。文件权限为 600，目录为 700；应单独持久保管，不复制进镜像或源码。Token 的传输形式为原始字节的无填充 Base64URL，CLI 不得领取这个管理身份。Agent 使用独立受限连接，不能使用管理 Token。
 
 配置文件仅含路径与监听信息，路径相对配置文件所在目录解析：
 
@@ -251,12 +218,12 @@ dart test --reporter expanded
 dart analyze bin lib test
 ```
 
-从仓库根目录运行 Linux ARM64 验收和实际容器重建：
+从仓库根目录运行服务测试和实际容器重建（使用 Docker 宿主架构）：
 
 ```sh
-docker build -f apps/server/Dockerfile -t chiyo-server-verification:a01 .
-docker run --rm chiyo-server-verification:a01
-python3 scripts/qa/check-server-container.py
+docker build -f apps/server/Dockerfile --target verify -t chiyo-server-verification:local .
+docker run --rm chiyo-server-verification:local
+python3 scripts/qa/check-server-container.py --image chiyo-server-verification:local
 ```
 
 测试只生成合成资料、临时证书及密钥。它验证真实 SQLCipher、独立进程正常退出/重开、TLS 校验、操作去重、旧单机格式加密备份恢复，以及删除/重建容器后的资料取回。脚本结束会移除自己的容器和临时目录，不操作其他容器或个人资料。

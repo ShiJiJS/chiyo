@@ -1,0 +1,22 @@
+[req]
+prompt = no
+distinguished_name = issuer
+x509_extensions = ca
+
+[issuer]
+CN = Chiyo Local CA
+
+[ca]
+basicConstraints = critical,CA:TRUE
+keyUsage = critical,keyCertSign,cRLSign
+
+[server]
+basicConstraints = critical,CA:FALSE
+keyUsage = critical,digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @addresses
+
+[addresses]
+# Replace these with the IP and/or DNS name actually entered in the App.
+IP.1 = 192.168.1.20
+DNS.1 = chiyo.local

@@ -1,5 +1,6 @@
 .scratch/
-/local/private/
+/local/
+/.local/
 .dart_tool/
 .packages
 build/
@@ -13,3 +14,11 @@ build/
 /.worktrees/
 __pycache__/
 /docs/development/evidence/
+
+# Toolchains and local deployment configuration
+/.tools/
+/.cache/
+/.downloads/
+/.ci/
+/deploy/.env
+/deploy/runtime/

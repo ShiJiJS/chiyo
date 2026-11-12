@@ -1,0 +1,34 @@
+services:
+  chiyo:
+    image: chiyo-server:local
+    build:
+      context: ..
+      dockerfile: apps/server/Dockerfile
+      target: runtime
+      args:
+        SOURCE_COMMIT: ${CHIYO_SOURCE_COMMIT:-unknown}
+    user: "${CHIYO_UID:-1000}:${CHIYO_GID:-1000}"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    ports:
+      - "${CHIYO_BIND_ADDRESS:-127.0.0.1}:${CHIYO_PORT:-47126}:47126"
+    volumes:
+      - type: bind
+        source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/data
+        target: /data
+      - type: bind
+        source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/config
+        target: /config
+        read_only: true
+      - type: bind
+        source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/secrets
+        target: /secrets
+        read_only: true
+      - type: bind
+        source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/tls
+        target: /tls
+        read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

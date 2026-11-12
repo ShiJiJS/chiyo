@@ -7,4 +7,4 @@ status: accepted
 
 Skill 只说明如何发现、查询和使用模板。这样增加了对本机服务可用性的依赖，但避免插件与 App、CLI、Skill 出现几份不同定义。服务不可用时明确报错；已经取到的模板在提交时仍由服务核对版本与可用状态，不能靠旧副本绕过变化。
 
-本决定补充 [ADR0016](0016-declarative-template-plugins.md) 的声明式插件方向，不更改既有资料保存时的模板格式，也不允许插件自行执行命令或批准操作。查询只提供模板资料，不因此开放用户字段值、秘密、私有备注或待审批提案。实现归 GitHub #78，接入归 #71，实际新会话验证归 #73；开发实现见[当前进度](https://github.com/ShiJiJS/chiyo/blob/46ff2a9ba5bda130c88f9aac9beef72eb586e781/docs/development/ai-template-ingestion.md)，最终独立新会话验收仍待完成。
+本决定补充 [ADR0016](0016-declarative-template-plugins.md) 的声明式插件方向，不更改既有资料保存时的模板格式，也不允许插件自行执行命令或批准操作。查询只提供模板资料，不因此开放用户字段值、凭据内容、私有备注或待审批提案。命令与当前查询方式见 [CLI 说明](../cli.md)；实现和验证状态由 GitHub Issues 维护，不在架构决策中保留逐次开发进度。
