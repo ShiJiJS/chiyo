@@ -18,6 +18,12 @@ import 'package:info_desktop/workspace/workspace_source.dart';
 
 const resume = WorkspaceRecordRef(WorkspaceRecordKind.information, 'resume');
 const https = WorkspaceRecordRef(WorkspaceRecordKind.information, 'https');
+// Scope attachment checks so the shared brand image cannot satisfy them.
+Finder attachmentImages() => find.descendant(
+  of: find.byType(LibraryFilePreviewView),
+  matching: find.byType(Image),
+);
+
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
   setUpAll(() async {
@@ -56,20 +62,17 @@ void main() {
     if (evidence.isEmpty) return;
     await ready(
       t,
-      () => find
-          .byType(Image)
-          .evaluate()
-          .every(
-            (element) => find
-                .descendant(
-                  of: find.byWidget(element.widget),
-                  matching: find.byWidgetPredicate(
-                    (w) => w is RawImage && w.image != null,
-                  ),
-                )
-                .evaluate()
-                .isNotEmpty,
-          ),
+      () => attachmentImages().evaluate().every(
+        (element) => find
+            .descendant(
+              of: find.byWidget(element.widget),
+              matching: find.byWidgetPredicate(
+                (w) => w is RawImage && w.image != null,
+              ),
+            )
+            .evaluate()
+            .isNotEmpty,
+      ),
     );
     await t.runAsync(() async {
       final boundary = t.renderObject<RenderRepaintBoundary>(
@@ -145,20 +148,17 @@ void main() {
     t,
     () =>
         find.byType(LibraryFilePreviewView).evaluate().isNotEmpty &&
-        find
-            .byType(Image)
-            .evaluate()
-            .every(
-              (element) => find
-                  .descendant(
-                    of: find.byWidget(element.widget),
-                    matching: find.byWidgetPredicate(
-                      (w) => w is RawImage && w.image != null,
-                    ),
-                  )
-                  .evaluate()
-                  .isNotEmpty,
-            ),
+        attachmentImages().evaluate().every(
+          (element) => find
+              .descendant(
+                of: find.byWidget(element.widget),
+                matching: find.byWidgetPredicate(
+                  (w) => w is RawImage && w.image != null,
+                ),
+              )
+              .evaluate()
+              .isNotEmpty,
+        ),
   );
   Finder value(String text) => find.byWidgetPredicate(
     (w) =>
@@ -188,7 +188,7 @@ void main() {
           expect(find.byType(Table), findsOneWidget);
           expect(value('图片：远程图'), findsOneWidget);
           expect(value('<script>doNotRun()</script>'), findsOneWidget);
-          expect(find.byType(Image), findsNothing);
+          expect(attachmentImages(), findsNothing);
           expect(network, 0);
           await tap(t, find.byKey(const ValueKey('library-document-raw')));
           expect(
@@ -283,7 +283,7 @@ void main() {
       await fileReady(t);
       expect(preview(t).preview.pageCount, 2);
       expect(preview(t).preview.file.ref.version, 2);
-      final image = find.byType(Image).first;
+      final image = attachmentImages().first;
       await t.ensureVisible(image);
       await t.pumpAndSettle();
       await capture(t, 'file-1280-light-pdf');
@@ -427,12 +427,12 @@ void main() {
         expect(preview(t).preview.pageCount, 1);
         if (selection == 'image') {
           expect(preview(t).preview.file.mediaType, 'image/png');
-          expect(find.byType(Image), findsOneWidget);
+          expect(attachmentImages(), findsOneWidget);
           await capture(t, 'file-1280-light-png');
         } else {
           expect(preview(t).preview.file.mediaType, 'text/plain');
           expect(value('Maintenance checklist'), findsOneWidget);
-          expect(find.byType(Image), findsNothing);
+          expect(attachmentImages(), findsNothing);
           expect(preview(t).preview.file.ref.version, 4);
         }
         expect(t.takeException(), isNull);
