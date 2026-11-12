@@ -1,4 +1,5 @@
 import 'support/workspace_fixtures.dart';
+import 'support/online_ui_harness.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -33,6 +34,11 @@ void main() {
     await File('$evidence/fonts.json').writeAsString(jsonEncode(fonts));
   });
   Future<void> ready(WidgetTester t) async {
+    await OnlineUiHarness(t).until(
+      () =>
+          find.byType(CircularProgressIndicator).evaluate().isEmpty &&
+          !t.binding.hasScheduledFrame,
+    );
     await t.pumpAndSettle();
     expect(t.takeException(), isNull);
   }
