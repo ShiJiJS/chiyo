@@ -83,8 +83,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     center()
     configureToolAccess(flutterViewController)
     secretEditor = NativeSecretEditor(window: self, messenger: flutterViewController.engine.binaryMessenger)
-    // Registers a local owner channel only. No helper/permission/AX work until
-    // an explicit call, and Dart's Mac focused-fill capability remains disabled.
+    // Registers a local owner channel only. Permission checks and filling run
+    // on demand; requesting OS permission requires the explicit Settings action.
     focusedFill = MacFocusedFillBridge(messenger: flutterViewController.engine.binaryMessenger)
     textFieldAccessibility = NativeTextFieldAccessibility(view: flutterViewController.view)
     let accessibility = FlutterMethodChannel(name: "agent_info_manage/text_field_accessibility",
