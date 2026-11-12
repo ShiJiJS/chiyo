@@ -30,7 +30,9 @@ import 'desktop_fonts.dart';
 
 Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isMacOS) await loadDesktopFonts(requiredFiles: false);
+  if (Platform.isMacOS || Platform.isWindows) {
+    await loadDesktopFonts(requiredFiles: false);
+  }
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks([
       'Noto Sans SC',
