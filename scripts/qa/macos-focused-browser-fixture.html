@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>Chiyo synthetic focused-fill QA</title>
+<style>body{font:20px system-ui;padding:60px}label{display:block;margin:24px 0}input{font:20px system-ui;width:500px;padding:12px}pre{font-size:16px}</style>
+<h1>Chiyo synthetic focused-fill QA</h1><p>Local fixture. Fake data only. No sign-in or submission.</p>
+<label>Synthetic password <input id="password" type="password" autocomplete="off" autofocus></label>
+<label>Second synthetic password <input id="other" type="password" autocomplete="off"></label>
+<label>Ordinary text <input id="plain" autocomplete="off"></label><pre id="result">Waiting</pre>
+<script>
+const expected="Synthetic-pass-1234567890-示例😊";
+let serial=-1;
+async function report(){let r={focus:document.activeElement.id,passwordMatched:password.value===expected,passwordEmpty:password.value.length===0,passwordLength:password.value.length,otherEmpty:other.value.length===0,plainEmpty:plain.value.length===0,visible:document.visibilityState,documentFocused:document.hasFocus(),serial};result.textContent=JSON.stringify(r,null,2);await fetch('/report',{method:'POST',body:JSON.stringify(r)});}
+for(let t of ['focus','blur'])window.addEventListener(t,report);
+for(let x of [password,other,plain])for(let t of ['input','focus','blur'])x.addEventListener(t,report);
+async function poll(){try{let c=await(await fetch('/command')).json();if(c.serial!==serial){serial=c.serial;if(c.clear)for(let x of [password,other,plain])x.value='';document.getElementById(c.focus).focus();await report();}}catch(e){}setTimeout(poll,80)}poll();
+</script>

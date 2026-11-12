@@ -90,9 +90,7 @@ extension _FocusedFillService on InformationService {
     int libraryGeneration,
   ) async {
     PreparedFocusedFill? prepared;
-    List<int>? secretBytes, units;
-    var anySent = false;
-    var nativeInFlight = false;
+    List<int>? secretBytes;
     var outcome = FocusedFillState.refused;
     String? error;
     try {
@@ -121,23 +119,10 @@ extension _FocusedFillService on InformationService {
           throw const CredentialUseFailure('material_prepare_failed');
         }
       });
-      final text = utf8.decode(secretBytes!);
-      units = List<int>.of(text.codeUnits);
-      if (units.isEmpty ||
-          units.length > 4096 ||
-          units.any((c) => c < 32 || c == 127)) {
-        throw const CredentialUseFailure('unsupported_secret');
-      }
-      for (var start = 0; start < units.length;) {
-        var end = min(start + 16, units.length);
-        if (end < units.length &&
-            units[end - 1] >= 0xd800 &&
-            units[end - 1] <= 0xdbff &&
-            units[end] >= 0xdc00 &&
-            units[end] <= 0xdfff) {
-          end--;
-        }
-        await owner._serialize(() async {
+      final result = await sendPreparedFocusedFill(
+        prepared,
+        secretBytes!,
+        beforeBatch: () => owner._serialize(() async {
           _requireFillGrant(session, original.requestId);
           final record = _fillOperation(id);
           if (!record.inputReleased) {
@@ -146,52 +131,14 @@ extension _FocusedFillService on InformationService {
               validate: () => _requireFillGrant(session, original.requestId),
             );
           }
-        });
-        final batch = List<int>.of(units.sublist(start, end));
-        FocusedFillBatchResult result;
-        try {
-          nativeInFlight = true;
-          result = await prepared.sendBatch(batch);
-          nativeInFlight = false;
-        } finally {
-          batch.fillRange(0, batch.length, 0);
-        }
-        if (result.state == FocusedFillState.sent && result.errorCode != null) {
-          outcome = FocusedFillState.unknown;
-          error = 'fill_unknown';
-          break;
-        }
-        if (result.state != FocusedFillState.sent) {
-          outcome = result.state == FocusedFillState.refused && anySent
-              ? FocusedFillState.partial
-              : result.state;
-          if (outcome == FocusedFillState.checking) {
-            outcome = FocusedFillState.unknown;
-          }
-          error =
-              result.errorCode != null &&
-                  focusedFillErrorCodes.contains(result.errorCode)
-              ? result.errorCode
-              : 'fill_unknown';
-          break;
-        }
-        anySent = true;
-        start = end;
-        outcome = FocusedFillState.sent;
-        error = null;
-      }
+        }),
+      );
+      outcome = result.state;
+      error = result.errorCode;
     } on Object catch (e) {
       error = _fillError(e);
-      // A throwing driver may already have submitted input. A confirmed
-      // refusal is the only path allowed to claim zero events after release.
-      outcome = nativeInFlight
-          ? FocusedFillState.unknown
-          : anySent
-          ? FocusedFillState.partial
-          : FocusedFillState.refused;
     } finally {
       secretBytes?.fillRange(0, secretBytes.length, 0);
-      units?.fillRange(0, units.length, 0);
       try {
         await prepared?.close();
       } on Object {
@@ -253,8 +200,20 @@ extension FocusedFillAgentAccess on AgentAccess {
   Future<CredentialUseRequest> requestFocusedFill(
     String session,
     FocusedFillInput input,
-  ) => _service.owner._serialize(() async {
-    if (!focusedFillAvailable) {
+  ) => _requestFocusedFill(
+    session,
+    input,
+    inspector: _service.focusedFillApplicationInspector,
+    available: focusedFillAvailable,
+  );
+
+  Future<CredentialUseRequest> _requestFocusedFill(
+    String session,
+    FocusedFillInput input, {
+    required FocusedFillApplicationInspector inspector,
+    required bool available,
+  }) => _service.owner._serialize(() async {
+    if (!available) {
       throw const CredentialUseFailure('unsupported_capability');
     }
     _service._fillRepository();
@@ -269,9 +228,7 @@ extension FocusedFillAgentAccess on AgentAccess {
     if (!credential.discoverable || credential.form != CredentialForm.string) {
       throw const CredentialUseFailure('invalid_reference');
     }
-    final application = await _service.focusedFillApplicationInspector(
-      input.fill.application,
-    );
+    final application = await inspector(input.fill.application);
     if (application.sha256 != input.fill.application.sha256) {
       throw const CredentialUseFailure('application_changed');
     }
@@ -360,43 +317,14 @@ extension FocusedFillAgentAccess on AgentAccess {
     String session,
     FocusedFillOperationInput input,
   ) async {
-    final claim = await _service.owner._serialize(() async {
-      final existing = _findFocusedFill(session, input);
-      if (existing != null) return (existing, false);
-      if (!focusedFillAvailable) {
-        throw const CredentialUseFailure('unsupported_capability');
-      }
-      final request = _service._requireFillGrant(session, input.requestId);
-      if (_service._activeFocusedFill != null) {
-        throw const CredentialUseFailure('busy');
-      }
-      if (_service._fillRepository().focusedFillOperations.any(
-        (o) =>
-            _service._credentialUseSessions[o.requestId] == session &&
-            ({
-              FocusedFillState.checking,
-              FocusedFillState.partial,
-              FocusedFillState.unknown,
-            }.contains(o.state)) &&
-            o.attentionAcknowledgedAt == null,
-      )) {
-        throw const CredentialUseFailure('fill_needs_attention');
-      }
-      final now = _service._clock().toUtc();
-      final operation = FocusedFillOperation(
-        id: _service._secret(),
-        requestId: request.id,
-        operationId: input.operationId,
-        fingerprint: input.fingerprint,
-        createdAt: now,
-        application: request.focusedFill!.application,
-      );
-      await _service._saveFocusedFill(
-        request: request.changed({'attemptedAt': _useTimestamp(now)}),
-        operation: operation,
-        validate: () => _service._requireFillGrant(session, input.requestId),
-      );
-      _service._activeFocusedFill = operation.id;
+    final claim = await _claimFocusedFill(
+      session,
+      input,
+      available: focusedFillAvailable,
+      reserveLocalDriver: true,
+    );
+    if (claim.$2) {
+      final operation = claim.$1;
       final task = _service
           ._runFocusedFill(session, operation.id, _service._libraryGeneration)
           .whenComplete(() {
@@ -407,10 +335,59 @@ extension FocusedFillAgentAccess on AgentAccess {
           });
       _service._focusedFillTasks[operation.id] = task;
       unawaited(task);
-      return (operation, true);
-    });
+    }
     return _service._publicFill(claim.$1, duplicate: !claim.$2);
   }
+
+  Future<(FocusedFillOperation, bool)> _claimFocusedFill(
+    String session,
+    FocusedFillOperationInput input, {
+    required bool available,
+    bool reserveLocalDriver = false,
+  }) => _service.owner._serialize(() async {
+    final existing = _findFocusedFill(session, input);
+    if (existing != null) return (existing, false);
+    if (!available) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
+    final request = _service._requireFillGrant(session, input.requestId);
+    if (_service._activeFocusedFill != null ||
+        _service._fillRepository().focusedFillOperations.any(
+          (o) =>
+              o.state == FocusedFillState.checking &&
+              _service._deviceFocusedFills.containsKey(o.id),
+        )) {
+      throw const CredentialUseFailure('busy');
+    }
+    if (_service._fillRepository().focusedFillOperations.any(
+      (o) =>
+          _service._credentialUseSessions[o.requestId] == session &&
+          ({
+            FocusedFillState.checking,
+            FocusedFillState.partial,
+            FocusedFillState.unknown,
+          }.contains(o.state)) &&
+          o.attentionAcknowledgedAt == null,
+    )) {
+      throw const CredentialUseFailure('fill_needs_attention');
+    }
+    final now = _service._clock().toUtc();
+    final operation = FocusedFillOperation(
+      id: _service._secret(),
+      requestId: request.id,
+      operationId: input.operationId,
+      fingerprint: input.fingerprint,
+      createdAt: now,
+      application: request.focusedFill!.application,
+    );
+    await _service._saveFocusedFill(
+      request: request.changed({'attemptedAt': _useTimestamp(now)}),
+      operation: operation,
+      validate: () => _service._requireFillGrant(session, input.requestId),
+    );
+    if (reserveLocalDriver) _service._activeFocusedFill = operation.id;
+    return (operation, true);
+  });
 }
 
 extension FocusedFillOwnerAccess on OwnerAccess {

@@ -39,6 +39,7 @@ final class OnlineInformationRuntime {
         throw const FormatException('Invalid online state');
       }
       runtime._restore(snapshot.payload['textRuntime']);
+      await runtime._maintainDeviceCredentialRequests(restoring: true);
       await runtime._save();
       return runtime;
     } on Object {
@@ -62,6 +63,7 @@ final class OnlineInformationRuntime {
       if (_failed) throw const AccessFailure('service_unavailable');
       await _checkGeneration();
       await _resolveDeviceCredentialDecisions();
+      await _maintainDeviceCredentialRequests();
       final libraryGeneration = service._libraryGeneration;
       try {
         return await action();

@@ -94,8 +94,14 @@ final class AgentGateway {
     } else if (DeviceCredentialRoutes.proofPaths.contains(path)) {
       capabilities.add(
         AgentDeviceCapability(
-          'credential-execution',
-          text('executionCapability'),
+          path.startsWith('/credential-use/device/fill/')
+              ? 'credential-fill'
+              : 'credential-execution',
+          text(
+            path.startsWith('/credential-use/device/fill/')
+                ? 'fillCapability'
+                : 'executionCapability',
+          ),
         ),
       );
     } else if (path == '/session/end') {
@@ -115,6 +121,9 @@ final class AgentGateway {
       result = await _protocol.dispatch(path, body);
     }
     final minted = <AgentDeviceCapability>[
+      if (path == '/credential-use/device/fill/begin')
+        if (result['fillCapability'] case final String proof)
+          AgentDeviceCapability('credential-fill', proof),
       if (_open.contains(path)) ...[
         AgentDeviceCapability('session', result['sessionSecret'] as String),
         if (result['endCapability'] != null)
@@ -154,6 +163,8 @@ final class AgentGateway {
           'agent-device-binding.v1',
           if (_deviceCredentials != null) ...[
             'credential-device-execution.v1',
+            if (_deviceCredentials.focusedFillAvailable)
+              'credential-device-focused-fill.v1',
             if ((result['capabilities'] as List).contains(
               'credential-use-reuse.v1',
             ))

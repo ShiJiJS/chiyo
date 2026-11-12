@@ -315,7 +315,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       WorkspaceApprovalKind.organization =>
         '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
       WorkspaceApprovalKind.focus =>
-        'Mac本机焦点填充尚未启用。本次只能查看申请与限制，不能批准填充。网页或工具的DOM焦点不代表系统前台焦点；未来真实能力由单独验收决定。',
+        '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
       WorkspaceApprovalKind.credential =>
         '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
     };

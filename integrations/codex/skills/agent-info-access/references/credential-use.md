@@ -203,10 +203,14 @@ credential-printing commands, and report only the needed nonsecret facts.
 
 Local input is available only when the current connection advertises it. A
 capability means the installed host offers that operation, not that every
-browser is supported. Server-mode approvals do not automatically provide a
-native fill driver on the Agent's device; if the server connection omits fill
-capabilities, choose a supported program receiver or separately approved
-original-value access. For approved ordinary attachments, use
+browser is supported. In server mode keep the matching App running on the
+Agent's current computer and connected to the same server. The server approves
+the credential use; that local App verifies the target and performs the input.
+The App's private filling host is discovered automatically. Do not configure a
+server-side desktop, copy an owner's connection token, or specify another
+device's host. If the App is absent, disconnected, or its filling capability is
+unavailable, restore that local connection or choose a supported program receiver
+or separately approved original-value access. For approved ordinary attachments, use
 [Ordinary information files](information-files.md); they are readable documents,
 not credentials for filling or process injection.
 

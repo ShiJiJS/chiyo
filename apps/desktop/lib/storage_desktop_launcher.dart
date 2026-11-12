@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:info_core/info_core.dart';
+import 'package:info_cli/device_focused_fill_host.dart';
+import 'bundled_focused_fill.dart';
+import 'macos_focused_fill.dart';
 import 'local_library_sync.dart';
 import 'package:info_remote/library_replication_client.dart';
 
@@ -28,12 +33,16 @@ class StorageDesktopLauncher extends StatefulWidget {
     this.appControlDirectory,
     this.platform,
     this.openLocal,
+    this.focusedFillDriver,
   });
 
   final PrivateConnectionProfileStore profiles;
   final Widget Function(DesktopBootstrap) localBuilder;
   final Directory? appControlDirectory;
   final DesktopPlatform? platform;
+
+  /// Owner-side test seam. Agent commands cannot select a driver or helper.
+  final FocusedFillDriver? focusedFillDriver;
   final Future<DesktopLibrary> Function(LocalLibraryConfiguration, bool)?
   openLocal;
 
@@ -43,6 +52,8 @@ class StorageDesktopLauncher extends StatefulWidget {
 
 class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   DesktopBootstrap? _local;
+  DeviceFocusedFillHost? _focusedFillHost;
+  bool _hostDisposed = false;
   bool _online = false;
   String? _failure;
   ServerSetupController? _initialSetup;
@@ -50,7 +61,38 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   @override
   void initState() {
     super.initState();
+    unawaited(_startFocusedFillHost());
     _restore();
+  }
+
+  Future<void> _startFocusedFillHost() async {
+    if (widget.focusedFillDriver == null &&
+        widget.platform != null &&
+        widget.platform is! NativeDesktopPlatform) {
+      return;
+    }
+    try {
+      final driver =
+          widget.focusedFillDriver ??
+          (Platform.isMacOS
+              ? MacOSFocusedFillDriver()
+              : Platform.isWindows
+              ? await loadBundledFocusedFill()
+              : null);
+      if (driver == null || _hostDisposed) return;
+      final host = await DeviceFocusedFillHost.start(
+        directory: Directory(widget.profiles.directory),
+        driver: driver,
+      );
+      if (_hostDisposed) {
+        await host.close();
+      } else {
+        _focusedFillHost = host;
+      }
+    } on Object {
+      // An absent optional helper or occupied locator never impersonates a live
+      // filling capability and must not prevent the owner opening their library.
+    }
   }
 
   Future<void> _restore() async {
@@ -172,6 +214,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       platform: platform,
       port: 0,
       localConfiguration: configuration,
+      closeDeviceFocusedFillHost: _closeFocusedFillHost,
       openAppControl:
           Platform.isMacOS &&
               platform is NativeDesktopPlatform &&
@@ -230,8 +273,14 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
     if (mounted) _startLocal(configuration);
   }
 
+  Future<void> _closeFocusedFillHost() async {
+    _hostDisposed = true;
+    await _focusedFillHost?.close();
+  }
+
   @override
   void dispose() {
+    unawaited(_closeFocusedFillHost());
     _initialSetup?.dispose();
     final bootstrap = _local;
     if (bootstrap != null) {
@@ -248,6 +297,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
         onSaveStorage: _adoptServer,
         appControlDirectory: widget.appControlDirectory,
         desktopPlatform: widget.platform,
+        closeDeviceFocusedFillHost: _closeFocusedFillHost,
       );
     }
     final bootstrap = _local;
