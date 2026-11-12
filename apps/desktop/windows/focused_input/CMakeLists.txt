@@ -1,3 +1,17 @@
+cmake_minimum_required(VERSION 3.14)
+
+# Native checks can run without building Flutter or changing its build tree.
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  project(chiyo_focused_input LANGUAGES CXX)
+  enable_testing()
+  add_definitions(-DUNICODE -D_UNICODE)
+  function(APPLY_STANDARD_SETTINGS TARGET)
+    target_compile_features(${TARGET} PUBLIC cxx_std_17)
+    target_compile_options(${TARGET} PRIVATE /W4 /WX /wd4100 /EHsc)
+    target_compile_definitions(${TARGET} PRIVATE _HAS_EXCEPTIONS=0)
+  endfunction()
+endif()
+
 # Read-only capture is shared by diagnostics and the private input broker.
 # Diagnostics, synthetic receivers and fault stubs remain explicit test targets.
 add_library(focused_input_snapshot STATIC EXCLUDE_FROM_ALL "focus_snapshot.cpp")
@@ -44,6 +58,23 @@ target_compile_definitions(focus_fixture PRIVATE NOMINMAX)
 target_compile_options(focus_fixture PRIVATE /utf-8)
 target_link_libraries(focus_fixture PRIVATE user32)
 set_target_properties(focus_fixture PROPERTIES OUTPUT_NAME "info-focus-fixture")
+
+# Synthetic stdin/env/file/askpass receiver. Never included in a user bundle.
+add_executable(credential_receiver_fixture EXCLUDE_FROM_ALL "credential_receiver_fixture.cpp")
+apply_standard_settings(credential_receiver_fixture)
+target_compile_definitions(credential_receiver_fixture PRIVATE NOMINMAX)
+target_compile_options(credential_receiver_fixture PRIVATE /utf-8)
+
+add_custom_target(check_focused_input
+  COMMAND $<TARGET_FILE:focus_snapshot_test>
+  COMMAND $<TARGET_FILE:fill_guard_test>
+  DEPENDS focus_snapshot_test fill_guard_test
+  VERBATIM)
+
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  add_test(NAME focused_input_snapshot COMMAND focus_snapshot_test)
+  add_test(NAME focused_input_guard COMMAND fill_guard_test)
+endif()
 
 foreach(mode IN ITEMS stall drop refusal malformed)
   if(mode STREQUAL "stall")
