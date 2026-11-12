@@ -19,11 +19,11 @@ Mac 开发包使用本机签名，尚未公证；更新后可能需要重新允�
 
 ## 部署可选的 Docker 服务器
 
-服务器运行在自己的 NAS 或 Linux 主机，客户端通过局域网 HTTPS 连接。需要 Docker、Docker Compose 和 OpenSSL。下面使用 POSIX shell；在仓库根目录执行命令，私有数据放在源码目录之外。
+服务器运行在自己的 NAS 或 Linux 主机，客户端通过可信局域网 HTTPS 连接。需要 Docker 和 Docker Compose；镜像内含生成证书所需的 OpenSSL。下面用于**全新部署**，在仓库根目录执行；已有部署保留原配置和挂载，只更新镜像，不能用新示例覆盖旧目录。
 
 ### 1. 准备私有目录
 
-把示例监听地址换成服务器的实际局域网地址。运行用户必须能读写这份新目录；NAS 上应使用目标数据目录所属的 UID/GID。
+把监听地址换成服务器的实际局域网地址。运行用户必须能读写这份新目录；NAS 上使用目标数据目录所属的 UID/GID。
 
 ```sh
 export CHIYO_STORAGE_DIRECTORY="$HOME/chiyo-data"
@@ -33,79 +33,37 @@ export CHIYO_GID="$(id -g)"
 export CHIYO_SOURCE_COMMIT="$(git rev-parse HEAD)"
 
 umask 077
-mkdir -p "$CHIYO_STORAGE_DIRECTORY/data" "$CHIYO_STORAGE_DIRECTORY/config" \
-  "$CHIYO_STORAGE_DIRECTORY/tls" "$CHIYO_STORAGE_DIRECTORY/ca"
+mkdir -p "$CHIYO_STORAGE_DIRECTORY/data" "$CHIYO_STORAGE_DIRECTORY/config"
 cp deploy/server.example.json "$CHIYO_STORAGE_DIRECTORY/config/server.json"
-cp deploy/tls.example.cnf "$CHIYO_STORAGE_DIRECTORY/ca/tls.cnf"
 ```
 
-编辑 `ca/tls.cnf` 中的 `[addresses]`：证书必须包含 App 真正连接的 IP 或域名。示例地址不能直接用于另一台 NAS。已有合适的证书时，也可以把服务端证书和私钥分别放到 `tls/server.pem`、`tls/server.key`，跳过下一步。
-
-### 2. 为局域网生成证书
-
-以下建立私有 CA 和服务端证书。CA 私钥放在 `ca/`，不会挂载进运行中的服务容器。
-
-```sh
-openssl req -x509 -newkey rsa:3072 -nodes -sha256 -days 3650 \
-  -config "$CHIYO_STORAGE_DIRECTORY/ca/tls.cnf" \
-  -keyout "$CHIYO_STORAGE_DIRECTORY/ca/ca.key" \
-  -out "$CHIYO_STORAGE_DIRECTORY/ca/ca.pem"
-
-openssl req -new -newkey rsa:3072 -nodes \
-  -subj "/CN=chiyo.local" \
-  -keyout "$CHIYO_STORAGE_DIRECTORY/tls/server.key" \
-  -out "$CHIYO_STORAGE_DIRECTORY/ca/server.csr"
-
-openssl x509 -req -sha256 -days 825 \
-  -in "$CHIYO_STORAGE_DIRECTORY/ca/server.csr" \
-  -CA "$CHIYO_STORAGE_DIRECTORY/ca/ca.pem" \
-  -CAkey "$CHIYO_STORAGE_DIRECTORY/ca/ca.key" -CAcreateserial \
-  -extfile "$CHIYO_STORAGE_DIRECTORY/ca/tls.cnf" -extensions server \
-  -out "$CHIYO_STORAGE_DIRECTORY/tls/server.pem"
-```
-
-App 只需要 CA 的公开证书 `ca/ca.pem`。不要把 CA 私钥或服务器私钥交给客户端，也不需要修改系统全局信任。
-
-### 3. 构建并初始化
+### 2. 构建并启动
 
 ```sh
 docker compose -f deploy/compose.yaml build
-
-docker run --rm --user "$CHIYO_UID:$CHIYO_GID" \
-  --mount "type=bind,source=$CHIYO_STORAGE_DIRECTORY,target=/setup" \
-  chiyo-server:local init-secrets /setup/secrets
-
 docker compose -f deploy/compose.yaml up -d
-```
-
-初始化创建数据库密钥、用户接入 Token 和服务器身份。`secrets` 必须尚不存在，重复初始化会被拒绝；升级或重启不再运行这一步。Compose 只给 `data` 写权限，`config`、`secrets` 和 `tls` 只读挂载。
-
-检查运行状态和日志：
-
-```sh
 docker compose -f deploy/compose.yaml ps
 docker compose -f deploy/compose.yaml logs --tail 50 chiyo
 ```
 
-默认容器端口是 `47126`；`CHIYO_PORT` 可调整宿主机端口。监听地址默认仅为本机回环，局域网使用需像示例一样设置 `CHIYO_BIND_ADDRESS`。重新维护容器时使用相同环境变量和私有目录，也可将这些值保存在自己保管的环境配置中；不要提交真实部署配置或密钥。
+新配置的 `autoInitialize: true` 仅在空安装中生成数据库密钥、服务器身份及 HTTPS 证书，存于持久化的 `data/server-identity/`。重启和升级沿用原文件；已有数据库缺少密钥或证书时拒绝启动，不重新生成替代品。无需手动生成、复制证书或运行 `init-secrets`。
+
+默认容器端口是 `47126`；`CHIYO_PORT` 可调整宿主机端口。监听地址默认仅为本机回环，局域网使用需设置 `CHIYO_BIND_ADDRESS`。维护容器时使用相同环境变量和私有目录，不提交真实配置或密钥。
 
 `server.json` 的 `readCacheMiB` 是数据库读缓存预算，默认 128 MiB，可设为 32～512，重启后生效；不是整个进程的内存上限，也不会把全部附件预载到内存。
 
 ## 在 App 连接服务器
 
-1. 打开「设置 → 存储与同步」，选择「服务器同步」。
-2. 填写 `https://实际局域网地址:47126`，以及用户接入 Token。
-3. 使用上述私有 CA 时，把 `ca/ca.pem` 的完整内容填入服务器证书处。
-4. 点击「连接并开启同步」，等首次资料传输完成。已有不同资料的两端不会被自动覆盖；遇到提示时先备份，再选择空目标。
+1. 首次打开选择「服务器同步」；已经使用 App 时，在「设置 → 存储与同步」切换。
+2. 填写服务器的 IP 或域名及端口，不需要填写 `https://`。
+3. App 自动取得并记住服务器证书。尚未初始化时设置一次「知予连接密码」；已初始化时输入原密码。它与 NAS 系统登录密码无关。
+4. 等首次资料传输完成。已有不同资料的两端不会被自动覆盖；先备份并选择空目标。以后重开会复用有效连接，无需重输密码。
 
-Token 可在自己的可信终端转换后填入 App：
+第一次连接应在可信局域网进行，核对自己部署的地址。已有连接的证书或服务器身份变化时 App 会拒绝连接并保留旧设置，不会自动接受新的身份。密码仅保存校验值，App 保存私有连接 Token，不保存密码原文；证书私钥始终留在服务器。服务器能解密资料，应部署在你信任的设备上。
 
-```sh
-openssl base64 -A -in "$CHIYO_STORAGE_DIRECTORY/secrets/owner.token" \
-  | tr '/+' '_-' | tr -d '='
-```
+修改连接密码使用「设置 → 存储与同步」中的密码管理。其他电脑原来通过该密码登录的连接会失效，需用新密码重新登录；当前电脑会自动更新连接。AI 使用独立受限身份，仍需申请和审批，不获得 App 的管理 Token。
 
-这是 **App 的管理 Token**，不要发给 AI 或写入普通日志。App 会自动准备受限的 Agent 连接，不用把管理 Token 配到 CLI。服务器持有解密能力，应保留在你信任的设备上。
+已有旧版服务先更新镜像，保持原 `server.json`、数据、密钥和 TLS 挂载不变。更新后原 App 连接仍可使用；在原已连接电脑的设置中首次设置知予连接密码，再供新电脑登录。未设置密码的旧资料库不能被陌生客户端认领。服务器未升级时原连接仍可继续使用，但不能使用新密码功能。
 
 服务器同步模式下，NAS 接收访问申请和提案，App 从 NAS 读取并审批；本地模式由本机服务处理。切换不搬运旧申请，已有聊天仍绑定原服务。详细使用方式见[使用指南](usage.md)。
 

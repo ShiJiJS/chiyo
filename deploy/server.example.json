@@ -1,8 +1,9 @@
 {
   "dataDirectory": "/data",
-  "secretsDirectory": "/secrets",
-  "tlsCertificate": "/tls/server.pem",
-  "tlsPrivateKey": "/tls/server.key",
+  "secretsDirectory": "/data/server-identity",
+  "tlsCertificate": "/data/server-identity/server.pem",
+  "tlsPrivateKey": "/data/server-identity/server.key",
+  "autoInitialize": true,
   "address": "0.0.0.0",
   "port": 47126,
   "readCacheMiB": 128

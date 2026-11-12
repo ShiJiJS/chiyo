@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
+import 'server_trust.dart';
 
 final class RemoteFailure implements Exception {
   const RemoteFailure(this.code, {this.fieldErrors = const {}});
@@ -42,6 +43,7 @@ final class OwnerClient implements OwnerTransport {
     required String token,
     String? expectedServerId,
     SecurityContext? trust,
+    String certificate = '',
   }) async {
     if (address.scheme != 'https' ||
         address.host.isEmpty ||
@@ -52,7 +54,7 @@ final class OwnerClient implements OwnerTransport {
         token.isEmpty) {
       throw const RemoteFailure('invalid_connection');
     }
-    final http = HttpClient(context: trust)
+    final http = serverHttpClient(certificate: certificate, trust: trust)
       ..connectionTimeout = const Duration(seconds: 10);
     try {
       final provisional = OwnerClient._(

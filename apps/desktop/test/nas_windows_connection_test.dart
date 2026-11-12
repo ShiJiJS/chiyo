@@ -24,6 +24,11 @@ class _Http extends HttpOverrides {
 class _NetworkClient implements HttpClient {
   _NetworkClient(this.inner, this.network);
   final HttpClient inner;
+  @override
+  set badCertificateCallback(
+    bool Function(X509Certificate, String, int)? callback,
+  ) => inner.badCertificateCallback = callback;
+
   final _Http network;
   @override
   Duration? get connectionTimeout => inner.connectionTimeout;
@@ -129,7 +134,7 @@ void main() {
               serverId: good.serverId,
               certificate: good.certificate,
             ),
-            error: 'Token 不正确，请重新填写。',
+            error: '当前连接已失效，请重新连接并输入知予连接密码。',
           ),
           (
             name: 'wrong CA',
@@ -187,12 +192,18 @@ void main() {
         await ui.until(() => ui.key('connection-error').evaluate().isNotEmpty);
         expect(find.byType(WorkspaceApp), findsNothing);
         expect(profiles.saves, 0);
-        final address = find.byWidgetPredicate(
-          (w) => w is TextField && w.decoration?.labelText == '服务器地址',
+        // Restoring an existing private connection requires no password UI;
+        // newly entered servers are covered by isolated setup/login tests.
+        await t.pumpWidget(const SizedBox());
+        profiles.value = good;
+        ui.phase = 'reopen original NAS profile';
+        await t.pumpWidget(
+          OnlineDesktopLauncher(
+            profiles: profiles,
+            desktopPlatform: NativeDesktopFixture(),
+            deviceFilesDirectory: '$directory/files',
+          ),
         );
-        await t.enterText(address, good.address);
-        ui.phase = 'reconnect to original NAS';
-        await t.tap(find.widgetWithText(FilledButton, '连接'));
         await ui.until(
           () =>
               find.byType(WorkspaceApp).evaluate().isNotEmpty &&

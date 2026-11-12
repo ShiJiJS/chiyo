@@ -274,7 +274,10 @@ void main() {
       addTearDown(t.view.resetDevicePixelRatio);
       final ui = OnlineUiHarness(t);
       final host = await ui.resolve(
-        () => DeviceCredentialFixture.create(replication: true),
+        () => DeviceCredentialFixture.create(
+          replication: true,
+          connectionPassword: 'synthetic-login-password',
+        ),
       );
       final proxy = await ui.resolve(
         () => OwnerReplyProxy.start(
@@ -312,21 +315,32 @@ void main() {
             },
           ),
         );
+        await ui.until(() => ui.key('setup-continue').evaluate().isNotEmpty);
+        await ui.tap('setup-continue');
         await ui.until(() => find.byTooltip('添加资料').evaluate().isNotEmpty);
         await ui.tap('workspace-nav-settings');
         await ui.tap('settings-section-connection');
         await ui.until(() => ui.key('connection-mode').evaluate().isNotEmpty);
-        expect(field('服务器地址'), findsNothing);
+        expect(field('服务器 IP 或域名'), findsNothing);
         await ui.tap('connection-mode-server');
-        await ui.until(() => field('服务器地址').evaluate().isNotEmpty);
-        await t.enterText(field('服务器地址'), proxy.address.toString());
-        await t.enterText(field('Token'), 'synthetic-invalid-token');
-        await t.tap(find.text('服务器证书'));
-        await t.pumpAndSettle();
-        await t.enterText(field('服务器 CA 证书'), host.certificate);
+        await ui.until(() => field('服务器 IP 或域名').evaluate().isNotEmpty);
+        await t.enterText(field('服务器 IP 或域名'), proxy.address.host);
+        await t.enterText(field('端口'), '${proxy.address.port}');
         await ui.tap('connection-save');
         await ui.until(
-          () => find.text('Token 不正确，请重新填写。').evaluate().isNotEmpty,
+          () => ui.key('settings-server-password').evaluate().isNotEmpty,
+        );
+        Future<void> password(String value) => t.enterText(
+          find.descendant(
+            of: ui.key('settings-server-password'),
+            matching: find.byType(TextField),
+          ),
+          value,
+        );
+        await password('synthetic-invalid-password');
+        await ui.tap('settings-server-password-save');
+        await ui.until(
+          () => find.text('知予连接密码不正确，请重新输入。').evaluate().isNotEmpty,
         );
         expect(ui.key('workspace-storage-mode'), findsOneWidget);
         final configuration = await ui.resolve(
@@ -338,8 +352,8 @@ void main() {
           replication: boot!.library!.replication!,
         );
         expect((await ui.resolve(sync.readConfiguration))['enabled'], false);
-        await t.enterText(field('Token'), host.token);
-        await ui.tap('connection-save');
+        await password('synthetic-login-password');
+        await ui.tap('settings-server-password-save');
         await ui.until(
           () => boot!.library!.service.owner.information.isNotEmpty,
         );
@@ -377,7 +391,7 @@ void main() {
           ),
         );
         await ui.tap('connection-mode-server');
-        expect(field('服务器地址'), findsOneWidget);
+        expect(field('服务器 IP 或域名'), findsOneWidget);
         expect((await ui.resolve(sync.readConfiguration))['enabled'], false);
         await ui.tap('connection-save');
         await ui.until(
@@ -422,7 +436,7 @@ void main() {
         await ui.until(
           () =>
               ui.key('connection-mode').evaluate().isNotEmpty &&
-              field('服务器地址').evaluate().isNotEmpty,
+              field('服务器 IP 或域名').evaluate().isNotEmpty,
         );
         proxy.failGetPrefix = '/v1/';
         final requests = jsonEncode(proxy.requests);
@@ -430,7 +444,7 @@ void main() {
         await ui.until(
           () =>
               find.text('本地模式').evaluate().isNotEmpty &&
-              field('服务器地址').evaluate().isEmpty &&
+              field('服务器 IP 或域名').evaluate().isEmpty &&
               ui.key('connection-save').evaluate().isEmpty &&
               ui
                   .key('workspace-nav-library')

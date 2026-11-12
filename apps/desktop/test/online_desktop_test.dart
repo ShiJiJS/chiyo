@@ -4,6 +4,7 @@ library;
 // Real OnlineServer fixture uses POSIX secret mounts. Windows behavior is
 // exercised by the explicit existing-NAS tests, without relaxing that boundary.
 import 'package:info_server/agent_devices.dart';
+import 'package:info_server/owner_authentication.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -39,18 +40,24 @@ void main() {
       late core.OnlineInformationRuntime runtime;
       late OnlineServer server;
       late SecurityContext serverTls;
-      late String token, certificate;
+      late String token;
+      late OwnerAuthentication authentication;
+      var password = 'synthetic-online-password';
       late String directoryId;
       await t.runAsync(() async {
         root = await Directory.systemTemp.createTemp('chiyo-online-ui-');
         await initializeServerSecrets('${root.path}/secrets');
         final tls = await createTlsFixture(root);
-        certificate = await File(tls.ca).readAsString();
         token = base64Url
             .encode(
               await File('${root.path}/secrets/owner.token').readAsBytes(),
             )
             .replaceAll('=', '');
+        authentication = await OwnerAuthentication.open(
+          '${root.path}/data',
+          token,
+        );
+        await authentication.initialize(password, peer: 'fixture');
         repo = await EncryptedInformationRepository.open(
           '${root.path}/data',
           MountedDatabaseKeyStore('${root.path}/secrets/database.key'),
@@ -70,6 +77,7 @@ void main() {
           runtime: runtime,
           tls: serverTls,
           ownerToken: token,
+          ownerAuthentication: authentication,
           serverId: 'online-ui-synthetic-0001',
         );
       });
@@ -102,13 +110,23 @@ void main() {
           ),
         );
         await settle();
-        await t.enterText(field('服务器地址'), 'https://127.0.0.1:${server.port}');
-        await t.enterText(field('Token'), token);
-        await t.tap(find.text('服务器证书'));
-        await settle();
-        await t.enterText(field('服务器 CA 证书'), certificate);
+        await t.enterText(field('服务器 IP 或域名'), '127.0.0.1');
+        await t.enterText(field('端口'), '${server.port}');
         await t.runAsync(
           () => t.tap(find.byKey(const ValueKey('connection-save'))),
+        );
+        await settle();
+        await t.enterText(
+          find.descendant(
+            of: find.byKey(const ValueKey('settings-server-password')),
+            matching: find.byType(TextField),
+          ),
+          password,
+        );
+        await t.runAsync(
+          () => t.tap(
+            find.byKey(const ValueKey('settings-server-password-save')),
+          ),
         );
         await settle();
         expect(
@@ -270,26 +288,30 @@ void main() {
         );
         await settle();
         await t.runAsync(() async {
-          final port = server.port;
-          await server.close();
-          token = base64Url.encode(List.filled(32, 72)).replaceAll('=', '');
-          server = await OnlineServer.start(
-            devices: AgentDeviceRegistry(repo),
-            runtime: runtime,
-            tls: serverTls,
-            ownerToken: token,
-            serverId: 'online-ui-synthetic-0001',
-            port: port,
+          token = await authentication.change(
+            password,
+            'synthetic-online-new-password',
+            token: token,
+            peer: 'fixture',
           );
+          password = 'synthetic-online-new-password';
         });
         await t.runAsync(
           () => t.tap(find.byKey(const ValueKey('connection-save'))),
         );
         await settle();
-        expect(find.text('Token 不正确，请重新填写。'), findsOneWidget);
-        await t.enterText(field('Token'), token);
+        expect(find.text('输入知予连接密码'), findsOneWidget);
+        await t.enterText(
+          find.descendant(
+            of: find.byKey(const ValueKey('settings-server-password')),
+            matching: find.byType(TextField),
+          ),
+          password,
+        );
         await t.runAsync(
-          () => t.tap(find.byKey(const ValueKey('connection-save'))),
+          () => t.tap(
+            find.byKey(const ValueKey('settings-server-password-save')),
+          ),
         );
         await settle();
         expect(find.text('远程合成资料'), findsWidgets);
@@ -316,6 +338,7 @@ void main() {
             runtime: runtime,
             tls: serverTls,
             ownerToken: token,
+            ownerAuthentication: authentication,
             serverId: 'online-ui-replacement-0002',
             port: port,
           );
@@ -324,18 +347,17 @@ void main() {
           () => t.tap(find.byKey(const ValueKey('connection-save'))),
         );
         await settle();
-        expect(find.text('服务器身份已变化，请核对服务器地址。'), findsOneWidget);
-        await t.runAsync(() => t.tap(find.text('确认连接新服务器')));
-        await settle();
-        expect(find.text('远程合成资料'), findsWidgets);
+        expect(find.text('服务器身份发生变化，请核对连接地址。原连接设置已保留。'), findsOneWidget);
         await t.runAsync(() async {
           expect(
             (await PrivateConnectionProfileStore(
               '${root.path}/profile-two',
             ).read())!.serverId,
-            'online-ui-replacement-0002',
+            'online-ui-synthetic-0001',
           );
         });
+        await t.tap(find.text('返回信息库'));
+        await settle();
         final disconnectedPort = server.port;
         await t.runAsync(() => server.close());
         await waitFor(find.byKey(const ValueKey('online-offline-blocker')));
@@ -349,7 +371,8 @@ void main() {
             runtime: runtime,
             tls: serverTls,
             ownerToken: token,
-            serverId: 'online-ui-replacement-0002',
+            ownerAuthentication: authentication,
+            serverId: 'online-ui-synthetic-0001',
             port: disconnectedPort,
           );
         });

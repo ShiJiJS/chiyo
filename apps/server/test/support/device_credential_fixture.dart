@@ -7,6 +7,7 @@ import 'package:info_remote/owner_client.dart';
 import 'package:info_server/agent_devices.dart';
 import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/online_server.dart';
+import 'package:info_server/owner_authentication.dart';
 import 'package:info_server/server_configuration.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:info_workspace/host_transport.dart';
@@ -36,6 +37,8 @@ class DeviceCredentialFixture {
   HttpClient? upstream;
   int claimPosts = 0;
   bool replicationEnabled = false;
+  bool connectionSetup = false;
+  String? connectionPassword;
   DatabaseKeyStore? _testKeys;
   DatabaseKeyStore get databaseKeys =>
       _testKeys ?? MountedDatabaseKeyStore('${root.path}/secrets/database.key');
@@ -69,6 +72,8 @@ class DeviceCredentialFixture {
   static Future<DeviceCredentialFixture> create({
     bool loseFirstClaim = false,
     bool replication = false,
+    bool connectionSetup = false,
+    String? connectionPassword,
     DateTime Function()? clock,
   }) async {
     final root = await Directory.systemTemp.createTemp(
@@ -105,6 +110,8 @@ class DeviceCredentialFixture {
       clock,
     );
     f.replicationEnabled = replication;
+    f.connectionSetup = connectionSetup || connectionPassword != null;
+    f.connectionPassword = connectionPassword;
     f._testKeys = testKeys;
     await f.open();
     if (loseFirstClaim) await f._proxy();
@@ -253,6 +260,16 @@ class DeviceCredentialFixture {
   }
 
   Future<void> open([int port = 0]) async {
+    final authentication = connectionSetup
+        ? await OwnerAuthentication.open('${root.path}/data', token)
+        : null;
+    if (connectionPassword != null && authentication?.configured == false) {
+      await authentication!.initialize(
+        connectionPassword!,
+        peer: 'fixture',
+        ownerToken: token,
+      );
+    }
     repo = await EncryptedInformationRepository.openOnline(
       '${root.path}/data',
       databaseKeys,
@@ -267,6 +284,7 @@ class DeviceCredentialFixture {
       devices: AgentDeviceRegistry(repo),
       tls: tls,
       ownerToken: token,
+      ownerAuthentication: authentication,
       serverId: 'synthetic-device-credential-operations',
       port: port,
       backups: repo.backups,

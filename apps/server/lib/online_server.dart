@@ -1,4 +1,5 @@
 import 'owner_sync_routes.dart';
+import 'owner_authentication.dart';
 import 'owner_replication_routes.dart';
 import 'agent_devices.dart';
 import 'agent_gateway.dart';
@@ -46,6 +47,7 @@ final class OnlineServer {
     this._policyState,
     this._onRequestTiming,
     this._replication,
+    this._ownerAuthentication,
   ) : _agents = AgentGateway(
         AgentProtocol(
           _runtime.service.agent,
@@ -103,6 +105,7 @@ final class OnlineServer {
   final OnlineInformationRuntime _runtime;
   InformationService get _service => _runtime.service;
   final String _ownerToken;
+  final OwnerAuthentication? _ownerAuthentication;
   final String serverId;
   final AgentDeviceRegistry _devices;
   final AgentGateway _agents;
@@ -204,6 +207,7 @@ final class OnlineServer {
     void Function(Map<String, Object?>)? onRequestTiming,
     LibraryReplication? replication,
     Directory? replicationDirectory,
+    OwnerAuthentication? ownerAuthentication,
   }) async {
     if (!RegExp(r'^[A-Za-z0-9_-]{43,128}$').hasMatch(ownerToken) ||
         !RegExp(r'^[A-Za-z0-9_-]{16,128}$').hasMatch(serverId)) {
@@ -286,6 +290,7 @@ final class OnlineServer {
               replication: replication,
               directory: replicationDirectory!,
             ),
+      ownerAuthentication,
     );
   }
 
@@ -307,6 +312,10 @@ final class OnlineServer {
   }
 
   bool _authenticated(String? value) {
+    if (_ownerAuthentication case final auth?) {
+      return value?.startsWith('Bearer ') == true &&
+          auth.accepts(value!.substring(7));
+    }
     final expected = 'Bearer $_ownerToken'.codeUnits;
     final supplied = (value ?? '').codeUnits;
     var difference = expected.length ^ supplied.length;
@@ -316,13 +325,87 @@ final class OnlineServer {
     return difference == 0;
   }
 
+  static const _authPaths = {
+    '/v1/setup',
+    '/v1/setup/initialize',
+    '/v1/setup/login',
+    '/v1/owner/connection-password',
+  };
+
+  Future<(int, Map<String, Object?>)> _connectionAuthentication(
+    HttpRequest request,
+  ) async {
+    final auth = _ownerAuthentication!;
+    if (request.uri.hasQuery) throw const FormatException();
+    final expected = request.headers.value('x-chiyo-server-id');
+    if (expected != null && expected != serverId)
+      throw const AccessFailure('server_changed');
+    if (request.method == 'GET' && request.uri.path == '/v1/setup') {
+      return (200, auth.status(serverId));
+    }
+    if (request.method != 'POST') return (405, {'error': 'method_not_allowed'});
+    final authorization = request.headers.value('authorization') ?? '';
+    final token = authorization.startsWith('Bearer ')
+        ? authorization.substring(7)
+        : '';
+    final peer = request.connectionInfo?.remoteAddress.address ?? 'unknown';
+    if (request.uri.path == '/v1/owner/connection-password' &&
+        !auth.accepts(token)) {
+      throw const AccessFailure('unauthorized');
+    }
+    final body = await _body(request);
+    if (request.uri.path == '/v1/owner/connection-password') {
+      if (body.length != 2 ||
+          body['currentPassword'] is! String ||
+          body['newPassword'] is! String)
+        throw const FormatException();
+      return (
+        200,
+        {
+          'serverId': serverId,
+          'token': await auth.change(
+            body['currentPassword'] as String,
+            body['newPassword'] as String,
+            token: token,
+            peer: peer,
+          ),
+        },
+      );
+    }
+    if (body.length != 1 || body['password'] is! String)
+      throw const FormatException();
+    final password = body['password'] as String;
+    if (request.uri.path == '/v1/setup/initialize') {
+      return (
+        200,
+        {
+          'serverId': serverId,
+          'token': await auth.initialize(
+            password,
+            peer: peer,
+            ownerToken: token,
+          ),
+        },
+      );
+    }
+    if (request.uri.path == '/v1/setup/login') {
+      return (
+        200,
+        {'serverId': serverId, 'token': await auth.login(password, peer: peer)},
+      );
+    }
+    return (405, {'error': 'method_not_allowed'});
+  }
+
   Future<Map<String, dynamic>> _body(HttpRequest request) async {
     if (request.headers.contentType?.mimeType != 'application/json') {
       throw const FormatException('Expected JSON');
     }
     // Only dedicated file upload routes accept the existing 10 MiB original
     // plus Base64 and bounded metadata. Ordinary management stays at 2 MiB.
-    final limit = request.uri.path == '/v1/owner/ssh-hosts/imports'
+    final limit = _authPaths.contains(request.uri.path)
+        ? 8192
+        : request.uri.path == '/v1/owner/ssh-hosts/imports'
         ? 16 * 1024 * 1024
         : const {
             '/v1/owner/files/uploads',
@@ -1030,36 +1113,46 @@ final class OnlineServer {
       if (request.headers.value('origin') != null) {
         throw const AccessFailure('unauthorized');
       }
-      final path = request.uri.pathSegments;
-      final authorization = request.headers.value('authorization') ?? '';
-      if (path.length >= 3 && path.take(2).join('/') == 'v1/agent') {
-        if (!authorization.startsWith('Bearer '))
+      if (_ownerAuthentication != null &&
+          _authPaths.contains(request.uri.path)) {
+        final response = await _connectionAuthentication(request);
+        status = response.$1;
+        result = response.$2;
+      } else {
+        final path = request.uri.pathSegments;
+        final authorization = request.headers.value('authorization') ?? '';
+        if (path.length >= 3 && path.take(2).join('/') == 'v1/agent') {
+          if (!authorization.startsWith('Bearer '))
+            throw const AccessFailure('unauthorized');
+          await _devices.authenticate(authorization.substring(7));
+        } else if (!_authenticated(authorization)) {
           throw const AccessFailure('unauthorized');
-        await _devices.authenticate(authorization.substring(7));
-      } else if (!_authenticated(authorization)) {
-        throw const AccessFailure('unauthorized');
-      }
-      if (request.method == 'POST') parsedBody = await _body(request);
-      if (request.method == 'GET' && request.uri.path == '/v1/owner/health') {
-        final expected = request.headers.value('x-chiyo-server-id');
-        if (request.uri.hasQuery) throw const FormatException();
-        if (expected != null && expected != serverId) {
-          throw const AccessFailure('server_changed');
         }
-        status = _runtime.isAvailable ? 200 : 503;
-        result = {
-          'serverId': serverId,
-          'state': _runtime.isAvailable ? 'ready' : 'unavailable',
-        };
-      } else
-        await _runtime.run(() async {
-          routeStarted = timing.elapsed;
-          try {
-            await route();
-          } finally {
-            routeFinished = timing.elapsed;
+        if (request.method == 'POST') parsedBody = await _body(request);
+        if (request.method == 'GET' && request.uri.path == '/v1/owner/health') {
+          final expected = request.headers.value('x-chiyo-server-id');
+          if (request.uri.hasQuery) throw const FormatException();
+          if (expected != null && expected != serverId) {
+            throw const AccessFailure('server_changed');
           }
-        }, skipUnchangedCheckpoint: true);
+          status = _runtime.isAvailable ? 200 : 503;
+          result = {
+            'serverId': serverId,
+            'state': _runtime.isAvailable ? 'ready' : 'unavailable',
+          };
+        } else
+          await _runtime.run(() async {
+            routeStarted = timing.elapsed;
+            try {
+              await route();
+            } finally {
+              routeFinished = timing.elapsed;
+            }
+          }, skipUnchangedCheckpoint: true);
+      }
+    } on OwnerAuthFailure catch (e) {
+      status = e.status;
+      result = {'error': e.code};
     } on AccessFailure catch (e) {
       status = e.status == 'unauthorized' ? 401 : 409;
       result = {'error': e.status, 'status': e.status};

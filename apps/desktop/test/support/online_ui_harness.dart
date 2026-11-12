@@ -55,6 +55,7 @@ class OnlineUiHarness {
     });
     await tester.ensureVisible(key(id));
     await tester.pump();
+    await until(() => key(id).hitTestable().evaluate().length == 1);
     await tester.runAsync(() => tester.tap(key(id)));
     await tester.pump();
   }

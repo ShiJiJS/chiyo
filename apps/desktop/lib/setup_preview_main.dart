@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'desktop_fonts.dart';
-import 'onboarding/setup_configuration_preview.dart';
+import 'onboarding/setup_configuration.dart';
+import 'onboarding/setup_preview_adapter.dart';
 import 'workspace/mac_preview_desktop.dart';
 import 'workspace/sample_workspace_source.dart';
 import 'workspace/workspace_app.dart';
@@ -48,9 +49,9 @@ class _SetupPreviewAppState extends State<SetupPreviewApp> {
           desktop: widget.desktop,
           windowTitle: MacPreviewDesktop.windowTitle,
           connectionBuilder: (context, onBack) =>
-              StorageSettingsPreview(draft: _draft, onBack: onBack),
+              ConnectionSettings(draft: _draft, onBack: onBack),
         )
-      : SetupConfigurationPreview(
+      : InitialConnectionSetup(
           draft: _draft,
           onComplete: () => setState(() => _entered = true),
         );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:info_desktop/onboarding/setup_configuration_preview.dart';
+import 'package:info_desktop/onboarding/setup_configuration.dart';
+import 'package:info_desktop/onboarding/setup_preview_adapter.dart';
 import 'package:info_desktop/setup_preview_main.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
 
@@ -34,7 +35,7 @@ void main() {
 
   Future<void> wizard(WidgetTester tester, SetupPreviewDraft draft) async {
     await tester.pumpWidget(
-      SetupConfigurationPreview(draft: draft, onComplete: () {}),
+      InitialConnectionSetup(draft: draft, onComplete: () {}),
     );
     await tester.pumpAndSettle();
     await tap(tester, 'setup-mode-server');
@@ -50,7 +51,7 @@ void main() {
       MaterialApp(
         theme: zhiyuTheme(brightness),
         home: Scaffold(
-          body: StorageSettingsPreview(draft: draft, onBack: () {}),
+          body: ConnectionSettings(draft: draft, onBack: () {}),
         ),
       ),
     );
@@ -70,8 +71,8 @@ void main() {
       );
       await tap(tester, 'workspace-nav-settings');
       await tap(tester, 'settings-section-connection');
-      expect(find.byType(StorageSettingsPreview), findsOneWidget);
-      expect(find.byType(SetupConfigurationPreview), findsNothing);
+      expect(find.byType(ConnectionSettings), findsOneWidget);
+      expect(find.byType(InitialConnectionSetup), findsNothing);
       expect(find.text('首次配置'), findsNothing);
       expect(find.text('上一步'), findsNothing);
       expect(find.text('继续'), findsNothing);
@@ -87,7 +88,7 @@ void main() {
       addTearDown(draft.dispose);
       var completed = false;
       await tester.pumpWidget(
-        SetupConfigurationPreview(
+        InitialConnectionSetup(
           draft: draft,
           onComplete: () => completed = true,
         ),
@@ -152,10 +153,7 @@ void main() {
     addTearDown(draft.dispose);
     var completed = false;
     await tester.pumpWidget(
-      SetupConfigurationPreview(
-        draft: draft,
-        onComplete: () => completed = true,
-      ),
+      InitialConnectionSetup(draft: draft, onComplete: () => completed = true),
     );
     await tap(tester, 'setup-mode-server');
     await tap(tester, 'setup-continue');
@@ -179,13 +177,13 @@ void main() {
       findsNothing,
     );
     expect(find.text('首次配置'), findsNothing);
-    await tap(tester, 'settings-save-connection');
+    await tap(tester, 'connection-save');
     expect(find.text('设置知予连接密码'), findsOneWidget);
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
     expect(draft.serverInitialized, isFalse);
     expect(draft.enabled, isFalse);
-    await tap(tester, 'settings-save-connection');
+    await tap(tester, 'connection-save');
     await fill(tester, 'settings-server-password', 'new-server-password');
     await fill(
       tester,
@@ -199,7 +197,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('服务器同步'));
     await tester.pumpAndSettle();
-    await tap(tester, 'settings-save-connection');
+    await tap(tester, 'connection-save');
     expect(find.text('设置知予连接密码'), findsNothing);
     expect(
       find.byKey(const ValueKey('settings-server-password')),
@@ -219,7 +217,7 @@ void main() {
       draft.host.text = '192.168.1.20';
       addTearDown(draft.dispose);
       await settings(tester, draft, Brightness.light);
-      await tap(tester, 'settings-save-connection');
+      await tap(tester, 'connection-save');
       expect(find.text('输入知予连接密码'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('settings-server-password-confirm')),
@@ -227,7 +225,7 @@ void main() {
       );
       await fill(tester, 'settings-server-password', 'incorrect-password');
       await tap(tester, 'settings-server-password-save');
-      expect(find.text('连接密码不正确，请重新输入。'), findsOneWidget);
+      expect(find.text('知予连接密码不正确，请重新输入。'), findsOneWidget);
       expect(draft.passwordMatches('first-server-password'), isTrue);
       await fill(tester, 'settings-server-password', 'first-server-password');
       await tap(tester, 'settings-server-password-save');
@@ -291,7 +289,7 @@ void main() {
       draft.saveServer('existing-password');
       addTearDown(draft.dispose);
       await settings(tester, draft, brightness);
-      await tap(tester, 'settings-save-connection');
+      await tap(tester, 'connection-save');
       expect(find.text('上一步'), findsNothing);
       await tap(tester, 'settings-change-password');
       await tester.tap(find.text('取消'));

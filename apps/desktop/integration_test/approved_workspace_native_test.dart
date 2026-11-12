@@ -15,6 +15,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:info_desktop/desktop_fonts.dart';
 import 'package:info_desktop/connection_view.dart';
+import 'package:info_desktop/onboarding/setup_configuration.dart';
+import 'package:info_desktop/onboarding/setup_preview_adapter.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
 import 'package:info_desktop/workspace/library_page.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
@@ -156,11 +158,8 @@ void main() {
     ))!;
     // ignore: avoid_print
     print('APPROVED_CONNECTION_EVIDENCE=$output');
-    final address = TextEditingController(
-      text: 'https://nas.example.local:47126',
-    );
-    final token = TextEditingController(text: 'SYNTHETIC_TEST_TOKEN');
-    final cert = TextEditingController();
+    final draft = SetupPreviewDraft()..host.text = 'nas.example.local';
+    draft.saveServer('SYNTHETIC_TEST_PASSWORD');
     final boundary = GlobalKey();
     await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
       'width': 1000.0,
@@ -175,13 +174,7 @@ void main() {
               theme: zhiyuTheme(dark ? Brightness.dark : Brightness.light),
               home: Scaffold(
                 body: state == 'form'
-                    ? ConnectionForm(
-                        address: address,
-                        token: token,
-                        certificate: cert,
-                        busy: false,
-                        onConnect: () {},
-                      )
+                    ? ConnectionSettings(draft: draft, onBack: () {})
                     : ConnectionSurface(
                         title: state == 'loading' ? '正在同步资料' : '连接已断开',
                         description: '合成界面验收',
@@ -206,9 +199,7 @@ void main() {
       }
     }
     await t.pumpWidget(const SizedBox());
-    address.dispose();
-    token.dispose();
-    cert.dispose();
+    draft.dispose();
     desktop.dispose();
     semantics.finishAfterUnmount();
   });
@@ -484,10 +475,10 @@ void main() {
               dark ? WorkspaceTheme.dark : WorkspaceTheme.light,
             );
             expect(
-              Theme.of(t.element(field('服务器地址'))).brightness,
+              Theme.of(t.element(field('服务器 IP 或域名'))).brightness,
               dark ? Brightness.dark : Brightness.light,
             );
-            expect(find.text('已核验'), findsOneWidget);
+            expect(find.text('已记住服务器证书'), findsOneWidget);
             expect(find.byTooltip('连接设置'), findsNothing);
             final render =
                 boundary.currentContext!.findRenderObject()!
@@ -578,15 +569,11 @@ void main() {
         await t.tap(find.text('2 小时').last);
         await t.pumpAndSettle();
         await harness.tap('settings-section-connection');
-        await t.tap(find.byTooltip('显示 Token'));
-        await t.pumpAndSettle();
-        await t.enterText(field('Token'), 'SYNTHETIC_WRONG_TOKEN');
+        await t.enterText(field('服务器 IP 或域名'), 'not a valid host');
         await harness.tap('connection-save');
         await harness.until(
-          () => find.text('Token 不正确，请重新填写。').evaluate().isNotEmpty,
-        );
-        await harness.until(
-          () => !t.widget<ConnectionForm>(find.byType(ConnectionForm)).busy,
+          () =>
+              find.text('请填写服务器 IP 或域名，不需要填写 https://。').evaluate().isNotEmpty,
         );
         expect(
           identical(
@@ -595,7 +582,7 @@ void main() {
           ),
           isTrue,
         );
-        await harness.tap('connection-cancel');
+        await t.tap(find.text('返回信息库'));
         await harness.until(
           () => find.byType(ApprovalsPage).evaluate().isNotEmpty,
         );

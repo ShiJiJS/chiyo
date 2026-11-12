@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_core/info_core.dart' as core;
-import 'package:info_desktop/connection_view.dart';
+import 'package:info_desktop/onboarding/setup_configuration.dart';
 import 'package:info_desktop/desktop_controls.dart';
 import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/online_desktop_launcher.dart';
@@ -15,8 +15,6 @@ import 'package:info_desktop/workspace/remote_workspace_source.dart';
 import 'package:info_desktop/workspace/settings_page.dart';
 import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_remote/connection_profile.dart';
-import 'package:info_server/agent_devices.dart';
-import 'package:info_server/online_server.dart';
 import '../../server/test/support/device_credential_fixture.dart';
 import '../../server/test/support/owner_reply_proxy.dart';
 import 'support/desktop_platform_fixture.dart';
@@ -61,7 +59,11 @@ void main() {
     addTearDown(t.view.resetDevicePixelRatio);
     final ui = OnlineUiHarness(t);
     final a = await ui.resolve(DeviceCredentialFixture.create);
-    final b = await ui.resolve(DeviceCredentialFixture.create);
+    final b = await ui.resolve(
+      () => DeviceCredentialFixture.create(
+        connectionPassword: 'synthetic-b-password',
+      ),
+    );
     final proxy = await ui.resolve(
       () => OwnerReplyProxy.start(
         tls: a.tls,
@@ -85,14 +87,17 @@ void main() {
     Future<void> open() async {
       await ui.tap('workspace-nav-settings');
       await ui.tap('settings-section-connection');
-      await ui.until(() => field('服务器地址').evaluate().isNotEmpty);
+      await ui.until(() => field('服务器 IP 或域名').evaluate().isNotEmpty);
     }
 
     Future<void> saveError(String text) async {
       await ui.tap('connection-save');
       await ui.until(() => find.text(text).evaluate().isNotEmpty);
       await ui.until(
-        () => !t.widget<ConnectionForm>(find.byType(ConnectionForm)).busy,
+        () => !t
+            .widget<ConnectionSettings>(find.byType(ConnectionSettings))
+            .draft
+            .busy,
       );
       expect(identical(live(), sources.first), isTrue);
       expect(
@@ -112,14 +117,6 @@ void main() {
           () => b.runtime.service.owner.createInformation('第二台资料', '', [
             const core.FieldInput('内容', '', 'Second body'),
           ]),
-        );
-        await b.server.close();
-        b.server = await OnlineServer.start(
-          runtime: b.runtime,
-          devices: AgentDeviceRegistry(b.repo),
-          tls: b.tls,
-          ownerToken: b.token,
-          serverId: 'synthetic-second-connection',
         );
         await profiles.save(
           ConnectionProfile(
@@ -152,14 +149,15 @@ void main() {
           .controller;
       await ui.until(() => settings.draft != null);
       settings.stage(settings.draft!.copyWith(requestMinutes: 137));
-      expect(find.text('已核验'), findsOneWidget);
-      await t.enterText(field('服务器地址'), 'not a URL');
-      await saveError('请填写完整的 HTTPS 服务器地址和 Token。');
+      expect(find.text('已记住服务器证书'), findsOneWidget);
+      await t.enterText(field('服务器 IP 或域名'), 'not a URL');
+      await saveError('请填写服务器 IP 或域名，不需要填写 https://。');
       expect(
-        t.widget<DesktopTextField>(field('服务器地址')).controller!.text,
+        t.widget<DesktopTextField>(field('服务器 IP 或域名')).controller!.text,
         'not a URL',
       );
-      await ui.tap('connection-cancel');
+      await t.tap(find.text('返回信息库'));
+      await t.pump();
       await ui.until(() => find.byType(LibraryPage).evaluate().isNotEmpty);
       expect(
         identical(
@@ -173,43 +171,31 @@ void main() {
       expect(settings.draft!.requestMinutes, 137);
       expect(settings.dirty, isTrue);
       await open();
-      await t.enterText(field('服务器地址'), proxy.address.toString());
-      await t.enterText(field('Token'), 'invalid-synthetic-token');
-      await saveError('Token 不正确，请重新填写。');
-      await t.enterText(field('Token'), a.token);
-      await t.tap(find.text('服务器证书'));
-      await t.pumpAndSettle();
-      await t.enterText(field('服务器 CA 证书'), b.certificate);
-      await saveError('无法验证服务器证书，请检查证书或连接地址。');
-      expect(find.text('核验失败'), findsOneWidget);
-      await t.enterText(field('服务器 CA 证书'), 'not a certificate');
-      await saveError('证书格式不正确，请填写 PEM 格式的 CA 证书。');
-      await t.enterText(
-        field('服务器 CA 证书'),
-        '${a.certificate}\n${b.certificate}',
-      );
-      // A healthy handshake is insufficient if the initial projection fails.
-      proxy.failPostPrefix = '/v1/owner/sync';
-      await saveError('连接失败，请检查服务器地址、Token 和网络后重试。');
-      proxy.failPostPrefix = null;
-      await t.enterText(field('服务器 CA 证书'), a.certificate);
+      await t.enterText(field('服务器 IP 或域名'), proxy.address.host);
+      await t.enterText(field('端口'), '${proxy.address.port}');
+      // A saved connection to an older backend still works without setup API.
       await ui.tap('connection-save');
       await ui.until(
-        () => !t.widget<ConnectionForm>(find.byType(ConnectionForm)).busy,
+        () => !t
+            .widget<ConnectionSettings>(find.byType(ConnectionSettings))
+            .draft
+            .busy,
       );
       expect(identical(live(), sources.first), isTrue);
       expect(settings.draft!.requestMinutes, 137);
       // Offline settings use the same page and can return without a new runtime.
-      await ui.tap('connection-cancel');
+      await t.tap(find.text('返回信息库'));
+      await t.pump();
       proxy.failGetPrefix = '/v1/owner/health';
       await ui.until(
         () => ui.key('online-offline-blocker').evaluate().isNotEmpty,
       );
       await t.tap(find.text('连接设置'));
       await ui.until(() => ui.key('online-offline-blocker').evaluate().isEmpty);
-      expect(find.byType(ConnectionForm), findsOneWidget);
+      expect(find.byType(ConnectionSettings), findsOneWidget);
       expect(identical(live(), sources.first), isTrue);
-      await ui.tap('connection-cancel');
+      await t.tap(find.text('返回信息库'));
+      await t.pump();
       await ui.until(
         () => ui.key('online-offline-blocker').evaluate().isNotEmpty,
       );
@@ -219,34 +205,57 @@ void main() {
       expect(identical(live(), sources.first), isTrue);
       expect(library.query.keyword, '第一台');
       await open();
-      await t.enterText(field('服务器地址'), 'https://127.0.0.1:${b.server.port}');
-      await t.enterText(field('Token'), b.token);
-      await t.tap(find.text('服务器证书'));
-      await t.pumpAndSettle();
-      await t.enterText(field('服务器 CA 证书'), b.certificate);
-      profiles.failSave = true;
-      await saveError('无法保存本机连接设置，请检查应用的数据目录权限后重试。');
-      profiles.failSave = false;
       // Hold the real initial sync: old source and saved profile remain active.
       final bproxy = await ui.resolve(
         () => OwnerReplyProxy.start(
           tls: b.tls,
           trust: b.trust,
           target: () => Uri.parse('https://127.0.0.1:${b.server.port}'),
-          serverId: 'synthetic-second-connection',
+          serverId: b.owner.serverId,
         ),
       );
       try {
-        await t.enterText(field('服务器地址'), bproxy.address.toString());
+        await t.enterText(field('服务器 IP 或域名'), bproxy.address.host);
+        await t.enterText(field('端口'), '${bproxy.address.port}');
         expect(
-          t.widget<DesktopTextField>(field('服务器地址')).controller!.text,
-          bproxy.address.toString(),
+          t.widget<DesktopTextField>(field('服务器 IP 或域名')).controller!.text,
+          bproxy.address.host,
         );
+        await ui.tap('connection-save');
+        await ui.until(
+          () => ui.key('settings-server-password').evaluate().isNotEmpty,
+        );
+        Future<void> password(String value) => t.enterText(
+          find.descendant(
+            of: ui.key('settings-server-password'),
+            matching: find.byType(TextField),
+          ),
+          value,
+        );
+        Future<void> submitError(String text) async {
+          await ui.tap('settings-server-password-save');
+          await ui.until(() => find.text(text).evaluate().isNotEmpty);
+          expect(identical(live(), sources.first), isTrue);
+          expect(
+            (await ui.resolve(profiles.read))!.address,
+            proxy.address.toString(),
+          );
+        }
+
+        await password('wrong-password');
+        await submitError('知予连接密码不正确，请重新输入。');
+        await password('synthetic-b-password');
+        bproxy.failPostPrefix = '/v1/owner/sync';
+        await submitError('连接失败，请检查服务器地址和网络后重试。');
+        bproxy.failPostPrefix = null;
+        profiles.failSave = true;
+        await submitError('无法保存本机连接设置，请检查应用的数据目录权限后重试。');
+        profiles.failSave = false;
         gate = Completer<void>();
         bproxy.beforeReply = (path) async {
           if (path == '/v1/owner/sync') await gate!.future;
         };
-        await ui.tap('connection-save');
+        await ui.tap('settings-server-password-save');
         await ui.until(() => (bproxy.requests['POST /v1/owner/sync'] ?? 0) > 0);
         expect(identical(live(), sources.first), isTrue);
         expect(
@@ -259,7 +268,7 @@ void main() {
         sources.add(live());
         await ui.until(() => find.text('第二台资料').evaluate().isNotEmpty);
         expect(find.text('第一台资料'), findsNothing);
-        expect(live().client.serverId, 'synthetic-second-connection');
+        expect(live().client.serverId, b.owner.serverId);
         expect(
           (await ui.resolve(profiles.read))!.address,
           bproxy.address.toString(),

@@ -64,6 +64,7 @@ void main() {
         await ui.until(
           () => find.byType(OnlineDesktopLauncher).evaluate().isNotEmpty,
         );
+        await ui.until(() => ui.key('connection-error').evaluate().isNotEmpty);
         expect(localOpens, 0);
         expect(find.text('Unexpected local library'), findsNothing);
         expect(
@@ -105,6 +106,9 @@ void main() {
       );
       try {
         await t.pumpWidget(launcher(1));
+        await ui.until(() => ui.key('setup-continue').evaluate().isNotEmpty);
+        expect(boot, isNull);
+        await ui.tap('setup-continue');
         await ui.until(() => find.byTooltip('添加资料').evaluate().isNotEmpty);
         expect(find.text('本地模式'), findsWidgets);
         await ui.tap('library-create');
@@ -128,11 +132,9 @@ void main() {
 
         await ui.tap('workspace-nav-settings');
         await ui.tap('settings-section-connection');
-        await ui.until(
-          () => find.text('资料保存在本机，可选择同步到自己的服务器。').evaluate().isNotEmpty,
-        );
+        await ui.until(() => find.text('资料保存在这台电脑').evaluate().isNotEmpty);
         expect(find.text('服务器地址'), findsNothing);
-        await t.tap(find.text('返回工作区'));
+        await t.tap(find.text('返回信息库'));
         await t.pumpAndSettle();
         final previous = boot!;
         await t.pumpWidget(const SizedBox());

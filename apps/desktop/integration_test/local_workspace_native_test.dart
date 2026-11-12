@@ -90,6 +90,7 @@ void main() {
 
       try {
         await t.pumpWidget(launcher(1));
+        await ui.tap('setup-continue');
         await ui.until(() => find.byTooltip('添加资料').evaluate().isNotEmpty);
         await MacPreviewDesktop.channel.invokeMethod<void>('setContentSize', {
           'width': 1440.0,
@@ -108,21 +109,21 @@ void main() {
           await ui.tap('settings-section-connection');
           await ui.until(() => ui.key('connection-mode').evaluate().isNotEmpty);
           await ui.tap('connection-mode-server');
-          await t.enterText(field('服务器地址'), fixture['address'] as String);
-          await t.tap(find.byTooltip('显示 Token'));
-          await t.pumpAndSettle();
-          await t.enterText(field('Token'), fixture['token'] as String);
-          await t.tap(find.byTooltip('隐藏 Token'));
-          await t.pumpAndSettle();
-          await t.tap(find.text('服务器证书'));
-          await t.pumpAndSettle();
-          await t.enterText(
-            field('服务器 CA 证书'),
-            fixture['certificate'] as String,
-          );
-          await t.tap(find.text('服务器证书'));
-          await t.pumpAndSettle();
+          final address = Uri.parse(fixture['address'] as String);
+          await t.enterText(field('服务器 IP 或域名'), address.host);
+          await t.enterText(field('端口'), '${address.port}');
           await ui.tap('connection-save');
+          await ui.until(
+            () => ui.key('settings-server-password').evaluate().isNotEmpty,
+          );
+          await t.enterText(
+            find.descendant(
+              of: ui.key('settings-server-password'),
+              matching: find.byType(TextField),
+            ),
+            fixture['connectionPassword'] as String,
+          );
+          await ui.tap('settings-server-password-save');
           await ui.until(
             () =>
                 boot!.library!.service.owner.information.length ==
@@ -135,13 +136,13 @@ void main() {
           );
           await ui.tap('workspace-nav-settings');
           await ui.tap('settings-section-connection');
-          await ui.until(() => field('服务器地址').evaluate().isNotEmpty);
+          await ui.until(() => field('服务器 IP 或域名').evaluate().isNotEmpty);
           await capture('local-sync-connected');
           await ui.tap('connection-mode-local');
           await ui.until(
             () =>
                 find.text('本地模式').evaluate().isNotEmpty &&
-                field('服务器地址').evaluate().isEmpty &&
+                field('服务器 IP 或域名').evaluate().isEmpty &&
                 ui.key('connection-save').evaluate().isEmpty,
           );
           await capture('local-sync-disabled');
