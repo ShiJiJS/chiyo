@@ -17,6 +17,12 @@ import 'package:info_desktop/workspace/sample_workspace_source.dart';
 import 'package:info_desktop/workspace/workspace_source.dart';
 
 const resume = WorkspaceRecordRef(WorkspaceRecordKind.information, 'resume');
+// Scope attachment checks so the shared brand image cannot satisfy them.
+Finder attachmentImages() => find.descendant(
+  of: find.byType(LibraryFilePreviewView),
+  matching: find.byType(Image),
+);
+
 void main() {
   const evidence = String.fromEnvironment('UI_EVIDENCE_DIR');
   setUpAll(() async {
@@ -55,20 +61,17 @@ void main() {
     if (evidence.isEmpty) return;
     await ready(
       t,
-      () => find
-          .byType(Image)
-          .evaluate()
-          .every(
-            (element) => find
-                .descendant(
-                  of: find.byWidget(element.widget),
-                  matching: find.byWidgetPredicate(
-                    (w) => w is RawImage && w.image != null,
-                  ),
-                )
-                .evaluate()
-                .isNotEmpty,
-          ),
+      () => attachmentImages().evaluate().every(
+        (element) => find
+            .descendant(
+              of: find.byWidget(element.widget),
+              matching: find.byWidgetPredicate(
+                (w) => w is RawImage && w.image != null,
+              ),
+            )
+            .evaluate()
+            .isNotEmpty,
+      ),
     );
     await t.runAsync(() async {
       final boundary = t.renderObject<RenderRepaintBoundary>(
@@ -139,20 +142,17 @@ void main() {
     t,
     () =>
         find.byType(LibraryFilePreviewView).evaluate().isNotEmpty &&
-        find
-            .byType(Image)
-            .evaluate()
-            .every(
-              (element) => find
-                  .descendant(
-                    of: find.byWidget(element.widget),
-                    matching: find.byWidgetPredicate(
-                      (w) => w is RawImage && w.image != null,
-                    ),
-                  )
-                  .evaluate()
-                  .isNotEmpty,
-            ),
+        attachmentImages().evaluate().every(
+          (element) => find
+              .descendant(
+                of: find.byWidget(element.widget),
+                matching: find.byWidgetPredicate(
+                  (w) => w is RawImage && w.image != null,
+                ),
+              )
+              .evaluate()
+              .isNotEmpty,
+        ),
   );
   Finder value(String text) => find.byWidgetPredicate(
     (w) =>
@@ -168,7 +168,7 @@ void main() {
         dialogChild(
           find.byType(LibraryFilePreviewView),
         ).evaluate().isNotEmpty &&
-        dialogChild(find.byType(Image)).evaluate().every(
+        dialogChild(attachmentImages()).evaluate().every(
           (e) => find
               .descendant(
                 of: find.byWidget(e.widget),
@@ -202,13 +202,13 @@ void main() {
         expect(preview(t).preview.file.ref.version, 2);
         await tap(t, find.byKey(const ValueKey('library-file-versions-file')));
         await historyReady(t);
-        final initialWidth = t.getSize(dialogChild(find.byType(Image))).width;
+        final initialWidth = t.getSize(dialogChild(attachmentImages())).width;
         await tap(
           t,
           dialogChild(find.byKey(const ValueKey('library-file-zoom-in'))),
         );
         expect(
-          t.getSize(dialogChild(find.byType(Image))).width,
+          t.getSize(dialogChild(attachmentImages())).width,
           closeTo(initialWidth * 1.5, .1),
         );
         await tap(
@@ -282,7 +282,7 @@ void main() {
         );
         await historyReady(t);
         expect(
-          t.getSize(dialogChild(find.byType(Image))).width,
+          t.getSize(dialogChild(attachmentImages())).width,
           closeTo(initialWidth * 1.5, .1),
         );
         await tap(t, find.byKey(const ValueKey('library-file-version-1')));
@@ -334,7 +334,7 @@ void main() {
       expect(metadata, contains('${file.byteLength} 字节'));
       await capture(t, 'file-metadata-light1440');
       await tap(t, find.text('关闭'));
-      final initialWidth = t.getSize(find.byType(Image)).width;
+      final initialWidth = t.getSize(attachmentImages()).width;
       await tap(t, find.byKey(const ValueKey('library-file-zoom-in')));
       await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
       final state = t.state(find.byType(LibraryFilePreviewView));
@@ -356,7 +356,7 @@ void main() {
       await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
       await fileReady(t);
       expect(
-        t.getSize(find.byType(Image)).width,
+        t.getSize(attachmentImages()).width,
         closeTo(initialWidth * 1.5, .1),
       );
       await t.pumpWidget(const SizedBox());
@@ -406,7 +406,7 @@ void main() {
         ),
       );
       await fileReady(t);
-      final initialWidth = t.getSize(find.byType(Image)).width;
+      final initialWidth = t.getSize(attachmentImages()).width;
       await tap(t, find.byKey(const ValueKey('library-file-page-next')));
       await fileReady(t);
       await tap(t, find.byKey(const ValueKey('library-file-zoom-in')));
@@ -455,7 +455,7 @@ void main() {
       await tap(t, find.byKey(const ValueKey('library-file-text-mode')));
       await fileReady(t);
       expect(
-        t.getSize(find.byType(Image)).width,
+        t.getSize(attachmentImages()).width,
         closeTo(initialWidth * 1.5, .1),
       );
       // A late result from the old source cannot revive its reader in the new

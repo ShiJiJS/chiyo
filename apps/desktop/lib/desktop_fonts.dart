@@ -12,7 +12,7 @@ Future<Map<String, String>> loadDesktopFonts({
   bool requiredFiles = true,
 }) async {
   if (!Platform.isMacOS) {
-    if (!await loadWindowsDesktopFonts()) {
+    if (!await loadWindowsDesktopFonts() && requiredFiles) {
       throw StateError('Desktop reference fonts are unavailable.');
     }
     return {'platform': Platform.operatingSystem, 'family': desktopFontFamily};
