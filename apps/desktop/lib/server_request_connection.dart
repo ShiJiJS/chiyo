@@ -35,6 +35,7 @@ final class ServerRequestConnection implements OwnerTransport {
       final client = await OwnerClient.connect(
         address: Uri.parse(profile.address),
         token: profile.token,
+        certificate: profile.certificate,
         expectedServerId: profile.serverId,
         trust: profile.certificate.isEmpty
             ? null

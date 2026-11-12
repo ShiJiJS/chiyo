@@ -130,6 +130,7 @@ extension LocalLibraryIncrementalSync on LocalLibrarySync {
       OwnerClient.connect(
         address: Uri.parse(profile.address),
         token: profile.token,
+        certificate: profile.certificate,
         expectedServerId: profile.serverId.isEmpty ? null : profile.serverId,
         trust: profile.certificate.isEmpty
             ? null

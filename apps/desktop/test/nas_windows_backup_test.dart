@@ -26,6 +26,11 @@ class _Http extends HttpOverrides {
 class _Client implements HttpClient {
   _Client(this.inner, this.observation);
   final HttpClient inner;
+  @override
+  set badCertificateCallback(
+    bool Function(X509Certificate, String, int)? callback,
+  ) => inner.badCertificateCallback = callback;
+
   final _Http observation;
   @override
   Duration? get connectionTimeout => inner.connectionTimeout;

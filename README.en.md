@@ -19,7 +19,7 @@ You can also give the AI a set of files to organize into an import proposal usin
 ## Getting started
 
 1. Get the appropriate development package from [Releases](https://github.com/ShiJiJS/chiyo/releases) and follow the [installation guide](docs/deployment.en.md).
-2. Under **Settings → Storage & sync**, select local mode or enter your own server's address, token, and certificate.
+2. On first launch, choose **Local use** or **Server sync**. Enter the server IP/domain and port, then set or enter its Chiyo connection password. Certificate setup is automatic.
 3. Add information manually, or configure the bundled CLI and Skill using the matching integration instructions so the AI can submit proposals.
 4. Review proposals and fill in missing passwords in the App. Handle AI access requests under **Access approvals**.
 

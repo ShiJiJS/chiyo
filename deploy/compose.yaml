@@ -20,14 +20,6 @@ services:
         source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/config
         target: /config
         read_only: true
-      - type: bind
-        source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/secrets
-        target: /secrets
-        read_only: true
-      - type: bind
-        source: ${CHIYO_STORAGE_DIRECTORY:?Set an absolute private data directory}/tls
-        target: /tls
-        read_only: true
     cap_drop:
       - ALL
     security_opt:

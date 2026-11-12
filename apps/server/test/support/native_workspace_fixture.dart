@@ -12,6 +12,7 @@ Future<void> main(List<String> arguments) async {
   final menu = arguments.contains('--pending-menu');
   final f = await DeviceCredentialFixture.create(
     replication: arguments.contains('--local-sync'),
+    connectionPassword: 'synthetic-native-connection-password',
   );
   final (request, proposalId) = await f.runtime.run(() async {
     final item = await f.runtime.service.owner
@@ -46,7 +47,7 @@ Future<void> main(List<String> arguments) async {
   });
   // These are generated fixture credentials, never a saved user profile.
   stdout.writeln(
-    'NATIVE_CONNECTION_FIXTURE=${base64Encode(utf8.encode(jsonEncode({'address': f.owner.address.toString(), 'token': f.token, 'certificate': f.certificate, 'serverId': f.owner.serverId, 'requestId': request.id, if (proposalId != null) 'proposalId': proposalId})))}',
+    'NATIVE_CONNECTION_FIXTURE=${base64Encode(utf8.encode(jsonEncode({'address': f.owner.address.toString(), 'token': f.token, 'certificate': f.certificate, 'serverId': f.owner.serverId, 'connectionPassword': 'synthetic-native-connection-password', 'requestId': request.id, if (proposalId != null) 'proposalId': proposalId})))}',
   );
   final done = Completer<void>();
   final stop = ProcessSignal.sigterm.watch().listen((_) {

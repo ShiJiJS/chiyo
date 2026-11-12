@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:info_storage/info_storage.dart';
 import 'mounted_database_key_store.dart';
+import 'server_initialization.dart';
 
 /// Paths are resolved against this explicit configuration file, never against
 /// a desktop profile or the process's working directory.
@@ -33,6 +34,7 @@ final class ServerConfiguration {
       'address',
       'port',
       'readCacheMiB',
+      'autoInitialize',
     }).isNotEmpty)
       throw const FormatException('Unknown configuration');
     String resolve(String name) {
@@ -48,6 +50,17 @@ final class ServerConfiguration {
       throw const FormatException('Invalid readCacheMiB (32..512)');
     }
     final secrets = resolve('secretsDirectory');
+    if (input.containsKey('autoInitialize') && input['autoInitialize'] is! bool)
+      throw const FormatException('Invalid autoInitialize');
+    if (input['autoInitialize'] == true) {
+      await prepareServerIdentity(
+        dataDirectory: resolve('dataDirectory'),
+        secretsDirectory: secrets,
+        certificate: resolve('tlsCertificate'),
+        privateKey: resolve('tlsPrivateKey'),
+        initializeSecrets: initializeServerSecrets,
+      );
+    }
     String encode(List<int> bytes) =>
         base64Url.encode(bytes).replaceAll('=', '');
     final ownerToken = encode(

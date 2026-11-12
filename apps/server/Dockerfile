@@ -17,6 +17,8 @@ RUN dart build cli --target bin/server.dart --output /out
 
 # AOT and its native SQLCipher asset; no SDK, source, data or private keys.
 FROM debian:trixie-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 ARG SOURCE_COMMIT=unknown
 LABEL org.opencontainers.image.title="Chiyo information server" \
       org.opencontainers.image.revision=$SOURCE_COMMIT

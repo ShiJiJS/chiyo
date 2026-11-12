@@ -104,6 +104,9 @@ _Avoid_: 安全沙箱、用途说明
 **临时授权凭证（Temporary Authorization Credential）**：向本软件证明某项访问或使用许可的私密证明，不是外部服务的登录秘密，也不等于请求编号。
 _Avoid_: 托管凭据、聊天 ID
 
+**知予连接密码（Chiyo Connection Password）**：用户为自己的一台知予服务器设置、供自己的电脑连接并管理资料的密码。它不同于 NAS 系统登录密码、资料中保管的密码以及 AI 使用资料的许可。
+_Avoid_: 管理密码、NAS 密码、服务接入 Token
+
 **服务接入 Token（Service Access Token）**：用户让桌面 App 管理自己部署的信息服务时使用的私密接入凭证。它不交给 Agent，与 Agent 设备接入凭证、某次聊天获得的访问许可及用户保存的外部服务 Token 各自独立。
 _Avoid_: 临时授权凭证、托管凭据
 

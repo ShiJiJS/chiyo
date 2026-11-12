@@ -16,6 +16,8 @@ import 'desktop_runtime.dart';
 import 'online_desktop_launcher.dart';
 import 'platform/local_library.dart';
 import 'workspace/zhiyu_theme.dart';
+import 'onboarding/setup_configuration.dart';
+import 'onboarding/server_setup_controller.dart';
 
 /// Resolves the persisted active library before opening any data or key.
 class StorageDesktopLauncher extends StatefulWidget {
@@ -43,6 +45,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   DesktopBootstrap? _local;
   bool _online = false;
   String? _failure;
+  ServerSetupController? _initialSetup;
 
   @override
   void initState() {
@@ -66,6 +69,32 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
           }
           return;
         }
+      }
+      if (active == null &&
+          await FileSystemEntity.type(
+                '${widget.profiles.directory}/local/library.db',
+                followLinks: false,
+              ) ==
+              FileSystemEntityType.notFound) {
+        if (mounted) {
+          setState(
+            () => _initialSetup = ServerSetupController(
+              onLocal: () async {
+                final configuration = await LocalLibraryConfiguration.open(
+                  widget.profiles.directory,
+                );
+                _startLocal(configuration);
+              },
+              onConnected: (profile, client) async {
+                // Remember a successful authenticated server connection before the
+                // potentially interrupted first content transfer; never a password.
+                await widget.profiles.save(profile);
+                await _adoptServer(profile, client, true);
+              },
+            ),
+          );
+        }
+        return;
       }
       final configuration = await LocalLibraryConfiguration.open(
         widget.profiles.directory,
@@ -154,7 +183,11 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
             )
           : null,
     );
-    if (mounted) setState(() => _local = bootstrap);
+    if (mounted) {
+      setState(() {
+        _local = bootstrap;
+      });
+    }
   }
 
   Future<void> _adoptServer(
@@ -199,6 +232,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
 
   @override
   void dispose() {
+    _initialSetup?.dispose();
     final bootstrap = _local;
     if (bootstrap != null) {
       bootstrap.close().whenComplete(bootstrap.dispose);
@@ -218,6 +252,9 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
     }
     final bootstrap = _local;
     if (bootstrap != null) return widget.localBuilder(bootstrap);
+    if (_initialSetup case final setup?) {
+      return InitialConnectionSetup(draft: setup, onComplete: () {});
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: zhiyuTheme(Brightness.light),

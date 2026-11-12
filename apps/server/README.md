@@ -19,28 +19,25 @@ docker build -f apps/server/Dockerfile --target runtime \
 
 ## 源码启动
 
-在本目录运行 `dart pub get`。在私有工作目录显式运行一次：
-
-```sh
-dart run bin/server.dart init-secrets /absolute/private/secrets
-```
-
-此操作生成三份互相独立的 32 字节材料：数据库密钥、用户接入 Token、服务器身份。目录必须不存在；重复初始化会拒绝，启动和重启不会自动重建丢失的密钥。文件权限为 600，目录为 700；应单独持久保管，不复制进镜像或源码。Token 的传输形式为原始字节的无填充 Base64URL，CLI 不得领取这个管理身份。Agent 使用独立受限连接，不能使用管理 Token。
-
-配置文件仅含路径与监听信息，路径相对配置文件所在目录解析：
+在本目录运行 `dart pub get`。新空安装使用自动初始化配置，路径相对配置文件解析：
 
 ```json
 {
+  "autoInitialize": true,
   "dataDirectory": "data",
-  "secretsDirectory": "secrets",
-  "tlsCertificate": "server.pem",
-  "tlsPrivateKey": "server.key",
+  "secretsDirectory": "data/server-identity",
+  "tlsCertificate": "data/server-identity/server.pem",
+  "tlsPrivateKey": "data/server-identity/server.key",
   "address": "127.0.0.1",
   "port": 47126
 }
 ```
 
-TLS 私钥须为私有普通文件；证书须包含连接地址的 SAN 与服务端用途。客户端信任签发 CA 并正常验证主机名，不关闭验证，不修改系统全局信任。局域网容器可显式监听 0.0.0.0，端口与访问范围由部署配置控制。
+空安装第一次启动自动创建数据库密钥、原管理 Token、稳定服务器身份及 TLS 证书。需要 OpenSSL，Docker 镜像已包含。身份目录为 700、私有文件为 600，持久保管，不复制进镜像或源码。已有库缺少密钥、证书或私钥时拒绝启动，不能重新生成后尝试打开原库。
+
+高级部署仍可手动运行 `dart run bin/server.dart init-secrets /absolute/private/secrets` 并提供自己的 TLS 文件；省略 `autoInitialize` 即沿用原启动方式。旧部署升级时保留原配置和挂载，不改用新示例的目录。正常重启复用原文件。
+
+App 首次连接自动记住公开证书，后续验证已有证书和服务器身份；旧 CA 配置仍正常验证证书链及主机名。新生成的叶证书采用精确指纹核对，允许客户端填写部署后的局域网地址，不需要安装全局 CA。首次信任仅用于可信局域网，不作为公网首次身份认证方案。
 
 ```sh
 dart run bin/server.dart serve /absolute/private/server.json
@@ -50,8 +47,13 @@ dart run bin/server.dart serve /absolute/private/server.json
 
 ## 当前协议
 
-协议版本为 1，所有接口均为 HTTPS，禁止浏览器 Origin。管理接口要求 `Authorization: Bearer <用户接入 Token>`，身份不合法返回 401；当前没有为 Agent 开放管理接口。
+协议版本为 1，所有接口均为 HTTPS，禁止浏览器 Origin。管理接口要求 `Authorization: Bearer <用户接入 Token>`；App 使用连接密码取得私有 Token，原管理 Token 保留兼容。身份不合法返回 401，Agent 不能使用管理接口。
 
+- `GET /v1/setup`：公开连接状态，只含协议、服务器身份、是否已设置连接密码及旧库是否需要原管理连接证明。
+- `POST /v1/setup/initialize`：一次设置连接密码。旧库需要原管理 Token；新空安装允许可信局域网内首次设置。重复设置拒绝，不重置资料。
+- `POST /v1/setup/login`：用知予连接密码取得 App 管理连接 Token。
+- `POST /v1/owner/connection-password`：已认证 App 提交当前及新密码，更新后返回新 Token，旧密码登录产生的 Token 失效。原维护 Token 保留；独立 Agent 身份和已有资料不变。
+- 上述密码接口限制请求体及每来源尝试次数；密码采用 PBKDF2-HMAC-SHA256、600000 次计算与独立随机盐，计算不阻塞数据库业务队列。登录及状态查询不写盘；只有初始化与改密码原子保存 `dataDirectory/connection-auth.json`。该文件不进入资料同步或便携内容备份，停机备份需要保留。
 - `GET /v1/server`：协议与服务器身份。
 - `GET /v1/owner/replication`：副本身份、目标是否为空及首次同步能力。`GET /v1/server` 中的 `replication` 能力必须先核对，旧服务不支持时不能退回覆盖整库。
 - `POST /v1/owner/replication/exports`：以稳定 operationId 准备完整加密内容；包含保留版本、文件、凭据、目录标签、顺序、回收及插件。设备设置、接入凭证和活动许可不进入内容包。

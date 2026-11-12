@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'server_trust.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 
@@ -190,8 +191,10 @@ final class AgentConnection {
   // independent of approval expiry and explicitly bounded lifecycle calls.
   static const defaultRequestTimeout = Duration(seconds: 15);
   AgentConnection(this.profile)
-    : _http = HttpClient(context: profile.trust)
-        ..connectionTimeout = const Duration(seconds: 5);
+    : _http = serverHttpClient(
+        certificate: profile.certificate,
+        trust: profile.trust,
+      )..connectionTimeout = const Duration(seconds: 5);
   final AgentConnectionProfile profile;
   final HttpClient _http;
   bool _closed = false, _serverChanged = false;

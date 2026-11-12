@@ -18,6 +18,8 @@ import 'workspace/owner_credential_input.dart';
 import 'credential_files.dart';
 import 'desktop_runtime.dart';
 import 'online_desktop_runtime.dart';
+import 'onboarding/setup_configuration.dart';
+import 'onboarding/server_setup_controller.dart';
 
 class OnlineDesktopLauncher extends StatefulWidget {
   const OnlineDesktopLauncher({
@@ -54,13 +56,14 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
   ConnectionProfile? _previous;
   String? _error;
   bool _busy = true;
-  bool _serverChanged = false, _certificateError = false;
+  bool _serverChanged = false;
   bool _connecting = false, _connectionView = false;
   final _connectionSettingsRequests = ValueNotifier<int>(0);
   bool _offline = false, _probing = false;
   bool _storageSyncEnabled = true;
   int _failedHealthChecks = 0;
   RemoteWorkspaceSource? _updatingSource;
+  ServerSetupController? _settingsSetup;
   Timer? _connectionTimer, _syncTimer;
   late final OnlineDesktopRuntime _desktop;
   String? _desktopObservation;
@@ -95,6 +98,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     try {
       final saved = await widget.profiles.read();
       if (!mounted) return;
+      _prepareConnectionSettings(saved);
       if (saved == null) {
         setState(() => _busy = false);
         return;
@@ -114,11 +118,34 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     }
   }
 
+  void _prepareConnectionSettings(ConnectionProfile? saved) {
+    _settingsSetup?.dispose();
+    _settingsSetup = ServerSetupController(
+      previous: saved,
+      syncEnabled: true,
+      onConnected: (profile, client) async {
+        _address.text = profile.address;
+        _token.text = profile.token;
+        _certificate.text = profile.certificate;
+        _storageSyncEnabled = true;
+        await _saveStorage();
+        if (_error != null) throw ConnectionSetupFailure(_error!);
+      },
+      onLocal: () async {
+        if (_source == null) {
+          throw const ConnectionSetupFailure('当前资料尚未完整保存到本机，请先恢复服务器连接。');
+        }
+        _storageSyncEnabled = false;
+        await _saveStorage();
+        if (_error != null) throw ConnectionSetupFailure(_error!);
+      },
+    );
+  }
+
   void _draftChanged() {
     if (mounted) {
       setState(() {
         _serverChanged = false;
-        _certificateError = false;
         _error = null;
       });
     }
@@ -128,19 +155,6 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       _address.text.trim() == profile.address &&
       _token.text.trim() == profile.token &&
       _certificate.text.trim() == profile.certificate;
-
-  ConnectionCertificateStatus get _certificateStatus {
-    if (_certificateError) return ConnectionCertificateStatus.error;
-    if (_source != null &&
-        !_offline &&
-        _previous != null &&
-        _matchesProfile(_previous!)) {
-      return ConnectionCertificateStatus.verified;
-    }
-    return _certificate.text.trim().isEmpty
-        ? ConnectionCertificateStatus.unconfigured
-        : ConnectionCertificateStatus.unverified;
-  }
 
   RemoteWorkspaceSource _createSource(
     OwnerClient client,
@@ -211,20 +225,6 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
     }
   }
 
-  Future<void> _selectStorageMode(bool enabled) async {
-    if (_busy || _connecting || _storageSyncEnabled == enabled) return;
-    setState(() {
-      _storageSyncEnabled = enabled;
-      _error = null;
-    });
-    if (!enabled) {
-      await _saveStorage();
-      if (mounted && _error != null) {
-        setState(() => _storageSyncEnabled = true);
-      }
-    }
-  }
-
   Future<void> _connect({bool confirmServer = false}) async {
     if (_connecting || _desktop.quitting || confirmServer && !_serverChanged) {
       return;
@@ -234,7 +234,6 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       _busy = true;
       _error = null;
       _serverChanged = false;
-      _certificateError = false;
     });
     OwnerClient? client;
     RemoteWorkspaceSource? candidate;
@@ -256,6 +255,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       client = await OwnerClient.connect(
         address: Uri.parse(address),
         token: token,
+        certificate: certificate,
         trust: trust,
         expectedServerId: !confirmServer && _previous?.address == address
             ? _previous!.serverId
@@ -319,18 +319,16 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       if (mounted && !_desktop.quitting) {
         setState(() {
           _serverChanged = e is RemoteFailure && e.code == 'server_changed';
-          _certificateError =
-              parsingCertificate ||
-              e is RemoteFailure && e.code == 'untrusted_server';
           _error = parsingCertificate
               ? '证书格式不正确，请填写 PEM 格式的 CA 证书。'
               : switch (e) {
-                  RemoteFailure(code: 'unauthorized') => 'Token 不正确，请重新填写。',
+                  RemoteFailure(code: 'unauthorized') =>
+                    '当前连接已失效，请重新连接并输入知予连接密码。',
                   RemoteFailure(code: 'server_changed') => '服务器身份已变化，请核对服务器地址。',
                   RemoteFailure(code: 'untrusted_server') =>
                     '无法验证服务器证书，请检查证书或连接地址。',
                   RemoteFailure(code: 'invalid_connection') ||
-                  FormatException() => '请填写完整的 HTTPS 服务器地址和 Token。',
+                  FormatException() => '请检查服务器 IP 或域名及端口。',
                   RemoteFailure(code: 'server_unavailable') =>
                     '无法连接服务器，请检查网络、服务器是否运行，以及系统是否允许知予访问本地网络。',
                   RemoteFailure(code: 'server_timeout') =>
@@ -341,7 +339,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                   ProcessException() => '无法保存本机连接设置，请检查应用的数据目录权限后重试。',
                   RemoteFailure(code: 'agent_connection_unavailable') =>
                     '无法准备 CLI 连接，请检查服务器后重试。原连接设置已保留。',
-                  _ => '连接失败，请检查服务器地址、Token 和网络后重试。',
+                  _ => '连接失败，请检查服务器地址和网络后重试。',
                 };
         });
       }
@@ -492,6 +490,7 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
 
   @override
   void dispose() {
+    _settingsSetup?.dispose();
     _desktop.removeListener(_desktopChanged);
     _desktop.dispose();
     _connectionTimer?.cancel();
@@ -569,24 +568,19 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
                         setState(() => _connectionView = visible);
                       }
                     },
-                    connectionBuilder: (context, onCancel) => ConnectionForm(
-                      embedded: true,
-                      address: _address,
-                      token: _token,
-                      certificate: _certificate,
-                      certificateStatus: _certificateStatus,
-                      busy: _busy,
-                      error: _error,
-                      syncEnabled: widget.onSaveStorage == null
-                          ? null
-                          : _storageSyncEnabled,
-                      onSyncChanged: _selectStorageMode,
-                      onConnect: _saveStorage,
-                      onCancel: onCancel,
-                      onConfirmServer: _serverChanged
-                          ? () => _saveStorage(confirmServer: true)
-                          : null,
-                    ),
+                    connectionBuilder: (context, onCancel) =>
+                        _settingsSetup == null
+                        ? const ConnectionSurface(
+                            title: '存储与同步',
+                            description: '',
+                            loading: true,
+                            children: [],
+                          )
+                        : ConnectionSettings(
+                            draft: _settingsSetup!,
+                            failure: _error,
+                            onBack: onCancel,
+                          ),
                   ),
                 ),
               ),
@@ -624,20 +618,18 @@ class _OnlineDesktopLauncherState extends State<OnlineDesktopLauncher> {
       debugShowCheckedModeBanner: false,
       theme: zhiyuTheme(Brightness.light),
       home: Scaffold(
-        body: ConnectionForm(
-          address: _address,
-          token: _token,
-          certificate: _certificate,
-          busy: _busy,
-          error: _error,
-          onConnect: _connect,
-          certificateStatus: _certificateStatus,
-          onConfirmServer: !_serverChanged
-              ? null
-              : () {
-                  unawaited(_connect(confirmServer: true));
-                },
-        ),
+        body: _settingsSetup == null
+            ? ConnectionSurface(
+                title: _error == null ? '正在读取连接…' : '连接设置暂时无法打开',
+                description: _error ?? '',
+                loading: _busy,
+                children: const [],
+              )
+            : ConnectionSettings(
+                draft: _settingsSetup!,
+                failure: _error,
+                onBack: () {},
+              ),
       ),
     );
   }

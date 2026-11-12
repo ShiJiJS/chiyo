@@ -7,6 +7,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_server/mounted_database_key_store.dart';
 import 'package:info_server/online_server.dart';
 import 'package:info_server/server_configuration.dart';
+import 'package:info_server/owner_authentication.dart';
 
 Future<void> main(List<String> args) async {
   try {
@@ -23,11 +24,30 @@ Future<void> main(List<String> args) async {
       return;
     }
     final config = await ServerConfiguration.read(args.last);
+    final newLibrary =
+        await FileSystemEntity.type(
+          '${config.dataDirectory}/library.db',
+          followLinks: false,
+        ) ==
+        FileSystemEntityType.notFound;
     final repository = await EncryptedInformationRepository.openOnline(
       config.dataDirectory,
       MountedDatabaseKeyStore(config.databaseKeyFile),
       readCacheMiB: config.readCacheMiB,
     );
+    late final OwnerAuthentication ownerAuthentication;
+    try {
+      // Read login state only after acquiring the library's process lock, so a
+      // waiting replacement process cannot retain stale pre-setup auth state.
+      ownerAuthentication = await OwnerAuthentication.open(
+        config.dataDirectory,
+        config.ownerToken,
+        newLibrary: newLibrary,
+      );
+    } on Object {
+      await repository.close();
+      rethrow;
+    }
     final runtime = await OnlineInformationRuntime.open(repository: repository);
     OnlineServer? server;
     StreamSubscription<ProcessSignal>? interrupt, terminate;
@@ -38,6 +58,7 @@ Future<void> main(List<String> args) async {
         tls: config.tls,
         ownerToken: config.ownerToken,
         serverId: config.serverId,
+        ownerAuthentication: ownerAuthentication,
         address: config.address,
         port: config.port,
         backups: repository.backups,
