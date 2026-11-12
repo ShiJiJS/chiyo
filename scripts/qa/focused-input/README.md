@@ -93,6 +93,40 @@ browser tool refuses control or cannot establish page context; do not change
 security settings or route around that check. `close` shuts down the local
 probe without any browser interaction; a 20-minute bound also ends it.
 
+## Windows HTTPS to App-host acceptance
+
+`apps/desktop/integration_test/windows_remote_focused_fill_test.dart` runs an
+isolated HTTPS server with SQLCipher and Windows DPAPI, the real desktop runner,
+`StorageDesktopLauncher`'s production private host, the build-bound native
+driver, and the Win32 receiver above. No production NAS profile or credential
+is loaded. The desktop platform fixture replaces OS notifications and final
+process termination; it still invokes the App's normal host-close lifecycle.
+
+From `apps/desktop`, with the fixed repository SDK and dependencies available:
+
+```powershell
+flutter test integration_test/windows_remote_focused_fill_test.dart -d windows --no-pub --dart-define=FILL_RECEIVER=C:/path/to/info-focus-fixture.exe --dart-define=FILL_EVIDENCE=C:/project/build/fresh-windows-fill
+```
+
+Use a fresh evidence directory. Wait for `state.json` to report
+`awaiting_focus`. Use an authorized native UI tool to focus receiver control
+101. Write increasing `id` and `action` pairs to `command.json`, waiting for the
+same ID in `state.json` after every action:
+
+1. `probe`, `request`, `approve`, `fill`, `duplicate`, `clear`.
+2. Focus plain control 103, then `fill`: no field may receive input.
+3. Refocus password control 101, then `arm-change`, `fill`, `attention-block`.
+4. `clear`, `quit`, `finish`.
+
+The synthetic owner approval goes through the real HTTPS owner endpoint.
+The receiver independently checks exact Unicode and whitespace, other fields,
+paste events and clipboard sequence. A changed target must stop later batches
+and require attention; the test never acknowledges an unknown operation to
+retry it. `quit` checks that App lifecycle closes the host and rejects new input.
+Complete within the receiver's five-minute safety limit. Teardown closes its
+pipe and removes the isolated server state normally. This does not establish
+browser compatibility or installation against a live NAS.
+
 ## Desktop build diagnostics
 
 Alternatively, after configuring the Windows Flutter build, run from `apps/desktop`
