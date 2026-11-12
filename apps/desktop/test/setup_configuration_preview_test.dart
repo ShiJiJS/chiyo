@@ -22,143 +22,185 @@ void main() {
     expect(tester.takeException(), isNull);
   }
 
-  testWidgets('local choice opens the existing empty workspace and settings', (
-    tester,
-  ) async {
-    await viewport(tester);
-    await tester.pumpWidget(const SetupPreviewApp());
-    await tester.pumpAndSettle();
-    expect(find.text('你的资料，放在哪里？'), findsOneWidget);
-    expect(find.byType(TextField), findsNothing);
-    await tap(tester, 'setup-continue');
-    expect(find.byKey(const ValueKey('workspace-nav-library')), findsOneWidget);
-    expect(find.text('自托管服务'), findsNothing);
-    await tap(tester, 'workspace-nav-settings');
-    await tap(tester, 'settings-section-connection');
-    expect(find.text('存储与同步'), findsWidgets);
-    expect(find.text('使用本地模式'), findsOneWidget);
-  });
-
-  testWidgets('invalid connection keeps the draft and can return to local', (
-    tester,
-  ) async {
-    await viewport(tester);
-    final draft = SetupPreviewDraft();
-    addTearDown(draft.dispose);
-    var completed = false;
-    await tester.pumpWidget(
-      SetupConfigurationPreview(
-        draft: draft,
-        onComplete: () => completed = true,
-      ),
+  Future<void> fill(WidgetTester tester, String key, String text) async {
+    final finder = find.descendant(
+      of: find.byKey(ValueKey(key)),
+      matching: find.byType(TextField),
     );
-    await tap(tester, 'setup-mode-server');
-    await tap(tester, 'setup-continue');
-    draft.address.text = 'http://192.168.1.20';
-    draft.token.text = 'preserved-test-value';
-    await tap(tester, 'setup-continue');
-    expect(find.text('请填写完整的 HTTPS 服务器地址。'), findsOneWidget);
-    expect(draft.token.text, 'preserved-test-value');
-    expect(completed, isFalse);
-    await tap(tester, 'setup-back');
-    await tap(tester, 'setup-mode-local');
-    await tap(tester, 'setup-continue');
-    expect(completed, isTrue);
-    expect(draft.enabled, isFalse);
-  });
-
-  testWidgets('server initialization leads to import and a connection state', (
-    tester,
-  ) async {
-    await viewport(tester);
-    final draft = SetupPreviewDraft();
-    addTearDown(draft.dispose);
-    var completed = false;
-    await tester.pumpWidget(
-      SetupConfigurationPreview(
-        draft: draft,
-        onComplete: () => completed = true,
-      ),
-    );
-    await tap(tester, 'setup-mode-server');
-    await tap(tester, 'setup-continue');
-    await tap(tester, 'setup-initialize');
-    expect(find.text('初始化服务器'), findsOneWidget);
-    await tap(tester, 'setup-continue');
-    await tap(tester, 'setup-import-confirm');
-    expect(draft.address.text, 'https://192.168.1.20:47126');
-    expect(draft.hasCertificate, isTrue);
-    expect(find.text('已导入服务器证书'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('setup-continue')));
+    await tester.ensureVisible(finder);
+    await tester.enterText(finder, text);
     await tester.pump();
-    expect(find.text('正在连接…'), findsOneWidget);
-    expect(completed, isFalse);
-    await tester.pumpAndSettle();
-    expect(completed, isTrue);
-    expect(draft.enabled, isTrue);
-  });
+  }
 
-  testWidgets('Token replacement can be cancelled and never clears data', (
-    tester,
+  Future<void> wizard(WidgetTester tester, SetupPreviewDraft draft) async {
+    await tester.pumpWidget(
+      SetupConfigurationPreview(draft: draft, onComplete: () {}),
+    );
+    await tester.pumpAndSettle();
+    await tap(tester, 'setup-mode-server');
+    await tap(tester, 'setup-continue');
+  }
+
+  Future<void> settings(
+    WidgetTester tester,
+    SetupPreviewDraft draft,
+    Brightness brightness,
   ) async {
-    await viewport(tester);
-    final draft = SetupPreviewDraft()..importConnection();
-    draft.saved = SetupStorageMode.server;
-    draft.verified = true;
-    addTearDown(draft.dispose);
     await tester.pumpWidget(
       MaterialApp(
-        theme: zhiyuTheme(Brightness.light),
+        theme: zhiyuTheme(brightness),
         home: Scaffold(
-          body: SetupConfigurationPreview(
-            draft: draft,
-            embedded: true,
-            onComplete: () {},
-            onBack: () {},
-          ),
+          body: StorageSettingsPreview(draft: draft, onBack: () {}),
         ),
       ),
     );
-    await tap(tester, 'setup-continue');
-    final original = draft.token.text;
-    await tap(tester, 'setup-replace-token');
-    await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
-    expect(draft.token.text, original);
-    await tap(tester, 'setup-replace-token');
-    await tap(tester, 'setup-replace-confirm');
-    expect(draft.token.text, isNot(original));
-    expect(draft.hasCertificate, isTrue);
-    expect(draft.enabled, isTrue);
-    expect(tester.takeException(), isNull);
-  });
+  }
 
-  for (final brightness in Brightness.values) {
-    testWidgets('setup remains usable with 200% text in ${brightness.name}', (
-      tester,
-    ) async {
-      await viewport(tester, scale: 2);
+  testWidgets(
+    'local setup enters the empty workspace; settings have no wizard',
+    (tester) async {
+      await viewport(tester);
+      await tester.pumpWidget(const SetupPreviewApp());
+      await tester.pumpAndSettle();
+      await tap(tester, 'setup-continue');
+      expect(
+        find.byKey(const ValueKey('workspace-nav-library')),
+        findsOneWidget,
+      );
+      await tap(tester, 'workspace-nav-settings');
+      await tap(tester, 'settings-section-connection');
+      expect(find.byType(StorageSettingsPreview), findsOneWidget);
+      expect(find.byType(SetupConfigurationPreview), findsNothing);
+      expect(find.text('首次配置'), findsNothing);
+      expect(find.text('上一步'), findsNothing);
+      expect(find.text('继续'), findsNothing);
+      expect(find.text('资料保存在这台电脑'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'new server requires only IP, port and a matching initial password',
+    (tester) async {
+      await viewport(tester);
       final draft = SetupPreviewDraft();
       addTearDown(draft.dispose);
+      var completed = false;
       await tester.pumpWidget(
-        MaterialApp(
-          theme: zhiyuTheme(brightness),
-          home: Scaffold(
-            body: SetupConfigurationPreview(
-              draft: draft,
-              embedded: true,
-              onComplete: () {},
-              onBack: () {},
-            ),
-          ),
+        SetupConfigurationPreview(
+          draft: draft,
+          onComplete: () => completed = true,
         ),
       );
       await tap(tester, 'setup-mode-server');
       await tap(tester, 'setup-continue');
-      await tap(tester, 'setup-import');
-      await tap(tester, 'setup-import-confirm');
-      await tap(tester, 'setup-back');
-      expect(find.text('存储与同步'), findsOneWidget);
+      await tap(tester, 'setup-continue');
+      expect(find.byKey(const ValueKey('setup-error')), findsOneWidget);
+      draft.host.text = '192.168.1.20';
+      draft.port.text = '47126';
+      await tap(tester, 'setup-continue');
+      expect(find.text('设置管理密码'), findsOneWidget);
+      expect(find.text('服务器证书已自动保存。'), findsOneWidget);
+      expect(find.textContaining('Token'), findsNothing);
+      expect(find.textContaining('导入'), findsNothing);
+      await fill(tester, 'setup-password', 'synthetic-password');
+      await fill(tester, 'setup-password-confirm', 'mismatch');
+      await tap(tester, 'setup-continue');
+      expect(find.text('两次输入的密码不一致，请重新确认。'), findsOneWidget);
+      expect(completed, isFalse);
+      await fill(tester, 'setup-password-confirm', 'synthetic-password');
+      await tester.tap(find.byKey(const ValueKey('setup-continue')));
+      await tester.pump();
+      expect(find.text('正在完成配置…'), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(completed, isTrue);
+      expect(draft.enabled, isTrue);
+      expect(draft.certificateRemembered, isTrue);
+      expect(draft.passwordMatches('synthetic-password'), isTrue);
+    },
+  );
+
+  testWidgets(
+    'initialized server asks for its existing password, not a reset',
+    (tester) async {
+      await viewport(tester);
+      final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+      draft.saveServer('existing-password');
+      addTearDown(draft.dispose);
+      await wizard(tester, draft);
+      await tap(tester, 'setup-continue');
+      expect(find.text('输入管理密码'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('setup-password-confirm')),
+        findsNothing,
+      );
+      await fill(tester, 'setup-password', 'wrong-password');
+      await tap(tester, 'setup-continue');
+      expect(find.text('管理密码不正确，请重新输入。'), findsOneWidget);
+      expect(draft.passwordMatches('existing-password'), isTrue);
+    },
+  );
+
+  testWidgets('back navigation retains address and can choose local instead', (
+    tester,
+  ) async {
+    await viewport(tester);
+    final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+    addTearDown(draft.dispose);
+    await wizard(tester, draft);
+    await tap(tester, 'setup-continue');
+    await tap(tester, 'setup-back');
+    expect(draft.host.text, '192.168.1.20');
+    await tap(tester, 'setup-back');
+    await tap(tester, 'setup-mode-local');
+    await tap(tester, 'setup-continue');
+    expect(draft.enabled, isFalse);
+  });
+
+  testWidgets(
+    'daily password change checks current password and supports cancel',
+    (tester) async {
+      await viewport(tester);
+      final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+      draft.saveServer('existing-password');
+      addTearDown(draft.dispose);
+      await settings(tester, draft, Brightness.light);
+      expect(find.text('首次配置'), findsNothing);
+      expect(find.text('继续'), findsNothing);
+      expect(find.textContaining('Token'), findsNothing);
+      await tap(tester, 'settings-change-password');
+      await fill(tester, 'settings-current-password', 'wrong-password');
+      await fill(tester, 'settings-new-password', 'replacement-password');
+      await fill(tester, 'settings-repeat-password', 'replacement-password');
+      await tap(tester, 'settings-save-password');
+      expect(find.text('当前密码不正确。'), findsOneWidget);
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
+      expect(draft.passwordMatches('existing-password'), isTrue);
+      await tap(tester, 'settings-change-password');
+      await fill(tester, 'settings-current-password', 'existing-password');
+      await fill(tester, 'settings-new-password', 'replacement-password');
+      await fill(tester, 'settings-repeat-password', 'replacement-password');
+      await tap(tester, 'settings-save-password');
+      expect(draft.passwordMatches('replacement-password'), isTrue);
+      expect(draft.certificateRemembered, isTrue);
+    },
+  );
+
+  for (final brightness in Brightness.values) {
+    testWidgets('daily settings stay usable at 200% in ${brightness.name}', (
+      tester,
+    ) async {
+      await viewport(tester, scale: 2);
+      final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+      draft.saveServer('existing-password');
+      addTearDown(draft.dispose);
+      await settings(tester, draft, brightness);
+      await tap(tester, 'settings-save-connection');
+      expect(find.text('上一步'), findsNothing);
+      await tap(tester, 'settings-change-password');
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../desktop_controls.dart';
 import '../desktop_interaction_host.dart';
 import '../desktop_motion.dart';
@@ -13,27 +12,48 @@ import '../workspace/zhiyu_theme.dart';
 
 enum SetupStorageMode { local, server }
 
-enum _Panel { mode, connection, initialization }
+enum _Panel { mode, connection, password }
 
-/// All configuration in this prototype lives in memory. Import, connection,
-/// initialization and Token replacement are simulated, never OS/network calls.
+/// Isolated UI state only. Connection checks, certificates, passwords and sync
+/// are synthetic and stay in memory. No production profile/API is involved.
 class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
-  final address = TextEditingController();
-  final token = TextEditingController();
-  final host = TextEditingController(text: '192.168.1.20');
+  final host = TextEditingController();
   final port = TextEditingController(text: '47126');
   SetupStorageMode selected = SetupStorageMode.local;
   SetupStorageMode saved = SetupStorageMode.local;
-  bool hasCertificate = false;
-  bool verified = false;
-  String? connectionFile;
+  String? _configuredEndpoint, _password;
+  bool certificateRemembered = false;
   @override
   bool busy = false;
   @override
   DateTime? updatedAt;
   bool _disposed = false;
-  int _tokenRevision = 0;
 
+  String get endpoint {
+    final value = host.text.trim();
+    return Uri(
+      scheme: 'https',
+      host: value,
+      port: int.parse(port.text),
+    ).toString();
+  }
+
+  String? get addressError {
+    final value = host.text.trim();
+    if (value.isEmpty ||
+        !RegExp(r'^[a-zA-Z0-9][a-zA-Z0-9.:-]*$').hasMatch(value)) {
+      return '请填写服务器 IP 或域名，不需要填写 https://。';
+    }
+    final number = int.tryParse(port.text);
+    if (number == null || number < 1 || number > 65535) {
+      return '请填写 1～65535 之间的端口。';
+    }
+    return null;
+  }
+
+  bool get knownServer =>
+      addressError == null && _configuredEndpoint == endpoint;
+  bool get hasConnection => _configuredEndpoint != null;
   @override
   bool get enabled => saved == SetupStorageMode.server;
   @override
@@ -41,27 +61,29 @@ class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
   @override
   Object? get failure => null;
 
-  void importConnection() {
-    address.text = 'https://${host.text.trim()}:${port.text.trim()}';
-    token.text = 'chiyo_preview_connection_token_not_a_real_credential';
-    selected = SetupStorageMode.server;
-    hasCertificate = true;
-    verified = false;
-    connectionFile = '家庭 NAS.chiyo-connection';
+  Future<void> checkServer() => synchronize();
+
+  void useLocal() {
+    selected = saved = SetupStorageMode.local;
     notifyListeners();
   }
 
-  void replaceToken() {
-    _tokenRevision++;
-    token.text = 'chiyo_preview_replaced_token_$_tokenRevision';
+  void saveServer(String password) {
+    _configuredEndpoint = endpoint;
+    _password = password;
+    selected = saved = SetupStorageMode.server;
+    certificateRemembered = true;
     notifyListeners();
   }
 
-  Future<void> finish() async {
-    if (selected == SetupStorageMode.server) await synchronize();
-    if (_disposed) return;
-    saved = selected;
-    verified = enabled;
+  bool passwordMatches(String value) => value == _password;
+  void changePassword(String value) {
+    _password = value;
+    notifyListeners();
+  }
+
+  void resumeServer() {
+    saved = selected = SetupStorageMode.server;
     notifyListeners();
   }
 
@@ -70,9 +92,7 @@ class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
     if (busy) return;
     busy = true;
     notifyListeners();
-    // A short in-memory transition lets the loading state be reviewed. There
-    // is deliberately no OwnerClient or fake production success receipt.
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     if (_disposed) return;
     busy = false;
     updatedAt = DateTime.now();
@@ -82,26 +102,21 @@ class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
   @override
   void dispose() {
     _disposed = true;
-    for (final controller in [address, token, host, port]) {
-      controller.dispose();
-    }
+    host.dispose();
+    port.dispose();
     super.dispose();
   }
 }
 
+/// First-run guide only. Settings compose StorageSettingsPreview instead.
 class SetupConfigurationPreview extends StatefulWidget {
   const SetupConfigurationPreview({
     super.key,
     required this.draft,
     required this.onComplete,
-    this.onBack,
-    this.embedded = false,
   });
   final SetupPreviewDraft draft;
   final VoidCallback onComplete;
-  final VoidCallback? onBack;
-  final bool embedded;
-
   @override
   State<SetupConfigurationPreview> createState() =>
       _SetupConfigurationPreviewState();
@@ -109,9 +124,11 @@ class SetupConfigurationPreview extends StatefulWidget {
 
 class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
   _Panel _panel = _Panel.mode;
-  bool _visible = false, _certificateDetails = false, _copied = false;
+  final _password = TextEditingController(),
+      _confirmation = TextEditingController();
   String? _error;
   SetupPreviewDraft get d => widget.draft;
+  bool get _initializing => !d.knownServer;
 
   void _go(_Panel panel) {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -121,106 +138,67 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
     });
   }
 
-  Future<void> _finish() async {
+  Future<void> _next() async {
     if (d.busy) return;
-    if (d.selected == SetupStorageMode.server) {
-      final uri = Uri.tryParse(d.address.text.trim());
-      if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
-        setState(() => _error = '请填写完整的 HTTPS 服务器地址。');
-        return;
+    if (_panel == _Panel.mode) {
+      if (d.selected == SetupStorageMode.local) {
+        d.useLocal();
+        widget.onComplete();
+      } else {
+        _go(_Panel.connection);
       }
-      if (d.token.text.trim().isEmpty) {
-        setState(() => _error = '请填写服务器初始化时生成的 Token。');
-        return;
-      }
+      return;
     }
-    setState(() => _error = null);
-    await d.finish();
-    if (mounted) widget.onComplete();
+    if (_panel == _Panel.connection) {
+      if (d.addressError case final message?) {
+        setState(() => _error = message);
+        return;
+      }
+      setState(() => _error = null);
+      await d.checkServer();
+      if (mounted) _go(_Panel.password);
+      return;
+    }
+    if (_password.text.isEmpty) {
+      setState(() => _error = '请填写管理密码。');
+      return;
+    }
+    if (_initializing && _password.text != _confirmation.text) {
+      setState(() => _error = '两次输入的密码不一致，请重新确认。');
+      return;
+    }
+    if (!_initializing && !d.passwordMatches(_password.text)) {
+      setState(() => _error = '管理密码不正确，请重新输入。');
+      return;
+    }
+    await d.checkServer();
+    if (!mounted) return;
+    d.saveServer(_password.text);
+    _password.clear();
+    _confirmation.clear();
+    widget.onComplete();
   }
 
-  Future<void> _import(BuildContext surfaceContext) async {
-    final imported = await showDesktopDialog<bool>(
-      surfaceContext,
-      builder: (context) => PrototypeDialog(
-        title: '导入连接文件',
-        onClose: () => Navigator.pop(context),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _note(context, '选择服务器初始化时导出的连接文件。'),
-            const SizedBox(height: 20),
-            _InfoRow(
-              icon: Icons.description_outlined,
-              title: '家庭 NAS.chiyo-connection',
-              description: '服务器地址、接入 Token 和公开证书',
-            ),
-          ],
-        ),
-        actions: [
-          DesktopButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          DesktopButton(
-            key: const ValueKey('setup-import-confirm'),
-            kind: DesktopButtonKind.primary,
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('导入'),
-          ),
-        ],
-      ),
-    );
-    if (imported != true || !mounted) return;
-    d.importConnection();
-    _go(_Panel.connection);
-  }
-
-  Future<void> _replaceToken(BuildContext surfaceContext) async {
-    final replace = await showDesktopDialog<bool>(
-      surfaceContext,
-      builder: (context) => PrototypeDialog(
-        title: '更换服务器 Token',
-        onClose: () => Navigator.pop(context),
-        body: _note(
-          context,
-          '自动生成新的接入 Token，并更新这台电脑的连接。其他电脑需要重新导入连接配置；已有资料和凭据不受影响。',
-        ),
-        actions: [
-          DesktopButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          DesktopButton(
-            key: const ValueKey('setup-replace-confirm'),
-            kind: DesktopButtonKind.primary,
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('生成并更换'),
-          ),
-        ],
-      ),
-    );
-    if (replace != true || !mounted) return;
-    d.replaceToken();
-    setState(() => _error = null);
+  @override
+  void dispose() {
+    _password.dispose();
+    _confirmation.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: d,
-    builder: (context, _) {
-      if (widget.embedded) return _surface(context);
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: '知予 · 配置预览',
-        theme: zhiyuTheme(Brightness.light),
-        darkTheme: zhiyuTheme(Brightness.dark),
-        scrollBehavior: const DesktopScrollBehavior(scrollbarGutter: 9),
-        builder: (_, child) =>
-            DesktopInteractionHost(child: DesktopWindowFrame(child: child!)),
-        home: Builder(builder: _standalone),
-      );
-    },
+    builder: (_, _) => MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: '知予 · 配置预览',
+      theme: zhiyuTheme(Brightness.light),
+      darkTheme: zhiyuTheme(Brightness.dark),
+      scrollBehavior: const DesktopScrollBehavior(scrollbarGutter: 9),
+      builder: (_, child) =>
+          DesktopInteractionHost(child: DesktopWindowFrame(child: child!)),
+      home: Builder(builder: _standalone),
+    ),
   );
 
   Widget _standalone(BuildContext context) {
@@ -293,7 +271,7 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
           const SizedBox(height: 12),
           _note(context, '选择资料的保存方式，\n随时可以在设置里调整。'),
           const SizedBox(height: 38),
-          for (final (index, title) in ['使用方式', '连接设置'].indexed) ...[
+          for (final (index, title) in ['使用方式', '连接服务器', '管理密码'].indexed) ...[
             Row(
               children: [
                 AnimatedContainer(
@@ -302,9 +280,7 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
                   height: 26,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: (index == 0) == (_panel == _Panel.mode)
-                        ? c.accent
-                        : c.paper,
+                    color: index == _panel.index ? c.accent : c.paper,
                     shape: BoxShape.circle,
                     border: Border.all(color: c.line),
                   ),
@@ -313,9 +289,7 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
                     style: libraryText(
                       context,
                       13,
-                      color: (index == 0) == (_panel == _Panel.mode)
-                          ? c.onAccent
-                          : c.muted,
+                      color: index == _panel.index ? c.onAccent : c.muted,
                     ),
                   ),
                 ),
@@ -336,394 +310,542 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
 
   Widget _surface(BuildContext context) {
     final title = switch (_panel) {
-      _Panel.mode => widget.embedded ? '存储与同步' : '你的资料，放在哪里？',
+      _Panel.mode => '你的资料，放在哪里？',
       _Panel.connection => '连接你的服务器',
-      _Panel.initialization => '初始化服务器',
+      _Panel.password => _initializing ? '设置管理密码' : '输入管理密码',
     };
     final subtitle = switch (_panel) {
       _Panel.mode => '先在本机使用，或连接自己的 NAS／服务器同步资料。',
-      _Panel.connection => '导入连接文件即可，也可以手动填写。',
-      _Panel.initialization => '在 NAS 或服务器上运行一次，自动准备证书和接入 Token。',
+      _Panel.connection => '填写已经启动知予服务的 NAS 或服务器地址。',
+      _Panel.password =>
+        _initializing ? '以后其他电脑连接这台服务器时，也使用这个密码。' : '这台服务器已完成初始化，输入管理密码即可连接。',
     };
     return ColoredBox(
       color: UiPalette.of(context).paper,
       child: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              key: const ValueKey('setup-body'),
-              padding: const EdgeInsets.all(32),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 690),
-                  child: Column(
+            child: _FormBody(
+              title: title,
+              subtitle: subtitle,
+              error: _error,
+              child: DesktopEntrance(
+                key: ValueKey(_panel),
+                child: switch (_panel) {
+                  _Panel.mode => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(title, style: libraryHeading(context, 28)),
-                      const SizedBox(height: 10),
-                      _note(context, subtitle),
-                      const SizedBox(height: 30),
-                      DesktopEntrance(
-                        key: ValueKey(_panel),
-                        child: switch (_panel) {
-                          _Panel.mode => _mode(context),
-                          _Panel.connection => _connection(context),
-                          _Panel.initialization => _initialization(context),
-                        },
-                      ),
-                      if (_error != null) ...[
-                        const SizedBox(height: 16),
-                        Text(
-                          _error!,
-                          key: const ValueKey('setup-error'),
-                          style: libraryText(
-                            context,
-                            14,
-                            color: UiPalette.of(context).danger,
-                          ),
+                      for (final mode in SetupStorageMode.values) ...[
+                        _ModeChoice(
+                          mode: mode,
+                          selected: d.selected == mode,
+                          onSelect: () => setState(() => d.selected = mode),
                         ),
+                        const SizedBox(height: 16),
                       ],
+                      const SizedBox(height: 8),
+                      const _InfoRow(
+                        icon: Icons.smart_toy_outlined,
+                        title: '两种方式都能接收 AI 申请',
+                        description: '由 AI 发起，你在 App 中审批和管理资料。',
+                      ),
                     ],
                   ),
-                ),
+                  _Panel.connection => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _ServerAddressFields(draft: d),
+                      const SizedBox(height: 18),
+                      const _InfoRow(
+                        icon: Icons.verified_user_outlined,
+                        title: '证书自动配置',
+                        description: '服务器自动生成证书，App 在连接时保存，无需查找或导入文件。',
+                      ),
+                    ],
+                  ),
+                  _Panel.password => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _InfoRow(
+                        icon: Icons.check_circle_outline,
+                        title: '已连接 · ${d.host.text.trim()}:${d.port.text}',
+                        description: '服务器证书已自动保存。',
+                      ),
+                      const SizedBox(height: 28),
+                      _PasswordField(
+                        controller: _password,
+                        label: '管理密码',
+                        enabled: !d.busy,
+                        fieldKey: 'setup-password',
+                      ),
+                      if (_initializing)
+                        _PasswordField(
+                          controller: _confirmation,
+                          label: '再次输入管理密码',
+                          enabled: !d.busy,
+                          fieldKey: 'setup-password-confirm',
+                        ),
+                      const SizedBox(height: 10),
+                      _note(context, '这是知予的连接密码，与 NAS 的系统登录密码无关。'),
+                    ],
+                  ),
+                },
               ),
             ),
           ),
-          _footer(context),
+          _FormFooter(
+            backLabel: _panel == _Panel.mode ? null : '上一步',
+            onBack: d.busy
+                ? null
+                : () => _go(
+                    _panel == _Panel.password ? _Panel.connection : _Panel.mode,
+                  ),
+            actionKey: 'setup-continue',
+            busy: d.busy,
+            onAction: d.busy ? null : _next,
+            action: d.busy
+                ? (_panel == _Panel.connection ? '正在连接…' : '正在完成配置…')
+                : switch (_panel) {
+                    _Panel.mode =>
+                      d.selected == SetupStorageMode.local ? '开始本地使用' : '继续',
+                    _Panel.connection => '连接服务器',
+                    _Panel.password => _initializing ? '完成配置并开始使用' : '连接并开始使用',
+                  },
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _mode(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      for (final mode in SetupStorageMode.values) ...[
-        _ModeChoice(
-          mode: mode,
-          selected: d.selected == mode,
-          onSelect: () => setState(() {
-            d.selected = mode;
-            _error = null;
-          }),
-        ),
-        const SizedBox(height: 16),
-      ],
-      const SizedBox(height: 8),
-      _InfoRow(
-        icon: Icons.smart_toy_outlined,
-        title: '两种方式都能接收 AI 申请',
-        description: '由 AI 发起，你在 App 中审批和管理资料。',
-      ),
-    ],
-  );
+/// Day-to-day settings are one page, not an embedded first-run wizard.
+class StorageSettingsPreview extends StatefulWidget {
+  const StorageSettingsPreview({
+    super.key,
+    required this.draft,
+    required this.onBack,
+  });
+  final SetupPreviewDraft draft;
+  final VoidCallback onBack;
+  @override
+  State<StorageSettingsPreview> createState() => _StorageSettingsPreviewState();
+}
 
-  Widget _connection(BuildContext context) {
-    final c = UiPalette.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            DesktopButton(
-              key: const ValueKey('setup-import'),
-              leading: const Icon(Icons.file_open_outlined),
-              onPressed: d.busy ? null : () => _import(context),
-              child: const Text('导入连接文件'),
-            ),
-            if (d.connectionFile != null) ...[
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  d.connectionFile!,
-                  overflow: TextOverflow.ellipsis,
-                  style: libraryText(context, 13, color: c.muted),
+class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
+  final _password = TextEditingController();
+  String? _error;
+  SetupPreviewDraft get d => widget.draft;
+
+  void _addressChanged() => setState(() => _error = null);
+  @override
+  void initState() {
+    super.initState();
+    d.selected = d.saved;
+    d.host.addListener(_addressChanged);
+    d.port.addListener(_addressChanged);
+  }
+
+  @override
+  void dispose() {
+    d.host.removeListener(_addressChanged);
+    d.port.removeListener(_addressChanged);
+    _password.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (d.busy) return;
+    final error = d.addressError;
+    if (error != null || !d.knownServer && _password.text.isEmpty) {
+      setState(() => _error = error ?? '请填写这台服务器的管理密码。');
+      return;
+    }
+    setState(() => _error = null);
+    await d.checkServer();
+    if (!mounted) return;
+    if (d.knownServer) {
+      d.resumeServer();
+    } else {
+      // This settings form represents logging into an existing server. It never
+      // creates a new server or re-enters first-run initialization.
+      d.saveServer(_password.text);
+    }
+    _password.clear();
+  }
+
+  Future<void> _changePassword(BuildContext context) async {
+    final current = TextEditingController(),
+        next = TextEditingController(),
+        repeated = TextEditingController();
+    await showDesktopDialog<void>(
+      context,
+      builder: (context) {
+        String? error;
+        return StatefulBuilder(
+          builder: (context, setDialogState) => PrototypeDialog(
+            title: '修改管理密码',
+            onClose: () => Navigator.pop(context),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _PasswordField(
+                  controller: current,
+                  label: '当前密码',
+                  fieldKey: 'settings-current-password',
                 ),
+                _PasswordField(
+                  controller: next,
+                  label: '新密码',
+                  fieldKey: 'settings-new-password',
+                ),
+                _PasswordField(
+                  controller: repeated,
+                  label: '再次输入新密码',
+                  fieldKey: 'settings-repeat-password',
+                ),
+                _note(context, '其他电脑下次连接时需要使用新密码，已有资料和凭据不受影响。'),
+                if (error != null)
+                  Text(
+                    error!,
+                    style: libraryText(
+                      context,
+                      14,
+                      color: UiPalette.of(context).danger,
+                    ),
+                  ),
+              ],
+            ),
+            actions: [
+              DesktopButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              DesktopButton(
+                key: const ValueKey('settings-save-password'),
+                kind: DesktopButtonKind.primary,
+                onPressed: () {
+                  if (!d.passwordMatches(current.text)) {
+                    setDialogState(() => error = '当前密码不正确。');
+                  } else if (next.text.isEmpty || next.text != repeated.text) {
+                    setDialogState(() => error = '请填写新密码，并确保两次输入一致。');
+                  } else {
+                    d.changePassword(next.text);
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('保存新密码'),
               ),
             ],
-          ],
-        ),
-        const SizedBox(height: 24),
-        DesktopTextField(
-          controller: d.address,
-          enabled: !d.busy,
-          decoration: const InputDecoration(
-            labelText: '服务器地址',
-            hintText: 'https://192.168.1.20:47126',
           ),
-        ),
-        const SizedBox(height: 4),
-        DesktopTextField(
-          controller: d.token,
-          enabled: !d.busy,
-          obscureText: !_visible,
-          inlineSecret: true,
-          autocorrect: false,
-          enableSuggestions: false,
-          decoration: InputDecoration(
-            labelText: '接入 Token',
-            hintText: '从服务器初始化结果中获取',
-            suffixIcon: IconButton(
-              key: const ValueKey('setup-token-eye'),
-              tooltip: _visible ? '隐藏 Token' : '显示 Token',
-              onPressed: d.busy
-                  ? null
-                  : () => setState(() => _visible = !_visible),
-              icon: Icon(
-                _visible
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                size: 18,
-              ),
-            ),
-          ),
-        ),
-        if (widget.embedded && d.verified)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DesktopButton(
-              key: const ValueKey('setup-replace-token'),
-              leading: const Icon(Icons.autorenew),
-              onPressed: d.busy ? null : () => _replaceToken(context),
-              child: const Text('更换服务器 Token'),
-            ),
-          ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: c.line),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DesktopButton(
-                kind: DesktopButtonKind.quiet,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.all(14),
-                leading: Icon(
-                  Icons.verified_user_outlined,
-                  color: d.hasCertificate ? c.success : c.muted,
-                ),
-                onPressed: () =>
-                    setState(() => _certificateDetails = !_certificateDetails),
-                child: Row(
+        );
+      },
+    );
+    // The route may still be unmounting its editors after pop.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      current.dispose();
+      next.dispose();
+      repeated.dispose();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: d,
+    builder: (context, _) {
+      final server = d.selected == SetupStorageMode.server;
+      return ColoredBox(
+        color: UiPalette.of(context).paper,
+        child: Column(
+          children: [
+            Expanded(
+              child: _FormBody(
+                title: '存储与同步',
+                subtitle: '管理资料的保存方式和服务器连接。',
+                error: _error,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Text(d.hasCertificate ? '已导入服务器证书' : '服务器证书'),
+                    SegmentedButton<SetupStorageMode>(
+                      key: const ValueKey('settings-storage-mode'),
+                      expandedInsets: EdgeInsets.zero,
+                      segments: const [
+                        ButtonSegment(
+                          value: SetupStorageMode.local,
+                          label: Text('本地模式'),
+                          icon: Icon(Icons.computer_outlined),
+                        ),
+                        ButtonSegment(
+                          value: SetupStorageMode.server,
+                          label: Text('服务器同步'),
+                          icon: Icon(Icons.cloud_sync_outlined),
+                        ),
+                      ],
+                      selected: {d.selected},
+                      onSelectionChanged: d.busy
+                          ? null
+                          : (values) => setState(() {
+                              d.selected = values.single;
+                              _error = null;
+                              if (!server) {
+                                _password.clear();
+                              }
+                              if (d.selected == SetupStorageMode.local) {
+                                d.useLocal();
+                              }
+                            }),
                     ),
-                    Icon(
-                      _certificateDetails
-                          ? Icons.expand_less
-                          : Icons.expand_more,
-                      size: 18,
-                    ),
+                    const SizedBox(height: 28),
+                    if (!server)
+                      const _InfoRow(
+                        icon: Icons.computer_outlined,
+                        title: '资料保存在这台电脑',
+                        description: '无需连接服务器，也能接收 AI 申请和审批。',
+                      )
+                    else ...[
+                      _ServerAddressFields(draft: d),
+                      if (!d.knownServer) ...[
+                        _PasswordField(
+                          controller: _password,
+                          label: '管理密码',
+                          fieldKey: 'settings-login-password',
+                          enabled: !d.busy,
+                        ),
+                        _note(context, '使用这台服务器已有的管理密码。'),
+                      ],
+                      const SizedBox(height: 20),
+                      if (d.knownServer && d.certificateRemembered) ...[
+                        _InfoRow(
+                          icon: Icons.verified_user_outlined,
+                          title: '已记住服务器证书',
+                          description: d.enabled
+                              ? '已连接 · ${d.host.text.trim()}:${d.port.text}'
+                              : '重新连接时自动核对服务器身份。',
+                        ),
+                        const SizedBox(height: 26),
+                        const Divider(),
+                        const SizedBox(height: 18),
+                        _InfoRow(
+                          icon: Icons.lock_outline,
+                          title: '管理密码',
+                          description: '用于其他电脑连接这台服务器。',
+                        ),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: DesktopButton(
+                            key: const ValueKey('settings-change-password'),
+                            onPressed: d.busy
+                                ? null
+                                : () => _changePassword(context),
+                            child: const Text('修改管理密码'),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 26),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: DesktopButton(
+                          key: const ValueKey('settings-save-connection'),
+                          kind: DesktopButtonKind.primary,
+                          busy: d.busy,
+                          onPressed: d.busy ? null : _save,
+                          child: Text(d.busy ? '正在连接…' : '保存连接'),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              if (_certificateDetails)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _note(
-                        context,
-                        d.hasCertificate
-                            ? '家庭 NAS 的公开证书，仅用于核对这台服务器。'
-                            : '有效的公开证书可直接连接；自建证书请从服务器导入公开 CA 证书。',
-                      ),
-                      const SizedBox(height: 12),
-                      DesktopButton(
-                        onPressed: () =>
-                            setState(() => d.hasCertificate = true),
-                        child: Text(d.hasCertificate ? '更换公开证书' : '导入公开证书'),
-                      ),
-                    ],
-                  ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: DesktopButton(
+                  kind: DesktopButtonKind.quiet,
+                  leading: const Icon(Icons.arrow_back),
+                  onPressed: d.busy ? null : widget.onBack,
+                  child: const Text('返回信息库'),
                 ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 22),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          children: [
-            _note(context, '还没部署服务器？'),
-            DesktopButton(
-              key: const ValueKey('setup-initialize'),
-              onPressed: d.busy ? null : () => _go(_Panel.initialization),
-              child: const Text('查看初始化步骤'),
+              ),
             ),
           ],
         ),
-      ],
-    );
-  }
+      );
+    },
+  );
+}
 
-  Widget _initialization(BuildContext context) {
-    final c = UiPalette.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DesktopTextField(
-          controller: d.host,
-          onChanged: (_) => setState(() => _copied = false),
-          decoration: const InputDecoration(
-            labelText: '服务器 IP 或域名',
-            helperText: '填写这台电脑实际连接的地址，证书也会按此生成。',
-          ),
+class _ServerAddressFields extends StatelessWidget {
+  const _ServerAddressFields({required this.draft});
+  final SetupPreviewDraft draft;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      DesktopTextField(
+        controller: draft.host,
+        enabled: !draft.busy,
+        decoration: const InputDecoration(
+          labelText: '服务器 IP 或域名',
+          hintText: '192.168.1.20',
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: 180,
-            child: DesktopTextField(
-              controller: d.port,
-              onChanged: (_) => setState(() => _copied = false),
-              decoration: const InputDecoration(labelText: '连接端口'),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text('在服务器的 Docker 终端执行', style: libraryHeading(context, 16)),
-        const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: c.rail,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: c.line),
-          ),
-          child: SelectableText(
-            _initializationCommand,
-            style: libraryText(
-              context,
-              13,
-              height: 1.8,
-            ).copyWith(fontFamily: 'Menlo'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: DesktopButton(
-            key: const ValueKey('setup-copy-command'),
-            leading: Icon(_copied ? Icons.check : Icons.copy_outlined),
-            onPressed: () async {
-              final host = d.host.text.trim(), port = int.tryParse(d.port.text);
-              if (!RegExp(r'^[a-zA-Z0-9][a-zA-Z0-9.:-]*$').hasMatch(host) ||
-                  port == null ||
-                  port < 1 ||
-                  port > 65535) {
-                setState(() => _error = '请填写服务器 IP／域名和有效端口。');
-                return;
-              }
-              await Clipboard.setData(
-                ClipboardData(text: _initializationCommand),
-              );
-              if (mounted) {
-                setState(() {
-                  _copied = true;
-                  _error = null;
-                });
-              }
-            },
-            child: Text(_copied ? '已复制' : '复制初始化命令'),
-          ),
-        ),
-        const SizedBox(height: 24),
-        const _InfoRow(
-          icon: Icons.task_alt,
-          title: '初始化后，导出连接文件',
-          description: '证书和 Token 自动生成，私钥留在服务器。重启和升级会沿用原配置。',
-        ),
-      ],
-    );
-  }
-
-  String get _initializationCommand =>
-      'docker compose run --rm chiyo setup \\\n  --host ${d.host.text.trim()} --port ${d.port.text.trim()}';
-
-  Widget _footer(BuildContext context) {
-    final c = UiPalette.of(context);
-    final local = d.selected == SetupStorageMode.local;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: c.line)),
       ),
-      child: Align(
+      Align(
         alignment: Alignment.centerLeft,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 690),
-          child: Row(
-            children: [
-              if (_panel != _Panel.mode || widget.embedded)
-                DesktopButton(
-                  key: const ValueKey('setup-back'),
-                  kind: DesktopButtonKind.quiet,
-                  leading: const Icon(Icons.arrow_back),
-                  onPressed: d.busy
-                      ? null
-                      : () {
-                          if (_panel == _Panel.mode) {
-                            widget.onBack?.call();
-                          } else {
-                            _go(
-                              _panel == _Panel.initialization
-                                  ? _Panel.connection
-                                  : _Panel.mode,
-                            );
-                          }
-                        },
-                  child: Text(_panel == _Panel.mode ? '返回信息库' : '上一步'),
-                ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: DesktopButton(
-                    key: const ValueKey('setup-continue'),
-                    kind: DesktopButtonKind.primary,
-                    busy: d.busy,
-                    minimumSize: const Size(160, 42),
-                    onPressed: d.busy
-                        ? null
-                        : () {
-                            if (_panel == _Panel.initialization) {
-                              _import(context);
-                            } else if (_panel == _Panel.mode && !local) {
-                              _go(_Panel.connection);
-                            } else {
-                              _finish();
-                            }
-                          },
-                    child: Text(
-                      d.busy
-                          ? '正在连接…'
-                          : _panel == _Panel.initialization
-                          ? '导入连接文件'
-                          : _panel == _Panel.mode
-                          ? local
-                                ? widget.embedded
-                                      ? '使用本地模式'
-                                      : '开始本地使用'
-                                : '继续'
-                          : widget.embedded
-                          ? '保存并连接'
-                          : '连接并开始使用',
-                    ),
-                  ),
+        child: SizedBox(
+          width: 180,
+          child: DesktopTextField(
+            controller: draft.port,
+            enabled: !draft.busy,
+            decoration: const InputDecoration(labelText: '端口'),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class _PasswordField extends StatefulWidget {
+  const _PasswordField({
+    required this.controller,
+    required this.label,
+    required this.fieldKey,
+    this.enabled = true,
+  });
+  final TextEditingController controller;
+  final String label, fieldKey;
+  final bool enabled;
+  @override
+  State<_PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<_PasswordField> {
+  bool _visible = false;
+  @override
+  Widget build(BuildContext context) => KeyedSubtree(
+    key: ValueKey(widget.fieldKey),
+    child: DesktopTextField(
+      controller: widget.controller,
+      enabled: widget.enabled,
+      obscureText: !_visible,
+      inlineSecret: true,
+      autocorrect: false,
+      enableSuggestions: false,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        suffixIcon: IconButton(
+          tooltip: _visible ? '隐藏密码' : '显示密码',
+          onPressed: widget.enabled
+              ? () => setState(() => _visible = !_visible)
+              : null,
+          icon: Icon(
+            _visible
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            size: 18,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _FormBody extends StatelessWidget {
+  const _FormBody({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    this.error,
+  });
+  final String title, subtitle;
+  final Widget child;
+  final String? error;
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.all(32),
+    child: Align(
+      alignment: Alignment.topLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 690),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(title, style: libraryHeading(context, 28)),
+            const SizedBox(height: 10),
+            _note(context, subtitle),
+            const SizedBox(height: 30),
+            child,
+            if (error != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                error!,
+                key: const ValueKey('setup-error'),
+                style: libraryText(
+                  context,
+                  14,
+                  color: UiPalette.of(context).danger,
                 ),
               ),
             ],
-          ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+class _FormFooter extends StatelessWidget {
+  const _FormFooter({
+    required this.action,
+    required this.actionKey,
+    required this.onAction,
+    required this.busy,
+    this.backLabel,
+    this.onBack,
+  });
+  final String action, actionKey;
+  final String? backLabel;
+  final VoidCallback? onAction, onBack;
+  final bool busy;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+    decoration: BoxDecoration(
+      border: Border(top: BorderSide(color: UiPalette.of(context).line)),
+    ),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 690),
+        child: Row(
+          children: [
+            if (backLabel != null)
+              DesktopButton(
+                key: const ValueKey('setup-back'),
+                kind: DesktopButtonKind.quiet,
+                leading: const Icon(Icons.arrow_back),
+                onPressed: onBack,
+                child: Text(backLabel!),
+              ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: DesktopButton(
+                  key: ValueKey(actionKey),
+                  kind: DesktopButtonKind.primary,
+                  busy: busy,
+                  minimumSize: const Size(160, 42),
+                  onPressed: onAction,
+                  child: Text(action),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _ModeChoice extends StatelessWidget {
@@ -735,7 +857,6 @@ class _ModeChoice extends StatelessWidget {
   final SetupStorageMode mode;
   final bool selected;
   final VoidCallback onSelect;
-
   @override
   Widget build(BuildContext context) {
     final c = UiPalette.of(context), local = mode == SetupStorageMode.local;
