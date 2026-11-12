@@ -1,7 +1,7 @@
 name: info_desktop
 description: Local information authorization and managed credentials desktop.
 publish_to: none
-version: 0.4.4+18
+version: 0.4.4+19
 environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
@@ -32,6 +32,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/branding/chiyo-icon.png
     - assets/fonts/OFL.txt
     - assets/zhiyu_files/
     - macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
