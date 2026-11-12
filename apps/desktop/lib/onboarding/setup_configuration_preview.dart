@@ -21,7 +21,9 @@ class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
   final port = TextEditingController(text: '47126');
   SetupStorageMode selected = SetupStorageMode.local;
   SetupStorageMode saved = SetupStorageMode.local;
-  String? _configuredEndpoint, _password;
+  String? _configuredEndpoint;
+  // Simulated server state is separate from this computer's remembered login.
+  final _serverPasswords = <String, String>{};
   bool certificateRemembered = false;
   @override
   bool busy = false;
@@ -53,7 +55,8 @@ class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
 
   bool get knownServer =>
       addressError == null && _configuredEndpoint == endpoint;
-  bool get hasConnection => _configuredEndpoint != null;
+  bool get serverInitialized =>
+      addressError == null && _serverPasswords.containsKey(endpoint);
   @override
   bool get enabled => saved == SetupStorageMode.server;
   @override
@@ -70,15 +73,21 @@ class SetupPreviewDraft extends ChangeNotifier implements WorkspaceSync {
 
   void saveServer(String password) {
     _configuredEndpoint = endpoint;
-    _password = password;
+    _serverPasswords[endpoint] = password;
     selected = saved = SetupStorageMode.server;
     certificateRemembered = true;
     notifyListeners();
   }
 
-  bool passwordMatches(String value) => value == _password;
+  bool passwordMatches(String value) => value == _serverPasswords[endpoint];
   void changePassword(String value) {
-    _password = value;
+    _serverPasswords[endpoint] = value;
+    notifyListeners();
+  }
+
+  /// Models a new computer without resetting the simulated server password.
+  void forgetConnection() {
+    _configuredEndpoint = null;
     notifyListeners();
   }
 
@@ -128,7 +137,7 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
       _confirmation = TextEditingController();
   String? _error;
   SetupPreviewDraft get d => widget.draft;
-  bool get _initializing => !d.knownServer;
+  bool get _initializing => !d.serverInitialized;
 
   void _go(_Panel panel) {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -156,11 +165,17 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
       }
       setState(() => _error = null);
       await d.checkServer();
-      if (mounted) _go(_Panel.password);
+      if (!mounted) return;
+      if (d.knownServer) {
+        d.resumeServer();
+        widget.onComplete();
+      } else {
+        _go(_Panel.password);
+      }
       return;
     }
     if (_password.text.isEmpty) {
-      setState(() => _error = '请填写管理密码。');
+      setState(() => _error = '请填写知予连接密码。');
       return;
     }
     if (_initializing && _password.text != _confirmation.text) {
@@ -168,7 +183,7 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
       return;
     }
     if (!_initializing && !d.passwordMatches(_password.text)) {
-      setState(() => _error = '管理密码不正确，请重新输入。');
+      setState(() => _error = '知予连接密码不正确，请重新输入。');
       return;
     }
     await d.checkServer();
@@ -271,7 +286,7 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
           const SizedBox(height: 12),
           _note(context, '选择资料的保存方式，\n随时可以在设置里调整。'),
           const SizedBox(height: 38),
-          for (final (index, title) in ['使用方式', '连接服务器', '管理密码'].indexed) ...[
+          for (final (index, title) in ['使用方式', '连接服务器', '知予连接密码'].indexed) ...[
             Row(
               children: [
                 AnimatedContainer(
@@ -312,13 +327,13 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
     final title = switch (_panel) {
       _Panel.mode => '你的资料，放在哪里？',
       _Panel.connection => '连接你的服务器',
-      _Panel.password => _initializing ? '设置管理密码' : '输入管理密码',
+      _Panel.password => _initializing ? '设置知予连接密码' : '输入知予连接密码',
     };
     final subtitle = switch (_panel) {
       _Panel.mode => '先在本机使用，或连接自己的 NAS／服务器同步资料。',
       _Panel.connection => '填写已经启动知予服务的 NAS 或服务器地址。',
       _Panel.password =>
-        _initializing ? '以后其他电脑连接这台服务器时，也使用这个密码。' : '这台服务器已完成初始化，输入管理密码即可连接。',
+        _initializing ? '以后其他电脑连接这台服务器时，也使用这个密码。' : '这台服务器已完成初始化，输入知予连接密码即可连接。',
     };
     return ColoredBox(
       color: UiPalette.of(context).paper,
@@ -374,14 +389,14 @@ class _SetupConfigurationPreviewState extends State<SetupConfigurationPreview> {
                       const SizedBox(height: 28),
                       _PasswordField(
                         controller: _password,
-                        label: '管理密码',
+                        label: '知予连接密码',
                         enabled: !d.busy,
                         fieldKey: 'setup-password',
                       ),
                       if (_initializing)
                         _PasswordField(
                           controller: _confirmation,
-                          label: '再次输入管理密码',
+                          label: '再次输入知予连接密码',
                           enabled: !d.busy,
                           fieldKey: 'setup-password-confirm',
                         ),
@@ -432,7 +447,6 @@ class StorageSettingsPreview extends StatefulWidget {
 }
 
 class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
-  final _password = TextEditingController();
   String? _error;
   SetupPreviewDraft get d => widget.draft;
 
@@ -449,15 +463,14 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
   void dispose() {
     d.host.removeListener(_addressChanged);
     d.port.removeListener(_addressChanged);
-    _password.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _save(BuildContext context) async {
     if (d.busy) return;
     final error = d.addressError;
-    if (error != null || !d.knownServer && _password.text.isEmpty) {
-      setState(() => _error = error ?? '请填写这台服务器的管理密码。');
+    if (error != null) {
+      setState(() => _error = error);
       return;
     }
     setState(() => _error = null);
@@ -466,11 +479,15 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
     if (d.knownServer) {
       d.resumeServer();
     } else {
-      // This settings form represents logging into an existing server. It never
-      // creates a new server or re-enters first-run initialization.
-      d.saveServer(_password.text);
+      if (!context.mounted) return;
+      // Only an uninitialized server asks to create a password. This one-time
+      // prompt does not embed the startup wizard into everyday settings.
+      await showDesktopDialog<void>(
+        context,
+        builder: (_) =>
+            _ServerPasswordDialog(draft: d, initializing: !d.serverInitialized),
+      );
     }
-    _password.clear();
   }
 
   Future<void> _changePassword(BuildContext context) async {
@@ -483,7 +500,7 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
         String? error;
         return StatefulBuilder(
           builder: (context, setDialogState) => PrototypeDialog(
-            title: '修改管理密码',
+            title: '修改知予连接密码',
             onClose: () => Navigator.pop(context),
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -586,9 +603,6 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
                           : (values) => setState(() {
                               d.selected = values.single;
                               _error = null;
-                              if (!server) {
-                                _password.clear();
-                              }
                               if (d.selected == SetupStorageMode.local) {
                                 d.useLocal();
                               }
@@ -603,15 +617,6 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
                       )
                     else ...[
                       _ServerAddressFields(draft: d),
-                      if (!d.knownServer) ...[
-                        _PasswordField(
-                          controller: _password,
-                          label: '管理密码',
-                          fieldKey: 'settings-login-password',
-                          enabled: !d.busy,
-                        ),
-                        _note(context, '使用这台服务器已有的管理密码。'),
-                      ],
                       const SizedBox(height: 20),
                       if (d.knownServer && d.certificateRemembered) ...[
                         _InfoRow(
@@ -626,7 +631,7 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
                         const SizedBox(height: 18),
                         _InfoRow(
                           icon: Icons.lock_outline,
-                          title: '管理密码',
+                          title: '知予连接密码',
                           description: '用于其他电脑连接这台服务器。',
                         ),
                         const SizedBox(height: 12),
@@ -637,7 +642,7 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
                             onPressed: d.busy
                                 ? null
                                 : () => _changePassword(context),
-                            child: const Text('修改管理密码'),
+                            child: const Text('修改知予连接密码'),
                           ),
                         ),
                       ],
@@ -648,8 +653,14 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
                           key: const ValueKey('settings-save-connection'),
                           kind: DesktopButtonKind.primary,
                           busy: d.busy,
-                          onPressed: d.busy ? null : _save,
-                          child: Text(d.busy ? '正在连接…' : '保存连接'),
+                          onPressed: d.busy ? null : () => _save(context),
+                          child: Text(
+                            d.busy
+                                ? '正在连接…'
+                                : d.knownServer
+                                ? '保存连接'
+                                : '连接服务器',
+                          ),
                         ),
                       ),
                     ],
@@ -673,6 +684,96 @@ class _StorageSettingsPreviewState extends State<StorageSettingsPreview> {
         ),
       );
     },
+  );
+}
+
+class _ServerPasswordDialog extends StatefulWidget {
+  const _ServerPasswordDialog({
+    required this.draft,
+    required this.initializing,
+  });
+  final SetupPreviewDraft draft;
+  final bool initializing;
+  @override
+  State<_ServerPasswordDialog> createState() => _ServerPasswordDialogState();
+}
+
+class _ServerPasswordDialogState extends State<_ServerPasswordDialog> {
+  final _password = TextEditingController(),
+      _confirmation = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    _confirmation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PrototypeDialog(
+    title: widget.initializing ? '设置知予连接密码' : '输入知予连接密码',
+    onClose: () => Navigator.pop(context),
+    body: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _note(
+          context,
+          widget.initializing
+              ? '这台知予服务器尚未设置连接密码。设置一次后，其他电脑连接时也使用这个密码。'
+              : '这台知予服务器已完成初始化，请输入你之前设置的知予连接密码。',
+        ),
+        const SizedBox(height: 20),
+        _PasswordField(
+          controller: _password,
+          label: '知予连接密码',
+          fieldKey: 'settings-server-password',
+        ),
+        if (widget.initializing)
+          _PasswordField(
+            controller: _confirmation,
+            label: '再次输入连接密码',
+            fieldKey: 'settings-server-password-confirm',
+          ),
+        _note(context, '与 NAS 的系统登录密码无关。证书由 App 自动配置。'),
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _error!,
+            style: libraryText(
+              context,
+              14,
+              color: UiPalette.of(context).danger,
+            ),
+          ),
+        ],
+      ],
+    ),
+    actions: [
+      DesktopButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('取消'),
+      ),
+      DesktopButton(
+        key: const ValueKey('settings-server-password-save'),
+        kind: DesktopButtonKind.primary,
+        onPressed: () {
+          if (_password.text.isEmpty) {
+            setState(() => _error = '请填写知予连接密码。');
+          } else if (widget.initializing &&
+              _password.text != _confirmation.text) {
+            setState(() => _error = '两次输入的密码不一致，请重新确认。');
+          } else if (!widget.initializing &&
+              !widget.draft.passwordMatches(_password.text)) {
+            setState(() => _error = '连接密码不正确，请重新输入。');
+          } else {
+            widget.draft.saveServer(_password.text);
+            Navigator.pop(context);
+          }
+        },
+        child: Text(widget.initializing ? '设置并连接' : '连接'),
+      ),
+    ],
   );
 }
 
