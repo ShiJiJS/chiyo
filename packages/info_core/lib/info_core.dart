@@ -81,6 +81,8 @@ part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
 part 'focused_fill_access.dart';
+part 'focused_fill_runner.dart';
+part 'device_focused_fill_access.dart';
 part 'credential_runtime_access.dart';
 part 'device_credential_launch.dart';
 part 'device_credential_access.dart';
@@ -290,6 +292,7 @@ class InformationService {
   // This private binding is not reconstructed from portable history.
   final _deviceCredentialRequests = <String, String>{};
   final _deviceCredentialExecutions = <String, _DeviceCredentialExecution>{};
+  final _deviceFocusedFills = <String, _DeviceFocusedFill>{};
   final _executionCapabilities = <String, String>{};
   final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
   late Future<void> _runtimeWrites = Future.value();

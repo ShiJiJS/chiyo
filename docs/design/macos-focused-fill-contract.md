@@ -1,6 +1,6 @@
 # macOS 本机焦点填充
 
-Mac 桌面本机资料库已接入焦点填充驱动，默认构建包含独立 XPC helper；远程 NAS 资料库到 Agent 设备的焦点填充尚未接通。能力取决于实际执行设备、helper 权限和当前输入目标，不能用 NAS 的操作系统或一次权限检查代替目标发现。
+Mac 默认构建包含独立 XPC helper；本机资料库直接使用本机驱动，NAS 资料库由同一电脑上运行的App领取已批准的使用操作并调用同一驱动。能力取决于实际执行设备、App当前连接、helper 权限和当前输入目标，不能用 NAS 的操作系统或一次权限检查代替目标发现。
 
 凭据交付方式和原文读取边界以 [ADR0031](../adr/0031-device-credential-delivery-and-reveal.md) 为准；申请、授权、逐操作审计和防重放沿用 [v2 协议](runtime-protocol-v2.md)及[本机焦点填充合同](local-focused-fill-contract.md)。本文规定 Mac 平台接口及执行边界，授权期限由当前公共模型处理，不在原生层另设业务期限。
 

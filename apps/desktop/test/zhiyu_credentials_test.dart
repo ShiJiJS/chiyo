@@ -217,7 +217,7 @@ void main() {
     'focus unavailable, storage-only and a reachable read failure remain usable without secrets or execution',
     (t) async {
       final model = await start(t, 'Vikunja 登录密码', dark: true);
-      expect(find.text('Mac本机焦点填充尚未启用。'), findsOneWidget);
+      expect(find.text('当前预览不执行实际密码填写。'), findsOneWidget);
       expect(find.byKey(const ValueKey('credential-use')), findsNothing);
       await capture(t, 'credential-1440-dark-focus-unavailable');
       await tap(t, find.byKey(const ValueKey('preview-guide')));

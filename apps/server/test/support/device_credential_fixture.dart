@@ -71,6 +71,7 @@ class DeviceCredentialFixture {
 
   static Future<DeviceCredentialFixture> create({
     bool loseFirstClaim = false,
+    String? loseFirstPath,
     bool replication = false,
     bool connectionSetup = false,
     String? connectionPassword,
@@ -114,7 +115,7 @@ class DeviceCredentialFixture {
     f.connectionPassword = connectionPassword;
     f._testKeys = testKeys;
     await f.open();
-    if (loseFirstClaim) await f._proxy();
+    if (loseFirstClaim || loseFirstPath != null) await f._proxy(loseFirstPath);
     for (var i = 0; i < 2; i++) {
       final device = await f.owner.request('POST', '/v1/owner/devices', {
         'operationId': 'device-$i',
@@ -134,7 +135,7 @@ class DeviceCredentialFixture {
     return f;
   }
 
-  Future<void> _proxy() async {
+  Future<void> _proxy([String? loseFirstPath]) async {
     upstream = HttpClient(context: trust);
     proxy = await HttpServer.bindSecure(InternetAddress.loopbackIPv4, 0, tls);
     proxy!.listen((request) async {
@@ -160,7 +161,8 @@ class DeviceCredentialFixture {
           (a, b) => a..addAll(b),
         );
         final claiming =
-            request.uri.path == '/v1/agent/credential-use/device/operation';
+            request.uri.path ==
+            (loseFirstPath ?? '/v1/agent/credential-use/device/operation');
         if (claiming) claimPosts++;
         if (claiming && claimPosts == 1) {
           (await request.response.detachSocket(writeHeaders: false)).destroy();

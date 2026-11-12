@@ -5,14 +5,21 @@ import 'package:info_core/info_core.dart';
 final class DeviceCredentialRoutes {
   DeviceCredentialRoutes(this.agent);
   final AgentAccess agent;
+  bool get focusedFillAvailable => agent.deviceFocusedFillAvailable;
   static const sessionPaths = {
     '/credential-use/device/request',
+    '/credential-use/device/fill/request',
+    '/credential-use/device/fill/begin',
+    '/credential-use/device/fill/status',
     '/credential-use/device/operation',
     '/credential-use/device/operation/status',
     '/credential-use/device/execution/status',
   };
   static const proofPaths = {
     '/credential-use/device/worker/register',
+    '/credential-use/device/fill/material',
+    '/credential-use/device/fill/batch',
+    '/credential-use/device/fill/finish',
     '/credential-use/device/materials/register',
     '/credential-use/device/execution/report',
     '/credential-use/device/cleanup/complete',
@@ -39,6 +46,81 @@ final class DeviceCredentialRoutes {
     Map<String, dynamic> body,
   ) async {
     switch (path) {
+      case '/credential-use/device/fill/request':
+        final errors = submissionMetadataErrors(body);
+        if (errors.isNotEmpty) {
+          return {
+            'status': 'invalid_request',
+            'errorCode': 'invalid_submission_metadata',
+            'fieldErrors': errors,
+          };
+        }
+        final command = Map<String, dynamic>.from(body)
+          ..remove('sessionSecret');
+        final request = await agent.requestDeviceFocusedFill(
+          deviceId,
+          _text(body, 'sessionSecret'),
+          FocusedFillInput.fromJson(command),
+        );
+        return agent.credentialUseStatus(
+          _text(body, 'sessionSecret'),
+          request.id,
+        );
+      case '/credential-use/device/fill/begin':
+      case '/credential-use/device/fill/status':
+        final command = Map<String, dynamic>.from(body)
+          ..remove('sessionSecret');
+        final input = FocusedFillOperationInput.fromJson(command);
+        if (command['command'] !=
+            (path.endsWith('/status') ? 'fill-status' : 'fill-use')) {
+          throw const CredentialUseFailure('invalid_plan');
+        }
+        return path.endsWith('/status')
+            ? agent.deviceFocusedFillStatus(
+                deviceId,
+                _text(body, 'sessionSecret'),
+                input,
+              )
+            : await agent.beginDeviceFocusedFill(
+                deviceId,
+                _text(body, 'sessionSecret'),
+                input,
+              );
+      case '/credential-use/device/fill/material':
+        _shape(body, {'fillId', 'fillCapability', 'application'});
+        if (body['application'] is! Map<String, dynamic>)
+          throw const CredentialUseFailure('invalid_type');
+        return agent.claimDeviceFocusedFillMaterial(
+          deviceId,
+          _text(body, 'fillId'),
+          _text(body, 'fillCapability'),
+          FocusedFillApplication.fromJson(
+            body['application'] as Map<String, dynamic>,
+          ),
+        );
+      case '/credential-use/device/fill/batch':
+        _shape(body, {'fillId', 'fillCapability'});
+        await agent.authorizeDeviceFocusedFillBatch(
+          deviceId,
+          _text(body, 'fillId'),
+          _text(body, 'fillCapability'),
+        );
+      case '/credential-use/device/fill/finish':
+        _shape(body, {'fillId', 'fillCapability', 'fillState', 'errorCode'});
+        final state = FocusedFillState.values
+            .where((s) => s.name == body['fillState'])
+            .firstOrNull;
+        if (state == null ||
+            body['errorCode'] != null && body['errorCode'] is! String) {
+          throw const CredentialUseFailure('invalid_type');
+        }
+        return agent.finishDeviceFocusedFill(
+          deviceId,
+          _text(body, 'fillId'),
+          _text(body, 'fillCapability'),
+          FocusedFillBatchResult(state, body['errorCode'] as String?),
+        );
+
       case '/credential-use/device/request':
         final errors = submissionMetadataErrors(body);
         if (errors.isNotEmpty)

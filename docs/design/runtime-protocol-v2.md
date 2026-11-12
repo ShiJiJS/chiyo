@@ -4,7 +4,7 @@
 
 ## 协商与旧客户端
 
-新增`capabilities`命令返回服务/随包CLI实际共同支持的`protocolVersions`和能力标识。v2复用能力标识为`credential-use-reuse.v1`；`information-attachments.v1`、`local-focused-fill.v1`在对应票通过并接入后才出现。新CLI先协商，未支持时返回`unsupported_capability`，不得偷偷降级为一次性申请或自行生成新的审批。
+`capabilities`命令返回服务/随包CLI实际共同支持的`protocolVersions`和能力标识。v2复用能力标识为`credential-use-reuse.v1`；普通附件用`information-attachments.v1`，密码框填写用`credential-focused-fill.v1`及`credential-focused-target.v1`，按当前服务与本机App实际能力提供。新CLI先协商，未支持时返回`unsupported_capability`，不得偷偷降级为一次性申请或自行生成新的审批。
 
 v2请求包含整数`protocolVersion:2`，字段类型、未知key、重复key、输入字节上限、标识/UTC沿用v1。旧的v1请求/许可保持v1单次语义，不能仅凭公开requestId或改变请求版本把旧许可升级。程序中新请求默认使用v2，旧格式记录和旧请求必须明确标记其原语义；不增加用户“单次/多次”开关。旧客户端请求v2专有能力明确失败。
 
@@ -73,4 +73,4 @@ v2在输出进入保留缓冲和Base64响应前，按stdout/stderr独立进行�
 
 `request-reveal` / `read-reveal` 是单独批准的字符串凭据原文读取，`useKind` 为 `credential_reveal`。申请必须说明用途和不能直接交付的原因；命令使用或密码框填写批准不能用于原文读取。每次读取先持久化操作ID及时间，再返回原文；同一会话操作ID不重复交付。固定版本、会话、有效期、撤销、停用等检查继续生效，文件凭据拒绝。用户本人查看或复制保存的字符串走Owner接口，不向自己提交Agent申请。
 
-保存上述新事实要求资料库格式64，完整备份及同步内容格式27；仍接受原有格式。快照、增量、首次同步和恢复均保留新事实；恢复不复活原许可。不能将新记录塞入旧格式26归档。填写权限在本机设置按需申请；当前只连通本地资料库的填写流程，NAS批准后驱动本机填写仍需单独实现。
+保存上述新事实要求资料库格式64，完整备份及同步内容格式27；仍接受原有格式。快照、增量、首次同步和恢复均保留新事实；恢复不复活原许可。不能将新记录塞入旧格式26归档。填写权限在本机设置按需申请；NAS模式的申请和使用记录保存在服务器，由匹配当前连接的本机App执行输入。设备、会话及固定应用身份共同核验，每次输入操作独立登记，失联后查询原结果，不重放输入。

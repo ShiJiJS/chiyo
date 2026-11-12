@@ -46,7 +46,9 @@ extension DeviceCredentialAgentAccess on AgentAccess {
 }
 
 extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
-  Future<void> _maintainDeviceCredentialRequests() async {
+  Future<void> _maintainDeviceCredentialRequests({
+    bool restoring = false,
+  }) async {
     if (service._deviceCredentialRequests.isEmpty) return;
     for (final request in service._runtimeRepository.credentialUseRequests) {
       if (!service._deviceCredentialRequests.containsKey(request.id)) continue;
@@ -60,6 +62,26 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
         await service._saveUse(
           request: request.changed({'invalidatedCode': 'grant_expired'}),
         );
+      }
+    }
+    if (service._repository is FocusedFillRuntimeRepository) {
+      for (final record in service._fillRepository().focusedFillOperations) {
+        if (!service._deviceCredentialRequests.containsKey(record.requestId)) {
+          continue;
+        }
+        final proof = service._deviceFocusedFills[record.id];
+        if (record.state == FocusedFillState.checking &&
+            (restoring ||
+                proof == null ||
+                !service._clock().isBefore(proof.deadline))) {
+          await service._saveFocusedFill(
+            operation: record.changed({
+              'fillState': 'unknown',
+              'errorCode': 'fill_unknown',
+              'finishedAt': _useTimestamp(service._clock().toUtc()),
+            }),
+          );
+        }
       }
     }
     for (final execution in service._runtimeRepository.credentialExecutions) {
@@ -107,7 +129,11 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
   }
 
   Map<String, Object?> _encodeDeviceCredentialRequests() => {
-    'version': 3,
+    'version': 4,
+    'fills': {
+      for (final e in service._deviceFocusedFills.entries)
+        e.key: e.value.toJson(),
+    },
     'decisions': {
       for (final entry in service._onlineCredentialDecisions.entries)
         entry.key: entry.value.toJson(),
@@ -133,7 +159,9 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
             ? raw.length != 2
             : raw['version'] == 2
             ? raw.length != 3
-            : raw['version'] != 3 || raw.length != 4) ||
+            : raw['version'] == 3
+            ? raw.length != 4
+            : raw['version'] != 4 || raw.length != 5) ||
         raw['requests'] is! List ||
         (raw['requests'] as List).length > 100000) {
       throw const FormatException('Invalid online credential state');
@@ -145,13 +173,22 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
     if (operations is! Map || operations.length > 100000) {
       throw const FormatException('Invalid device executions');
     }
-    final decisions = raw['version'] == 3
+    final decisions = raw['version'] == 3 || raw['version'] == 4
         ? raw['decisions']
         : <String, dynamic>{};
     if (decisions is! Map || decisions.length > 100000) {
       throw const FormatException('Invalid online credential decisions');
     }
-    if (rows.isEmpty && operations.isEmpty && decisions.isEmpty) return;
+    final fills = raw['version'] == 4 ? raw['fills'] : <String, dynamic>{};
+    if (fills is! Map || fills.length > 100000) {
+      throw const FormatException('Invalid device fills');
+    }
+    if (rows.isEmpty &&
+        operations.isEmpty &&
+        decisions.isEmpty &&
+        fills.isEmpty) {
+      return;
+    }
     if (service._repository is! CredentialRuntimeRepository) {
       throw const FormatException('Missing online credential repository');
     }
@@ -174,7 +211,7 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
       final fact = facts[id];
       if (fact == null ||
           fact.protocolVersion != 2 ||
-          !fact.isCommand ||
+          fact.isReveal ||
           fact.restoredAt != null ||
           !service._sessions.containsKey(session) ||
           fact.chatLabel != service._sessions[session] ||
@@ -186,6 +223,23 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
       if (value['inactive'] as bool) {
         service._inactiveCredentialApprovals.add(id);
       }
+    }
+    for (final entry in fills.entries) {
+      if (entry.key is! String || entry.value is! Map) {
+        throw const FormatException('Invalid device fill proof');
+      }
+      final proof = _DeviceFocusedFill.fromJson(
+        Map<String, dynamic>.from(entry.value as Map),
+      );
+      final record = service._fillOperation(entry.key as String);
+      if (record.restoredAt != null ||
+          service._deviceCredentialRequests[record.requestId] !=
+              proof.deviceId ||
+          proof.deadline != record.createdAt.add(const Duration(seconds: 30)) ||
+          proof.materialClaimed && record.checkedAt == null) {
+        throw const FormatException('Inconsistent device fill proof');
+      }
+      service._deviceFocusedFills[record.id] = proof;
     }
     final pendingRequests = <String>{};
     for (final entry in decisions.entries) {

@@ -45,6 +45,7 @@ class DesktopBootstrap extends ChangeNotifier {
     this.openLibraryWithKeyAccess,
     this.openAppControl,
     this.localConfiguration,
+    this.closeDeviceFocusedFillHost,
   });
   final Future<DesktopLibrary> Function() openLibrary;
 
@@ -53,6 +54,7 @@ class DesktopBootstrap extends ChangeNotifier {
   final DesktopPlatform platform;
   final int port;
   final LocalLibraryConfiguration? localConfiguration;
+  final Future<void> Function()? closeDeviceFocusedFillHost;
   AgentConnectionProfile? localConnection;
   final String? credentialWorkerExecutable;
   final Future<MacDesktopControlHost> Function(
@@ -201,6 +203,7 @@ class DesktopBootstrap extends ChangeNotifier {
         service: library!.service,
         platform: platform,
         closeServer: () async {
+          await closeDeviceFocusedFillHost?.call();
           host.close();
           await server.close();
         },
