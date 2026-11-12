@@ -99,7 +99,7 @@ void main() {
       draft.host.text = '192.168.1.20';
       draft.port.text = '47126';
       await tap(tester, 'setup-continue');
-      expect(find.text('设置管理密码'), findsOneWidget);
+      expect(find.text('设置知予连接密码'), findsOneWidget);
       expect(find.text('服务器证书已自动保存。'), findsOneWidget);
       expect(find.textContaining('Token'), findsNothing);
       expect(find.textContaining('导入'), findsNothing);
@@ -126,18 +126,113 @@ void main() {
       await viewport(tester);
       final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
       draft.saveServer('existing-password');
+      draft.forgetConnection();
       addTearDown(draft.dispose);
       await wizard(tester, draft);
       await tap(tester, 'setup-continue');
-      expect(find.text('输入管理密码'), findsOneWidget);
+      expect(find.text('输入知予连接密码'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('setup-password-confirm')),
         findsNothing,
       );
       await fill(tester, 'setup-password', 'wrong-password');
       await tap(tester, 'setup-continue');
-      expect(find.text('管理密码不正确，请重新输入。'), findsOneWidget);
+      expect(find.text('知予连接密码不正确，请重新输入。'), findsOneWidget);
       expect(draft.passwordMatches('existing-password'), isTrue);
+    },
+  );
+
+  testWidgets('remembered connection skips password setup and login', (
+    tester,
+  ) async {
+    await viewport(tester);
+    final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+    draft.saveServer('existing-password');
+    draft.useLocal();
+    addTearDown(draft.dispose);
+    var completed = false;
+    await tester.pumpWidget(
+      SetupConfigurationPreview(
+        draft: draft,
+        onComplete: () => completed = true,
+      ),
+    );
+    await tap(tester, 'setup-mode-server');
+    await tap(tester, 'setup-continue');
+    await tap(tester, 'setup-continue');
+    expect(completed, isTrue);
+    expect(find.byKey(const ValueKey('setup-password')), findsNothing);
+    expect(draft.passwordMatches('existing-password'), isTrue);
+  });
+
+  testWidgets('first server connection from settings initializes only once', (
+    tester,
+  ) async {
+    await viewport(tester);
+    final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+    addTearDown(draft.dispose);
+    await settings(tester, draft, Brightness.light);
+    await tester.tap(find.text('服务器同步'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('settings-server-password')),
+      findsNothing,
+    );
+    expect(find.text('首次配置'), findsNothing);
+    await tap(tester, 'settings-save-connection');
+    expect(find.text('设置知予连接密码'), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(draft.serverInitialized, isFalse);
+    expect(draft.enabled, isFalse);
+    await tap(tester, 'settings-save-connection');
+    await fill(tester, 'settings-server-password', 'new-server-password');
+    await fill(
+      tester,
+      'settings-server-password-confirm',
+      'new-server-password',
+    );
+    await tap(tester, 'settings-server-password-save');
+    expect(draft.serverInitialized, isTrue);
+    expect(draft.enabled, isTrue);
+    await tester.tap(find.text('本地模式'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('服务器同步'));
+    await tester.pumpAndSettle();
+    await tap(tester, 'settings-save-connection');
+    expect(find.text('设置知予连接密码'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('settings-server-password')),
+      findsNothing,
+    );
+    expect(draft.passwordMatches('new-server-password'), isTrue);
+  });
+
+  testWidgets(
+    'existing server on another computer asks to log in, never resets',
+    (tester) async {
+      await viewport(tester);
+      final draft = SetupPreviewDraft()..host.text = '192.168.1.20';
+      draft.saveServer('first-server-password');
+      draft.host.text = '192.168.1.21';
+      draft.saveServer('second-server-password');
+      draft.host.text = '192.168.1.20';
+      addTearDown(draft.dispose);
+      await settings(tester, draft, Brightness.light);
+      await tap(tester, 'settings-save-connection');
+      expect(find.text('输入知予连接密码'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('settings-server-password-confirm')),
+        findsNothing,
+      );
+      await fill(tester, 'settings-server-password', 'incorrect-password');
+      await tap(tester, 'settings-server-password-save');
+      expect(find.text('连接密码不正确，请重新输入。'), findsOneWidget);
+      expect(draft.passwordMatches('first-server-password'), isTrue);
+      await fill(tester, 'settings-server-password', 'first-server-password');
+      await tap(tester, 'settings-server-password-save');
+      expect(draft.knownServer, isTrue);
+      expect(draft.passwordMatches('first-server-password'), isTrue);
     },
   );
 
