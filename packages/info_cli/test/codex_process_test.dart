@@ -382,7 +382,7 @@ void main() {
   }
 
   test(
-    'explicit reconnect creates a fresh association without recovering grants',
+    'agent reconnect guidance creates an unapproved session without reviving grants',
     () async {
       final core = InformationService.fictional();
       final server = await AgentServer.start(core.agent, port: 0);
@@ -392,28 +392,99 @@ void main() {
         await core.close();
         await root.delete(recursive: true);
       });
-      final hook = await invoke(
-        'bin/codex_hook.dart',
-        {},
-        chat: 'reconnect-chat',
-        args: [
-          '--connect',
-          '--port',
-          '${server.port}',
-          '--state-root',
-          root.path,
-        ],
-      );
-      final reference = jsonDecode(
-        hook['hookSpecificOutput']['additionalContext'] as String,
-      )['association'];
-      final result = await invoke('bin/codex_info.dart', {
+      final args = ['--port', '${server.port}', '--state-root', root.path];
+      Future<String> connect() async {
+        final hook = await invoke(
+          'bin/codex_hook.dart',
+          {},
+          chat: 'reconnect-chat',
+          args: ['--connect', ...args],
+        );
+        return jsonDecode(
+              hook['hookSpecificOutput']['additionalContext'] as String,
+            )['association']
+            as String;
+      }
+
+      Future<Map<String, dynamic>> call(
+        String reference,
+        Map<String, dynamic> input,
+      ) => invoke('bin/codex_info.dart', {
         'association': reference,
-        'command': 'claim',
-        'requestId': 'known-request',
+        ...input,
       }, chat: 'reconnect-chat');
-      expect(result['status'], 'unauthorized');
-      expect(core.owner.requests, isEmpty);
+      final original = await connect();
+      final requested = await call(original, {
+        'command': 'request',
+        'purpose': 'Read the approved test address',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      });
+      final requestId = requested['requestId'] as String;
+      core.owner.approve(requestId, [const FieldRef('demo-server', 'host')]);
+      final approved = await call(original, {
+        'command': 'claim',
+        'requestId': requestId,
+      });
+      expect(approved['status'], 'ok');
+      var fresh = original;
+      for (final source in ['resume', 'compact']) {
+        final restored = await invoke('bin/codex_hook.dart', {
+          'hook_event_name': 'SessionStart',
+          'source': source,
+          'session_id': 'reconnect-chat',
+        }, args: args);
+        final guidance =
+            restored['hookSpecificOutput']['additionalContext'] as String;
+        expect(guidance, contains('automatically'));
+        expect(guidance, contains('no separate user confirmation'));
+        expect(guidance, isNot(contains(original)));
+        // Simulate the Agent losing its reference and executing the documented
+        // connection command. No owner decision is made for this new session.
+        fresh = await connect();
+        expect(fresh, isNot(original));
+        expect(
+          (await call(fresh, {'command': 'session-check'}))['status'],
+          'ok',
+        );
+        expect(
+          (await call(fresh, {
+            'command': 'claim',
+            'requestId': requestId,
+          }))['status'],
+          'unauthorized',
+        );
+        expect(core.owner.requests, hasLength(1));
+        expect(
+          (await call(original, {
+            'command': 'claim',
+            'requestId': requestId,
+          }))['expiresAt'],
+          approved['expiresAt'],
+        );
+      }
+      final pending = await call(fresh, {
+        'command': 'request',
+        'purpose': 'A separate test task',
+        'fields': [
+          {'itemId': 'demo-server', 'fieldId': 'host'},
+        ],
+      });
+      expect(pending['status'], 'pending');
+      await invoke(
+        'bin/codex_hook.dart',
+        {'hook_event_name': 'SessionEnd', 'session_id': 'reconnect-chat'},
+        args: ['--state-root', root.path],
+      );
+      expect(
+        (await call(original, {
+          'command': 'claim',
+          'requestId': requestId,
+        }))['status'],
+        'unauthorized',
+      );
+      expect(core.owner.requests.last.state, AccessRequestState.cancelled);
     },
   );
 

@@ -14,7 +14,7 @@ description: 使用信息授权软件查询公开目录和当前插件模板，�
 首次连接或核对连接方式时，先读[资料库连接与命令调用](references/remote-connection.md)。CLI 默认发现 App 已确认的当前库配置；运行包指定 `Connection profile` 时使用该准确路径。配置只用于接入，审批仍在 App；本地模式需要 App 在后台运行，关闭窗口仍可接收申请，显式退出后服务停止；服务器模式不要求 App 持续运行。按末尾的 `Session state directory` 使用对应状态目录（若提供）。只把配置路径传给程序，不读取或输出配置内容，不查找 App 的管理 Token。
 
 1. 优先使用当前聊天 SessionStart 已提供的私密 `association`。它是能力引用，不能打印、写入命令行、普通日志、提交或无关聊天；不能按聊天 ID 搜索或恢复关联文件，也不读取 Codex 的登录文件或聊天记录。
-2. 用户已明确要求本次使用软件，且这是当前聊天首次连接时，可以执行同包 `info-codex-hook --connect`，取得一个新的**未授权会话**，再提交业务申请。运行包指定 `Connection profile` 时传入 `--connection`，否则自动发现；按运行包指定值传入 `--state-root`（若有）。该动作不批准任何资料。已结束或失效的会话、丢失的既有关联不能静默重连；需要用户明确要求重新连接。
+2. 本次任务需要使用软件时，聊天连接由 Agent 自行处理，无需用户另行确认或复述连接口令。已有有效关联直接复用；首次连接、关联引用丢失，或 `session-check` 确认原会话已无效时，执行同包 `info-codex-hook --connect` 创建新的**未授权会话**。运行包指定 `Connection profile` 时传入 `--connection`，否则自动发现；按指定值传入 `--state-root`（若有）。一次恢复最多新建一次，失败报告具体原因。新连接不继承旧申请、批准范围或期限；业务申请仍在 App 审批。被拒绝、撤销或到期的访问不能靠重连自动重提。
 3. CLI 每次读取独立 stdin JSON，附本聊天的私密关联与 `command`。用执行工具的独立 stdin，或 Node／Python 的子进程管道传入；不要把整个 JSON 拼成 shell 命令、here-string 或 argv。工具不能安全传 stdin 时说明限制并停止私密访问。
 4. 子进程 `CODEX_THREAD_ID` 必须是当前聊天标识。Node REPL 不继承时，从当前工具的 `nodeRepl.requestMeta.threadId` 设置，保留本机正常环境；聊天标识只作误用检查，不能代替实际关联。
 5. 先查 `capabilities`。按服务实际提供的入口执行；服务不可用时保留已有请求标识，恢复后先查原状态。没有所需能力时说明需要更新或暂缓该项，不把别的格式当作已完成。

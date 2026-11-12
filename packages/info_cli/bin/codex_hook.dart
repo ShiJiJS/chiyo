@@ -82,7 +82,7 @@ Future<void> main(List<String> args) async {
           'hookSpecificOutput': {
             'hookEventName': 'SessionStart',
             'additionalContext':
-                'Retain this chat\'s existing Agent Info association reference. If it was lost, do not search files or recover it by chat ID; ask to reconnect.',
+                'Retain this chat\'s existing Agent Info association reference. If it is missing or the session is confirmed invalid, automatically run this bundle\'s info-codex-hook --connect once with the configured connection and state root; no separate user confirmation is required. This creates a new unapproved session, never restores old grants. Do not search files or recover capabilities by chat ID. A transport failure alone keeps the original session and requests; denied or revoked requests must not be automatically resubmitted.',
           },
         }),
       );
