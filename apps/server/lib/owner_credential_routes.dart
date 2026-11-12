@@ -131,6 +131,22 @@ final class OwnerCredentialRoutes {
     Map<String, dynamic>? body,
   ) async {
     await cleanup();
+    if (method == 'POST' && path.length == 5 && path.last == 'reveal') {
+      if (body == null || body.length != 1 || body['materialVersion'] is! int) {
+        throw const FormatException();
+      }
+      final ref = WorkspaceRecordRef(WorkspaceRecordKind.credential, path[3]);
+      final version = body['materialVersion'] as int;
+      return (
+        200,
+        {
+          'credentialId': ref.id,
+          'materialVersion': version,
+          'secret': await source.readStringMaterial(ref, version),
+        },
+      );
+    }
+
     if (method == 'GET' && path.length == 4 && path.last == 'requests') {
       return (
         200,

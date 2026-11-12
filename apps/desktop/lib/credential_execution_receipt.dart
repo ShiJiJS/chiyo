@@ -186,12 +186,11 @@ class _ExecutionReceiptState extends State<_ExecutionReceipt> {
                 fact('退出码', record.exitCode?.toString() ?? '尚无记录'),
                 fact('文件清理', credentialCleanupLabel(record.cleanupState)),
                 if (record.materialLease != null)
-                  fact(
-                    '受管材料',
-                    plan.receiver == 'ssh_identity'
-                        ? '私钥副本 · SSH 空配置 · 确认主机快照 · 空全局主机记录'
-                        : 'AWS 凭据副本 · AWS 空配置',
-                  ),
+                  fact('受管材料', switch (plan.receiver) {
+                    'ssh_identity' => '私钥副本 · SSH 空配置 · 确认主机快照 · 空全局主机记录',
+                    'aws_shared_credentials' => 'AWS 凭据副本 · AWS 空配置',
+                    _ => '临时凭据文件',
+                  }),
                 if (_cleanupError != null)
                   QuietNotice(_cleanupError!, warning: true),
                 fact('开始时间', time(record.startedAt)),

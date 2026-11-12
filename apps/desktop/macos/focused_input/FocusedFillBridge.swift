@@ -8,6 +8,8 @@ final class MacFocusedFillBridge {
   private let channel: FlutterMethodChannel
   private var active: (id: String, client: MacFocusOwnerClient?)?
   private var closed = false
+  private var permissionClient: MacFocusPermissionClient?
+  private var permissionOpening = false
 
   init(messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(name: "agent_info_manage/focused_fill", binaryMessenger: messenger)
@@ -18,12 +20,38 @@ final class MacFocusedFillBridge {
 
   func close() {
     closed = true
+    permissionClient?.close()
+    permissionClient = nil
     active?.client?.close()
     active = nil
   }
 
   private func handle(_ call: FlutterMethodCall, _ reply: @escaping FlutterResult) {
     guard !closed else { refused("session_unavailable", reply); return }
+    if call.method == "permissions" || call.method == "requestPermission" {
+      guard call.arguments == nil || (call.arguments as? [String: Any])?.isEmpty == true else {
+        reply(MacFocusPermissionStatus.unavailable.wire); return
+      }
+      guard !permissionOpening, permissionClient == nil, active == nil else {
+        reply(MacFocusPermissionStatus(state: "unavailable", errorCode: "busy").wire); return
+      }
+      permissionOpening = true
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        let client = try? MacFocusPermissionClient()
+        DispatchQueue.main.async {
+          guard let self else { client?.close(); reply(MacFocusPermissionStatus.unavailable.wire); return }
+          self.permissionOpening = false
+          guard !self.closed, let client else {
+            reply(MacFocusPermissionStatus.unavailable.wire); return
+          }
+          self.permissionClient = client
+          client.query(prompt: call.method == "requestPermission") { [weak self] status in
+            DispatchQueue.main.async { self?.permissionClient = nil; reply(status.wire) }
+          }
+        }
+      }
+      return
+    }
     guard let arguments = call.arguments as? [String: Any],
           let id = arguments["connection"] as? String, id.utf8.count == 32,
           id.utf8.allSatisfy({ (48...57).contains($0) || (97...102).contains($0) }) else {
@@ -37,7 +65,7 @@ final class MacFocusedFillBridge {
       if active?.id == id { active?.client?.close(); active = nil }
       reply(nil)
     case "inspect", "prepare":
-      guard active == nil else { refused("busy", reply); return }
+      guard active == nil, !permissionOpening, permissionClient == nil else { refused("busy", reply); return }
       let application: MacFocusApplication?
       if call.method == "prepare" {
         guard keys == ["connection", "application"],

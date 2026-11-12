@@ -4,15 +4,20 @@ import CoreGraphics
 import CryptoKit
 import Darwin
 
-/// These public facts are necessary, but do not prove that a desktop is
-/// unlocked. Only owner-built, independently validated session policy may admit
-/// them. The current support matrix is empty; the default always refuses.
+/// Current local-console facts are combined with live foreground/AX checks.
+/// No Agent-supplied switch or historical notification can admit a desktop.
 struct MacFocusSessionFacts {
   let user: uid_t
   let onConsole: Bool
   let loginComplete: Bool
   let protectedDataAvailable: Bool
   let operatingSystem: OperatingSystemVersion
+  let screenLocked: Bool
+
+  static func supportsLocalConsole(_ facts: MacFocusSessionFacts) -> Bool {
+    facts.user == geteuid() && facts.onConsole && facts.loginComplete &&
+      facts.protectedDataAvailable && !facts.screenLocked && facts.operatingSystem.majorVersion >= 14
+  }
 }
 
 /// Candidate XPC-side Adapter. This source is deliberately absent from Runner's
@@ -45,7 +50,7 @@ final class SystemMacFocusEnvironment: MacFocusEnvironment {
   private let clock: () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
   private var deadline: TimeInterval = 0
 
-  init(supportedSession: @escaping (MacFocusSessionFacts) -> Bool = { _ in false },
+  init(supportedSession: @escaping (MacFocusSessionFacts) -> Bool = MacFocusSessionFacts.supportsLocalConsole,
        connected: @escaping () -> Bool = { false }) {
     self.supportedSession = supportedSession
     self.connected = connected
@@ -129,13 +134,25 @@ final class SystemMacFocusEnvironment: MacFocusEnvironment {
     return .submitted
   }
 
+  /// Only the explicit owner settings action passes prompt=true. The checks
+  /// run inside the unsandboxed XPC helper, never the sandboxed Flutter owner.
+  static func permissions(prompt: Bool) -> MacFocusPermissionStatus {
+    if prompt {
+      let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+      _ = AXIsProcessTrustedWithOptions(options)
+      if AXIsProcessTrusted() && !CGPreflightPostEventAccess() { _ = CGRequestPostEventAccess() }
+    }
+    return AXIsProcessTrusted() && CGPreflightPostEventAccess()
+      ? MacFocusPermissionStatus(state: "ready")
+      : MacFocusPermissionStatus(state: "permission_required", errorCode: "permission_required")
+  }
+
   private func begin() throws {
     guard Thread.isMainThread else { throw MacFocusFailure("unsupported_desktop") }
     guard connected() else { throw MacFocusFailure("session_unavailable") }
     deadline = clock() + 2
     try session()
-    // Never prompt here. A future explicit owner settings action may request
-    // permission; discovery, prepare and send are observation-only.
+    // Discovery, prepare and send never request OS permission.
     guard AXIsProcessTrusted(), CGPreflightPostEventAccess() else {
       throw MacFocusFailure("access_denied")
     }
@@ -152,7 +169,12 @@ final class SystemMacFocusEnvironment: MacFocusEnvironment {
     }
     let facts = MacFocusSessionFacts(user: geteuid(), onConsole: onConsole,
       loginComplete: login, protectedDataAvailable: NSApplication.shared.isProtectedDataAvailable,
-      operatingSystem: ProcessInfo.processInfo.operatingSystemVersion)
+      operatingSystem: ProcessInfo.processInfo.operatingSystemVersion,
+      // WindowServer omits this key on an unlocked console on current macOS.
+      // Absence is not sufficient: console, protected-data and live foreground
+      // secure-field ownership must all pass independently before posting.
+      screenLocked: dictionary["CGSSessionScreenIsLocked"] as? Bool ?? false)
+    guard !facts.screenLocked else { throw MacFocusFailure("desktop_locked") }
     guard facts.onConsole, facts.loginComplete, facts.protectedDataAvailable else {
       throw MacFocusFailure("session_unavailable")
     }

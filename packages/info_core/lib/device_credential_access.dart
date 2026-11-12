@@ -174,7 +174,7 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
       final fact = facts[id];
       if (fact == null ||
           fact.protocolVersion != 2 ||
-          fact.isFocusedFill ||
+          !fact.isCommand ||
           fact.restoredAt != null ||
           !service._sessions.containsKey(session) ||
           fact.chatLabel != service._sessions[session] ||

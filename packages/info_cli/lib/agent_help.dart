@@ -18,6 +18,9 @@ Map<String, dynamic> agentCommandHelp() => {
   'commands': {
     'session': '通用 CLI 建立新会话；提供 chatLabel 和 externalChatId。',
     'request': '提供 purpose、fields、operationId。',
+    'request-reveal':
+        '仅在直接填写/程序接收不可行时申请读取已存字符串凭据；提供 credentialId、version、purpose、fallbackReason。须单独批准，原文会进入聊天。',
+    'read-reveal': '使用单独批准的原文读取申请，提供 requestId 与新的 operationId；既有使用授权不能读取原文。',
     'request-use': '提供 purpose，按凭据协议填写 credentials 和 launch/fill。',
     'import-submit':
         '提供 title、purpose、operationId、items。items 来自当前 template-read。',

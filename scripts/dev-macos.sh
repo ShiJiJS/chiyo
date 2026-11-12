@@ -21,7 +21,7 @@ Usage: ./scripts/dev-macos.sh <command> [arguments]
   doctor        Show Flutter and native toolchain diagnostics
   check         Analyze and test all Dart packages and desktop widgets
   build         Compile release with fixed GH/AWS tools (requires full Xcode)
-                Optional --with-focused-fill-candidate embeds a disabled XPC candidate
+                Includes the private focused-fill helper; OS permission is owner-controlled
   run           Open the macOS app in debug mode (requires full Xcode)
   preview       Run the isolated Zhiyu UI with its own application identity
   preview-check [--library] Run the sandboxed native Zhiyu UI integration check
@@ -175,7 +175,6 @@ case "$command_name" in
     # Scope architecture selection to this invocation, not Flutter's global
     # preferences. The shipped worker and Dart CLI are ARM64 as well.
     export FLUTTER_MACOS_ARM64_ONLY=true
-    with_focused_fill_candidate=false
     flutter_arguments=()
     for argument in "$@"; do
       if [[ "$argument" == --with-focused-fill-candidate ]]; then
@@ -183,7 +182,7 @@ case "$command_name" in
           echo 'The focused-fill candidate option is available for build only.' >&2
           exit 64
         fi
-        with_focused_fill_candidate=true
+        : # Retained legacy option; default release now includes the helper.
       else
         flutter_arguments+=("$argument")
       fi
@@ -196,14 +195,8 @@ case "$command_name" in
       python3 "$project_root/scripts/build-macos-release.py" "$flutter_root" "$@"
       python3 "$project_root/scripts/bundle-macos-tools.py" \
         "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
-      if [[ "$with_focused_fill_candidate" == true ]]; then
-        python3 "$project_root/scripts/bundle-macos-focused-helper.py" \
-          "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app" \
-          --with-focused-fill-candidate
-      else
-        python3 "$project_root/scripts/bundle-macos-focused-helper.py" \
-          "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
-      fi
+      python3 "$project_root/scripts/bundle-macos-focused-helper.py" \
+        "$project_root/apps/desktop/build/macos/Build/Products/Release/info_desktop.app"
     else
       flutter run -d macos "$@"
     fi

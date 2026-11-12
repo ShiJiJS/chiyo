@@ -89,13 +89,31 @@ final class CredentialFocusedFillSpecification
   final FocusedFillPlan plan;
 }
 
+final class CredentialRevealSpecification extends CredentialUseSpecification {
+  const CredentialRevealSpecification(this.fallbackReason);
+  final String fallbackReason;
+}
+
 CredentialUseSpecification _credentialSpecification(
   int protocolVersion,
   CredentialLaunchPlan? command,
   FocusedFillPlan? fill,
   CredentialLaunchPlan? requested,
   Iterable<FieldRef> fields,
+  String? revealReason,
 ) {
+  if (revealReason != null) {
+    if (protocolVersion != 2 ||
+        command != null ||
+        fill != null ||
+        requested != null ||
+        fields.isNotEmpty ||
+        revealReason.trim().isEmpty ||
+        revealReason.length > 2000) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    return CredentialRevealSpecification(revealReason);
+  }
   if ((command == null) == (fill == null) ||
       fill != null &&
           (protocolVersion != 2 || requested != null || fields.isNotEmpty)) {
@@ -108,8 +126,21 @@ CredentialUseSpecification _credentialSpecification(
 
 bool _storedFocusedFill(Map<String, dynamic> json) {
   final kind = json['useKind'];
-  if (kind != null && kind != 'command' && kind != 'focused_fill') {
+  if (kind != null &&
+      kind != 'command' &&
+      kind != 'focused_fill' &&
+      kind != 'credential_reveal') {
     throw const CredentialUseFailure('unsupported_receiver');
+  }
+  if (kind == 'credential_reveal' &&
+      (json.containsKey('plan') ||
+          json.containsKey('fill') ||
+          json.containsKey('requestedPlan'))) {
+    throw const CredentialUseFailure('invalid_plan');
+  }
+  if (kind != 'credential_reveal' &&
+      (json.containsKey('fallbackReason') || json.containsKey('revealReads'))) {
+    throw const CredentialUseFailure('invalid_plan');
   }
   final fill = kind == 'focused_fill';
   if (fill && (json.containsKey('plan') || !json.containsKey('fill')) ||

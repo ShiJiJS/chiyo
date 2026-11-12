@@ -5,7 +5,8 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/macos_runtime_target.dart';
 
 /// Darwin implementation of the same private, two-gate worker protocol.
-/// Control is stdin + private receipts; the target inherits only output pipes.
+/// Control is stdin + private receipts; target input has a separate anonymous
+/// pipe and no private input bytes are persisted in receipts.
 Future<void> runMacOsRuntimeWorker() async {
   final input = StreamIterator(
     stdin.transform(utf8.decoder).transform(const LineSplitter()),
@@ -28,10 +29,17 @@ Future<void> runMacOsRuntimeWorker() async {
   }
 
   try {
-    if (!await input.moveNext() || utf8.encode(input.current).length > 262144) {
+    if (!await input.moveNext() ||
+        utf8.encode(input.current).length > 4194304) {
       throw const FormatException();
     }
     final plan = jsonDecode(input.current) as Map<String, dynamic>;
+    final targetEnvironment =
+        (plan['targetEnvironment'] as Map?)?.cast<String, String>() ??
+        Platform.environment;
+    final targetStdin = plan['targetStdinBase64'] == null
+        ? null
+        : base64Decode(plan['targetStdinBase64'] as String);
     final path = plan['statePath'] as String;
     final temporary = Platform.environment['TMPDIR'];
     if (temporary == null ||
@@ -55,7 +63,8 @@ Future<void> runMacOsRuntimeWorker() async {
     target = MacOsRuntimeTarget.spawn(
       plan['executable'] as String,
       (plan['argv'] as List).cast<String>(),
-      Platform.environment,
+      targetEnvironment,
+      pipeStdin: targetStdin != null,
     );
     identity = CredentialProcessIdentity.capture(target.pid);
     if (identity == null) throw StateError('process_identity_unavailable');
@@ -69,7 +78,11 @@ Future<void> runMacOsRuntimeWorker() async {
     // The supervisor captures the still-suspended target before closing stdin.
     await input.moveNext();
     target.resume();
-    final result = await target.exitCode;
+    final inputDone = target.sendStdin(targetStdin ?? const []);
+    final result = (await Future.wait<int>([
+      target.exitCode,
+      inputDone.then((_) => 0),
+    ])).first;
     await group.waitForDescendants();
     await write({
       'state': 'exited',
@@ -85,6 +98,7 @@ Future<void> runMacOsRuntimeWorker() async {
       // an admitted command. Keep draining via inherited native descriptors.
       try {
         target.resume();
+        target.closeStdin();
         await target.exitCode;
         await group?.waitForDescendants();
       } on Object {
@@ -100,6 +114,7 @@ Future<void> runMacOsRuntimeWorker() async {
     }
     exitCode = 70;
   } finally {
+    target?.closeStdin();
     identity?.close();
     group?.close();
     await input.cancel();

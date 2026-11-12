@@ -142,3 +142,43 @@ final class MacFocusOwnerClient {
     }
   }
 }
+
+/// Short-lived authenticated permission connection. It never owns a target or
+/// retries an RPC; the bridge retains it until completion or app shutdown.
+final class MacFocusPermissionClient {
+  private let connection: NSXPCConnection
+  private let queue = DispatchQueue(label: "org.shijijs.agent-info.focus-permissions")
+  private var completion: ((MacFocusPermissionStatus) -> Void)?
+  private var ended = false
+
+  init() throws { connection = try MacFocusPrivateConnection.open() }
+  deinit { connection.invalidate() }
+
+  func query(prompt: Bool, reply: @escaping (MacFocusPermissionStatus) -> Void) {
+    queue.async { [self] in
+      guard !ended, completion == nil else { reply(.unavailable); return }
+      completion = reply
+      connection.invalidationHandler = { [weak self] in self?.finish(nil) }
+      connection.interruptionHandler = { [weak self] in self?.finish(nil) }
+      connection.resume()
+      guard let proxy = connection.remoteObjectProxyWithErrorHandler({ [weak self] _ in self?.finish(nil) })
+        as? MacFocusPrivateProtocol else { finish(nil); return }
+      queue.asyncAfter(deadline: .now() + 5) { [weak self] in self?.finish(nil) }
+      let received: (Data) -> Void = { [weak self] data in self?.finish(data) }
+      if prompt { proxy.requestPermission(reply: received) }
+      else { proxy.permissions(reply: received) }
+    }
+  }
+
+  func close() { finish(nil) }
+  private func finish(_ data: Data?) {
+    queue.async { [self] in
+      guard !ended else { return }
+      ended = true
+      let reply = completion
+      completion = nil
+      connection.invalidate()
+      reply?(data.flatMap(MacFocusPermissionStatus.decode) ?? .unavailable)
+    }
+  }
+}
