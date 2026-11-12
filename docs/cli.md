@@ -232,7 +232,7 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 
 先查询`capabilities`；新版CLI的request-use/run-use/operation-status省略协议版本时按2处理，必须共同支持`credential-use-reuse.v1`。旧服务返回unsupported_capability，不能静默降级或重提单次申请。其他查询可按执行事实返回原版本。旧v1记录与明确的v1调用保留一次尝试，不能升级旧许可；这不是用户的单次/多次模式开关。
 
-字符串接收配置gh_token、文件接收配置ssh_identity/aws_shared_credentials沿用已验证工具版本及严格接收器规则。程序、CLI、worker整包匹配；CLI只在自己创建的子进程中注入值或文件路径，不修改Agent当前shell、全局环境或返回秘密材料。
+先查看 `supportedCredentialReceivers`。`gh_token`、`ssh_identity`、`aws_shared_credentials` 保留既有工具约束；`program_stdin`、`program_env`、`program_file` 支持用户批准的其他程序，且只接受协议2。程序、CLI、worker整包匹配；直接使用只把凭据交给CLI创建的子进程，不修改Agent当前shell或全局环境。三种通用接收方式的填写示例见[随包使用说明](../integrations/codex/skills/agent-info-access/references/credential-use.md)。
 
 查询credential-catalog选择相关凭据及固定版本，然后在现有私密会话提交一次申请。以下ID与绝对路径需替换为当前实际结果，普通字段可用readFields同时申请：
 
@@ -252,7 +252,11 @@ CLI 在发送带编号的请求前检查服务能力，旧服务返回 `unsuppor
 
 accepted只表示登记操作；根据processStarted、executionState、实际exitCode和独立cleanupState判断运行结果。每次执行冻结自己的程序身份/参数/目录/注入计划，材料及Job独立。撤销、到期、轮换、停用、删除、会话结束及重启拒绝新操作，已运行任务继续；某任务退出只清理自己的材料。cleanup-use按原executionId重试清理，不能当作重新运行。重启保留未知结果但不恢复许可。
 
-Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH的-i后独立参数`{"file":"alias"}`接收临时路径；AWS_SHARED_CREDENTIALS_FILE接收`{"file":"alias"}`路径。普通文本{{SSH_KEY_FILE}}不替换。通用cookie文件、普通附件领取和浏览器密码填充不由这些接收器自动支持。
+Typed env/argv对象才产生注入：GH_TOKEN接收`{"secret":"alias"}`；SSH的-i后独立参数`{"file":"alias"}`接收临时路径；AWS_SHARED_CREDENTIALS_FILE接收`{"file":"alias"}`路径。通用方式分别使用 `launch.stdin:{"secret":"alias"}`、显式环境变量中的 `{"secret":"alias"}`，或参数/环境变量中的 `{"file":"alias"}`；普通文本占位符不替换。批准后程序身份、接收方式及凭据放置位置固定。stdin按原UTF-8字节交付后关闭，不自动加换行，也不能据此认为SSH会读取它作为登录密码。
+
+密码框填写是独立的 `local-focused-fill.v1` 能力，需要本机App和系统填写权限。当前NAS批准后交由本机App填写的桥接尚未实现；不能把服务器具有其他凭据能力当作支持本机填写。
+
+直接使用不可行时，另行提交 `request-reveal`，包含 `protocolVersion:2`、`credentialId`、`version`、`purpose` 和 `fallbackReason`。用户明确批准“AI读取凭据原文”后，才可用 `read-reveal`（`protocolVersion:2`、`requestId`、唯一 `operationId`）取得字符串凭据；原文将进入聊天。原有使用许可不能代替这次批准，文件凭据不支持此入口。相同读取操作不能重复交付；撤销不能删除已经交付的原文。
 
 输出在执行宿主内存有界保留、base64按流/序号分页；已知凭据直接回显在保留前遮挡，但不保证编码、截图或外部文件安全。输出不可用不代表执行失败。通用CLI需保持进程接续；Codex由持续宿主跨单命令进程保管，结束/缓存淘汰后不恢复输出。CLI的stdin EOF不结束共享会话。
 
