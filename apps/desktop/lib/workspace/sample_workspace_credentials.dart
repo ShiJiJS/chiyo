@@ -355,7 +355,7 @@ class SampleWorkspaceCredentials implements WorkspaceCredentialSource {
       ].contains(state.candidate.delivery),
       useUnavailableReason:
           state.candidate.delivery == WorkspaceCredentialDelivery.focus
-          ? 'Mac本机焦点填充尚未启用。'
+          ? '当前预览不执行实际密码填写。'
           : null,
       form: state.candidate.form,
       format: state.candidate.format,

@@ -587,7 +587,7 @@ class _SampleApprovals implements WorkspaceApprovalSource {
       fieldExpiresAt: f?.fieldEnd,
       credentialExpiresAt: f?.credentialEnd,
       approveUnavailableReason: r.kind == WorkspaceApprovalKind.focus
-          ? 'Mac本机焦点填充尚未启用，不能批准填充。'
+          ? '当前预览不执行实际密码填写。'
           : null,
     );
   }

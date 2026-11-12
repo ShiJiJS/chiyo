@@ -7,6 +7,36 @@ import 'focused_fill_test.dart' show fixture, code;
 
 void main() {
   test(
+    'different sessions atomically reserve one local native desktop',
+    () async {
+      final f = await fixture();
+      final other = f.service.agent.openSession('Other synthetic chat');
+      final request = await f.service.agent.requestFocusedFill(
+        other,
+        FocusedFillInput.fromJson(f.input()),
+      );
+      await f.service.owner.decideCredentialUse(
+        request.id,
+        approveCredential: true,
+      );
+      f.driver.preparation = Completer<void>();
+      final results = await Future.wait([
+        f.service.agent
+            .startFocusedFill(f.session, f.operation('first'))
+            .then<Object>((r) => r, onError: (Object e) => e),
+        f.service.agent
+            .startFocusedFill(other, f.operation('other', request.id))
+            .then<Object>((r) => r, onError: (Object e) => e),
+      ]);
+      expect(results.whereType<CredentialUseFailure>().single.code, 'busy');
+      expect(f.repo.focusedFillOperations.length, 1);
+      expect(f.driver.prepares, 1);
+      f.driver.preparation!.complete();
+      await f.service.drainFocusedFills();
+      expect(f.driver.closes, 1);
+    },
+  );
+  test(
     'busy does not queue an operation for an unknown future foreground target',
     () async {
       final f = await fixture();
