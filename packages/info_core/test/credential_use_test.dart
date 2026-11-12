@@ -84,6 +84,79 @@ Future<(InformationService, String, CredentialUseRequest)> tokenRequest({
 
 void main() {
   test(
+    'login account is private until approved and disappears after revoke',
+    () async {
+      final repository = MemoryInformationRepository();
+      final (service, session, request) = await tokenRequest(
+        repository: repository,
+        protocolVersion: 2,
+      );
+      addTearDown(service.close);
+      await repository.commitCredentials([
+        repository.managedCredentials.single.copy(
+          account: 'fixture-login-user',
+          modifiedAt: DateTime.utc(2026, 11, 12),
+        ),
+      ], repository.credentialMaterials);
+      expect(
+        service.agent.credentialCatalog().credentials.single.containsKey(
+          'account',
+        ),
+        isFalse,
+      );
+      expect(
+        service.agent
+            .credentialUseStatus(session, request.id)
+            .containsKey('decision'),
+        isFalse,
+      );
+      await service.owner.decideCredentialUse(
+        request.id,
+        approveCredential: true,
+      );
+      Map use() =>
+          ((service.agent.credentialUseStatus(session, request.id)['decision']
+                  as Map)['credentialUse']
+              as Map);
+      expect(use()['account'], 'fixture-login-user');
+      final other = service.agent.openSession('Different chat');
+      expect(
+        () => service.agent.credentialUseStatus(other, request.id),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      await service.owner.revokeCredentialUse(request.id);
+      expect(use().containsKey('account'), isFalse);
+    },
+  );
+
+  test('expired credential use does not disclose its login account', () async {
+    final repository = MemoryInformationRepository();
+    var now = DateTime.utc(2026, 11, 12);
+    final (service, session, request) = await tokenRequest(
+      repository: repository,
+      protocolVersion: 2,
+      clock: () => now,
+    );
+    addTearDown(service.close);
+    await repository.commitCredentials([
+      repository.managedCredentials.single.copy(
+        account: 'fixture-login-user',
+        modifiedAt: now,
+      ),
+    ], repository.credentialMaterials);
+    await service.owner.decideCredentialUse(
+      request.id,
+      approveCredential: true,
+    );
+    now = now.add(const Duration(days: 2));
+    final use =
+        (service.agent.credentialUseStatus(session, request.id)['decision']
+                as Map)['credentialUse']
+            as Map;
+    expect(use.containsKey('account'), isFalse);
+  });
+
+  test(
     'pending denied revoked expired and cross-session requests never consume a launch attempt',
     () async {
       for (final scenario in [

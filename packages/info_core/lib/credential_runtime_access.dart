@@ -742,6 +742,10 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
 
   Map<String, Object?> credentialUseStatus(String session, String id) {
     final r = _service._sessionUseRequest(session, id, allowEnded: true);
+    final grantState = _service._useGrantState(r);
+    final account = r.credentialApproved && grantState == 'available'
+        ? _service.owner.credential(r.credentialId).account
+        : null;
     return {
       'protocolVersion': r.protocolVersion,
       'status': _service._useState(r),
@@ -755,7 +759,8 @@ extension CredentialRuntimeAgentAccess on AgentAccess {
         'decision': {
           'credentialUse': {
             'approved': r.credentialApproved,
-            'state': _service._useGrantState(r),
+            'state': grantState,
+            if (account != null && account.isNotEmpty) 'account': account,
             if (r.credentialApproved) ...{
               'credentialId': r.credentialId,
               'version': r.version,

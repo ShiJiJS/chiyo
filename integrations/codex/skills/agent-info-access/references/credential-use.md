@@ -8,6 +8,25 @@ method, or the visible app/password field. Query the current connection's
 capabilities first. The device executor handles injected credentials; approval
 alone neither starts the program nor fills a field.
 
+Choose the receiving method before submitting an application:
+
+- For a browser tool with a documented fill API, use a receiver that actually
+  reaches that API. First probe the exact login URL and unique password input
+  without a real credential. The personal agent-info-access Skill supplies an
+  ego-browser stdin bridge; use its browser-filling reference when installed.
+  ego-browser nodejs scripts do not inherit the CLI process's environment, so
+  program_env alone does not deliver a password into those scripts.
+- For a visible desktop or browser password box without a usable script API,
+  discover a ready native target before requesting focused input.
+- For command-line programs, check the actual stdin/env/file interface first.
+  Use a synthetic value to verify an uncertain adapter before requesting real
+  credentials. Capability availability alone does not prove the adapter works.
+
+Submit one complete working plan for the task. If an unexecuted plan has to be
+replaced, clearly identify the superseded request rather than leaving the user
+to choose between similar applications. A successful receiver exit or `sent`
+only establishes delivery; verify the service's logged-in result separately.
+
 If the required method is unavailable or a definite failure prevents use,
 explain that reason and use [Explicit original-value access](#explicit-original-value-access)
 only after its separate approval. A lost response or unknown outcome is not a
@@ -52,6 +71,11 @@ reason to switch methods and repeat the action.
    request; it does not self-approve session validity or send a huge duration.
    This option applies only to SSH, not ordinary reads or other receivers.
    Ordinary fields have their own user-approved deadline and use claim/read.
+   With `credential-account.v1`, an available approved use also returns the
+   stored login account in `decision.credentialUse.account` when nonempty.
+   Use this account for the approved service; it is not a password. It stays
+   out of the public catalog and is omitted for pending or invalid grants.
+   An absent/empty account is unknown; do not guess it from the service name.
 4. For each logical command, choose a new unique `operationId` and send
    `run-use` with the same `requestId` and that command's complete `launch`.
    The alias, credential version and receiver remain in the approved scope.
@@ -94,7 +118,16 @@ under the same request. Preserve each submitted object until its result is known
 Query `capabilities` and `credential-catalog`, choose the actual SSH key and the
 host already trusted in App settings. Submit a normal protocol2 `request-use`
 with `receiver:"ssh_identity"`, the discovered OpenSSH `executable`, typed
-`"-i",{"file":"ssh_key"}` arguments and an empty `env`. The user may approve
+`"-i",{"file":"ssh_key"}` arguments and an empty `env`. Include the required
+noninteractive flags `-T`, `-o`, `BatchMode=yes`; put the host after the key and
+port options. Remote command arguments stay separate, for example `"uname","-s"`
+rather than one `"uname -s"` argument. A complete illustrative launch is:
+
+```json
+{"receiver":"ssh_identity","executable":"/usr/bin/ssh","argv":["-T","-o","BatchMode=yes","-i",{"file":"ssh_key"},"-p","22","user@host.example","uname","-s"],"cwd":"/absolute/workdir","env":{}}
+```
+
+Use the discovered path and the actual approved host/account/port. The user may approve
 “本聊天内不限时”; then check the returned decision above. Run `uname -s` and
 `uptime` as two logical `run-use` operations with different operationIds under
 the same requestId, checking each execution result. This example uses read-only

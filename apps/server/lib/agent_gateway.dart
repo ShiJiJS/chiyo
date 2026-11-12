@@ -159,6 +159,10 @@ final class AgentGateway {
           'submission-metadata.v1',
           if ((result['capabilities'] as List).contains('credential-reveal.v1'))
             'credential-reveal.v1',
+          if ((result['capabilities'] as List).contains(
+            'credential-account.v1',
+          ))
+            'credential-account.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
           if (_deviceCredentials != null) ...[

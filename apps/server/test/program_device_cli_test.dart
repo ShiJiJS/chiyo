@@ -44,6 +44,11 @@ void main() {
             discoverable: true,
           );
         });
+        await f.runtime.run(
+          () => f.repo.commitCredentials([
+            c.copy(account: 'synthetic-login-user', modifiedAt: c.modifiedAt),
+          ], f.repo.credentialMaterials),
+        );
         expect(
           (await client.openLifecycleSession(
             'Synthetic program chat',
@@ -78,6 +83,17 @@ void main() {
         });
         expect(requested['status'], 'pending', reason: '$requested');
         final request = requested['requestId'] as String;
+        expect(
+          (await client.execute({'command': 'capabilities'}))['capabilities'],
+          contains('credential-account.v1'),
+        );
+        expect(
+          (await client.execute({
+            'command': 'status',
+            'requestId': request,
+          })).containsKey('decision'),
+          isFalse,
+        );
         final detail = approvalDetailFromJson(
           await f.owner.request('GET', '/v1/owner/approvals/details/$request'),
         );
@@ -98,6 +114,14 @@ void main() {
         );
         // The executable snapshot and stdin binding survive encrypted persistence.
         await f.reopen();
+        final approved = await client.execute({
+          'command': 'status',
+          'requestId': request,
+        });
+        expect(
+          ((approved['decision'] as Map)['credentialUse'] as Map)['account'],
+          'synthetic-login-user',
+        );
         final run = {
           'protocolVersion': 2,
           'command': 'run-use',
