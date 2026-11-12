@@ -49,6 +49,50 @@ not a production secret transport. These checks prove OS receiver behavior,
 not Chiyo approval, worker lifecycle, private file ACLs, or shipped SSH password
 support. Test those separately against the shared runtime implementation.
 
+## Win32 receiver for App-host integration
+
+`focus_fixture` contains two masked controls (IDs 101 / 102) and a plain text
+control (ID 103). The second masked control supports focus-change checks; the
+plain control must be refused by a production fill. A successful synthetic
+match now also requires both other controls to be empty. `empty` means all
+three controls are empty, so misdirected input cannot be hidden by an empty
+first password control.
+
+`packages/info_cli/test/support/windows_password_receiver.dart` wraps the
+receiver's existing private frames. It configures a synthetic value, verifies
+boolean results, clears fields, arms a focus change and closes the receiver
+by EOF. It does not activate windows or send keyboard input. Reuse it with the
+actual HTTPS / App-host implementation instead of duplicating host protocols.
+
+From `packages/info_cli`, after building `focus_fixture`:
+
+```powershell
+$env:WINDOWS_PASSWORD_RECEIVER = 'C:/path/to/build/focused-input-native/Release/info-focus-fixture.exe'
+dart test test/windows_password_receiver_test.dart
+```
+
+The test checks pipe framing, empty-field metadata and normal window shutdown;
+it does not prove a credential fill. An unset executable or another OS is an
+explicit skip.
+
+## Interactive browser probe
+
+`packages/info_cli/test/support/windows_browser_fill_probe.dart` prepares a
+loopback synthetic page and an isolated Memory service, then drives a compiled
+JSON-lines CLI with the production Windows broker. It opens no browser itself.
+The operator owns foreground selection and must use an authorized browser tool.
+Its arguments are fixed broker executable, CLI executable, and a fresh evidence
+directory. The initial public state contains the page URL; `command.json`
+accepts increasing integer `id` values and actions `probe`, `authorize`, `fill`,
+`duplicate`, `reserve`, `send-reserved`, `clear`, `arm-change`, `query`, `close`.
+Public results contain only application identity, statuses and test booleans;
+random synthetic material stays in the credential service and test receiver.
+
+This helper's existence is not browser compatibility evidence. Stop when a
+browser tool refuses control or cannot establish page context; do not change
+security settings or route around that check. `close` shuts down the local
+probe without any browser interaction; a 20-minute bound also ends it.
+
 ## Desktop build diagnostics
 
 Alternatively, after configuring the Windows Flutter build, run from `apps/desktop`
