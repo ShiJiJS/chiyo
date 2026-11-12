@@ -161,7 +161,7 @@ class DesktopBootstrap extends ChangeNotifier {
         connectionToken: transport?.deviceToken,
         libraryId: transport?.serverId,
         enableReusableCredentialUse: Platform.isWindows || Platform.isMacOS,
-        enableFocusedFill: Platform.isWindows,
+        enableFocusedFill: Platform.isWindows || Platform.isMacOS,
         enableInformationFiles: Platform.isWindows || Platform.isMacOS,
         credentialTools: Platform.isWindows
             ? WindowsBundledTools().read

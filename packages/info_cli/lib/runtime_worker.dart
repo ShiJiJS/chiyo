@@ -28,8 +28,9 @@ Future<void> _forwardOutput(
 }
 
 /// Internal process launcher, not a JSON-lines agent command. The parent sends
-/// only the already approved executable/argv/cwd and a non-secret state path.
-/// The worker's environment was built by the executor; it has no session proof.
+/// the approved executable/argv/cwd, non-secret receipt path and optional private
+/// target input/environment over its anonymous control pipe. That payload is
+/// never written into receipts. The worker has no authorization session proof.
 Future<void> main([List<String> args = const []]) async {
   if (args.length == 1 && args.single == '--information-file-guardian') {
     return runInformationFileGuardian();
@@ -65,10 +66,17 @@ Future<void> main([List<String> args = const []]) async {
   }
 
   try {
-    if (!await input.moveNext() || utf8.encode(input.current).length > 262144) {
+    if (!await input.moveNext() ||
+        utf8.encode(input.current).length > 4194304) {
       throw const FormatException();
     }
     final plan = jsonDecode(input.current) as Map<String, dynamic>;
+    final targetEnvironment =
+        (plan['targetEnvironment'] as Map?)?.cast<String, String>() ??
+        Platform.environment;
+    final targetStdin = plan['targetStdinBase64'] == null
+        ? null
+        : base64Decode(plan['targetStdinBase64'] as String);
     final path = plan['statePath'] as String;
     // Only the parent-created execution TEMP directory is writable here.
     final temp = Platform.environment['TEMP'];
@@ -101,14 +109,13 @@ Future<void> main([List<String> args = const []]) async {
       plan['executable'] as String,
       (plan['argv'] as List).cast<String>(),
       workingDirectory: plan['cwd'] as String,
-      environment: Platform.environment,
+      environment: targetEnvironment,
       includeParentEnvironment: false,
       runInShell: false,
     );
     outDone = _forwardOutput(target.stdout, stdout);
     errDone = _forwardOutput(target.stderr, stderr);
     identity = CredentialProcessIdentity.capture(target.pid);
-    await target.stdin.close();
     await write({
       'state': 'started',
       'workerPid': pid,
@@ -119,8 +126,17 @@ Future<void> main([List<String> args = const []]) async {
     // Keep the process handle until the parent has captured the identity, even
     // if a very short command already exited. EOF acknowledges that capture.
     final acknowledged = input.moveNext();
+    final inputDone = () async {
+      try {
+        if (targetStdin != null) target!.stdin.add(targetStdin);
+        await target!.stdin.close();
+      } on Object {
+        // A program may close its input without consuming it. Its exit receipt
+        // remains authoritative; no input bytes are included in diagnostics.
+      }
+    }();
     final result = await target.exitCode;
-    await Future.wait([outDone, errDone]);
+    await Future.wait([outDone, errDone, inputDone]);
     await acknowledged;
     await job.waitForDescendants();
     await write({

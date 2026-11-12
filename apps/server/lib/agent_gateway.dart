@@ -27,6 +27,8 @@ final class AgentGateway {
   static const _open = {'/session', '/session/lifecycle'};
   static const _session = {
     '/session/check',
+    '/credential-reveal/request',
+    '/credential-reveal/read',
     '/request',
     '/request/status',
     '/cancel',
@@ -146,6 +148,8 @@ final class AgentGateway {
         'capabilities': [
           'information-request-operations.v1',
           'submission-metadata.v1',
+          if ((result['capabilities'] as List).contains('credential-reveal.v1'))
+            'credential-reveal.v1',
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
           if (_deviceCredentials != null) ...[

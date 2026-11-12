@@ -52,13 +52,13 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
       var r = CredentialUseRequest.fromJson(
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
-      if ((!_preserveOnlineCredentialFacts || r.isFocusedFill) &&
+      if ((!_preserveOnlineCredentialFacts || !r.isCommand) &&
           r.state == 'pending') {
         r = r.changed({
           'state': 'cancelled',
           'invalidatedCode': 'grant_revoked',
         });
-      } else if ((!_preserveOnlineCredentialFacts || r.isFocusedFill) &&
+      } else if ((!_preserveOnlineCredentialFacts || !r.isCommand) &&
           r.credentialApproved &&
           !r.attemptConsumed) {
         r = r.changed({'invalidatedCode': 'grant_revoked'});
@@ -136,6 +136,11 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
     try {
       await _writeMetadata(() async {
         validate?.call();
+        if (requests.any(
+          (r) => r.isReveal || r.isCommand && r.plan.isProgramReceiver,
+        )) {
+          await _requireAdmissionFormat(_credentialDeliveryLibraryFormat);
+        }
         if (requests.any(
           (r) => r.credentialValidity == CredentialUseValidity.session,
         )) {
@@ -240,7 +245,7 @@ void _validateRuntimeSnapshot(
   for (final e in executions) {
     final r = byId[e.requestId];
     if (r == null ||
-        r.isFocusedFill ||
+        !r.isCommand ||
         e.protocolVersion != r.protocolVersion ||
         !{1, 2}.contains(e.protocolVersion)) {
       invalid();
@@ -281,6 +286,16 @@ void _validateRuntimeSnapshot(
   );
   for (final r in requests) {
     if (!{1, 2}.contains(r.protocolVersion)) invalid();
+    if (r.isReveal) {
+      if (r.attemptConsumed ||
+          r.executionId != null ||
+          r.attemptedAt != null ||
+          r.approvedFields.isNotEmpty ||
+          r.revealReads.isNotEmpty && !r.credentialApproved ||
+          r.revealReads.length > 1000)
+        invalid();
+      continue;
+    }
     if (r.isFocusedFill) continue;
     if (r.protocolVersion == 2 &&
         (r.attemptConsumed ||

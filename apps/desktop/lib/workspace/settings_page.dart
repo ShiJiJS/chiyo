@@ -5,6 +5,7 @@ import '../prototype_icons.dart';
 import '../ui_palette.dart';
 import 'library_widgets.dart';
 import 'classification_controller.dart';
+import 'credential_fill_settings.dart';
 import 'backup_controller.dart';
 import 'backup_page.dart';
 import 'runtime_controller.dart';
@@ -519,6 +520,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
                         PrototypeIconGlyph.layers,
                       WorkspaceSettingsSection.notifications =>
                         PrototypeIconGlyph.inbox,
+                      WorkspaceSettingsSection.credentialFill =>
+                        PrototypeIconGlyph.shield,
                       WorkspaceSettingsSection.records =>
                         PrototypeIconGlyph.clock,
                       WorkspaceSettingsSection.plugins =>
@@ -572,6 +575,8 @@ class _WorkspaceSettingsPageState extends State<WorkspaceSettingsPage> {
           Expanded(
             child: m.section == WorkspaceSettingsSection.connection
                 ? widget.connectionBuilder!(context)
+                : m.section == WorkspaceSettingsSection.credentialFill
+                ? const CredentialFillSettings()
                 : m.section == WorkspaceSettingsSection.plugins
                 ? widget.pluginBuilder(context)
                 : m.section == WorkspaceSettingsSection.classifications

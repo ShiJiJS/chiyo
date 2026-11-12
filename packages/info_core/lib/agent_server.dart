@@ -305,6 +305,7 @@ class AgentProtocol {
     if (const {
       '/request',
       '/credential-use/request',
+      '/credential-reveal/request',
       '/organization/request',
       '/import/submit',
       '/update/submit',
@@ -340,10 +341,14 @@ class AgentProtocol {
           'protocolVersion': 1,
           'status': 'ok',
           'protocolVersions': [1, if (enableReusableCredentialUse) 2],
+          if (enableReusableCredentialUse)
+            'supportedCredentialReceivers':
+                CredentialLaunchPlan.supportedReceivers,
           'capabilities': [
             'information-request-operations.v1',
             'submission-metadata.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
+            if (enableReusableCredentialUse) 'credential-reveal.v1',
             if (enableReusableCredentialUse)
               'credential-ssh-session-validity.v1',
             if (_focusedFillEnabled) 'credential-focused-fill.v1',
@@ -505,6 +510,33 @@ class AgentProtocol {
           );
         }
         return _agent.cleanupDeviceInformationFile(session, input.deliveryId);
+      case '/credential-reveal/request':
+      case '/credential-reveal/read':
+        if (!enableReusableCredentialUse) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
+        final session = _text(body, 'sessionSecret');
+        final command = Map<String, dynamic>.from(body)
+          ..remove('sessionSecret');
+        if (path.endsWith('/request')) {
+          final request = await _agent.requestCredentialReveal(
+            session,
+            CredentialRevealInput.fromJson(command),
+          );
+          return _agent.credentialUseStatus(session, request.id);
+        }
+        if (command.length != 4 ||
+            command['protocolVersion'] != 2 ||
+            command['command'] != 'read-reveal' ||
+            command['requestId'] is! String ||
+            command['operationId'] is! String) {
+          throw const CredentialUseFailure('invalid_type');
+        }
+        return _agent.readCredentialReveal(
+          session,
+          command['requestId'] as String,
+          command['operationId'] as String,
+        );
       case '/credential-use/focus-target':
         if (!_focusedFillEnabled || !_agent.focusedFillDiscoveryAvailable) {
           throw const CredentialUseFailure('unsupported_capability');

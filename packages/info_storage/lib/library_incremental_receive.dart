@@ -392,6 +392,10 @@ extension LibraryIncrementalReceive on LibraryIncremental {
       );
       return;
     }
+    if (portable == 'credential_use_requests' &&
+        _hasCredentialDeliveryRows([row])) {
+      await _repo._requireAdmissionFormat(_credentialDeliveryLibraryFormat);
+    }
     if (portable == 'information_revision_snapshots')
       await _repo._requireAdmissionFormat(_libraryRevisionSnapshotFormat);
     if (portable == 'credential_material_snapshots')

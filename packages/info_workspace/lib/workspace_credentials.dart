@@ -15,6 +15,8 @@ enum WorkspaceCredentialForm { string, file }
 
 enum WorkspaceCredentialDelivery {
   environment('子进程环境变量'),
+  standardInput('程序标准输入'),
+  reveal('AI 读取凭据原文'),
   file('临时凭据文件'),
   focus('本机焦点填充'),
   storage('仅保管');
@@ -437,4 +439,12 @@ abstract interface class WorkspaceCredentialSource {
     WorkspaceRecordRef? ref,
   });
   Future<List<WorkspaceCredentialUseHistory>> history(WorkspaceRecordRef ref);
+}
+
+/// Explicit owner-only action. Secrets never enter ordinary detail DTOs.
+abstract interface class WorkspaceCredentialRevealSource {
+  Future<String> readStringMaterial(
+    WorkspaceRecordRef ref,
+    int materialVersion,
+  );
 }

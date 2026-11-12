@@ -70,7 +70,11 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
   }) => WorkspaceGrantSummary(
     id: 'request:${r.id}',
     requestId: r.id,
-    title: r.isFocusedFill ? '本机焦点填充申请' : '托管凭据使用申请',
+    title: r.isReveal
+        ? 'AI 读取凭据原文申请'
+        : r.isFocusedFill
+        ? '本机焦点填充申请'
+        : '托管凭据使用申请',
     kind: r.isFocusedFill
         ? WorkspaceApprovalKind.focus
         : WorkspaceApprovalKind.credential,
@@ -88,7 +92,8 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
             ((ordinary?.accesses.length ?? 0) +
                 (ordinary?.deliveries.length ?? 0))) +
         owner.credentialExecutions.where((e) => e.requestId == r.id).length +
-        owner.focusedFillOperations.where((f) => f.requestId == r.id).length,
+        owner.focusedFillOperations.where((f) => f.requestId == r.id).length +
+        r.revealReads.length,
   );
 
   WorkspaceGrantState _organizationHistoryState(core.OrganizationTask t) {
@@ -285,6 +290,13 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
     final events =
         <WorkspaceGrantEvent>[
           ...?fields?.events,
+          for (final read in r.revealReads)
+            WorkspaceGrantEvent(
+              'credential-reveal:${read.operationId}',
+              read.at,
+              'AI 读取凭据原文 · 材料v${r.version}',
+              '原文读取已放行；不确认对方是否收到。记录不保留秘密内容。',
+            ),
           if (r.decidedAt != null)
             WorkspaceGrantEvent(
               'credential-decision:${r.id}',
@@ -391,8 +403,9 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
             ),
       ],
       events: events,
-      scopeNotice:
-          'SSH可在本聊天内不限时使用，其他凭据与普通字段按批准期限处理；每次使用独立记录。查询历史不会执行命令、领取材料或重新激活许可。${owner.credentialUseDecisionUnconfirmed(r) ? '原决定结果未确认，许可未启用。' : ''}',
+      scopeNotice: r.isReveal
+          ? '仅允许原聊天在批准期限内读取固定版本的字符串凭据。原文会进入聊天上下文；撤销不能删除已经交付的原文。'
+          : 'SSH可在本聊天内不限时使用，其他凭据与普通字段按批准期限处理；每次使用独立记录。查询历史不会执行命令、领取材料或重新激活许可。${owner.credentialUseDecisionUnconfirmed(r) ? '原决定结果未确认，许可未启用。' : ''}',
       legacyNotice: r.restoredAt != null
           ? '来自备份的历史事实，不恢复原设备授权、进程或临时材料。'
           : fields?.legacyNotice,

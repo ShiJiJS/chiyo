@@ -8,6 +8,7 @@ import 'prototype_ui.dart';
 import 'settings_controls.dart';
 import 'ui.dart';
 import 'focused_fill_ui.dart';
+import 'credential_reveal_ui.dart';
 
 String credentialHistoryState(OwnerAccess owner, CredentialUseRequest r) {
   if (r.protocolVersion == 2) {
@@ -263,6 +264,14 @@ class _CredentialHistoryDocumentState extends State<CredentialHistoryDocument> {
   );
   @override
   Widget build(BuildContext context) {
+    if (r.isReveal) {
+      return CredentialRevealPanel(
+        owner: widget.owner,
+        request: r,
+        onChanged: widget.onChanged,
+        history: true,
+      );
+    }
     if (r.isFocusedFill) {
       return FocusedFillHistoryDocument(
         key: ValueKey('focused-history-${r.id}'),

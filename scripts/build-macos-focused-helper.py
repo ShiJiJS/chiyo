@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build a private focused-fill XPC candidate into a NEW project-local directory.
+"""Build a private focused-fill XPC helper into a NEW project-local directory.
 
 Build/sign/inspect only. Never execute or embed the helper, launch an App,
 register a service, request TCC, modify a keychain or change any installed app.
-The native supported-session policy stays closed; this is not capability enablement.
+Build receipts describe implementation availability, not OS permission or target acceptance.
 """
 
 import argparse
@@ -83,9 +83,9 @@ def build(requested):
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
     changed = subprocess.run(["git", "diff", "HEAD", "--quiet", "--", *source_hashes], cwd=ROOT).returncode != 0
     output.mkdir(parents=True, exist_ok=False)
-    report = {"format": 1, "kind": "macos-focused-fill-xpc-candidate", "complete": False,
+    report = {"format": 1, "kind": "macos-focused-fill-xpc-helper", "complete": False,
               "sourceCommit": commit, "sourceInputsDirty": changed or not tracked,
-              "sourceInputs": source_hashes, "capabilityEnabled": False, "supportedSessions": [],
+              "sourceInputs": source_hashes, "capabilityEnabled": True, "supportedSessions": ["local-console"], "systemAcceptance": False,
               "helperExecuted": False, "embeddedInApp": False, "phases": []}
     logs = output / "logs"
     logs.mkdir()
@@ -149,7 +149,7 @@ def main():
     except (ValueError, RuntimeError, subprocess.SubprocessError) as error:
         parser.exit(1, str(error) + "\n")
     print(json.dumps({"complete": result["complete"], "bundle": result["bundle"],
-                      "helperExecuted": False, "capabilityEnabled": False}, indent=2))
+                      "helperExecuted": False, "capabilityEnabled": True}, indent=2))
 
 
 if __name__ == "__main__":

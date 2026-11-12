@@ -62,7 +62,8 @@ WorkspaceRecycleEntry ownerCredentialRecycleEntry(
 
 /// Owner credential management. Secret staging is Host-owned; workspace DTOs
 /// contain metadata/opaque identities only. AI use remains a separate adapter.
-class OwnerWorkspaceCredentials implements WorkspaceCredentialSource {
+class OwnerWorkspaceCredentials
+    implements WorkspaceCredentialSource, WorkspaceCredentialRevealSource {
   OwnerWorkspaceCredentials(this.owner, {this.onChanged})
     : _scope = owner.captureLibraryScope(),
       staging = OwnerCredentialStaging(owner);
@@ -96,6 +97,14 @@ class OwnerWorkspaceCredentials implements WorkspaceCredentialSource {
   Future<WorkspaceCredentialReceipt> requestUse(
     WorkspaceCredentialUseDraft draft,
   ) => _unsupported();
+
+  @override
+  Future<String> readStringMaterial(
+    WorkspaceRecordRef ref,
+    int materialVersion,
+  ) => _read(
+    () => owner.readStringCredential(_credential(ref).id, materialVersion),
+  );
 
   final core.OwnerAccess owner;
   final core.OwnerLibraryScope _scope;
@@ -144,7 +153,7 @@ class OwnerWorkspaceCredentials implements WorkspaceCredentialSource {
               r.credentialId == credential.id &&
               r.version == credential.version &&
               r.useGeneration == credential.useGeneration &&
-              !r.isFocusedFill &&
+              r.isCommand &&
               r.restoredAt == null,
         );
 
@@ -277,6 +286,13 @@ class OwnerWorkspaceCredentials implements WorkspaceCredentialSource {
                 : r.credentialExpiresAt ?? r.requestExpiresAt,
             state: request.state.label,
             operations: [
+              for (final read in r.revealReads)
+                WorkspaceCredentialUseOperation(
+                  read.operationId,
+                  read.at,
+                  'AI 读取凭据原文',
+                  '原文读取已放行（不确认对方接收）',
+                ),
               if (r.decidedAt != null)
                 WorkspaceCredentialUseOperation(
                   'decision:${r.id}',

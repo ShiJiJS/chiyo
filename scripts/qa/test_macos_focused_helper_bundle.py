@@ -59,25 +59,25 @@ class EmbeddedCandidateTests(unittest.TestCase):
     def embed(self):
         return MODULE.assemble(self.app, enabled=True, build_helper=self.build_helper)
 
-    def test_default_without_candidate_does_not_modify_the_app(self):
+    def test_explicit_disabled_without_helper_does_not_modify_the_app(self):
         before = {str(p.relative_to(self.app)): MODULE.BUILDER.digest(p) for p in self.app.rglob("*") if p.is_file()}
-        self.assertEqual(MODULE.assemble(self.app), {"included": False, "modified": False, "capabilityEnabled": False})
+        self.assertEqual(MODULE.assemble(self.app, enabled=False), {"included": False, "modified": False, "capabilityEnabled": False})
         self.assertEqual(before, {str(p.relative_to(self.app)): MODULE.BUILDER.digest(p) for p in self.app.rglob("*") if p.is_file()})
 
-    def test_embedding_and_incremental_default_remove_preserve_sandbox_and_worker(self):
+    def test_embedding_and_explicit_remove_preserve_sandbox_and_worker(self):
         owner_rights = MODULE.entitlements(self.app)
         worker_rights = MODULE.entitlements(self.worker)
         worker_digest = MODULE.BUILDER.digest(self.worker)
         result = self.embed()
         self.assertTrue(result["included"])
-        self.assertFalse(result["capabilityEnabled"])
+        self.assertTrue(result["capabilityEnabled"])
         self.assertFalse(result["helperExecuted"])
         record = MODULE.inspect(self.app)
         self.assertEqual(record["helper"], self.receipt)
         self.assertEqual(MODULE.entitlements(self.app), owner_rights)
         self.assertEqual(MODULE.entitlements(self.worker), worker_rights)
         self.assertEqual(MODULE.BUILDER.digest(self.worker), worker_digest)
-        result = MODULE.assemble(self.app)
+        result = MODULE.assemble(self.app, enabled=False)
         self.assertEqual(result, {"included": False, "modified": True, "capabilityEnabled": False})
         self.assertIsNone(MODULE.inspect(self.app))
         self.assertFalse((self.app / MODULE.HELPER).exists())
@@ -85,6 +85,12 @@ class EmbeddedCandidateTests(unittest.TestCase):
         self.assertEqual(MODULE.entitlements(self.app), owner_rights)
         self.assertEqual(MODULE.BUILDER.digest(self.worker), worker_digest)
         MODULE.command(["/usr/bin/codesign", "--verify", "--deep", "--strict", str(self.app)])
+
+    def test_default_embeds_enabled_helper(self):
+        result = MODULE.assemble(self.app, build_helper=self.build_helper)
+        self.assertTrue(result["included"])
+        self.assertTrue(result["capabilityEnabled"])
+        self.assertFalse(MODULE.inspect(self.app)["helper"]["systemAcceptance"])
 
     def test_repeated_candidate_build_keeps_one_helper(self):
         self.embed()

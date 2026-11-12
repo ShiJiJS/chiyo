@@ -19,6 +19,7 @@ extension CredentialMaterialAgentAccess on AgentAccess {
         : (old.operationPlan ?? _service._useRequest(old.requestId).plan)
               .receiver;
     final names = switch (receiver) {
+      'program_file' => {'credential.bin'},
       'aws_shared_credentials' => {'credential.bin', 'aws-config'},
       'ssh_identity' => {
         'credential.bin',

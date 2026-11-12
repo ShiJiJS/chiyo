@@ -65,6 +65,7 @@ extension _CredentialHistoryService on InformationService {
     }
     final times = [
       r.createdAt,
+      ...r.revealReads.map((read) => read.at),
       ?r.decidedAt,
       ?r.revokedAt,
       ?r.attemptedAt,

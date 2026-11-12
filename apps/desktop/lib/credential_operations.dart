@@ -143,7 +143,9 @@ class _CredentialUseOperationsState extends State<CredentialUseOperations> {
                     child: _fact('允许方式', switch (r.plan.receiver) {
                       'ssh_identity' => 'SSH · 临时文件参数',
                       'aws_shared_credentials' => '临时文件 · 环境变量',
-                      _ => '秘密值 · 环境变量',
+                      'program_stdin' => '程序标准输入',
+                      'program_file' => '临时凭据文件',
+                      _ => '凭据值 · 环境变量',
                     }),
                   ),
                   TextButton(

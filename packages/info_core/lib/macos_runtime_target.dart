@@ -6,10 +6,12 @@ import 'package:ffi/ffi.dart';
 
 /// Internal Darwin worker primitive. The executable is loaded suspended so the
 /// supervisor can verify its real kernel identity before a short target exits.
-/// stdout/stderr inherit only the worker's bounded-output pipes; stdin is null.
+/// stdout/stderr inherit only the worker's bounded-output pipes. Optional stdin
+/// uses a separate anonymous pipe, never the worker's control descriptor.
 /// The caller is already in the approved working directory and process group.
 class MacOsRuntimeTarget {
-  MacOsRuntimeTarget._(this.pid, this._queue);
+  MacOsRuntimeTarget._(this.pid, this._queue, this._stdinFd);
+  int? _stdinFd;
   final int pid;
   final int _queue;
   bool _resumed = false;
@@ -93,6 +95,21 @@ class MacOsRuntimeTarget {
   );
   static final _close = _lib
       .lookupFunction<Int32 Function(Int32), int Function(int)>('close');
+  static final _pipe = _lib
+      .lookupFunction<
+        Int32 Function(Pointer<Int32>),
+        int Function(Pointer<Int32>)
+      >('pipe');
+  static final _fcntl = _lib
+      .lookupFunction<
+        Int32 Function(Int32, Int32, VarArgs<(Int32,)>),
+        int Function(int, int, int)
+      >('fcntl');
+  static final _write = _lib
+      .lookupFunction<
+        IntPtr Function(Int32, Pointer<Uint8>, IntPtr),
+        int Function(int, Pointer<Uint8>, int)
+      >('write');
   static final _events = _lib
       .lookupFunction<
         Int32 Function(
@@ -118,8 +135,9 @@ class MacOsRuntimeTarget {
   static MacOsRuntimeTarget spawn(
     String executable,
     List<String> argv,
-    Map<String, String> environment,
-  ) {
+    Map<String, String> environment, {
+    bool pipeStdin = false,
+  }) {
     if (!Platform.isMacOS) throw UnsupportedError('Darwin target required');
     if (!executable.startsWith('/') ||
         [
@@ -139,14 +157,33 @@ class MacOsRuntimeTarget {
     );
     final devNull = '/dev/null'.toNativeUtf8();
     var attrsReady = false, actionsReady = false;
+    int? inputRead, inputWrite;
     try {
       if (_attrInit(attrs) != 0) throw StateError('spawn_init_failed');
       attrsReady = true;
       if (_actionsInit(actions) != 0) throw StateError('spawn_init_failed');
       actionsReady = true;
+      if (pipeStdin) {
+        final pair = calloc<Int32>(2);
+        try {
+          if (_pipe(pair) != 0) throw StateError('stdin_pipe_failed');
+          inputRead = pair[0];
+          inputWrite = pair[1];
+          // Nonblocking writes keep the Dart worker responsive while a target
+          // consumes large input. F_SETNOSIGPIPE turns early close into EPIPE.
+          if (_fcntl(inputWrite, 4, 4) != 0 || _fcntl(inputWrite, 73, 1) != 0) {
+            throw StateError('stdin_pipe_failed');
+          }
+        } finally {
+          calloc.free(pair);
+        }
+      }
       // POSIX_SPAWN_START_SUSPENDED | POSIX_SPAWN_CLOEXEC_DEFAULT.
       if (_flags(attrs, 0x4080) != 0 ||
-          _open(actions, 0, devNull, 0, 0) != 0 ||
+          (inputRead == null
+                  ? _open(actions, 0, devNull, 0, 0)
+                  : _dup(actions, inputRead, 0)) !=
+              0 ||
           _dup(actions, 1, 1) != 0 ||
           _dup(actions, 2, 2) != 0 ||
           _spawn(
@@ -179,11 +216,15 @@ class MacOsRuntimeTarget {
           if (queue >= 0) _close(queue);
           throw StateError('process_start_failed');
         }
-        return MacOsRuntimeTarget._(process.value, queue);
+        final target = MacOsRuntimeTarget._(process.value, queue, inputWrite);
+        inputWrite = null;
+        return target;
       } finally {
         calloc.free(change);
       }
     } finally {
+      if (inputRead != null) _close(inputRead);
+      if (inputWrite != null) _close(inputWrite);
       if (actionsReady) _actionsDestroy(actions);
       if (attrsReady) _attrDestroy(attrs);
       calloc.free(attrs);
@@ -192,6 +233,39 @@ class MacOsRuntimeTarget {
       calloc.free(devNull);
       arguments.close();
       env.close();
+    }
+  }
+
+  void closeStdin() {
+    final fd = _stdinFd;
+    _stdinFd = null;
+    if (fd != null) _close(fd);
+  }
+
+  Future<void> sendStdin(List<int> bytes) async {
+    final fd = _stdinFd;
+    if (fd == null) return;
+    final buffer = calloc<Uint8>(4096);
+    var offset = 0;
+    try {
+      while (offset < bytes.length && _stdinFd == fd) {
+        final length = (bytes.length - offset).clamp(0, 4096);
+        buffer.asTypedList(length).setRange(0, length, bytes, offset);
+        final written = _write(fd, buffer, length);
+        if (written > 0) {
+          offset += written;
+        } else if (written < 0 && _errno().value == 32) {
+          return; // Target intentionally closed stdin (EPIPE).
+        } else if (written < 0 && {4, 35}.contains(_errno().value)) {
+          await Future<void>.delayed(const Duration(milliseconds: 5));
+        } else {
+          throw StateError('stdin_delivery_failed');
+        }
+      }
+    } finally {
+      buffer.asTypedList(4096).fillRange(0, 4096, 0);
+      calloc.free(buffer);
+      closeStdin();
     }
   }
 

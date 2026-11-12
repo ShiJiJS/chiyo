@@ -43,16 +43,18 @@ class MacBuildArgumentsTests(unittest.TestCase):
     def test_empty_arguments_work_on_macos_bash_without_extra_empty_string(self):
         result, flutter, python = self.run_launcher("build")
         self.assertEqual(result.returncode, 0, result.stderr.decode())
-        self.assertEqual(flutter, [["build", "macos", "--release", "--no-pub"]])
-        self.assertEqual(len(python), 2)
-        self.assertTrue(python[1][0].endswith("/bundle-macos-focused-helper.py"))
-        self.assertEqual(len(python[1]), 2)  # Default reconciles to no candidate.
+        self.assertEqual(flutter, [])
+        self.assertTrue(python[0][0].endswith("/build-macos-release.py"))
+        self.assertEqual(len(python), 3)
+        self.assertTrue(python[2][0].endswith("/bundle-macos-focused-helper.py"))
+        self.assertEqual(len(python[2]), 2)  # Default embeds the helper.
 
     def test_candidate_option_is_consumed_and_other_arguments_keep_spaces(self):
         result, flutter, python = self.run_launcher("build", "--with-focused-fill-candidate", "--build-name=合成 版本")
         self.assertEqual(result.returncode, 0, result.stderr.decode())
-        self.assertEqual(flutter, [["build", "macos", "--release", "--no-pub", "--build-name=合成 版本"]])
-        self.assertEqual(python[1][-1], "--with-focused-fill-candidate")
+        self.assertEqual(flutter, [])
+        self.assertEqual(python[0][-1], "--build-name=合成 版本")
+        self.assertEqual(len(python[2]), 2)
         self.assertNotIn("--with-focused-fill-candidate", python[0])
 
     def test_run_preserves_ordinary_arguments_without_packaging(self):
