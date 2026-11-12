@@ -336,7 +336,8 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
 
   Widget _credential(BuildContext context, WorkspaceCredentialUseRequest r) {
     final c = UiPalette.of(context),
-        focus = r.delivery == WorkspaceCredentialDelivery.focus;
+        focus = r.delivery == WorkspaceCredentialDelivery.focus,
+        reveal = r.delivery == WorkspaceCredentialDelivery.reveal;
     Widget block(String label, String text) => Container(
       margin: const EdgeInsets.only(top: 15),
       padding: const EdgeInsets.all(16),
@@ -361,15 +362,20 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           '${r.credentialName} · 材料v${r.materialVersion}',
           style: libraryText(context, 14, weight: FontWeight.w600),
         ),
-        block('注入位置', switch (r.delivery) {
+        block(reveal ? '原文读取范围' : '注入位置', switch (r.delivery) {
+          WorkspaceCredentialDelivery.reveal =>
+            '允许 AI 读取这项已保存凭据的原文。原文会进入当前聊天上下文，撤销许可不能删除已经交付的原文。此申请与直接填写或程序使用许可分开审批。',
+          WorkspaceCredentialDelivery.standardInput => 'stdin → 已核对程序的标准输入',
           WorkspaceCredentialDelivery.environment =>
             '${r.receiver.binding} → 仅CLI创建的子进程环境变量',
           WorkspaceCredentialDelivery.file =>
             '${r.receiver.binding} → 临时凭据文件路径 → 已核对的参数位置',
-          WorkspaceCredentialDelivery.focus => '本机前台窗口的真实输入焦点；Mac当前未启用',
+          WorkspaceCredentialDelivery.focus => '本机前台窗口中经核验的密码输入框',
           WorkspaceCredentialDelivery.storage => '仅保管，不提供运行时使用',
         }),
-        if (!focus) ...[
+        if (reveal)
+          block('无法直接填写或交给程序的原因（AI 提供）', r.receiver.arguments.join('\n')),
+        if (!focus && !reveal) ...[
           block(
             '由 CLI 启动',
             '${r.receiver.executable} ${r.receiver.arguments.map((a) => a.contains(RegExp(r'\s')) ? jsonEncode(a) : a).join(' ')}',

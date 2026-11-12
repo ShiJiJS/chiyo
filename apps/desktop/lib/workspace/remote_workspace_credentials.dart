@@ -11,7 +11,7 @@ import 'workspace_source.dart';
 /// Dedicated trusted owner input and metadata adapter. No plaintext enters
 /// WorkspaceCredentialWrite or ordinary detail/receipt projections.
 class RemoteWorkspaceCredentials extends UnavailableWorkspaceCredential
-    implements CredentialInputStaging {
+    implements CredentialInputStaging, WorkspaceCredentialRevealSource {
   RemoteWorkspaceCredentials(this.client, {required this.changed});
   final OwnerClient client;
   final void Function() changed;
@@ -78,6 +78,22 @@ class RemoteWorkspaceCredentials extends UnavailableWorkspaceCredential
     }
     return '$_prefix/${Uri.encodeComponent(ref.id)}';
   }
+
+  @override
+  Future<String> readStringMaterial(
+    WorkspaceRecordRef ref,
+    int materialVersion,
+  ) => _read(() async {
+    final response = await client.request('POST', '${_record(ref)}/reveal', {
+      'materialVersion': materialVersion,
+    });
+    if (response['credentialId'] != ref.id ||
+        response['materialVersion'] != materialVersion ||
+        response['secret'] is! String) {
+      throw const FormatException('Invalid credential material response');
+    }
+    return response['secret'] as String;
+  });
 
   @override
   Future<WorkspaceCredentialDetail> read(WorkspaceRecordRef ref) => _read(

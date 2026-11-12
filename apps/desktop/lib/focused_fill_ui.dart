@@ -24,7 +24,7 @@ String _application(FocusedFillApplication value) =>
 
 String _outcome(FocusedFillState state) => switch (state) {
   FocusedFillState.checking => '等待本次操作完成，先查询原操作。',
-  FocusedFillState.sent => '按键已提交给 Windows；未读取密码框确认，也未提交登录。',
+  FocusedFillState.sent => '输入已发送给目标应用，未自动提交登录。',
   FocusedFillState.refused => '本次未发送按键。修正原因后，可明确发起新操作。',
   FocusedFillState.partial => '可能已留下部分内容。停止自动填充，由用户检查并清空后决定是否重新操作。',
   FocusedFillState.unknown => '无法确认是否已输入。只查询原操作；不要自动更换操作 ID 重填。',
@@ -40,7 +40,7 @@ String _reason(String? code) => switch (code) {
   'access_denied' => '目标程序的用户、会话或权限条件不允许输入。',
   'audit_unavailable' => '操作记录未能完整保存，需先核查原操作。',
   'busy' => '已有输入操作占用当前桌面。',
-  'input_rejected' => 'Windows 未接受本次输入。',
+  'input_rejected' => '系统未接受本次输入。',
   'native_unavailable' => '原生输入程序不可用。',
   'grant_expired' => '使用授权已到期。',
   'grant_revoked' => '使用授权已撤销。',

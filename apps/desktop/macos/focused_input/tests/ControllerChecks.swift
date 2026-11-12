@@ -62,6 +62,24 @@ private enum ControllerChecks {
       do { try body(); passed.append(name) }
       catch { fputs("FAIL: \(name)\n", stderr); throw error }
     }
+    try scenario("helper permission replies cannot be confused with target readiness") {
+      for status in [MacFocusPermissionStatus(state: "ready"),
+                     MacFocusPermissionStatus(state: "permission_required", errorCode: "permission_required"),
+                     MacFocusPermissionStatus.unavailable] {
+        let encoded = try JSONSerialization.data(withJSONObject: status.wire)
+        try check(MacFocusPermissionStatus.decode(encoded)?.state == status.state)
+      }
+      let target = try JSONSerialization.data(withJSONObject: MacFocusReply(state: "ready", application: app).wire)
+      try check(MacFocusPermissionStatus.decode(target) == nil)
+      for invalid: [String: Any] in [
+        ["format": 1, "platform": "windows", "state": "ready"],
+        ["format": 1, "platform": "macos", "state": "ready", "errorCode": "permission_required"],
+        ["format": 1, "platform": "macos", "state": "permission_required"],
+        ["format": 1, "platform": "macos", "state": "unavailable", "errorCode": "unknown_raw_error"]] {
+        let encoded = try JSONSerialization.data(withJSONObject: invalid)
+        try check(MacFocusPermissionStatus.decode(encoded) == nil)
+      }
+    }
     try scenario("application identity is exact and bounded") {
       try check(app.wire.count == 2)
       for sha in [String(repeating: "a", count: 64) + "\n", String(repeating: "A", count: 64), "123"] {

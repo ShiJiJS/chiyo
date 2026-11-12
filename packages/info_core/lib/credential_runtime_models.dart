@@ -288,6 +288,10 @@ class CredentialUseInput {
     if (launch is! Map<String, dynamic>) {
       throw const CredentialUseFailure('invalid_type', fieldPath: 'launch');
     }
+    if (protocolVersion != 2 &&
+        CredentialLaunchPlan.programReceivers.contains(launch['receiver'])) {
+      throw const CredentialUseFailure('unsupported_protocol');
+    }
     final rawFields = j.containsKey('readFields') ? j['readFields'] : const [];
     if (rawFields is! List) {
       throw const CredentialUseFailure('invalid_type', fieldPath: 'readFields');
@@ -386,8 +390,17 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
       'ssh_identity' => {'ssh', 'ssh.exe'},
       _ => <String>{},
     };
-    if (!names.contains(name)) {
+    if (!CredentialLaunchPlan.programReceivers.contains(receiver) &&
+        !names.contains(name)) {
       throw const CredentialUseFailure('unsupported_tool_version');
+    }
+    if (CredentialLaunchPlan.programReceivers.contains(receiver)) {
+      return ExecutableIdentity(
+        canonical,
+        stat.size,
+        stat.modified.microsecondsSinceEpoch,
+        'sha256:${sha256.convert(await file.readAsBytes())}',
+      );
     }
     probe = await Directory.systemTemp.createTemp('info-tool-probe-');
     // macOS /var is an ancestor alias. Keep the created directory's canonical
@@ -482,6 +495,26 @@ Future<ExecutableIdentity> inspectCredentialExecutable(
 }
 
 class CredentialLaunchPlan {
+  static const programReceivers = {
+    'program_stdin',
+    'program_env',
+    'program_file',
+  };
+  static const supportedReceivers = [
+    'gh_token',
+    'aws_shared_credentials',
+    'ssh_identity',
+    'program_stdin',
+    'program_env',
+    'program_file',
+  ];
+  bool get isProgramReceiver => programReceivers.contains(receiver);
+  bool get requiresMaterialFiles => {
+    'aws_shared_credentials',
+    'ssh_identity',
+    'program_file',
+  }.contains(receiver);
+
   CredentialLaunchPlan._(
     this.receiver,
     this.path,
@@ -489,12 +522,14 @@ class CredentialLaunchPlan {
     this.cwd,
     this.env, {
     this.identity,
+    this.stdin,
     this.sshTrustSnapshotId,
     Map<String, String> internalMaterialHashes = const {},
   }) : internalMaterialHashes = Map.unmodifiable(internalMaterialHashes);
   final String receiver, path, cwd;
   final List<LaunchValue> argv;
   final Map<String, LaunchValue> env;
+  final LaunchValue? stdin;
   final ExecutableIdentity? identity;
   final String? sshTrustSnapshotId;
   final Map<String, String> internalMaterialHashes;
@@ -504,19 +539,21 @@ class CredentialLaunchPlan {
     bool allowInternal = false,
     bool allowPortablePaths = false,
   }) {
-    _useShape(j, {'receiver', 'executable', 'argv', 'cwd', 'env'});
+    _useShape(j, {'receiver', 'executable', 'argv', 'cwd', 'env'}, {'stdin'});
     final receiver = _useText(
       j['receiver'],
       'launch.receiver',
       max: 64,
       empty: false,
     );
-    if (!{
-      'gh_token',
-      'ssh_identity',
-      'aws_shared_credentials',
-    }.contains(receiver)) {
+    if (!supportedReceivers.contains(receiver)) {
       throw const CredentialUseFailure('unsupported_receiver');
+    }
+    if ((receiver == 'program_stdin') != j.containsKey('stdin')) {
+      throw const CredentialUseFailure(
+        'invalid_reference',
+        fieldPath: 'launch.stdin',
+      );
     }
     final path = _useText(
       j['executable'],
@@ -565,6 +602,9 @@ class CredentialLaunchPlan {
             allowInternal: allowInternal,
           ),
       }),
+      stdin: j.containsKey('stdin')
+          ? LaunchValue.parse(j['stdin'], 'launch.stdin', environment: true)
+          : null,
     );
   }
   CredentialLaunchPlan resolved(ExecutableIdentity identity, String cwd) =>
@@ -575,6 +615,7 @@ class CredentialLaunchPlan {
         cwd,
         env,
         identity: identity,
+        stdin: stdin,
         sshTrustSnapshotId: sshTrustSnapshotId,
         internalMaterialHashes: internalMaterialHashes,
       );
@@ -588,6 +629,7 @@ class CredentialLaunchPlan {
     cwd,
     Map.unmodifiable(env ?? this.env),
     identity: identity,
+    stdin: stdin,
     sshTrustSnapshotId: sshTrustSnapshotId,
     internalMaterialHashes: internalMaterialHashes,
   );
@@ -599,6 +641,7 @@ class CredentialLaunchPlan {
         cwd,
         env,
         identity: identity,
+        stdin: stdin,
         sshTrustSnapshotId: trust.id,
         internalMaterialHashes: {
           'ssh_known_hosts': trust.sha256,
@@ -612,6 +655,7 @@ class CredentialLaunchPlan {
     'argv': argv.map((v) => v.toJson()).toList(),
     'cwd': cwd,
     'env': {for (final e in env.entries) e.key: e.value.toJson()},
+    if (stdin != null) 'stdin': stdin!.toJson(),
     if (identity != null) 'executableIdentity': identity!.toJson(),
     if (sshTrustSnapshotId != null) 'sshTrustSnapshotId': sshTrustSnapshotId,
     if (internalMaterialHashes.isNotEmpty)
@@ -642,12 +686,97 @@ class CredentialLaunchPlan {
       resolved.cwd,
       resolved.env,
       identity: resolved.identity,
+      stdin: resolved.stdin,
       sshTrustSnapshotId: j['sshTrustSnapshotId'] as String?,
       internalMaterialHashes:
           (j['internalMaterialHashes'] as Map?)?.cast<String, String>() ??
           const {},
     );
   }
+
+  /// Validate typed bindings independently of any secret material.
+  void validateProgramBindings(String alias, CredentialForm form) {
+    if (!isProgramReceiver) {
+      throw const CredentialUseFailure('unsupported_receiver');
+    }
+    if (receiver != 'program_file' && form != CredentialForm.string) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    var references = 0;
+    void check(LaunchValue value, LaunchValueKind allowed) {
+      if (value.kind == LaunchValueKind.literal) return;
+      if (value.kind != allowed || value.value != alias) {
+        throw const CredentialUseFailure('invalid_reference');
+      }
+      references++;
+    }
+
+    for (final value in argv) {
+      if (receiver == 'program_file') {
+        check(value, LaunchValueKind.file);
+      } else if (value.kind != LaunchValueKind.literal) {
+        throw const CredentialUseFailure(
+          'invalid_reference',
+          fieldPath: 'launch.argv',
+        );
+      }
+    }
+    for (final value in env.values) {
+      if (receiver == 'program_stdin') {
+        if (value.kind != LaunchValueKind.literal) {
+          throw const CredentialUseFailure('invalid_reference');
+        }
+      } else {
+        check(
+          value,
+          receiver == 'program_file'
+              ? LaunchValueKind.file
+              : LaunchValueKind.secret,
+        );
+      }
+    }
+    if (receiver == 'program_stdin') {
+      if (stdin?.kind != LaunchValueKind.secret || stdin?.value != alias) {
+        throw const CredentialUseFailure(
+          'invalid_reference',
+          fieldPath: 'launch.stdin',
+        );
+      }
+      references++;
+    } else if (stdin != null) {
+      throw const CredentialUseFailure(
+        'invalid_reference',
+        fieldPath: 'launch.stdin',
+      );
+    }
+    if (references == 0) throw const CredentialUseFailure('invalid_reference');
+  }
+
+  /// A reusable program grant fixes the executable bytes and typed destinations.
+  /// Literal arguments and working directories remain per-operation facts.
+  void requireApprovedProgramScope(CredentialLaunchPlan approved) {
+    if (!approved.isProgramReceiver) return;
+    Object bindings(CredentialLaunchPlan plan) => {
+      'receiver': plan.receiver,
+      'executable': plan.identity?.toJson(),
+      'stdin': plan.stdin?.toJson(),
+      'argv': {
+        for (var i = 0; i < plan.argv.length; i++)
+          if (plan.argv[i].kind != LaunchValueKind.literal)
+            '$i': plan.argv[i].toJson(),
+      },
+      'env': {
+        for (final entry in plan.env.entries)
+          if (entry.value.kind != LaunchValueKind.literal)
+            entry.key: entry.value.toJson(),
+      },
+    };
+    if (_useFingerprint(bindings(this)) !=
+        _useFingerprint(bindings(approved))) {
+      throw const CredentialUseFailure('scope_not_approved');
+    }
+  }
+
   String get planHash {
     Object? ordered(Object? v) => v is Map
         ? {
@@ -679,6 +808,8 @@ class CredentialUseRequest {
     required this.useGeneration,
     CredentialLaunchPlan? plan,
     FocusedFillPlan? fill,
+    String? revealReason,
+    Iterable<CredentialRevealRead> revealReads = const [],
     this.requestedPlan,
     required this.createdAt,
     required this.requestExpiresAt,
@@ -703,9 +834,16 @@ class CredentialUseRequest {
          fill,
          requestedPlan,
          fields,
+         revealReason,
        ),
+       revealReads = List.unmodifiable(revealReads),
        fields = List.unmodifiable(fields),
        approvedFields = List.unmodifiable(approvedFields) {
+    if (!isReveal && revealReads.isNotEmpty ||
+        revealReads.map((r) => r.operationId).toSet().length !=
+            revealReads.length) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     if (credentialValidity == CredentialUseValidity.session &&
         (!supportsSessionValidity ||
             !credentialApproved ||
@@ -724,6 +862,13 @@ class CredentialUseRequest {
   final int version, useGeneration;
   final int protocolVersion;
   final CredentialUseSpecification specification;
+  final List<CredentialRevealRead> revealReads;
+  bool get isReveal => specification is CredentialRevealSpecification;
+  bool get isCommand => specification is CredentialCommandSpecification;
+  String? get revealReason => switch (specification) {
+    CredentialRevealSpecification(:final fallbackReason) => fallbackReason,
+    _ => null,
+  };
   bool get isFocusedFill => specification is CredentialFocusedFillSpecification;
   FocusedFillPlan? get focusedFill => switch (specification) {
     CredentialFocusedFillSpecification(:final plan) => plan,
@@ -736,7 +881,12 @@ class CredentialUseRequest {
     CredentialCommandSpecification(:final plan) => plan,
     _ => throw const CredentialUseFailure('scope_not_approved'),
   };
-  String get usePlanHash => focusedFill?.planHash ?? plan.planHash;
+  String get usePlanHash => isReveal
+      ? _useFingerprint({
+          'useKind': 'credential_reveal',
+          'fallbackReason': revealReason,
+        })
+      : focusedFill?.planHash ?? plan.planHash;
   final CredentialLaunchPlan? requestedPlan;
   final DateTime createdAt, requestExpiresAt;
   final List<FieldRef> fields, approvedFields;
@@ -744,7 +894,7 @@ class CredentialUseRequest {
   final DateTime? credentialExpiresAt, fieldExpiresAt;
   final CredentialUseValidity credentialValidity;
   bool get supportsSessionValidity =>
-      protocolVersion == 2 && !isFocusedFill && plan.receiver == 'ssh_identity';
+      protocolVersion == 2 && isCommand && plan.receiver == 'ssh_identity';
   bool credentialGrantExpired(DateTime now) =>
       credentialValidity != CredentialUseValidity.session &&
       (credentialExpiresAt == null || !now.isBefore(credentialExpiresAt!));
@@ -763,7 +913,11 @@ class CredentialUseRequest {
     'credentialId': credentialId,
     'version': version,
     'useGeneration': useGeneration,
-    if (isFocusedFill) ...{
+    if (isReveal) ...{
+      'useKind': 'credential_reveal',
+      'fallbackReason': revealReason,
+      'revealReads': revealReads.map((r) => r.toJson()).toList(),
+    } else if (isFocusedFill) ...{
       'useKind': 'focused_fill',
       'fill': focusedFill!.toJson(),
     } else
@@ -800,7 +954,7 @@ class CredentialUseRequest {
         credentialId: j['credentialId'] as String,
         version: j['version'] as int,
         useGeneration: j['useGeneration'] as int,
-        plan: _storedFocusedFill(j)
+        plan: _storedFocusedFill(j) || j['useKind'] == 'credential_reveal'
             ? null
             : CredentialLaunchPlan.fromStorageJson(
                 j['plan'] as Map<String, dynamic>,
@@ -808,6 +962,14 @@ class CredentialUseRequest {
         fill: _storedFocusedFill(j)
             ? FocusedFillPlan.fromJson(j['fill'] as Map<String, dynamic>)
             : null,
+        revealReason: j['useKind'] == 'credential_reveal'
+            ? j['fallbackReason'] as String
+            : null,
+        revealReads: (j['revealReads'] as List? ?? const []).map(
+          (r) => CredentialRevealRead.fromJson(
+            Map<String, dynamic>.from(r as Map),
+          ),
+        ),
         requestedPlan: j['requestedPlan'] == null
             ? null
             : CredentialLaunchPlan.fromStorageJson(
@@ -861,17 +1023,23 @@ class CredentialUseRequest {
   Map<String, Object?> toStorageJson() => toJson();
   Map<String, Object?> toRequestInputJson() => {
     'protocolVersion': protocolVersion,
-    'command': 'request-use',
+    'command': isReveal ? 'request-reveal' : 'request-use',
     'purpose': purpose,
-    'credentials': [
-      {'alias': alias, 'credentialId': credentialId, 'version': version},
-    ],
-    if (isFocusedFill)
+    if (isReveal) ...{
+      'credentialId': credentialId,
+      'version': version,
+    } else
+      'credentials': [
+        {'alias': alias, 'credentialId': credentialId, 'version': version},
+      ],
+    if (isReveal)
+      'fallbackReason': revealReason
+    else if (isFocusedFill)
       'fill': focusedFill!.toJson()
     else
       'launch': Map<String, Object?>.from((requestedPlan ?? plan).toJson())
         ..remove('executableIdentity'),
-    'readFields': fields.map((f) => f.toJson()).toList(),
+    if (!isReveal) 'readFields': fields.map((f) => f.toJson()).toList(),
   };
 }
 

@@ -140,7 +140,7 @@ def main():
     parser.add_argument("output", type=Path, help="NEW directory under this checkout's build/")
     parser.add_argument("--check", action="store_true", help="Also run all four source test suites")
     parser.add_argument("--with-focused-fill-candidate", action="store_true",
-                        help="Embed the disabled native XPC candidate; no permission, input or capability activation")
+                        help="Compatibility option; the native helper is now included by default")
     args = parser.parse_args()
     if sys.platform != "darwin" or platform.machine() != "arm64":
         parser.error("Build on ARM64 macOS")
@@ -184,8 +184,8 @@ def main():
         shutil.copytree(ROOT / "apps/desktop/build/macos/Build/Products/Release/info_desktop.app",
                         app, symlinks=True)
         focus = FOCUS_BUNDLE.inspect(app)
-        if (focus is not None) != args.with_focused_fill_candidate:
-            raise RuntimeError("Focused-fill candidate state differs from the requested package")
+        if focus is None or focus.get("capabilityEnabled") is not True:
+            raise RuntimeError("Packaged focused-fill helper is missing or disabled")
         cli = payload / "cli"
         cli.mkdir()
         for entry, name in [
@@ -321,8 +321,6 @@ def main():
         cipher = app / "Contents/Frameworks/sqlcipher.framework/Versions/A/sqlcipher"
         version = re.search(r"^version:\s*(.+)$", (ROOT / "apps/desktop/pubspec.yaml").read_text(), re.M).group(1)
         release = f"{version}-mac-dev.{commit[:12]}"
-        if focus is not None:
-            release += "-focused-fill-candidate"
         readme = (ROOT / "integrations/macos/README.md").read_text()
         for token, value in {
             "@RELEASE@": release, "@SOURCE_COMMIT@": commit,
@@ -354,7 +352,7 @@ def main():
             "machO": architecture, "files": inventory(payload),
         }
         if focus is not None:
-            manifest["focusedFillCandidate"] = {"included": True, "capabilityEnabled": False,
+            manifest["focusedFill"] = {"included": True, "capabilityEnabled": True,
                 "systemAcceptance": False, "helper": focus["helper"]}
         clean_source(commit)
         (payload / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

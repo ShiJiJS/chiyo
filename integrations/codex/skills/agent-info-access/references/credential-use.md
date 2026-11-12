@@ -3,8 +3,15 @@
 Use the same private association and stdin-only `info-codex` transport as the
 main Skill. Choose command injection below for a CLI tool, or
 [Focused password input](#focused-password-input) for a visible local password
-box. The device's resident executor handles the credential; your own shell does not receive
-the secret or a secret-file path. Approval alone performs neither operation.
+box. Identify the actual destination before requesting: the program and input
+method, or the visible app/password field. Query the current connection's
+capabilities first. The device executor handles injected credentials; approval
+alone neither starts the program nor fills a field.
+
+If the required method is unavailable or a definite failure prevents use,
+explain that reason and use [Explicit original-value access](#explicit-original-value-access)
+only after its separate approval. A lost response or unknown outcome is not a
+reason to switch methods and repeat the action.
 
 ## Command injection: request once, reuse within the approved validity
 
@@ -12,14 +19,17 @@ the secret or a secret-file path. Approval alone performs neither operation.
    default to protocol2 and require `credential-use-reuse.v1`. An unsupported
    service requires a matching whole app/CLI/worker bundle; never silently
    downgrade or create a replacement single-use request.
-   On Mac, also require `credential-tools.v1`. Select the matching receiver in
+   For `gh_token`, `ssh_identity` and `aws_shared_credentials`, require
+   `credential-tools.v1`. Select the matching receiver in
    `credentialTools` with `available:true` and use its exact absolute
    `executable`. In server mode these are current-device CLI observations, not
    paths on the server. A prepared bundle refers to its matching App's tools;
    keep that App at its stable path and prepare again after moving/upgrading it.
    Missing or invalid entries require restoring the matching package, not
-   guessing another executable. App Sandbox directory access does not make an
-   arbitrary external program executable.
+   guessing another executable. For general programs, require the chosen
+   `program_*` receiver in `supportedCredentialReceivers` and use the actual
+   installed executable. Its presence in this list means the receiving method
+   exists, not that every program or its sandbox permits a successful launch.
    Tool discovery is public metadata; the owner still approves credential use,
    and each operation independently checks executable identity and version.
 2. Query `credential-catalog` for public metadata, form, current version and
@@ -45,6 +55,8 @@ the secret or a secret-file path. Approval alone performs neither operation.
 4. For each logical command, choose a new unique `operationId` and send
    `run-use` with the same `requestId` and that command's complete `launch`.
    The alias, credential version and receiver remain in the approved scope.
+   For `program_*`, executable identity and typed credential positions also stay
+   fixed. A different program or injection position requires a new request.
    Legal new commands within that scope need no new approval and never extend
    a timed deadline or turn a session grant into permission for another chat. CLI validates the real receiver and freezes each operation's
    executable identity, parameters, directory and effective injection plan.
@@ -125,6 +137,19 @@ and requestId. Do not reinterpret an old record as a reusable grant.
 
 ## Typed injection
 
+The three `program_*` receivers require protocol2, including when the caller
+supplies a protocol version explicitly.
+
+- program_stdin: a string credential via `"stdin":{"secret":"password"}` in
+  the launch, with `"env":{}`. The executor writes its exact UTF-8 bytes then EOF,
+  without adding a newline. Use only programs documented to read the credential
+  from stdin; OpenSSH password authentication does **not** read from stdin.
+- program_env: a string credential via an explicit variable such as
+  `"env":{"SERVICE_TOKEN":{"secret":"token"}}`. The variable exists only in
+  the approved target program, not the worker or parent shell.
+- program_file: a string or file credential via `{"file":"credential"}` in
+  argv or env. The program receives a private temporary file's path. The same
+  managed cleanup and operation rules below apply.
 - gh_token: string credential through `"env":{"GH_TOKEN":{"secret":"github_token"}}`.
   Only the CLI-created child's environment receives it; global and parent shell
   environments are unchanged. This supports the validated GitHub CLI receiver,
@@ -145,6 +170,22 @@ The credential entry alias must match its typed reference. Literal text such as
 CLI substitutes strings. Secrets are not placed in argv. Each file operation
 owns independent temporary material; one finishing never cleans another's files.
 
+For example, a real helper that accepts its password on stdin can use:
+
+```json
+{"protocolVersion":2,"command":"request-use","purpose":"Sign in to the requested service","credentials":[{"alias":"password","credentialId":"CREDENTIAL_ID","version":1}],"launch":{"receiver":"program_stdin","executable":"/absolute/path/to/login-helper","argv":["--password-stdin","--url","https://service.example"],"cwd":"/absolute/workdir","env":{},"stdin":{"secret":"password"}}}
+```
+
+After approval, submit `run-use` with the request ID, a new operation ID and the
+same complete launch. The helper path and flags above are illustrative: check
+the real program's interface first. For an API client or browser automation
+tool, the receiving process can read stdin/env/file and pass the value to its
+documented header/fill API. Bind the intended URL/tab/field in that helper's
+arguments and check the actual destination before filling. This does not imply
+Chiyo provides a universal browser extension or supports every browser tool.
+SSH password use needs an actual tested askpass-capable receiver; do not invent
+`ssh_password` or claim `program_stdin` makes OpenSSH read a password.
+
 For cleanup failure, call cleanup-use with that operation's executionId. This
 retries cleanup only. Cleanup_busy retains files while a group may be active;
 identity mismatch needs owner review. Let the registered cleanup mechanism handle
@@ -152,7 +193,7 @@ paths. Revocation blocks new operations, but does not terminate running programs
 or recall injected data. After restart, uncertain facts stay unknown and cleanup
 checks the original registered process groups before deleting anything.
 
-Known direct credential byte echoes are masked before output is retained, with
+For protocol2 operations, known direct credential byte echoes are masked before output is retained, with
 bounded stream matching. This does not cover arbitrary encodings, screenshots,
 external files or deliberate disclosure. The approved program receives the raw
 credential; runtime injection is not a sandbox. Use task results, not deliberate
@@ -160,19 +201,24 @@ credential-printing commands, and report only the needed nonsecret facts.
 
 ## Focused password input
 
-This development branch has a separate local input protocol. A capability means
-the installed host offers that operation, not that every browser is supported.
-The previously delivered0.4.0+8 package does not offer it. Windows source now has
-verified local-input workflows; use only capabilities actually returned by the
-installed host. For approved ordinary attachments, use
+Local input is available only when the current connection advertises it. A
+capability means the installed host offers that operation, not that every
+browser is supported. Server-mode approvals do not automatically provide a
+native fill driver on the Agent's device; if the server connection omits fill
+capabilities, choose a supported program receiver or separately approved
+original-value access. For approved ordinary attachments, use
 [Ordinary information files](information-files.md); they are readable documents,
 not credentials for filling or process injection.
 
 1. Query `capabilities`. Require protocol2, `credential-use-reuse.v1` and
    `credential-focused-fill.v1`. For safe target discovery also require
    `credential-focused-target.v1`. If discovery is unavailable, stop this
-   workflow and report it; keep secrets in the app rather than requesting raw
-   password text or inventing a receiver/placeholder.
+   workflow and explain it. Use a supported program receiver, or separately
+   request original-value access if needed; never invent a receiver/placeholder.
+   On Mac, `access_denied` may require the user to enable permission in App
+   Settings → 凭据填写. Checking support does not request OS permission.
+   Windows has no equivalent global Accessibility consent switch: distinguish
+   an absent helper from an unavailable desktop or unsupported target.
 2. Select one current **string** credential from `credential-catalog`. Click the
    intended visible password box, then call `focus-target` through a background
    execution tool that preserves the foreground. Require `targetState:ready`
@@ -186,7 +232,7 @@ not credentials for filling or process injection.
    `decision.credentialUse.approved` and current `state:available`. The grant
    fixes this credential version, application and the user-approved 2/4/8/24-hour deadline.
 4. After approval, prepare an empty password box and click it again. Leave it
-   masked and keep the intended application in the Windows foreground. A
+   masked and keep the intended application in the desktop foreground. A
    browser tool's DOM focus or visible panel alone may leave the approval app
    foreground. If the tool cannot activate the target window, ask the owner to
    return to it. Require `focus-target:ready` for the approved application before
@@ -196,8 +242,8 @@ not credentials for filling or process injection.
    carry private stdin separately, report that transport limitation.
 5. Query `fill-status` with the original requestId/operationId until a terminal
    `fillState`, using bounded polling. `checking` is in progress; `sent` means
-   Windows accepted input events, not proof of full receipt or login. Never read
-   back, reveal or screenshot a visible password to verify it. Filling does not
+   input events were sent, not proof of full receipt or login. Verify the login
+   result without printing the password. Filling does not
    clear the box or submit the form. Continue the user's authorized website task
    only after the result is understood.
 
@@ -240,3 +286,29 @@ redaction by another browser tool is that tool's behavior, not an Agent Info
 guarantee; explicit value extraction or a revealed-password screenshot can expose
 secrets. This workflow limits accidental disclosure during normal use, not
 deliberate readback or arbitrary third-party capture.
+
+## Explicit original-value access
+
+Use this fallback for a **string** credential only when direct delivery cannot
+complete the task. Require `credential-reveal.v1`. Explain the actual limitation
+and that the password will enter the current AI chat; submit a separate
+`request-reveal`. An existing `request-use` approval cannot be used for this.
+
+```json
+{"protocolVersion":2,"command":"request-reveal","credentialId":"CREDENTIAL_ID","version":1,"purpose":"Sign in to the service requested by the user","fallbackReason":"The current browser has no usable input or program receiver; the password will enter this AI chat."}
+```
+
+Keep the returned request ID and wait for its approval with the normal `status`
+or `wait` commands. Only when that reveal grant is available, call:
+
+```json
+{"protocolVersion":2,"command":"read-reveal","requestId":"REVEAL_REQUEST_ID","operationId":"password-read-01"}
+```
+
+The explicit response contains `secret`; use it only for the approved task and
+do not repeat it in user-facing summaries. Each operation ID can return the
+value once. A lost response must not trigger automatic new IDs or a new request.
+Denial, expiry, revocation or changed credentials require stopping; normal use
+cannot be silently escalated to this fallback. File credentials are excluded.
+The user can separately view/copy their stored string credential in the App;
+that Owner action does not require them to approve themselves.

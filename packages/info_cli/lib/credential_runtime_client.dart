@@ -14,6 +14,8 @@ Future<Process> _startCredentialProcess(
   Map<String, String> environment, {
   String? workerExecutable,
   String? plannedJobName,
+  Map<String, String>? targetEnvironment,
+  List<int>? targetStdin,
   Future<void> Function(int workerPid)? registerWorker,
 }) async {
   if (!Platform.isWindows && !Platform.isMacOS) {
@@ -52,6 +54,8 @@ Future<Process> _startCredentialProcess(
       'cwd': cwd,
       'statePath': state.path,
       'jobName': jobName,
+      'targetEnvironment': ?targetEnvironment,
+      if (targetStdin != null) 'targetStdinBase64': base64Encode(targetStdin),
     }),
   );
   await process.stdin.flush();
@@ -312,6 +316,14 @@ extension _CredentialRuntimeClient on AgentClient {
         throw const CredentialUseFailure('session_required');
       }
       if (_remote != null && input['protocolVersion'] == 1) {
+        throw const CredentialUseFailure('unsupported_protocol');
+      }
+      final launchInput = input['launch'];
+      if (version != 2 &&
+          launchInput is Map &&
+          CredentialLaunchPlan.programReceivers.contains(
+            launchInput['receiver'],
+          )) {
         throw const CredentialUseFailure('unsupported_protocol');
       }
       final filling =
@@ -915,14 +927,15 @@ class _CredentialRuntimeExecutor {
       reservations--;
     }
     final output = _ExecutionOutput(
-      secretPatterns: operation == null
+      secretPatterns:
+          operation == null && !material.approvedPlan.isProgramReceiver
           ? const []
           : _credentialOutputPatterns(material),
     );
     outputs[material.executionId] = output;
     late Future<void> work;
     work = Future<void>(
-      () => _launch(material, output),
+      () => _launch(material, output, allowProgram: operation != null),
     ).whenComplete(() => running.remove(work));
     running.add(work);
     return {
@@ -973,8 +986,9 @@ class _CredentialRuntimeExecutor {
 
   Future<void> _launch(
     CredentialExecutionMaterial m,
-    _ExecutionOutput output,
-  ) async {
+    _ExecutionOutput output, {
+    required bool allowProgram,
+  }) async {
     Directory? folder;
     Process? process;
     CredentialProcessIdentity? processIdentity;
@@ -1033,6 +1047,16 @@ class _CredentialRuntimeExecutor {
       final tokenReceiver = plan.receiver == 'gh_token';
       final awsReceiver = plan.receiver == 'aws_shared_credentials';
       final sshReceiver = plan.receiver == 'ssh_identity';
+      final programReceiver = plan.isProgramReceiver;
+      if (programReceiver) {
+        if (!allowProgram) {
+          throw const CredentialUseFailure('material_prepare_failed');
+        }
+        plan.validateProgramBindings(m.alias, m.credentialMaterial.form);
+        if (m.credentialMaterial.bytes.isEmpty) {
+          throw const CredentialUseFailure('material_prepare_failed');
+        }
+      }
       final binding =
           plan.env[tokenReceiver ? 'GH_TOKEN' : 'AWS_SHARED_CREDENTIALS_FILE'];
       if (tokenReceiver &&
@@ -1043,13 +1067,14 @@ class _CredentialRuntimeExecutor {
               m.credentialMaterial.stringValue.isEmpty)) {
         throw const CredentialUseFailure('material_prepare_failed');
       }
-      if (!tokenReceiver) {
+      if (plan.requiresMaterialFiles) {
         if (client._remote != null && materialLease == null) {
           materialLease = ManagedCredentialFiles.create();
           await deviceJournal!.rememberLease(materialLease);
         }
-        if ((!awsReceiver && !sshReceiver) ||
-            m.credentialMaterial.form != CredentialForm.file ||
+        if ((!awsReceiver && !sshReceiver && !programReceiver) ||
+            (!programReceiver &&
+                m.credentialMaterial.form != CredentialForm.file) ||
             materialLease == null ||
             materialLease.files.isNotEmpty) {
           throw const CredentialUseFailure('material_prepare_failed');
@@ -1084,6 +1109,8 @@ class _CredentialRuntimeExecutor {
           materialLease,
           awsReceiver
               ? ['credential.bin', 'aws-config']
+              : programReceiver
+              ? ['credential.bin']
               : [
                   'credential.bin',
                   'ssh-config',
@@ -1207,7 +1234,8 @@ class _CredentialRuntimeExecutor {
           '$option="${materialPath(file).replaceAll('\\', '/')}"';
       String resolveArgument(LaunchValue value) => switch (value.kind) {
         LaunchValueKind.literal => value.value,
-        LaunchValueKind.file when sshReceiver && value.value == m.alias =>
+        LaunchValueKind.file
+            when (sshReceiver || programReceiver) && value.value == m.alias =>
           materialPath('credential.bin'),
         LaunchValueKind.internalMaterial when sshReceiver =>
           switch (value.value) {
@@ -1225,6 +1253,27 @@ class _CredentialRuntimeExecutor {
         _ => throw const CredentialUseFailure('material_prepare_failed'),
       };
       final argv = plan.argv.map(resolveArgument).toList();
+      final targetEnvironment = programReceiver
+          ? <String, String>{...env}
+          : env;
+      if (programReceiver) {
+        for (final entry in plan.env.entries) {
+          // Windows environment names are case-insensitive. Keep exactly the
+          // approved spelling/value, never two competing variants.
+          if (Platform.isWindows) {
+            targetEnvironment.removeWhere(
+              (key, _) => key.toLowerCase() == entry.key.toLowerCase(),
+            );
+          }
+          targetEnvironment[entry.key] =
+              entry.value.kind == LaunchValueKind.secret
+              ? m.credentialMaterial.stringValue
+              : resolveArgument(entry.value);
+        }
+      }
+      final targetStdin = plan.receiver == 'program_stdin'
+          ? m.credentialMaterial.bytes
+          : null;
       preparing = false;
       process = client._usesDefaultCredentialStarter
           ? await _startCredentialProcess(
@@ -1234,6 +1283,8 @@ class _CredentialRuntimeExecutor {
               env,
               workerExecutable: client._runtimeWorkerExecutable,
               plannedJobName: m.jobName,
+              targetEnvironment: programReceiver ? targetEnvironment : null,
+              targetStdin: targetStdin,
               registerWorker: (workerPid) async {
                 final identity = CredentialProcessIdentity.capture(workerPid);
                 if (identity == null) {
@@ -1270,7 +1321,7 @@ class _CredentialRuntimeExecutor {
               plan.path,
               argv,
               plan.cwd,
-              env,
+              targetEnvironment,
             );
       // Drain immediately after OS creation, including when identity capture or
       // audit reporting fails. Neither failure ends the child's lifetime.
@@ -1280,6 +1331,10 @@ class _CredentialRuntimeExecutor {
       stderrDone = process.stderr
           .listen((data) => output.add('stderr', data))
           .asFuture<void>();
+      if (!client._usesDefaultCredentialStarter && targetStdin != null) {
+        process.stdin.add(targetStdin);
+        await process.stdin.flush();
+      }
       processIdentity = CredentialProcessIdentity.capture(process.pid);
       // Preserve the existing Windows control-channel timing. Only Darwin's
       // paused-target protocol needs the channel held through Core validation.

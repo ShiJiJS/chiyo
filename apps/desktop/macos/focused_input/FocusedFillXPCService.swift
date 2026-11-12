@@ -10,12 +10,14 @@ final class MacFocusPrivateService: NSObject, NSXPCListenerDelegate {
   private let lock = NSLock()
   private var sessions: [UUID: MacFocusPrivateSession] = [:]
 
-  init(supportedSession: @escaping (MacFocusSessionFacts) -> Bool = { _ in false }) throws {
+  init(supportedSession: @escaping (MacFocusSessionFacts) -> Bool = MacFocusSessionFacts.supportsLocalConsole) throws {
     self.identity = try MacFocusSignedPair.load(isHelper: true)
     self.listener = .service()
     self.supportedSession = supportedSession
     super.init()
-    listener.setConnectionCodeSigningRequirement(identity.ownerRequirement)
+    // service() listeners do not support listener-level requirements (Foundation
+    // asserts/crashes). Apply the exact requirement to each accepted connection
+    // below, before resume or any exported RPC can execute.
     listener.delegate = self
   }
 
@@ -25,7 +27,7 @@ final class MacFocusPrivateService: NSObject, NSXPCListenerDelegate {
     guard connection.effectiveUserIdentifier == geteuid(),
           let process = try? MacFocusProcessWitness(connection.processIdentifier),
           process.path == identity.ownerExecutable else { return false }
-    // Set this before resume as well as on the listener: authentication belongs
+    // Set this before resume: authentication belongs
     // to the actual XPC peer, never to a PID/identifier claimed in a request.
     connection.setCodeSigningRequirement(identity.ownerRequirement)
     let id = UUID()
@@ -126,6 +128,16 @@ private final class MacFocusPrivateSession: NSObject, MacFocusPrivateProtocol {
       pending = false
       state.unlock()
       respond(result, reply)
+    }
+  }
+
+  func permissions(reply: @escaping (Data) -> Void) { permissionStatus(prompt: false, reply: reply) }
+  func requestPermission(reply: @escaping (Data) -> Void) { permissionStatus(prompt: true, reply: reply) }
+
+  private func permissionStatus(prompt: Bool, reply: @escaping (Data) -> Void) {
+    DispatchQueue.main.async { [self] in
+      let result = live() ? SystemMacFocusEnvironment.permissions(prompt: prompt) : .unavailable
+      reply((try? JSONSerialization.data(withJSONObject: result.wire)) ?? Data())
     }
   }
 

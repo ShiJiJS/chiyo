@@ -1,5 +1,18 @@
 part of 'info_storage.dart';
 
+// Content-triggered: ordinary synchronized libraries remain readable by the
+// existing format-26 implementation. New credential facts require format 27.
+bool _hasCredentialDeliveryRows(Iterable<Map<String, Object?>> rows) =>
+    rows.any((row) {
+      final request = CredentialUseRequest.fromJson(_backupJson(row));
+      return request.isReveal ||
+          request.isCommand && request.plan.isProgramReceiver;
+    });
+int _syncContentFormat(Map<String, List<Map<String, Object?>>> tables) =>
+    _hasCredentialDeliveryRows(tables['credential_use_requests'] ?? const [])
+    ? 27
+    : 26;
+
 /// Owner-private portable metadata. Bodies remain in immutable attachment
 /// storage. Units are complete records, not independently mergeable fields.
 final class LibraryReplicaContents {
@@ -103,6 +116,7 @@ final class LibraryReplicaContents {
     _archiveCredentialRuntime(tables, now);
     final normalized = {
       ...document,
+      'version': _syncContentFormat(tables),
       'tables': _LibrarySyncProjection.normalizeTables(tables),
     };
     final current = InformationBackups._validate(normalized);
@@ -168,7 +182,7 @@ final class LibraryReplicaContents {
     }
     return {
       'format': InformationBackups._format,
-      'version': 26,
+      'version': _syncContentFormat(tables),
       'createdAt': now.toUtc().toIso8601String(),
       'tables': tables,
       'attachments': attachments,
@@ -193,7 +207,7 @@ extension LibraryReplicationContents on LibraryReplication {
       );
       final normalized = {
         ...document,
-        'version': 26,
+        'version': _syncContentFormat(tables),
         'tables': tables,
         'attachments': document['attachments'] ?? <Object?>[],
       };

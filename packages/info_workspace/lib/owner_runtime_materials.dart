@@ -14,9 +14,9 @@ class OwnerRuntimeMaterials {
       (e) => e.restoredAt == null,
     ))
       for (final r in owner.credentialUseRequests.where(
-        (r) => !r.isFocusedFill && r.restoredAt == null && r.id == e.requestId,
+        (r) => r.isCommand && r.restoredAt == null && r.id == e.requestId,
       ))
-        if (r.plan.receiver != 'gh_token') _credentials.execution(r, e),
+        if (r.plan.requiresMaterialFiles) _credentials.execution(r, e),
   ];
   List<WorkspaceCopyMaintenance> copies() => [
     for (final d in owner.informationFileDeliveries)

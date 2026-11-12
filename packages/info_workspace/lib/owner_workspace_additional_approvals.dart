@@ -51,7 +51,11 @@ class OwnerWorkspaceAdditionalApprovals {
   WorkspaceApprovalSummary credentialSummary(core.CredentialUseRequest r) =>
       WorkspaceApprovalSummary(
         id: r.id,
-        title: r.isFocusedFill ? '本机焦点填充申请' : '托管凭据使用申请',
+        title: r.isReveal
+            ? 'AI 读取凭据原文申请'
+            : r.isFocusedFill
+            ? '本机焦点填充申请'
+            : '托管凭据使用申请',
         kind: r.isFocusedFill
             ? WorkspaceApprovalKind.focus
             : WorkspaceApprovalKind.credential,
@@ -179,7 +183,11 @@ class OwnerWorkspaceAdditionalApprovals {
           WorkspaceRecordKind.credential,
           r.credentialId,
         ),
-        label: r.isFocusedFill ? '托管材料填入已指定应用' : '在固定接收计划中使用托管材料',
+        label: r.isReveal
+            ? '允许 AI 读取已保存的凭据原文；原文会进入当前聊天'
+            : r.isFocusedFill
+            ? '托管材料填入已指定应用'
+            : '在固定接收计划中使用托管材料',
         section: '托管凭据',
         recordName: r.credentialName ?? c?.name ?? '原凭据已不可用',
         kind: WorkspaceApprovalScopeKind.credential,
@@ -257,7 +265,7 @@ class OwnerWorkspaceAdditionalApprovals {
           ? '原决定的保存响应未能确认，许可没有启用；核对原结果后请让 AI 重新申请。'
           : null,
       executions: [
-        if (!r.isFocusedFill)
+        if (r.isCommand)
           for (final e in owner.credentialExecutions.where(
             (e) => e.requestId == r.id,
           ))

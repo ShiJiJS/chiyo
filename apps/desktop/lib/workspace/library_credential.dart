@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../desktop_controls.dart';
 import '../desktop_feedback.dart';
 import '../prototype_icons.dart';
@@ -33,6 +34,7 @@ class LibraryCredential extends StatefulWidget {
 
 class _LibraryCredentialState extends State<LibraryCredential> {
   WorkspaceCredentialDetail? _detail;
+  String? _revealed;
   List<WorkspaceRecordSummary> _links = [];
   List<WorkspaceCredentialUseRequest> _requests = [];
   WorkspaceFailure? _failure, _requestFailure, _linksFailure;
@@ -63,6 +65,7 @@ class _LibraryCredentialState extends State<LibraryCredential> {
 
   Future<void> _load() async {
     final generation = ++_generation;
+    _revealed = null;
     setState(() {
       _loading = _detail == null;
       _refreshing = true;
@@ -130,6 +133,36 @@ class _LibraryCredentialState extends State<LibraryCredential> {
     } finally {
       if (mounted) setState(() => _busy = false);
       widget.onModalChanged?.call(false);
+    }
+  }
+
+  Future<void> _readSecret({required bool copy}) async {
+    final source = widget.source.credentials;
+    final detail = _detail;
+    if (_busy || detail == null || source is! WorkspaceCredentialRevealSource) {
+      return;
+    }
+    final generation = _generation;
+    setState(() => _busy = true);
+    try {
+      final secret = await (source as WorkspaceCredentialRevealSource)
+          .readStringMaterial(widget.ref, detail.materialVersion);
+      if (!mounted || generation != _generation) return;
+      if (copy) {
+        await Clipboard.setData(ClipboardData(text: secret));
+        if (mounted) DesktopFeedback.show(context, '已复制凭据');
+      } else {
+        setState(() => _revealed = secret);
+      }
+    } catch (error) {
+      if (mounted) {
+        DesktopFeedback.show(
+          context,
+          error is WorkspaceFailure ? error.message : '凭据原文暂不可读取。',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -280,13 +313,39 @@ class _LibraryCredentialState extends State<LibraryCredential> {
                         spacing: 10,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
+                          if (detail.form == WorkspaceCredentialForm.string &&
+                              widget.source.credentials
+                                  is WorkspaceCredentialRevealSource) ...[
+                            DesktopButton(
+                              key: const ValueKey('credential-reveal'),
+                              kind: DesktopButtonKind.quiet,
+                              onPressed: enabled
+                                  ? () {
+                                      if (_revealed != null) {
+                                        setState(() => _revealed = null);
+                                      } else {
+                                        unawaited(_readSecret(copy: false));
+                                      }
+                                    }
+                                  : null,
+                              child: Text(_revealed == null ? '查看' : '隐藏'),
+                            ),
+                            DesktopButton(
+                              key: const ValueKey('credential-copy'),
+                              kind: DesktopButtonKind.quiet,
+                              onPressed: enabled
+                                  ? () => _readSecret(copy: true)
+                                  : null,
+                              child: const Text('复制'),
+                            ),
+                          ],
                           if (detail.filename != null)
                             Text(
                               detail.format,
                               style: libraryText(context, 13, color: c.warning),
                             ),
                           SelectableText(
-                            detail.mask,
+                            _revealed ?? detail.mask,
                             key: const ValueKey('credential-mask'),
                             semanticsLabel: '凭据内容已隐藏',
                             style: libraryText(

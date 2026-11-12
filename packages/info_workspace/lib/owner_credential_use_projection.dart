@@ -63,6 +63,9 @@ class OwnerCredentialUseProjection {
       WorkspaceCredentialReceiver(
         id: p.receiver,
         label: switch (p.receiver) {
+          'program_stdin' => '程序标准输入',
+          'program_env' => '程序环境变量',
+          'program_file' => '程序凭据文件',
           'gh_token' => 'GitHub CLI',
           'aws_shared_credentials' => 'AWS CLI',
           'ssh_identity' => 'OpenSSH',
@@ -77,7 +80,23 @@ class OwnerCredentialUseProjection {
             _ => '〈托管材料〉',
           },
         ),
-        binding: p.receiver == 'ssh_identity' ? '-i' : p.env.keys.join('、'),
+        binding: p.receiver == 'program_stdin'
+            ? 'stdin'
+            : p.receiver == 'program_file'
+            ? [
+                for (final (i, v) in p.argv.indexed)
+                  if (v.kind == core.LaunchValueKind.file) 'argv[$i]',
+                for (final e in p.env.entries)
+                  if (e.value.kind == core.LaunchValueKind.file) e.key,
+              ].join('、')
+            : p.receiver == 'ssh_identity'
+            ? '-i'
+            : p.receiver == 'program_env'
+            ? p.env.entries
+                  .where((e) => e.value.kind == core.LaunchValueKind.secret)
+                  .map((e) => e.key)
+                  .join('、')
+            : p.env.keys.join('、'),
       );
   WorkspaceCredentialUseRequest request(core.CredentialUseRequest r) {
     final c = owner.credentials
@@ -90,12 +109,25 @@ class OwnerCredentialUseProjection {
       credentialName: r.credentialName ?? c?.name ?? '原凭据已不可用',
       materialVersion: r.version,
       useGeneration: r.useGeneration,
-      delivery: r.isFocusedFill
+      delivery: r.isReveal
+          ? WorkspaceCredentialDelivery.reveal
+          : r.isFocusedFill
           ? WorkspaceCredentialDelivery.focus
-          : r.plan.receiver == 'gh_token'
+          : r.plan.receiver == 'program_stdin'
+          ? WorkspaceCredentialDelivery.standardInput
+          : {'gh_token', 'program_env'}.contains(r.plan.receiver)
           ? WorkspaceCredentialDelivery.environment
           : WorkspaceCredentialDelivery.file,
-      receiver: r.isFocusedFill
+      receiver: r.isReveal
+          ? WorkspaceCredentialReceiver(
+              id: 'credential_reveal',
+              label: '原文将进入 AI 聊天上下文',
+              executable: '',
+              workingDirectory: '',
+              arguments: [r.revealReason!],
+              binding: '单独批准读取原文',
+            )
+          : r.isFocusedFill
           ? WorkspaceCredentialReceiver(
               id: 'focused_fill',
               label: '本机焦点填充',

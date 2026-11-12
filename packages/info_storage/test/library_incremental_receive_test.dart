@@ -159,6 +159,168 @@ Future<LibrarySyncReceipt> transfer(
 }
 
 void main() {
+  for (final reveal in [true, false]) {
+    test(
+      'new credential ${reveal ? 'reveal' : 'program'} history survives initial and delta sync, restart, and ordinary edits',
+      () async {
+        final pair = await _Pair.create();
+        _Device? reopenedA, reopenedB, third;
+        try {
+          final owner = pair.a.service.owner;
+          var credential = await owner.createStringCredential(
+            name: 'Synthetic sync credential',
+            publicPurpose: '',
+            secret: 'SYNTHETIC_SYNC_CREDENTIAL',
+          );
+          credential = await owner.updateCredentialMetadata(
+            credential.id,
+            credential.revision,
+            name: credential.name,
+            publicPurpose: '',
+            privateNote: '',
+            suggestedBinding: 'TOKEN',
+            discoverable: true,
+          );
+          final session = pair.a.service.agent.openSession(
+            'Synthetic credential sync',
+          );
+          final request = reveal
+              ? await pair.a.service.agent.requestCredentialReveal(
+                  session,
+                  CredentialRevealInput.fromJson({
+                    'protocolVersion': 2,
+                    'command': 'request-reveal',
+                    'credentialId': credential.id,
+                    'version': credential.version,
+                    'purpose': 'Synthetic fallback',
+                    'fallbackReason': 'Synthetic unavailable target',
+                  }),
+                )
+              : await pair.a.service.agent.requestCredentialUse(
+                  session,
+                  CredentialUseInput.fromJson({
+                    'protocolVersion': 2,
+                    'command': 'request-use',
+                    'purpose': 'Synthetic program',
+                    'credentials': [
+                      {
+                        'alias': 'token',
+                        'credentialId': credential.id,
+                        'version': credential.version,
+                      },
+                    ],
+                    'launch': {
+                      'receiver': 'program_stdin',
+                      'executable': Platform.resolvedExecutable,
+                      'argv': ['synthetic'],
+                      'cwd': Directory.current.path,
+                      'env': <String, dynamic>{},
+                      'stdin': {'secret': 'token'},
+                    },
+                  }),
+                );
+          await owner.decideCredentialUse(request.id, approveCredential: true);
+          if (reveal)
+            await pair.a.service.agent.readCredentialReveal(
+              session,
+              request.id,
+              'synthetic-read',
+            );
+          final contents = await owner.exportLibrary(
+            () => LibraryReplication(pair.a.repo).snapshotContents(),
+          );
+          contents.validate(DateTime.now().toUtc());
+          final entries = await pair.a.after(0);
+          expect(entries, isNotEmpty);
+          for (final entry in entries) {
+            expect(
+              (await transfer(pair.a, pair.b, entry.batch)).conflict,
+              isFalse,
+            );
+          }
+          expect(pair.b.repo.credentialUseRequests.single.isReveal, reveal);
+          expect(
+            pair.b.service.owner.credentialGrantState(
+              pair.b.repo.credentialUseRequests.single,
+            ),
+            isNot('available'),
+          );
+          final native = pair.b.inspect();
+          try {
+            expect(
+              native.select('PRAGMA user_version').single.values.single,
+              64,
+            );
+            expect(
+              native
+                  .select('SELECT version FROM library_format')
+                  .single['version'],
+              64,
+            );
+          } finally {
+            native.close();
+          }
+          // A complete initial archive has the same new content discriminator.
+          third = await _Device.open('${pair.root.path}/third');
+          final path = '${pair.root.path}/new-credential-initial.encrypted';
+          final initial = await owner.exportLibrary(
+            () => pair.a.incremental.exportInitialWithBaseline(path),
+          );
+          expect(initial.initial.transfer.contentFormat, 27);
+          await third.service.owner.restoreLibrary(
+            () => third!.incremental.installInitialWithBaseline(
+              path: path,
+              transferKey: initial.initial.transferKey,
+              operationId: 'new-credential-initial',
+              transfer: initial.initial.transfer,
+              baseline: initial.baseline,
+              expectedSourceReplicaId: initial.baseline.sourceReplicaId,
+            ),
+          );
+          expect(third.repo.credentialUseRequests.single.isReveal, reveal);
+          await pair.a.close();
+          await pair.b.close();
+          reopenedA = await _Device.open(
+            pair.a.root.path,
+            existingKeys: pair.a.keys,
+          );
+          reopenedB = await _Device.open(
+            pair.b.root.path,
+            existingKeys: pair.b.keys,
+          );
+          await reopenedA.start();
+          await reopenedB.start();
+          expect(
+            reopenedB.repo.credentialUseRequests.single.restoredAt,
+            isNotNull,
+          );
+          final ref = FieldRef(pair.initial.id, pair.initial.fields.single.id);
+          await reopenedA.service.owner.correctValue(
+            ref,
+            'SYNTHETIC_AFTER_RESTART',
+          );
+          final later = await reopenedA.after(entries.last.cursor);
+          expect(later, isNotEmpty);
+          for (final entry in later) {
+            expect(
+              (await transfer(reopenedA, reopenedB, entry.batch)).conflict,
+              isFalse,
+            );
+          }
+          expect(
+            reopenedB.repo.items.single.fields.single.value,
+            'SYNTHETIC_AFTER_RESTART',
+          );
+        } finally {
+          await third?.close();
+          await reopenedA?.close();
+          await reopenedB?.close();
+          await pair.close();
+        }
+      },
+    );
+  }
+
   test(
     'a new replica adopts current versions, tombstones and watermark in the initial commit',
     () async {
