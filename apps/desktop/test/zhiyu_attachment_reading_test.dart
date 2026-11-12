@@ -179,13 +179,15 @@ void main() {
           }
 
           await open('服务端开发简历', 'information:resume');
+          final renderedAttachment = find.descendant(
+            of: find.byType(LibraryFilePreviewView),
+            matching: find.byWidgetPredicate(
+              (w) => w is RawImage && w.image != null,
+            ),
+          );
           for (
             var frame = 0;
-            frame < 40 &&
-                find
-                    .byWidgetPredicate((w) => w is RawImage && w.image != null)
-                    .evaluate()
-                    .isEmpty;
+            frame < 40 && renderedAttachment.evaluate().isEmpty;
             frame++
           ) {
             await t.runAsync(
@@ -193,10 +195,7 @@ void main() {
             );
             await t.pump();
           }
-          expect(
-            find.byWidgetPredicate((w) => w is RawImage && w.image != null),
-            findsOneWidget,
-          );
+          expect(renderedAttachment, findsOneWidget);
           final detail = find.byType(LibraryDetail);
           expect(
             find.descendant(of: detail, matching: find.text('概览')),
