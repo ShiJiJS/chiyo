@@ -6,7 +6,7 @@
 #include <thread>
 
 namespace {
-HWND window = nullptr, password = nullptr, other = nullptr;
+HWND window = nullptr, password = nullptr, other = nullptr, plain = nullptr;
 WNDPROC original = nullptr;
 std::wstring expected;
 DWORD clipboard = 0;
@@ -34,15 +34,19 @@ LRESULT CALLBACK Window(HWND h, UINT message, WPARAM w, LPARAM l) {
       std::wstring received(8193, L'\0');
       const int size = GetWindowTextW(password, received.data(), static_cast<int>(received.size()));
       received.resize(size > 0 ? size : 0);
-      const bool matches = received == expected;
+      const bool other_empty = GetWindowTextLengthW(other) == 0;
+      const bool plain_empty = GetWindowTextLengthW(plain) == 0;
+      const bool matches = received == expected && other_empty && plain_empty;
       SecureZeroMemory(received.data(), received.size() * sizeof(wchar_t));
       Write(std::string("{\"event\":\"verified\",\"matches\":") + (matches ? "true" : "false") +
-          ",\"empty\":" + (size == 0 ? "true" : "false") +
+          ",\"empty\":" + (size == 0 && other_empty && plain_empty ? "true" : "false") +
+          ",\"otherEmpty\":" + (other_empty ? "true" : "false") +
+          ",\"plainEmpty\":" + (plain_empty ? "true" : "false") +
           ",\"noPaste\":" + (pastes == 0 ? "true" : "false") +
           ",\"clipboardUnchanged\":" + (clipboard == GetClipboardSequenceNumber() ? "true" : "false") +
           ",\"focusChanged\":" + (focus_changed ? "true" : "false") + "}");
     } else if (command == 3) {
-      SetWindowTextW(password, L""); SetWindowTextW(other, L"");
+      SetWindowTextW(password, L""); SetWindowTextW(other, L""); SetWindowTextW(plain, L"");
       changes = 0; focus_changed = false; change_focus = false;
       Write("{\"event\":\"cleared\"}");
     } else if (command == 4) {
@@ -74,7 +78,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE, wchar_t*, int) {
   type.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
   if (!RegisterClassW(&type)) return 70;
   window = CreateWindowW(type.lpszClassName, L"AgentInfo synthetic focused-fill test", WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, CW_USEDEFAULT, 640, 330, nullptr, nullptr, instance, nullptr);
+      CW_USEDEFAULT, CW_USEDEFAULT, 640, 440, nullptr, nullptr, instance, nullptr);
   CreateWindowW(L"STATIC", L"Local synthetic receiver. No login or network access.", WS_CHILD | WS_VISIBLE,
       24, 24, 560, 28, window, nullptr, instance, nullptr);
   CreateWindowW(L"STATIC", L"Password input (masked)", WS_CHILD | WS_VISIBLE,
@@ -86,6 +90,10 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE, wchar_t*, int) {
       24, 166, 560, 24, window, nullptr, instance, nullptr);
   other = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_PASSWORD | ES_AUTOHSCROLL,
       24, 196, 560, 40, window, reinterpret_cast<HMENU>(102), instance, nullptr);
+  CreateWindowW(L"STATIC", L"Plain input (must never receive a credential)", WS_CHILD | WS_VISIBLE,
+      24, 264, 560, 24, window, nullptr, instance, nullptr);
+  plain = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
+      24, 294, 560, 40, window, reinterpret_cast<HMENU>(103), instance, nullptr);
   ShowWindow(window, SW_SHOWNOACTIVATE); UpdateWindow(window);
   Write("{\"event\":\"window_ready\"}");
   std::thread([] {
