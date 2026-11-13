@@ -93,6 +93,7 @@ part 'device_credential_launch.dart';
 part 'device_credential_access.dart';
 part 'device_credential_execution.dart';
 part 'credential_execution_audit.dart';
+part 'credential_execution_report.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
 part 'credential_history_access.dart';
