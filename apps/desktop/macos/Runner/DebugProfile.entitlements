@@ -12,6 +12,10 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.citrolabs.ego.lite.ego-browser</string>
+	</array>
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
 </dict>
