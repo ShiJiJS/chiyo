@@ -1152,6 +1152,7 @@ class EncryptedInformationRepository
     await _db.transaction(
       () => _reconcileAttachmentRetention(_clock().toUtc()),
     );
+    await _ensureCredentialHistorySyncCapture();
   }
 
   @override

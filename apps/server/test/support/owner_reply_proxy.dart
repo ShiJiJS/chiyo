@@ -14,6 +14,7 @@ class OwnerReplyProxy {
   String? dropNextPath, failGetPrefix;
   String? failPostPrefix, failPostsAfterDrop, failGetsAfterDrop;
   final requests = <String, int>{};
+  List<int>? advertisedContentFormats;
   Future<void> Function(String path)? beforeReply;
   Uri get address => Uri.parse('https://127.0.0.1:${server.port}');
   static Future<OwnerReplyProxy> start({
@@ -59,7 +60,13 @@ class OwnerReplyProxy {
       }
       await request.addStream(incoming);
       final response = await request.close();
-      final bytes = await response.fold<List<int>>([], (a, b) => a..addAll(b));
+      var bytes = await response.fold<List<int>>([], (a, b) => a..addAll(b));
+      if (path == '/v1/server' && advertisedContentFormats != null) {
+        final value = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+        (value['replication'] as Map)['contentFormats'] =
+            advertisedContentFormats;
+        bytes = utf8.encode(jsonEncode(value));
+      }
       await beforeReply?.call(path);
       if (path == dropNextPath) {
         dropNextPath = null;

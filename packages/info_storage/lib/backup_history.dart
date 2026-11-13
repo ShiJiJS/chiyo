@@ -1056,6 +1056,46 @@ extension _CompleteBackups on InformationBackups {
           fills,
           (f) => requestIds.contains(f.requestId),
         );
+        final batchIds = histories('credential-batch');
+        map(_repository._credentialBatches, batches, (r) => r.id, batchIds);
+        void operationMap<T>(
+          Map<String, T> target,
+          Iterable<T> values,
+          String Function(T) unitId,
+          String Function(T) key,
+        ) {
+          final selected = byKind[LibrarySyncKind.history]!
+              .where((id) => id.startsWith('credential-batch-operation:'))
+              .toSet();
+          if (selected.isEmpty) return;
+          target.removeWhere((_, value) => selected.contains(unitId(value)));
+          target.addEntries(
+            values
+                .where((v) => selected.contains(unitId(v)))
+                .map((v) => MapEntry(key(v), v)),
+          );
+        }
+
+        operationMap(
+          _repository._credentialBatchOperations,
+          batchOperations,
+          (o) => _credentialOperationSyncKey(
+            'credential_batch_operations',
+            o.sessionBinding,
+            o.operationId,
+          ).id,
+          (o) => _batchOperationKey(o.sessionBinding, o.operationId),
+        );
+        operationMap(
+          _repository._credentialProgramOperations,
+          programOperations,
+          (o) => _credentialOperationSyncKey(
+            'credential_program_operations',
+            o.sessionBinding,
+            o.operationId,
+          ).id,
+          (o) => _batchOperationKey(o.sessionBinding, o.operationId),
+        );
         return;
       }
       _repository._libraryOrder = libraryOrder;

@@ -235,6 +235,7 @@ extension LibraryIncrementalReceive on LibraryIncremental {
   }
 
   bool _ownsActiveHistory(LibrarySyncBatch batch) {
+    Map<String, String>? operationRequests;
     for (final change in batch.changes.where(
       (c) => c.key.kind == LibrarySyncKind.history,
     )) {
@@ -250,7 +251,60 @@ extension LibraryIncrementalReceive on LibraryIncremental {
         if (request != null &&
             request.restoredAt == null &&
             (request.state == 'pending' ||
-                request.credentialApproved && request.invalidatedCode == null))
+                request.credentialApproved && request.invalidatedCode == null ||
+                request.submissionOperationId != null ||
+                request.revealReads.isNotEmpty ||
+                _repo._credentialExecutions.any(
+                  (o) => o.requestId == request.id && o.operationId != null,
+                )))
+          return true;
+      }
+      if (id.startsWith('credential-batch:')) {
+        final request =
+            _repo._credentialBatches[id.substring('credential-batch:'.length)];
+        // Local source facts also fence duplicate operations after a grant has
+        // expired. A replica's archive or retention deletion must not replace
+        // them. Only the source Owner's normal retention can remove this unit.
+        if (request != null && !request.archived) return true;
+      }
+      if (id.startsWith('credential-batch-operation:')) {
+        final tables = change.content?['tables'] as Map? ?? const {};
+        final requests = <String>{};
+        for (final table in [
+          'credential_batch_operations',
+          'credential_program_operations',
+        ]) {
+          for (final row in tables[table] as List? ?? const []) {
+            requests.add((row as Map)['request_id'] as String);
+            final key = _batchOperationKey(
+              row['session_binding'] as String,
+              row['operation_id'] as String,
+            );
+            final previous = table == 'credential_batch_operations'
+                ? _repo._credentialBatchOperations[key]?.requestId
+                : _repo._credentialProgramOperations[key]?.requestId;
+            if (previous != null) requests.add(previous);
+          }
+        }
+        if (change.content == null) {
+          operationRequests ??= {
+            for (final o in _repo._credentialBatchOperations.values)
+              _credentialOperationSyncKey(
+                'credential_batch_operations',
+                o.sessionBinding,
+                o.operationId,
+              ).id: o.requestId,
+            for (final o in _repo._credentialProgramOperations.values)
+              _credentialOperationSyncKey(
+                'credential_program_operations',
+                o.sessionBinding,
+                o.operationId,
+              ).id: o.requestId,
+          };
+          if (operationRequests[id] case final requestId?)
+            requests.add(requestId);
+        }
+        if (requests.any((r) => _repo._credentialBatches[r]?.archived == false))
           return true;
       }
       if (id.startsWith('information_deliveries:')) {
@@ -396,6 +450,19 @@ extension LibraryIncrementalReceive on LibraryIncremental {
         _hasCredentialDeliveryRows([row])) {
       await _repo._requireAdmissionFormat(_credentialDeliveryLibraryFormat);
     }
+    if (portable == 'credential_batches' ||
+        portable == 'credential_batch_operations') {
+      await _repo._createCredentialBatchTables();
+      if (portable == 'credential_batches' &&
+          _storedBatch(row).programPlan != null) {
+        await _repo._requireAdmissionFormat(
+          _credentialProgramBatchLibraryFormat,
+        );
+      }
+    }
+    if (portable == 'credential_program_operations') {
+      await _repo._createCredentialProgramTable();
+    }
     if (portable == 'information_revision_snapshots')
       await _repo._requireAdmissionFormat(_libraryRevisionSnapshotFormat);
     if (portable == 'credential_material_snapshots')
@@ -404,7 +471,7 @@ extension LibraryIncrementalReceive on LibraryIncremental {
       await _repo._writeGrantHistory(GrantHistory.fromJson(_backupJson(row)));
       return;
     }
-    final columns = InformationBackups._v26Columns[portable]!;
+    final columns = InformationBackups._v29Columns[portable]!;
     final values = columns.map((c) => row[c]).toList();
     final update = columns
         .where((c) => !keys.contains(c))

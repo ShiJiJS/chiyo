@@ -371,6 +371,9 @@ final class LibraryIncrementalClient {
   }) async {
     final known = await deltaReceipt(transfer);
     if (known != null) return known;
+    await transport._requireCredentialHistoryFormat(
+      transfer.archive.contentFormat,
+    );
     await transport._verifyFile(file, transfer.archive);
     _key(transferKey);
     final prepared = await _client.request('POST', '$_base/delta-imports', {
@@ -424,6 +427,7 @@ final class LibraryIncrementalClient {
       throw const RemoteFailure('sync_base_changed');
     final known = await initialReceipt(operationId, transfer, descriptor);
     if (known != null) return known;
+    await transport._requireCredentialHistoryFormat(transfer.contentFormat);
     await transport._verifyFile(file, transfer);
     _key(transferKey);
     final prepared = await _client.request('POST', '$_base/versioned-imports', {

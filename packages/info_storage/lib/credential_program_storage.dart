@@ -91,6 +91,7 @@ extension _EncryptedCredentialPrograms on EncryptedInformationRepository {
       'request_id TEXT NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(session_binding,operation_id),'
       'FOREIGN KEY(request_id,session_binding) REFERENCES credential_batches(id,session_binding))',
     );
+    await _ensureCredentialHistorySyncCapture();
   }
 
   Future<void> _loadCredentialPrograms() async {

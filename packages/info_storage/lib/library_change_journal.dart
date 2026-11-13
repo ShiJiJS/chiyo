@@ -61,7 +61,11 @@ final class LibraryChangeJournal {
       }
       await _repo._requireAdmissionFormat(_libraryCredentialArchiveFormat);
       for (final entry in _tables.entries) {
-        await _capture(entry.key, entry.value);
+        if (_credentialHistoryTables.containsKey(entry.key)) {
+          await _captureCredentialHistory(entry.key, entry.value);
+        } else {
+          await _capture(entry.key, entry.value);
+        }
       }
     });
     _db.syncJournalEnabled = true;
@@ -72,12 +76,18 @@ final class LibraryChangeJournal {
     for (final entry in InformationBackups._v26Columns.entries)
       if (entry.key != 'settings')
         InformationBackups._physicalTables[entry.key] ?? entry.key: entry.value,
+    ..._credentialHistoryTables,
     'information_attachment_versions': [
       'attachment_id',
       'version',
       'metadata',
       'byte_length',
     ],
+  };
+  static final _credentialHistoryTables = <String, List<String>>{
+    for (final entry in InformationBackups._v29Columns.entries)
+      if (!InformationBackups._v26Columns.containsKey(entry.key))
+        entry.key: entry.value,
   };
   static const _keys = <String, List<String>>{
     'information_fields': ['id'],
@@ -90,7 +100,54 @@ final class LibraryChangeJournal {
     'credential_material_snapshots': ['credential_id', 'snapshot_id'],
     'information_file_fields': ['field_id'],
     'information_attachment_versions': ['attachment_id', 'version'],
+    'credential_batch_operations': ['session_binding', 'operation_id'],
+    'credential_program_operations': ['session_binding', 'operation_id'],
   };
+
+  /// New tables are created lazily. Also seed existing rows once when upgrading
+  /// an already-running journal, so an old projection cannot miss their parent
+  /// request and later fail on an operation-only change. Source rows stay intact.
+  Future<void> _captureCredentialHistory(
+    String table,
+    List<String> columns,
+  ) async {
+    if ((await _db
+            .customSelect(
+              "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+              variables: [Variable(table)],
+            )
+            .get())
+        .isEmpty)
+      return;
+    final triggers = await _db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type='trigger' AND name IN (?,?,?,?)",
+          variables: [
+            for (final suffix in ['insert', 'delete', 'update', 'key'])
+              Variable('sync_${table}_$suffix'),
+          ],
+        )
+        .get();
+    if (triggers.length == 4) return;
+    await _capture(table, columns);
+    final keys = _keys[table] ?? const ['id'];
+    for (final row
+        in await _db
+            .customSelect(
+              'SELECT ${columns.map((c) => '"$c"').join(',')} FROM "$table" ORDER BY rowid',
+            )
+            .get()) {
+      await _db.customStatement(
+        'INSERT INTO library_sync_dirty(table_name,row_key,before_json,after_json) VALUES(?,?,NULL,?) '
+        'ON CONFLICT(table_name,row_key) DO UPDATE SET after_json=excluded.after_json',
+        [
+          table,
+          jsonEncode([for (final key in keys) row.data[key]]),
+          jsonEncode(row.data),
+        ],
+      );
+    }
+  }
 
   Future<void> _capture(String table, List<String> columns) async {
     final keys = _keys[table] ?? const ['id'];
@@ -169,6 +226,18 @@ final class LibraryChangeJournal {
           ]),
         ),
     ]);
+  }
+}
+
+extension _CredentialHistorySyncCapture on EncryptedInformationRepository {
+  Future<void> _ensureCredentialHistorySyncCapture() async {
+    if (!_db.syncJournalEnabled) return;
+    await _db.transaction(() async {
+      final journal = LibraryChangeJournal(LibraryReplication(this));
+      for (final e in LibraryChangeJournal._credentialHistoryTables.entries) {
+        await journal._captureCredentialHistory(e.key, e.value);
+      }
+    });
   }
 }
 

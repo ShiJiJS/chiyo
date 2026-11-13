@@ -24,6 +24,21 @@ final class LibraryReplicationClient {
   static const base = '/v1/owner/replication';
   static const chunkBytes = 512 * 1024;
 
+  /// New credential histories must be understood by both peers. Older servers
+  /// did not advertise all ordinary formats, so preserve that existing path;
+  /// never send batch/program archives to an unconfirmed older implementation.
+  Future<void> _requireCredentialHistoryFormat(int format) async {
+    if (format < 28) return;
+    final info = await client.request('GET', '/v1/server');
+    final caps = info['replication'];
+    if (caps is! Map ||
+        caps['wireVersion'] != 1 ||
+        caps['contentFormats'] is! List ||
+        !(caps['contentFormats'] as List).contains(format)) {
+      throw const RemoteFailure('unsupported_sync');
+    }
+  }
+
   Future<({LibraryReplicaIdentity identity, bool empty})> status() async {
     final server = await client.request('GET', '/v1/server');
     final capabilities = server['replication'];
@@ -199,6 +214,7 @@ final class LibraryReplicationClient {
     replicaOperationId(operationId);
     final known = await receipt(operationId);
     if (known != null) return _confirmed(known, operationId, transfer);
+    await _requireCredentialHistoryFormat(transfer.contentFormat);
     await _verifyFile(file, transfer);
     final prepared = await client.request('POST', '$base/imports', {
       'wireVersion': 1,

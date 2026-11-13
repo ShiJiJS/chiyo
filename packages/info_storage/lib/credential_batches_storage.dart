@@ -123,6 +123,7 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
       'PRIMARY KEY(session_binding,operation_id),'
       'FOREIGN KEY(request_id,session_binding) REFERENCES credential_batches(id,session_binding))',
     );
+    await _ensureCredentialHistorySyncCapture();
   }
 
   Future<bool> _hasCredentialBatchTables() async {

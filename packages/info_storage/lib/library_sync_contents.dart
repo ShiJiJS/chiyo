@@ -1,17 +1,74 @@
 part of 'info_storage.dart';
 
-// Content-triggered: ordinary synchronized libraries remain readable by the
-// existing format-26 implementation. New credential facts require format 27.
+// Content-triggered: ordinary synchronized libraries keep format 26. Only
+// retained credential delivery/batch/program facts require a newer reader.
 bool _hasCredentialDeliveryRows(Iterable<Map<String, Object?>> rows) =>
     rows.any((row) {
       final request = CredentialUseRequest.fromJson(_backupJson(row));
       return request.isReveal ||
           request.isCommand && request.plan.isProgramReceiver;
     });
-int _syncContentFormat(Map<String, List<Map<String, Object?>>> tables) =>
-    _hasCredentialDeliveryRows(tables['credential_use_requests'] ?? const [])
-    ? 27
-    : 26;
+int _syncContentFormat(Map tables) {
+  final batches = tables['credential_batches'] as List? ?? const [];
+  if ((tables['credential_program_operations'] as List? ?? const [])
+          .isNotEmpty ||
+      batches.any(
+        (r) =>
+            _storedBatch(Map<String, Object?>.from(r as Map)).programPlan !=
+            null,
+      )) {
+    return 29;
+  }
+  if (batches.isNotEmpty ||
+      (tables['credential_batch_operations'] as List? ?? const []).isNotEmpty) {
+    return 28;
+  }
+  return _hasCredentialDeliveryRows(
+        (tables['credential_use_requests'] as List? ?? const []).map(
+          (r) => Map<String, Object?>.from(r as Map),
+        ),
+      )
+      ? 27
+      : 26;
+}
+
+Map<String, List<String>> _syncColumns(int format) => switch (format) {
+  29 => InformationBackups._v29Columns,
+  28 => InformationBackups._v28Columns,
+  _ => InformationBackups._v26Columns,
+};
+
+int _syncBatchContentFormat(LibrarySyncBatch batch) {
+  final tables = <String, List<Map<String, Object?>>>{};
+  for (final change in batch.changes) {
+    for (final e in (change.content?['tables'] as Map? ?? const {}).entries) {
+      tables.putIfAbsent(e.key as String, () => []).addAll([
+        for (final row in e.value as List)
+          Map<String, Object?>.from(row as Map),
+      ]);
+    }
+  }
+  final format = _syncContentFormat(tables);
+  // A deletion still names the new complete history unit. Do not disguise it
+  // as a format-26 delta just because it no longer carries parent rows.
+  return batch.changes.any(
+        (c) =>
+            c.key.kind == LibrarySyncKind.history &&
+            (c.key.id.startsWith('credential-batch:') ||
+                c.key.id.startsWith('credential-batch-operation:')),
+      )
+      ? max(28, format)
+      : format;
+}
+
+LibrarySyncKey _credentialOperationSyncKey(
+  String table,
+  String binding,
+  String id,
+) => LibrarySyncKey(
+  LibrarySyncKind.history,
+  'credential-batch-operation:${crypto.sha256.convert(utf8.encode(jsonEncode([table, binding, id])))}',
+);
 
 /// Owner-private portable metadata. Bodies remain in immutable attachment
 /// storage. Units are complete records, not independently mergeable fields.
@@ -52,7 +109,7 @@ final class LibraryReplicaContents {
     Iterable<LibrarySqlChangeGroup> groups,
     DateTime now,
   ) {
-    final document = _document(now);
+    final document = _document(now, includeUnusedTables: true);
     final tables =
         document['tables'] as Map<String, List<Map<String, Object?>>>;
     final attachments = document['attachments'] as List<Object?>;
@@ -114,6 +171,8 @@ final class LibraryReplicaContents {
       }
     }
     _archiveCredentialRuntime(tables, now);
+    _archiveCredentialBatches(tables, now);
+    _archiveCredentialPrograms(tables);
     final normalized = {
       ...document,
       'version': _syncContentFormat(tables),
@@ -155,9 +214,12 @@ final class LibraryReplicaContents {
     return contents;
   }
 
-  Map<String, Object?> _document(DateTime now) {
+  Map<String, Object?> _document(
+    DateTime now, {
+    bool includeUnusedTables = false,
+  }) {
     final tables = <String, List<Map<String, Object?>>>{
-      for (final name in InformationBackups._v26Columns.keys) name: [],
+      for (final name in InformationBackups._v29Columns.keys) name: [],
     };
     final attachments = <Object?>[];
     for (final unit in units.values) {
@@ -180,11 +242,14 @@ final class LibraryReplicaContents {
       }
       attachments.addAll(unit['attachments'] as List);
     }
+    final format = _syncContentFormat(tables);
     return {
       'format': InformationBackups._format,
-      'version': _syncContentFormat(tables),
+      'version': format,
       'createdAt': now.toUtc().toIso8601String(),
-      'tables': tables,
+      'tables': includeUnusedTables
+          ? tables
+          : {for (final key in _syncColumns(format).keys) key: tables[key]!},
       'attachments': attachments,
     };
   }
@@ -228,7 +293,7 @@ extension LibraryReplicationContents on LibraryReplication {
 
 final class _LibrarySyncProjection {
   static Map<String, List<Map<String, Object?>>> normalizeTables(Map raw) => {
-    for (final table in InformationBackups._v26Columns.entries)
+    for (final table in _syncColumns(_syncContentFormat(raw)).entries)
       table.key: table.key == 'settings'
           ? []
           : [
@@ -353,13 +418,23 @@ final class _LibrarySyncProjection {
             LibrarySyncKind.history,
             'credential:${row['request_id']}',
           ),
+          'credential_batches' => LibrarySyncKey(
+            LibrarySyncKind.history,
+            'credential-batch:${row['id']}',
+          ),
+          'credential_batch_operations' ||
+          'credential_program_operations' => _credentialOperationSyncKey(
+            table.key,
+            row['session_binding'] as String,
+            row['operation_id'] as String,
+          ),
           _ => LibrarySyncKey(
             LibrarySyncKind.history,
             '${table.key}:${row['id']}',
           ),
         };
         add(key, table.key, {
-          for (final column in InformationBackups._v26Columns[table.key]!)
+          for (final column in InformationBackups._v29Columns[table.key]!)
             column: column == 'payload'
                 ? preserveLocalMarkers
                       ? _syncJson(jsonDecode(row[column] as String))
