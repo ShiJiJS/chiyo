@@ -5,6 +5,7 @@ import 'approvals_controller.dart';
 import 'library_widgets.dart';
 import 'program_plan.dart';
 import 'workspace_source.dart';
+import 'operation_pages_footer.dart';
 
 class ProgramOperations extends StatefulWidget {
   const ProgramOperations({super.key, required this.controller});
@@ -31,7 +32,14 @@ class _ProgramOperationsState extends State<ProgramOperations> {
       _expanded.clear();
     }
     final operations = detail.programOperations.toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort(
+        (a, b) => CredentialOperationCursor.compare(
+          a.createdAt,
+          a.operationId,
+          b.createdAt,
+          b.operationId,
+        ),
+      );
     final names = {
       for (final scope in detail.scopes) scope.record.id: scope.recordName,
     };
@@ -54,14 +62,18 @@ class _ProgramOperationsState extends State<ProgramOperations> {
                 color: UiPalette.of(context).muted,
               ),
             ),
-          for (final operation in operations.take(_shown))
+          for (final operation
+              in detail.operationTotal == null
+                  ? operations.take(_shown)
+                  : operations)
             _operation(context, operation, names),
-          if (operations.length > _shown)
+          if (detail.operationTotal == null && operations.length > _shown)
             DesktopButton(
               kind: DesktopButtonKind.quiet,
               onPressed: () => setState(() => _shown += 20),
               child: Text('显示更多记录（剩余${operations.length - _shown}次）'),
             ),
+          OperationPagesFooter(controller: widget.controller),
         ],
       ),
     );
@@ -118,11 +130,14 @@ class _ProgramOperationsState extends State<ProgramOperations> {
             style: libraryText(context, 12, color: c.muted),
           ),
           Text(
-              operation.fromBackup ? '备份中的执行历史' : operation.state == 'unknown'
-                ? '${operation.processLabel} · ${operation.cleanupLabel}' : operation.cleanupLabel,
+            operation.fromBackup
+                ? '备份中的执行历史'
+                : operation.state == 'unknown'
+                ? '${operation.processLabel} · ${operation.cleanupLabel}'
+                : operation.cleanupLabel,
             style: libraryText(context, 13, color: c.muted, height: 1.8),
           ),
-            if (operation.errorLabel != null && !operation.fromBackup)
+          if (operation.errorLabel != null && !operation.fromBackup)
             Text(
               operation.errorLabel!,
               style: libraryText(context, 13, color: color, height: 1.8),

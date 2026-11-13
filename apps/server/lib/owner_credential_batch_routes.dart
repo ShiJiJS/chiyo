@@ -8,46 +8,47 @@ final class OwnerCredentialBatchRoutes {
   OwnerCredentialBatchRoutes(this.owner);
   final OwnerAccess owner;
 
-  Map<String, Object?> _view(CredentialUseBatch request) => {
-    'protocolVersion': 3,
-    'id': request.id,
-    'agentName': request.agentName,
-    'externalChatId': request.externalChatId,
-    'chatLabel': request.chatLabel,
-    'purpose': request.purpose,
-    'createdAt': request.createdAt.toUtc().toIso8601String(),
-    'requestExpiresAt': request.requestExpiresAt.toUtc().toIso8601String(),
-    'revision': request.revision,
-    'state': owner.credentialBatchState(request),
-    'items': [
-      for (final item in request.items)
-        {
-          'id': item.id,
-          'credentialId': item.credentialId,
-          'name': item.credentialName,
-          'version': item.version,
-          'destination': item.destination.toJson(),
-          'decision': item.decision.name,
-          'grantState': owner.credentialBatchItemState(request, item),
-          'expiresAt': item.expiresAt?.toUtc().toIso8601String(),
-        },
-    ],
-    'operations': [
-      for (final operation in owner.credentialBatchOperations)
-        if (operation.requestId == request.id)
-          owner.credentialBatchOperationView(operation),
-    ],
-    if (request.programPlan != null) ...{
-      'programPlan': request.programPlan!.toJson(),
-      'programOperations': [
-        for (final operation in owner.credentialProgramOperations)
-          if (operation.requestId == request.id)
-            OwnerWorkspaceCredentialBatches(
-              owner,
-            ).programOperationView(operation).toJson(),
+  Map<String, Object?> _view(CredentialUseBatch request) {
+    final page = OwnerWorkspaceCredentialBatches(
+      owner,
+    ).operationPage(request.id);
+    return {
+      'protocolVersion': 3,
+      'id': request.id,
+      'agentName': request.agentName,
+      'externalChatId': request.externalChatId,
+      'chatLabel': request.chatLabel,
+      'purpose': request.purpose,
+      'createdAt': request.createdAt.toUtc().toIso8601String(),
+      'requestExpiresAt': request.requestExpiresAt.toUtc().toIso8601String(),
+      'revision': request.revision,
+      'state': owner.credentialBatchState(request),
+      'items': [
+        for (final item in request.items)
+          {
+            'id': item.id,
+            'credentialId': item.credentialId,
+            'name': item.credentialName,
+            'version': item.version,
+            'destination': item.destination.toJson(),
+            'decision': item.decision.name,
+            'grantState': owner.credentialBatchItemState(request, item),
+            'expiresAt': item.expiresAt?.toUtc().toIso8601String(),
+          },
       ],
-    },
-  };
+      'operations': page.batches
+          .map((operation) => operation.toJson())
+          .toList(),
+      'operationTotal': page.total,
+      'operationsCursor': page.nextCursor,
+      if (request.programPlan != null) ...{
+        'programPlan': request.programPlan!.toJson(),
+        'programOperations': page.programs
+            .map((operation) => operation.toJson())
+            .toList(),
+      },
+    };
+  }
 
   void _shape(Map<String, dynamic>? body, Set<String> keys) {
     if (body == null ||
@@ -84,6 +85,26 @@ final class OwnerCredentialBatchRoutes {
         .firstOrNull;
     if (request == null) return (404, {'error': 'not_found'});
     if (method == 'GET' && path.length == 4) return (200, _view(request));
+    if (method == 'POST' &&
+        path.length == 6 &&
+        path[4] == 'operations' &&
+        path[5] == 'query') {
+      if (body == null ||
+          body.keys.any((key) => !{'cursor', 'limit'}.contains(key)) ||
+          body['cursor'] != null && body['cursor'] is! String ||
+          body['limit'] != null && body['limit'] is! int)
+        throw const FormatException();
+      return (
+        200,
+        OwnerWorkspaceCredentialBatches(owner)
+            .operationPage(
+              request.id,
+              cursor: body['cursor'] as String?,
+              limit: body['limit'] as int? ?? 25,
+            )
+            .toJson(),
+      );
+    }
     if (method == 'GET' && path.length == 6 && path[4] == 'operations') {
       final source = OwnerWorkspaceCredentialBatches(owner);
       return (

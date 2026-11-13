@@ -58,6 +58,74 @@ class OwnerWorkspaceCredentialBatches {
   List<WorkspaceApprovalSummary> summaries() =>
       owner.credentialBatches.map(summary).toList();
 
+  WorkspaceCredentialOperationPage operationPage(
+    String id, {
+    String? cursor,
+    int limit = 25,
+  }) {
+    final request = _request(id), program = request.programPlan != null;
+    if (limit < 1 || limit > 50) {
+      throw const WorkspaceFailure('invalid_query', '每次只能读取1至50条记录。');
+    }
+    CredentialOperationCursor? after;
+    try {
+      if (cursor != null) after = CredentialOperationCursor.decode(cursor);
+      if (after != null &&
+          (after.requestId != id || after.program != program)) {
+        throw const FormatException();
+      }
+    } on FormatException {
+      throw const WorkspaceFailure('invalid_query', '分页位置无效，请重新读取申请。');
+    }
+    final keys =
+        <(DateTime, String)>[
+          if (program) ...[
+            for (final o in owner.credentialProgramOperations)
+              if (o.requestId == id) (o.progress.createdAt!, o.operationId),
+          ] else ...[
+            for (final o in owner.credentialBatchOperations)
+              if (o.requestId == id) (o.createdAt, o.operationId),
+          ],
+        ]..sort(
+          (a, b) => CredentialOperationCursor.compare(a.$1, a.$2, b.$1, b.$2),
+        );
+    final older = keys
+        .where(
+          (key) =>
+              after == null ||
+              CredentialOperationCursor.compare(
+                    key.$1,
+                    key.$2,
+                    after.at,
+                    after.id,
+                  ) >
+                  0,
+        )
+        .take(limit + 1)
+        .toList();
+    final selected = older.take(limit).toList();
+    return WorkspaceCredentialOperationPage(
+      requestId: id,
+      program: program,
+      cursor: cursor,
+      total: keys.length,
+      nextCursor: older.length > limit
+          ? CredentialOperationCursor(
+              id,
+              program,
+              selected.last.$1,
+              selected.last.$2,
+            ).encode()
+          : null,
+      batches: program
+          ? const []
+          : selected.map((key) => operation(id, key.$2)),
+      programs: program
+          ? selected.map((key) => programOperation(id, key.$2))
+          : const [],
+    );
+  }
+
   static String destinationLabel(core.CredentialBatchDestination d) {
     if (d.program case final program?) {
       final binding = program.binding;
@@ -194,6 +262,7 @@ class OwnerWorkspaceCredentialBatches {
 
   WorkspaceApprovalDetail read(String id) {
     final r = _request(id);
+    final page = operationPage(id);
     final scopes = <WorkspaceApprovalScope>[];
     for (final item in r.items) {
       String? problem;
@@ -240,17 +309,10 @@ class OwnerWorkspaceCredentialBatches {
           : WorkspaceCredentialProgramPlan.fromJson(
               Map<String, dynamic>.from(r.programPlan!.toJson()),
             ),
-      programOperations: r.programPlan == null
-          ? const []
-          : [
-              for (final operation in owner.credentialProgramOperations)
-                if (operation.requestId == r.id)
-                  programOperationView(operation),
-            ],
-      batchOperations: [
-        for (final o in owner.credentialBatchOperations)
-          if (o.requestId == r.id) operationView(r, o),
-      ],
+      programOperations: page.programs,
+      batchOperations: page.batches,
+      operationTotal: page.total,
+      operationsCursor: page.nextCursor,
       approved: r.items
           .where((i) => i.decision == core.CredentialBatchItemDecision.approved)
           .map((i) => i.id),

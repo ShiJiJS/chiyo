@@ -4,6 +4,7 @@ import '../ui_palette.dart';
 import 'approvals_controller.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'operation_pages_footer.dart';
 
 /// One renderer is shared by request details and grant history. These buttons
 /// query/acknowledge facts; they never submit input or launch another operation.
@@ -35,7 +36,14 @@ class _BatchOperationsState extends State<BatchOperations> {
     }
     final c = UiPalette.of(context);
     final operations = detail.batchOperations.toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort(
+        (a, b) => CredentialOperationCursor.compare(
+          a.createdAt,
+          a.operationId,
+          b.createdAt,
+          b.operationId,
+        ),
+      );
     final names = {for (final s in detail.scopes) s.id: s.recordName};
     return Padding(
       padding: const EdgeInsets.only(top: 26),
@@ -49,14 +57,18 @@ class _BatchOperationsState extends State<BatchOperations> {
           const SizedBox(height: 12),
           if (operations.isEmpty)
             Text('尚无填写记录。', style: libraryText(context, 14, color: c.muted)),
-          for (final o in operations.take(_shown))
+          for (final o
+              in detail.operationTotal == null
+                  ? operations.take(_shown)
+                  : operations)
             _operation(context, model, o, names),
-          if (operations.length > _shown)
+          if (detail.operationTotal == null && operations.length > _shown)
             DesktopButton(
               kind: DesktopButtonKind.quiet,
               onPressed: () => setState(() => _shown += 20),
               child: Text('显示更多记录（剩余${operations.length - _shown}次）'),
             ),
+          OperationPagesFooter(controller: widget.controller),
         ],
       ),
     );

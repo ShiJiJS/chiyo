@@ -62,6 +62,55 @@ class ApprovalsController extends ChangeNotifier {
   final _executionReads = <(String, String), ({int serial, int generation})>{};
   int _executionSerial = 0;
   final _executionErrors = <(String, String), String>{};
+  ({int serial, int generation})? _pageRead;
+  String? _pageErrorRequest, _pageError;
+  bool get readingOperationPage => _pageRead?.generation == _generation;
+  String? get operationPageError =>
+      _pageErrorRequest == selection ? _pageError : null;
+  Future<void> loadMoreOperations() async {
+    final actions = source, before = detail;
+    if (_closed ||
+        frozen ||
+        loading ||
+        reading ||
+        readingOperationPage ||
+        before == null ||
+        before.operationsCursor == null ||
+        actions is! WorkspaceCredentialOperationPages) {
+      return;
+    }
+    final request = selection!,
+        generation = _generation,
+        serial = ++_executionSerial;
+    final cursor = before.operationsCursor;
+    _pageRead = (serial: serial, generation: generation);
+    _pageErrorRequest = request;
+    _pageError = null;
+    _notify();
+    try {
+      final page = await (actions as WorkspaceCredentialOperationPages)
+          .operationPage(request, cursor: cursor);
+      if (_closed ||
+          generation != _generation ||
+          selection != request ||
+          frozen ||
+          detail?.operationsCursor != cursor ||
+          detail?.reviewToken != before.reviewToken) {
+        return;
+      }
+      detail = detail!.withOperationPage(page);
+    } catch (error) {
+      if (!_closed && generation == _generation && selection == request) {
+        _pageError = error is WorkspaceFailure
+            ? error.message
+            : '暂时无法读取较早记录，请稍后重试。';
+      }
+    } finally {
+      if (_pageRead?.serial == serial) _pageRead = null;
+      _notify();
+    }
+  }
+
   bool readingExecution(String id) =>
       _executionReads[(selection, id)]?.generation == _generation;
   String? executionError(String id) => _executionErrors[(selection, id)];

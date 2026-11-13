@@ -98,7 +98,9 @@ void main() {
         'GET',
         '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
       );
-      expect(raw['version'], 3);
+      expect(raw['version'], 5);
+      expect(raw['operationTotal'], 0);
+      expect(raw['operationsCursor'], isNull);
       noPrivate(raw);
       final detail = approvalDetailFromJson(raw);
       expect(detail.credentialBatch, true);

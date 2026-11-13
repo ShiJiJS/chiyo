@@ -15,7 +15,8 @@ class OwnerWorkspaceApprovals
     implements
         WorkspaceApprovalSource,
         WorkspaceCredentialBatchActions,
-        WorkspaceCredentialProgramActions {
+        WorkspaceCredentialProgramActions,
+        WorkspaceCredentialOperationPages {
   OwnerWorkspaceApprovals({required this.owner})
     : _scope = owner.captureLibraryScope(),
       _additional = OwnerWorkspaceAdditionalApprovals(owner);
@@ -491,6 +492,16 @@ class OwnerWorkspaceApprovals
     String operationId,
   ) => _read(() => _additional.execution(requestId, operationId));
 
+  @override
+  Future<WorkspaceCredentialOperationPage> operationPage(
+    String requestId, {
+    String? cursor,
+    int limit = 25,
+  }) => _read(
+    () async => OwnerWorkspaceCredentialBatches(
+      owner,
+    ).operationPage(requestId, cursor: cursor, limit: limit),
+  );
   @override
   Future<WorkspaceCredentialProgramOperation> programOperation(
     String requestId,

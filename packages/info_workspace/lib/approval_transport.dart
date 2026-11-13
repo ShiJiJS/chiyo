@@ -101,12 +101,18 @@ Map<String, Object?> approvalDetailToJson(
 }) {
   // The original endpoint stays v1 and refuses credential details. Only the
   // explicit v2 endpoint can deliver the complete mixed review to a new App.
-  if (!{1, 2, 3, 4}.contains(version)) {
+  if (!{1, 2, 3, 4, 5}.contains(version)) {
     throw const FormatException('Invalid approval version');
   }
   if (d.credentialBatch && version < 3 ||
       d.programPlan != null && version < 4) {
     throw const WorkspaceFailure('unsupported', '请更新 App 后核对这份多凭据申请。');
+  }
+  if (version < 5 &&
+      (d.operationsCursor != null ||
+          d.operationsTotal >
+              d.batchOperations.length + d.programOperations.length)) {
+    throw const WorkspaceFailure('unsupported', '请更新 App 后分页查看这些使用记录。');
   }
   if (version == 1 && (d.credential != null || d.executions.isNotEmpty)) {
     throw const WorkspaceFailure('unsupported', '此类申请的联网接入尚未完成。');
@@ -126,6 +132,10 @@ Map<String, Object?> approvalDetailToJson(
     if (version >= 4) ...{
       'programPlan': d.programPlan?.toJson(),
       'programOperations': d.programOperations.map((o) => o.toJson()).toList(),
+    },
+    if (version >= 5) ...{
+      'operationTotal': d.operationsTotal,
+      'operationsCursor': d.operationsCursor,
     },
     'request': approvalSummaryToJson(d.request),
     'reviewToken': d.reviewToken,
@@ -174,12 +184,17 @@ WorkspaceApprovalDetail approvalDetailFromJson(
   Map<String, dynamic> j,
 ) => _parse(() {
   final version = j['version'] ?? 1;
-  if (!{1, 2, 3, 4}.contains(version) ||
+  if (!{1, 2, 3, 4, 5}.contains(version) ||
       version >= 2 && !j.containsKey('credential') ||
       version >= 3 && j['credentialBatch'] is! bool ||
       version >= 3 && j['batchOperations'] is! List ||
       version >= 4 &&
           (!j.containsKey('programPlan') || j['programOperations'] is! List) ||
+      version >= 5 &&
+          (j['operationTotal'] is! int || !j.containsKey('operationsCursor')) ||
+      version < 5 &&
+          (j.containsKey('operationTotal') ||
+              j.containsKey('operationsCursor')) ||
       version < 4 &&
           (j.containsKey('programPlan') ||
               j.containsKey('programOperations')) ||
@@ -232,6 +247,8 @@ WorkspaceApprovalDetail approvalDetailFromJson(
     approveUnavailableReason: j['approveUnavailableReason'] as String?,
     fileVersionPolicy: j['fileVersionPolicy'] as String?,
     decisionUnavailableReason: j['decisionUnavailableReason'] as String?,
+    operationTotal: version >= 5 ? j['operationTotal'] as int : null,
+    operationsCursor: version >= 5 ? j['operationsCursor'] as String? : null,
     credentialBatch: version >= 3 && j['credentialBatch'] == true,
     programPlan: version >= 4 && j['programPlan'] != null
         ? WorkspaceCredentialProgramPlan.fromJson(
@@ -278,7 +295,7 @@ WorkspaceApprovalDetail approvalDetailFromJson(
             e.requestId != result.request.id ||
             e.credential.id != result.credential?.id,
       ) ||
-      result.batchOperations.length > 1000 ||
+      result.batchOperations.length > (version >= 5 ? 50 : 1000) ||
       result.batchOperations.map((o) => o.operationId).toSet().length !=
           result.batchOperations.length ||
       result.batchOperations.any(
@@ -299,7 +316,7 @@ WorkspaceApprovalDetail approvalDetailFromJson(
                 ),
               )) ||
       result.programPlan == null && result.programOperations.isNotEmpty ||
-      result.programOperations.length > 1000 ||
+      result.programOperations.length > (version >= 5 ? 50 : 1000) ||
       result.programOperations.map((o) => o.operationId).toSet().length !=
           result.programOperations.length ||
       result.programOperations.any(
@@ -308,6 +325,23 @@ WorkspaceApprovalDetail approvalDetailFromJson(
             !result.programPlan!.accepts(operation.plan, operation.itemIds),
       )) {
     throw const FormatException('Incomplete credential approval');
+  }
+  if (version >= 5) {
+    final page = WorkspaceCredentialOperationPage.fromJson({
+      'version': 1,
+      'requestId': result.request.id,
+      'program': result.programPlan != null,
+      'total': result.operationsTotal,
+      'cursor': null,
+      'nextCursor': result.operationsCursor,
+      'batches': result.batchOperations.map((o) => o.toJson()).toList(),
+      'programs': result.programOperations.map((o) => o.toJson()).toList(),
+    });
+    if (!result.credentialBatch &&
+            (page.total != 0 || page.nextCursor != null) ||
+        page.total > page.length && page.nextCursor == null) {
+      throw const FormatException('Incomplete operation page');
+    }
   }
   return result;
 });

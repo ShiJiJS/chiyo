@@ -8,7 +8,8 @@ final class RemoteWorkspaceApprovals
     implements
         WorkspaceApprovalSource,
         WorkspaceCredentialBatchActions,
-        WorkspaceCredentialProgramActions {
+        WorkspaceCredentialProgramActions,
+        WorkspaceCredentialOperationPages {
   RemoteWorkspaceApprovals(this.client, {required this.onChanged});
   final OwnerTransport client;
   final void Function() onChanged;
@@ -40,6 +41,24 @@ final class RemoteWorkspaceApprovals
       ),
     ),
   );
+  @override
+  Future<WorkspaceCredentialOperationPage> operationPage(
+    String requestId, {
+    String? cursor,
+    int limit = 25,
+  }) => _read(() async {
+    final page = WorkspaceCredentialOperationPage.fromJson(
+      await client.request(
+        'POST',
+        '/v1/owner/credential-batches/${Uri.encodeComponent(requestId)}/operations/query',
+        {'cursor': cursor, 'limit': limit},
+      ),
+    );
+    if (page.requestId != requestId || page.cursor != cursor) {
+      throw const FormatException();
+    }
+    return page;
+  });
   @override
   Future<WorkspaceCredentialProgramOperation> programOperation(
     String requestId,

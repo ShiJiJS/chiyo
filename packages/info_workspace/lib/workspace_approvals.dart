@@ -7,6 +7,8 @@ import 'workspace_credentials.dart';
 import 'workspace_approval_execution.dart';
 import 'workspace_credential_batches.dart';
 import 'workspace_credential_programs.dart';
+import 'workspace_credential_operation_pages.dart';
+export 'workspace_credential_operation_pages.dart';
 export 'workspace_credential_batches.dart';
 export 'workspace_credential_programs.dart';
 export 'workspace_approval_execution.dart';
@@ -147,6 +149,8 @@ class WorkspaceApprovalDetail {
     this.credential,
     this.credentialBatch = false,
     this.programPlan,
+    this.operationTotal,
+    this.operationsCursor,
     this.decidedAt,
     this.fieldExpiresAt,
     this.credentialExpiresAt,
@@ -166,6 +170,10 @@ class WorkspaceApprovalDetail {
   final List<WorkspaceCredentialBatchOperation> batchOperations;
   final List<WorkspaceCredentialProgramOperation> programOperations;
   final WorkspaceCredentialProgramPlan? programPlan;
+  final int? operationTotal;
+  final String? operationsCursor;
+  int get operationsTotal =>
+      operationTotal ?? batchOperations.length + programOperations.length;
   final WorkspaceApprovalSummary request;
   final String reviewToken;
   final List<WorkspaceApprovalScope> scopes;
@@ -189,6 +197,8 @@ class WorkspaceApprovalDetail {
         credential: credential,
         credentialBatch: credentialBatch,
         programPlan: programPlan,
+        operationTotal: operationTotal,
+        operationsCursor: operationsCursor,
         programOperations: programOperations,
         decidedAt: decidedAt,
         fieldExpiresAt: fieldExpiresAt,
@@ -213,6 +223,8 @@ class WorkspaceApprovalDetail {
     credential: credential,
     credentialBatch: credentialBatch,
     programPlan: programPlan,
+    operationTotal: operationTotal,
+    operationsCursor: operationsCursor,
     programOperations: programOperations,
     decidedAt: decidedAt,
     fieldExpiresAt: fieldExpiresAt,
@@ -237,6 +249,8 @@ class WorkspaceApprovalDetail {
     credential: credential,
     credentialBatch: credentialBatch,
     programPlan: programPlan,
+    operationTotal: operationTotal,
+    operationsCursor: operationsCursor,
     decidedAt: decidedAt,
     fieldExpiresAt: fieldExpiresAt,
     credentialExpiresAt: credentialExpiresAt,
@@ -250,6 +264,51 @@ class WorkspaceApprovalDetail {
         operation.operationId == next.operationId ? next : operation,
     ],
   );
+  WorkspaceApprovalDetail withOperationPage(
+    WorkspaceCredentialOperationPage input,
+  ) {
+    final page = WorkspaceCredentialOperationPage.fromJson(
+      Map<String, dynamic>.from(input.toJson()),
+    );
+    final ids = {
+      ...batchOperations.map((o) => o.operationId),
+      ...programOperations.map((o) => o.operationId),
+    };
+    if (!credentialBatch ||
+        page.cursor != operationsCursor ||
+        operationsCursor == null ||
+        !page.validFor(
+          request.id,
+          programPlan,
+          scopes.map((s) => s.id).toSet(),
+        ) ||
+        page.keys.any((key) => ids.contains(key.$2)) ||
+        page.total < ids.length + page.length) {
+      throw const WorkspaceFailure('invalid_response', '记录分页已变化，请重新读取申请后再继续。');
+    }
+    return WorkspaceApprovalDetail(
+      request: request,
+      reviewToken: reviewToken,
+      scopes: scopes,
+      approved: approved,
+      fileVersions: fileVersions,
+      credential: credential,
+      credentialBatch: credentialBatch,
+      programPlan: programPlan,
+      decidedAt: decidedAt,
+      fieldExpiresAt: fieldExpiresAt,
+      credentialExpiresAt: credentialExpiresAt,
+      approveUnavailableReason: approveUnavailableReason,
+      fileVersionPolicy: fileVersionPolicy,
+      decisionUnavailableReason: decisionUnavailableReason,
+      executions: executions,
+      batchOperations: [...batchOperations, ...page.batches],
+      programOperations: [...programOperations, ...page.programs],
+      operationTotal: page.total,
+      operationsCursor: page.nextCursor,
+    );
+  }
+
   bool get credentialSessionBound => credential?.sessionBound == true;
   bool get canApprove =>
       request.state == WorkspaceApprovalState.pending &&
