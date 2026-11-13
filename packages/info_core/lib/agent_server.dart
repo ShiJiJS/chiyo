@@ -424,6 +424,7 @@ class AgentProtocol {
             'information-import-operations.v1',
             'import-proposal-title.v1',
             'information-update-operations.v1',
+            'information-delete-operations.v1',
             'information-proposal-precheck.v1',
             'information-directory-discovery.v1',
             if (_agent.informationImportFilesAvailable)
@@ -900,6 +901,15 @@ class AgentProtocol {
       case '/delete/submit':
         return _submitDelete(body);
       case '/delete/status':
+        if (body.containsKey('operationId')) {
+          if (body.containsKey('proposalId')) {
+            throw const AccessFailure('invalid_request');
+          }
+          return _agent.deleteStatusByOperation(
+            _text(body, 'sessionSecret'),
+            _text(body, 'operationId'),
+          );
+        }
         return _agent.deleteStatus(
           _text(body, 'sessionSecret'),
           _text(body, 'proposalId'),
@@ -1254,6 +1264,9 @@ class AgentProtocol {
       agentName: _optionalMetadata(body, 'agentName'),
       purpose: _optionalMetadata(body, 'purpose'),
       externalChatId: _optionalMetadata(body, 'externalChatId'),
+      operationId: body['operationId'] == null
+          ? null
+          : _text(body, 'operationId'),
     );
     return _agent.deleteStatus(session, id);
   }

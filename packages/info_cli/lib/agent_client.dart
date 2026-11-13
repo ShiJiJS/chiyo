@@ -501,15 +501,42 @@ class AgentClient {
         });
       case 'delete-submit':
         if (_session == null) return {'status': 'unauthorized'};
+        if (input.containsKey('operationId')) {
+          final support = await _call('/capabilities', {});
+          if (support['status'] != 'ok') return support;
+          if (!(support['capabilities'] as List? ?? []).contains(
+            'information-delete-operations.v1',
+          )) {
+            return {'status': 'unsupported_capability'};
+          }
+        }
         return _call('/delete/submit', {
           'sessionSecret': _session,
           'itemId': input['itemId'],
           'baseVersion': input['baseVersion'],
           ..._submissionFields(input, proposal: true),
           if (input['fieldId'] != null) 'fieldId': input['fieldId'],
+          if (input.containsKey('operationId'))
+            'operationId': input['operationId'],
         });
       case 'delete-status':
         if (_session == null) return {'status': 'unauthorized'};
+        if (input.containsKey('operationId')) {
+          if (input.containsKey('proposalId')) {
+            return {'status': 'invalid_request'};
+          }
+          final support = await _call('/capabilities', {});
+          if (support['status'] != 'ok') return support;
+          if (!(support['capabilities'] as List? ?? []).contains(
+            'information-delete-operations.v1',
+          )) {
+            return {'status': 'unsupported_capability'};
+          }
+          return _call('/delete/status', {
+            'sessionSecret': _session,
+            'operationId': input['operationId'],
+          });
+        }
         return _call('/delete/status', {
           'sessionSecret': _session,
           'proposalId': input['proposalId'],

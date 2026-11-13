@@ -2,12 +2,43 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/chiyo_cli.dart';
 import 'package:info_cli/chiyo_context.dart';
+import 'package:info_cli/chiyo_command_line.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'opaque positional IDs beginning with a hyphen preserve their identity and trailing options',
+    () {
+      final grammar = ChiyoCommandLine();
+      for (final id in ['-${'A' * 42}=', '--${'A' * 41}', '---${'A' * 40}=']) {
+        for (final path in [
+          ['requests', 'show'],
+          ['requests', 'wait'],
+          ['requests', 'cancel'],
+          ['proposals', 'show'],
+        ]) {
+          final parsed = grammar.parse([
+            '--context',
+            id,
+            ...path,
+            id,
+            if (path.last == 'wait') ...['--timeout', '0'],
+            '--json',
+          ]);
+          expect(parsed.options.rest, [id]);
+          expect(parsed.root['context'], id);
+          expect(parsed.json, true);
+          if (path.last == 'wait') expect(parsed.options['timeout'], '0');
+        }
+        expect(grammar.parse(['requests', 'show', '--', id]).options.rest, [
+          id,
+        ]);
+      }
+    },
+  );
   test('all help levels work with no context, files, App or stdin', () async {
     final neverRead = Stream<List<int>>.error(
       StateError('stdin must not be read'),
@@ -129,6 +160,24 @@ void main() {
     });
 
     test(
+      'an unavailable program capability is a connection/capability failure, not invalid user input',
+      () async {
+        final result = await call([
+          'exec',
+          'output',
+          '--operation',
+          'not-started',
+        ]);
+        expect(result.exitCode, 3, reason: result.render());
+        expect(
+          (result.output['error'] as Map)['code'],
+          'unsupported_capability',
+        );
+        expect(repository.credentialProgramOperations, isEmpty);
+      },
+    );
+
+    test(
       'queries own requests, preserves wait semantics and finds lost submit IDs',
       () async {
         final request = service.agent.request(context.secret, 'read host', [
@@ -157,7 +206,7 @@ void main() {
           '--timeout',
           '0',
         ]);
-        expect(wait.exitCode, 6);
+        expect(wait.exitCode, 6, reason: wait.render());
         expect(
           service.agent.status(context.secret, request.id)['status'],
           'pending',

@@ -99,6 +99,7 @@ const _credentialDeliveryLibraryFormat = 64;
 const _credentialBatchLibraryFormat = 65;
 const _agentSubmissionLibraryFormat = 66;
 const _credentialProgramBatchLibraryFormat = 67;
+const _deleteSubmissionLibraryFormat = 68;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -724,7 +725,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _credentialProgramBatchLibraryFormat) {
+      if (headerVersion > _deleteSubmissionLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -740,7 +741,7 @@ class EncryptedInformationRepository
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
             (marker.single['version'] as int) >
-                _credentialProgramBatchLibraryFormat ||
+                _deleteSubmissionLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -976,6 +977,8 @@ class EncryptedInformationRepository
         ),
       );
     }
+    final deleteSubmissions = <String>{};
+    int? deleteSubmissionFormat;
     for (final row
         in await _db
             .customSelect('SELECT payload FROM delete_proposals ORDER BY rowid')
@@ -983,6 +986,21 @@ class EncryptedInformationRepository
       final proposal = DeleteProposal.fromJson(
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
+      if (proposal.operationId != null) {
+        deleteSubmissionFormat ??=
+            (await _db
+                    .customSelect(
+                      'SELECT version FROM library_format WHERE singleton=1',
+                    )
+                    .getSingle())
+                .read<int>('version');
+        if (deleteSubmissionFormat < _deleteSubmissionLibraryFormat ||
+            !deleteSubmissions.add(
+              jsonEncode([proposal.sessionBinding, proposal.operationId]),
+            )) {
+          throw const StorageFailure('unsupported_schema');
+        }
+      }
       _deletes[proposal.id] = proposal;
     }
     for (final row
@@ -2105,6 +2123,21 @@ class EncryptedInformationRepository
   }
 
   Future<void> _writeDelete(DeleteProposal proposal) async {
+    if (!proposal.hasValidSubmissionIdentity) {
+      throw const StorageFailure('invalid_proposal');
+    }
+    final previous = _deletes[proposal.id];
+    if (previous?.operationId != null &&
+        (previous!.operationId != proposal.operationId ||
+            previous.submissionDigest != proposal.submissionDigest)) {
+      throw const StorageFailure('operation_conflict');
+    }
+    if (proposal.operationId != null) {
+      await _requireAdmissionFormat(_deleteSubmissionLibraryFormat);
+      await _db.customStatement(
+        "CREATE UNIQUE INDEX IF NOT EXISTS delete_submission_identity ON delete_proposals(json_extract(payload,'\$.sessionBinding'),json_extract(payload,'\$.operationId')) WHERE json_extract(payload,'\$.operationId') IS NOT NULL",
+      );
+    }
     await _db.customStatement(
       'INSERT INTO delete_proposals(id,payload) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',
       [proposal.id, jsonEncode(proposal.toJson())],

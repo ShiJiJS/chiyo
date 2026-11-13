@@ -1040,6 +1040,22 @@ class MemoryInformationRepository
       List.unmodifiable(_deletes.values);
   @override
   Future<void> saveDeleteProposal(DeleteProposal proposal) async {
+    if (!proposal.hasValidSubmissionIdentity ||
+        _deletes.values.any(
+          (old) =>
+              old.id != proposal.id &&
+              proposal.operationId != null &&
+              old.sessionBinding == proposal.sessionBinding &&
+              old.operationId == proposal.operationId,
+        )) {
+      throw const AccessFailure('operation_conflict');
+    }
+    final previous = _deletes[proposal.id];
+    if (previous?.operationId != null &&
+        (previous!.operationId != proposal.operationId ||
+            previous.submissionDigest != proposal.submissionDigest)) {
+      throw const AccessFailure('operation_conflict');
+    }
     _deletes[proposal.id] = proposal;
   }
 

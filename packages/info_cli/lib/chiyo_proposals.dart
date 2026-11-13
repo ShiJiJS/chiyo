@@ -414,13 +414,17 @@ extension _ChiyoProposals on ChiyoCli {
     if (result['status'] != 'ok') {
       return {...result, 'operationId': intent.operationId};
     }
-    // Delete's old protocol has no creation idempotency. Do not silently send
-    // through it; the new capability is required before enabling this branch.
     if (kind == 'delete') {
-      return {
-        'status': 'unsupported_capability',
-        'operationId': intent.operationId,
-      };
+      final support = await client.execute({'command': 'capabilities'});
+      if (support['status'] != 'ok') return support;
+      if (!(support['capabilities'] as List? ?? []).contains(
+        'information-delete-operations.v1',
+      )) {
+        return {
+          'status': 'unsupported_capability',
+          'operationId': intent.operationId,
+        };
+      }
     }
     final submission = Map<String, dynamic>.from(
       jsonDecode(jsonEncode(source)) as Map,
@@ -469,6 +473,14 @@ extension _ChiyoProposals on ChiyoCli {
       'id': intent.operationId,
     });
     if (original['status'] != 'not_found') {
+      if (original['status'] == 'ok' &&
+          (original['kind'] != 'proposal-submit' ||
+              original['requestKind'] != intent.payload['kind'])) {
+        return {
+          'status': 'operation_conflict',
+          'operationId': intent.operationId,
+        };
+      }
       return {...original, 'operationId': intent.operationId};
     }
     final path = intent.payload['sourcePath'];

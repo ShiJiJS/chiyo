@@ -10,6 +10,7 @@ extension AgentDeletes on AgentAccess {
     String agentName = '',
     String purpose = '',
     String externalChatId = '',
+    String? operationId,
   }) => _service.owner._serialize(() async {
     _service._requireSession(session);
     if (!validSubmissionMetadata(
@@ -27,6 +28,44 @@ extension AgentDeletes on AgentAccess {
         baseVersion < 1 ||
         (fieldId != null && (fieldId.isEmpty || fieldId.length > 200))) {
       throw const AccessFailure('invalid_proposal');
+    }
+    if (operationId != null &&
+        !RegExp(
+          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+        ).hasMatch(operationId)) {
+      throw const AccessFailure('invalid_operation_id');
+    }
+    final digest = DeleteProposal.digestFor(
+      itemId: itemId,
+      baseVersion: baseVersion,
+      fieldId: fieldId,
+      title: title,
+      agentName: agentName,
+      purpose: purpose,
+      externalChatId: externalChatId,
+    );
+    if (operationId != null) {
+      final previous = _service._repository.deleteProposals
+          .where(
+            (proposal) =>
+                proposal.sessionBinding == binding &&
+                proposal.operationId == operationId,
+          )
+          .firstOrNull;
+      if (previous != null) {
+        if (previous.submissionDigest != digest) {
+          throw const AccessFailure('operation_conflict');
+        }
+        return previous.id;
+      }
+      if (!_reserveAgentOperation(
+        session,
+        operationId,
+        'delete-submit',
+        digest,
+      )) {
+        throw const AccessFailure('operation_conflict');
+      }
     }
     if (_service._repository.deleteProposals
             .where(
@@ -50,6 +89,8 @@ extension AgentDeletes on AgentAccess {
       baseVersion: baseVersion,
       createdAt: _service._clock(),
       fieldId: fieldId,
+      operationId: operationId,
+      submissionDigest: operationId == null ? null : digest,
     );
     await _service._repository.saveDeleteProposal(proposal);
     return proposal.id;
@@ -63,7 +104,32 @@ extension AgentDeletes on AgentAccess {
     if (binding == null || found.isEmpty) {
       throw const AccessFailure('unauthorized');
     }
-    return {'status': found.single.state.name, 'proposalId': id};
+    return {
+      'status': found.single.state.name,
+      'proposalId': id,
+      if (found.single.operationId != null)
+        'operationId': found.single.operationId,
+    };
+  }
+
+  Map<String, Object?> deleteStatusByOperation(
+    String session,
+    String operationId,
+  ) {
+    _service._requireSession(session);
+    if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(operationId)) {
+      throw const AccessFailure('invalid_operation_id');
+    }
+    final proposal = _service._repository.deleteProposals
+        .where(
+          (proposal) =>
+              proposal.sessionBinding == _service._sessionBindings[session] &&
+              proposal.operationId == operationId,
+        )
+        .firstOrNull;
+    return proposal == null
+        ? {'status': 'not_found', 'operationId': operationId}
+        : deleteStatus(session, proposal.id);
   }
 }
 

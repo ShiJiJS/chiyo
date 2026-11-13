@@ -724,6 +724,9 @@ class ChiyoCli {
     final status = data['status'] as String? ?? 'invalid_response';
     final code = data['errorCode'] as String? ?? status;
     final int? failure = switch (code) {
+      'unsupported_capability' ||
+      'unsupported_protocol' ||
+      'unsupported_tool_version' when status != 'ok' => 3,
       'operation_conflict' ||
       'credential_version_changed' ||
       'template_changed' => 8,

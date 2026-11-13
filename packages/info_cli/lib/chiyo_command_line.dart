@@ -313,7 +313,7 @@ class ChiyoCommandLine {
   ChiyoInvocation parse(List<String> arguments) {
     ArgResults root;
     try {
-      root = _root.parse(arguments);
+      root = _root.parse(_opaqueIdentifiers(arguments));
     } on ArgParserException {
       throw const ChiyoUsageFailure('命令或参数不正确；使用 chiyo --help 查看用法。');
     }
@@ -341,6 +341,33 @@ class ChiyoCommandLine {
       _validate(path, result);
     }
     return ChiyoInvocation(path, result, root, json, help);
+  }
+
+  /// Server IDs are opaque base64url and may begin with '-'. Keep trailing
+  /// flags as flags and put only that positional ID after the conventional
+  /// terminator. Use the actual grammar to skip option values and commands.
+  List<String> _opaqueIdentifiers(List<String> arguments) {
+    var parser = _root, path = '';
+    for (var i = 0; i < arguments.length; i++) {
+      final token = arguments[i];
+      if (token == '--') return arguments;
+      if (_arguments.containsKey(path) &&
+          RegExp(r'^-[A-Za-z0-9_-]{42}=?$').hasMatch(token)) {
+        return [...arguments.take(i), ...arguments.skip(i + 1), '--', token];
+      }
+      if (token.startsWith('--')) {
+        final name = token.substring(2).split('=').first;
+        final option = parser.options[name] ?? _root.options[name];
+        if (option != null && !option.isFlag && !token.contains('=')) i++;
+        continue;
+      }
+      final command = parser.commands[token];
+      if (command != null) {
+        parser = command;
+        path = path.isEmpty ? token : '$path $token';
+      }
+    }
+    return arguments;
   }
 
   void _validate(String path, ArgResults options) {

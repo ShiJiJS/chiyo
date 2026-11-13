@@ -99,6 +99,7 @@ extension AgentRecordQueries on AgentAccess {
         'agentName': p.agentName,
         'createdAt': _useTimestamp(p.createdAt),
         'status': deleteStatus(session, p.id)['status'],
+        if (p.operationId != null) 'operationId': p.operationId,
       };
     }
     for (final task in _service._repository.organizationTasks) {

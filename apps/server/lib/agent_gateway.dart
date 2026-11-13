@@ -220,6 +220,10 @@ final class AgentGateway {
           'import-proposal-title.v1',
           'information-update-operations.v1',
           if ((result['capabilities'] as List).contains(
+            'information-delete-operations.v1',
+          ))
+            'information-delete-operations.v1',
+          if ((result['capabilities'] as List).contains(
             'information-proposal-precheck.v1',
           ))
             'information-proposal-precheck.v1',

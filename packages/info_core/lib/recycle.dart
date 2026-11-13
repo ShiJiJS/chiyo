@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+
 import 'information.dart';
 import 'update_proposals.dart';
 
@@ -23,13 +27,55 @@ class DeleteProposal {
     this.agentName = '',
     this.purpose = '',
     this.externalChatId = '',
+    this.operationId,
+    this.submissionDigest,
   });
   final String id, sessionBinding, chatLabel, itemId;
   final String? fieldId, entryId;
+  final String? operationId, submissionDigest;
   final int baseVersion, version;
   final String title, agentName, purpose, externalChatId;
   final DateTime createdAt;
   final DeleteProposalState state;
+  static String digestFor({
+    required String itemId,
+    required int baseVersion,
+    String? fieldId,
+    String title = '',
+    String agentName = '',
+    String purpose = '',
+    String externalChatId = '',
+  }) => sha256
+      .convert(
+        utf8.encode(
+          jsonEncode([
+            itemId,
+            baseVersion,
+            fieldId,
+            title.trim(),
+            agentName.trim(),
+            purpose.trim(),
+            externalChatId.trim(),
+          ]),
+        ),
+      )
+      .toString();
+  bool get hasValidSubmissionIdentity =>
+      operationId == null && submissionDigest == null ||
+      operationId != null &&
+          RegExp(
+            r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+          ).hasMatch(operationId!) &&
+          submissionDigest ==
+              digestFor(
+                itemId: itemId,
+                baseVersion: baseVersion,
+                fieldId: fieldId,
+                title: title,
+                agentName: agentName,
+                purpose: purpose,
+                externalChatId: externalChatId,
+              );
   DeleteProposal finish(DeleteProposalState state, {String? entryId}) =>
       DeleteProposal(
         id: id,
@@ -39,6 +85,8 @@ class DeleteProposal {
         agentName: agentName,
         purpose: purpose,
         externalChatId: externalChatId,
+        operationId: operationId,
+        submissionDigest: submissionDigest,
         itemId: itemId,
         baseVersion: baseVersion,
         createdAt: createdAt,
@@ -51,6 +99,10 @@ class DeleteProposal {
     'id': id,
     'sessionBinding': sessionBinding,
     'chatLabel': chatLabel,
+    if (operationId != null) ...{
+      'operationId': operationId,
+      'submissionDigest': submissionDigest,
+    },
     if (title.isNotEmpty) 'title': title,
     if (agentName.isNotEmpty) 'agentName': agentName,
     if (purpose.isNotEmpty) 'purpose': purpose,
@@ -63,22 +115,41 @@ class DeleteProposal {
     'version': version,
     'entryId': entryId,
   };
-  factory DeleteProposal.fromJson(Map<String, dynamic> j) => DeleteProposal(
-    id: j['id'] as String,
-    sessionBinding: j['sessionBinding'] as String,
-    chatLabel: j['chatLabel'] as String,
-    title: j['title'] as String? ?? '',
-    agentName: j['agentName'] as String? ?? '',
-    purpose: j['purpose'] as String? ?? '',
-    externalChatId: j['externalChatId'] as String? ?? '',
-    itemId: j['itemId'] as String,
-    baseVersion: j['baseVersion'] as int,
-    createdAt: DateTime.parse(j['createdAt'] as String),
-    fieldId: j['fieldId'] as String?,
-    state: DeleteProposalState.values.byName(j['state'] as String),
-    version: j['version'] as int,
-    entryId: j['entryId'] as String?,
-  );
+  factory DeleteProposal.fromJson(Map<String, dynamic> j) {
+    final operation = j['operationId'], digest = j['submissionDigest'];
+    if ((operation == null) != (digest == null) ||
+        operation != null &&
+            (operation is! String ||
+                !RegExp(
+                  r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+                ).hasMatch(operation) ||
+                digest is! String ||
+                !RegExp(r'^[0-9a-f]{64}$').hasMatch(digest))) {
+      throw const FormatException('Invalid delete submission');
+    }
+    final result = DeleteProposal(
+      id: j['id'] as String,
+      sessionBinding: j['sessionBinding'] as String,
+      chatLabel: j['chatLabel'] as String,
+      title: j['title'] as String? ?? '',
+      agentName: j['agentName'] as String? ?? '',
+      purpose: j['purpose'] as String? ?? '',
+      externalChatId: j['externalChatId'] as String? ?? '',
+      operationId: operation as String?,
+      submissionDigest: digest as String?,
+      itemId: j['itemId'] as String,
+      baseVersion: j['baseVersion'] as int,
+      createdAt: DateTime.parse(j['createdAt'] as String),
+      fieldId: j['fieldId'] as String?,
+      state: DeleteProposalState.values.byName(j['state'] as String),
+      version: j['version'] as int,
+      entryId: j['entryId'] as String?,
+    );
+    if (!result.hasValidSubmissionIdentity) {
+      throw const FormatException('Changed delete submission');
+    }
+    return result;
+  }
 }
 
 /// Owner-only recoverable content. Terminal entries retain no content values.

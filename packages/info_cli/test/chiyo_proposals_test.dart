@@ -183,6 +183,65 @@ void main() {
     },
   );
   test(
+    'checked deletion submits once, remains pending until approval and can be recovered by its original operation',
+    () async {
+      final item = await service.owner.createInformation(
+        'Synthetic retained item',
+        '',
+        [const FieldInput('Body', '', 'PRIVATE-KEEP-UNTIL-APPROVED')],
+      );
+      await business.writeAsString(
+        jsonEncode({
+          'title': 'Remove synthetic item',
+          'purpose': 'Clean synthetic test data',
+          'itemId': item.id,
+          'baseVersion': item.version,
+        }),
+      );
+      final checked = await call([
+        'proposals',
+        'check',
+        '--kind',
+        'delete',
+        '--input',
+        business.path,
+      ]);
+      expect(checked.exitCode, 0, reason: checked.render());
+      expect(repo.deleteProposals, isEmpty);
+      final checkId = (checked.output['data'] as Map)['checkId'] as String;
+      final args = [
+        'proposals',
+        'submit',
+        '--kind',
+        'delete',
+        '--check',
+        checkId,
+        '--input',
+        business.path,
+        '--operation',
+        'delete-once',
+      ];
+      final submitted = await call(args);
+      expect(submitted.exitCode, 0, reason: submitted.render());
+      expect((await call(args)).exitCode, 0);
+      expect(repo.deleteProposals, hasLength(1));
+      expect(service.owner.information.single.id, item.id);
+      final proposal = repo.deleteProposals.single;
+      await service.owner.confirmDelete(proposal.id, proposal.version);
+      expect(service.owner.information, isEmpty);
+      final recovered = await call(['operations', 'retry', 'delete-once']);
+      expect(recovered.exitCode, 0, reason: recovered.render());
+      expect((recovered.output['data'] as Map)['requestId'], proposal.id);
+      expect((await call(args)).exitCode, 0);
+      expect(repo.deleteProposals, hasLength(1));
+      expect(repo.recycleEntries, hasLength(1));
+      expect(
+        submitted.render(),
+        isNot(contains('PRIVATE-KEEP-UNTIL-APPROVED')),
+      );
+    },
+  );
+  test(
     'check freezes dynamic definitions, stores no source text, submits once and recovers by operation',
     () async {
       final checked = await check(body: note());
