@@ -262,7 +262,7 @@ void main() {
     test(
       'new context cannot overwrite a previous chat or chmod a general directory',
       () async {
-        final original = await contextFile.readAsString();
+        final original = await contextFile.readAsBytes();
         final result = await ChiyoCli(environment: {}).run([
           'chat',
           'start',
@@ -279,7 +279,7 @@ void main() {
           '--json',
         ]);
         expect(result.exitCode, 2);
-        expect(await contextFile.readAsString(), original);
+        expect(await contextFile.readAsBytes(), original);
         if (!Platform.isWindows) {
           final public = await Directory('${root.path}/general').create();
           await Process.run('/bin/chmod', ['755', public.path]);
@@ -363,6 +363,8 @@ void main() {
         Platform.resolvedExecutable,
         ['run', 'bin/chiyo.dart', '--json', 'requests', 'list'],
         environment: {'CHIYO_CONTEXT': '', 'CODEX_THREAD_ID': ''},
+        stdoutEncoding: utf8,
+        stderrEncoding: utf8,
       );
       expect(result.exitCode, 3);
       expect(result.stderr, isEmpty);
