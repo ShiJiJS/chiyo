@@ -21,6 +21,7 @@ Future<void> main(List<String> args) async {
   await output.create(recursive: true);
   final suffix = Platform.isWindows ? '.exe' : '';
   for (final entry in {
+    'chiyo': 'chiyo',
     'codex_hook': 'info-codex-hook',
     'codex_info': 'info-codex',
     'runtime_worker': 'info-runtime-worker',

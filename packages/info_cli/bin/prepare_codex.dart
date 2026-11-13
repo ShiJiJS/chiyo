@@ -15,7 +15,7 @@ Future<void> main(List<String> args) async {
     try {
       await registerCodexRuntime(Directory(args[1]).absolute);
       stdout.writeln(
-        'Registered public Codex runtime descriptor; configuration and hook trust were not changed.',
+        'Registered public Chiyo runtime descriptor; configuration and hook trust were not changed.',
       );
     } on Object {
       stderr.writeln(
@@ -89,6 +89,7 @@ Future<void> main(List<String> args) async {
     }
     final suffix = Platform.isWindows ? '.exe' : '';
     final binaries = [
+      'chiyo$suffix',
       'info-codex$suffix',
       'info-codex-hook$suffix',
       'info-runtime-worker$suffix',

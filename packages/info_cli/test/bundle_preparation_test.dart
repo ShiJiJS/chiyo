@@ -54,12 +54,15 @@ void main() {
         extraReferences.add(name);
       }
       for (final name in [
+        'chiyo',
         'info-codex',
         'info-codex-hook',
         'info-runtime-worker',
       ]) {
         if (delivered == null) {
-          final entry = name == 'info-runtime-worker'
+          final entry = name == 'chiyo'
+              ? 'chiyo'
+              : name == 'info-runtime-worker'
               ? 'runtime_worker'
               : name.endsWith('hook')
               ? 'codex_hook'
@@ -132,7 +135,8 @@ void main() {
       final skill = await File(
         '$output/skills/agent-info-access/SKILL.md',
       ).readAsString();
-      expect(skill, contains('$output/info-codex$suffix'));
+      expect(skill, contains('$output/chiyo$suffix'));
+      expect(await File('$output/chiyo$suffix').exists(), true);
       expect(
         await File(
           '$output/skills/agent-info-access/references/credential-use.md',
