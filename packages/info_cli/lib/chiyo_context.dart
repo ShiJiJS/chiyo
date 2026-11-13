@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/private_connection_files.dart';
 import 'agent_client.dart';
@@ -117,6 +118,11 @@ class ChiyoContext {
             parentType == FileSystemEntityType.directory &&
             (await target.parent.stat()).mode & 0xE3F != 0) {
       throw const FormatException('context_store_unavailable');
+    }
+    if (Platform.isWindows && parentType == FileSystemEntityType.directory) {
+      // Verify without changing an existing directory's ACL. The shared writer
+      // may adopt app-owned storage, but chat setup cannot adopt any user folder.
+      WindowsPrivateFiles.verify(target.parent.path, directory: true);
     }
     await PrivateConnectionFiles.write(target, {
       'version': 1,
