@@ -180,6 +180,21 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             ),
           ),
         ),
+        if (!editable &&
+            current.credentialBatch &&
+            scope.available &&
+            current.approved.contains(scope.id))
+          DesktopButton(
+            key: ValueKey('approval-revoke-scope-${scope.id}'),
+            kind: DesktopButtonKind.quiet,
+            onPressed: model.canDecide
+                ? () => model.decide(
+                    WorkspaceApprovalAction.revoke,
+                    revokeItems: [scope.id],
+                  )
+                : null,
+            child: const Text('撤销此凭据'),
+          ),
         if (scope.kind == WorkspaceApprovalScopeKind.file && checked)
           Padding(
             padding: const EdgeInsets.only(left: 30, bottom: 16),

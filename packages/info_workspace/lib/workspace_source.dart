@@ -27,6 +27,7 @@ export 'workspace_hosts.dart';
 export 'workspace_adoption.dart';
 export 'workspace_legacy_templates.dart';
 export 'workspace_approvals.dart';
+export 'workspace_credential_batches.dart';
 export 'workspace_grant_history.dart';
 export 'workspace_proposals.dart';
 

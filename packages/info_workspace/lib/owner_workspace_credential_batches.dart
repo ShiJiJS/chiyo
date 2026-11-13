@@ -56,6 +56,60 @@ class OwnerWorkspaceCredentialBatches {
   List<WorkspaceApprovalSummary> summaries() =>
       owner.credentialBatches.map(summary).toList();
 
+  static String destinationLabel(core.CredentialBatchDestination d) {
+    final browser = d.browser;
+    return browser == null
+        ? '本机密码框 · ${d.application!.executable}'
+        : '${d.via == 'ego' ? 'Ego' : 'Chrome'} · ${browser.url}\n表单：${browser.formSelector}\n密码框：${browser.fieldSelector}';
+  }
+
+  static String scopeLabel(core.CredentialBatchItem item) =>
+      '第${item.version}版 · ${destinationLabel(item.destination)}';
+
+  WorkspaceCredentialBatchOperation operationView(
+    core.CredentialUseBatch r,
+    core.CredentialBatchOperation operation,
+  ) => WorkspaceCredentialBatchOperation.fromJson({
+    ...owner.credentialBatchOperationView(operation),
+    'attentionOperationId': operation.attentionOperationId,
+    'fromBackup': r.archived,
+  });
+  WorkspaceCredentialBatchOperation operation(
+    String requestId,
+    String operationId,
+  ) {
+    final r = _request(requestId);
+    final operation = owner.credentialBatchOperations
+        .where((o) => o.requestId == requestId && o.operationId == operationId)
+        .firstOrNull;
+    if (operation == null) {
+      throw const WorkspaceFailure('not_found', '未找到这次填写记录。');
+    }
+    return operationView(r, operation);
+  }
+
+  Future<WorkspaceCredentialBatchOperation> acknowledge(
+    WorkspaceCredentialBatchAcknowledgement change,
+  ) async {
+    final r = _request(change.requestId);
+    try {
+      final result = await owner.acknowledgeCredentialBatchOperation(
+        r.id,
+        change.operationId,
+        ownerOperationId: change.ownerOperationId,
+        revision: change.revision,
+      );
+      return operationView(r, result);
+    } on core.CredentialUseFailure catch (error) {
+      throw WorkspaceFailure(
+        error.code == 'audit_unavailable' ? 'unknown_outcome' : 'conflict',
+        error.code == 'audit_unavailable'
+            ? '无法确认核对结果，请查询原操作。'
+            : '填写记录已变化，请重新读取后核对。',
+      );
+    }
+  }
+
   String reviewToken(String id) {
     final r = _request(id);
     return sha256
@@ -89,11 +143,16 @@ class OwnerWorkspaceCredentialBatches {
       } on core.CredentialUseFailure {
         problem = '凭据已变化或不可用，请让 AI 重新申请。';
       }
-      final d = item.destination;
-      final browser = d.browser;
-      final destination = browser == null
-          ? '本机密码框 · ${d.application!.executable}'
-          : '${d.via == 'ego' ? 'Ego' : 'Chrome'} · ${browser.url}\n表单：${browser.formSelector}\n密码框：${browser.fieldSelector}';
+      if (r.decisions.isNotEmpty && problem == null) {
+        problem = switch (owner.credentialBatchItemState(r, item)) {
+          'available' => null,
+          'denied' => '这份凭据未获批准。',
+          'revoked' => '这份凭据的许可已撤销或失效。',
+          'expired' => '这份凭据的使用期限已到。',
+          'version_invalidated' => '凭据已更新，需要重新申请。',
+          _ => '这份凭据的许可已不可用。',
+        };
+      }
       scopes.add(
         WorkspaceApprovalScope(
           id: item.id,
@@ -101,7 +160,7 @@ class OwnerWorkspaceCredentialBatches {
             WorkspaceRecordKind.credential,
             item.credentialId,
           ),
-          label: '第${item.version}版 · $destination',
+          label: scopeLabel(item),
           section: item.credentialName,
           recordName: item.credentialName,
           kind: WorkspaceApprovalScopeKind.credential,
@@ -117,12 +176,21 @@ class OwnerWorkspaceCredentialBatches {
       reviewToken: reviewToken(id),
       scopes: scopes,
       credentialBatch: true,
+      batchOperations: [
+        for (final o in owner.credentialBatchOperations)
+          if (o.requestId == r.id) operationView(r, o),
+      ],
       approved: r.items
           .where((i) => i.decision == core.CredentialBatchItemDecision.approved)
           .map((i) => i.id),
       decidedAt: r.decisions.firstOrNull?.at,
       credentialExpiresAt: r.items
-          .where((i) => i.decision == core.CredentialBatchItemDecision.approved)
+          .where(
+            (i) => {
+              core.CredentialBatchItemDecision.approved,
+              core.CredentialBatchItemDecision.revoked,
+            }.contains(i.decision),
+          )
           .map((i) => i.expiresAt)
           .firstOrNull,
     );
@@ -172,7 +240,15 @@ class OwnerWorkspaceCredentialBatches {
                         !detail.scopes.any((s) => s.id == id && s.available),
                   ) ||
                   change.credentialMinutes == null
-            : change.selected.isNotEmpty)) {
+            : change.action == WorkspaceApprovalAction.deny
+            ? change.selected.isNotEmpty
+            : change.selected.any(
+                (id) => !r.items.any(
+                  (i) =>
+                      i.id == id &&
+                      i.decision == core.CredentialBatchItemDecision.approved,
+                ),
+              ))) {
       throw const WorkspaceFailure('invalid_scope', '请核对凭据、填写位置和使用期限。');
     }
     try {
@@ -181,11 +257,15 @@ class OwnerWorkspaceCredentialBatches {
           r.id,
           operationId: change.operationId,
           revision: r.revision,
-          itemIds: r.items
-              .where(
-                (i) => i.decision == core.CredentialBatchItemDecision.approved,
-              )
-              .map((i) => i.id),
+          itemIds: change.selected.isNotEmpty
+              ? change.selected
+              : r.items
+                    .where(
+                      (i) =>
+                          i.decision ==
+                          core.CredentialBatchItemDecision.approved,
+                    )
+                    .map((i) => i.id),
           reviewToken: change.reviewToken,
           commandDigest: change.digest,
           validateReview: guard,

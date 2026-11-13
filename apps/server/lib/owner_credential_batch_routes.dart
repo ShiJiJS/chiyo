@@ -1,4 +1,6 @@
 import 'package:info_core/info_core.dart';
+import 'package:info_workspace/owner_workspace_credential_batches.dart';
+import 'package:info_workspace/workspace_source.dart';
 
 /// Entered only from the authenticated owner queue. Agent routes intentionally
 /// have no decision or acknowledgement equivalent.
@@ -72,6 +74,14 @@ final class OwnerCredentialBatchRoutes {
         .firstOrNull;
     if (request == null) return (404, {'error': 'not_found'});
     if (method == 'GET' && path.length == 4) return (200, _view(request));
+    if (method == 'GET' && path.length == 6 && path[4] == 'operations') {
+      return (
+        200,
+        OwnerWorkspaceCredentialBatches(
+          owner,
+        ).operation(request.id, path[5]).toJson(),
+      );
+    }
     if (method == 'POST' && path.length == 5 && path.last == 'decide') {
       _shape(body, {
         'operationId',
@@ -104,13 +114,15 @@ final class OwnerCredentialBatchRoutes {
         path[4] == 'operations' &&
         path.last == 'acknowledge') {
       _shape(body, {'operationId', 'revision'});
-      final result = await owner.acknowledgeCredentialBatchOperation(
-        request.id,
-        path[5],
-        ownerOperationId: body!['operationId'] as String,
-        revision: body['revision'] as int,
+      final result = await OwnerWorkspaceCredentialBatches(owner).acknowledge(
+        WorkspaceCredentialBatchAcknowledgement(
+          requestId: request.id,
+          operationId: path[5],
+          ownerOperationId: body!['operationId'] as String,
+          revision: body['revision'] as int,
+        ),
       );
-      return (200, owner.credentialBatchOperationView(result));
+      return (200, result.toJson());
     }
     return (404, {'error': 'not_found'});
   }

@@ -581,6 +581,7 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
   ) => {
     ..._service._batchOperationForDisplay(operation).toPublicJson(),
     'revision': operation.revision,
+    'observedAt': _useTimestamp(_service._clock()),
   };
   String credentialBatchState(CredentialUseBatch r) => _service._batchState(r);
   String credentialBatchItemState(

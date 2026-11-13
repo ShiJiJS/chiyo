@@ -596,7 +596,8 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                 ),
             ]),
             if (m.linkedDecision &&
-                (m.decision.detail!.credentialExpiresAt != null ||
+                (m.decision.detail!.credentialBatch ||
+                    m.decision.detail!.credentialExpiresAt != null ||
                     m.decision.detail!.credentialSessionBound))
               ApprovalExecutions(controller: m.decision),
             if (d.events.isNotEmpty)

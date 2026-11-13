@@ -5,6 +5,8 @@ import 'workspace_records.dart';
 import 'workspace_files.dart';
 import 'workspace_credentials.dart';
 import 'workspace_approval_execution.dart';
+import 'workspace_credential_batches.dart';
+export 'workspace_credential_batches.dart';
 export 'workspace_approval_execution.dart';
 
 enum WorkspaceApprovalKind {
@@ -149,11 +151,14 @@ class WorkspaceApprovalDetail {
     this.fileVersionPolicy,
     this.decisionUnavailableReason,
     Iterable<WorkspaceApprovalExecution> executions = const [],
+    Iterable<WorkspaceCredentialBatchOperation> batchOperations = const [],
   }) : executions = List.unmodifiable(executions),
+       batchOperations = List.unmodifiable(batchOperations),
        scopes = List.unmodifiable(scopes),
        approved = Set.unmodifiable(approved),
        fileVersions = Map.unmodifiable(fileVersions);
   final List<WorkspaceApprovalExecution> executions;
+  final List<WorkspaceCredentialBatchOperation> batchOperations;
   final WorkspaceApprovalSummary request;
   final String reviewToken;
   final List<WorkspaceApprovalScope> scopes;
@@ -186,7 +191,30 @@ class WorkspaceApprovalDetail {
           for (final e in executions)
             e.operationId == next.operationId ? next : e,
         ],
+        batchOperations: batchOperations,
       );
+  WorkspaceApprovalDetail withBatchOperation(
+    WorkspaceCredentialBatchOperation next,
+  ) => WorkspaceApprovalDetail(
+    request: request,
+    reviewToken: reviewToken,
+    scopes: scopes,
+    approved: approved,
+    fileVersions: fileVersions,
+    credential: credential,
+    credentialBatch: credentialBatch,
+    decidedAt: decidedAt,
+    fieldExpiresAt: fieldExpiresAt,
+    credentialExpiresAt: credentialExpiresAt,
+    approveUnavailableReason: approveUnavailableReason,
+    fileVersionPolicy: fileVersionPolicy,
+    decisionUnavailableReason: decisionUnavailableReason,
+    executions: executions,
+    batchOperations: [
+      for (final o in batchOperations)
+        o.operationId == next.operationId ? next : o,
+    ],
+  );
   bool get credentialSessionBound => credential?.sessionBound == true;
   bool get canApprove =>
       request.state == WorkspaceApprovalState.pending &&

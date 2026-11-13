@@ -4,7 +4,8 @@ import 'workspace_source.dart';
 
 /// Uses the same owner review and command rules as the local adapter, through
 /// authenticated HTTPS. No approval logic or information body is cached here.
-final class RemoteWorkspaceApprovals implements WorkspaceApprovalSource {
+final class RemoteWorkspaceApprovals
+    implements WorkspaceApprovalSource, WorkspaceCredentialBatchActions {
   RemoteWorkspaceApprovals(this.client, {required this.onChanged});
   final OwnerTransport client;
   final void Function() onChanged;
@@ -36,6 +37,54 @@ final class RemoteWorkspaceApprovals implements WorkspaceApprovalSource {
       ),
     ),
   );
+  @override
+  Future<WorkspaceCredentialBatchOperation> batchOperation(
+    String requestId,
+    String operationId,
+  ) => _read(
+    () async => WorkspaceCredentialBatchOperation.fromJson(
+      await client.request(
+        'GET',
+        '/v1/owner/credential-batches/${Uri.encodeComponent(requestId)}/operations/${Uri.encodeComponent(operationId)}',
+      ),
+    ),
+  );
+  @override
+  Future<WorkspaceCredentialBatchOperation> acknowledgeBatchOperation(
+    WorkspaceCredentialBatchAcknowledgement change,
+  ) async {
+    try {
+      final result = WorkspaceCredentialBatchOperation.fromJson(
+        await client.request(
+          'POST',
+          '/v1/owner/credential-batches/${Uri.encodeComponent(change.requestId)}/operations/${Uri.encodeComponent(change.operationId)}/acknowledge',
+          {'operationId': change.ownerOperationId, 'revision': change.revision},
+        ),
+      );
+      if (result.requestId != change.requestId ||
+          result.operationId != change.operationId ||
+          result.attentionOperationId != change.ownerOperationId ||
+          result.revision != change.revision + 1) {
+        throw const FormatException();
+      }
+      onChanged();
+      return result;
+    } on RemoteFailure catch (error) {
+      throw WorkspaceFailure(
+        {
+              'operation_conflict',
+              'scope_not_approved',
+              'invalid_reference',
+            }.contains(error.code)
+            ? 'conflict'
+            : 'unknown_outcome',
+        '核对结果尚未确认，请重新查询原操作；不要直接再次填写。',
+      );
+    } on Object {
+      throw const WorkspaceFailure('unknown_outcome', '核对结果尚未确认，请重新查询原操作。');
+    }
+  }
+
   @override
   Future<WorkspaceApprovalDetail> read(String id) => _read(
     () async => approvalDetailFromJson(

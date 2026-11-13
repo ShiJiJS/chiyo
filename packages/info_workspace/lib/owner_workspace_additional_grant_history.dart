@@ -10,7 +10,9 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
   core.OrganizationTask? _organizationHistory(String id) =>
       owner.organizationTasks.where((t) => id == 'request:${t.id}').firstOrNull;
   bool _additionalRequest(String id) =>
-      _credentialHistory(id) != null || _organizationHistory(id) != null;
+      _batchHistory(id) != null ||
+      _credentialHistory(id) != null ||
+      _organizationHistory(id) != null;
 
   bool _credentialLive(core.CredentialUseRequest r) =>
       r.restoredAt == null &&
@@ -138,6 +140,8 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
       );
 
   List<WorkspaceGrantSummary> _additionalSummaries(List<_Entry> ordinary) => [
+    for (final r in owner.credentialBatches)
+      if (owner.credentialBatchState(r) != 'pending') _batchHistorySummary(r),
     for (final r in owner.credentialUseRequests)
       if (owner.credentialUseState(r) != 'pending')
         _credentialHistorySummary(
@@ -176,6 +180,15 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
           '';
       yield owner.credentialRequestSessionId(r.id) ?? '';
     }
+    final batch = _batchHistory(s.id);
+    if (batch != null) {
+      for (final item in batch.items) {
+        yield item.credentialName;
+        yield OwnerWorkspaceCredentialBatches.destinationLabel(
+          item.destination,
+        );
+      }
+    }
     final t = _organizationHistory(s.id);
     if (t != null) {
       yield t.sessionBinding;
@@ -188,6 +201,8 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
   }
 
   Future<WorkspaceGrantDetail> _readAdditionalHistory(String id) async {
+    final batch = _batchHistory(id);
+    if (batch != null) return _readBatchHistory(batch);
     final credential = _credentialHistory(id);
     if (credential != null) return _readCredentialHistory(id);
     var task = _organizationHistory(id)!;
@@ -301,7 +316,7 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
             WorkspaceGrantEvent(
               'credential-decision:${r.id}',
               r.decidedAt!,
-              '主人审批凭据与字段范围',
+              '用户审批凭据与字段范围',
               r.state == 'denied'
                   ? '已拒绝，未启用凭据或字段范围。'
                   : '凭据${r.credentialApproved ? '已批准' : '未批准'}；普通字段批准${r.approvedFields.length}项。不代表已经执行或读取。',
@@ -310,7 +325,7 @@ extension _AdditionalGrantHistory on OwnerWorkspaceGrantHistory {
             WorkspaceGrantEvent(
               'credential-revoked:${r.id}',
               r.revokedAt!,
-              '主人撤销凭据申请',
+              '用户撤销凭据申请',
               '本次范围已撤销，既有执行结果仍保留。',
             ),
           for (final e in owner.credentialExecutions.where(

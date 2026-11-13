@@ -66,7 +66,41 @@ class ApprovalsController extends ChangeNotifier {
       _executionReads[(selection, id)]?.generation == _generation;
   String? executionError(String id) => _executionErrors[(selection, id)];
 
-  Future<void> refreshExecution(String id) async {
+  Future<void> refreshExecution(String id) =>
+      _refreshOperation<WorkspaceApprovalExecution>(
+        id,
+        detail?.executions.where((e) => e.operationId == id).firstOrNull,
+        (request) => source.execution(request, id),
+        (next, old) => next.updates(old),
+        (next) => detail = detail!.withExecution(next),
+      );
+  Future<void> refreshBatchOperation(String id) async {
+    final actions = source;
+    if (actions is! WorkspaceCredentialBatchActions) return;
+    await _refreshOperation<WorkspaceCredentialBatchOperation>(
+      id,
+      detail?.batchOperations.where((o) => o.operationId == id).firstOrNull,
+      (request) => (actions as WorkspaceCredentialBatchActions).batchOperation(
+        request,
+        id,
+      ),
+      (next, old) => next.updates(old),
+      (next) {
+        detail = detail!.withBatchOperation(next);
+        if (next.attentionAcknowledgedAt != null) {
+          _batchAcknowledgements.remove((next.requestId, id));
+        }
+      },
+    );
+  }
+
+  Future<void> _refreshOperation<T>(
+    String id,
+    T? old,
+    Future<T> Function(String request) read,
+    bool Function(T next, T old) updates,
+    void Function(T next) publish,
+  ) async {
     if (_closed ||
         frozen ||
         loading ||
@@ -75,9 +109,6 @@ class ApprovalsController extends ChangeNotifier {
         detail == null) {
       return;
     }
-    final old = detail!.executions
-        .where((e) => e.operationId == id)
-        .firstOrNull;
     if (old == null) return;
     final request = selection!, generation = _generation, key = (request, id);
     final serial = ++_executionSerial;
@@ -85,20 +116,20 @@ class ApprovalsController extends ChangeNotifier {
     _executionErrors.remove(key);
     _notify();
     try {
-      final next = await source.execution(request, id);
+      final next = await read(request);
       if (_closed ||
           generation != _generation ||
           selection != request ||
           frozen) {
         return;
       }
-      if (!next.updates(old)) {
+      if (!updates(next, old)) {
         throw const WorkspaceFailure(
           'unknown_outcome',
           '使用结果与原操作不符，原状态已保留。请继续查询原操作，不要重跑。',
         );
       }
-      detail = detail!.withExecution(next);
+      publish(next);
     } catch (error) {
       if (!_closed && generation == _generation && selection == request) {
         _executionErrors[key] = error is WorkspaceFailure
@@ -108,6 +139,67 @@ class ApprovalsController extends ChangeNotifier {
     } finally {
       if (_executionReads[key]?.serial == serial) _executionReads.remove(key);
       _notify();
+    }
+  }
+
+  final _batchAcknowledgements =
+      <(String, String), WorkspaceCredentialBatchAcknowledgement>{};
+  Future<void> acknowledgeBatchOperation(String id) async {
+    final actions = source;
+    if (_closed ||
+        frozen ||
+        loading ||
+        reading ||
+        detail == null ||
+        actions is! WorkspaceCredentialBatchActions) {
+      return;
+    }
+    final old = detail!.batchOperations
+        .where((o) => o.operationId == id)
+        .firstOrNull;
+    if (old == null || !old.needsAttention) return;
+    final request = selection!, key = (request, id);
+    final change = _batchAcknowledgements.putIfAbsent(
+      key,
+      () => WorkspaceCredentialBatchAcknowledgement(
+        requestId: request,
+        operationId: id,
+        ownerOperationId: workspaceOperationId(),
+        revision: old.revision,
+      ),
+    );
+    final generation = ++_generation;
+    busy = true;
+    _executionErrors.remove(key);
+    _notify();
+    try {
+      final next = await (actions as WorkspaceCredentialBatchActions)
+          .acknowledgeBatchOperation(change);
+      if (_closed || generation != _generation || selection != request) return;
+      if (!next.updates(old) ||
+          next.attentionOperationId != change.ownerOperationId ||
+          next.revision != change.revision + 1) {
+        throw const WorkspaceFailure('unknown_outcome', '核对结果与原操作不符，请查询原记录。');
+      }
+      detail = detail!.withBatchOperation(next);
+      _batchAcknowledgements.remove(key);
+      notice = '核对结果已记录，后续填写仍由 AI 另行发起。';
+    } catch (error) {
+      if (!_closed && generation == _generation && selection == request) {
+        _executionErrors[key] = error is WorkspaceFailure
+            ? error.message
+            : '核对结果尚未确认，请查询原操作。';
+        if (error is WorkspaceFailure && error.code != 'unknown_outcome') {
+          _batchAcknowledgements.remove(key);
+        }
+      }
+    } finally {
+      if (!_closed && generation == _generation) busy = false;
+      _notify();
+      if (!_closed && !frozen && _refreshPending) {
+        _refreshPending = false;
+        await load(background: true);
+      }
     }
   }
 
@@ -413,9 +505,23 @@ class ApprovalsController extends ChangeNotifier {
     await load(accepted: true);
   }
 
-  Future<void> decide(WorkspaceApprovalAction action) async {
+  Future<void> decide(
+    WorkspaceApprovalAction action, {
+    Iterable<String> revokeItems = const [],
+  }) async {
     if (!canDecide) return;
     final d = draft!, current = detail!;
+    final revoked = revokeItems.toSet();
+    if (revoked.isNotEmpty &&
+        (action != WorkspaceApprovalAction.revoke ||
+            !current.credentialBatch ||
+            revoked.any(
+              (id) =>
+                  !current.approved.contains(id) ||
+                  !current.scopes.any((s) => s.id == id && s.available),
+            ))) {
+      return;
+    }
     d.dirty = true;
     _command = WorkspaceApprovalChange(
       operationId: workspaceOperationId(),
@@ -424,7 +530,7 @@ class ApprovalsController extends ChangeNotifier {
       action: action,
       selected: action == WorkspaceApprovalAction.approve
           ? d.selected
-          : const [],
+          : revoked,
       fileVersions: action == WorkspaceApprovalAction.approve
           ? {
               for (final x in current.scopes)

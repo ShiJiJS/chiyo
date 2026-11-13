@@ -1,4 +1,5 @@
 import 'owner_workspace_additional_approvals.dart';
+import 'owner_workspace_credential_batches.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
@@ -10,7 +11,8 @@ import 'workspace_files.dart';
 /// Ordinary owner decisions and metadata from the actual service.
 /// Requests still originate in Agent transport; this source never retains values,
 /// private session proofs or read tokens.
-class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
+class OwnerWorkspaceApprovals
+    implements WorkspaceApprovalSource, WorkspaceCredentialBatchActions {
   OwnerWorkspaceApprovals({required this.owner})
     : _scope = owner.captureLibraryScope(),
       _additional = OwnerWorkspaceAdditionalApprovals(owner);
@@ -485,4 +487,18 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
     String requestId,
     String operationId,
   ) => _read(() => _additional.execution(requestId, operationId));
+
+  @override
+  Future<WorkspaceCredentialBatchOperation> batchOperation(
+    String requestId,
+    String operationId,
+  ) => _read(
+    () async => OwnerWorkspaceCredentialBatches(
+      owner,
+    ).operation(requestId, operationId),
+  );
+  @override
+  Future<WorkspaceCredentialBatchOperation> acknowledgeBatchOperation(
+    WorkspaceCredentialBatchAcknowledgement change,
+  ) => _read(() => OwnerWorkspaceCredentialBatches(owner).acknowledge(change));
 }

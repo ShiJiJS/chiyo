@@ -4,10 +4,12 @@ import 'package:info_core/info_core.dart' as core;
 import 'owner_workspace_approvals.dart';
 import 'owner_workspace_additional_approvals.dart';
 import 'owner_credential_use_projection.dart';
+import 'owner_workspace_credential_batches.dart';
 import 'workspace_source.dart';
 import 'workspace_information_codec.dart';
 
 part 'owner_workspace_additional_grant_history.dart';
+part 'owner_workspace_batch_grant_history.dart';
 
 /// Unified audit facts from the same owner service as approvals. Lists never
 /// decode field bodies; snapshot content requires an explicit owner read.
@@ -157,6 +159,7 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
     final ordinary = _entries(observed.history);
     final additionalIds = {
       for (final r in owner.credentialUseRequests) r.id,
+      for (final r in owner.credentialBatches) r.id,
       for (final t in owner.organizationTasks) t.id,
     };
     final rows =
@@ -396,53 +399,55 @@ class OwnerWorkspaceGrantHistory implements WorkspaceGrantHistorySource {
   }
 
   @override
-  Future<WorkspaceArchive> snapshot(String id, WorkspaceRecordRef record) =>
-      _read(() async {
-        final organization = _organizationHistory(id);
-        if (organization != null) {
-          if (record.kind != WorkspaceRecordKind.information ||
-              organization.approvedAt == null ||
-              !organization.itemVersions.containsKey(record.id)) {
-            throw const WorkspaceFailure('not_found', '此资料不属于指定批准范围。');
-          }
-          final version = organization.itemVersions[record.id]!;
-          await owner.revisionsFor(record.id);
-          final fresh = _organizationHistory(id);
-          if (fresh == null || fresh.itemVersions[record.id] != version) {
-            throw const WorkspaceFailure('not_found', '指定整理历史已变化或清理。');
-          }
-          final item = _recordedVersion(record.id, version);
-          if (item == null) {
-            throw const WorkspaceFailure(
-              'snapshot_unavailable',
-              '当时的资料快照已不可用。',
-            );
-          }
-          return WorkspaceArchive(
-            detail: _codec.decode(
-              item,
-              tagNames: {for (final t in owner.tags) t.id: t.name},
-            ),
-            archivedAt: organization.approvedAt!,
-          );
-        }
-        final e = await _entry(id);
-        if (record.kind != WorkspaceRecordKind.information ||
-            !e.fields.any((f) => f.itemId == record.id)) {
-          throw const WorkspaceFailure('not_found', '此资料不属于指定历史。');
-        }
-        final item = await _snapshotItem(e, record.id);
-        if (item == null) {
-          throw const WorkspaceFailure('snapshot_unavailable', '当时的资料快照已不可用。');
-        }
-        return WorkspaceArchive(
-          detail: _codec.decode(
-            item,
-            tagNames: {for (final t in owner.tags) t.id: t.name},
-          ),
-          archivedAt: e.grant!.approvedAt,
-        );
-      });
+  Future<WorkspaceArchive> snapshot(
+    String id,
+    WorkspaceRecordRef record,
+  ) => _read(() async {
+    if (_batchHistory(id) != null) {
+      throw const WorkspaceFailure('snapshot_unavailable', '凭据使用历史不保存密码原文。');
+    }
+    final organization = _organizationHistory(id);
+    if (organization != null) {
+      if (record.kind != WorkspaceRecordKind.information ||
+          organization.approvedAt == null ||
+          !organization.itemVersions.containsKey(record.id)) {
+        throw const WorkspaceFailure('not_found', '此资料不属于指定批准范围。');
+      }
+      final version = organization.itemVersions[record.id]!;
+      await owner.revisionsFor(record.id);
+      final fresh = _organizationHistory(id);
+      if (fresh == null || fresh.itemVersions[record.id] != version) {
+        throw const WorkspaceFailure('not_found', '指定整理历史已变化或清理。');
+      }
+      final item = _recordedVersion(record.id, version);
+      if (item == null) {
+        throw const WorkspaceFailure('snapshot_unavailable', '当时的资料快照已不可用。');
+      }
+      return WorkspaceArchive(
+        detail: _codec.decode(
+          item,
+          tagNames: {for (final t in owner.tags) t.id: t.name},
+        ),
+        archivedAt: organization.approvedAt!,
+      );
+    }
+    final e = await _entry(id);
+    if (record.kind != WorkspaceRecordKind.information ||
+        !e.fields.any((f) => f.itemId == record.id)) {
+      throw const WorkspaceFailure('not_found', '此资料不属于指定历史。');
+    }
+    final item = await _snapshotItem(e, record.id);
+    if (item == null) {
+      throw const WorkspaceFailure('snapshot_unavailable', '当时的资料快照已不可用。');
+    }
+    return WorkspaceArchive(
+      detail: _codec.decode(
+        item,
+        tagNames: {for (final t in owner.tags) t.id: t.name},
+      ),
+      archivedAt: e.grant!.approvedAt,
+    );
+  });
 
   Future<
     ({

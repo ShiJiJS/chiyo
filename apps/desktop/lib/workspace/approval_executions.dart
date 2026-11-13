@@ -6,6 +6,7 @@ import '../ui_palette.dart';
 import 'approvals_controller.dart';
 import 'library_widgets.dart';
 import 'workspace_source.dart';
+import 'batch_operations.dart';
 
 /// One grant can have many independent operations. Owner only reads results.
 class ApprovalExecutions extends StatelessWidget {
@@ -14,6 +15,7 @@ class ApprovalExecutions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final detail = controller.detail!, c = UiPalette.of(context);
+    if (detail.credentialBatch) return BatchOperations(controller: controller);
     if (detail.credentialExpiresAt == null &&
         !detail.credentialSessionBound &&
         detail.executions.isEmpty) {

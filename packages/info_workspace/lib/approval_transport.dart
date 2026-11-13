@@ -118,7 +118,10 @@ Map<String, Object?> approvalDetailToJson(
           : credentialUseRequestToJson(d.credential!),
       'executions': d.executions.map(approvalExecutionToJson).toList(),
     },
-    if (version == 3) 'credentialBatch': d.credentialBatch,
+    if (version == 3) ...{
+      'credentialBatch': d.credentialBatch,
+      'batchOperations': d.batchOperations.map((o) => o.toJson()).toList(),
+    },
     'request': approvalSummaryToJson(d.request),
     'reviewToken': d.reviewToken,
     'scopes': [
@@ -168,6 +171,7 @@ WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
       if (!{1, 2, 3}.contains(version) ||
           version >= 2 && !j.containsKey('credential') ||
           version == 3 && j['credentialBatch'] is! bool ||
+          version == 3 && j['batchOperations'] is! List ||
           version == 1 &&
               (j.containsKey('credential') || j.containsKey('executions'))) {
         throw const FormatException();
@@ -218,6 +222,13 @@ WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
         fileVersionPolicy: j['fileVersionPolicy'] as String?,
         decisionUnavailableReason: j['decisionUnavailableReason'] as String?,
         credentialBatch: version == 3 && j['credentialBatch'] == true,
+        batchOperations: version == 3
+            ? (j['batchOperations'] as List).map(
+                (o) => WorkspaceCredentialBatchOperation.fromJson(
+                  Map<String, dynamic>.from(o as Map),
+                ),
+              )
+            : const [],
         credential: version >= 2 && j['credential'] != null
             ? credentialUseRequestFromJson(j['credential'])
             : null,
@@ -244,6 +255,15 @@ WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
             (e) =>
                 e.requestId != result.request.id ||
                 e.credential.id != result.credential?.id,
+          ) ||
+          result.batchOperations.length > 1000 ||
+          result.batchOperations.map((o) => o.operationId).toSet().length !=
+              result.batchOperations.length ||
+          result.batchOperations.any(
+            (o) =>
+                !result.credentialBatch ||
+                o.requestId != result.request.id ||
+                o.itemIds.any((id) => !result.scopes.any((s) => s.id == id)),
           )) {
         throw const FormatException('Incomplete credential approval');
       }
