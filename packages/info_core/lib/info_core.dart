@@ -80,6 +80,7 @@ part 'credential_record_operations.dart';
 part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
+part 'browser_fill_models.dart';
 part 'focused_fill_access.dart';
 part 'focused_fill_runner.dart';
 part 'device_focused_fill_access.dart';
@@ -101,6 +102,7 @@ part 'template_import_access.dart';
 part 'import_admission_access.dart';
 part 'update_admission_access.dart';
 part 'online_information_runtime.dart';
+part 'agent_record_queries.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);

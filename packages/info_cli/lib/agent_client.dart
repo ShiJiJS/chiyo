@@ -149,21 +149,26 @@ class AgentClient {
     _local?.close();
   }
 
-  Future<Map<String, dynamic>> execute(Map<String, dynamic> input) async {
+  Future<Map<String, dynamic>> execute(
+    Map<String, dynamic> input, {
+    bool maintainDeviceState = true,
+  }) async {
     if (input['command'] == 'help' && input.length == 1) {
       return agentCommandHelp();
     }
-    try {
-      await _deviceFileMaintenance;
-    } on Object {
-      // Preserve failed cleanup journals. An unrelated catalog/proposal must
-      // still work; file fetch/release rechecks its own journal and fails closed.
-    }
-    try {
-      await _deviceCredentialJournal?.maintain();
-    } on Object {
-      // Failed/uncertain cleanup remains journaled; it cannot authorize a new
-      // launch or turn unrelated catalog queries into material delivery.
+    if (maintainDeviceState) {
+      try {
+        await _deviceFileMaintenance;
+      } on Object {
+        // Preserve failed cleanup journals. An unrelated catalog/proposal must
+        // still work; file fetch/release rechecks its own journal and fails closed.
+      }
+      try {
+        await _deviceCredentialJournal?.maintain();
+      } on Object {
+        // Failed/uncertain cleanup remains journaled; it cannot authorize a new
+        // launch or turn unrelated catalog queries into material delivery.
+      }
     }
     final command = input['command'];
     const submissions = {
@@ -271,6 +276,33 @@ class AgentClient {
           : {'status': 'invalid_request'};
     }
     switch (command) {
+      case 'requests-list':
+      case 'requests-show':
+      case 'proposals-list':
+      case 'operations-list':
+      case 'operations-show':
+        if (_session == null) return {'status': 'unauthorized'};
+        final allowed = switch (command) {
+          'requests-list' ||
+          'proposals-list' => {'command', 'kind', 'state', 'offset', 'limit'},
+          'operations-list' => {'command', 'requestId', 'offset', 'limit'},
+          _ => {'command', 'id'},
+        };
+        if (input.keys.any((k) => !allowed.contains(k))) {
+          return {'status': 'invalid_query'};
+        }
+        final support = await _call('/capabilities', {});
+        if (support['status'] != 'ok') return support;
+        if (!(support['capabilities'] as List? ?? const []).contains(
+          'agent-record-queries.v1',
+        )) {
+          return {'status': 'unsupported_capability'};
+        }
+        return _call('/${(command as String).replaceAll('-', '/')}', {
+          'sessionSecret': _session,
+          for (final entry in input.entries)
+            if (entry.key != 'command') entry.key: entry.value,
+        });
       case 'capabilities':
         if (input.keys.any((k) => k != 'command')) {
           return Map<String, dynamic>.from(
@@ -335,7 +367,13 @@ class AgentClient {
         return _call('/templates/read', {'templateId': input['templateId']});
       case 'credential-catalog':
         if (input.keys.any(
-          (k) => !{'command', 'cursor', 'limit'}.contains(k),
+          (k) => !{
+            'command',
+            'cursor',
+            'limit',
+            'query',
+            'directoryId',
+          }.contains(k),
         )) {
           return {
             'protocolVersion': 1,
@@ -343,6 +381,15 @@ class AgentClient {
             'errorCode': 'unknown_field',
             'retryable': false,
           };
+        }
+        if (input['query'] != null || input['directoryId'] != null) {
+          final support = await _call('/capabilities', {});
+          if (support['status'] != 'ok') return support;
+          if (!(support['capabilities'] as List? ?? const []).contains(
+            'credential-catalog-search.v1',
+          )) {
+            return {'status': 'unsupported_capability'};
+          }
         }
         if (input['cursor'] != null && input['cursor'] is! String ||
             input.containsKey('limit') &&
@@ -359,6 +406,9 @@ class AgentClient {
         return _call('/credentials/catalog', {
           'cursor': input['cursor'],
           'limit': input['limit'] ?? 50,
+          if (input.containsKey('query')) 'query': input['query'],
+          if (input.containsKey('directoryId'))
+            'directoryId': input['directoryId'],
         });
       case 'organize-request':
         if (_session == null) return {'status': 'unauthorized'};
@@ -523,6 +573,11 @@ class AgentClient {
       case 'session-check':
         if (_session == null) return {'status': 'unauthorized'};
         return _call('/session/check', {'sessionSecret': _session});
+      case 'session-close':
+        if (_session == null || input.length != 1) {
+          return {'status': 'unauthorized'};
+        }
+        return _call('/session/close', {'sessionSecret': _session});
       case 'request':
       case 'request-status':
         if (_session == null) return {'status': 'unauthorized'};

@@ -26,7 +26,13 @@ final class AgentGateway {
   };
   static const _open = {'/session', '/session/lifecycle'};
   static const _session = {
+    '/requests/list',
+    '/requests/show',
+    '/proposals/list',
+    '/operations/list',
+    '/operations/show',
     '/session/check',
+    '/session/close',
     '/credential-reveal/request',
     '/credential-reveal/read',
     '/request',

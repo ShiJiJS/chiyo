@@ -1,10 +1,13 @@
 name: info_cli
-description: Agent-only JSON-lines and Codex clients for the information service.
+description: Chiyo command-line workflows and private Agent transport clients.
 version: 0.1.0
 publish_to: none
+executables:
+  chiyo: chiyo
 environment:
   sdk: '>=3.9.0 <4.0.0'
 dependencies:
+  args: ^2.7.0
   info_remote:
     path: ../info_remote
   crypto: ^3.0.6

@@ -519,15 +519,37 @@ extension _CredentialService on InformationService {
 }
 
 extension CredentialAgentAccess on AgentAccess {
-  CredentialCatalogPage credentialCatalog({String? cursor, int limit = 50}) {
+  CredentialCatalogPage credentialCatalog({
+    String? cursor,
+    int limit = 50,
+    String query = '',
+    String? directoryId,
+  }) {
     if (!_service.owner.serviceAvailable) {
       throw const AccessFailure('service_unavailable');
     }
-    if (limit < 1 || limit > 100) throw const AccessFailure('invalid_request');
+    if (limit < 1 ||
+        limit > 100 ||
+        query.length > 2000 ||
+        directoryId != null &&
+            (directoryId.isEmpty || directoryId.length > 200)) {
+      throw const AccessFailure('invalid_request');
+    }
+    final term = unorm.nfc(query.trim()).toLowerCase();
     final source = _service._repository;
     final list = source is CredentialRepository
         ? (source as CredentialRepository).managedCredentials
-              .where((c) => c.discoverable && c.deletedAt == null)
+              .where(
+                (c) =>
+                    c.discoverable &&
+                    c.deletedAt == null &&
+                    (directoryId == null || c.directoryId == directoryId) &&
+                    (term.isEmpty ||
+                        unorm
+                            .nfc('${c.name}\n${c.publicPurpose}')
+                            .toLowerCase()
+                            .contains(term)),
+              )
               .toList()
         : <ManagedCredential>[];
     list.sort((a, b) {

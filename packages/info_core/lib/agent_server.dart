@@ -185,7 +185,10 @@ class AgentServer extends AgentProtocol {
               request.uri.path == '/update/revise' ||
               request.uri.path.startsWith('/templates/') ||
               request.uri.path.startsWith('/import-file/') ||
-              request.uri.path == '/plugins/catalog'
+              request.uri.path == '/plugins/catalog' ||
+              request.uri.path.startsWith('/requests/') ||
+              request.uri.path.startsWith('/operations/') ||
+              request.uri.path == '/proposals/list'
           ? decodeProtocolObject(utf8.decode(bytes), maxBytes: limit)
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
@@ -345,6 +348,8 @@ class AgentProtocol {
             'supportedCredentialReceivers':
                 CredentialLaunchPlan.supportedReceivers,
           'capabilities': [
+            'agent-record-queries.v1',
+            'credential-catalog-search.v1',
             'information-request-operations.v1',
             'submission-metadata.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
@@ -421,6 +426,67 @@ class AgentProtocol {
         return _agent.importFileStatus(
           _text(body, 'sessionSecret'),
           _text(body, 'operationId'),
+        );
+      case '/requests/list':
+      case '/proposals/list':
+        if (body.keys.any(
+              (k) => !{
+                'sessionSecret',
+                'kind',
+                'state',
+                'offset',
+                'limit',
+              }.contains(k),
+            ) ||
+            body['kind'] != null && body['kind'] is! String ||
+            body['state'] != null && body['state'] is! String ||
+            body['offset'] != null && body['offset'] is! int ||
+            body['limit'] != null && body['limit'] is! int) {
+          throw const AccessFailure('invalid_query');
+        }
+        return _agent.queryOwnRequests(
+          _text(body, 'sessionSecret'),
+          kind: body['kind'] as String?,
+          state: body['state'] as String?,
+          offset: body['offset'] as int? ?? 0,
+          limit: body['limit'] as int? ?? 20,
+          proposalsOnly: path == '/proposals/list',
+        );
+      case '/requests/show':
+        if (body.keys.any((k) => !{'sessionSecret', 'id'}.contains(k))) {
+          throw const AccessFailure('invalid_query');
+        }
+        return _agent.showOwnRequest(
+          _text(body, 'sessionSecret'),
+          _text(body, 'id'),
+        );
+      case '/operations/list':
+        if (body.keys.any(
+              (k) => !{
+                'sessionSecret',
+                'requestId',
+                'offset',
+                'limit',
+              }.contains(k),
+            ) ||
+            body['requestId'] != null && body['requestId'] is! String ||
+            body['offset'] != null && body['offset'] is! int ||
+            body['limit'] != null && body['limit'] is! int) {
+          throw const AccessFailure('invalid_query');
+        }
+        return _agent.queryOwnOperations(
+          _text(body, 'sessionSecret'),
+          requestId: body['requestId'] as String?,
+          offset: body['offset'] as int? ?? 0,
+          limit: body['limit'] as int? ?? 20,
+        );
+      case '/operations/show':
+        if (body.keys.any((k) => !{'sessionSecret', 'id'}.contains(k))) {
+          throw const AccessFailure('invalid_query');
+        }
+        return _agent.showOwnOperation(
+          _text(body, 'sessionSecret'),
+          _text(body, 'id'),
         );
       case '/plugins/catalog':
         if (body.isNotEmpty) throw const AccessFailure('invalid_request');
@@ -737,7 +803,9 @@ class AgentProtocol {
             )
             .toJson();
       case '/credentials/catalog':
-        if (body.keys.any((k) => !{'cursor', 'limit'}.contains(k))) {
+        if (body.keys.any(
+          (k) => !{'cursor', 'limit', 'query', 'directoryId'}.contains(k),
+        )) {
           throw const _CredentialRequestFailure('unknown_field');
         }
         if (body['cursor'] != null && body['cursor'] is! String) {
@@ -745,6 +813,10 @@ class AgentProtocol {
         }
         if (body['limit'] != null && body['limit'] is! int) {
           throw const _CredentialRequestFailure('invalid_type', 'limit');
+        }
+        if (body['query'] != null && body['query'] is! String ||
+            body['directoryId'] != null && body['directoryId'] is! String) {
+          throw const _CredentialRequestFailure('invalid_type');
         }
         if (body['limit'] is int &&
             ((body['limit'] as int) < 1 || (body['limit'] as int) > 100)) {
@@ -754,6 +826,8 @@ class AgentProtocol {
             .credentialCatalog(
               cursor: body['cursor'] as String?,
               limit: body['limit'] as int? ?? 50,
+              query: body['query'] as String? ?? '',
+              directoryId: body['directoryId'] as String?,
             )
             .toJson();
       case '/delete/submit':
@@ -957,6 +1031,10 @@ class AgentProtocol {
       case '/session/check':
         _agent.validateSession(_text(body, 'sessionSecret'));
         return {'status': 'ok'};
+      case '/session/close':
+        if (body.length != 1) throw const AccessFailure('invalid_request');
+        _agent.endSession(_text(body, 'sessionSecret'));
+        return {'status': 'ended'};
       case '/session/end':
         _agent.endSessionWithCapability(_text(body, 'endCapability'));
         return {'status': 'ended'};
