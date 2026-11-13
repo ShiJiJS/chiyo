@@ -11,11 +11,24 @@ final class DeviceCredentialLaunch {
   static Future<DeviceCredentialLaunch> prepare(
     CredentialLaunchPlan plan, {
     CredentialExecutableInspector inspector = inspectCredentialExecutable,
-  }) async {
-    final identity = await inspector(plan.path, plan.receiver);
+  }) => _prepare(plan.path, plan.cwd, plan.planHash, plan.receiver, inspector);
+
+  static Future<DeviceCredentialLaunch> prepareProgram(
+    CredentialProgramPlan plan, {
+    CredentialExecutableInspector inspector = inspectCredentialExecutable,
+  }) => _prepare(plan.path, plan.cwd, plan.planHash, 'program_env', inspector);
+
+  static Future<DeviceCredentialLaunch> _prepare(
+    String path,
+    String directory,
+    String planHash,
+    String receiver,
+    CredentialExecutableInspector inspector,
+  ) async {
+    final identity = await inspector(path, receiver);
     String cwd;
     try {
-      cwd = await Directory(plan.cwd).resolveSymbolicLinks();
+      cwd = await Directory(directory).resolveSymbolicLinks();
       if (!await Directory(cwd).exists()) throw const FormatException();
     } on Object {
       throw const CredentialUseFailure('invalid_plan', fieldPath: 'launch.cwd');
@@ -23,10 +36,17 @@ final class DeviceCredentialLaunch {
     // Validate the same transport shape before sending it to the server.
     return DeviceCredentialLaunch.fromPrivateJson({
       'version': 1,
-      'planHash': plan.planHash,
+      'planHash': planHash,
       'executable': identity.toJson(),
       'cwd': cwd,
     });
+  }
+
+  CredentialProgramPlan resolveProgram(CredentialProgramPlan requested) {
+    if (requested.identity != null || requested.planHash != planHash) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    return requested.resolved(executable, cwd);
   }
 
   Map<String, Object?> toPrivateJson() => {

@@ -205,10 +205,33 @@ class ChiyoCommandLine {
     _command('exec', '让业务程序通过标准输入、环境变量或受管文件使用凭据。');
     final exec = _command('exec request', '提交真实业务程序和凭据接收位置；不暴露内部填写程序。');
     _input(exec);
+    _credential(exec);
+    exec.addOption(
+      'via',
+      allowed: ['stdin', 'env', 'file'],
+      help: '这份凭据交给程序的实际位置；多份凭据使用 --input。',
+    );
+    exec.addOption('executable', help: '业务程序的绝对路径，不是知予内部脚本。');
+    exec.addOption('cwd', help: '业务程序的工作目录绝对路径。');
+    exec.addMultiOption(
+      'arg',
+      splitCommas: false,
+      help: '一个普通参数，可重复；以 - 开头时使用 --arg=VALUE。',
+    );
+    exec.addOption('variable', help: 'env 的环境变量名；file 时表示通过此变量交付受管文件路径。');
+    exec.addOption(
+      'file-argument',
+      help: 'file 方式中插入受管文件路径的参数位置，从 0 开始；与 --variable 二选一。',
+    );
     _operation(exec);
     final execRun = _command('exec run', '执行获批业务程序；所需凭据全部有效后才启动。');
     _request(execRun);
+    _input(execRun);
     _operation(execRun);
+    final execOutput = _command('exec output', '读取本次程序的有限输出；不会重新启动程序。');
+    _operation(execOutput);
+    execOutput.addOption('cursor', defaultsTo: '0', help: '上次结果中的输出位置。');
+    execOutput.addOption('limit', defaultsTo: '16', help: '本次读取 1–16 段。');
     _command('operations', '找回原操作；结果未知时查询，不重放输入。');
     final operations = _command('operations list', '列出本聊天的提交和执行操作。');
     operations.addOption('request', help: '只看某份申请的操作。');
@@ -380,11 +403,57 @@ class ChiyoCommandLine {
       } else if (options['item'] != null || options['field'] != null) {
         throw const ChiyoUsageFailure('--input 不能和 --item / --field 混用。');
       }
-    } else if ({
-      'exec request',
-      'proposals check',
-      'proposals submit',
-    }.contains(path)) {
+    } else if (path == 'exec output') {
+      required('operation');
+      number('cursor', 0, 2147483647);
+      number('limit', 1, 16);
+    } else if (path == 'exec request') {
+      const single = [
+        'credential',
+        'version',
+        'purpose',
+        'via',
+        'executable',
+        'cwd',
+        'variable',
+        'file-argument',
+      ];
+      final arguments = options['arg'] as List<String>;
+      if (options['input'] != null) {
+        if (arguments.isNotEmpty || single.any((k) => options[k] != null)) {
+          throw const ChiyoUsageFailure('--input 的程序计划不能和单项程序参数混用。');
+        }
+        return;
+      }
+      for (final key in ['credential', 'purpose', 'via', 'executable', 'cwd']) {
+        required(key);
+      }
+      if (arguments.length > 128) {
+        throw const ChiyoUsageFailure('程序普通参数最多 128 项。');
+      }
+      final via = options['via'];
+      if (via == 'env') {
+        required('variable');
+        if (options['file-argument'] != null) {
+          throw const ChiyoUsageFailure(
+            'env 方式使用 --variable，不使用 --file-argument。',
+          );
+        }
+      } else if (via == 'stdin') {
+        if (options['variable'] != null || options['file-argument'] != null) {
+          throw const ChiyoUsageFailure('stdin 方式不使用环境变量名或文件参数位置。');
+        }
+      } else {
+        if ((options['variable'] == null) ==
+            (options['file-argument'] == null)) {
+          throw const ChiyoUsageFailure(
+            'file 方式的 --variable 和 --file-argument 必须选一个。',
+          );
+        }
+        if (options['variable'] != null) required('variable');
+        number('file-argument', 0, arguments.length);
+      }
+    } else if ({'proposals check', 'proposals submit'}.contains(path)) {
       required('input');
       if (path == 'proposals submit') required('check');
     } else if (path == 'credentials reveal request') {
