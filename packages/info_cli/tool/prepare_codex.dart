@@ -42,17 +42,15 @@ Future<void> main(List<String> args) async {
   final source = await File(
     '${repository.path}/integrations/codex/skills/agent-info-access/SKILL.md',
   ).readAsString();
-  final credentialUseReference = await File(
-    '${repository.path}/integrations/codex/skills/agent-info-access/references/credential-use.md',
-  ).readAsString();
-  final informationFilesReference = await File(
-    '${repository.path}/integrations/codex/skills/agent-info-access/references/information-files.md',
-  ).readAsString();
+  final references = await readCodexReferences(
+    Directory(
+      '${repository.path}/integrations/codex/skills/agent-info-access/references',
+    ),
+  );
   await writeCodexConfiguration(
     output,
     source,
-    credentialUseReference: credentialUseReference,
-    informationFilesReference: informationFilesReference,
+    additionalReferences: references,
   );
   stdout.writeln('Prepared bundle: ${output.path}');
   stdout.writeln(

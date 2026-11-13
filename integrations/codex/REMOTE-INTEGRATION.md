@@ -10,14 +10,16 @@ info-prepare-codex <新的稳定运行目录>
 
 准备命令只生成运行包、Skill 和待审查的 hooks.json，不改个人 Codex 配置，也不自动启用或信任 hooks。需要独立状态目录时加 `--state-root <私有状态目录>`。在另一文件夹执行准备程序时，可通过 `--source-bundle <同版本CLI文件夹>` 指定来源。
 
-把准备后运行包中 `skills/agent-info-access/SKILL.md` 交给当前 Agent。说明末尾带准确程序位置，Agent 首次使用可按说明手动关联；后续正式部署再按既有流程核对和启用 hooks。配置只给 AI 连接、查询允许公开的目录和提交申请，审批仍在 App。用户 Token 不交给 AI。
+把准备后运行包中 `skills/agent-info-access/SKILL.md` 交给当前 Agent。说明末尾带准确的 `chiyo` 位置，先读 `--help`；已有本聊天私有配置时复用，没有时自动用 `chat start` 创建未授权聊天。普通终端也可使用，不要求 Codex hooks；hooks 仅作为可选的宿主生命周期适配。设备配置只给 AI 连接、查询允许公开的目录和提交申请，审批仍在 App；管理 Token 不交给 AI。
 
-模板插件仍在正常 App「设置 → 插件」选择 JSON、核对预览后安装。安装、更新、启停或移除后的下一次 CLI `plugin-list`、`template-list` 和 `template-read` 直接查询服务器，不复制模板清单到 Skill。模板返回字段格式、关联说明和填写例子；使用实际查询到的模板 ID，停用后不能继续新建，已有资料保留原来的类型和内容。模板查询和提案保存是不同能力：只有 capabilities 声明录入能力时才提交提案，当前未接通的能力不能当作已保存。
+模板插件在正常 App「设置 → 插件」选择 JSON、核对预览后安装。`templates list/show/examples` 每次查询服务器当前定义，不复制模板清单到 Skill。模板返回字段格式、关联说明和填写例子；停用后不能继续新建，已有资料保留原来的类型和内容。先查实际目录和现有资料，再选择模板和准备提案。
 
-当前已接文字资料的 `import-submit`、`import-revise`、`import-status` 和 `update-submit`、`update-revise`、`update-status`。使用稳定的 operationId；提交只产生待核对提案，用户在 App「录入提案」预览并一次保存。相互引用的多条资料在同一份提案里一起入库。App 关闭时仍能提交，重开后处理；状态以服务器返回为准，不能把 pending 或 approved_awaiting_admission 说成保存成功。文件和凭据录入仍需核对各自 capabilities，缺少能力时暂缓该整份提案，不省略材料继续保存。
+新增／修改／删除用 `proposals check/submit --kind import|update|delete`，复杂内容使用业务 JSON 文件，CLI 固定来源及模板版本。提交只产生待核对提案，用户在 App「录入提案」预览并一次保存；相互引用的多条资料一起入库。App 关闭时仍能提交，重开后处理；用 `proposals list/show` 查原结果，待审或待关联不表示保存成功。模板变化或材料缺失时重新检查或暂缓，不省略材料继续保存。修订旧提案及旧 SSH 会话按随包兼容说明处理，不把重提当作恢复。
+
+普通字段使用 `access request/read`，普通附件使用 `files fetch/status/release`。凭据先确定真实目的地：指定 Ego／Chrome 表单、本机密码框，或业务程序；分别使用 `fill` 和 `exec`。`doctor` 检查当前设备支持，批准后的实际填写和程序仍在 Agent 所在设备执行。本机 App 提供填写能力，NAS 不代按网页或探测其他电脑的路径。
 
 App 关闭后 CLI 仍直接连接服务器。服务器普通维护不单独结束有效许可，重开后沿用原聊天、原批准字段和原到期时间；根聊天结束、撤销或到期后不能继续新访问。配置文件更新只影响以后首次连接的聊天，已有聊天和结束通知保留原设备与服务器配置。
 
 首次接入失败时先检查服务器地址、证书和设备是否被撤销，不关闭证书校验，已配置服务器不可用时不回退到其他连接。设备配置有误时在 App 设置中修正；聊天关联丢失或确认无效时由 Agent 自动新建一次未授权连接，不要求用户口头确认，不迁移旧批准或续期。当前端到端验收范围和待办见 [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues)。
 
-默认发现只读取本软件的活动设备配置，不读取管理 Token。命名连接或隔离运行可通过 `CHIYO_CONNECTION_DIRECTORY` 指定 App 对应的私有连接目录；显式 `--connection` 仍用于固定目标。已有 hooks 保持原定义，更新发现方式时另行审查准确配置，不自动改写或重新信任。
+默认发现只读取本软件的活动设备配置，不读取管理 Token。命名连接或隔离运行可通过 `CHIYO_CONNECTION_DIRECTORY` 指定 App 对应的私有连接目录；`chat start --connection` 用于固定目标。当前聊天通过 `CHIYO_CONTEXT` 或独立 stdin 复用私有配置；断网不换库。已有 hooks 保持原定义，更新发现方式时另行审查准确配置，不自动改写或重新信任。

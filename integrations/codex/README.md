@@ -9,7 +9,7 @@
 | Mac 运行包与 Codex | [Mac 接入](MACOS-INTEGRATION.md) |
 | Windows 运行包与 Codex | [Windows 接入](../../docs/development/windows-codex-integration.md) |
 | NAS 服务器及设备配置 | [服务器接入](REMOTE-INTEGRATION.md) |
-| 通用 JSON 命令 | [CLI 参考](../../docs/cli.md) |
+| chiyo 参数命令及旧协议兼容 | [CLI 参考](../../docs/cli.md) |
 | AI 整理资料的调用方法 | [Skill 模板](skills/agent-info-access/SKILL.md) |
 | 凭据与普通文件 | [凭据使用](skills/agent-info-access/references/credential-use.md) · [文件领取](skills/agent-info-access/references/information-files.md) |
 
@@ -23,7 +23,9 @@ App 根据设置自动准备本地或服务器模式的受限连接。新聊天�
 
 完整包中的 `info-prepare-codex`（Windows 为 `.exe`）向新的稳定目录生成程序、Skill 和 `hooks.json`。准备不修改个人配置，也不自动安装或信任 hooks；需要启用时按对应平台说明审查准确路径和命令，保留已有配置。
 
-聊天关联引用是私密能力，只通过独立 stdin 交给当前聊天的 CLI，不放进 shell 命令、参数、日志或仓库。公开聊天 ID、请求 ID 和 Agent 名称都不是访问凭证。引用丢失时由 Agent 自动建立一次新的未授权连接，无需用户另行确认；不能按 ID 搜索磁盘恢复旧能力。
+新入口为 `chiyo`，普通查询、申请和执行用子命令与参数，复杂批量业务才用 `--input`。先看 `--help` 和同版本 Skill；公开资料和模板动态查询。已有本聊天私有配置时复用，没有时用 `chat start` 新建未授权聊天。普通终端可用，不要求 hooks。
+
+聊天配置是私密能力，通过本聊天的 `CHIYO_CONTEXT` 环境值或独立 stdin 交给 CLI，不放普通命令参数、日志或仓库。公开聊天 ID、请求 ID 和 Agent 名称都不是访问凭证。配置丢失时由 Agent 自动建立一次新的未授权连接，无需用户另行确认；不能按 ID 搜索磁盘恢复旧能力。
 
 常规恢复或压缩保留有效的原引用，不延长许可。根聊天结束、撤销或到期后停止后续访问；普通 CLI 退出、切换聊天和子调用结束不自动结束根聊天。相关取舍见 [ADR0005](../../docs/adr/0005-end-only-codex-lifecycle.md)。
 

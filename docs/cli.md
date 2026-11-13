@@ -1,4 +1,56 @@
-# 通用 CLI 申请与等待
+# chiyo CLI
+
+`chiyo`（Windows 为 `chiyo.exe`）是当前参数入口。普通查询、申请和使用通过子命令完成，复杂提案或多凭据计划才用业务 JSON 文件。CLI 自动处理内部协议、当前聊天和模板摘要，Agent 不需要选择填写脚本或给密码另起别名。使用同版本 App、CLI、worker 和随包 Skill，先看根帮助和具体命令帮助：
+
+```sh
+chiyo --help
+chiyo fill request --help
+chiyo proposals check --help
+```
+
+帮助可在没有 App、连接或聊天配置时读取。App 根据设置准备本地或服务器连接，管理 Token 不交给 CLI。新版包需要显式支持相应能力的服务，不把旧包改名或拆成多个旧申请来代替新协议。
+
+## 当前聊天
+
+宿主已经提供本聊天的 `CHIYO_CONTEXT` 时直接复用；普通终端或其他 Agent 没有配置时自动建立未授权聊天：
+
+```sh
+chiyo chat start --agent "Example Agent" --id ACTUAL_CHAT_ID --label "核对 NAS 应用" --context-out /absolute/private-chat/context.json --json
+```
+
+后续调用通过本聊天环境的 `CHIYO_CONTEXT` 指向调用方刚指定的私有文件。也可按根帮助使用独立 stdin 传私有引用。配置固定原资料库和执行设备，不按公开聊天 ID 恢复许可，不因 App 模式切换或断网换库。创建不会覆盖旧文件或修改一般目录权限，普通 CLI 退出不等于聊天结束；任务实际结束使用 `chat end`。Codex hooks 是可选的宿主生命周期适配，不是普通 CLI 的依赖。
+
+`connection show` / `chat show` 展示当前库、审批位置、执行设备和状态，不打印私密证明。隔离运行可在 `chat start` 使用 `--connection` 指定准确的设备配置；默认发现只读取 App 已准备的当前连接。
+
+## 常用流程
+
+| 任务 | 命令与下一步 |
+| --- | --- |
+| 查看资料归属、避免重复目录 | `directories list` 返回完整层级；`catalog list` 按关键词、目录、模板或标签查询公开说明 |
+| 查看凭据名称和版本 | `credentials list`；不返回密码、私钥或私人说明 |
+| 选择插件模板 | `templates list` → `templates show ID` → `templates examples ID`，格式和完整例子来自当前库 |
+| 新增／修改／删除资料 | `proposals check --kind import\|update\|delete --input FILE`，再用同来源 `proposals submit --check CHECK_ID --kind KIND --input FILE`；用户在 App 核对并保存 |
+| 读取普通字段 | `access request --item ID --field ID --purpose TEXT`，等待原申请获批后 `access read --request ID --item ID --field ID`；多字段用 `--input` |
+| 领取普通附件 | 同样申请 file 字段，再 `files fetch --request ID --item ID --field ID`；使用返回的本机路径，用完 `files release --delivery ID` |
+| 填写网页密码框 | `fill request --via ego\|chrome`，提供具体页面、表单和字段；获批后 `fill run --request ID`，正常页面操作另行确认是否登录 |
+| 填写前台应用密码框 | `fill request --via focus` 捕获实际应用，获批后 `fill run`；由本机系统权限和实际控件决定是否可用 |
+| 将凭据交给业务程序 | `exec request` 声明程序、参数、目录和 stdin／env／file 接收方式，获批后 `exec run --request ID`；多凭据用 `--input`，不用中间别名 |
+| 单独读取凭据原文 | 直接使用无法完成时 `credentials reveal request` 说明原因，用户另行批准后 `credentials reveal read`；不得从填写自动降级 |
+| 核对能力与原记录 | `doctor`；`requests list/show/wait`；`proposals list/show`；`operations list/show/retry` |
+
+上表是流程索引；具体必填参数和业务 JSON 格式以各级 `--help`、动态模板和[同版本 Skill](../integrations/codex/skills/agent-info-access/SKILL.md)为准。填写／程序计划见[凭据说明](../integrations/codex/skills/agent-info-access/references/credential-use.md)，附件见[领取说明](../integrations/codex/skills/agent-info-access/references/information-files.md)。提案预检不入库；同一提案整体保存。使用申请可部分批准，但某次执行所需的各项必须全部有效。
+
+## 输出、分页和恢复
+
+加 `--json` 返回一个完整结构：`schemaVersion:1`、`ok`、`data`，失败时另有 `error.code/message`。查询成功不表示业务成功，例如申请仍待审或原执行失败时查询可返回0；需要判断 `data` 中的状态。目录列表一次完整返回，其他列表按返回的 `nextOffset`／`cursor` 继续，不能把第一页当全部。
+
+退出码：0 命令成功；2 输入错误；3 连接／上下文／能力不可用；4 本次使用未获准；5 已知执行失败；6 等待超时；7 结果未知；8 内容或版本冲突。等待超时不取消申请、缩短批准或自动重提。
+
+每次新业务可用 `--operation` 指定稳定编号，省略则软件生成并在发送前保存。回复丢失先查原编号，丢失编号则查本聊天列表；`operations retry ID` 恢复原事实，未知填写和程序启动不重放。附件恢复可取回原副本，不换版本或重复生成；状态查询不返回路径。新业务和故障重试分别处理，不能换编号掩盖未知结果。普通运行记录不保存凭据原文。
+
+## 旧协议及管理工具兼容参考
+
+下面保留 `info` / `info-codex` 的 JSON 协议和应用管理工具，用于旧聊天、旧 SSH 会话、整理任务及兼容维护。它们不是新 `chiyo` 的参数格式。保留原上下文和批准语义；通用聊天配置不能冒充旧 Codex association，不能通过公开聊天 ID 继承旧授权。
 
 App 根据当前本地或服务器模式自动准备并复用受限设备配置。通用入口 `info` 默认发现当前连接，`info --connection <配置路径>` 可固定独立目标；隔离配置可设置 `CHIYO_CONNECTION_DIRECTORY`，接入入口见 [AI 与 CLI 接入](../integrations/codex/README.md)。Mac / Windows 均使用同版本准备包中的 Skill、`info-codex` 和 `info-codex-hook`。只有受限设备接入凭证进入 CLI，用户管理 Token 留在 App。实际可用能力以 `capabilities` 为准，不按开发分支或旧下载包推测。
 

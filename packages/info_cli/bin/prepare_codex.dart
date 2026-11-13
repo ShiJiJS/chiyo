@@ -67,26 +67,9 @@ Future<void> main(List<String> args) async {
       return;
     }
     final skill = await File('${source.path}/template/SKILL.md').readAsString();
-    final credentialUseReference = await File(
-      '${source.path}/template/references/credential-use.md',
-    ).readAsString();
-    final informationFilesReference = await File(
-      '${source.path}/template/references/information-files.md',
-    ).readAsString();
-    final additionalReferences = <String, String>{};
-    await for (final entity in Directory(
-      '${source.path}/template/references',
-    ).list(followLinks: false)) {
-      if (entity is! File || !entity.path.endsWith('.md')) continue;
-      final name = entity.uri.pathSegments.last;
-      if (const {'credential-use.md', 'information-files.md'}.contains(name)) {
-        continue;
-      }
-      if (await entity.length() > 131072 || additionalReferences.length >= 32) {
-        throw const FormatException('Invalid reference files');
-      }
-      additionalReferences[name] = await entity.readAsString();
-    }
+    final references = await readCodexReferences(
+      Directory('${source.path}/template/references'),
+    );
     final suffix = Platform.isWindows ? '.exe' : '';
     final binaries = [
       'chiyo$suffix',
@@ -130,11 +113,9 @@ Future<void> main(List<String> args) async {
         staging,
         skill,
         finalDirectory: output,
-        credentialUseReference: credentialUseReference,
-        informationFilesReference: informationFilesReference,
         connectionFile: connectionFile,
         stateRoot: stateRoot,
-        additionalReferences: additionalReferences,
+        additionalReferences: references,
       );
       if (await FileSystemEntity.type(output.path, followLinks: false) !=
           FileSystemEntityType.notFound) {

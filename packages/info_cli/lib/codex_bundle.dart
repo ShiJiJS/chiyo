@@ -1,6 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
 
+/// Both SDK and shipped preparation include the complete same-version manual.
+/// Only bounded ordinary Markdown references are accepted from this source.
+Future<Map<String, String>> readCodexReferences(Directory directory) async {
+  final references = <String, String>{};
+  await for (final entry in directory.list(followLinks: false)) {
+    final name = entry.uri.pathSegments.last;
+    if (entry is! File ||
+        !RegExp(r'^[a-z0-9][a-z0-9-]*\.md$').hasMatch(name) ||
+        await entry.length() > 131072 ||
+        references.length >= 32) {
+      throw const FormatException('Invalid reference files');
+    }
+    references[name] = await entry.readAsString();
+  }
+  for (final required in ['credential-use.md', 'information-files.md']) {
+    if (!references.containsKey(required)) {
+      throw const FormatException('Missing reference');
+    }
+  }
+  return references;
+}
+
 /// Renders reviewable installation materials for binaries at their final path.
 /// This never merges configuration, installs a Skill, or trusts hooks.
 Future<void> writeCodexConfiguration(

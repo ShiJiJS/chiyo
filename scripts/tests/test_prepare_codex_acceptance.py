@@ -27,7 +27,7 @@ class PreparationTests(unittest.TestCase):
         delivery.mkdir()
         bundle.mkdir()
         files = []
-        for name in ['info-codex', 'info-codex-hook', 'info-runtime-worker']:
+        for name in ['chiyo', 'info-codex', 'info-codex-hook', 'info-runtime-worker']:
             path = delivery / 'cli' / (name + suffix)
             path.parent.mkdir(exist_ok=True)
             path.write_bytes(b'synthetic configuration fixture: ' + name.encode())
@@ -35,13 +35,13 @@ class PreparationTests(unittest.TestCase):
         template = delivery / 'cli/template'
         (template / 'references').mkdir(parents=True)
         (template / 'SKILL.md').write_text('Synthetic skill\n')
-        for name in ['credential-use.md', 'information-files.md']:
+        for name in ['credential-use.md', 'information-files.md', 'remote-connection.md', 'information-file-intake.md']:
             (template / 'references' / name).write_text(name)
         skill = bundle / 'skills/agent-info-access'
         (skill / 'references').mkdir(parents=True)
         (skill / 'SKILL.md').write_text(
-            f'Synthetic skill\n\nBundle executable: `{bundle.as_posix()}/info-codex{suffix}`.\n')
-        for name in ['credential-use.md', 'information-files.md']:
+            f'Synthetic skill\n\nBundle executable: `{bundle.as_posix()}/chiyo{suffix}`.\n')
+        for name in ['credential-use.md', 'information-files.md', 'remote-connection.md', 'information-file-intake.md']:
             (skill / 'references' / name).write_bytes((template / 'references' / name).read_bytes())
         for path in sorted(delivery.rglob('*')):
             if path.is_file():
@@ -73,6 +73,9 @@ class PreparationTests(unittest.TestCase):
         self.assertIn('app/info_desktop.exe', (workspace / 'README.txt').read_text())
         self.assertFalse(result['trusted'])
         self.assertEqual((workspace / '.codex/hooks.json').read_bytes(), (bundle / 'hooks.json').read_bytes())
+        self.assertIn('/chiyo.exe', (workspace / '.agents/skills/agent-info-access/SKILL.md').read_text())
+        self.assertEqual((workspace / '.agents/skills/agent-info-access/references/remote-connection.md').read_bytes(),
+                         (bundle / 'skills/agent-info-access/references/remote-connection.md').read_bytes())
 
     def test_mac_layout_and_cases_are_unexecuted(self):
         delivery, bundle = self.fixture('macos-arm64')
@@ -93,6 +96,14 @@ class PreparationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Workspace exists'):
             module.prepare(delivery, bundle, workspace)
         self.assertEqual(before, {p.relative_to(workspace): p.read_bytes() for p in workspace.rglob('*') if p.is_file()})
+
+    def test_changed_or_missing_new_reference_is_refused_before_writes(self):
+        delivery, bundle = self.fixture('macos-arm64')
+        reference = bundle / 'skills/agent-info-access/references/remote-connection.md'
+        reference.write_text('changed instructions')
+        with self.assertRaisesRegex(ValueError, 'reference differs'):
+            module.prepare(delivery, bundle, self.root / 'changed-reference')
+        self.assertFalse((self.root / 'changed-reference').exists())
 
     def test_hook_mutations_refused_before_writes(self):
         delivery, bundle = self.fixture('macos-arm64')

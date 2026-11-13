@@ -8,6 +8,7 @@ import argparse
 import base64
 import hashlib
 import json
+import re
 import shutil
 
 
@@ -42,18 +43,27 @@ def prepare(delivery, bundle, workspace):
             raise ValueError('Delivery no longer matches its manifest.')
         return path
 
+    unified = 'cli/chiyo' + suffix in entries
     binaries = [name + suffix for name in
+                (['chiyo'] if unified else []) +
                 ['info-codex', 'info-codex-hook', 'info-runtime-worker']]
     for name in binaries:
         if digest(bundle / name) != digest(shipped('cli/' + name)):
             raise ValueError('Bundle binary differs from the delivered version.')
-    references = ['credential-use.md', 'information-files.md']
+    reference_prefix = 'cli/template/references/'
+    references = sorted(name[len(reference_prefix):] for name in entries
+                        if name.startswith(reference_prefix))
+    if (not {'credential-use.md', 'information-files.md'}.issubset(references)
+            or any(not re.fullmatch(r'[a-z0-9][a-z0-9-]*\.md', name)
+                   for name in references)):
+        raise ValueError('Missing or invalid delivered references.')
     skill = bundle / 'skills/agent-info-access'
     for name in references:
         if digest(skill / 'references' / name) != digest(shipped('cli/template/references/' + name)):
             raise ValueError('Bundle reference differs from the delivered version.')
     original_skill = shipped('cli/template/SKILL.md').read_text(encoding='utf-8')
-    expected_skill = f'{original_skill}\nBundle executable: `{bundle.as_posix()}/info-codex{suffix}`.\n'
+    entry_name = 'chiyo' if unified else 'info-codex'
+    expected_skill = f'{original_skill}\nBundle executable: `{bundle.as_posix()}/{entry_name}{suffix}`.\n'
     if (skill / 'SKILL.md').read_text(encoding='utf-8') != expected_skill:
         raise ValueError('Unexpected Skill contents or executable path.')
     hooks_path = bundle / 'hooks.json'
@@ -139,7 +149,7 @@ def prepare(delivery, bundle, workspace):
 聊天B必须由用户另开，只提供A的公开请求ID/聊天ID，不把A的私密关联交给B。
 真实结束/恢复也由用户操作；主子共享按用户允许的真人场景另行安排。
 普通字段、凭据命令、普通附件和焦点填充保持独立流程；能力以实际capabilities为准。
-Mac 当前没有焦点填充，不把 Windows 专用说明当作 Mac 可用能力。
+焦点填写由同版本 App、原生模块及系统权限决定，不能以脚本启动或 Windows 结果代替 Mac 实机检查。
 记录客户端版本、实际信任入口、公开请求ID和截止时间；所有测试只用虚构资料。
 
 参考官方文档：
