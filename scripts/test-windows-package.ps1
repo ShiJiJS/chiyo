@@ -127,7 +127,7 @@ try {
     }
     Invoke-LockedPackageTests -Package 'packages/info_cli' -Tests @('test/bundle_preparation_test.dart', 'test/cli_test.dart', 'test/codex_process_test.dart', 'test/codex_focused_fill_test.dart', 'test/codex_information_files_test.dart', 'test/codex_association_windows_test.dart')
     if ($hasChiyo) {
-        Invoke-LockedPackageTests -Package 'packages/info_cli' -Tests @('test/windows_chiyo_cli_test.dart', 'test/windows_chiyo_context_test.dart')
+        Invoke-LockedPackageTests -Package 'packages/info_cli' -Tests @('test/windows_chiyo_cli_test.dart', 'test/windows_chiyo_context_test.dart', 'test/windows_chiyo_registration_test.dart')
     }
     # Actual extracted CLI/worker with encrypted source-side owner/Job tests;
     # focused input and executable classification remain controlled fixtures.
