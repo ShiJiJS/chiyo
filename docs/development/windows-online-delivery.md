@@ -2,6 +2,8 @@
 
 本包支持本地加密资料库，也可以与现有知予 NAS 服务同步。设置中的“本地模式”和“服务器同步”决定当前使用方式；主题、通知、关窗行为及设备操作记录保存在当前 Windows 用户下。
 
+新版业务 CLI 统一为 `cli/chiyo.exe`。正式安装后的稳定路径是 `C:\Software\AgentInfoManage\current\cli\chiyo.exe`；安装器只将这个目录加入当前用户 PATH。旧宿主尚未刷新环境时，使用公开运行描述中的绝对路径。便携解压仍使用解压目录下的完整路径，不自动修改系统环境。
+
 准确版本、源码提交、SDK 和逐文件 SHA256 见 manifest.json。完整解压后使用 app/info_desktop.exe，保留相邻 DLL、data、cli 和 tools 目录。移动时移动整个目录；更新时把新 ZIP 解压到新目录。
 
 ## 打开和连接
@@ -33,7 +35,7 @@
 
 ## 包内容和检查
 
-app 为完整桌面程序、同版 worker 与原有辅助程序；cli 含五个 AOT 命令、模板及四份当前引用；tools 为固定官方 GH/AWS 完整载荷及许可。notices、tools/notices 与 provenance 保存第三方许可、依赖锁和工具来源。
+app 为完整桌面程序、同版 worker 与原有辅助程序；cli 含统一 `chiyo`、五个保留兼容职责的 AOT 程序、模板及当前引用；tools 为固定官方 GH/AWS 完整载荷及许可。notices、tools/notices 与 provenance 保存第三方许可、依赖锁和工具来源。
 
 diagnostics/bin/info-storage-check.exe 在新临时目录检查 SQLCipher/当前用户 DPAPI、重开和迁移，不打开实际资料库。运行时保留 diagnostics/lib。
 
@@ -41,7 +43,7 @@ diagnostics/bin/info-storage-check.exe 在新临时目录检查 SQLCipher/当前
 
 ## 本机安装与源码重建
 
-当前开发工作只产包，不自动安装、覆盖旧版本、修改全局 PATH、启用 hooks 或授予信任。正式安装位置和交付后清理沿用仓库 windows-delivery.md 的“本机安装与清理”；用户原资料、共享 SDK/缓存及运行中的材料不属于构建清理范围。
+使用 `-PackageOnly` 的开发构建只产包。用户授权安装时，安装器按仓库 windows-delivery.md 的“本机安装与清理”切换安装、更新公开 CLI 登记和当前用户 PATH；不自动启用 hooks 或授予信任。用户原资料、共享 SDK/缓存及运行中的材料不属于构建清理范围。
 
 从干净已提交源码，在已有工具链下运行（示例路径替换为实际位置）：
 

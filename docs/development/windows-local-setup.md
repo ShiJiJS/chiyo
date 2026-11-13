@@ -48,3 +48,9 @@ Python 构建工具可通过 uv 安装到项目的 `.tools/python`，uv 缓存�
 - [连续核对范围](windows-online-acceptance.md)
 
 当前任务、限制和完成状态从 [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues) 读取；本页只维护可重复使用的开发步骤。
+
+## 网页填写驱动的合成检查
+
+`packages/info_cli/test/chrome_browser_fill_live_test.dart` 通过 `CHIYO_CHROME_TEST_EXECUTABLE` 接收已安装 Chrome 的准确路径，仅启动独立的临时无界面测试资料，不连接日常浏览器。`ego_browser_fill_live_test.dart` 则通过 `CHIYO_EGO_TEST_EXECUTABLE`、`CHIYO_EGO_TEST_SPACE`、`CHIYO_EGO_TEST_PAGE` 接收现有 Ego CLI 与本次独占的合成工作区/页面；测试会导航并关闭这个页面，不得指向用户正在使用的页面。调用方完成检查后结束该工作区。未显式提供这些条件时测试跳过，不计为真实浏览器通过。
+
+两种驱动都限定主文档中的唯一区域及区域内的唯一密码框，使用假密码检查精确替换、Unicode、焦点变化、结构变化及发送后的未知结果。Ego 还实际核对文档刷新后的执行上下文失效，防止页面编号继续存在却写入另一个文档。传输检查 `ego_browser_fill_test.dart` 使用独立编译的合成 helper，覆盖私有 stdin、诊断回显丢弃、超时及无自动重试。这些驱动检查不替代申请、App 审批、服务端持久化与正式安装后的完整联调。

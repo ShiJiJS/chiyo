@@ -15,6 +15,7 @@ class WindowsAgentBundle {
     appExecutable,
     'app/info-runtime-worker.exe',
     'app/info-focus-broker.exe',
+    'cli/chiyo.exe',
     'cli/info.exe',
     'cli/info-codex.exe',
     'cli/info-codex-hook.exe',

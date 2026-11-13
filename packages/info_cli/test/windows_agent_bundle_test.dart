@@ -85,6 +85,21 @@ void main() {
   );
 
   test(
+    'legacy binaries cannot substitute for a missing chiyo command',
+    () async {
+      expect((await probe.read()).verified, isTrue);
+      await file('cli/chiyo.exe').delete();
+      (manifest['files'] as List).removeWhere(
+        (row) => (row as Map)['path'] == 'cli/chiyo.exe',
+      );
+      await writeManifest();
+      expect(await file('cli/info.exe').exists(), isTrue);
+      expect(await file('cli/info-codex.exe').exists(), isTrue);
+      expect((await probe.read()).status, 'bundle_invalid');
+    },
+  );
+
+  test(
     'every declared payload is hashed and missing or changed files fail closed',
     () async {
       expect((await probe.read()).verified, isTrue);
@@ -164,17 +179,20 @@ void main() {
     },
   );
 
-  test('bounded verification checks late files and can recover after rejection', () async {
-    final original = 'SYNTHETIC_PAYLOAD_' * 512;
-    for (var index = 0; index < 32; index++) {
-      await declare('tools/synthetic/payload-$index.dat', original);
-    }
-    await writeManifest();
-    expect((await probe.read(rehash: true)).verified, isTrue);
-    final late = file('tools/synthetic/payload-31.dat');
-    await late.writeAsString('X' * original.length);
-    expect((await probe.read(rehash: true)).status, 'bundle_invalid');
-    await late.writeAsString(original);
-    expect((await probe.read(rehash: true)).verified, isTrue);
-  });
+  test(
+    'bounded verification checks late files and can recover after rejection',
+    () async {
+      final original = 'SYNTHETIC_PAYLOAD_' * 512;
+      for (var index = 0; index < 32; index++) {
+        await declare('tools/synthetic/payload-$index.dat', original);
+      }
+      await writeManifest();
+      expect((await probe.read(rehash: true)).verified, isTrue);
+      final late = file('tools/synthetic/payload-31.dat');
+      await late.writeAsString('X' * original.length);
+      expect((await probe.read(rehash: true)).status, 'bundle_invalid');
+      await late.writeAsString(original);
+      expect((await probe.read(rehash: true)).verified, isTrue);
+    },
+  );
 }

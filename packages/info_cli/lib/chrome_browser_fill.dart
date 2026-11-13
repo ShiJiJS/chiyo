@@ -4,21 +4,12 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'browser_form_script.dart';
+import 'browser_fill_types.dart';
+export 'browser_fill_types.dart';
 
 /// Only fixed public error codes leave the browser transport. Browser error
 /// messages may echo evaluated source, including material, and are discarded.
-class BrowserFillFailure implements Exception {
-  const BrowserFillFailure(this.code);
-  final String code;
-  @override
-  String toString() => 'BrowserFillFailure($code)';
-}
-
-class ChromeFormInspection {
-  const ChromeFormInspection(this.target, this.structure);
-  final BrowserFormTarget target;
-  final Map<String, dynamic> structure;
-}
+typedef ChromeFormInspection = BrowserFormInspection;
 
 /// A caller-selected local Chrome CDP endpoint. Does not launch a browser,
 /// discover profiles, activate tabs or alter remote-debugging settings.
@@ -259,22 +250,8 @@ class ChromeBrowserFill {
   }
 }
 
-String _receiptCode(Map<String, dynamic> receipt) {
-  final code = receipt['code'];
-  return const {
-        'destination_changed',
-        'ambiguous_form',
-        'ambiguous_field',
-        'not_password_field',
-        'unavailable_target',
-        'form_changed',
-        'unsupported_password_value',
-        'value_not_retained',
-        'browser_operation_failed',
-      }.contains(code)
-      ? code as String
-      : 'browser_operation_failed';
-}
+String _receiptCode(Map<String, dynamic> receipt) =>
+    browserReceiptCode(receipt);
 
 class _CdpPage {
   _CdpPage(this.socket, this.timeout) {
