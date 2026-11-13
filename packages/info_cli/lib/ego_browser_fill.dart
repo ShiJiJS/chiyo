@@ -58,8 +58,9 @@ class EgoBrowserFill {
 
   Future<Map<String, Object?>> fill(
     BrowserFormTarget approved,
-    String password,
-  ) async {
+    String password, {
+    Future<void> Function()? beforeDispatch,
+  }) async {
     if (approved.provider != 'ego') {
       return const {'status': 'refused', 'code': 'destination_changed'};
     }
@@ -70,7 +71,7 @@ class EgoBrowserFill {
       return const {'status': 'refused', 'code': 'unsupported_password_value'};
     }
     try {
-      final receipt = await _run(approved, password);
+      final receipt = await _run(approved, password, beforeDispatch);
       final status = receipt['status'];
       if (!{'filled', 'refused', 'unknown'}.contains(status)) {
         return const {'status': 'unknown', 'code': 'browser_response_invalid'};
@@ -94,16 +95,21 @@ class EgoBrowserFill {
   Future<Map<String, dynamic>> _run(
     BrowserFormTarget target, [
     String? password,
+    Future<void> Function()? beforeDispatch,
   ]) async {
     final nonce = base64Url.encode(
       List.generate(24, (_) => Random.secure().nextInt(256)),
     );
     final prefix = 'chiyo-$nonce:';
-    final source = _script(target, password, prefix);
+    final guard = beforeDispatch == null
+        ? null
+        : await _DispatchGuard.start(beforeDispatch, timeout);
+    final source = _script(target, password, prefix, guard?.configuration);
     late Process process;
     try {
       process = await Process.start(executable, ['nodejs']);
     } on Object {
+      await guard?.close();
       throw const BrowserFillFailure('browser_not_started');
     }
     final output = <int>[];
@@ -164,11 +170,17 @@ class EgoBrowserFill {
       }
       await out.cancel();
       await err.cancel();
+      await guard?.close();
     }
   }
 }
 
-String _script(BrowserFormTarget target, String? password, String prefix) {
+String _script(
+  BrowserFormTarget target,
+  String? password,
+  String prefix,
+  Map<String, Object?>? guard,
+) {
   final inspect = browserFormExpression(
     url: target.url,
     form: target.formSelector,
@@ -181,7 +193,7 @@ String _script(BrowserFormTarget target, String? password, String prefix) {
     password: password,
   );
   return '''
-const config = ${jsonEncode({'space': target.space, 'page': target.pageId, 'url': target.url, 'instance': password == null ? null : target.instanceId, 'digest': password == null ? null : target.structureDigest})};
+const config = ${jsonEncode({'space': target.space, 'page': target.pageId, 'url': target.url, 'instance': password == null ? null : target.instanceId, 'digest': password == null ? null : target.structureDigest, 'guard': guard})};
 const prefix = ${jsonEncode(prefix)};
 let dispatched = false;
 let receipt;
@@ -221,14 +233,111 @@ try {
         // very same document context. A navigation invalidates it rather than
         // evaluating in whichever document a mutable Page label now resolves.
         const expression = write.replace(${jsonEncode('"expectedStructure":null')}, '"expectedStructure":'+JSON.stringify(checked.structure));
-        dispatched = true;
-        receipt = await evaluate(expression);
+        let allowed = true;
+        if (config.guard !== null) {
+          try {
+            const response = await fetch(config.guard.url,{method:'POST',headers:{'authorization':'Bearer '+config.guard.capability,'content-type':'application/json'},body:'{}',redirect:'error',signal:AbortSignal.timeout(config.guard.timeoutMs)});
+            const decision = await response.json();
+            allowed = response.status===200 && decision.allowed===true;
+            if (!allowed) receipt = {status:'refused',code:decision.code||'browser_operation_failed'};
+          } catch {allowed=false;receipt={status:'refused',code:'browser_operation_failed'};}
+        }
+        if (allowed) {
+          dispatched = true;
+          receipt = await evaluate(expression);
+        }
       }
     }
   }
 } catch {
   receipt = {status:dispatched?'unknown':'refused',code:'browser_operation_failed'};
 }
+
 console.log(prefix+JSON.stringify(receipt));
 ''';
+}
+
+/// A one-call private Node-to-App guard. It carries no browser material or Core
+/// proof, is not published on disk and cannot grant a second dispatch.
+class _DispatchGuard {
+  _DispatchGuard(this.server, this.capability, this.callback, this.timeout) {
+    server.listen((request) {
+      unawaited(_respond(request));
+    });
+  }
+  final HttpServer server;
+  final String capability;
+  final Future<void> Function() callback;
+  final Duration timeout;
+  final watch = Stopwatch()..start();
+  bool _consumed = false, _closed = false;
+  Map<String, Object?> get configuration => {
+    'url': 'http://127.0.0.1:${server.port}/dispatch',
+    'capability': capability,
+    'timeoutMs': timeout.inMilliseconds,
+  };
+  static Future<_DispatchGuard> start(
+    Future<void> Function() callback,
+    Duration timeout,
+  ) async {
+    try {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final capability = base64Url
+          .encode(List.generate(32, (_) => Random.secure().nextInt(256)))
+          .replaceAll('=', '');
+      return _DispatchGuard(server, capability, callback, timeout);
+    } on Object {
+      throw const BrowserFillFailure('browser_not_started');
+    }
+  }
+
+  Future<void> _respond(HttpRequest request) async {
+    var allowed = false;
+    var code = 'browser_operation_failed';
+    try {
+      if (_closed ||
+          _consumed ||
+          watch.elapsed >= timeout ||
+          request.method != 'POST' ||
+          request.uri.path != '/dispatch' ||
+          request.uri.hasQuery ||
+          request.headers.value('origin') != null ||
+          request.headers.value('host') != '127.0.0.1:${server.port}' ||
+          request.headers.value('authorization') != 'Bearer $capability') {
+        throw const BrowserFillFailure('browser_operation_failed');
+      }
+      final bytes = <int>[];
+      await for (final chunk in request.timeout(timeout)) {
+        if (bytes.length + chunk.length > 1024) {
+          throw const BrowserFillFailure('browser_operation_failed');
+        }
+        bytes.addAll(chunk);
+      }
+      if (utf8.decode(bytes) != '{}' ||
+          _closed ||
+          _consumed ||
+          watch.elapsed >= timeout) {
+        throw const BrowserFillFailure('browser_operation_failed');
+      }
+      _consumed = true;
+      await callback().timeout(timeout - watch.elapsed);
+      allowed = !_closed && watch.elapsed < timeout;
+    } on Object catch (error) {
+      code = browserDispatchError(error);
+    }
+    try {
+      request.response.headers.contentType = ContentType.json;
+      request.response.write(
+        jsonEncode({'allowed': allowed, if (!allowed) 'code': code}),
+      );
+      await request.response.close();
+    } on Object {
+      /* A lost guard response never authorizes another attempt. */
+    }
+  }
+
+  Future<void> close() async {
+    _closed = true;
+    await server.close(force: true);
+  }
 }

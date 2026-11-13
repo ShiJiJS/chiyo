@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/ego_browser_fill.dart';
+import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
 // Opt-in only. SPACE/PAGE must name an exclusively owned synthetic test Page.
@@ -193,6 +194,56 @@ try {
             await evaluate('document.querySelector("#password").value'),
             isEmpty,
           );
+        },
+      );
+      test(
+        'final private authorization can allow or refuse without changing the selected target',
+        () async {
+          final checked = await inspect();
+          var calls = 0;
+          expect(
+            await driver.fill(
+              checked.target,
+              synthetic,
+              beforeDispatch: () async {
+                calls++;
+                throw const CredentialUseFailure('grant_revoked');
+              },
+            ),
+            {'status': 'refused', 'code': 'grant_revoked'},
+          );
+          expect(await evaluate('window.inputEvents'), 0);
+          expect(
+            await driver.fill(
+              checked.target,
+              synthetic,
+              beforeDispatch: () async {
+                calls++;
+              },
+            ),
+            {'status': 'filled'},
+          );
+          expect(calls, 2);
+          expect(await evaluate('window.inputEvents'), 1);
+        },
+      );
+      test(
+        'navigation during private authorization never writes into the replacement document',
+        () async {
+          final checked = await inspect();
+          final result = await driver.fill(
+            checked.target,
+            synthetic,
+            beforeDispatch: () async {
+              await control('await page.reload();return true;');
+            },
+          );
+          expect(result['status'], isIn(['refused', 'unknown']));
+          expect(
+            await evaluate('document.querySelector("#password").value'),
+            isEmpty,
+          );
+          expect(await evaluate('window.inputEvents'), 0);
         },
       );
       test(

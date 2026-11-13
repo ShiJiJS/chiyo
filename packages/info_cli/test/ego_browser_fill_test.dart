@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 import 'package:info_cli/ego_browser_fill.dart';
 import 'package:info_core/info_core.dart';
@@ -95,6 +96,89 @@ void main() {
       'status': 'refused',
       'code': 'browser_operation_failed',
     });
+  });
+  test(
+    'private final-dispatch guard permits one callback and propagates only fixed refusal codes',
+    () async {
+      await mode('guard-valid');
+      var calls = 0;
+      expect(
+        await driver.fill(
+          target,
+          material,
+          beforeDispatch: () async {
+            calls++;
+          },
+        ),
+        {'status': 'filled'},
+      );
+      expect(calls, 1);
+      expect(
+        await driver.fill(
+          target,
+          material,
+          beforeDispatch: () async {
+            throw const CredentialUseFailure('grant_revoked');
+          },
+        ),
+        {'status': 'refused', 'code': 'grant_revoked'},
+      );
+      expect(
+        await driver.fill(
+          target,
+          material,
+          beforeDispatch: () async {
+            throw StateError(material);
+          },
+        ),
+        {'status': 'refused', 'code': 'browser_operation_failed'},
+      );
+    },
+  );
+  for (final invalid in [
+    'duplicate',
+    'origin',
+    'capability',
+    'method',
+    'body',
+  ]) {
+    test(
+      'guard $invalid cannot authorize another write or leak a callback exception',
+      () async {
+        await mode('guard-$invalid');
+        var calls = 0;
+        final result = await driver.fill(
+          target,
+          material,
+          beforeDispatch: () async {
+            calls++;
+          },
+        );
+        expect(result['status'], 'refused');
+        expect(calls, invalid == 'duplicate' ? 1 : 0);
+        expect(jsonEncode(result), isNot(contains(material)));
+      },
+    );
+  }
+  test('a guard timeout never becomes a delayed successful dispatch', () async {
+    await mode('guard-valid');
+    final release = Completer<void>();
+    var calls = 0;
+    final candidate = EgoBrowserFill(
+      executable,
+      timeout: const Duration(milliseconds: 350),
+    );
+    final result = await candidate.fill(
+      target,
+      material,
+      beforeDispatch: () {
+        calls++;
+        return release.future;
+      },
+    );
+    expect(result['status'], isNot('filled'));
+    expect(calls, 1);
+    release.complete();
   });
   test(
     'missing helper is refused before dispatch; invalid values do not start it',

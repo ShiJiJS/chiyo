@@ -26,6 +26,46 @@ Future<void> main(List<String> args) async {
   );
   void receipt(Map<String, Object?> value) =>
       stderr.writeln(prefix + jsonEncode(value));
+  if ((mode['mode'] as String).startsWith('guard-')) {
+    final config =
+        jsonDecode(
+              RegExp(r'const config = (.+);').firstMatch(source)!.group(1)!,
+            )
+            as Map;
+    final guard = config['guard'] as Map;
+    final http = HttpClient();
+    final decisions = <bool>[];
+    try {
+      for (var i = 0; i < (mode['mode'] == 'guard-duplicate' ? 2 : 1); i++) {
+        final request = await http.openUrl(
+          mode['mode'] == 'guard-method' ? 'GET' : 'POST',
+          Uri.parse(guard['url'] as String),
+        );
+        request.headers.set(
+          'authorization',
+          'Bearer ${mode['mode'] == 'guard-capability' ? 'invalid' : guard['capability']}',
+        );
+        if (mode['mode'] == 'guard-origin') {
+          request.headers.set('origin', 'https://synthetic.invalid');
+        }
+        if (mode['mode'] != 'guard-method') {
+          request.write(mode['mode'] == 'guard-body' ? '[]' : '{}');
+        }
+        final response = await request.close();
+        final decision =
+            jsonDecode(await utf8.decoder.bind(response).join()) as Map;
+        decisions.add(decision['allowed'] == true);
+        if (decision['allowed'] != true) {
+          receipt({'status': 'refused', 'code': decision['code']});
+          return;
+        }
+      }
+      receipt({'status': 'filled'});
+    } finally {
+      http.close(force: true);
+    }
+    return;
+  }
   switch (mode['mode']) {
     case 'ready':
       receipt({
