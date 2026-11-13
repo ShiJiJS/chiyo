@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:info_cli/macos_agent_bundle.dart';
+import 'package:info_cli/macos_bundled_tools.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -66,6 +67,37 @@ void main() {
       expect(moved.verified, isTrue);
       expect(moved.directory, root.path);
       expect(moved.manifestDigest, initial.manifestDigest);
+    },
+  );
+  test('new Mac package requires its unified chiyo entry', () async {
+    await file('cli/chiyo').delete();
+    expect((await probe.read()).verified, false);
+  });
+  test(
+    'the unified CLI resolves only its verified same-source App tools',
+    () async {
+      final reference = await MacBundledTools(
+        executable: file('cli/chiyo').path,
+      ).sourceReference();
+      expect(
+        reference?['application'],
+        file(MacAgentBundle.appExecutable).path,
+      );
+      expect(reference?['sourceCommit'], 'a' * 40);
+      final copied = await file('standalone/chiyo').create(recursive: true);
+      await file('cli/chiyo').copy(copied.path);
+      await file(
+        'standalone/${MacBundledTools.sourceFile}',
+      ).writeAsString(jsonEncode(reference));
+      expect(
+        await MacBundledTools(executable: copied.path).sourceReference(),
+        reference,
+      );
+      await copied.writeAsString('different executable');
+      expect(
+        await MacBundledTools(executable: copied.path).sourceReference(),
+        null,
+      );
     },
   );
 
