@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'package:info_core/info_core.dart';
 import 'package:info_cli/device_focused_fill_host.dart';
+import 'package:info_cli/device_credential_batch_host.dart';
+import 'package:info_cli/installed_ego_browser.dart';
 import 'bundled_focused_fill.dart';
 import 'macos_focused_fill.dart';
 import 'local_library_sync.dart';
@@ -53,6 +55,7 @@ class StorageDesktopLauncher extends StatefulWidget {
 class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   DesktopBootstrap? _local;
   DeviceFocusedFillHost? _focusedFillHost;
+  DeviceCredentialBatchHost? _credentialBatchHost;
   bool _hostDisposed = false;
   bool _online = false;
   String? _failure;
@@ -79,15 +82,29 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
               : Platform.isWindows
               ? await loadBundledFocusedFill()
               : null);
-      if (driver == null || _hostDisposed) return;
-      final host = await DeviceFocusedFillHost.start(
+      if (_hostDisposed) return;
+      if (driver != null) {
+        final host = await DeviceFocusedFillHost.start(
+          directory: Directory(widget.profiles.directory),
+          driver: driver,
+        );
+        if (_hostDisposed) {
+          await host.close();
+          return;
+        }
+        _focusedFillHost = host;
+      }
+      final browser = await findInstalledEgoBrowser();
+      if (_hostDisposed) return;
+      final batches = await DeviceCredentialBatchHost.start(
         directory: Directory(widget.profiles.directory),
         driver: driver,
+        egoExecutable: browser,
       );
       if (_hostDisposed) {
-        await host.close();
+        await batches.close();
       } else {
-        _focusedFillHost = host;
+        _credentialBatchHost = batches;
       }
     } on Object {
       // An absent optional helper or occupied locator never impersonates a live
@@ -275,6 +292,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
 
   Future<void> _closeFocusedFillHost() async {
     _hostDisposed = true;
+    await _credentialBatchHost?.close();
     await _focusedFillHost?.close();
   }
 

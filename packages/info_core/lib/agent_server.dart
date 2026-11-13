@@ -379,6 +379,8 @@ class AgentProtocol {
                 CredentialLaunchPlan.supportedReceivers,
           'capabilities': [
             'agent-record-queries.v1',
+            if (enableCredentialBatches && _agent.credentialBatchesAvailable)
+              'credential-batches.v3',
             'credential-catalog-search.v1',
             'information-request-operations.v1',
             'submission-metadata.v1',

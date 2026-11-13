@@ -333,6 +333,15 @@ class ChiyoCommandLine {
     number('offset', 0, 1000000);
     number('timeout', 0, 300);
     number('version', 1, 2147483647);
+    if (options.options.contains('operation') &&
+        options['operation'] != null &&
+        !RegExp(
+          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+        ).hasMatch(options['operation'] as String)) {
+      throw const ChiyoUsageFailure(
+        '--operation 必须是 1–128 位字母、数字、点、下划线、冒号或连字符。',
+      );
+    }
     if (path == 'chat start') {
       for (final key in ['agent', 'id', 'label', 'context-out']) {
         required(key);
@@ -433,15 +442,6 @@ class ChiyoCommandLine {
         options['browser'] != null &&
         options['via'] != 'chrome') {
       throw const ChiyoUsageFailure('--browser 需要同时指定 --via chrome。');
-    }
-    if (options.options.contains('operation') &&
-        options['operation'] != null &&
-        !RegExp(
-          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
-        ).hasMatch(options['operation'] as String)) {
-      throw const ChiyoUsageFailure(
-        '--operation 必须是 1–128 位字母、数字、点、下划线、冒号或连字符。',
-      );
     }
   }
 

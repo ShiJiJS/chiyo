@@ -409,8 +409,7 @@ void main() {
           'credential-catalog-search.v1',
         ]),
       );
-      // v3 is deliberately not advertised until the shipped App UI/Host can run it.
-      expect(capabilities, isNot(contains('credential-batches.v3')));
+      expect(capabilities, contains('credential-batches.v3'));
     },
   );
 

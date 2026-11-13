@@ -188,6 +188,8 @@ final class AgentGateway {
           'information-directory-discovery.v1',
           'agent-device-binding.v1',
           if (_deviceCredentials != null) ...[
+            if (_deviceCredentials.credentialBatchesAvailable)
+              'credential-batches.v3',
             'credential-device-execution.v1',
             if (_deviceCredentials.focusedFillAvailable)
               'credential-device-focused-fill.v1',

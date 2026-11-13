@@ -10,6 +10,8 @@ import 'chiyo_command_line.dart';
 import 'chiyo_context.dart';
 import 'chrome_browser_fill.dart';
 import 'chiyo_intents.dart';
+import 'device_credential_batch_host.dart';
+part 'chiyo_fill.dart';
 
 class ChiyoRunResult {
   const ChiyoRunResult(
@@ -74,6 +76,7 @@ class ChiyoCli {
         return _success(data, invocation);
       }
       final context = await _context(invocation);
+      _activeContext = context;
       _intents = ChiyoIntentStore(
         Directory('${_contextFile!.parent.path}/chiyo-intents').absolute,
         chiyoIntentDigest({
@@ -160,6 +163,7 @@ class ChiyoCli {
 
   File? _contextFile;
   late ChiyoIntentStore _intents;
+  late ChiyoContext _activeContext;
   Future<ChiyoContext> _context(ChiyoInvocation i) async {
     final supplied =
         i.root['context'] as String? ?? environment['CHIYO_CONTEXT'];
@@ -356,6 +360,9 @@ class ChiyoCli {
         if (record.kind == 'access-request') {
           return _submitAccess(client, record);
         }
+        if (record.kind == 'fill-request' || record.kind == 'fill-run') {
+          return _continueFill(record, recover: true);
+        }
         // An execution record is never an instruction to type again. Remaining
         // adapters can recover their own immutable intent through this seam.
         return client.execute({'command': 'operations-show', 'id': id});
@@ -451,6 +458,10 @@ class ChiyoCli {
           'fields': fields,
         }, operationId: o['operation'] as String?);
         return _submitAccess(client, intent);
+      case 'fill request':
+        return _requestFill(i);
+      case 'fill run':
+        return _runFill(i);
       default:
         // New target and multi-credential semantics must be implemented by the
         // receiving service; never translate them to a broader old script plan.

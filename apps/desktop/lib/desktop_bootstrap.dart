@@ -165,6 +165,7 @@ class DesktopBootstrap extends ChangeNotifier {
         enableReusableCredentialUse: Platform.isWindows || Platform.isMacOS,
         enableFocusedFill: Platform.isWindows || Platform.isMacOS,
         enableInformationFiles: Platform.isWindows || Platform.isMacOS,
+        enableCredentialBatches: Platform.isWindows || Platform.isMacOS,
         credentialTools: Platform.isWindows
             ? WindowsBundledTools().read
             : Platform.isMacOS

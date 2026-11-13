@@ -7,6 +7,7 @@ final class DeviceCredentialRoutes {
   DeviceCredentialRoutes(this.agent);
   final AgentAccess agent;
   bool get focusedFillAvailable => agent.deviceFocusedFillAvailable;
+  bool get credentialBatchesAvailable => agent.credentialBatchesAvailable;
   static const sessionPaths = {
     ...CredentialBatchProtocol.sessionPaths,
     '/credential-use/device/request',
