@@ -4,6 +4,7 @@ extension _CredentialImportClient on AgentClient {
   Future<Map<String, dynamic>> _executeImportCommand(
     Map<String, dynamic> input, {
     required bool revise,
+    Map<String, ({String sha256, int byteLength})>? checkedSourceFiles,
   }) async {
     if (_session == null) return {'status': 'unauthorized'};
     if (input.containsKey('title')) {
@@ -88,6 +89,7 @@ extension _CredentialImportClient on AgentClient {
                 ? '${input['proposalId']}:${input['version']}'
                 : input['operationId'] as String? ?? '',
             itemIndex: index,
+            checkedSourceFiles: checkedSourceFiles,
           );
         }
         if (item['credential'] != null) {
@@ -123,6 +125,14 @@ extension _CredentialImportClient on AgentClient {
               final bytes = await handle.read(1048577);
               if (bytes.length != length || await handle.length() != length) {
                 return {'status': 'invalid_credential_file'};
+              }
+              if (checkedSourceFiles != null) {
+                final pin = checkedSourceFiles[file.path];
+                if (pin == null ||
+                    pin.byteLength != bytes.length ||
+                    pin.sha256 != sha256.convert(bytes).toString()) {
+                  return {'status': 'source_changed'};
+                }
               }
               item['credential'] = CredentialImportInput.agentFile(
                 file.uri.pathSegments.last,

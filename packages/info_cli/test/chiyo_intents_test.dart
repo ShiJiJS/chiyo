@@ -11,6 +11,42 @@ void main() {
     store = ChiyoIntentStore(Directory('${root.path}/intents'), 'a' * 64);
   });
   tearDown(() => root.delete(recursive: true));
+  test(
+    'large public template snapshots preserve separate bounded mutation limits',
+    () async {
+      final definition = {'instructions': 'x' * (180 * 1024)};
+      final checked = await store.remember('proposal-check', {
+        'templates': [definition],
+      }, operationId: 'check-large-definition');
+      expect((await store.read(checked.operationId))!.payload['templates'], [
+        definition,
+      ]);
+      expect((await store.list()).single.summary['state'], 'checked');
+      await expectLater(
+        store.remember('proposal-check', {
+          'tooLarge': 'x' * ChiyoIntentStore.maxCheckBytes,
+        }),
+        throwsA(
+          isA<ChiyoIntentFailure>().having(
+            (e) => e.code,
+            'code',
+            'intent_too_large',
+          ),
+        ),
+      );
+      await expectLater(
+        store.remember('proposal-submit', {'unexpected': definition}),
+        throwsA(
+          isA<ChiyoIntentFailure>().having(
+            (e) => e.code,
+            'code',
+            'intent_too_large',
+          ),
+        ),
+      );
+      expect(await store.list(), hasLength(1));
+    },
+  );
   Map<String, dynamic> payload() => {
     'command': 'request',
     'purpose': 'Synthetic check',

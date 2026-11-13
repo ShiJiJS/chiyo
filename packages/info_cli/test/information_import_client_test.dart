@@ -8,6 +8,60 @@ import '../../info_core/test/fixtures/file_import_fixture.dart';
 
 void main() {
   test(
+    'checked file hashes are revalidated at the final upload boundary',
+    () async {
+      final root = await Directory.systemTemp.createTemp('checked-original-');
+      final repo = MemoryInformationRepository();
+      final service = InformationService(repository: repo);
+      configureFileImports(service);
+      final server = await AgentServer.start(service.agent, port: 0);
+      final cli = AgentClient(server.port);
+      addTearDown(() async {
+        cli.close();
+        await server.close();
+        await service.close();
+        await root.delete(recursive: true);
+      });
+      await cli.execute({
+        'command': 'session',
+        'chatLabel': 'Synthetic source pin',
+      });
+      final file = File('${root.path}/synthetic.txt');
+      await file.writeAsString('CHANGED-SYNTHETIC');
+      final result = await cli.execute(
+        {
+          'command': 'import-submit',
+          'operationId': 'checked-source',
+          'items': [
+            {
+              'key': 'file',
+              'name': 'Synthetic source',
+              'templateId': 'file',
+              'templateVersion': '1',
+              'templateDigest': 'a' * 64,
+              'values': {'file': 'primary'},
+              'attachments': [
+                {
+                  'key': 'primary',
+                  'name': 'Source',
+                  'templateField': 'file',
+                  'currentVersion': 1,
+                  'versions': [
+                    {'filePath': file.path},
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        checkedSourceFiles: {file.path: (sha256: 'a' * 64, byteLength: 17)},
+      );
+      expect(result['status'], 'source_changed');
+      expect((await repo.informationFileStagingUsage()).files, 0);
+      expect(repo.importProposals, isEmpty);
+    },
+  );
+  test(
     'CLI privately uploads a maximum-size original, retries, and preserves explicit version choice after approval',
     () async {
       final root = await Directory.systemTemp.createTemp(

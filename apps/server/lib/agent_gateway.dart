@@ -30,6 +30,7 @@ final class AgentGateway {
     '/requests/list',
     '/requests/show',
     '/proposals/list',
+    '/proposals/check',
     '/operations/list',
     '/operations/show',
     '/session/check',
@@ -205,6 +206,10 @@ final class AgentGateway {
           'information-import-operations.v1',
           'import-proposal-title.v1',
           'information-update-operations.v1',
+          if ((result['capabilities'] as List).contains(
+            'information-proposal-precheck.v1',
+          ))
+            'information-proposal-precheck.v1',
           if ((result['capabilities'] as List).contains('credential-import.v1'))
             'credential-import.v1',
           if ((result['capabilities'] as List).contains(

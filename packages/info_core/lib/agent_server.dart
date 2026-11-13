@@ -154,7 +154,8 @@ class AgentServer extends AgentProtocol {
       final limit = request.uri.path == '/import-file/submit'
           ? 15 * 1024 * 1024
           : request.uri.path == '/import/submit' ||
-                request.uri.path == '/import/revise'
+                request.uri.path == '/import/revise' ||
+                request.uri.path == '/proposals/check'
           ? 6000000
           : request.uri.path == '/organization/submit' ||
                 request.uri.path == '/update/submit' ||
@@ -196,7 +197,7 @@ class AgentServer extends AgentProtocol {
               request.uri.path == '/plugins/catalog' ||
               request.uri.path.startsWith('/requests/') ||
               request.uri.path.startsWith('/operations/') ||
-              request.uri.path == '/proposals/list'
+              request.uri.path.startsWith('/proposals/')
           ? decodeProtocolObject(utf8.decode(bytes), maxBytes: limit)
           : jsonDecode(utf8.decode(bytes));
       if (body is! Map<String, dynamic>) {
@@ -402,6 +403,7 @@ class AgentProtocol {
             'information-import-operations.v1',
             'import-proposal-title.v1',
             'information-update-operations.v1',
+            'information-proposal-precheck.v1',
             'information-directory-discovery.v1',
             if (_agent.informationImportFilesAvailable)
               'information-file-upload.v1',
@@ -862,6 +864,18 @@ class AgentProtocol {
               directoryId: body['directoryId'] as String?,
             )
             .toJson();
+      case '/proposals/check':
+        if (body.keys.any(
+              (k) => !{'sessionSecret', 'kind', 'input'}.contains(k),
+            ) ||
+            body['input'] is! Map<String, dynamic>) {
+          throw const AccessFailure('invalid_request');
+        }
+        return _agent.checkProposal(
+          _text(body, 'sessionSecret'),
+          _text(body, 'kind'),
+          body['input'] as Map<String, dynamic>,
+        );
       case '/delete/submit':
         return _submitDelete(body);
       case '/delete/status':

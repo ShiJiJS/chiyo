@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
@@ -12,6 +13,7 @@ import 'chrome_browser_fill.dart';
 import 'chiyo_intents.dart';
 import 'device_credential_batch_host.dart';
 part 'chiyo_fill.dart';
+part 'chiyo_proposals.dart';
 
 class ChiyoRunResult {
   const ChiyoRunResult(
@@ -291,17 +293,33 @@ class ChiyoCli {
           if (o['plugin'] != null) 'packageId': o['plugin'],
         });
       case 'templates show':
-        return client.execute({'command': 'template-read', 'templateId': id});
+        final result = await client.execute({
+          'command': 'template-read',
+          'templateId': id,
+        });
+        if (result['status'] != 'ok' ||
+            result['template'] is! Map<String, dynamic>) {
+          return result;
+        }
+        return {
+          ...result,
+          'template': _publicProposalTemplate(
+            result['template'] as Map<String, dynamic>,
+          ),
+        };
       case 'templates examples':
         final result = await client.execute({
           'command': 'template-read',
           'templateId': id,
         });
         if (result['status'] != 'ok') return result;
-        final template = result['template'] as Map? ?? result;
+        final template = _publicProposalTemplate(
+          result['template'] as Map<String, dynamic>? ?? result,
+        );
         return {
           'status': 'ok',
           'templateId': id,
+          'workflow': template['workflow'],
           if (template['submissionExample'] != null)
             'submissionExample': template['submissionExample'],
           if (template['submissionExamples'] != null)
@@ -336,8 +354,9 @@ class ChiyoCli {
                 in records
                     .where(
                       (r) =>
-                          o['request'] == null ||
-                          r.payload['requestId'] == o['request'],
+                          r.kind != 'proposal-check' &&
+                          (o['request'] == null ||
+                              r.payload['requestId'] == o['request']),
                     )
                     .skip(_integer(i, 'offset', 0, 1000000))
                     .take(_integer(i, 'limit', 1, 100)))
@@ -362,6 +381,9 @@ class ChiyoCli {
         }
         if (record.kind == 'fill-request' || record.kind == 'fill-run') {
           return _continueFill(record, recover: true);
+        }
+        if (record.kind == 'proposal-submit') {
+          return _recoverProposal(client, record);
         }
         // An execution record is never an instruction to type again. Remaining
         // adapters can recover their own immutable intent through this seam.
@@ -462,6 +484,9 @@ class ChiyoCli {
         return _requestFill(i);
       case 'fill run':
         return _runFill(i);
+      case 'proposals check':
+      case 'proposals submit':
+        return _proposal(i, client);
       default:
         // New target and multi-credential semantics must be implemented by the
         // receiving service; never translate them to a broader old script plan.
@@ -684,10 +709,13 @@ class ChiyoCli {
       'invalid_type' ||
       'invalid_cursor' ||
       'invalid_submission_metadata' ||
+      'source_required' ||
       'validation_failed' ||
       'invalid_response' => 2,
       'operation_conflict' ||
       'template_changed' ||
+      'source_changed' ||
+      'check_changed' ||
       'proposal_conflict' ||
       'credential_version_changed' => 8,
       'conflict' =>

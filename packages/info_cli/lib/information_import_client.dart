@@ -9,6 +9,7 @@ extension _InformationImportClient on AgentClient {
   Future<Map<String, dynamic>> _executeUpdateCommand(
     Map<String, dynamic> input, {
     required bool revise,
+    Map<String, ({String sha256, int byteLength})>? checkedSourceFiles,
   }) async {
     if (_session == null) return {'status': 'unauthorized'};
     if (input['update'] is! Map) return {'status': 'invalid_request'};
@@ -44,6 +45,7 @@ extension _InformationImportClient on AgentClient {
               ? 'update:${input['proposalId']}:${input['version']}'
               : 'update:${input['operationId'] ?? ''}',
           itemIndex: 0,
+          checkedSourceFiles: checkedSourceFiles,
         );
       }
       UpdateInput.fromJson(update);
@@ -68,6 +70,7 @@ extension _InformationImportClient on AgentClient {
     Object? input, {
     required String rootOperation,
     required int itemIndex,
+    Map<String, ({String sha256, int byteLength})>? checkedSourceFiles,
   }) async {
     if (input is! List || input.length > 50) {
       throw const _ImportFileClientFailure({'status': 'invalid_request'});
@@ -108,6 +111,7 @@ extension _InformationImportClient on AgentClient {
             version['filePath'] as String,
             operationId,
             mediaType: version['mediaType'] as String?,
+            checkedSourceFiles: checkedSourceFiles,
           );
           versions.add({
             'uploadId': upload['uploadId'],
@@ -133,6 +137,7 @@ extension _InformationImportClient on AgentClient {
     String path,
     String operationId, {
     String? mediaType,
+    Map<String, ({String sha256, int byteLength})>? checkedSourceFiles,
   }) async {
     final file = File(path);
     late List<int> bytes;
@@ -166,6 +171,14 @@ extension _InformationImportClient on AgentClient {
       throw const _ImportFileClientFailure({
         'status': 'invalid_information_file',
       });
+    }
+    if (checkedSourceFiles != null) {
+      final pin = checkedSourceFiles[path];
+      if (pin == null ||
+          pin.byteLength != bytes.length ||
+          pin.sha256 != sha256.convert(bytes).toString()) {
+        throw const _ImportFileClientFailure({'status': 'source_changed'});
+      }
     }
     final type = mediaType ?? ordinaryImportMediaType(path);
     final response = await _call('/import-file/submit', {

@@ -406,6 +406,12 @@ final class OnlineServer {
     // plus Base64 and bounded metadata. Ordinary management stays at 2 MiB.
     final limit = _authPaths.contains(request.uri.path)
         ? 8192
+        : const {
+            '/v1/agent/import/submit',
+            '/v1/agent/import/revise',
+            '/v1/agent/proposals/check',
+          }.contains(request.uri.path)
+        ? 6000000
         : request.uri.path == '/v1/owner/ssh-hosts/imports'
         ? 16 * 1024 * 1024
         : const {

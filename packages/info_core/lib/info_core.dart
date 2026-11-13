@@ -46,6 +46,7 @@ part 'organization_access.dart';
 part 'organization_task_access.dart';
 part 'history_access.dart';
 part 'import_access.dart';
+part 'proposal_precheck.dart';
 part 'proposal_password_operations.dart';
 part 'information_import_file_access.dart';
 part 'update_access.dart';

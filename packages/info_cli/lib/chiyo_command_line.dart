@@ -132,6 +132,9 @@ class ChiyoCommandLine {
         verb == 'check'
             ? '按实际模板检查内容并冻结模板版本；不提交或写入信息库。'
             : '提交已检查的内容；模板变化时须重新检查。',
+        example: verb == 'check'
+            ? 'chiyo proposals check --input proposal.json --json'
+            : 'chiyo proposals submit --check CHECK_ID --input proposal.json --json',
       );
       _input(proposal);
       proposal.addOption(
@@ -139,7 +142,10 @@ class ChiyoCommandLine {
         allowed: ['import', 'update', 'delete'],
         defaultsTo: 'import',
       );
-      if (verb == 'submit') _operation(proposal);
+      if (verb == 'submit') {
+        proposal.addOption('check', help: 'check 命令返回的检查编号，固定内容、文件和模板。');
+        _operation(proposal);
+      }
     }
     _command('proposals show', '查看本聊天提案的状态和入库结果。', argument: 'ID');
     final proposals = _command('proposals list', '列出本聊天的录入、修改和删除提案。');
@@ -333,6 +339,13 @@ class ChiyoCommandLine {
     number('offset', 0, 1000000);
     number('timeout', 0, 300);
     number('version', 1, 2147483647);
+    if (path == 'proposals submit' &&
+        options['check'] != null &&
+        !RegExp(
+          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+        ).hasMatch(options['check'] as String)) {
+      throw const ChiyoUsageFailure('--check 必须使用检查命令返回的编号。');
+    }
     if (options.options.contains('operation') &&
         options['operation'] != null &&
         !RegExp(
@@ -372,6 +385,7 @@ class ChiyoCommandLine {
       'proposals submit',
     }.contains(path)) {
       required('input');
+      if (path == 'proposals submit') required('check');
     } else if (path == 'credentials reveal request') {
       for (final key in ['credential', 'purpose', 'reason']) {
         required(key);

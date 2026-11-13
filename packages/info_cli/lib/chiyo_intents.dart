@@ -34,7 +34,7 @@ class ChiyoIntent {
     'kind': kind,
     'createdAt': createdAt.toUtc().toIso8601String(),
     'source': 'local-intent',
-    'state': 'unconfirmed',
+    'state': kind == 'proposal-check' ? 'checked' : 'unconfirmed',
   };
 }
 
@@ -57,10 +57,13 @@ class ChiyoIntentStore {
     'exec-request',
     'exec-run',
     'proposal-submit',
+    'proposal-check',
     'reveal-request',
     'reveal-read',
   };
   static const maxRecordBytes = 100 * 1024;
+  // Checks retain public template definitions, never source contents/material.
+  static const maxCheckBytes = 2 * 1024 * 1024;
   static const maxRecords = 1000;
   static const maxTotalBytes = 8 * 1024 * 1024;
   Directory get _folder => Directory('${root.path}/$scope');
@@ -101,7 +104,10 @@ class ChiyoIntentStore {
     try {
       final file = _file(id);
       if (!await _verify(root) || !await _verify(_folder)) return null;
-      final raw = await PrivateConnectionFiles.read(file);
+      final raw = await PrivateConnectionFiles.read(
+        file,
+        maxBytes: maxCheckBytes,
+      );
       if (raw == null) return null;
       if (raw.length != 8 ||
           raw['version'] != 1 ||
@@ -115,7 +121,11 @@ class ChiyoIntentStore {
                 'kind': raw['kind'],
                 'payload': raw['payload'],
               }) ||
-          raw['createdAt'] is! String) {
+          raw['createdAt'] is! String ||
+          utf8.encode(jsonEncode(raw)).length >
+              (raw['kind'] == 'proposal-check'
+                  ? maxCheckBytes
+                  : maxRecordBytes)) {
         throw const FormatException();
       }
       return ChiyoIntent(
@@ -166,7 +176,7 @@ class ChiyoIntentStore {
         'createdAt': DateTime.now().toUtc().toIso8601String(),
       };
       final size = utf8.encode(jsonEncode(raw)).length;
-      if (size > maxRecordBytes) {
+      if (size > (kind == 'proposal-check' ? maxCheckBytes : maxRecordBytes)) {
         throw const ChiyoIntentFailure('intent_too_large');
       }
       await _ensure(root);
@@ -212,7 +222,10 @@ class ChiyoIntentStore {
     try {
       final result = <ChiyoIntent>[];
       for (final file in await _records()) {
-        final raw = await PrivateConnectionFiles.read(file);
+        final raw = await PrivateConnectionFiles.read(
+          file,
+          maxBytes: maxCheckBytes,
+        );
         if (raw?['operationId'] is! String) throw const FormatException();
         final record = await read(raw!['operationId'] as String);
         if (record == null ||

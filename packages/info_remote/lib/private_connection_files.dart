@@ -7,13 +7,22 @@ import 'owner_client.dart';
 /// Private configuration only. Windows secrets use current-user DPAPI; POSIX
 /// files are staged under a private directory and atomically renamed.
 abstract final class PrivateConnectionFiles {
-  static Future<Map<String, dynamic>?> read(File file) async {
+  static Future<Map<String, dynamic>?> read(
+    File file, {
+    int maxBytes = 131072,
+  }) async {
     try {
+      if (maxBytes < 1 || maxBytes > 8 * 1024 * 1024) {
+        throw const RemoteFailure('invalid_profile');
+      }
       if (Platform.isWindows) {
-        final value = WindowsPrivateFiles.readSecret(file);
+        final value = WindowsPrivateFiles.readSecret(
+          file,
+          maxBytes: maxBytes + 4096,
+        );
         return value == null
             ? null
-            : decodeProtocolObject(value, maxBytes: 131072);
+            : decodeProtocolObject(value, maxBytes: maxBytes);
       }
       final type = await FileSystemEntity.type(file.path, followLinks: false);
       if (type == FileSystemEntityType.notFound) return null;
@@ -23,10 +32,13 @@ abstract final class PrivateConnectionFiles {
           (await file.parent.stat()).mode & 0xE3F != 0 ||
           type != FileSystemEntityType.file ||
           stat.mode & 0xE3F != 0 ||
-          stat.size > 131072) {
+          stat.size > maxBytes) {
         throw const RemoteFailure('invalid_profile');
       }
-      return decodeProtocolObject(await file.readAsString(), maxBytes: 131072);
+      return decodeProtocolObject(
+        await file.readAsString(),
+        maxBytes: maxBytes,
+      );
     } on Object {
       throw const RemoteFailure('invalid_profile');
     }

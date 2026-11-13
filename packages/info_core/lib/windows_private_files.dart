@@ -234,8 +234,8 @@ final class WindowsPrivateFiles {
     }
   }
 
-  static String? readSecret(File file) {
-    final bytes = read(file);
+  static String? readSecret(File file, {int maxBytes = 262144}) {
+    final bytes = read(file, maxBytes: maxBytes);
     if (bytes == null) return null;
     if (bytes.length < 5 ||
         List.generate(4, (i) => bytes[i] != _header[i]).contains(true)) {

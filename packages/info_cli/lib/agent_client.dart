@@ -152,6 +152,7 @@ class AgentClient {
   Future<Map<String, dynamic>> execute(
     Map<String, dynamic> input, {
     bool maintainDeviceState = true,
+    Map<String, ({String sha256, int byteLength})>? checkedSourceFiles,
   }) async {
     if (input['command'] == 'help' && input.length == 1) {
       return agentCommandHelp();
@@ -258,12 +259,14 @@ class AgentClient {
       return _executeCredentialCommand(input);
     }
     if (utf8.encode(jsonEncode(input)).length >
-        (command == 'credential-catalog' ||
+        (command == 'proposals-check' ||
                 command == 'import-submit' ||
-                command == 'import-revise' ||
-                command == 'update-submit' ||
-                command == 'update-revise' ||
-                command == 'organize-submit'
+                command == 'import-revise'
+            ? 6000000
+            : command == 'credential-catalog' ||
+                  command == 'update-submit' ||
+                  command == 'update-revise' ||
+                  command == 'organize-submit'
             ? 262144
             : 16384)) {
       return command == 'credential-catalog'
@@ -359,6 +362,16 @@ class AgentClient {
         return _call('/templates/catalog', {
           for (final key in ['packageId', 'offset', 'limit'])
             if (input.containsKey(key)) key: input[key],
+        });
+      case 'proposals-check':
+        if (_session == null) return {'status': 'unauthorized'};
+        if (input.keys.any((k) => !{'command', 'kind', 'input'}.contains(k))) {
+          return {'status': 'invalid_request'};
+        }
+        return _call('/proposals/check', {
+          'sessionSecret': _session,
+          'kind': input['kind'],
+          'input': input['input'],
         });
       case 'template-read':
         if (input.length != 2 || input['templateId'] is! String) {
@@ -479,7 +492,11 @@ class AgentClient {
           'proposalId': input['proposalId'],
         });
       case 'update-submit':
-        return _executeUpdateCommand(input, revise: false);
+        return _executeUpdateCommand(
+          input,
+          revise: false,
+          checkedSourceFiles: checkedSourceFiles,
+        );
       case 'update-status':
         if (_session == null) return {'status': 'unauthorized'};
         if (input.containsKey('operationId')) {
@@ -505,7 +522,11 @@ class AgentClient {
       case 'update-revise':
         return _executeUpdateCommand(input, revise: true);
       case 'import-submit':
-        return _executeImportCommand(input, revise: false);
+        return _executeImportCommand(
+          input,
+          revise: false,
+          checkedSourceFiles: checkedSourceFiles,
+        );
       case 'import-status':
         if (_session == null) return {'status': 'unauthorized'};
         if (input.containsKey('operationId')) {
