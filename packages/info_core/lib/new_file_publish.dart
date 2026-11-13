@@ -8,6 +8,33 @@ import 'package:ffi/ffi.dart';
 void publishNewDirectory(String source, String destination) =>
     publishNewFile(source, destination);
 
+/// Atomically replace a caller-validated ordinary file on the same volume.
+/// Unlike publishNewFile this explicitly permits replacing the target; callers
+/// must establish ownership/format first. Never delete the old file before move.
+Future<void> publishReplacingFile(String source, String destination) async {
+  if (source.contains('\x00') || destination.contains('\x00')) {
+    throw const FileSystemException('Invalid destination');
+  }
+  if (!Platform.isWindows) {
+    await File(source).rename(destination);
+    return;
+  }
+  final move = DynamicLibrary.open('Kernel32.dll')
+      .lookupFunction<
+        Int32 Function(Pointer<Utf16>, Pointer<Utf16>, Uint32),
+        int Function(Pointer<Utf16>, Pointer<Utf16>, int)
+      >('MoveFileExW');
+  final from = source.toNativeUtf16(), to = destination.toNativeUtf16();
+  try {
+    if (move(from, to, 8 | 1) == 0) {
+      throw const FileSystemException('File publication failed');
+    }
+  } finally {
+    calloc.free(from);
+    calloc.free(to);
+  }
+}
+
 /// Same-volume no-replace publication of a closed, verified ordinary file or
 /// encrypted backup. Never fall back to an overwriting rename or copy.
 void publishNewFile(String source, String destination) {

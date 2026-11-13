@@ -12,6 +12,7 @@ void main() {
     bundle = Directory('${root.path}/中文 bundle \' \u0024()');
     await bundle.create();
     for (final name in [
+      'chiyo',
       'info-codex',
       'info-codex-hook',
       'info-runtime-worker',
@@ -34,13 +35,13 @@ void main() {
     'explicit registration discovers the complete reviewed Skill and publishes public paths and hashes only',
     () async {
       final result = await registerCodexRuntime(bundle, descriptor: descriptor);
-      expect(result['schemaVersion'], 1);
+      expect(result['schemaVersion'], 2);
       expect(
         result['cliPath'],
-        '${await bundle.resolveSymbolicLinks()}/info-codex$suffix',
+        '${await bundle.resolveSymbolicLinks()}/chiyo$suffix',
       );
       expect(result['skillPath'], endsWith('/template/SKILL.md'));
-      expect((result['files'] as List).length, 5);
+      expect((result['files'] as List).length, 6);
       expect(jsonEncode(result), isNot(contains('PRIVATE-SYNTHETIC')));
       expect(jsonDecode(await descriptor.readAsString()), result);
       expect(
@@ -94,6 +95,31 @@ void main() {
     );
     expect(await descriptor.readAsString(), 'PRIVATE-EXISTING-FILE');
   });
+  test(
+    'a complete old descriptor upgrades to the unified CLI without changing old binary roles',
+    () async {
+      await descriptor.parent.create();
+      await descriptor.writeAsString(
+        jsonEncode({
+          'schemaVersion': 1,
+          'cliPath': '${bundle.path}/info-codex$suffix',
+          'files': <Object>[],
+        }),
+      );
+      final result = await registerCodexRuntime(bundle, descriptor: descriptor);
+      expect(result['schemaVersion'], 2);
+      expect(result['cliPath'], endsWith('/chiyo$suffix'));
+      expect(result['legacyCliPath'], endsWith('/info-codex$suffix'));
+      expect(result['hookPath'], endsWith('/info-codex-hook$suffix'));
+      final before = await descriptor.readAsBytes();
+      await File('${bundle.path}/chiyo$suffix').delete();
+      await expectLater(
+        registerCodexRuntime(bundle, descriptor: descriptor),
+        throwsFormatException,
+      );
+      expect(await descriptor.readAsBytes(), before);
+    },
+  );
   test(
     'redirected documentation and registry files cannot read or replace private files',
     () async {

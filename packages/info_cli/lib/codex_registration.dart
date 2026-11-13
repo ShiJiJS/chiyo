@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:info_core/new_file_publish.dart';
 
 String codexRegistrationPath() {
   if (Platform.isMacOS) {
@@ -29,6 +30,7 @@ Future<Map<String, Object?>> registerCodexRuntime(
   final root = Directory(await bundle.resolveSymbolicLinks());
   final suffix = Platform.isWindows ? '.exe' : '';
   final binaries = [
+    'chiyo$suffix',
     'info-codex$suffix',
     'info-codex-hook$suffix',
     'info-runtime-worker$suffix',
@@ -94,11 +96,12 @@ Future<Map<String, Object?>> registerCodexRuntime(
     });
   }
   final registration = <String, Object?>{
-    'schemaVersion': 1,
+    'schemaVersion': 2,
     'bundleDirectory': root.path,
     'cliPath': '${root.path}/${binaries[0]}',
-    'hookPath': '${root.path}/${binaries[1]}',
-    'workerPath': '${root.path}/${binaries[2]}',
+    'legacyCliPath': '${root.path}/${binaries[1]}',
+    'hookPath': '${root.path}/${binaries[2]}',
+    'workerPath': '${root.path}/${binaries[3]}',
     'skillPath': '${root.path}/$skillRelative',
     'files': rows,
   };
@@ -117,11 +120,20 @@ Future<Map<String, Object?>> registerCodexRuntime(
     }
     final old = jsonDecode(await target.readAsString());
     if (old is! Map ||
-        old['schemaVersion'] != 1 ||
+        !{1, 2}.contains(old['schemaVersion']) ||
         old['files'] is! List ||
         old['cliPath'] is! String) {
       throw const FormatException('Not an existing runtime descriptor');
     }
+    if (jsonEncode(old) == jsonEncode(registration)) return registration;
+  }
+  final parentType = await FileSystemEntity.type(
+    target.parent.path,
+    followLinks: false,
+  );
+  if (parentType != FileSystemEntityType.notFound &&
+      parentType != FileSystemEntityType.directory) {
+    throw const FormatException('Unsafe descriptor directory');
   }
   await target.parent.create(recursive: true);
   if (!Platform.isWindows) {
@@ -140,20 +152,7 @@ Future<Map<String, Object?>> registerCodexRuntime(
       '${const JsonEncoder.withIndent('  ').convert(registration)}\n',
       flush: true,
     );
-    if (Platform.isWindows && await target.exists()) {
-      // Windows registration is additive to the existing installer contract.
-      // Keep its prior contents if replacement cannot be completed.
-      final old = await target.readAsBytes();
-      await target.delete();
-      try {
-        await pending.rename(target.path);
-      } on Object {
-        await target.writeAsBytes(old, flush: true);
-        rethrow;
-      }
-    } else {
-      await pending.rename(target.path);
-    }
+    await publishReplacingFile(pending.path, target.path);
   } finally {
     if (await stage.exists()) await stage.delete(recursive: true);
   }

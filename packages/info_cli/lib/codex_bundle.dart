@@ -64,7 +64,7 @@ Future<void> writeCodexConfiguration(
   final skill = Directory('${output.path}/skills/agent-info-access');
   await skill.create(recursive: true);
   await File('${skill.path}/SKILL.md').writeAsString(
-    '$skillSource\nBundle executable: `${bundle.path}/info-codex$suffix`.\n'
+    '$skillSource\nBundle executable: `${bundle.path}/chiyo$suffix`.\n'
     '${connectionFile == null ? '' : 'Connection profile: `$connectionFile`.\n'}'
     '${stateRoot == null ? '' : 'Session state directory: `$stateRoot`.\n'}',
   );

@@ -32,6 +32,11 @@ import 'info_core.dart'
         CredentialRuntimeRepository,
         CredentialUseRequest,
         CredentialExecution,
+        CredentialBatchRepository,
+        CredentialUseBatch,
+        CredentialBatchOperation,
+        CredentialUseFailure,
+        validateCredentialBatchCommit,
         FocusedFillRuntimeRepository,
         FocusedFillOperation,
         InformationAttachmentRepository,
@@ -65,6 +70,7 @@ part 'memory_classification_operations.dart';
 part 'memory_library_recycle.dart';
 part 'memory_library_move.dart';
 part 'memory_information_purge.dart';
+part 'memory_credential_batches.dart';
 
 enum FieldKind { structured, textNote, file }
 
@@ -457,6 +463,7 @@ class MemoryInformationRepository
         LibraryRecycleRepository,
         CredentialRepository,
         CredentialRuntimeRepository,
+        CredentialBatchRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
         InformationImportFileRepository,
@@ -468,6 +475,28 @@ class MemoryInformationRepository
         InformationPurgeRepository,
         InformationClassificationRepository,
         SshHostTrustRepository {
+  final _credentialBatches = <String, CredentialUseBatch>{};
+  final _credentialBatchOperations = <String, CredentialBatchOperation>{};
+  @override
+  List<CredentialUseBatch> get credentialBatches =>
+      List.unmodifiable(_credentialBatches.values);
+  @override
+  List<CredentialBatchOperation> get credentialBatchOperations =>
+      List.unmodifiable(_credentialBatchOperations.values);
+  @override
+  Future<void> commitCredentialBatch(
+    CredentialUseBatch request, {
+    required int expectedRevision,
+    required void Function() validate,
+    CredentialBatchOperation? operation,
+    int? expectedOperationRevision,
+  }) => _commitCredentialBatch(
+    request,
+    expectedRevision: expectedRevision,
+    validate: validate,
+    operation: operation,
+    expectedOperationRevision: expectedOperationRevision,
+  );
   @override
   Future<void> commitInformationPurge(InformationPurgeChange change) async =>
       _commitPurge(change);
