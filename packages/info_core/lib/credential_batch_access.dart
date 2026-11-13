@@ -569,6 +569,12 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
       _service._batchRepository.credentialBatches;
   List<CredentialBatchOperation> get credentialBatchOperations =>
       _service._batchRepository.credentialBatchOperations;
+  Map<String, Object?> credentialBatchOperationView(
+    CredentialBatchOperation operation,
+  ) => {
+    ..._service._batchOperationForDisplay(operation).toPublicJson(),
+    'revision': operation.revision,
+  };
   String credentialBatchState(CredentialUseBatch r) => _service._batchState(r);
   String credentialBatchItemState(
     CredentialUseBatch r,

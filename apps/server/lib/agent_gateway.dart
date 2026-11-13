@@ -1,5 +1,6 @@
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/credential_batch_protocol.dart';
 import 'agent_devices.dart';
 import 'device_credential_routes.dart';
 
@@ -100,11 +101,15 @@ final class AgentGateway {
     } else if (DeviceCredentialRoutes.proofPaths.contains(path)) {
       capabilities.add(
         AgentDeviceCapability(
-          path.startsWith('/credential-use/device/fill/')
+          CredentialBatchProtocol.proofPaths.contains(path)
+              ? 'credential-batch'
+              : path.startsWith('/credential-use/device/fill/')
               ? 'credential-fill'
               : 'credential-execution',
           text(
-            path.startsWith('/credential-use/device/fill/')
+            CredentialBatchProtocol.proofPaths.contains(path)
+                ? 'privateProof'
+                : path.startsWith('/credential-use/device/fill/')
                 ? 'fillCapability'
                 : 'executionCapability',
           ),
@@ -127,6 +132,9 @@ final class AgentGateway {
       result = await _protocol.dispatch(path, body);
     }
     final minted = <AgentDeviceCapability>[
+      if (path == '${CredentialBatchProtocol.base}/begin')
+        if (result['privateProof'] case final String proof)
+          AgentDeviceCapability('credential-batch', proof),
       if (path == '/credential-use/device/fill/begin')
         if (result['fillCapability'] case final String proof)
           AgentDeviceCapability('credential-fill', proof),
@@ -162,6 +170,14 @@ final class AgentGateway {
         // Files and credentials follow their own tickets.
         'capabilities': [
           'information-request-operations.v1',
+          if ((result['capabilities'] as List).contains(
+            'agent-record-queries.v1',
+          ))
+            'agent-record-queries.v1',
+          if ((result['capabilities'] as List).contains(
+            'credential-catalog-search.v1',
+          ))
+            'credential-catalog-search.v1',
           'submission-metadata.v1',
           if ((result['capabilities'] as List).contains('credential-reveal.v1'))
             'credential-reveal.v1',

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'info_core.dart';
 import 'protocol_json.dart';
+import 'credential_batch_protocol.dart';
 
 class _CredentialRequestFailure implements Exception {
   const _CredentialRequestFailure(this.code, [this.fieldPath]);
@@ -57,6 +58,7 @@ class AgentServer extends AgentProtocol {
     bool reusable,
     bool focused,
     bool files,
+    bool batches,
     Future<List<CredentialToolLocation>> Function()? credentialTools,
     this._connectionToken,
     this._libraryId,
@@ -66,6 +68,9 @@ class AgentServer extends AgentProtocol {
         enableReusableCredentialUse: reusable,
         enableFocusedFill: focused,
         enableInformationFiles: files,
+        enableCredentialBatches: batches,
+        credentialBatchDeviceId:
+            _connectionToken?.split('.').first ?? 'local-device-0000000000',
         credentialTools: credentialTools,
       ) {
     _server.listen(_handle);
@@ -80,6 +85,7 @@ class AgentServer extends AgentProtocol {
     bool enableReusableCredentialUse = false,
     bool enableFocusedFill = false,
     bool enableInformationFiles = false,
+    bool enableCredentialBatches = false,
     Future<List<CredentialToolLocation>> Function()? credentialTools,
     String? connectionToken,
     String? libraryId,
@@ -100,6 +106,7 @@ class AgentServer extends AgentProtocol {
       enableReusableCredentialUse,
       enableFocusedFill,
       enableInformationFiles,
+      enableCredentialBatches,
       credentialTools,
       connectionToken,
       libraryId,
@@ -130,7 +137,8 @@ class AgentServer extends AgentProtocol {
     Map<String, Object?> result;
     final runtime = request.uri.path.startsWith('/credential-use/');
     final informationFile = request.uri.path.startsWith('/information-file/');
-    var protocolVersion = 1;
+    var protocolVersion =
+        request.uri.path.startsWith('${CredentialBatchProtocol.base}/') ? 3 : 1;
     if (_libraryId != null) {
       request.response.headers.set('x-chiyo-server-id', _libraryId);
     }
@@ -194,7 +202,11 @@ class AgentServer extends AgentProtocol {
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
-      if (body['protocolVersion'] == 2) protocolVersion = 2;
+      if (request.uri.path.startsWith('${CredentialBatchProtocol.base}/')) {
+        protocolVersion = 3;
+      } else if (body['protocolVersion'] == 2) {
+        protocolVersion = 2;
+      }
       result = await _dispatch(request.uri.path, body);
     } on InformationFileFailure catch (error) {
       result = error.toJson();
@@ -245,6 +257,9 @@ class AgentServer extends AgentProtocol {
         result['operationClaimed'] = result.remove('attemptConsumed');
       }
     }
+    if (runtime && protocolVersion == 3) {
+      result = {...result, 'protocolVersion': 3};
+    }
     request.response.headers.contentType = ContentType.json;
     request.response.headers.set('Cache-Control', 'no-store');
     request.response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -272,6 +287,8 @@ class AgentProtocol {
     this.enableReusableCredentialUse = false,
     this.enableFocusedFill = false,
     this.enableInformationFiles = false,
+    this.enableCredentialBatches = false,
+    this.credentialBatchDeviceId = 'local-device-0000000000',
     Future<List<CredentialToolLocation>> Function()? credentialTools,
   }) : _credentialExecutionHandler = credentialExecutionHandler,
        _credentialTools = credentialTools;
@@ -287,6 +304,10 @@ class AgentProtocol {
 
   /// Off until storage, file driver and owner UI are connected by the host.
   final bool enableInformationFiles;
+
+  /// Kept off until the host connects v3 approvals and the private App executor.
+  final bool enableCredentialBatches;
+  final String credentialBatchDeviceId;
   bool get _informationFilesEnabled =>
       enableReusableCredentialUse &&
       enableInformationFiles &&
@@ -305,6 +326,15 @@ class AgentProtocol {
     String path,
     Map<String, dynamic> body,
   ) async {
+    if (CredentialBatchProtocol.handles(path)) {
+      if (!enableCredentialBatches) {
+        throw const CredentialUseFailure('unsupported_capability');
+      }
+      return CredentialBatchProtocol(
+        _agent,
+        credentialBatchDeviceId,
+      ).dispatch(path, body);
+    }
     if (const {
       '/request',
       '/credential-use/request',

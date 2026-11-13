@@ -25,6 +25,7 @@ import 'owner_proposal_routes.dart';
 import 'owner_library_routes.dart';
 import 'owner_file_routes.dart';
 import 'owner_credential_routes.dart';
+import 'owner_credential_batch_routes.dart';
 import 'owner_host_routes.dart';
 import 'owner_history_routes.dart';
 import 'owner_backup_routes.dart';
@@ -498,6 +499,20 @@ final class OnlineServer {
                   ],
               ],
               [
+                for (final r in owner.credentialBatches)
+                  [
+                    r.id,
+                    r.revision,
+                    owner.credentialBatchState(r),
+                    for (final item in r.items)
+                      [item.id, owner.credentialBatchItemState(r, item)],
+                  ],
+              ],
+              [
+                for (final op in owner.credentialBatchOperations)
+                  owner.credentialBatchOperationView(op),
+              ],
+              [
                 for (final e in owner.credentialExecutions)
                   [e.id, e.state, e.cleanupState, e.exitCode],
               ],
@@ -562,6 +577,20 @@ final class OnlineServer {
                     owner.credentialFieldGrantState(r, forReview: true),
                     owner.credentialUseDecisionUnconfirmed(r),
                   ],
+              ],
+              [
+                for (final r in owner.credentialBatches)
+                  [
+                    r.id,
+                    r.revision,
+                    owner.credentialBatchState(r),
+                    for (final item in r.items)
+                      [item.id, owner.credentialBatchItemState(r, item)],
+                  ],
+              ],
+              [
+                for (final op in owner.credentialBatchOperations)
+                  owner.credentialBatchOperationView(op),
               ],
               [
                 for (final e in owner.credentialExecutions)
@@ -806,6 +835,12 @@ final class OnlineServer {
             path,
             parsedBody,
           );
+          await reply(code, value);
+        } else if (path.length >= 3 &&
+            path.take(3).join('/') == 'v1/owner/credential-batches') {
+          final (code, value) = await OwnerCredentialBatchRoutes(
+            _service.owner,
+          ).dispatch(request.method, path, parsedBody);
           await reply(code, value);
         } else if (path.length >= 3 &&
             path.take(3).join('/') == 'v1/owner/credentials') {
@@ -1085,10 +1120,12 @@ final class OnlineServer {
           request.uri.path.startsWith('/v1/agent/') ? 200 : 400,
           e.toJson(
             protocolVersion:
-                parsedBody?['protocolVersion'] == 2 ||
-                    request.uri.path.startsWith(
-                      '/v1/agent/credential-use/device/',
-                    )
+                request.uri.path.startsWith('/v1/agent/credential-use/batch/')
+                ? 3
+                : parsedBody?['protocolVersion'] == 2 ||
+                      request.uri.path.startsWith(
+                        '/v1/agent/credential-use/device/',
+                      )
                 ? 2
                 : 1,
           ),
