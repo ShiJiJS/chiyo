@@ -12,7 +12,10 @@ import 'workspace_files.dart';
 /// Requests still originate in Agent transport; this source never retains values,
 /// private session proofs or read tokens.
 class OwnerWorkspaceApprovals
-    implements WorkspaceApprovalSource, WorkspaceCredentialBatchActions {
+    implements
+        WorkspaceApprovalSource,
+        WorkspaceCredentialBatchActions,
+        WorkspaceCredentialProgramActions {
   OwnerWorkspaceApprovals({required this.owner})
     : _scope = owner.captureLibraryScope(),
       _additional = OwnerWorkspaceAdditionalApprovals(owner);
@@ -488,6 +491,15 @@ class OwnerWorkspaceApprovals
     String operationId,
   ) => _read(() => _additional.execution(requestId, operationId));
 
+  @override
+  Future<WorkspaceCredentialProgramOperation> programOperation(
+    String requestId,
+    String operationId,
+  ) => _read(
+    () async => OwnerWorkspaceCredentialBatches(
+      owner,
+    ).programOperation(requestId, operationId),
+  );
   @override
   Future<WorkspaceCredentialBatchOperation> batchOperation(
     String requestId,

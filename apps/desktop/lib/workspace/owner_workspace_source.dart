@@ -280,6 +280,10 @@ class OwnerWorkspaceSource
                   owner.credentialBatchOperationView(op),
               ],
               [
+                for (final operation in owner.credentialProgramOperations)
+                  owner.credentialProgramOperationView(operation),
+              ],
+              [
                 for (final e in owner.credentialExecutions)
                   [
                     e.id,

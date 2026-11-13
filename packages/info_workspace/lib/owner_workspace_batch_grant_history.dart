@@ -43,9 +43,13 @@ extension _BatchGrantHistory on OwnerWorkspaceGrantHistory {
         chatClaim: core.submissionChatLabel(r.chatLabel, r.externalChatId),
         purpose: r.purpose,
         recordedAt: r.decisions.lastOrNull?.at ?? r.createdAt,
-        operationCount: owner.credentialBatchOperations
-            .where((o) => o.requestId == r.id)
-            .length,
+        operationCount: r.programPlan != null
+            ? owner.credentialProgramOperations
+                  .where((operation) => operation.requestId == r.id)
+                  .length
+            : owner.credentialBatchOperations
+                  .where((o) => o.requestId == r.id)
+                  .length,
       );
 
   String _batchResult(String state) =>
@@ -55,6 +59,12 @@ extension _BatchGrantHistory on OwnerWorkspaceGrantHistory {
     final operations = owner.credentialBatchOperations
         .where((o) => o.requestId == r.id)
         .toList();
+    final programs = r.programPlan == null
+        ? <WorkspaceCredentialProgramOperation>[]
+        : owner.credentialProgramOperations
+              .where((operation) => operation.requestId == r.id)
+              .map(OwnerWorkspaceCredentialBatches(owner).programOperationView)
+              .toList();
     final pending = operations
         .where(
           (o) =>
@@ -73,8 +83,22 @@ extension _BatchGrantHistory on OwnerWorkspaceGrantHistory {
               d.at,
               index == 0 ? '用户审批凭据使用' : '撤销凭据使用许可',
               index == 0
-                  ? '批准${r.items.where((i) => i.decision != core.CredentialBatchItemDecision.denied).length}项，拒绝${r.items.where((i) => i.decision == core.CredentialBatchItemDecision.denied).length}项。批准不代表已填写。'
-                  : '已撤销的范围不能继续使用，既有填写结果仍保留。',
+                  ? '批准${r.items.where((i) => i.decision != core.CredentialBatchItemDecision.denied).length}项，拒绝${r.items.where((i) => i.decision == core.CredentialBatchItemDecision.denied).length}项。${r.programPlan == null ? '批准不代表已填写。' : '批准不代表程序已启动。'}'
+                  : '已撤销的范围不能继续使用，既有使用结果仍保留。',
+            ),
+          for (final operation in programs)
+            WorkspaceGrantEvent(
+              'program-operation:${operation.operationId}',
+              operation.finishedAt ?? operation.createdAt,
+              '运行 ${operation.plan.executable.split(RegExp(r'[/\\]')).last}',
+              [
+                operation.resultLabel,
+                operation.cleanupLabel,
+                if (operation.errorLabel != null && !operation.fromBackup)
+                  operation.errorLabel!,
+                '使用${operation.itemIds.map((id) => names[id] ?? '凭据').toSet().join('、')}',
+                if (operation.fromBackup) '来自备份的执行历史。',
+              ].join('\n'),
             ),
           for (final operation in operations)
             (() {
@@ -146,7 +170,11 @@ extension _BatchGrantHistory on OwnerWorkspaceGrantHistory {
           ),
       ],
       events: events,
-      scopeNotice: pending == 0
+      scopeNotice: r.archived
+          ? null
+          : programs.any((operation) => operation.state == 'unknown')
+          ? '有程序执行结果未确认。请查询原操作，不要重新启动。'
+          : pending == 0
           ? null
           : '有$pending次填写结果需要核对。请打开对应申请查看详情；不会自动再次填写。',
     );

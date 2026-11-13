@@ -40,7 +40,9 @@ class OwnerWorkspaceCredentialBatches {
     core.CredentialUseBatch r,
   ) => WorkspaceApprovalSummary(
     id: r.id,
-    title: r.items.length == 1
+    title: r.programPlan != null
+        ? '${r.programPlan!.path.split(RegExp(r'[/\\]')).last} · 程序使用'
+        : r.items.length == 1
         ? '${r.items.single.credentialName} · 凭据使用'
         : '${r.items.length}份凭据使用申请',
     kind: WorkspaceApprovalKind.credential,
@@ -83,6 +85,54 @@ class OwnerWorkspaceCredentialBatches {
     'attentionOperationId': operation.attentionOperationId,
     'fromBackup': r.archived,
   });
+  WorkspaceCredentialProgramOperation programOperationView(
+    core.CredentialProgramOperation operation,
+  ) {
+    final view = owner.credentialProgramOperationView(operation);
+    return WorkspaceCredentialProgramOperation.fromJson({
+      'kind': 'program',
+      'requestId': operation.requestId,
+      'operationId': operation.operationId,
+      'revision': operation.revision,
+      'programPlan': operation.plan.toJson(),
+      'itemIds': operation.itemIds,
+      for (final key in [
+        'executionState',
+        'createdAt',
+        'observedAt',
+        'startedAt',
+        'finishedAt',
+        'processStarted',
+        'cleanupState',
+        'exitCode',
+        'errorCode',
+      ])
+        key: view[key],
+      'fromBackup': operation.archived,
+    });
+  }
+
+  WorkspaceCredentialProgramOperation programOperation(
+    String requestId,
+    String operationId,
+  ) {
+    final request = _request(requestId);
+    if (request.programPlan == null) {
+      throw const WorkspaceFailure('not_found', '这不是程序使用申请。');
+    }
+    final operation = owner.credentialProgramOperations
+        .where(
+          (operation) =>
+              operation.requestId == requestId &&
+              operation.operationId == operationId,
+        )
+        .firstOrNull;
+    if (operation == null) {
+      throw const WorkspaceFailure('not_found', '未找到这次程序执行记录。');
+    }
+    return programOperationView(operation);
+  }
+
   WorkspaceCredentialBatchOperation operation(
     String requestId,
     String operationId,
@@ -185,6 +235,18 @@ class OwnerWorkspaceCredentialBatches {
       reviewToken: reviewToken(id),
       scopes: scopes,
       credentialBatch: true,
+      programPlan: r.programPlan == null
+          ? null
+          : WorkspaceCredentialProgramPlan.fromJson(
+              Map<String, dynamic>.from(r.programPlan!.toJson()),
+            ),
+      programOperations: r.programPlan == null
+          ? const []
+          : [
+              for (final operation in owner.credentialProgramOperations)
+                if (operation.requestId == r.id)
+                  programOperationView(operation),
+            ],
       batchOperations: [
         for (final o in owner.credentialBatchOperations)
           if (o.requestId == r.id) operationView(r, o),
@@ -258,7 +320,7 @@ class OwnerWorkspaceCredentialBatches {
                       i.decision == core.CredentialBatchItemDecision.approved,
                 ),
               ))) {
-      throw const WorkspaceFailure('invalid_scope', '请核对凭据、填写位置和使用期限。');
+      throw const WorkspaceFailure('invalid_scope', '请核对凭据、使用位置和期限。');
     }
     try {
       if (change.action == WorkspaceApprovalAction.revoke) {

@@ -37,6 +37,16 @@ final class OwnerCredentialBatchRoutes {
         if (operation.requestId == request.id)
           owner.credentialBatchOperationView(operation),
     ],
+    if (request.programPlan != null) ...{
+      'programPlan': request.programPlan!.toJson(),
+      'programOperations': [
+        for (final operation in owner.credentialProgramOperations)
+          if (operation.requestId == request.id)
+            OwnerWorkspaceCredentialBatches(
+              owner,
+            ).programOperationView(operation).toJson(),
+      ],
+    },
   };
 
   void _shape(Map<String, dynamic>? body, Set<String> keys) {
@@ -75,11 +85,12 @@ final class OwnerCredentialBatchRoutes {
     if (request == null) return (404, {'error': 'not_found'});
     if (method == 'GET' && path.length == 4) return (200, _view(request));
     if (method == 'GET' && path.length == 6 && path[4] == 'operations') {
+      final source = OwnerWorkspaceCredentialBatches(owner);
       return (
         200,
-        OwnerWorkspaceCredentialBatches(
-          owner,
-        ).operation(request.id, path[5]).toJson(),
+        request.programPlan == null
+            ? source.operation(request.id, path[5]).toJson()
+            : source.programOperation(request.id, path[5]).toJson(),
       );
     }
     if (method == 'POST' && path.length == 5 && path.last == 'decide') {

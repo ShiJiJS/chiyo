@@ -7,6 +7,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_workspace/approval_transport.dart';
+import 'package:info_workspace/history_transport.dart';
 import 'package:info_workspace/workspace_source.dart';
 import 'package:test/test.dart';
 import 'support/device_credential_fixture.dart';
@@ -218,6 +219,25 @@ void main() {
       ]);
       expect(run.exitCode, 0, reason: run.render());
       await trial.wait('one-program', {'running'});
+      Future<WorkspaceApprovalDetail> detail() async => approvalDetailFromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
+        ),
+      );
+      final runningDetail = await detail();
+      final running = runningDetail.programOperations.single;
+      expect(running.state, 'running');
+      expect(running.processStarted, true);
+      expect((await detail()).batchOperations, isEmpty);
+      expect(
+        (await detail()).programPlan!.executable,
+        trial.launch['executable'],
+      );
+      expect(
+        () => approvalDetailToJson(runningDetail, version: 3),
+        throwsA(isA<WorkspaceFailure>()),
+      );
       for (var i = 0; i < 200; i++) {
         if (await trial.counter.exists() &&
             await trial.counter.readAsString() == 'start\n')
@@ -254,6 +274,33 @@ void main() {
       });
       expect(ended['executionState'], 'exited', reason: '$ended');
       expect(ended['exitCode'], 0, reason: '$ended');
+      final ownerOperation = WorkspaceCredentialProgramOperation.fromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/credential-batches/${Uri.encodeComponent(id)}/operations/one-program',
+        ),
+      );
+      expect(ownerOperation.state, 'exited');
+      expect(ownerOperation.updates(running), true);
+      final history = grantDetailFromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/grant-history/entries/${Uri.encodeComponent('request:$id')}',
+        ),
+      );
+      expect(history.summary.operationCount, 1);
+      expect(
+        history.events.any((event) => event.result.contains('退出码 0')),
+        true,
+      );
+      expect(
+        history.events.any((event) => event.description.contains('运行')),
+        true,
+      );
+      expect(
+        jsonEncode(approvalDetailToJson(await detail(), version: 4)),
+        isNot(contains('SYNTHETIC_DB_')),
+      );
       final output = await trial.call([
         'exec',
         'output',
@@ -488,6 +535,78 @@ void main() {
         _stream(output.output['data'] as Map, 'stdout'),
         contains('"stdinExact":true'),
       );
+    },
+    skip: !Platform.isMacOS && !Platform.isWindows,
+  );
+
+  test(
+    'portable backup keeps program history readable through ordinary owner APIs without restoring a usable grant',
+    () async {
+      final f = await DeviceCredentialFixture.create(
+        loseFirstPath: '/v1/agent/credential-use/program/begin',
+      );
+      final trial = _ProgramTrial(f);
+      await trial.open();
+      addTearDown(() async {
+        await trial.close();
+        await f.dispose();
+      });
+      final id = await trial.request();
+      await trial.approve(id, ['b1', 'b2', 'b3', 'b4']);
+      expect(
+        (await trial.call([
+          'exec',
+          'run',
+          '--request',
+          id,
+          '--operation',
+          'archive-program',
+        ])).exitCode,
+        7,
+      );
+      final recovery = await f.runtime.run(() => f.repo.backups.enable());
+      final archive = '${f.root.path}/program-history.aimbackup';
+      await f.runtime.run(() async {
+        await f.repo.backups.saveRecoveryKeyTo('${f.root.path}/recovery.key');
+        await f.runtime.service.owner.exportLibrary(
+          () => f.repo.backups.exportTo(archive),
+        );
+      });
+      final target = await DeviceCredentialFixture.create();
+      addTearDown(target.dispose);
+      await target.runtime.run(
+        () => target.runtime.service.owner.restoreLibrary(
+          () => target.repo.backups.restoreFrom(archive, recovery),
+        ),
+      );
+      final detail = approvalDetailFromJson(
+        await target.owner.request(
+          'GET',
+          '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
+        ),
+      );
+      expect(detail.programOperations.single.fromBackup, true);
+      expect(detail.programOperations.single.state, 'unknown');
+      expect(detail.scopes.every((scope) => !scope.available), true);
+      expect(detail.canApprove, false);
+      final history = grantDetailFromJson(
+        await target.owner.request(
+          'GET',
+          '/v1/owner/grant-history/entries/${Uri.encodeComponent('request:$id')}',
+        ),
+      );
+      expect(history.summary.state, WorkspaceGrantState.unavailable);
+      expect(history.summary.operationCount, 1);
+      expect(history.scopeNotice, null);
+      expect(
+        history.events.any((event) => event.result.contains('来自备份')),
+        true,
+      );
+      expect(
+        jsonEncode(approvalDetailToJson(detail, version: 4)),
+        isNot(contains('SYNTHETIC_DB_')),
+      );
+      expect(await trial.counter.exists(), false);
     },
     skip: !Platform.isMacOS && !Platform.isWindows,
   );

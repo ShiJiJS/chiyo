@@ -94,6 +94,19 @@ class ApprovalsController extends ChangeNotifier {
     );
   }
 
+  Future<void> refreshProgramOperation(String id) async {
+    final actions = source;
+    if (actions is! WorkspaceCredentialProgramActions) return;
+    await _refreshOperation<WorkspaceCredentialProgramOperation>(
+      id,
+      detail?.programOperations.where((o) => o.operationId == id).firstOrNull,
+      (request) => (actions as WorkspaceCredentialProgramActions)
+          .programOperation(request, id),
+      (next, old) => next.updates(old),
+      (next) => detail = detail!.withProgramOperation(next),
+    );
+  }
+
   Future<void> _refreshOperation<T>(
     String id,
     T? old,

@@ -8,6 +8,7 @@ import 'library_widgets.dart';
 import 'approvals_controller.dart';
 import 'approval_executions.dart';
 import 'approval_directory_location.dart';
+import 'program_plan.dart';
 import 'workspace_source.dart';
 
 class ApprovalsPage extends StatefulWidget {
@@ -320,7 +321,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
 
   Future<void> _tip(BuildContext context) async {
     final r = model.detail!.request;
-    final text = model.detail!.credentialBatch
+    final text = model.detail!.programPlan != null
+        ? '批准固定程序、凭据版本和接收位置。有效期内，AI 可以调整业务参数和工作目录再次使用；不代表只允许上方显示的这一条命令。所需凭据全部有效才启动，程序在 AI 所在电脑运行。批准不会立即启动程序，查询原结果不会再次运行。'
+        : model.detail!.credentialBatch
         ? '每项凭据固定版本、填写方式和目标。可以只批准部分；AI执行一次操作所需的凭据必须全部获准。批准不会自动填写，填写不会自动提交登录。'
         : switch (r.kind) {
             WorkspaceApprovalKind.information =>
@@ -659,11 +662,25 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             d.request.purpose,
             style: libraryText(context, 14, height: 1.95),
           ),
+          if (d.programPlan != null)
+            _section(
+              context,
+              '申请的程序',
+              ProgramPlan(
+                plan: d.programPlan!,
+                names: {
+                  for (final scope in d.scopes)
+                    scope.record.id: scope.recordName,
+                },
+              ),
+            ),
           _section(context, '申请范围', _scopes(context)),
           _section(
             context,
             d.request.kind == WorkspaceApprovalKind.organization
                 ? '整理范围'
+                : d.programPlan != null
+                ? '程序接收方式'
                 : d.credentialBatch
                 ? '凭据填写方式'
                 : d.credential == null
@@ -685,7 +702,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   _credential(context, d.credential!)
                 else
                   Text(
-                    d.credentialBatch
+                    d.programPlan != null
+                        ? '凭据只交给上方程序的指定位置。批准固定程序和接收位置，业务参数及工作目录可以调整；每次启动前检查所需的批准。程序在 AI 所在电脑运行。'
+                        : d.credentialBatch
                         ? '只在上方指定的位置使用勾选的凭据。批准后由 AI 发起填写，每次填写分别记录结果。'
                         : d.request.kind == WorkspaceApprovalKind.organization
                         ? '只读限定资料的元数据，并允许自动调整目录与标签；不读取字段值，不修改正文。'

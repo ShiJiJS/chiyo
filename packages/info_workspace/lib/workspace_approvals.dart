@@ -6,7 +6,9 @@ import 'workspace_files.dart';
 import 'workspace_credentials.dart';
 import 'workspace_approval_execution.dart';
 import 'workspace_credential_batches.dart';
+import 'workspace_credential_programs.dart';
 export 'workspace_credential_batches.dart';
+export 'workspace_credential_programs.dart';
 export 'workspace_approval_execution.dart';
 
 enum WorkspaceApprovalKind {
@@ -144,6 +146,7 @@ class WorkspaceApprovalDetail {
     Map<String, int> fileVersions = const {},
     this.credential,
     this.credentialBatch = false,
+    this.programPlan,
     this.decidedAt,
     this.fieldExpiresAt,
     this.credentialExpiresAt,
@@ -152,13 +155,17 @@ class WorkspaceApprovalDetail {
     this.decisionUnavailableReason,
     Iterable<WorkspaceApprovalExecution> executions = const [],
     Iterable<WorkspaceCredentialBatchOperation> batchOperations = const [],
+    Iterable<WorkspaceCredentialProgramOperation> programOperations = const [],
   }) : executions = List.unmodifiable(executions),
        batchOperations = List.unmodifiable(batchOperations),
+       programOperations = List.unmodifiable(programOperations),
        scopes = List.unmodifiable(scopes),
        approved = Set.unmodifiable(approved),
        fileVersions = Map.unmodifiable(fileVersions);
   final List<WorkspaceApprovalExecution> executions;
   final List<WorkspaceCredentialBatchOperation> batchOperations;
+  final List<WorkspaceCredentialProgramOperation> programOperations;
+  final WorkspaceCredentialProgramPlan? programPlan;
   final WorkspaceApprovalSummary request;
   final String reviewToken;
   final List<WorkspaceApprovalScope> scopes;
@@ -181,6 +188,8 @@ class WorkspaceApprovalDetail {
         fileVersions: fileVersions,
         credential: credential,
         credentialBatch: credentialBatch,
+        programPlan: programPlan,
+        programOperations: programOperations,
         decidedAt: decidedAt,
         fieldExpiresAt: fieldExpiresAt,
         credentialExpiresAt: credentialExpiresAt,
@@ -203,6 +212,8 @@ class WorkspaceApprovalDetail {
     fileVersions: fileVersions,
     credential: credential,
     credentialBatch: credentialBatch,
+    programPlan: programPlan,
+    programOperations: programOperations,
     decidedAt: decidedAt,
     fieldExpiresAt: fieldExpiresAt,
     credentialExpiresAt: credentialExpiresAt,
@@ -213,6 +224,30 @@ class WorkspaceApprovalDetail {
     batchOperations: [
       for (final o in batchOperations)
         o.operationId == next.operationId ? next : o,
+    ],
+  );
+  WorkspaceApprovalDetail withProgramOperation(
+    WorkspaceCredentialProgramOperation next,
+  ) => WorkspaceApprovalDetail(
+    request: request,
+    reviewToken: reviewToken,
+    scopes: scopes,
+    approved: approved,
+    fileVersions: fileVersions,
+    credential: credential,
+    credentialBatch: credentialBatch,
+    programPlan: programPlan,
+    decidedAt: decidedAt,
+    fieldExpiresAt: fieldExpiresAt,
+    credentialExpiresAt: credentialExpiresAt,
+    approveUnavailableReason: approveUnavailableReason,
+    fileVersionPolicy: fileVersionPolicy,
+    decisionUnavailableReason: decisionUnavailableReason,
+    executions: executions,
+    batchOperations: batchOperations,
+    programOperations: [
+      for (final operation in programOperations)
+        operation.operationId == next.operationId ? next : operation,
     ],
   );
   bool get credentialSessionBound => credential?.sessionBound == true;

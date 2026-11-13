@@ -1004,7 +1004,11 @@ final class OnlineServer {
               200,
               approvalDetailToJson(
                 detail,
-                version: detail.credentialBatch ? 3 : 2,
+                version: detail.programPlan != null
+                    ? 4
+                    : detail.credentialBatch
+                    ? 3
+                    : 2,
               ),
             );
           } else if (path.length == 4 && request.method == 'GET') {

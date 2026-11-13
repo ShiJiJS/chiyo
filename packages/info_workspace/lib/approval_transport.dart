@@ -101,10 +101,11 @@ Map<String, Object?> approvalDetailToJson(
 }) {
   // The original endpoint stays v1 and refuses credential details. Only the
   // explicit v2 endpoint can deliver the complete mixed review to a new App.
-  if (!{1, 2, 3}.contains(version)) {
+  if (!{1, 2, 3, 4}.contains(version)) {
     throw const FormatException('Invalid approval version');
   }
-  if (d.credentialBatch && version != 3) {
+  if (d.credentialBatch && version < 3 ||
+      d.programPlan != null && version < 4) {
     throw const WorkspaceFailure('unsupported', '请更新 App 后核对这份多凭据申请。');
   }
   if (version == 1 && (d.credential != null || d.executions.isNotEmpty)) {
@@ -118,9 +119,13 @@ Map<String, Object?> approvalDetailToJson(
           : credentialUseRequestToJson(d.credential!),
       'executions': d.executions.map(approvalExecutionToJson).toList(),
     },
-    if (version == 3) ...{
+    if (version >= 3) ...{
       'credentialBatch': d.credentialBatch,
       'batchOperations': d.batchOperations.map((o) => o.toJson()).toList(),
+    },
+    if (version >= 4) ...{
+      'programPlan': d.programPlan?.toJson(),
+      'programOperations': d.programOperations.map((o) => o.toJson()).toList(),
     },
     'request': approvalSummaryToJson(d.request),
     'reviewToken': d.reviewToken,
@@ -165,110 +170,147 @@ Map<String, Object?> approvalDetailToJson(
   };
 }
 
-WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
-    _parse(() {
-      final version = j['version'] ?? 1;
-      if (!{1, 2, 3}.contains(version) ||
-          version >= 2 && !j.containsKey('credential') ||
-          version == 3 && j['credentialBatch'] is! bool ||
-          version == 3 && j['batchOperations'] is! List ||
-          version == 1 &&
-              (j.containsKey('credential') || j.containsKey('executions'))) {
-        throw const FormatException();
-      }
-      DateTime? date(String k) =>
-          j[k] == null ? null : DateTime.parse(j[k] as String);
-      final result = WorkspaceApprovalDetail(
-        request: _readSummary(Map<String, dynamic>.from(j['request'] as Map)),
-        reviewToken: j['reviewToken'] as String,
-        scopes: (j['scopes'] as List).map((raw) {
-          final s = Map<String, dynamic>.from(raw as Map);
-          return WorkspaceApprovalScope(
-            id: s['id'] as String,
-            record: WorkspaceRecordRef(
-              WorkspaceRecordKind.values.byName(s['recordKind'] as String),
-              s['recordId'] as String,
-            ),
-            label: s['label'] as String,
-            section: s['section'] as String,
-            recordName: s['recordName'] as String,
-            kind: WorkspaceApprovalScopeKind.values.byName(s['kind'] as String),
-            recordVersion: s['recordVersion'] as int,
-            fieldKey: s['fieldKey'] as String?,
-            fieldId: s['fieldId'] as String?,
-            entryId: s['entryId'] as String?,
-            requested: s['requested'] as bool,
-            available: s['available'] as bool,
-            unavailableReason: s['unavailableReason'] as String?,
-            fileVersions: (s['fileVersions'] as List).map((raw) {
-              final f = Map<String, dynamic>.from(raw as Map);
-              return WorkspaceFileVersion(
-                ref: WorkspaceFileRef.fromJson(f['ref']),
-                filename: f['filename'] as String,
-                mediaType: f['mediaType'] as String,
-                byteLength: f['byteLength'] as int,
-                createdAt: DateTime.parse(f['createdAt'] as String),
-                available: f['available'] as bool,
-              );
-            }),
+WorkspaceApprovalDetail approvalDetailFromJson(
+  Map<String, dynamic> j,
+) => _parse(() {
+  final version = j['version'] ?? 1;
+  if (!{1, 2, 3, 4}.contains(version) ||
+      version >= 2 && !j.containsKey('credential') ||
+      version >= 3 && j['credentialBatch'] is! bool ||
+      version >= 3 && j['batchOperations'] is! List ||
+      version >= 4 &&
+          (!j.containsKey('programPlan') || j['programOperations'] is! List) ||
+      version < 4 &&
+          (j.containsKey('programPlan') ||
+              j.containsKey('programOperations')) ||
+      version == 1 &&
+          (j.containsKey('credential') || j.containsKey('executions'))) {
+    throw const FormatException();
+  }
+  DateTime? date(String k) =>
+      j[k] == null ? null : DateTime.parse(j[k] as String);
+  final result = WorkspaceApprovalDetail(
+    request: _readSummary(Map<String, dynamic>.from(j['request'] as Map)),
+    reviewToken: j['reviewToken'] as String,
+    scopes: (j['scopes'] as List).map((raw) {
+      final s = Map<String, dynamic>.from(raw as Map);
+      return WorkspaceApprovalScope(
+        id: s['id'] as String,
+        record: WorkspaceRecordRef(
+          WorkspaceRecordKind.values.byName(s['recordKind'] as String),
+          s['recordId'] as String,
+        ),
+        label: s['label'] as String,
+        section: s['section'] as String,
+        recordName: s['recordName'] as String,
+        kind: WorkspaceApprovalScopeKind.values.byName(s['kind'] as String),
+        recordVersion: s['recordVersion'] as int,
+        fieldKey: s['fieldKey'] as String?,
+        fieldId: s['fieldId'] as String?,
+        entryId: s['entryId'] as String?,
+        requested: s['requested'] as bool,
+        available: s['available'] as bool,
+        unavailableReason: s['unavailableReason'] as String?,
+        fileVersions: (s['fileVersions'] as List).map((raw) {
+          final f = Map<String, dynamic>.from(raw as Map);
+          return WorkspaceFileVersion(
+            ref: WorkspaceFileRef.fromJson(f['ref']),
+            filename: f['filename'] as String,
+            mediaType: f['mediaType'] as String,
+            byteLength: f['byteLength'] as int,
+            createdAt: DateTime.parse(f['createdAt'] as String),
+            available: f['available'] as bool,
           );
         }),
-        approved: (j['approved'] as List).cast<String>(),
-        fileVersions: Map<String, int>.from(j['fileVersions'] as Map),
-        decidedAt: date('decidedAt'),
-        fieldExpiresAt: date('fieldExpiresAt'),
-        credentialExpiresAt: date('credentialExpiresAt'),
-        approveUnavailableReason: j['approveUnavailableReason'] as String?,
-        fileVersionPolicy: j['fileVersionPolicy'] as String?,
-        decisionUnavailableReason: j['decisionUnavailableReason'] as String?,
-        credentialBatch: version == 3 && j['credentialBatch'] == true,
-        batchOperations: version == 3
-            ? (j['batchOperations'] as List).map(
-                (o) => WorkspaceCredentialBatchOperation.fromJson(
-                  Map<String, dynamic>.from(o as Map),
-                ),
-              )
-            : const [],
-        credential: version >= 2 && j['credential'] != null
-            ? credentialUseRequestFromJson(j['credential'])
-            : null,
-        executions: version >= 2
-            ? (j['executions'] as List).map(approvalExecutionFromJson)
-            : const [],
       );
-      if (({
-                WorkspaceApprovalKind.credential,
-                WorkspaceApprovalKind.focus,
-              }.contains(result.request.kind)) !=
-              (result.credential != null || result.credentialBatch) ||
-          result.credentialBatch &&
-              (result.credential != null ||
-                  result.executions.isNotEmpty ||
-                  result.scopes.isEmpty ||
-                  result.scopes.length > 20 ||
-                  result.scopes.any(
-                    (s) => s.kind != WorkspaceApprovalScopeKind.credential,
-                  )) ||
-          result.credential != null &&
-              result.credential!.id != result.request.id ||
-          result.executions.any(
-            (e) =>
-                e.requestId != result.request.id ||
-                e.credential.id != result.credential?.id,
-          ) ||
-          result.batchOperations.length > 1000 ||
-          result.batchOperations.map((o) => o.operationId).toSet().length !=
-              result.batchOperations.length ||
-          result.batchOperations.any(
-            (o) =>
-                !result.credentialBatch ||
-                o.requestId != result.request.id ||
-                o.itemIds.any((id) => !result.scopes.any((s) => s.id == id)),
-          )) {
-        throw const FormatException('Incomplete credential approval');
-      }
-      return result;
-    });
+    }),
+    approved: (j['approved'] as List).cast<String>(),
+    fileVersions: Map<String, int>.from(j['fileVersions'] as Map),
+    decidedAt: date('decidedAt'),
+    fieldExpiresAt: date('fieldExpiresAt'),
+    credentialExpiresAt: date('credentialExpiresAt'),
+    approveUnavailableReason: j['approveUnavailableReason'] as String?,
+    fileVersionPolicy: j['fileVersionPolicy'] as String?,
+    decisionUnavailableReason: j['decisionUnavailableReason'] as String?,
+    credentialBatch: version >= 3 && j['credentialBatch'] == true,
+    programPlan: version >= 4 && j['programPlan'] != null
+        ? WorkspaceCredentialProgramPlan.fromJson(
+            Map<String, dynamic>.from(j['programPlan'] as Map),
+          )
+        : null,
+    programOperations: version >= 4
+        ? (j['programOperations'] as List).map(
+            (value) => WorkspaceCredentialProgramOperation.fromJson(
+              Map<String, dynamic>.from(value as Map),
+            ),
+          )
+        : const [],
+    batchOperations: version >= 3
+        ? (j['batchOperations'] as List).map(
+            (o) => WorkspaceCredentialBatchOperation.fromJson(
+              Map<String, dynamic>.from(o as Map),
+            ),
+          )
+        : const [],
+    credential: version >= 2 && j['credential'] != null
+        ? credentialUseRequestFromJson(j['credential'])
+        : null,
+    executions: version >= 2
+        ? (j['executions'] as List).map(approvalExecutionFromJson)
+        : const [],
+  );
+  if (({
+            WorkspaceApprovalKind.credential,
+            WorkspaceApprovalKind.focus,
+          }.contains(result.request.kind)) !=
+          (result.credential != null || result.credentialBatch) ||
+      result.credentialBatch &&
+          (result.credential != null ||
+              result.executions.isNotEmpty ||
+              result.scopes.isEmpty ||
+              result.scopes.length > 20 ||
+              result.scopes.any(
+                (s) => s.kind != WorkspaceApprovalScopeKind.credential,
+              )) ||
+      result.credential != null && result.credential!.id != result.request.id ||
+      result.executions.any(
+        (e) =>
+            e.requestId != result.request.id ||
+            e.credential.id != result.credential?.id,
+      ) ||
+      result.batchOperations.length > 1000 ||
+      result.batchOperations.map((o) => o.operationId).toSet().length !=
+          result.batchOperations.length ||
+      result.batchOperations.any(
+        (o) =>
+            !result.credentialBatch ||
+            o.requestId != result.request.id ||
+            o.itemIds.any((id) => !result.scopes.any((s) => s.id == id)),
+      ) ||
+      result.programPlan != null &&
+          (!result.credentialBatch ||
+              result.batchOperations.isNotEmpty ||
+              result.scopes.length != result.programPlan!.bindingCount ||
+              result.scopes.any(
+                (scope) => !result.programPlan!.matchesScope(
+                  scope.id,
+                  scope.record.id,
+                  scope.recordVersion,
+                ),
+              )) ||
+      result.programPlan == null && result.programOperations.isNotEmpty ||
+      result.programOperations.length > 1000 ||
+      result.programOperations.map((o) => o.operationId).toSet().length !=
+          result.programOperations.length ||
+      result.programOperations.any(
+        (operation) =>
+            operation.requestId != result.request.id ||
+            !result.programPlan!.accepts(operation.plan, operation.itemIds),
+      )) {
+    throw const FormatException('Incomplete credential approval');
+  }
+  return result;
+});
 
 Map<String, Object?> approvalChangeToJson(WorkspaceApprovalChange c) => {
   'operationId': c.operationId,

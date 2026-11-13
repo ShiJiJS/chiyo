@@ -5,7 +5,10 @@ import 'workspace_source.dart';
 /// Uses the same owner review and command rules as the local adapter, through
 /// authenticated HTTPS. No approval logic or information body is cached here.
 final class RemoteWorkspaceApprovals
-    implements WorkspaceApprovalSource, WorkspaceCredentialBatchActions {
+    implements
+        WorkspaceApprovalSource,
+        WorkspaceCredentialBatchActions,
+        WorkspaceCredentialProgramActions {
   RemoteWorkspaceApprovals(this.client, {required this.onChanged});
   final OwnerTransport client;
   final void Function() onChanged;
@@ -34,6 +37,18 @@ final class RemoteWorkspaceApprovals
         'POST',
         '/v1/owner/approvals/query',
         approvalQueryToJson(query, keepSelection: keepSelection),
+      ),
+    ),
+  );
+  @override
+  Future<WorkspaceCredentialProgramOperation> programOperation(
+    String requestId,
+    String operationId,
+  ) => _read(
+    () async => WorkspaceCredentialProgramOperation.fromJson(
+      await client.request(
+        'GET',
+        '/v1/owner/credential-batches/${Uri.encodeComponent(requestId)}/operations/${Uri.encodeComponent(operationId)}',
       ),
     ),
   );
