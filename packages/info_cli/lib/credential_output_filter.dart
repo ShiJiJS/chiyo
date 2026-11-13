@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 /// Masks exact known material bytes before output is encoded or retained.
 /// Each pipe needs its own instance. This cannot recognize transformed secrets.
@@ -81,8 +82,8 @@ class _Mask {
 /// KMP state keeps matching work linear even for long repeated prefixes.
 class _Pattern {
   _Pattern(List<int> source)
-    : bytes = List<int>.unmodifiable(source),
-      failure = List<int>.filled(source.length, 0) {
+    : bytes = Uint8List.fromList(source).asUnmodifiableView(),
+      failure = Uint32List(source.length) {
     var prefix = 0;
     for (var i = 1; i < bytes.length; i++) {
       while (prefix > 0 && bytes[prefix] != bytes[i]) {

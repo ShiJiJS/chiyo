@@ -82,6 +82,8 @@ part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'credential_program_plan.dart';
 part 'credential_program_operations.dart';
+part 'credential_program_materials.dart';
+part 'credential_program_access.dart';
 part 'focused_fill_models.dart';
 part 'browser_fill_models.dart';
 part 'credential_batches.dart';
@@ -304,6 +306,7 @@ class InformationService {
   // This private binding is not reconstructed from portable history.
   final _deviceCredentialRequests = <String, String>{};
   final _deviceCredentialExecutions = <String, _DeviceCredentialExecution>{};
+  final _credentialProgramProofs = <String, _DeviceCredentialExecution>{};
   final _deviceFocusedFills = <String, _DeviceFocusedFill>{};
   final _executionCapabilities = <String, String>{};
   final _pendingExecutionReceipts = <String, Map<String, Object?>>{};
@@ -386,6 +389,7 @@ class InformationService {
     _endedSessions.clear();
     _sessionBindings.clear();
     _batchMaterialProofs.clear();
+    _credentialProgramProofs.clear();
     _requests.clear();
     _grants.clear();
     _submitted.close();

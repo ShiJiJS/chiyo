@@ -49,6 +49,7 @@ extension _DeviceCredentialMaintenance on OnlineInformationRuntime {
   Future<void> _maintainDeviceCredentialRequests({
     bool restoring = false,
   }) async {
+    await _maintainCredentialPrograms();
     if (service._deviceCredentialRequests.isEmpty) return;
     for (final request in service._runtimeRepository.credentialUseRequests) {
       if (!service._deviceCredentialRequests.containsKey(request.id)) continue;

@@ -23,6 +23,7 @@ final class AgentDeviceCapability {
           'credential-execution',
           'credential-fill',
           'credential-batch',
+          'credential-program',
         }.contains(kind) ||
         value.isEmpty ||
         value.length > 2000) {

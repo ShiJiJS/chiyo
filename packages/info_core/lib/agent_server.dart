@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'info_core.dart';
 import 'protocol_json.dart';
 import 'credential_batch_protocol.dart';
+import 'credential_program_protocol.dart';
 
 class _CredentialRequestFailure implements Exception {
   const _CredentialRequestFailure(this.code, [this.fieldPath]);
@@ -138,7 +139,10 @@ class AgentServer extends AgentProtocol {
     final runtime = request.uri.path.startsWith('/credential-use/');
     final informationFile = request.uri.path.startsWith('/information-file/');
     var protocolVersion =
-        request.uri.path.startsWith('${CredentialBatchProtocol.base}/') ? 3 : 1;
+        (request.uri.path.startsWith('${CredentialBatchProtocol.base}/') ||
+            request.uri.path.startsWith('${CredentialProgramProtocol.base}/'))
+        ? 3
+        : 1;
     if (_libraryId != null) {
       request.response.headers.set('x-chiyo-server-id', _libraryId);
     }
@@ -203,7 +207,8 @@ class AgentServer extends AgentProtocol {
       if (body is! Map<String, dynamic>) {
         throw const AccessFailure('invalid_request');
       }
-      if (request.uri.path.startsWith('${CredentialBatchProtocol.base}/')) {
+      if (request.uri.path.startsWith('${CredentialBatchProtocol.base}/') ||
+          request.uri.path.startsWith('${CredentialProgramProtocol.base}/')) {
         protocolVersion = 3;
       } else if (body['protocolVersion'] == 2) {
         protocolVersion = 2;
@@ -327,6 +332,15 @@ class AgentProtocol {
     String path,
     Map<String, dynamic> body,
   ) async {
+    if (CredentialProgramProtocol.handles(path)) {
+      if (!enableCredentialBatches) {
+        throw const CredentialUseFailure('unsupported_capability');
+      }
+      return CredentialProgramProtocol(
+        _agent,
+        credentialBatchDeviceId,
+      ).dispatch(path, body);
+    }
     if (CredentialBatchProtocol.handles(path)) {
       if (!enableCredentialBatches) {
         throw const CredentialUseFailure('unsupported_capability');
@@ -374,7 +388,11 @@ class AgentProtocol {
         return {
           'protocolVersion': 1,
           'status': 'ok',
-          'protocolVersions': [1, if (enableReusableCredentialUse) 2],
+          'protocolVersions': [
+            1,
+            if (enableReusableCredentialUse) 2,
+            if (enableCredentialBatches && _agent.credentialBatchesAvailable) 3,
+          ],
           if (enableReusableCredentialUse)
             'supportedCredentialReceivers':
                 CredentialLaunchPlan.supportedReceivers,
@@ -382,6 +400,8 @@ class AgentProtocol {
             'agent-record-queries.v1',
             if (enableCredentialBatches && _agent.credentialBatchesAvailable)
               'credential-batches.v3',
+            if (enableCredentialBatches && _agent.credentialProgramsAvailable)
+              'credential-programs.v3',
             'credential-catalog-search.v1',
             'information-request-operations.v1',
             'submission-metadata.v1',

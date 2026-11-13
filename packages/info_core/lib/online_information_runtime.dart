@@ -180,8 +180,10 @@ final class OnlineInformationRuntime {
   }
 
   Map<String, Object?> _encode() => {
-    'version': 3,
+    'version': service._credentialProgramProofs.isEmpty ? 3 : 4,
     'credentialRuntime': _encodeDeviceCredentialRequests(),
+    if (service._credentialProgramProofs.isNotEmpty)
+      'credentialPrograms': _encodeCredentialPrograms(),
     'expiredOrganizations': [
       for (final task in service.owner.organizationTasks)
         if (service._expiredOrganizations.contains(task.id)) task.id,
@@ -267,7 +269,8 @@ final class OnlineInformationRuntime {
       final data = object(raw);
       if (data['version'] != 1 &&
           data['version'] != 2 &&
-          data['version'] != 3) {
+          data['version'] != 3 &&
+          data['version'] != 4) {
         throw const FormatException('Invalid online state version');
       }
       if (data['version'] != 1) {
@@ -288,8 +291,11 @@ final class OnlineInformationRuntime {
         service._sessionBindings[secret] = text(row['binding'], 200);
         if (row['ended'] as bool) ended.add(secret);
       }
-      if (data['version'] == 3) {
+      if (data['version'] == 3 || data['version'] == 4) {
         _restoreDeviceCredentialRequests(data['credentialRuntime']);
+      }
+      if (data['version'] == 4) {
+        _restoreCredentialPrograms(data['credentialPrograms']);
       }
       for (final entry in object(data['endCapabilities']).entries) {
         if (!service._sessions.containsKey(entry.value)) {

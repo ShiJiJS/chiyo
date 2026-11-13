@@ -177,40 +177,49 @@ void main() {
         ),
       );
       expect(repo.credentialBatchOperations, isEmpty);
-      // Synthetic process facts exercise persistence only; no worker is started
-      // and this trusted repository test never issues an execution capability.
+      // Worker facts are synthetic: the real claim/checkpoint/report protocol
+      // is exercised, but this test never starts a process on the NAS.
       final onlyApproved =
           Map<String, dynamic>.from(submitted.programPlan!.toJson())
             ..remove('executableIdentity')
             ..remove('stdin');
-      final operationPlan = CredentialProgramPlan.fromJson(
+      final launch = CredentialProgramPlan.fromJson(
         onlyApproved,
         allowPortablePaths: true,
-      ).resolved(identity, '/execution-device/work');
+      );
+      final prepared = DeviceCredentialLaunch.fromPrivateJson({
+        'version': 1,
+        'planHash': launch.planHash,
+        'executable': identity.toJson(),
+        'cwd': launch.cwd,
+      });
       const job = 'macos:AgentInfoRuntime-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-      final operation = CredentialProgramOperation(
-        sessionBinding: submitted.sessionBinding,
-        deviceId: device,
-        plan: operationPlan,
-        itemIds: ['b1', 'b2'],
-        progress: CredentialExecution(
-          id: 'synthetic-program-operation',
-          requestId: submitted.id,
-          protocolVersion: 2,
+      final claim = await runtime.run(
+        () => runtime.service.agent.beginCredentialProgramOperation(
+          session,
+          device,
+          submitted.id,
+          launch,
+          prepared,
+          job,
           operationId: 'program-operation',
-          operationFingerprint: operationPlan.planHash,
-          createdAt: submitted.createdAt,
-          jobName: job,
-          cleanupState: 'pending',
         ),
       );
-      await runtime.run(
-        () => repo.commitCredentialProgramOperation(
-          operation,
-          expectedRevision: 0,
-          requestRevision: 2,
-          validate: () {},
-        ),
+      final operation = claim.operation,
+          material = claim.material!,
+          operationPlan = claim.operation.plan;
+      expect(material.materials, hasLength(2));
+      expect(
+        material.materials['b2']!.stringValue,
+        'NEVER-SAVE-PROGRAM-PASSWORD',
+      );
+      expect(
+        material.materials['b1']!.bytes,
+        utf8.encode('NEVER-SAVE-PROGRAM-KEY'),
+      );
+      expect(
+        jsonEncode(claim.toPublicJson()),
+        isNot(contains('NEVER-SAVE-PROGRAM')),
       );
       await expectLater(
         runtime.run(
@@ -241,23 +250,39 @@ void main() {
         ),
         throwsA(isA<CredentialUseFailure>()),
       );
-      final running = operation.withReport(
-        CredentialExecutionReport(
-          executionId: operation.id,
-          executionCapability: 'not-issued-by-this-test',
-          state: 'running',
-          pid: 1234,
-          processCreatedAt: 'synthetic-worker-identity',
-          startedAt: submitted.createdAt,
-          jobName: job,
+      await runtime.run(
+        () => runtime.service.agent.registerCredentialProgramMaterials(
+          device,
+          operation.id,
+          material.executionCapability,
+          CredentialMaterialLease(
+            '/execution-device/managed',
+            'synthetic-folder',
+            {'credential-b1.bin': 'synthetic-file'},
+          ),
         ),
       );
       await runtime.run(
-        () => repo.commitCredentialProgramOperation(
-          running,
-          expectedRevision: 1,
-          requestRevision: 2,
-          validate: () {},
+        () => runtime.service.agent.registerCredentialProgramWorker(
+          device,
+          operation.id,
+          material.executionCapability,
+          9999,
+          'synthetic-worker-registration',
+        ),
+      );
+      await runtime.run(
+        () => runtime.service.agent.reportCredentialProgramExecution(
+          device,
+          CredentialExecutionReport(
+            executionId: operation.id,
+            executionCapability: material.executionCapability,
+            state: 'running',
+            pid: 1234,
+            processCreatedAt: 'synthetic-worker-identity',
+            startedAt: operation.progress.createdAt,
+            jobName: job,
+          ),
         ),
       );
       await runtime.close();
@@ -275,7 +300,20 @@ void main() {
       );
       runtime = await OnlineInformationRuntime.open(repository: repo);
       expect(repo.credentialProgramOperations.single.id, operation.id);
-      expect(repo.credentialProgramOperations.single.revision, 2);
+      expect(repo.credentialProgramOperations.single.revision, 4);
+      final duplicate = await runtime.run(
+        () => runtime.service.agent.beginCredentialProgramOperation(
+          session,
+          device,
+          submitted.id,
+          launch,
+          prepared,
+          job,
+          operationId: 'program-operation',
+        ),
+      );
+      expect(duplicate.operation.id, operation.id);
+      expect(duplicate.material, null);
       expect(
         repo.credentialProgramOperations.single.plan.toJson(),
         operationPlan.toJson(),

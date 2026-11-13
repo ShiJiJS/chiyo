@@ -1,6 +1,7 @@
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/credential_batch_protocol.dart';
+import 'package:info_core/credential_program_protocol.dart';
 import 'agent_devices.dart';
 import 'device_credential_routes.dart';
 
@@ -102,7 +103,9 @@ final class AgentGateway {
     } else if (DeviceCredentialRoutes.proofPaths.contains(path)) {
       capabilities.add(
         AgentDeviceCapability(
-          CredentialBatchProtocol.proofPaths.contains(path)
+          CredentialProgramProtocol.proofPaths.contains(path)
+              ? 'credential-program'
+              : CredentialBatchProtocol.proofPaths.contains(path)
               ? 'credential-batch'
               : path.startsWith('/credential-use/device/fill/')
               ? 'credential-fill'
@@ -154,6 +157,10 @@ final class AgentGateway {
         if (result['material'] case final Map material)
           if (material['executionCapability'] case final String proof)
             AgentDeviceCapability('credential-execution', proof),
+      if (path == '${CredentialProgramProtocol.base}/begin')
+        if (result['material'] case final Map material)
+          if (material['executionCapability'] case final String proof)
+            AgentDeviceCapability('credential-program', proof),
     ];
     if (minted.isNotEmpty) {
       await _devices.bindCapabilities(bearer, device.generation, minted);
@@ -195,6 +202,8 @@ final class AgentGateway {
           if (_deviceCredentials != null) ...[
             if (_deviceCredentials.credentialBatchesAvailable)
               'credential-batches.v3',
+            if (_deviceCredentials.credentialProgramsAvailable)
+              'credential-programs.v3',
             'credential-device-execution.v1',
             if (_deviceCredentials.focusedFillAvailable)
               'credential-device-focused-fill.v1',

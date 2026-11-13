@@ -196,6 +196,19 @@ extension AgentRecordQueries on AgentAccess {
         'createdAt': r['createdAt'],
       };
     }
+    if (_service._repository case CredentialProgramRepository programs) {
+      final binding = _service._sessionBindings[session];
+      for (final operation in programs.credentialProgramOperations) {
+        if (operation.archived || operation.sessionBinding != binding) continue;
+        final view = _service._programView(operation);
+        yield {
+          ...view,
+          'id': operation.operationId,
+          'kind': 'credential-program',
+          'state': view['executionState'],
+        };
+      }
+    }
     if (_service._repository case CredentialBatchRepository batches) {
       final binding = _service._sessionBindings[session];
       for (final operation in batches.credentialBatchOperations) {

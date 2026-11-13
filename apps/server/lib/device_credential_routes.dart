@@ -1,5 +1,6 @@
 import 'package:info_core/info_core.dart';
 import 'package:info_core/credential_batch_protocol.dart';
+import 'package:info_core/credential_program_protocol.dart';
 
 /// Private device Host transport. Ordinary Agent commands receive only the
 /// public projections, never the first operation's material/proof response.
@@ -8,8 +9,10 @@ final class DeviceCredentialRoutes {
   final AgentAccess agent;
   bool get focusedFillAvailable => agent.deviceFocusedFillAvailable;
   bool get credentialBatchesAvailable => agent.credentialBatchesAvailable;
+  bool get credentialProgramsAvailable => agent.credentialProgramsAvailable;
   static const sessionPaths = {
     ...CredentialBatchProtocol.sessionPaths,
+    ...CredentialProgramProtocol.sessionPaths,
     '/credential-use/device/request',
     '/credential-use/device/fill/request',
     '/credential-use/device/fill/begin',
@@ -20,6 +23,7 @@ final class DeviceCredentialRoutes {
   };
   static const proofPaths = {
     ...CredentialBatchProtocol.proofPaths,
+    ...CredentialProgramProtocol.proofPaths,
     '/credential-use/device/worker/register',
     '/credential-use/device/fill/material',
     '/credential-use/device/fill/batch',
@@ -49,6 +53,9 @@ final class DeviceCredentialRoutes {
     String path,
     Map<String, dynamic> body,
   ) async {
+    if (CredentialProgramProtocol.handles(path)) {
+      return CredentialProgramProtocol(agent, deviceId).dispatch(path, body);
+    }
     if (CredentialBatchProtocol.handles(path)) {
       return CredentialBatchProtocol(agent, deviceId).dispatch(path, body);
     }

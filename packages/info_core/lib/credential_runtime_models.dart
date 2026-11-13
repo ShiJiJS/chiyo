@@ -1481,7 +1481,7 @@ class CredentialMaterialValue {
     this.version,
     this.form,
     Iterable<int> bytes,
-  ) : bytes = List.unmodifiable(bytes);
+  ) : bytes = _credentialMaterialBytes(bytes);
   final String credentialId;
   final int version;
   final CredentialForm form;
@@ -1502,4 +1502,12 @@ class CredentialMaterialValue {
       );
   @override
   String toString() => 'CredentialMaterialValue($credentialId,v$version)';
+}
+
+List<int> _credentialMaterialBytes(Iterable<int> bytes) {
+  final source = bytes is List<int> ? bytes : bytes.toList(growable: false);
+  if (source.any((v) => v < 0 || v > 255)) {
+    throw const CredentialUseFailure('invalid_reference');
+  }
+  return Uint8List.fromList(source).asUnmodifiableView();
 }

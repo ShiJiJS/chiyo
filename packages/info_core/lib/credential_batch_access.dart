@@ -314,6 +314,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
       'requestId': r.id,
       'operationId': r.operationId,
       'purpose': r.purpose,
+      if (r.programPlan != null) 'programPlan': r.programPlan!.toJson(),
       'revision': r.revision,
       'createdAt': _useTimestamp(r.createdAt),
       'requestExpiresAt': _useTimestamp(r.requestExpiresAt),

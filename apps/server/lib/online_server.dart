@@ -1131,7 +1131,12 @@ final class OnlineServer {
           request.uri.path.startsWith('/v1/agent/') ? 200 : 400,
           e.toJson(
             protocolVersion:
-                request.uri.path.startsWith('/v1/agent/credential-use/batch/')
+                (request.uri.path.startsWith(
+                      '/v1/agent/credential-use/batch/',
+                    ) ||
+                    request.uri.path.startsWith(
+                      '/v1/agent/credential-use/program/',
+                    ))
                 ? 3
                 : parsedBody?['protocolVersion'] == 2 ||
                       request.uri.path.startsWith(
