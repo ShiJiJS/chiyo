@@ -93,6 +93,28 @@ class CredentialProgramBinding {
   const CredentialProgramBinding._(this.location, this.via, this.reference);
   final String location, via;
   final CredentialProgramReference reference;
+  factory CredentialProgramBinding.fromJson(Map<String, dynamic> json) {
+    _useShape(json, {'location', 'via', 'credentialId'}, {'version'});
+    final location = json['location'], via = json['via'];
+    if (location is! String ||
+        !(location == 'stdin' && via == 'stdin' ||
+            RegExp(
+                  r'^argv\[(?:0|[1-9][0-9]?|1[01][0-9]|12[0-7])\]$',
+                ).hasMatch(location) &&
+                via == 'file' ||
+            RegExp(r'^env\.[A-Za-z_][A-Za-z0-9_]{0,63}$').hasMatch(location) &&
+                {'env', 'file'}.contains(via))) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    return CredentialProgramBinding._(
+      location,
+      via as String,
+      CredentialProgramReference.fromJson({
+        'credentialId': json['credentialId'],
+        if (json.containsKey('version')) 'version': json['version'],
+      }),
+    );
+  }
   bool acceptsForm(CredentialForm form) =>
       via == 'file' || form == CredentialForm.string;
   Map<String, Object?> toJson() => {
@@ -235,6 +257,26 @@ class CredentialProgramPlan {
   };
   String get planHash => _useFingerprint(toJson());
 
+  /// Only private Host transport and stored public plan facts contain the
+  /// identity. Business input uses fromJson and cannot choose this snapshot.
+  factory CredentialProgramPlan.fromPreparedJson(Map<String, dynamic> json) {
+    final raw = Map<String, dynamic>.from(json)..remove('executableIdentity');
+    final requested = CredentialProgramPlan.fromJson(
+      raw,
+      allowPortablePaths: true,
+    );
+    final prepared = DeviceCredentialLaunch.fromPrivateJson({
+      'version': 1,
+      'planHash': requested.planHash,
+      'executable': json['executableIdentity'],
+      'cwd': requested.cwd,
+    });
+    if (prepared.executable.path != requested.path) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    return prepared.resolveProgram(requested);
+  }
+
   /// A later command may use a subset of the originally requested receivers,
   /// but cannot move material, change versions or substitute a program. The
   /// caller must separately check every remaining binding's current approval.
@@ -252,4 +294,49 @@ class CredentialProgramPlan {
       throw const CredentialUseFailure('scope_not_approved');
     }
   }
+}
+
+class CredentialProgramDestination {
+  const CredentialProgramDestination(this.executable, this.binding);
+  final ExecutableIdentity executable;
+  final CredentialProgramBinding binding;
+  Map<String, Object?> toJson() => {
+    'executable': executable.toJson(),
+    'binding': binding.toJson(),
+  };
+  factory CredentialProgramDestination.fromJson(Map<String, dynamic> json) {
+    _useShape(json, {'executable', 'binding'});
+    if (json['binding'] is! Map<String, dynamic> ||
+        json['executable'] is! Map<String, dynamic>) {
+      throw const CredentialUseFailure('invalid_type');
+    }
+    // Reuse the established, portable identity validation without looking up a
+    // Windows/Mac path on the NAS or accepting extra executable fields.
+    final identity = ExecutableIdentity.fromPreparedJson(
+      json['executable'] as Map<String, dynamic>,
+    );
+    return CredentialProgramDestination(
+      identity,
+      CredentialProgramBinding.fromJson(
+        json['binding'] as Map<String, dynamic>,
+      ),
+    );
+  }
+}
+
+List<CredentialBatchCandidate> _programCandidates(CredentialProgramPlan plan) {
+  if (plan.identity == null) throw const CredentialUseFailure('invalid_plan');
+  return [
+    for (final b in plan.bindings)
+      CredentialBatchCandidate(
+        b.reference.credentialId,
+        b.reference.version,
+        CredentialBatchDestination._(
+          'program',
+          null,
+          null,
+          CredentialProgramDestination(plan.identity!, b),
+        ),
+      ),
+  ];
 }

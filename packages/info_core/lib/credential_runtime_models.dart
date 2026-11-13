@@ -366,6 +366,25 @@ class ExecutableIdentity {
         j['modifiedMicros'] as int,
         j['sha256'] as String,
       );
+  factory ExecutableIdentity.fromPreparedJson(Map<String, dynamic> json) {
+    _useShape(json, {'path', 'byteLength', 'modifiedMicros', 'sha256'});
+    final path = _useText(
+      json['path'],
+      'launch.executable',
+      max: 4096,
+      empty: false,
+    );
+    if (!(path.startsWith('/') || RegExp(r'^[A-Za-z]:[/\\]').hasMatch(path)) ||
+        json['byteLength'] is! int ||
+        (json['byteLength'] as int) <= 0 ||
+        json['modifiedMicros'] is! int ||
+        (json['modifiedMicros'] as int) < 0 ||
+        json['sha256'] is! String ||
+        !RegExp(r'^sha256:[0-9a-f]{64}$').hasMatch(json['sha256'] as String)) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    return ExecutableIdentity.fromJson(json);
+  }
 }
 
 Future<ExecutableIdentity> inspectCredentialExecutable(

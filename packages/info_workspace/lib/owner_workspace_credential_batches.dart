@@ -57,6 +57,15 @@ class OwnerWorkspaceCredentialBatches {
       owner.credentialBatches.map(summary).toList();
 
   static String destinationLabel(core.CredentialBatchDestination d) {
+    if (d.program case final program?) {
+      final binding = program.binding;
+      final position = binding.location == 'stdin'
+          ? '标准输入'
+          : binding.location.startsWith('env.')
+          ? '环境变量 ${binding.location.substring(4)}'
+          : '参数位置 ${binding.location.substring(5, binding.location.length - 1)}';
+      return '程序 · ${program.executable.path}\n$position${binding.via == 'file' ? '（受管文件路径）' : ''}';
+    }
     final browser = d.browser;
     return browser == null
         ? '本机密码框 · ${d.application!.executable}'

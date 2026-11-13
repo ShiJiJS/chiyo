@@ -513,6 +513,11 @@ class InformationBackups {
         _archiveCredentialBatches(tables, now);
       }
       final hasBatchHistory = tables['credential_batches']?.isNotEmpty ?? false;
+      final hasProgramBatchHistory =
+          tables['credential_batches']?.any(
+            (row) => _storedBatch(row).programPlan != null,
+          ) ??
+          false;
       if (!hasBatchHistory) {
         tables.remove('credential_batches');
         tables.remove('credential_batch_operations');
@@ -614,7 +619,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = hasBatchHistory
+        formatVersion = hasProgramBatchHistory
+            ? 29
+            : hasBatchHistory
             ? 28
             : hasCredentialDeliveryExtensions
             ? 27
@@ -1226,6 +1233,11 @@ class InformationBackups {
         if (contents.formatVersion >= 28) {
           await _repository._createCredentialBatchTables();
         }
+        if (contents.formatVersion >= 29) {
+          await _repository._requireAdmissionFormat(
+            _credentialProgramBatchLibraryFormat,
+          );
+        }
         if (contents.formatVersion >= 27) {
           await _repository._requireAdmissionFormat(
             _credentialDeliveryLibraryFormat,
@@ -1330,6 +1342,7 @@ class InformationBackups {
           26,
           27,
           28,
+          29,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1355,7 +1368,7 @@ class InformationBackups {
       21 || 22 || 23 || 24 => _v21Columns,
       25 => _v25Columns,
       26 || 27 => _v26Columns,
-      28 => _v28Columns,
+      28 || 29 => _v28Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1583,7 +1596,10 @@ class InformationBackups {
     );
     _validateBackupLibraryRecycle(tables);
     _validateBackupLibraryOrder(tables);
-    _validateBackupCredentialBatches(tables);
+    _validateBackupCredentialBatches(
+      tables,
+      formatVersion: decoded['version'] as int,
+    );
     final packageIds = <String>{};
     final packages =
         tables['template_packages'] ?? const <Map<String, Object?>>[];

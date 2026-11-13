@@ -66,37 +66,16 @@ final class DeviceCredentialLaunch {
         json['executable'] is! Map<String, dynamic>) {
       throw const CredentialUseFailure('invalid_plan');
     }
-    final raw = json['executable'] as Map<String, dynamic>;
-    _useShape(raw, {'path', 'byteLength', 'modifiedMicros', 'sha256'});
-    final path = _useText(
-      raw['path'],
-      'launch.executable',
-      max: 4096,
-      empty: false,
+    final identity = ExecutableIdentity.fromPreparedJson(
+      json['executable'] as Map<String, dynamic>,
     );
     final cwd = _useText(json['cwd'], 'launch.cwd', max: 4096, empty: false);
     bool absolute(String value) =>
         value.startsWith('/') || RegExp(r'^[A-Za-z]:[/\\]').hasMatch(value);
-    if (!absolute(path) ||
-        !absolute(cwd) ||
-        raw['byteLength'] is! int ||
-        (raw['byteLength'] as int) <= 0 ||
-        raw['modifiedMicros'] is! int ||
-        (raw['modifiedMicros'] as int) < 0 ||
-        raw['sha256'] is! String ||
-        !RegExp(r'^sha256:[0-9a-f]{64}$').hasMatch(raw['sha256'] as String)) {
+    if (!absolute(cwd)) {
       throw const CredentialUseFailure('invalid_plan');
     }
-    return DeviceCredentialLaunch._(
-      json['planHash'] as String,
-      ExecutableIdentity(
-        path,
-        raw['byteLength'] as int,
-        raw['modifiedMicros'] as int,
-        raw['sha256'] as String,
-      ),
-      cwd,
-    );
+    return DeviceCredentialLaunch._(json['planHash'] as String, identity, cwd);
   }
 
   CredentialLaunchPlan resolve(CredentialLaunchPlan requested) {

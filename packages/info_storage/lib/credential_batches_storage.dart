@@ -66,15 +66,17 @@ void _archiveCredentialBatches(
 }
 
 void _validateBackupCredentialBatches(
-  Map<String, List<Map<String, Object?>>> tables,
-) {
+  Map<String, List<Map<String, Object?>>> tables, {
+  required int formatVersion,
+}) {
   try {
     final requests = <String, CredentialUseBatch>{};
     final submissions = <String>{};
     for (final row
         in tables['credential_batches'] ?? const <Map<String, Object?>>[]) {
       final r = _storedBatch(row);
-      if (!r.archived ||
+      if (r.programPlan != null && formatVersion < 29 ||
+          !r.archived ||
           r.decisions.isEmpty ||
           requests.containsKey(r.id) ||
           !submissions.add(
@@ -154,6 +156,10 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
               )
               .get()) {
         final batch = _storedBatch(row.data);
+        if (batch.programPlan != null &&
+            marker < _credentialProgramBatchLibraryFormat) {
+          throw const StorageFailure('unsupported_schema');
+        }
         _credentialBatches[batch.id] = batch;
       }
       for (final row
@@ -229,6 +235,9 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
     try {
       await _writeMetadata(() async {
         await _createCredentialBatchTables();
+        if (request.programPlan != null) {
+          await _requireAdmissionFormat(_credentialProgramBatchLibraryFormat);
+        }
         final found = await _db
             .customSelect(
               'SELECT id,session_binding,operation_id,payload FROM credential_batches WHERE id=?',

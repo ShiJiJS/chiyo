@@ -118,6 +118,60 @@ class _Fixture {
 }
 
 void main() {
+  test(
+    'program approval names each real receiving position without treating it as a browser password box',
+    () async {
+      final f = _Fixture();
+      await f.open();
+      addTearDown(f.service.close);
+      final credentials = f.service.owner.credentials;
+      final plan =
+          core.CredentialProgramPlan.fromJson({
+            'executable': '/execution-device/tool',
+            'cwd': '/execution-device/work',
+            'argv': ['query'],
+            'env': {
+              'DB_PASSWORD': {'credentialId': credentials.first.id},
+              'KEY_PATH': {
+                'file': {'credentialId': credentials.last.id},
+              },
+            },
+          }, allowPortablePaths: true).resolved(
+            core.ExecutableIdentity(
+              '/execution-device/tool',
+              100,
+              1,
+              'sha256:${'a' * 64}',
+            ),
+            '/execution-device/work',
+          );
+      final session = f.service.agent.openSession('合成程序审批');
+      final r = await f.service.agent.requestCredentialBatch(
+        session,
+        'A' * 22,
+        core.CredentialBatchInput.forProgram(plan, purpose: '查询合成服务'),
+        operationId: 'program-ui',
+      );
+      final detail = await f.source.read(r.id);
+      expect(
+        detail.scopes.first.label,
+        contains('程序 · /execution-device/tool'),
+      );
+      expect(detail.scopes.first.label, contains('环境变量 DB_PASSWORD'));
+      expect(detail.scopes.last.label, contains('环境变量 KEY_PATH（受管文件路径）'));
+      expect(
+        detail.scopes.map((s) => s.record.id),
+        credentials.map((c) => c.id),
+      );
+      expect(detail.scopes.every((s) => s.available), true);
+      expect(detail.batchOperations, isEmpty);
+      expect(
+        detail.scopes.any((s) => s.label.contains('NEVER-RENDER-PASSWORD')),
+        false,
+      );
+    },
+  );
+
   testWidgets(
     'query and owner acknowledgement never replay input; the user must first check the target',
     (tester) async {

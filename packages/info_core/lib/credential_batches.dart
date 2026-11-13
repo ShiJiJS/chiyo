@@ -8,12 +8,32 @@ DateTime _batchTime(DateTime value) => DateTime.fromMillisecondsSinceEpoch(
 /// A real destination, not a caller-defined credential alias. Browser and
 /// native application scopes remain different even when both show passwords.
 class CredentialBatchDestination {
-  const CredentialBatchDestination._(this.via, this.browser, this.application);
+  const CredentialBatchDestination._(
+    this.via,
+    this.browser,
+    this.application, [
+    this.program,
+  ]);
   final String via;
   final BrowserFormTarget? browser;
   final FocusedFillApplication? application;
+  final CredentialProgramDestination? program;
   factory CredentialBatchDestination.fromJson(Map<String, dynamic> json) {
     final via = json['via'];
+    if (via == 'program') {
+      _useShape(json, {'via', 'program'});
+      if (json['program'] is! Map<String, dynamic>) {
+        throw const CredentialUseFailure('invalid_type');
+      }
+      return CredentialBatchDestination._(
+        'program',
+        null,
+        null,
+        CredentialProgramDestination.fromJson(
+          json['program'] as Map<String, dynamic>,
+        ),
+      );
+    }
     if (via == 'ego' || via == 'chrome') {
       _useShape(json, {'via', 'target'});
       if (json['target'] is! Map<String, dynamic>) {
@@ -46,6 +66,7 @@ class CredentialBatchDestination {
     'via': via,
     if (browser != null) 'target': browser!.toJson(),
     if (application != null) 'application': application!.toJson(),
+    if (program != null) 'program': program!.toJson(),
   };
   String get fingerprint => _useFingerprint(toJson());
   bool matches(CredentialBatchDestination other) =>
@@ -92,15 +113,25 @@ class CredentialBatchInput {
     this.purpose,
     this.agentName,
     this.externalChatId,
-    Iterable<CredentialBatchCandidate> items,
-  ) : items = List.unmodifiable(items);
+    Iterable<CredentialBatchCandidate> items, [
+    this.programPlan,
+  ]) : items = List.unmodifiable(items);
   final String purpose, agentName, externalChatId;
   final List<CredentialBatchCandidate> items;
-  factory CredentialBatchInput.fromJson(Map<String, dynamic> json) {
+  final CredentialProgramPlan? programPlan;
+  factory CredentialBatchInput.fromJson(
+    Map<String, dynamic> json, {
+    bool allowProgram = false,
+  }) {
     _useShape(
       json,
       {'protocolVersion', 'purpose', 'items'},
-      {'agentName', 'externalChatId', 'submissionVersion'},
+      {
+        'agentName',
+        'externalChatId',
+        'submissionVersion',
+        if (allowProgram) 'programPlan',
+      },
     );
     if (json['protocolVersion'] != 3) {
       throw const CredentialUseFailure('unsupported_protocol');
@@ -133,19 +164,46 @@ class CredentialBatchInput {
           (v) => CredentialBatchCandidate.fromJson(v as Map<String, dynamic>),
         )
         .toList();
+    final program = json.containsKey('programPlan')
+        ? CredentialProgramPlan.fromPreparedJson(
+            Map<String, dynamic>.from(json['programPlan'] as Map),
+          )
+        : null;
+    if ((program == null && items.any((i) => i.destination.program != null)) ||
+        program != null &&
+            _useFingerprint(items.map((i) => i.toJson()).toList()) !=
+                _useFingerprint(
+                  _programCandidates(program).map((i) => i.toJson()).toList(),
+                )) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     if (items.map((i) => _useFingerprint(i.toJson())).toSet().length !=
             items.length ||
         utf8.encode(jsonEncode(json)).length > 262144) {
       throw const CredentialUseFailure('invalid_plan');
     }
-    return CredentialBatchInput._(purpose, agent, chat, items);
+    return CredentialBatchInput._(purpose, agent, chat, items, program);
   }
+  factory CredentialBatchInput.forProgram(
+    CredentialProgramPlan plan, {
+    required String purpose,
+    String agentName = '',
+    String externalChatId = '',
+  }) => CredentialBatchInput.fromJson({
+    'protocolVersion': 3,
+    'purpose': purpose,
+    'agentName': agentName,
+    'externalChatId': externalChatId,
+    'programPlan': plan.toJson(),
+    'items': _programCandidates(plan).map((i) => i.toJson()).toList(),
+  }, allowProgram: true);
   Map<String, Object?> toJson() => {
     'protocolVersion': 3,
     'purpose': purpose,
     'agentName': agentName,
     'externalChatId': externalChatId,
     'items': items.map((i) => i.toJson()).toList(),
+    if (programPlan != null) 'programPlan': programPlan!.toJson(),
   };
   String get fingerprint => _useFingerprint(toJson());
 }
@@ -315,6 +373,7 @@ class CredentialUseBatch {
     required this.createdAt,
     required this.requestExpiresAt,
     required Iterable<CredentialBatchItem> items,
+    this.programPlan,
     this.revision = 1,
     this.archived = false,
     Iterable<CredentialBatchDecisionReceipt> decisions = const [],
@@ -324,6 +383,7 @@ class CredentialUseBatch {
   final String chatLabel, agentName, externalChatId, purpose;
   final DateTime createdAt, requestExpiresAt;
   final List<CredentialBatchItem> items;
+  final CredentialProgramPlan? programPlan;
   final List<CredentialBatchDecisionReceipt> decisions;
   final int revision;
   final bool archived;
@@ -358,26 +418,31 @@ class CredentialUseBatch {
     'archived': archived,
     'items': items.map((i) => i.toJson()).toList(),
     'decisions': decisions.map((d) => d.toJson()).toList(),
+    if (programPlan != null) 'programPlan': programPlan!.toJson(),
   };
   factory CredentialUseBatch.fromJson(Map<String, dynamic> json) {
-    _useShape(json, {
-      'protocolVersion',
-      'id',
-      'sessionBinding',
-      'deviceId',
-      'operationId',
-      'submissionDigest',
-      'chatLabel',
-      'agentName',
-      'externalChatId',
-      'purpose',
-      'createdAt',
-      'requestExpiresAt',
-      'revision',
-      'archived',
-      'items',
-      'decisions',
-    });
+    _useShape(
+      json,
+      {
+        'protocolVersion',
+        'id',
+        'sessionBinding',
+        'deviceId',
+        'operationId',
+        'submissionDigest',
+        'chatLabel',
+        'agentName',
+        'externalChatId',
+        'purpose',
+        'createdAt',
+        'requestExpiresAt',
+        'revision',
+        'archived',
+        'items',
+        'decisions',
+      },
+      {'programPlan'},
+    );
     if (json['protocolVersion'] != 3 ||
         json['revision'] is! int ||
         (json['revision'] as int) < 1 ||
@@ -408,6 +473,30 @@ class CredentialUseBatch {
           ),
         )
         .toList();
+    final program = json.containsKey('programPlan')
+        ? CredentialProgramPlan.fromPreparedJson(
+            Map<String, dynamic>.from(json['programPlan'] as Map),
+          )
+        : null;
+    if (program == null
+        ? items.any((i) => i.destination.program != null)
+        : program.bindings.any((b) => b.reference.version == null) ||
+              _useFingerprint(
+                    items
+                        .map(
+                          (i) => CredentialBatchCandidate(
+                            i.credentialId,
+                            i.version,
+                            i.destination,
+                          ).toJson(),
+                        )
+                        .toList(),
+                  ) !=
+                  _useFingerprint(
+                    _programCandidates(program).map((i) => i.toJson()).toList(),
+                  )) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     final created = _batchDate(json['createdAt'])!,
         expiry = _batchDate(json['requestExpiresAt'])!;
     if (items.map((i) => i.id).toSet().length != items.length ||
@@ -455,6 +544,7 @@ class CredentialUseBatch {
       createdAt: created,
       requestExpiresAt: expiry,
       items: items,
+      programPlan: program,
       revision: json['revision'] as int,
       archived: json['archived'] as bool,
       decisions: decisions,
@@ -476,6 +566,7 @@ class CredentialUseBatch {
     createdAt: createdAt,
     requestExpiresAt: requestExpiresAt,
     items: next,
+    programPlan: programPlan,
     revision: revision + 1,
     archived: archived,
     decisions: [...decisions, receipt],
@@ -734,6 +825,9 @@ void validateCredentialBatchCommit(
   int? expectedOperationRevision,
 }) {
   CredentialUseBatch.fromJson(Map<String, dynamic>.from(next.toJson()));
+  if (next.programPlan != null && operation != null) {
+    throw const CredentialUseFailure('unsupported_receiver');
+  }
   if ((previous?.revision ?? 0) != expectedRevision) {
     throw const CredentialUseFailure('operation_conflict');
   }

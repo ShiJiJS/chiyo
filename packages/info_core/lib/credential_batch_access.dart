@@ -218,7 +218,11 @@ extension CredentialBatchAgentAccess on AgentAccess {
         candidate.version ?? known.version,
         requireMaterial: false,
       );
-      if (c.form != CredentialForm.string) {
+      if (candidate.destination.program case final program?) {
+        if (!program.binding.acceptsForm(c.form)) {
+          throw const CredentialUseFailure('invalid_reference');
+        }
+      } else if (c.form != CredentialForm.string) {
         throw const CredentialUseFailure('invalid_reference');
       }
       items.add(
@@ -228,7 +232,21 @@ extension CredentialBatchAgentAccess on AgentAccess {
           credentialName: c.name,
           version: c.version,
           useGeneration: c.useGeneration,
-          destination: candidate.destination,
+          destination: candidate.destination.program == null
+              ? candidate.destination
+              : CredentialBatchDestination._(
+                  'program',
+                  null,
+                  null,
+                  CredentialProgramDestination(
+                    candidate.destination.program!.executable,
+                    CredentialProgramBinding._(
+                      candidate.destination.program!.binding.location,
+                      candidate.destination.program!.binding.via,
+                      CredentialProgramReference._(c.id, c.version),
+                    ),
+                  ),
+                ),
         ),
       );
     }
@@ -259,6 +277,9 @@ extension CredentialBatchAgentAccess on AgentAccess {
       createdAt: now,
       requestExpiresAt: now.add(_service._requestLifetime),
       items: items,
+      programPlan: input.programPlan?.withVersions({
+        for (final i in items) i.credentialId: i.version,
+      }),
     );
     void validate() {
       _service._requireSession(session);
@@ -323,6 +344,9 @@ extension CredentialBatchAgentAccess on AgentAccess {
   }) => _service.owner._serialize(() async {
     _batchOperationId(operationId);
     final r = _service._sessionBatch(session, deviceId, requestId);
+    if (r.programPlan != null) {
+      throw const CredentialUseFailure('unsupported_receiver');
+    }
     final selected = _service._selectedBatchItems(r, itemIds);
     final ids = selected.map((i) => i.id).toList()..sort();
     final fingerprint = _useFingerprint({
