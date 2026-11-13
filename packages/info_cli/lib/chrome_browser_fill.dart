@@ -189,8 +189,9 @@ class ChromeBrowserFill {
 
   Future<Map<String, Object?>> fill(
     BrowserFormTarget approved,
-    String password,
-  ) async {
+    String password, {
+    Future<void> Function()? beforeDispatch,
+  }) async {
     if (approved.provider != 'chrome' ||
         approved.browserAddress != address.toString()) {
       return const {'status': 'refused', 'code': 'destination_changed'};
@@ -218,6 +219,13 @@ class ChromeBrowserFill {
         approved.fieldSelector,
       );
       approved.requireSameTarget(checked.target);
+      if (beforeDispatch != null) {
+        try {
+          await beforeDispatch().timeout(timeout);
+        } on Object catch (error) {
+          throw BrowserFillFailure(browserDispatchError(error));
+        }
+      }
       // Once sent, a lost CDP reply cannot prove that no input occurred.
       dispatched = true;
       final receipt = await _evaluate(
@@ -242,7 +250,7 @@ class ChromeBrowserFill {
         'status': dispatched ? 'unknown' : 'refused',
         'code': error is BrowserFillFailure
             ? error.code
-            : 'destination_changed',
+            : browserDispatchError(error),
       };
     } finally {
       await page?.close();

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/browser_form_script.dart';
 import 'package:info_cli/chrome_browser_fill.dart';
+import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
 
 // Opt-in: launches only a new test profile, never the user's Chrome profile.
@@ -235,6 +236,64 @@ void main() {
             ),
           );
           expect(receipt, {'status': 'refused', 'code': 'form_changed'});
+          expect(await probe.evaluate('window.inputEvents'), 0);
+        },
+      );
+      test(
+        'final dispatch authorization can refuse after target checks with zero input',
+        () async {
+          final checked = await inspect();
+          var calls = 0;
+          final result = await driver.fill(
+            checked.target,
+            synthetic,
+            beforeDispatch: () async {
+              calls++;
+              throw const CredentialUseFailure('grant_revoked');
+            },
+          );
+          expect(result, {'status': 'refused', 'code': 'grant_revoked'});
+          expect(calls, 1);
+          expect(await probe.evaluate('window.inputEvents'), 0);
+        },
+      );
+      test(
+        'structure changes while waiting for final authorization refuse the setter',
+        () async {
+          final checked = await inspect();
+          expect(
+            await driver.fill(
+              checked.target,
+              synthetic,
+              beforeDispatch: () async {
+                await probe.evaluate(
+                  'document.querySelector("#login").setAttribute("method","get");true',
+                );
+              },
+            ),
+            {'status': 'refused', 'code': 'form_changed'},
+          );
+          expect(await probe.evaluate('window.inputEvents'), 0);
+        },
+      );
+      test(
+        'a final authorization timeout never dispatches after the callback completes',
+        () async {
+          final checked = await inspect();
+          final release = Completer<void>();
+          final candidate = ChromeBrowserFill(
+            driver.address.toString(),
+            timeout: const Duration(milliseconds: 300),
+          );
+          expect(
+            (await candidate.fill(
+              checked.target,
+              synthetic,
+              beforeDispatch: () => release.future,
+            ))['status'],
+            'refused',
+          );
+          release.complete();
           expect(await probe.evaluate('window.inputEvents'), 0);
         },
       );
