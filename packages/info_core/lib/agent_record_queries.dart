@@ -210,6 +210,18 @@ extension AgentRecordQueries on AgentAccess {
         };
       }
     }
+    final binding = _service._sessionBindings[session];
+    for (final delivery in _service._informationDeliveries) {
+      if (!delivery.runtime || delivery.sessionBinding != binding) continue;
+      yield {
+        ...delivery.statusJson(),
+        'id': delivery.operationId,
+        'operationId': delivery.operationId,
+        'requestId': delivery.requestId,
+        'kind': 'information-file',
+        'createdAt': _useTimestamp(delivery.createdAt),
+      };
+    }
     if (_service._repository case CredentialBatchRepository batches) {
       final binding = _service._sessionBindings[session];
       for (final operation in batches.credentialBatchOperations) {

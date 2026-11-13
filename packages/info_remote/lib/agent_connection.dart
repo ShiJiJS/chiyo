@@ -245,6 +245,11 @@ final class AgentConnection {
           maxBytes: 32 * 1024 * 1024,
         );
         if (response.statusCode != 200) {
+          if (path.startsWith('/information-file/')) {
+            final failure = InformationFileFailure.fromResponse(result);
+            if (failure != null)
+              return Map<String, dynamic>.from(failure.toJson());
+          }
           final code = result['error'] ?? result['status'];
           return <String, dynamic>{
             'status': code is String && !const {'ok', 'ended'}.contains(code)

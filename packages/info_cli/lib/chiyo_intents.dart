@@ -52,6 +52,7 @@ class ChiyoIntentStore {
   final String scope;
   static const kinds = {
     'access-request',
+    'file-fetch',
     'fill-request',
     'fill-run',
     'exec-request',

@@ -114,6 +114,8 @@ class ChiyoCli {
           'exec run',
           'credentials reveal read',
           'access read',
+          'files fetch',
+          'files release',
         }.contains(invocation.path),
       );
     } on ChiyoContextMismatch {
@@ -396,6 +398,9 @@ class ChiyoCli {
         if (record.kind == 'access-request') {
           return _submitAccess(client, record);
         }
+        if (record.kind == 'file-fetch') {
+          return _fetchFile(client, record);
+        }
         if (record.kind == 'fill-request' || record.kind == 'fill-run') {
           return _continueFill(record, recover: true);
         }
@@ -459,6 +464,16 @@ class ChiyoCli {
           'requestId': request,
         });
         if (claim['status'] != 'ok') return claim;
+        final fields = claim['fields'];
+        if (fields is! List) return {'status': 'invalid_response'};
+        if (!fields.any(
+          (field) =>
+              field is Map &&
+              field['itemId'] == o['item'] &&
+              field['fieldId'] == o['field'],
+        )) {
+          return {'status': 'scope_not_approved'};
+        }
         return client.execute({
           'command': 'read',
           'requestId': request,
@@ -506,6 +521,26 @@ class ChiyoCli {
           'fields': fields,
         }, operationId: o['operation'] as String?);
         return _submitAccess(client, intent);
+      case 'files fetch':
+        final intent = await _intents.remember('file-fetch', {
+          'command': 'file-fetch',
+          'protocolVersion': 2,
+          'requestId': _required(i, 'request'),
+          'itemId': _required(i, 'item'),
+          'fieldId': _required(i, 'field'),
+        }, operationId: o['operation'] as String?);
+        return _fetchFile(client, intent);
+      case 'files status':
+        return client.execute({
+          'command': 'file-status',
+          if (o['operation'] != null) 'operationId': o['operation'],
+          if (o['delivery'] != null) 'deliveryId': o['delivery'],
+        });
+      case 'files release':
+        return client.execute({
+          'command': 'file-release',
+          'deliveryId': _required(i, 'delivery'),
+        });
       case 'fill request':
         return _requestFill(i);
       case 'fill run':
@@ -552,6 +587,17 @@ class ChiyoCli {
       throw const ChiyoUsageFailure('无法读取业务 JSON 文件，请检查文件和格式。');
     }
   }
+
+  Future<Map<String, dynamic>> _fetchFile(
+    AgentClient client,
+    ChiyoIntent intent,
+  ) async => {
+    ...await client.execute({
+      ...intent.payload,
+      'operationId': intent.operationId,
+    }),
+    'operationId': intent.operationId,
+  };
 
   Future<Map<String, dynamic>> _submitAccess(
     AgentClient client,
@@ -751,6 +797,10 @@ class ChiyoCli {
       'credential_disabled' ||
       'credential_deleted' ||
       'scope_not_approved' => 4,
+      'not_authorized' || 'session_ended' => 4,
+      'field_removed' => 8,
+      'delivery_unknown' => 7,
+      'delivery_io_failed' || 'attachment_integrity_failed' => 5,
       _ => switch (status) {
         'service_unavailable' ||
         'connection_unavailable' ||
@@ -798,6 +848,7 @@ class ChiyoCli {
           2 => '内容或参数未通过检查；请查看返回的字段说明。',
           3 => '当前聊天、连接或所需能力不可用；请检查连接和软件版本。',
           4 => '本次操作没有有效批准；请查看原申请状态。',
+          5 => '本次交付未完成，请查看原操作和清理状态。',
           8 => '内容或版本已变化；请核对原记录，不要直接重复提交。',
           7 => '结果尚未确认，请查询原操作，不要重新提交或执行。',
           _ => '本次操作未完成。',
@@ -817,6 +868,32 @@ class ChiyoCli {
       );
     }
     if (executing) {
+      if ((i.path, data['delivery']) case ('files fetch', final Map delivery)) {
+        final state = delivery['state'];
+        if (state == 'unknown') {
+          return _failure(
+            'delivery_unknown',
+            '原附件交付结果尚未确认，请查询原操作。',
+            7,
+            i.json,
+            data: data,
+          );
+        }
+        if ({
+          'released',
+          'expired',
+          'failed',
+          'cleanup_pending',
+        }.contains(state)) {
+          return _failure(
+            'delivery_unavailable',
+            '原附件副本已不可用，请查看交付记录；本次没有重新领取。',
+            5,
+            i.json,
+            data: data,
+          );
+        }
+      }
       if ({
         'denied',
         'expired',

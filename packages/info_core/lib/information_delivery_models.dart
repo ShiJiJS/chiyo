@@ -13,6 +13,55 @@ final class InformationFileFailure implements Exception {
   final String code;
   final String? deliveryId;
   final bool operationClaimed;
+
+  /// Recognized, content-free errors. Transports can preserve a typed failure
+  /// on HTTP 400/403 without forwarding arbitrary remote diagnostic fields.
+  static const codes = {
+    'not_authorized',
+    'session_ended',
+    'grant_expired',
+    'operation_conflict',
+    'field_removed',
+    'delivery_not_found',
+    'audit_failed',
+    'service_unavailable',
+    'delivery_capacity',
+    'delivery_io_failed',
+    'attachment_integrity_failed',
+    'delivery_unknown',
+    'invalid_reference',
+    'invalid_request',
+    'unsupported_protocol',
+    'unsupported_capability',
+    'invalid_json',
+    'limit_exceeded',
+    'not_a_file',
+    'attachment_missing',
+  };
+  static InformationFileFailure? fromResponse(Map<String, dynamic> value) {
+    if (value['protocolVersion'] is! int ||
+        value['protocolVersion'] != 2 ||
+        !codes.contains(value['errorCode']) ||
+        value['retryable'] != false ||
+        value['operationClaimed'] is! bool) {
+      return null;
+    }
+    final rawId = value['deliveryId'];
+    if (rawId != null &&
+        (rawId is! String ||
+            rawId.isEmpty ||
+            rawId.length > 200 ||
+            rawId.codeUnits.any((c) => c < 33 || c > 126))) {
+      return null;
+    }
+    final result = InformationFileFailure(
+      value['errorCode'] as String,
+      deliveryId: rawId as String?,
+      operationClaimed: value['operationClaimed'] as bool,
+    );
+    return result.toJson()['status'] == value['status'] ? result : null;
+  }
+
   Map<String, Object?> toJson() => {
     'protocolVersion': 2,
     'status': switch (code) {

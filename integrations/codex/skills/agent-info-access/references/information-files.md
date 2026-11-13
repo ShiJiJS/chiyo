@@ -1,108 +1,58 @@
-# 普通附件交付（旧聊天兼容）
+# 普通附件：申请、领取和释放
 
-Read this branch for a catalog field with `kind:file`, such as a resume or a
-document the user wants read or uploaded. This grants access to the original
-file contents. Token strings and private-key files used to authenticate belong
-to [Credential use](credential-use.md), which supplies use rather than raw data.
+资料字段为 `kind:file`，且任务需要阅读或上传简历、文档等原件时读本页。密码、Token、私钥等认证材料走[凭据使用](credential-use.md)，不能通过附件申请领取。
 
-This reference continues existing legacy attachment workflows through the verified
-`legacyCliPath`. Use that original chat's private association and separate stdin
-transport for every command. Examples omit `association`; include that same
-reference in each stdin JSON object, never in shell arguments. A new generic
-`chiyo` context is not a legacy association. Do not create another chat or claim
-its approvals to continue an old delivery; check the installed command help for
-the current supported entry points.
+## 申请与领取
 
-## Request and fetch
+从 `catalog list` 确认真实的资料 ID 和 file 字段 ID。公开目录不包含原文件名、路径或原文。使用本聊天的私有配置；普通终端也可用，不需要切换为 Codex 聊天。
 
-1. Query `capabilities`; require protocol2 and `information-attachments.v1`.
-   If absent, report that the installed app/CLI bundle cannot deliver files.
-   An old client or a text `read` is not a substitute for this capability.
-2. Discover actual item/field IDs in `catalog`. The public file entry describes
-   the field; it contains no original filename, body or source path. Include
-   this field with any text fields needed in one ordinary `request`. Keep that
-   requestId and use the main Skill's bounded status/wait workflow. Credential
-   use and classification approvals are separate capabilities.
-3. After approval, inspect `claim` for the owner's final fields and expiry.
-   Fetch only an approved file field using `file-fetch` with requestId, itemId,
-   fieldId and a unique logical operationId. Use the actual deadline returned
-   after user approval; fetches and process exits do not renew it.
-
-```json
-{"protocolVersion":2,"command":"file-fetch","requestId":"REQUEST_ID","itemId":"ITEM_ID","fieldId":"FILE_FIELD_ID","operationId":"resume-copy-01"}
-{"protocolVersion":2,"command":"file-status","operationId":"resume-copy-01"}
-{"protocolVersion":2,"command":"file-release","deliveryId":"DELIVERY_ID"}
+```bash
+chiyo access request --item ITEM_ID --field FILE_FIELD_ID --purpose "阅读简历并填写招聘网站" --json
+chiyo requests show REQUEST_ID --json
+chiyo files fetch --request REQUEST_ID --item ITEM_ID --field FILE_FIELD_ID --operation resume-copy-01 --json
 ```
 
-An `ok` fetch returns `delivery` with deliveryId, fieldVersion,
-attachmentVersion, fileName, mediaType, byteLength, path, state and expiresAt.
-`ready` means the host prepared a copy; it does not mean a tool read or uploaded
-it. Keep the deliveryId/operationId and actual returned path for this task.
+申请可以通过 `--input` 同时包含多个附件和普通字段，格式见 `access request --help`。批准后只领取最终获准的字段；未获准、到期、撤销或聊天结束时停止。等待命令超时不取消申请，也不延长批准。
 
-## Use the returned file
+`files fetch` 的统一结果在 `data.delivery`：
 
-Pass `delivery.path` directly to a same-machine document reader or a supported
-browser upload/file-chooser API. Read ordinary document contents when needed for
-the user's task. Use the user's requested destination for uploads; approval to
-read a file does not authorize sending it to unrelated sites.
+- `state:ready` 且有 `path`：本机副本已准备好。保留返回的 deliveryId、operationId、版本和实际路径。
+- `preparing`：原操作仍在准备，用 `files status` 有限等待。
+- `released`、`expired`、`failed`、`unknown` 或 `cleanup_pending`：查看原结果，不把它当作可用文件。
 
-`fileName` describes the original file. The managed path uses a safe basename
-such as `attachment.txt`, so it may differ from fileName. Use the returned path
-without rebuilding it, moving the managed file, or guessing a temporary folder.
-The media type/extension is a hint, not a parser or executable-safety guarantee.
+`fileName` 是原文件名，受管路径可能使用 `attachment.txt` 等安全文件名。直接使用返回路径，不猜目录、改名或移动受管文件。文件就绪不代表工具已读过，也不代表上传完成。
 
-A local path is usable only when the consuming tool can access this machine's
-filesystem. If its remote/headless browser cannot, report that transport limit.
-The app does not implement a remote upload bridge or inline Base64 delivery.
-File input selection alone is not upload success: check the consuming tool or
-website's actual result. After it has finished and closed its file input or
-reader, call `file-release` using deliveryId, including on task cancellation.
-Release concerns this managed copy, not files the user independently saved.
-With a server connection, the CLI's device guardian manages this copy even when
-the App is closed. The server records device reports; a server path is not a
-path to a file on the consuming device.
+## 使用与释放
 
-## Reuse and uncertain operations
+把 `data.delivery.path` 交给同机文件阅读工具，或正常浏览器的上传／文件选择接口。普通附件可按任务阅读原文；上传目的地仍以用户任务为准。只有浏览器实际提交并确认后才能报告上传成功，文件选择成功本身不够。
 
-Within the same live grant, a genuinely new file use can fetch again with a new
-operationId, without another approval. A new operation gets the field's current
-attachment version; replacement of the same field does not change an older
-delivered copy. Newly added/replaced-meaning fields need their own approval.
+远程或无头工具不能访问本机文件时，说明该工具的传输限制；本功能不提供远程上传桥或 Base64 原文输出。连接服务器时，副本也在 Agent 所在设备生成，NAS 路径不是本机路径。
 
-For a timeout, lost response or `delivery_unknown`, query `file-status` with the
-**original operationId** (or its deliveryId when known). Status returns facts,
-not a path. For a known ready copy still within the grant, retry the same fetch
-arguments and operationId to retrieve that original copy. It must not create a
-second copy or select a newer version. Changed fetch arguments with the same ID
-are an operation conflict.
+工具用完并关闭输入文件后释放副本；任务取消时也处理：
 
-- `preparing`: query the same operation with bounded polling.
-- `ready`: use the known copy, then release it.
-- `cleanup_pending`: leave ownership with the app and report the cleanup issue;
-  the app retains the registration and quota until it can safely reclaim it.
-- `released`, `expired`, `failed` or `unknown`: report the recorded result;
-  an old operation is not a fresh fetch. `not_found` after a transport timeout
-  alone does not prove the first fetch cannot still arrive. Resolve the original
-  operation before deciding whether a new logical use is needed.
+```bash
+chiyo files release --delivery DELIVERY_ID --json
+```
 
-Revocation, expiry, deleted fields or session end stop new fetches. With a server
-connection, App exit/reopen and ordinary server maintenance keep the original
-still-valid grant and deadline; they do not revive ended or expired permission.
-Keep successful operation facts distinct from current permission; no automatic
-reapproval, session recovery from public IDs, or retry under a new ID to hide an
-uncertain result. Restored backup history is not an active grant or live copy.
+释放只处理软件生成的受管副本，不删除用户自行另存的文件。App 关闭后，远程副本仍由本机看护进程检查到期、撤销与聊天结束；清理失败时保留登记并报告待清理。
 
-## File proposals and errors
+## 查询与重试
 
-For user-supplied file ingestion or new versions, read
-[source intake and file proposals](information-file-intake.md). Query current
-upload/update capabilities and dynamic file examples, then give the supplied
-path to the CLI for submission. This is a proposal, not admission or reading
-permission. On an old service without that capability, defer the affected
-proposal and explain what is missing. Preserve file fields as files.
+```bash
+chiyo files status --operation resume-copy-01 --json
+chiyo files status --delivery DELIVERY_ID --json
+chiyo operations show resume-copy-01 --json
+chiyo operations retry resume-copy-01 --json
+```
 
-For permission/integrity/capacity/service errors, retain the original public
-operation IDs and explain the error. Let the owner check the current field,
-quota or pending cleanup; do not delete history or change scope to force a
-fetch. A revoked grant stops new access but cannot retract copies already read,
-saved elsewhere or uploaded by a consuming tool.
+状态查询和 `operations list/show` 只返回事实，不返回路径或原文。回复丢失时，先用原 operationId 查询。恢复使用原编号和原参数；`operations retry` 或同一 `files fetch` 可取回仍有效的原副本，不会创建第二份或改取新版。修改原编号的内容会冲突。
+
+`unknown`、网络超时后的 `not_found` 不证明第一次领取从未到达，不换编号掩盖未知结果。已释放或过期的旧操作不再次交付；确有新的业务用途且原许可仍有效时，才建立新操作。一次新领取使用字段当时的附件版本，不改变已有副本。新增字段仍需申请。
+
+普通服务器重启保留原有效申请和期限；备份恢复的只读历史不恢复聊天或副本使用能力。许可撤销不能追回已经读过、另存或上传的内容。
+
+## 录入与错误
+
+用户提供文件要求保存或修订，走[来源整理与文件提案](information-file-intake.md)和动态模板，不把源文件先当作已有附件申请领取。预检与提案不表示入库或获准阅读。
+
+能力不支持时报告需要更新当前软件；不要把 file 字段改成普通文本读取。权限、完整性、容量或清理出错时保留原编号，核对原结果；不删除登记或改范围强行重领。

@@ -17,8 +17,9 @@ App 管理资料和审批，CLI 查询、提案和使用获准内容。模板格
 | --- | --- |
 | 用户给文件，要求新增或更新资料 | 读[来源整理与文件例子](references/information-file-intake.md)，查 `directories list`、`catalog list`、`credentials list`，再查 `templates list/show/examples` |
 | 阅读已保存的普通字段 | 从 `catalog list` 选准确资料与字段，用 `access request`；等待原申请后 `access read` |
+| 读取或上传已保存的普通附件 | 读[普通附件](references/information-files.md)，用 `access request` 申请 file 字段，获准后 `files fetch/status/release` |
 | 密码、Token、私钥用于登录或程序 | 读[凭据使用](references/credential-use.md)，先确定真正目的地，再查 `doctor`，使用 `fill` 或 `exec` |
-| 继续旧版普通附件交付或整理任务 | 按下方兼容说明与[普通附件](references/information-files.md)使用原聊天的旧协议；不要换聊天继承批准 |
+| 继续旧版整理任务 | 按下方兼容说明使用原聊天的旧协议；不要换聊天继承批准 |
 
 ## 整理和提交
 
@@ -52,7 +53,7 @@ App 管理资料和审批，CLI 查询、提案和使用获准内容。模板格
 
 ## 旧聊天兼容与结束
 
-本包保留 `info-codex` 兼容旧协议与既有授权，位置由已核对描述的 legacyCliPath 给出；不能由改名猜路径。旧协议的 association 通过独立 stdin 传入，仍核对原 CODEX_THREAD_ID，不能把新通用聊天配置冒充旧 association。继续旧 SSH 会话不限时、普通附件和整理任务时读取相应兼容说明及旧入口 `--help`。没有原私有证明就不能继承旧任务，也不为凑功能自动重建申请。
+本包保留 `info-codex` 兼容旧协议与既有授权，位置由已核对描述的 legacyCliPath 给出；不能由改名猜路径。旧协议的 association 通过独立 stdin 传入，仍核对原 CODEX_THREAD_ID，不能把新通用聊天配置冒充旧 association。继续旧 SSH 会话不限时和整理任务时读取相应兼容说明及旧入口 `--help`。普通附件可通过本包的 `files` 命令继续使用原聊天的许可。没有原私有证明就不能继承旧任务，也不为凑功能自动重建申请。
 
 已有 Codex 宿主委托继续使用原 delegate 规则；子聊天必须收到父聊天明确传递的私有委托，公开父聊天 ID 不能代替证明。普通 CLI 退出、子 Agent 完成、切换或归档聊天不等于收到根聊天结束事件。通用聊天实际结束使用 `chat end`；宿主有真实结束事件时由适配器处理。服务器普通重启不延长批准或恢复已结束许可。撤销阻止后续使用，不能追回已经披露的内容或撤销外部程序已经做的事。
 

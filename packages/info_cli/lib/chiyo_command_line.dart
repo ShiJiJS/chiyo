@@ -103,6 +103,24 @@ class ChiyoCommandLine {
     _request(accessRead);
     accessRead.addOption('item', help: '资料 ID。');
     accessRead.addOption('field', help: '字段 ID。');
+    _command('files', '领取、查询和释放获准的普通附件副本；不用于密码或私钥。');
+    final fetch = _command(
+      'files fetch',
+      '领取本机受管副本；ready 的 path 才可交给同机工具。相同操作编号取回原副本。',
+      example:
+          'chiyo files fetch --request REQUEST_ID --item ITEM_ID --field FILE_FIELD_ID --operation resume-copy-01 --json',
+    );
+    _request(fetch);
+    fetch.addOption('item', help: '资料 ID。');
+    fetch.addOption('field', help: '已批准的 file 类型字段 ID。');
+    _operation(fetch);
+    final fileStatus = _command('files status', '查询原交付状态，不返回路径或重新领取原文。');
+    fileStatus.addOption('operation', help: '原领取操作编号；与 --delivery 二选一。');
+    fileStatus.addOption('delivery', help: '已返回的交付 ID；与 --operation 二选一。');
+    _command(
+      'files release',
+      '同机工具用完后释放受管副本，不删除用户另存的文件。',
+    ).addOption('delivery', help: '领取时返回的交付 ID。');
     _command('requests', '查询本聊天的访问、凭据、提案及整理申请。');
     final requests = _command('requests list', '找回本聊天的申请，不按公开聊天 ID 查询其他聊天。');
     requests.addOption(
@@ -419,10 +437,17 @@ class ChiyoCommandLine {
       'credentials reveal read',
     }.contains(path)) {
       required('request');
-    } else if (path == 'access read') {
+    } else if (path == 'access read' || path == 'files fetch') {
       for (final key in ['request', 'item', 'field']) {
         required(key);
       }
+    } else if (path == 'files status') {
+      if ((options['operation'] == null) == (options['delivery'] == null)) {
+        throw const ChiyoUsageFailure('--operation 和 --delivery 必须选一个。');
+      }
+      required(options['operation'] == null ? 'delivery' : 'operation');
+    } else if (path == 'files release') {
+      required('delivery');
     } else if (path == 'access request') {
       required('purpose');
       if (options['input'] == null) {
