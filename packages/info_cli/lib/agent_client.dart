@@ -81,15 +81,18 @@ class AgentClient {
     _remote!.profile,
     directory: focusedFillHostDirectory,
   );
-  DeviceCredentialJournal? get _deviceCredentialJournal =>
-      _remote != null && deviceFileStateDirectory != null
-      ? DeviceCredentialJournal(
-          _remote.profile,
-          Directory(
-            '${deviceFileStateDirectory!.absolute.parent.path}/credential-executions',
-          ),
-        )
-      : null;
+  DeviceCredentialJournal? get _deviceCredentialJournal {
+    final profile = _remote?.profile ?? _local?.profile;
+    return profile != null && deviceFileStateDirectory != null
+        ? DeviceCredentialJournal(
+            profile,
+            Directory(
+              '${deviceFileStateDirectory!.absolute.parent.path}/credential-executions',
+            ),
+          )
+        : null;
+  }
+
   late final Future<void> _deviceFileMaintenance =
       _remote != null && deviceFileStateDirectory != null
       ? DeviceInformationFiles(

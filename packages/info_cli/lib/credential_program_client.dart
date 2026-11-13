@@ -3,18 +3,9 @@ part of 'agent_client.dart';
 const _programBase = '/credential-use/program';
 
 extension _ProgramClient on AgentClient {
-  DeviceCredentialJournal get _programJournal {
-    final profile = _remote?.profile ?? _local?.profile;
-    if (profile == null || deviceFileStateDirectory == null) {
-      throw const CredentialUseFailure('service_unavailable');
-    }
-    return DeviceCredentialJournal(
-      profile,
-      Directory(
-        '${deviceFileStateDirectory!.absolute.parent.path}/credential-executions',
-      ),
-    );
-  }
+  DeviceCredentialJournal get _programJournal =>
+      _deviceCredentialJournal ??
+      (throw const CredentialUseFailure('service_unavailable'));
 
   Future<Map<String, dynamic>> _programStatus(String operation) async {
     final result = await _call('/operations/show', {
