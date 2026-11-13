@@ -215,7 +215,13 @@ class ChiyoIntentStore {
         final raw = await PrivateConnectionFiles.read(file);
         if (raw?['operationId'] is! String) throw const FormatException();
         final record = await read(raw!['operationId'] as String);
-        if (record == null || _file(record.operationId).path != file.path) {
+        if (record == null ||
+            _file(record.operationId).uri.pathSegments.last !=
+                file.uri.pathSegments.last ||
+            !await FileSystemEntity.identical(
+              _file(record.operationId).path,
+              file.path,
+            )) {
           throw const FormatException();
         }
         result.add(record);
