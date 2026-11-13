@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:test/test.dart';
+import 'package:info_workspace/approval_transport.dart';
+import 'package:info_workspace/workspace_approvals.dart';
 import 'support/device_credential_fixture.dart';
 
 const base = '/credential-use/batch';
@@ -37,6 +39,166 @@ void noPrivate(Object value) {
 }
 
 void main() {
+  test(
+    'normal App inbox reviews one multi-credential request and recovers its exact partial decision after restart',
+    () async {
+      final f = await DeviceCredentialFixture.create();
+      addTearDown(f.dispose);
+      final a = f.agents.first;
+      final session = (await a.call('/session/lifecycle', {
+        'chatLabel': 'Synthetic App review',
+      }))['sessionSecret'];
+      final cs = await f.runtime.run(() async {
+        final owner = f.runtime.service.owner;
+        final items = <ManagedCredential>[];
+        for (var i = 0; i < 2; i++) {
+          final c = await owner.createStringCredential(
+            name: 'Synthetic password $i',
+            publicPurpose: '',
+            secret: password,
+          );
+          items.add(
+            await owner.updateCredentialMetadata(
+              c.id,
+              c.revision,
+              name: c.name,
+              publicPurpose: '',
+              privateNote: '',
+              suggestedBinding: 'password',
+              discoverable: true,
+            ),
+          );
+        }
+        return items;
+      });
+      final created = await a.call('$base/request', {
+        'sessionSecret': session,
+        'operationId': 'app-submit',
+        'input': {
+          'protocolVersion': 3,
+          'purpose': 'Synthetic App workflow',
+          'agentName': 'Trial Agent',
+          'externalChatId': 'trial-chat',
+          'submissionVersion': 1,
+          'items': [
+            for (final (index, c) in cs.indexed)
+              {'credentialId': c.id, 'destination': target('p${index + 1}')},
+          ],
+        },
+      });
+      final id = created['requestId'] as String;
+      final inbox = approvalResultsFromJson(
+        await f.owner.request('POST', '/v1/owner/approvals/query', {}),
+      );
+      expect(inbox.pending, 1);
+      expect(inbox.items.single.id, id);
+      final summary = await f.owner.request('GET', '/v1/owner/updates');
+      expect((summary['summary'] as Map)['pending'], 1);
+      final raw = await f.owner.request(
+        'GET',
+        '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
+      );
+      expect(raw['version'], 3);
+      noPrivate(raw);
+      final detail = approvalDetailFromJson(raw);
+      expect(detail.credentialBatch, true);
+      expect(detail.scopes, hasLength(2));
+      expect(
+        detail.scopes.first.label,
+        contains('https://synthetic.test/login'),
+      );
+      expect(detail.scopes.first.label, contains('#password'));
+      expect(detail.scopes.first.record.id, cs.first.id);
+      expect(() => approvalDetailToJson(detail, version: 2), throwsA(anything));
+      final change = WorkspaceApprovalChange(
+        operationId: 'app-partial',
+        requestId: id,
+        reviewToken: detail.reviewToken,
+        action: WorkspaceApprovalAction.approve,
+        selected: ['b1'],
+      );
+      final receipt = approvalReceiptFromJson(
+        await f.owner.request(
+          'POST',
+          '/v1/owner/approvals/decisions',
+          approvalChangeToJson(change),
+        ),
+      );
+      expect(receipt.matches(change), true);
+      expect(
+        approvalReceiptFromJson(
+          await f.owner.request(
+            'POST',
+            '/v1/owner/approvals/decisions',
+            approvalChangeToJson(change),
+          ),
+        ).matches(change),
+        true,
+      );
+      final decided = approvalDetailFromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
+        ),
+      );
+      expect(decided.approved, {'b1'});
+      expect(decided.request.state, WorkspaceApprovalState.approved);
+      expect(
+        (await a.call('$base/status', {
+          'sessionSecret': session,
+          'requestId': id,
+        }))['status'],
+        'partially_approved',
+      );
+      await f.reopen();
+      final recovered = approvalReceiptFromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/approvals/operations/app-partial',
+        ),
+      );
+      expect(recovered.matches(change), true);
+      final after = approvalDetailFromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
+        ),
+      );
+      expect(after.credentialExpiresAt, decided.credentialExpiresAt);
+      final revoke = WorkspaceApprovalChange(
+        operationId: 'app-revoke',
+        requestId: id,
+        reviewToken: after.reviewToken,
+        action: WorkspaceApprovalAction.revoke,
+      );
+      expect(
+        approvalReceiptFromJson(
+          await f.owner.request(
+            'POST',
+            '/v1/owner/approvals/decisions',
+            approvalChangeToJson(revoke),
+          ),
+        ).matches(revoke),
+        true,
+      );
+      final original = approvalReceiptFromJson(
+        await f.owner.request(
+          'POST',
+          '/v1/owner/approvals/decisions',
+          approvalChangeToJson(change),
+        ),
+      );
+      expect(original.matches(change), true);
+      final finalState = approvalDetailFromJson(
+        await f.owner.request(
+          'GET',
+          '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
+        ),
+      );
+      expect(finalState.request.state, WorkspaceApprovalState.revoked);
+      expect(finalState.approved, isEmpty);
+    },
+  );
   test(
     'HTTPS multi-credential request, partial decision, original device and one-time App material',
     () async {

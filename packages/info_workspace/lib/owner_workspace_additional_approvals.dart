@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
 import 'owner_credential_use_projection.dart';
 import 'workspace_source.dart';
+import 'owner_workspace_credential_batches.dart';
 
 /// Existing AI requests only. This adapter cannot initiate or execute a request.
 class OwnerWorkspaceAdditionalApprovals {
@@ -10,7 +11,9 @@ class OwnerWorkspaceAdditionalApprovals {
     : projection = OwnerCredentialUseProjection(owner);
   final core.OwnerAccess owner;
   final OwnerCredentialUseProjection projection;
+  late final batches = OwnerWorkspaceCredentialBatches(owner);
   bool contains(String id) =>
+      batches.contains(id) ||
       owner.credentialUseRequests.any((r) => r.id == id) ||
       owner.organizationTasks.any((r) => r.id == id);
   String _hash(Object value) =>
@@ -81,6 +84,7 @@ class OwnerWorkspaceAdditionalApprovals {
         state: _organizationState(t),
       );
   List<WorkspaceApprovalSummary> summaries() => [
+    ...batches.summaries(),
     for (final r in owner.credentialUseRequests) credentialSummary(r),
     for (final t in owner.organizationTasks) organizationSummary(t),
   ];
@@ -91,6 +95,7 @@ class OwnerWorkspaceAdditionalApprovals {
 
   /// Shared metadata stamp for history links and the original decision.
   String historyReviewToken(String id) {
+    if (batches.contains(id)) return batches.reviewToken(id);
     if (owner.credentialUseRequests.any((r) => r.id == id)) {
       final r = _credential(id);
       final c = owner.credentials
@@ -128,6 +133,7 @@ class OwnerWorkspaceAdditionalApprovals {
   }
 
   Future<WorkspaceApprovalDetail> read(String id) async {
+    if (batches.contains(id)) return batches.read(id);
     if (owner.credentialUseRequests.any((r) => r.id == id)) {
       return _readCredential(_credential(id));
     }
@@ -284,11 +290,17 @@ class OwnerWorkspaceAdditionalApprovals {
         commandDigest: r.commandDigest,
       );
   Future<WorkspaceApprovalReceipt?> receipt(String id) async {
+    final batch = batches.receipt(id);
+    if (batch != null) return batch;
     final r = await owner.additionalApprovalReceipt(id);
     return r == null ? null : _receipt(r);
   }
 
   Future<WorkspaceApprovalReceipt> change(WorkspaceApprovalChange c) async {
+    if (batches.contains(c.requestId) ||
+        batches.receipt(c.operationId) != null) {
+      return batches.change(c);
+    }
     final prior = await owner.additionalApprovalReceipt(c.operationId);
     if (prior != null) {
       if (prior.requestId != c.requestId ||

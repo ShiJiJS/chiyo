@@ -101,20 +101,24 @@ Map<String, Object?> approvalDetailToJson(
 }) {
   // The original endpoint stays v1 and refuses credential details. Only the
   // explicit v2 endpoint can deliver the complete mixed review to a new App.
-  if (version != 1 && version != 2) {
+  if (!{1, 2, 3}.contains(version)) {
     throw const FormatException('Invalid approval version');
+  }
+  if (d.credentialBatch && version != 3) {
+    throw const WorkspaceFailure('unsupported', '请更新 App 后核对这份多凭据申请。');
   }
   if (version == 1 && (d.credential != null || d.executions.isNotEmpty)) {
     throw const WorkspaceFailure('unsupported', '此类申请的联网接入尚未完成。');
   }
   return {
-    if (version == 2) ...{
-      'version': 2,
+    if (version >= 2) ...{
+      'version': version,
       'credential': d.credential == null
           ? null
           : credentialUseRequestToJson(d.credential!),
       'executions': d.executions.map(approvalExecutionToJson).toList(),
     },
+    if (version == 3) 'credentialBatch': d.credentialBatch,
     'request': approvalSummaryToJson(d.request),
     'reviewToken': d.reviewToken,
     'scopes': [
@@ -161,8 +165,9 @@ Map<String, Object?> approvalDetailToJson(
 WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
     _parse(() {
       final version = j['version'] ?? 1;
-      if (version != 1 && version != 2 ||
-          version == 2 && !j.containsKey('credential') ||
+      if (!{1, 2, 3}.contains(version) ||
+          version >= 2 && !j.containsKey('credential') ||
+          version == 3 && j['credentialBatch'] is! bool ||
           version == 1 &&
               (j.containsKey('credential') || j.containsKey('executions'))) {
         throw const FormatException();
@@ -212,10 +217,11 @@ WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
         approveUnavailableReason: j['approveUnavailableReason'] as String?,
         fileVersionPolicy: j['fileVersionPolicy'] as String?,
         decisionUnavailableReason: j['decisionUnavailableReason'] as String?,
-        credential: version == 2 && j['credential'] != null
+        credentialBatch: version == 3 && j['credentialBatch'] == true,
+        credential: version >= 2 && j['credential'] != null
             ? credentialUseRequestFromJson(j['credential'])
             : null,
-        executions: version == 2
+        executions: version >= 2
             ? (j['executions'] as List).map(approvalExecutionFromJson)
             : const [],
       );
@@ -223,7 +229,15 @@ WorkspaceApprovalDetail approvalDetailFromJson(Map<String, dynamic> j) =>
                 WorkspaceApprovalKind.credential,
                 WorkspaceApprovalKind.focus,
               }.contains(result.request.kind)) !=
-              (result.credential != null) ||
+              (result.credential != null || result.credentialBatch) ||
+          result.credentialBatch &&
+              (result.credential != null ||
+                  result.executions.isNotEmpty ||
+                  result.scopes.isEmpty ||
+                  result.scopes.length > 20 ||
+                  result.scopes.any(
+                    (s) => s.kind != WorkspaceApprovalScopeKind.credential,
+                  )) ||
           result.credential != null &&
               result.credential!.id != result.request.id ||
           result.executions.any(

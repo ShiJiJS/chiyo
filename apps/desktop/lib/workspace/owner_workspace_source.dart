@@ -266,6 +266,20 @@ class OwnerWorkspaceSource
                   ],
               ],
               [
+                for (final r in owner.credentialBatches)
+                  [
+                    r.id,
+                    r.revision,
+                    owner.credentialBatchState(r),
+                    for (final item in r.items)
+                      [item.id, owner.credentialBatchItemState(r, item)],
+                  ],
+              ],
+              [
+                for (final op in owner.credentialBatchOperations)
+                  owner.credentialBatchOperationView(op),
+              ],
+              [
                 for (final e in owner.credentialExecutions)
                   [
                     e.id,
@@ -364,7 +378,9 @@ class OwnerWorkspaceSource
     if (requestSummary != null) return requestSummary!(records);
     return WorkspaceSummary(
       records: records,
-      pending: owner.queryInbox(limit: 1).pendingCount,
+      pending:
+          owner.queryInbox(limit: 1).pendingCount +
+          owner.pendingCredentialBatchCount,
       proposals: owner.queryProposals(limit: 1).pendingCount,
     );
   });
