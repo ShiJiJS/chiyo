@@ -64,6 +64,7 @@ class WindowsBundledTools {
       if (!isApp) {
         final name = binary.uri.pathSegments.last.toLowerCase();
         if (!const {
+              'chiyo.exe',
               'info.exe',
               'info-codex.exe',
               'info-codex-hook.exe',

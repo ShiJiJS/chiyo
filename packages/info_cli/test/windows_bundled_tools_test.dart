@@ -144,6 +144,37 @@ void main() {
       expect(await available(probe), false);
     },
   );
+  test(
+    'unified chiyo and its prepared copy resolve only matching shipped tools',
+    () async {
+      final direct = WindowsBundledTools(
+        executable: file('cli/chiyo.exe').path,
+      );
+      expect(await available(direct), true);
+      final reference = await direct.sourceReference();
+      expect(reference, isNotNull);
+      final prepared = await Directory(
+        '${root.path}/prepared chiyo 中文',
+      ).create();
+      final binary = await file(
+        'cli/chiyo.exe',
+      ).copy('${prepared.path}/chiyo.exe');
+      await File(
+        '${prepared.path}/${WindowsBundledTools.sourceFile}',
+      ).writeAsString(jsonEncode(reference));
+      final probe = WindowsBundledTools(executable: binary.path);
+      expect(await available(probe), true);
+      final rows = await probe.read();
+      expect(rows.take(2).map((r) => r.receiver), [
+        'gh_token',
+        'aws_shared_credentials',
+      ]);
+      expect(rows.last.receiver, 'ssh_identity');
+      await binary.writeAsString('tampered unified command');
+      expect(await available(probe), false);
+      expect(await probe.sourceReference(), null);
+    },
+  );
   test('complete package can move, stale external pointer cannot', () async {
     final reference = (await WindowsBundledTools(
       executable: file('cli/info-codex.exe').path,
