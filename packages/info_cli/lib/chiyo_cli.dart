@@ -11,10 +11,12 @@ import 'chiyo_command_line.dart';
 import 'chiyo_context.dart';
 import 'chrome_browser_fill.dart';
 import 'chiyo_intents.dart';
+import 'chiyo_programs.dart';
 import 'device_credential_batch_host.dart';
 part 'chiyo_fill.dart';
 part 'chiyo_proposals.dart';
 part 'chiyo_reveal.dart';
+part 'chiyo_exec.dart';
 
 class ChiyoRunResult {
   const ChiyoRunResult(
@@ -392,6 +394,9 @@ class ChiyoCli {
         if (record.kind == 'reveal-read') {
           return _revealReceipt(client, record);
         }
+        if (record.kind == 'exec-request' || record.kind == 'exec-run') {
+          return _continueProgram(client, record, recover: true);
+        }
         // An execution record is never an instruction to type again. Remaining
         // adapters can recover their own immutable intent through this seam.
         return client.execute({'command': 'operations-show', 'id': id});
@@ -491,6 +496,17 @@ class ChiyoCli {
         return _requestFill(i);
       case 'fill run':
         return _runFill(i);
+      case 'exec request':
+        return _requestProgram(i, client);
+      case 'exec run':
+        return _runProgram(i, client);
+      case 'exec output':
+        return client.execute({
+          'command': 'program-output',
+          'operationId': _required(i, 'operation'),
+          'cursor': _integer(i, 'cursor', 0, 2147483647),
+          'limit': _integer(i, 'limit', 1, 16),
+        });
       case 'proposals check':
       case 'proposals submit':
         return _proposal(i, client);
@@ -797,18 +813,27 @@ class ChiyoCli {
       if (state == 'unknown' || state == 'request_unknown') {
         return _failure(
           'execution_unknown',
-          '结果尚无法确认，请查询原操作；不要再次填写。',
+          '结果尚无法确认，请查询原操作；不要重新执行。',
           7,
           i.json,
           data: data,
         );
       }
-      if ({'failed', 'refused', 'not_started', 'partial'}.contains(state)) {
+      if ({
+            'failed',
+            'refused',
+            'not_started',
+            'partial',
+            'start_failed',
+            'prepare_failed',
+          }.contains(state) ||
+          state == 'exited' && data['exitCode'] != 0) {
         return _failure(code, '本次执行未完成，请查看原操作记录。', 5, i.json, data: data);
       }
     }
     if (!{
       'ok',
+      'accepted',
       'pending',
       'approved',
       'partially_approved',

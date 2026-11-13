@@ -84,20 +84,36 @@ class CredentialExecutionHost {
     }
     _prune();
     final command = input['command'];
+    final program = const {
+      'program-run',
+      'program-status',
+      'program-output',
+      'program-cleanup',
+    }.contains(command);
+    final starts = command == 'run-use' || command == 'program-run';
     if (!{
-      'run-use',
-      'execution-status',
-      'execution-output',
-      'cleanup-use',
-    }.contains(command)) {
+          'run-use',
+          'execution-status',
+          'execution-output',
+          'cleanup-use',
+        }.contains(command) &&
+        !program) {
       return Map.from(
         const CredentialUseFailure(
           'invalid_plan',
         ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
       );
     }
-    if (command != 'run-use') {
-      final entry = _entries[input['executionId']];
+    if (!starts) {
+      final entry = program
+          ? _entries.values
+                .where(
+                  (entry) =>
+                      entry.session == session &&
+                      entry.operationId == input['operationId'],
+                )
+                .firstOrNull
+          : _entries[input['executionId']];
       if (entry != null && entry.session == session) {
         return entry.client.execute(input);
       }
@@ -108,15 +124,16 @@ class CredentialExecutionHost {
         client.close();
       }
     }
-    if (input['protocolVersion'] == 2) {
+    if (program || input['protocolVersion'] == 2) {
       // Query before reserving a capacity slot: an old operation is readable
       // even when all slots are occupied, and never needs a second worker.
       final query = _client(session);
       try {
-        final existing = await query.execute({
-          ...input,
-          'command': 'operation-status',
-        });
+        final existing = await query.execute(
+          program
+              ? {...input, 'command': 'program-status'}
+              : {...input, 'command': 'operation-status'},
+        );
         if (existing['status'] != 'not_found') return existing;
       } finally {
         query.close();
@@ -158,7 +175,11 @@ class CredentialExecutionHost {
     try {
       final result = await client.execute(input);
       if (result['status'] == 'accepted') {
-        final entry = _HostedExecution(client, session);
+        final entry = _HostedExecution(
+          client,
+          session,
+          operationId: program ? input['operationId'] as String : null,
+        );
         if (!_closed) _entries[result['executionId'] as String] = entry;
         retained = true;
         unawaited(
@@ -199,8 +220,9 @@ class CredentialExecutionHost {
 }
 
 class _HostedExecution {
-  _HostedExecution(this.client, this.session);
+  _HostedExecution(this.client, this.session, {this.operationId});
   final AgentClient client;
   final String session;
+  final String? operationId;
   DateTime? finishedAt;
 }

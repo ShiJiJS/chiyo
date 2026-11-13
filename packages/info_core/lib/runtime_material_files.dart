@@ -105,6 +105,7 @@ class ManagedCredentialFiles {
           'known-hosts',
           'global-known-hosts',
         }.contains(name) &&
+        !RegExp(r'^credential-b(?:[1-9]|1[0-9]|20)\.bin$').hasMatch(name) &&
         !RegExp(r'^attachment\.[a-z0-9]{1,12}$').hasMatch(name)) {
       throw const RuntimeMaterialFailure('identity_mismatch');
     }

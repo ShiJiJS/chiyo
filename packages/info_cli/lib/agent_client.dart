@@ -16,6 +16,7 @@ import 'device_credential_host.dart';
 import 'device_focused_fill_host.dart';
 import 'agent_help.dart';
 part 'credential_runtime_client.dart';
+part 'credential_program_client.dart';
 part 'information_file_client.dart';
 part 'credential_import_client.dart';
 part 'information_import_client.dart';
@@ -103,7 +104,14 @@ class AgentClient {
   final CredentialProcessStarter _credentialProcessStarter;
   final bool _usesDefaultCredentialStarter;
   late final _credentialExecutions = _CredentialRuntimeExecutor(this);
-  Future<void> drainCredentialExecutions() => _credentialExecutions.drain();
+  late final _programExecutions = _CredentialProgramExecutor(this);
+  Future<void> drainCredentialExecutions() async {
+    await Future.wait([
+      _credentialExecutions.drain(),
+      _programExecutions.drain(),
+    ]);
+  }
+
   final int port;
   final String sourceAgent;
 
@@ -180,6 +188,7 @@ class AgentClient {
       'import-submit',
       'update-submit',
       'delete-submit',
+      'program-request',
     };
     if (_session != null &&
         (requireSubmissionMetadata || input.containsKey('submissionVersion')) &&
@@ -219,6 +228,15 @@ class AgentClient {
           'message': '服务器暂不支持新的提交说明，请更新服务器后重试。',
         };
       }
+    }
+    if ({
+      'program-request',
+      'program-run',
+      'program-status',
+      'program-output',
+      'program-cleanup',
+    }.contains(command)) {
+      return _executeProgramCommand(input);
     }
     if (command == 'request-reveal' || command == 'read-reveal') {
       if (_session == null) return {'status': 'unauthorized'};

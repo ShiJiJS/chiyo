@@ -41,6 +41,7 @@ class CredentialProgramOperation {
     'kind': 'program',
     'revision': revision,
     'itemIds': itemIds,
+    'programPlan': plan.toJson(),
     'fromBackup': archived,
   };
   Map<String, Object?> toStorageJson() => {

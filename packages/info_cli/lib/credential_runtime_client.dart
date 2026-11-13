@@ -819,6 +819,62 @@ extension _CredentialRuntimeClient on AgentClient {
   }
 }
 
+/// Worker receipts always use isolated directories. The target may receive
+/// explicit approved overrides, without changing the worker's control paths.
+Future<Map<String, String>> _isolatedCredentialEnvironment(
+  Directory folder,
+  String executable,
+) async {
+  final config = await Directory('${folder.path}/config').create();
+  final temp = await Directory('${folder.path}/temp').create();
+  final data = await Directory('${folder.path}/program-data').create();
+  final environment = <String, String>{
+    'HOME': config.path,
+    'USERPROFILE': config.path,
+    'APPDATA': config.path,
+    'LOCALAPPDATA': config.path,
+    'XDG_CONFIG_HOME': config.path,
+  };
+  if (Platform.isWindows) {
+    final system = Platform.environment['SystemRoot'];
+    if (system == null || system.isEmpty) {
+      throw const CredentialUseFailure('material_prepare_failed');
+    }
+    environment.addAll({
+      'SystemRoot': system,
+      'WINDIR': system,
+      'COMSPEC': '$system\\System32\\cmd.exe',
+      'TEMP': temp.path,
+      'TMP': temp.path,
+      'ProgramData': data.path,
+      'PATH': '$system\\System32;${File(executable).parent.path}',
+    });
+  } else {
+    environment.addAll({
+      'PATH': '/usr/bin:/bin',
+      'TMPDIR': temp.path,
+      'LANG': 'C.UTF-8',
+    });
+  }
+  return environment;
+}
+
+Future<void> _verifyCredentialExecutable(
+  ExecutableIdentity approved,
+  String cwd,
+) async {
+  final file = File(approved.path), stat = await File(approved.path).stat();
+  if (stat.type != FileSystemEntityType.file ||
+      stat.size != approved.byteLength ||
+      stat.modified.microsecondsSinceEpoch != approved.modifiedMicros ||
+      'sha256:${sha256.convert(await file.readAsBytes())}' != approved.sha256) {
+    throw const CredentialUseFailure('executable_changed');
+  }
+  if (!await Directory(cwd).exists()) {
+    throw const CredentialUseFailure('material_prepare_failed');
+  }
+}
+
 class _ExecutionOutput {
   _ExecutionOutput({List<List<int>> secretPatterns = const []})
     : _secretPatterns = secretPatterns;
@@ -910,11 +966,8 @@ List<List<int>> _credentialOutputPatterns(
       .toList();
 }
 
-class _CredentialRuntimeExecutor {
-  _CredentialRuntimeExecutor(this.client);
-  final AgentClient client;
+class _CredentialOutputStore {
   final outputs = <String, _ExecutionOutput>{};
-  final running = <Future<void>>{};
   int reservations = 0;
   void prune() {
     final cutoff = DateTime.now().subtract(const Duration(minutes: 30));
@@ -927,6 +980,33 @@ class _CredentialRuntimeExecutor {
     }
   }
 
+  Map<String, dynamic> output(String id, Object cursor, Object limit) {
+    if (cursor is! int || limit is! int || limit < 1 || limit > 16) {
+      throw const CredentialUseFailure('invalid_type');
+    }
+    final o = outputs[id];
+    if (o == null) throw const CredentialUseFailure('output_unavailable');
+    if (cursor < 0 || cursor > o.chunks.length) {
+      throw const CredentialUseFailure('cursor_out_of_range');
+    }
+    final chunks = o.chunks.skip(cursor).take(limit).toList();
+    return {
+      'protocolVersion': 1,
+      'status': 'ok',
+      'executionId': id,
+      'chunks': chunks,
+      'nextCursor': cursor + chunks.length,
+      'hasMore': cursor + chunks.length < o.chunks.length,
+      'outputComplete': o.complete,
+      'outputTruncated': o.truncated,
+    };
+  }
+}
+
+class _CredentialRuntimeExecutor extends _CredentialOutputStore {
+  _CredentialRuntimeExecutor(this.client);
+  final AgentClient client;
+  final running = <Future<void>>{};
   Future<Map<String, dynamic>> start(
     String id, {
     CredentialOperationInput? operation,
@@ -993,28 +1073,6 @@ class _CredentialRuntimeExecutor {
     while (running.isNotEmpty) {
       await Future.wait(running.toList());
     }
-  }
-
-  Map<String, dynamic> output(String id, Object cursor, Object limit) {
-    if (cursor is! int || limit is! int || limit < 1 || limit > 16) {
-      throw const CredentialUseFailure('invalid_type');
-    }
-    final o = outputs[id];
-    if (o == null) throw const CredentialUseFailure('output_unavailable');
-    if (cursor < 0 || cursor > o.chunks.length) {
-      throw const CredentialUseFailure('cursor_out_of_range');
-    }
-    final chunks = o.chunks.skip(cursor).take(limit).toList();
-    return {
-      'protocolVersion': 1,
-      'status': 'ok',
-      'executionId': id,
-      'chunks': chunks,
-      'nextCursor': cursor + chunks.length,
-      'hasMore': cursor + chunks.length < o.chunks.length,
-      'outputComplete': o.complete,
-      'outputTruncated': o.truncated,
-    };
   }
 
   Future<void> _launch(
@@ -1201,23 +1259,16 @@ class _CredentialRuntimeExecutor {
         }),
         flush: true,
       );
-      final config = await Directory('${folder.path}/config').create();
-      final temp = await Directory('${folder.path}/temp').create();
-      final programData = await Directory(
-        '${folder.path}/program-data',
-      ).create();
-      final env = <String, String>{
-        'HOME': config.path,
-        'USERPROFILE': config.path,
-        'APPDATA': config.path,
-        'LOCALAPPDATA': config.path,
-        'XDG_CONFIG_HOME': config.path,
-        if (tokenReceiver) ...{
-          'GH_CONFIG_DIR': config.path,
+      final env = await _isolatedCredentialEnvironment(folder, plan.path);
+      if (tokenReceiver) {
+        env.addAll({
+          'GH_CONFIG_DIR': env['XDG_CONFIG_HOME']!,
           'GH_HOST': 'github.com',
           'GH_PROMPT_DISABLED': '1',
           'GH_TOKEN': m.credentialMaterial.stringValue,
-        } else if (awsReceiver) ...{
+        });
+      } else if (awsReceiver) {
+        env.addAll({
           'AWS_SHARED_CREDENTIALS_FILE':
               '${materialLease!.path}${Platform.pathSeparator}credential.bin',
           'AWS_CONFIG_FILE':
@@ -1225,42 +1276,9 @@ class _CredentialRuntimeExecutor {
           'AWS_EC2_METADATA_DISABLED': 'true',
           'AWS_PAGER': '',
           'AWS_CLI_AUTO_PROMPT': 'off',
-        },
-      };
-      if (Platform.isWindows) {
-        final system = Platform.environment['SystemRoot'];
-        if (system == null || system.isEmpty) {
-          throw const CredentialUseFailure('material_prepare_failed');
-        }
-        env.addAll({
-          'SystemRoot': system,
-          'WINDIR': system,
-          'COMSPEC': '$system\\System32\\cmd.exe',
-          'TEMP': temp.path,
-          'TMP': temp.path,
-          'PATH': '$system\\System32;${File(plan.path).parent.path}',
-          'ProgramData': programData.path,
-        });
-      } else {
-        env.addAll({
-          'PATH': '/usr/bin:/bin',
-          'TMPDIR': temp.path,
-          'LANG': 'C.UTF-8',
         });
       }
-      final file = File(plan.path);
-      final stat = await file.stat();
-      if (stat.type != FileSystemEntityType.file ||
-          stat.size != plan.executable.byteLength ||
-          stat.modified.microsecondsSinceEpoch !=
-              plan.executable.modifiedMicros ||
-          'sha256:${sha256.convert(await file.readAsBytes())}' !=
-              plan.executable.sha256) {
-        throw const CredentialUseFailure('executable_changed');
-      }
-      if (!await Directory(plan.cwd).exists()) {
-        throw const CredentialUseFailure('material_prepare_failed');
-      }
+      await _verifyCredentialExecutable(plan.executable, plan.cwd);
       String materialPath(String name) =>
           '${materialLease!.path}${Platform.pathSeparator}$name';
       String hostsOption(String option, String file) =>

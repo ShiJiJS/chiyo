@@ -17,28 +17,49 @@ final class DeviceCredentialJournal {
 
   Future<DeviceCredentialJournalEntry> begin(
     CredentialExecutionMaterial material,
-  ) async {
+  ) => _begin(
+    material.executionId,
+    material.executionCapability,
+    material.jobName,
+  );
+
+  Future<DeviceCredentialJournalEntry> beginProgram(
+    CredentialProgramMaterial material,
+  ) => _begin(
+    material.executionId,
+    material.executionCapability,
+    material.jobName,
+    program: true,
+  );
+
+  Future<DeviceCredentialJournalEntry> _begin(
+    String executionId,
+    String capability,
+    String? jobName, {
+    bool program = false,
+  }) async {
     final identity = CredentialProcessIdentity.capture(pid);
     if (identity == null ||
-        material.jobName == null ||
-        !CredentialProcessJob.validName(material.jobName!)) {
+        jobName == null ||
+        !CredentialProcessJob.validName(jobName)) {
       identity?.close();
       throw const CredentialUseFailure('material_prepare_failed');
     }
     final folder = await privateDeviceDirectory(directory.absolute);
     final file = File(
-      '${folder.path}/${sha256.convert(utf8.encode(material.executionId))}.json',
+      '${folder.path}/${sha256.convert(utf8.encode(executionId))}.json',
     );
     try {
       if (await readPrivateDeviceState(file) != null) {
         throw const CredentialUseFailure('execution_unknown');
       }
       final entry = DeviceCredentialJournalEntry._(profile, file, {
-        'version': 1,
+        'version': program ? 2 : 1,
+        if (program) 'kind': 'program',
         'deviceScope': _scope,
-        'executionId': material.executionId,
-        'executionCapability': material.executionCapability,
-        'jobName': material.jobName,
+        'executionId': executionId,
+        'executionCapability': capability,
+        'jobName': jobName,
         'supervisorPid': pid,
         'supervisorIdentity': identity.value,
         'workerPid': null,
@@ -103,8 +124,9 @@ final class DeviceCredentialJournalEntry {
   final AgentConnectionProfile profile;
   final File file;
   final Map<String, dynamic> _state;
+  bool get _program => _state['version'] == 2 && _state['kind'] == 'program';
   void _validate() {
-    if (_state.length != 12 ||
+    if (_state.length != (_program ? 13 : 12) ||
         !_state.keys.toSet().containsAll(const {
           'version',
           'deviceScope',
@@ -119,7 +141,7 @@ final class DeviceCredentialJournalEntry {
           'report',
           'cleaned',
         }) ||
-        _state['version'] != 1 ||
+        (!_program && _state['version'] != 1) ||
         _state['deviceScope'] is! String ||
         !RegExp(r'^[0-9a-f]{64}$').hasMatch(_state['deviceScope'] as String) ||
         _state['executionId'] is! String ||
@@ -220,16 +242,22 @@ final class DeviceCredentialJournalEntry {
         await _save();
       }
       final result = await connection.call(
-        '/credential-use/device/execution/report',
+        _program
+            ? '/credential-use/program/report'
+            : '/credential-use/device/execution/report',
         report,
       );
       if (result['status'] != 'ok') return;
-      final cleaned = await connection
-          .call('/credential-use/device/cleanup/complete', {
-            'executionId': _state['executionId'],
-            'executionCapability': _state['executionCapability'],
-            'treeEnded': true,
-          });
+      final cleaned = await connection.call(
+        _program
+            ? '/credential-use/program/cleanup'
+            : '/credential-use/device/cleanup/complete',
+        {
+          'executionId': _state['executionId'],
+          'executionCapability': _state['executionCapability'],
+          'treeEnded': true,
+        },
+      );
       if (cleaned['status'] == 'ok') await file.delete();
     } finally {
       connection.close();

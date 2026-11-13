@@ -5,6 +5,40 @@ import 'package:test/test.dart';
 void main() {
   group('Darwin managed material files', () {
     test(
+      'program slots use private fixed names and reject out-of-range or arbitrary paths',
+      () async {
+        var lease = ManagedCredentialFiles.create();
+        addTearDown(() => ManagedCredentialFiles.cleanup(lease));
+        for (final name in [
+          'credential-b0.bin',
+          'credential-b21.bin',
+          '../credential-b1.bin',
+          'credential-unknown.bin',
+        ]) {
+          expect(
+            () => ManagedCredentialFiles.reserve(lease, [name]),
+            throwsA(isA<RuntimeMaterialFailure>()),
+          );
+        }
+        lease = ManagedCredentialFiles.reserve(lease, [
+          'credential-b1.bin',
+          'credential-b20.bin',
+        ]);
+        ManagedCredentialFiles.write(lease, 'credential-b1.bin', [1, 0, 255]);
+        ManagedCredentialFiles.verify(lease);
+        expect(await File('${lease.path}/credential-b1.bin').readAsBytes(), [
+          1,
+          0,
+          255,
+        ]);
+        expect(
+          FileStat.statSync('${lease.path}/credential-b20.bin').mode & 0x1ff,
+          0x180,
+        );
+      },
+    );
+
+    test(
       'owner-only files retain identity and allow only the first body write',
       () async {
         var lease = ManagedCredentialFiles.create();

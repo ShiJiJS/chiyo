@@ -95,11 +95,11 @@ final class DeviceCredentialHost {
       return await _control(record, '/execute', {
         'sessionSecret': session,
         'input': input,
-      }, uncertain: input['command'] == 'run-use');
+      }, uncertain: {'run-use', 'program-run'}.contains(input['command']));
     } on Object {
       // No timeout/failed probe creates a replacement while the original Host
       // identity or its lifetime lock is still live or inconclusive.
-      final uncertain = input['command'] == 'run-use';
+      final uncertain = {'run-use', 'program-run'}.contains(input['command']);
       return _failure(
         uncertain ? 'material_claim_failed' : 'service_unavailable',
         uncertain: uncertain,
