@@ -177,6 +177,89 @@ void main() {
         ),
       );
       expect(repo.credentialBatchOperations, isEmpty);
+      // Synthetic process facts exercise persistence only; no worker is started
+      // and this trusted repository test never issues an execution capability.
+      final onlyApproved =
+          Map<String, dynamic>.from(submitted.programPlan!.toJson())
+            ..remove('executableIdentity')
+            ..remove('stdin');
+      final operationPlan = CredentialProgramPlan.fromJson(
+        onlyApproved,
+        allowPortablePaths: true,
+      ).resolved(identity, '/execution-device/work');
+      const job = 'macos:AgentInfoRuntime-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+      final operation = CredentialProgramOperation(
+        sessionBinding: submitted.sessionBinding,
+        deviceId: device,
+        plan: operationPlan,
+        itemIds: ['b1', 'b2'],
+        progress: CredentialExecution(
+          id: 'synthetic-program-operation',
+          requestId: submitted.id,
+          protocolVersion: 2,
+          operationId: 'program-operation',
+          operationFingerprint: operationPlan.planHash,
+          createdAt: submitted.createdAt,
+          jobName: job,
+          cleanupState: 'pending',
+        ),
+      );
+      await runtime.run(
+        () => repo.commitCredentialProgramOperation(
+          operation,
+          expectedRevision: 0,
+          requestRevision: 2,
+          validate: () {},
+        ),
+      );
+      await expectLater(
+        runtime.run(
+          () => runtime.service.agent.requestCredentialBatch(
+            session,
+            device,
+            input,
+            operationId: 'program-operation',
+          ),
+        ),
+        throwsA(
+          isA<CredentialUseFailure>().having(
+            (e) => e.code,
+            'code',
+            'operation_conflict',
+          ),
+        ),
+      );
+      expect(repo.credentialBatches, hasLength(1));
+      await expectLater(
+        runtime.run(
+          () => repo.commitCredentialProgramOperation(
+            operation,
+            expectedRevision: 0,
+            requestRevision: 2,
+            validate: () {},
+          ),
+        ),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      final running = operation.withReport(
+        CredentialExecutionReport(
+          executionId: operation.id,
+          executionCapability: 'not-issued-by-this-test',
+          state: 'running',
+          pid: 1234,
+          processCreatedAt: 'synthetic-worker-identity',
+          startedAt: submitted.createdAt,
+          jobName: job,
+        ),
+      );
+      await runtime.run(
+        () => repo.commitCredentialProgramOperation(
+          running,
+          expectedRevision: 1,
+          requestRevision: 2,
+          validate: () {},
+        ),
+      );
       await runtime.close();
       await repo.close();
       final db = sqlite.sqlite3.open('${root.path}/source/library.db');
@@ -191,6 +274,12 @@ void main() {
         keys,
       );
       runtime = await OnlineInformationRuntime.open(repository: repo);
+      expect(repo.credentialProgramOperations.single.id, operation.id);
+      expect(repo.credentialProgramOperations.single.revision, 2);
+      expect(
+        repo.credentialProgramOperations.single.plan.toJson(),
+        operationPlan.toJson(),
+      );
       final repeated = await runtime.run(
         () => runtime.service.agent.requestCredentialBatch(
           session,
@@ -218,10 +307,13 @@ void main() {
           () => repo.backups.exportTo(path),
         ),
       );
-      expect((await repo.backups.inspect(path, recovery)).formatVersion, 29);
+      final preview = await repo.backups.inspect(path, recovery);
+      expect(preview.formatVersion, 29);
+      expect(preview.credentialExecutionCount, 1);
+      final targetKeys = TestKeyStore();
       final target = await EncryptedInformationRepository.open(
         '${root.path}/restored',
-        TestKeyStore(),
+        targetKeys,
       );
       final restored = InformationService(repository: target);
       try {
@@ -231,6 +323,14 @@ void main() {
         final history = target.credentialBatches.single;
         expect(history.archived, true);
         expect(history.programPlan!.toJson(), repeated.programPlan!.toJson());
+        final recorded = target.credentialProgramOperations.single;
+        expect(recorded.archived, true);
+        expect(recorded.progress.state, 'unknown');
+        expect(recorded.progress.processStarted, true);
+        expect(recorded.progress.pid, null);
+        expect(recorded.progress.jobName, null);
+        expect(recorded.progress.materialLease, null);
+        expect(recorded.plan.toJson(), operationPlan.toJson());
         expect(
           restored.owner.credentialBatchItemState(history, history.items.first),
           'revoked',
@@ -242,6 +342,23 @@ void main() {
       } finally {
         await restored.close();
         await target.close();
+      }
+      final reopened = await EncryptedInformationRepository.open(
+        '${root.path}/restored',
+        targetKeys,
+      );
+      try {
+        expect(reopened.credentialProgramOperations.single.archived, true);
+        expect(
+          reopened.credentialProgramOperations.single.progress.state,
+          'unknown',
+        );
+        expect(
+          reopened.credentialProgramOperations.single.progress.jobName,
+          null,
+        );
+      } finally {
+        await reopened.close();
       }
       for (final file in Directory(
         '${root.path}/source',

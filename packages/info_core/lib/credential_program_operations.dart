@@ -242,22 +242,19 @@ abstract interface class CredentialProgramRepository {
   });
 }
 
-void validateCredentialProgramCommit(
+void validateCredentialProgramRecord(
   CredentialUseBatch request,
   CredentialProgramOperation next,
-  CredentialProgramOperation? previous,
-  int expectedRevision,
 ) {
   CredentialProgramOperation.fromStorageJson(
     Map<String, dynamic>.from(next.toStorageJson()),
   );
   if (request.programPlan == null ||
-      next.archived ||
-      request.archived ||
+      request.decisions.isEmpty ||
+      next.archived != request.archived ||
       request.id != next.requestId ||
       request.sessionBinding != next.sessionBinding ||
-      request.deviceId != next.deviceId ||
-      (previous?.revision ?? 0) != expectedRevision) {
+      request.deviceId != next.deviceId) {
     throw const CredentialUseFailure('operation_conflict');
   }
   next.plan.requireApprovedScope(request.programPlan!);
@@ -275,6 +272,20 @@ void validateCredentialProgramCommit(
             next.plan.bindings.map((b) => b.fingerprint).toList()..sort(),
           )) {
     throw const CredentialUseFailure('invalid_reference');
+  }
+}
+
+void validateCredentialProgramCommit(
+  CredentialUseBatch request,
+  CredentialProgramOperation next,
+  CredentialProgramOperation? previous,
+  int expectedRevision,
+) {
+  validateCredentialProgramRecord(request, next);
+  if (next.archived ||
+      request.archived ||
+      (previous?.revision ?? 0) != expectedRevision) {
+    throw const CredentialUseFailure('operation_conflict');
   }
   if (previous == null) {
     if (next.revision != 1 ||

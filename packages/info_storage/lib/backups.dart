@@ -52,7 +52,8 @@ class BackupContents {
       (_tables['credential_batches']?.length ?? 0);
   int get credentialExecutionCount =>
       _tables['credential_executions']!.length +
-      (_tables['credential_batch_operations']?.length ?? 0);
+      (_tables['credential_batch_operations']?.length ?? 0) +
+      (_tables['credential_program_operations']?.length ?? 0);
   int get focusedFillCount => _tables['credential_focused_fills']!.length;
   int get sshTrustCount => _tables['ssh_host_trust']!.length;
   int get attachmentCount => attachments.where((v) => v.available).length;
@@ -221,6 +222,16 @@ class InformationBackups {
     ..._v26Columns,
     'credential_batches': ['id', 'session_binding', 'operation_id', 'payload'],
     'credential_batch_operations': [
+      'session_binding',
+      'operation_id',
+      'request_id',
+      'payload',
+    ],
+  });
+  static final _v29Columns = Map<String, List<String>>.unmodifiable({
+    ..._v28Columns,
+    'credential_program_operations': [
+      'execution_id',
       'session_binding',
       'operation_id',
       'request_id',
@@ -511,6 +522,19 @@ class InformationBackups {
           ];
         }
         _archiveCredentialBatches(tables, now);
+        tables['credential_program_operations'] =
+            await _repository._hasCredentialProgramTable()
+            ? [
+                for (final row
+                    in await _repository._db
+                        .customSelect(
+                          'SELECT execution_id,session_binding,operation_id,request_id,payload FROM credential_program_operations ORDER BY rowid',
+                        )
+                        .get())
+                  row.data,
+              ]
+            : [];
+        _archiveCredentialPrograms(tables);
       }
       final hasBatchHistory = tables['credential_batches']?.isNotEmpty ?? false;
       final hasProgramBatchHistory =
@@ -522,6 +546,8 @@ class InformationBackups {
         tables.remove('credential_batches');
         tables.remove('credential_batch_operations');
       }
+      if (!hasProgramBatchHistory)
+        tables.remove('credential_program_operations');
       final sessionSshGrants = tables['credential_use_requests']!.any(
         (row) =>
             CredentialUseRequest.fromJson(
@@ -659,7 +685,9 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (hasBatchHistory
+            in (hasProgramBatchHistory
+                    ? _v29Columns
+                    : hasBatchHistory
                     ? _v28Columns
                     : hasCredentialDeliveryExtensions || hasCredentialSnapshots
                     ? _v26Columns
@@ -1234,9 +1262,7 @@ class InformationBackups {
           await _repository._createCredentialBatchTables();
         }
         if (contents.formatVersion >= 29) {
-          await _repository._requireAdmissionFormat(
-            _credentialProgramBatchLibraryFormat,
-          );
+          await _repository._createCredentialProgramTable();
         }
         if (contents.formatVersion >= 27) {
           await _repository._requireAdmissionFormat(
@@ -1254,7 +1280,9 @@ class InformationBackups {
           );
         }
         for (final table
-            in (contents.formatVersion >= 28
+            in (contents.formatVersion >= 29
+                    ? _v29Columns
+                    : contents.formatVersion >= 28
                     ? _v28Columns
                     : contents.formatVersion >= 26
                     ? _v26Columns
@@ -1368,7 +1396,8 @@ class InformationBackups {
       21 || 22 || 23 || 24 => _v21Columns,
       25 => _v25Columns,
       26 || 27 => _v26Columns,
-      28 || 29 => _v28Columns,
+      28 => _v28Columns,
+      29 => _v29Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1597,6 +1626,10 @@ class InformationBackups {
     _validateBackupLibraryRecycle(tables);
     _validateBackupLibraryOrder(tables);
     _validateBackupCredentialBatches(
+      tables,
+      formatVersion: decoded['version'] as int,
+    );
+    _validateBackupCredentialPrograms(
       tables,
       formatVersion: decoded['version'] as int,
     );

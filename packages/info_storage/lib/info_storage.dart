@@ -24,6 +24,7 @@ part 'credentials_storage.dart';
 part 'credential_record_storage.dart';
 part 'credential_runtime_storage.dart';
 part 'credential_batches_storage.dart';
+part 'credential_program_storage.dart';
 part 'focused_fill_storage.dart';
 part 'information_files_storage.dart';
 part 'information_import_files_storage.dart';
@@ -184,6 +185,7 @@ class EncryptedInformationRepository
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
         CredentialBatchRepository,
+        CredentialProgramRepository,
         InformationAttachmentRepository,
         InformationImportFileRepository,
         InformationFileDeliveryRepository,
@@ -201,6 +203,22 @@ class EncryptedInformationRepository
         ServerProposalPasswordRepository {
   final _credentialBatches = <String, CredentialUseBatch>{};
   final _credentialBatchOperations = <String, CredentialBatchOperation>{};
+  final _credentialProgramOperations = <String, CredentialProgramOperation>{};
+  @override
+  List<CredentialProgramOperation> get credentialProgramOperations =>
+      List.unmodifiable(_credentialProgramOperations.values);
+  @override
+  Future<void> commitCredentialProgramOperation(
+    CredentialProgramOperation operation, {
+    required int expectedRevision,
+    required int requestRevision,
+    required void Function() validate,
+  }) => _commitCredentialProgramOperation(
+    operation,
+    expectedRevision: expectedRevision,
+    requestRevision: requestRevision,
+    validate: validate,
+  );
   @override
   List<CredentialUseBatch> get credentialBatches =>
       List.unmodifiable(_credentialBatches.values);
@@ -876,6 +894,7 @@ class EncryptedInformationRepository
     await _loadSshTrust();
     await _loadRuntime();
     await _loadCredentialBatches();
+    await _loadCredentialPrograms();
     _credentials.clear();
     _credentialMaterials.clear();
     for (final row

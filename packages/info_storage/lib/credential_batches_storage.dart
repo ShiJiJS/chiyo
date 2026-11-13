@@ -267,6 +267,21 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
           previousOperation: oldOperation,
           expectedOperationRevision: expectedOperationRevision,
         );
+        if (await _hasCredentialProgramTable()) {
+          for (final id in {
+            if (previous == null) request.operationId,
+            if (operation != null) operation.operationId,
+          }) {
+            final collision = await _db
+                .customSelect(
+                  'SELECT 1 FROM credential_program_operations WHERE session_binding=? AND operation_id=? LIMIT 1',
+                  variables: [Variable(request.sessionBinding), Variable(id)],
+                )
+                .get();
+            if (collision.isNotEmpty)
+              throw const CredentialUseFailure('operation_conflict');
+          }
+        }
         if (previous == null) {
           final collision = await _db
               .customSelect(

@@ -903,6 +903,12 @@ extension _CompleteBackups on InformationBackups {
               const <Map<String, Object?>>[])
         _storedBatchOperation(row),
     ];
+    final programOperations = [
+      for (final row
+          in tables['credential_program_operations'] ??
+              const <Map<String, Object?>>[])
+        _storedProgramOperation(row),
+    ];
     final deliveries = _validateBackupFileDeliveries(
       tables,
       contents.attachments,
@@ -1060,6 +1066,16 @@ extension _CompleteBackups on InformationBackups {
         ..clear()
         ..addEntries(
           batchOperations.map(
+            (o) => MapEntry(
+              _batchOperationKey(o.sessionBinding, o.operationId),
+              o,
+            ),
+          ),
+        );
+      _repository._credentialProgramOperations
+        ..clear()
+        ..addEntries(
+          programOperations.map(
             (o) => MapEntry(
               _batchOperationKey(o.sessionBinding, o.operationId),
               o,
