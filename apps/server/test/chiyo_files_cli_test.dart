@@ -71,19 +71,30 @@ void main() {
           ))!,
         ).parent.parent.uri.resolve('bin/chiyo.dart').toFilePath();
         Future<(int, Map<String, dynamic>)> cli(List<String> args) async {
+          final binary = Platform.environment['CHIYO_TEST_EXECUTABLE'];
+          final environment = Map<String, String>.from(Platform.environment)
+            ..removeWhere(
+              (key, _) => key.startsWith('CHIYO_') || key.startsWith('CODEX_'),
+            );
           final result = await Process.run(
-            Platform.resolvedExecutable,
+            binary ?? Platform.resolvedExecutable,
             [
-              '--packages=${(await Isolate.packageConfig)!.toFilePath()}',
-              script,
+              if (binary == null) ...[
+                '--packages=${(await Isolate.packageConfig)!.toFilePath()}',
+                script,
+              ],
               ...args,
               '--json',
             ],
             environment: {
+              ...environment,
               'CHIYO_CONTEXT': contextFile.path,
               'CHIYO_CHAT_ID': 'generic-file-chat',
             },
+            includeParentEnvironment: false,
             runInShell: false,
+            stdoutEncoding: utf8,
+            stderrEncoding: utf8,
           );
           expect(result.stderr, isEmpty);
           final raw = result.stdout as String;

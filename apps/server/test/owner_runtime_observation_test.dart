@@ -129,6 +129,9 @@ void main() {
       final chat = await f.agents.first.call('/session/lifecycle', {
         'chatLabel': 'Synthetic remote-only report',
       });
+      final deviceRoot = Platform.isWindows
+          ? r'C:\synthetic-device-not-server'
+          : '/synthetic-device-not-server';
       final command = <String, dynamic>{
         'protocolVersion': 2,
         'command': 'request-use',
@@ -138,8 +141,8 @@ void main() {
         ],
         'launch': {
           'receiver': 'aws_shared_credentials',
-          'executable': '/synthetic-device-not-server/aws',
-          'cwd': '/synthetic-device-not-server/work',
+          'executable': '$deviceRoot/${Platform.isWindows ? 'aws.exe' : 'aws'}',
+          'cwd': '$deviceRoot/work',
           'argv': ['sts', 'get-caller-identity', '--region', 'us-east-1'],
           'env': {
             'AWS_SHARED_CREDENTIALS_FILE': {'file': 'material'},
