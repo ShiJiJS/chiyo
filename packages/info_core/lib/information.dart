@@ -33,6 +33,9 @@ import 'info_core.dart'
         CredentialUseRequest,
         CredentialExecution,
         CredentialBatchRepository,
+        CredentialProgramRepository,
+        CredentialProgramOperation,
+        validateCredentialProgramCommit,
         CredentialUseBatch,
         CredentialBatchOperation,
         CredentialUseFailure,
@@ -464,6 +467,7 @@ class MemoryInformationRepository
         CredentialRepository,
         CredentialRuntimeRepository,
         CredentialBatchRepository,
+        CredentialProgramRepository,
         FocusedFillRuntimeRepository,
         InformationAttachmentRepository,
         InformationImportFileRepository,
@@ -477,6 +481,42 @@ class MemoryInformationRepository
         SshHostTrustRepository {
   final _credentialBatches = <String, CredentialUseBatch>{};
   final _credentialBatchOperations = <String, CredentialBatchOperation>{};
+  final _credentialProgramOperations = <String, CredentialProgramOperation>{};
+  @override
+  List<CredentialProgramOperation> get credentialProgramOperations =>
+      List.unmodifiable(_credentialProgramOperations.values);
+  @override
+  Future<void> commitCredentialProgramOperation(
+    CredentialProgramOperation operation, {
+    required int expectedRevision,
+    required int requestRevision,
+    required void Function() validate,
+  }) async {
+    final request = _credentialBatches[operation.requestId];
+    final key = '${operation.sessionBinding}\u0000${operation.operationId}';
+    if (request == null ||
+        request.revision != requestRevision ||
+        _credentialBatchOperations.containsKey(key) ||
+        _credentialBatches.values.any(
+          (r) =>
+              r.sessionBinding == operation.sessionBinding &&
+              r.operationId == operation.operationId,
+        )) {
+      throw const CredentialUseFailure('operation_conflict');
+    }
+    validateCredentialProgramCommit(
+      request,
+      operation,
+      _credentialProgramOperations[key],
+      expectedRevision,
+    );
+    validate();
+    _credentialProgramOperations[key] =
+        CredentialProgramOperation.fromStorageJson(
+          Map<String, dynamic>.from(operation.toStorageJson()),
+        );
+  }
+
   @override
   List<CredentialUseBatch> get credentialBatches =>
       List.unmodifiable(_credentialBatches.values);

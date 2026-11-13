@@ -28,13 +28,19 @@ extension _MemoryCredentialBatches on MemoryInformationRepository {
                 ) ||
                 _credentialBatchOperations.containsKey(
                   '${request.sessionBinding}\u0000${request.operationId}',
+                ) ||
+                _credentialProgramOperations.containsKey(
+                  '${request.sessionBinding}\u0000${request.operationId}',
                 )) ||
         operation != null &&
-            _credentialBatches.values.any(
-              (r) =>
-                  r.sessionBinding == operation.sessionBinding &&
-                  r.operationId == operation.operationId,
-            )) {
+            (_credentialProgramOperations.containsKey(
+                  '${operation.sessionBinding}\u0000${operation.operationId}',
+                ) ||
+                _credentialBatches.values.any(
+                  (r) =>
+                      r.sessionBinding == operation.sessionBinding &&
+                      r.operationId == operation.operationId,
+                ))) {
       throw const CredentialUseFailure('operation_conflict');
     }
     validate();

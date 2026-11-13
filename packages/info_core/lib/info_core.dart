@@ -81,6 +81,7 @@ part 'credential_record_operations.dart';
 part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'credential_program_plan.dart';
+part 'credential_program_operations.dart';
 part 'focused_fill_models.dart';
 part 'browser_fill_models.dart';
 part 'credential_batches.dart';
