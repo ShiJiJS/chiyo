@@ -179,6 +179,11 @@ class ChiyoCommandLine {
     final run = _command('fill run', '按获批计划发起一次新填写；先登记操作，再检查和发送。');
     _request(run);
     _operation(run);
+    run.addMultiOption(
+      'item',
+      splitCommas: false,
+      help: '仅执行申请中指定的条目 ID，可重复提供；省略则需要整份计划的所有条目均获准。ID 由软件返回，不手工起别名。',
+    );
     _command('exec', '让业务程序通过标准输入、环境变量或受管文件使用凭据。');
     final exec = _command('exec request', '提交真实业务程序和凭据接收位置；不暴露内部填写程序。');
     _input(exec);

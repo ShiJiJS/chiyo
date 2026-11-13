@@ -48,8 +48,11 @@ class BackupContents {
       _tables['credential_materials']!.length +
       (_tables['credential_material_snapshots']?.length ?? 0);
   int get credentialUseHistoryCount =>
-      _tables['credential_use_requests']!.length;
-  int get credentialExecutionCount => _tables['credential_executions']!.length;
+      _tables['credential_use_requests']!.length +
+      (_tables['credential_batches']?.length ?? 0);
+  int get credentialExecutionCount =>
+      _tables['credential_executions']!.length +
+      (_tables['credential_batch_operations']?.length ?? 0);
   int get focusedFillCount => _tables['credential_focused_fills']!.length;
   int get sshTrustCount => _tables['ssh_host_trust']!.length;
   int get attachmentCount => attachments.where((v) => v.available).length;
@@ -211,6 +214,16 @@ class InformationBackups {
       'credential_id',
       'version',
       'snapshot_id',
+      'payload',
+    ],
+  });
+  static final _v28Columns = Map<String, List<String>>.unmodifiable({
+    ..._v26Columns,
+    'credential_batches': ['id', 'session_binding', 'operation_id', 'payload'],
+    'credential_batch_operations': [
+      'session_binding',
+      'operation_id',
+      'request_id',
       'payload',
     ],
   });
@@ -482,6 +495,28 @@ class InformationBackups {
       // Pending requests are not portable history. Select the new label only
       // after archiving, but before metadata admission/validation or publication.
       _archiveCredentialRuntime(tables, now);
+      if (await _repository._hasCredentialBatchTables()) {
+        for (final table in [
+          'credential_batches',
+          'credential_batch_operations',
+        ]) {
+          tables[table] = [
+            for (final row
+                in await _repository._db
+                    .customSelect(
+                      'SELECT ${_v28Columns[table]!.join(',')} FROM $table ORDER BY rowid',
+                    )
+                    .get())
+              row.data,
+          ];
+        }
+        _archiveCredentialBatches(tables, now);
+      }
+      final hasBatchHistory = tables['credential_batches']?.isNotEmpty ?? false;
+      if (!hasBatchHistory) {
+        tables.remove('credential_batches');
+        tables.remove('credential_batch_operations');
+      }
       final sessionSshGrants = tables['credential_use_requests']!.any(
         (row) =>
             CredentialUseRequest.fromJson(
@@ -562,6 +597,7 @@ class InformationBackups {
       final hasCredentialDeliveryExtensions = _repository.credentialUseRequests
           .any((r) => r.isReveal || r.isCommand && r.plan.isProgramReceiver);
       final extendedColumns =
+          hasBatchHistory ||
           hasCredentialDeliveryExtensions ||
           hasCredentialSnapshots ||
           hasRevisionSnapshots ||
@@ -578,7 +614,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = hasCredentialDeliveryExtensions
+        formatVersion = hasBatchHistory
+            ? 28
+            : hasCredentialDeliveryExtensions
             ? 27
             : hasCredentialSnapshots
             ? 26
@@ -614,7 +652,9 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (hasCredentialDeliveryExtensions || hasCredentialSnapshots
+            in (hasBatchHistory
+                    ? _v28Columns
+                    : hasCredentialDeliveryExtensions || hasCredentialSnapshots
                     ? _v26Columns
                     : hasRevisionSnapshots
                     ? _v25Columns
@@ -1183,6 +1223,9 @@ class InformationBackups {
           if (reader == null) throw const StorageFailure('invalid_backup');
           await _installAttachmentBodies(contents, reader);
         }
+        if (contents.formatVersion >= 28) {
+          await _repository._createCredentialBatchTables();
+        }
         if (contents.formatVersion >= 27) {
           await _repository._requireAdmissionFormat(
             _credentialDeliveryLibraryFormat,
@@ -1199,7 +1242,9 @@ class InformationBackups {
           );
         }
         for (final table
-            in (contents.formatVersion >= 26
+            in (contents.formatVersion >= 28
+                    ? _v28Columns
+                    : contents.formatVersion >= 26
                     ? _v26Columns
                     : contents.formatVersion >= 25
                     ? _v25Columns
@@ -1284,6 +1329,7 @@ class InformationBackups {
           25,
           26,
           27,
+          28,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1309,6 +1355,7 @@ class InformationBackups {
       21 || 22 || 23 || 24 => _v21Columns,
       25 => _v25Columns,
       26 || 27 => _v26Columns,
+      28 => _v28Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -1536,6 +1583,7 @@ class InformationBackups {
     );
     _validateBackupLibraryRecycle(tables);
     _validateBackupLibraryOrder(tables);
+    _validateBackupCredentialBatches(tables);
     final packageIds = <String>{};
     final packages =
         tables['template_packages'] ?? const <Map<String, Object?>>[];

@@ -23,6 +23,7 @@ part 'backup_metadata_budget.dart';
 part 'credentials_storage.dart';
 part 'credential_record_storage.dart';
 part 'credential_runtime_storage.dart';
+part 'credential_batches_storage.dart';
 part 'focused_fill_storage.dart';
 part 'information_files_storage.dart';
 part 'information_import_files_storage.dart';
@@ -94,6 +95,7 @@ const _libraryGrantSnapshotFormat = 61;
 const _libraryRevisionSnapshotFormat = 62;
 const _libraryCredentialArchiveFormat = 63;
 const _credentialDeliveryLibraryFormat = 64;
+const _credentialBatchLibraryFormat = 65;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -179,6 +181,7 @@ class EncryptedInformationRepository
         CredentialRecordRepository,
         CredentialFieldMigrationRepository,
         FocusedFillRuntimeRepository,
+        CredentialBatchRepository,
         InformationAttachmentRepository,
         InformationImportFileRepository,
         InformationFileDeliveryRepository,
@@ -194,6 +197,28 @@ class EncryptedInformationRepository
         TemplatePackageRepository,
         SshHostTrustRepository,
         ServerProposalPasswordRepository {
+  final _credentialBatches = <String, CredentialUseBatch>{};
+  final _credentialBatchOperations = <String, CredentialBatchOperation>{};
+  @override
+  List<CredentialUseBatch> get credentialBatches =>
+      List.unmodifiable(_credentialBatches.values);
+  @override
+  List<CredentialBatchOperation> get credentialBatchOperations =>
+      List.unmodifiable(_credentialBatchOperations.values);
+  @override
+  Future<void> commitCredentialBatch(
+    CredentialUseBatch request, {
+    required int expectedRevision,
+    required void Function() validate,
+    CredentialBatchOperation? operation,
+    int? expectedOperationRevision,
+  }) => _commitCredentialBatch(
+    request,
+    expectedRevision: expectedRevision,
+    validate: validate,
+    operation: operation,
+    expectedOperationRevision: expectedOperationRevision,
+  );
   @override
   Future<ServerStateSnapshot> openServerState() => _openServerState();
   @override
@@ -679,7 +704,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _credentialDeliveryLibraryFormat) {
+      if (headerVersion > _credentialBatchLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -694,8 +719,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) >
-                _credentialDeliveryLibraryFormat ||
+            (marker.single['version'] as int) > _credentialBatchLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -848,6 +872,7 @@ class EncryptedInformationRepository
     await _db.customStatement('DELETE FROM information_draft_commits');
     await _loadSshTrust();
     await _loadRuntime();
+    await _loadCredentialBatches();
     _credentials.clear();
     _credentialMaterials.clear();
     for (final row

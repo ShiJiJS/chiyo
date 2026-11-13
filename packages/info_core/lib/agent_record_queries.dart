@@ -45,6 +45,22 @@ extension AgentRecordQueries on AgentAccess {
         };
       }
     }
+    if (_service._repository case CredentialBatchRepository batches) {
+      for (final r in batches.credentialBatches) {
+        if (r.sessionBinding != binding || r.archived) continue;
+        yield {
+          'id': r.id,
+          'kind': 'credential-use',
+          'protocolVersion': 3,
+          'status': _service._batchState(r),
+          'purpose': r.purpose,
+          'agentName': r.agentName,
+          'operationId': r.operationId,
+          'createdAt': _useTimestamp(r.createdAt),
+          'itemCount': r.items.length,
+        };
+      }
+    }
     for (final p in _service._repository.importProposals) {
       if (p.sessionBinding != binding) continue;
       yield {
@@ -147,6 +163,10 @@ extension AgentRecordQueries on AgentAccess {
       session,
     ).where((r) => r['id'] == id).firstOrNull;
     if (record == null) return {'status': 'not_found'};
+    if (record['protocolVersion'] == 3) {
+      final r = _service._batchRequest(id);
+      return {...record, ...credentialBatchStatus(session, r.deviceId, id)};
+    }
     final detail = switch (record['kind']) {
       'import' => importStatus(session, id),
       'update' => updateStatus(session, id),
@@ -173,6 +193,18 @@ extension AgentRecordQueries on AgentAccess {
         'requestStatus': r['status'],
         'createdAt': r['createdAt'],
       };
+    }
+    if (_service._repository case CredentialBatchRepository batches) {
+      final binding = _service._sessionBindings[session];
+      for (final operation in batches.credentialBatchOperations) {
+        if (operation.sessionBinding != binding) continue;
+        yield {
+          ..._service._batchOperationForDisplay(operation).toPublicJson(),
+          'id': operation.operationId,
+          'kind': 'credential-fill',
+          'state': _service._batchOperationForDisplay(operation).state.name,
+        };
+      }
     }
     if (_service._repository case CredentialRuntimeRepository runtime) {
       for (final e in runtime.credentialExecutions) {
@@ -205,9 +237,7 @@ extension AgentRecordQueries on AgentAccess {
         }
       }
       if (runtime is FocusedFillRuntimeRepository) {
-        for (final operation
-            in (runtime)
-                .focusedFillOperations) {
+        for (final operation in (runtime).focusedFillOperations) {
           if (_service._credentialUseSessions[operation.requestId] != session) {
             continue;
           }

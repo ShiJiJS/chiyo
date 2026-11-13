@@ -69,6 +69,7 @@ extension OwnerLibraryBackup on OwnerAccess {
         _service._deviceCredentialRequests.clear();
         _service._deviceCredentialExecutions.clear();
         _service._deviceFocusedFills.clear();
+        _service._batchMaterialProofs.clear();
         _service._executionCapabilities.clear();
         _service._pendingExecutionReceipts.clear();
         _service._failedFillAudits.clear();

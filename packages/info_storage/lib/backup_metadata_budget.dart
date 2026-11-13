@@ -48,6 +48,22 @@ void _checkBackupAdmissionCounts(
         1 + (item['fields'] as List).length + (item['tagIds'] as List).length;
   }
 
+  for (final row
+      in tables['credential_batches'] ?? const <Map<String, Object?>>[]) {
+    final request = _backupJson(row);
+    nested +=
+        (request['items'] as List).length +
+        (request['decisions'] as List).length;
+  }
+  for (final row
+      in tables['credential_batch_operations'] ??
+          const <Map<String, Object?>>[]) {
+    final operation = _backupJson(row);
+    nested +=
+        (operation['itemIds'] as List).length +
+        (operation['itemResults'] as Map).length;
+  }
+
   for (final row in [
     ...tables['information_revisions']!,
     ...?tables['information_revision_snapshots'],

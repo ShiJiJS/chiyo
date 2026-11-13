@@ -892,6 +892,17 @@ extension _CompleteBackups on InformationBackups {
     final fills = tables['credential_focused_fills']!
         .map((r) => FocusedFillOperation.fromStorageJson(_backupJson(r)))
         .toList();
+    final batches = [
+      for (final row
+          in tables['credential_batches'] ?? const <Map<String, Object?>>[])
+        _storedBatch(row),
+    ];
+    final batchOperations = [
+      for (final row
+          in tables['credential_batch_operations'] ??
+              const <Map<String, Object?>>[])
+        _storedBatchOperation(row),
+    ];
     final deliveries = _validateBackupFileDeliveries(
       tables,
       contents.attachments,
@@ -1042,6 +1053,19 @@ extension _CompleteBackups on InformationBackups {
         return;
       }
       _repository._libraryOrder = libraryOrder;
+      _repository._credentialBatches
+        ..clear()
+        ..addEntries(batches.map((r) => MapEntry(r.id, r)));
+      _repository._credentialBatchOperations
+        ..clear()
+        ..addEntries(
+          batchOperations.map(
+            (o) => MapEntry(
+              _batchOperationKey(o.sessionBinding, o.operationId),
+              o,
+            ),
+          ),
+        );
       _repository._libraryRecycleBatches
         ..clear()
         ..addEntries(recycleBatches.map((b) => MapEntry(b.id, b)));

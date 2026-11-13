@@ -81,6 +81,8 @@ part 'credential_field_migration.dart';
 part 'credential_runtime_models.dart';
 part 'focused_fill_models.dart';
 part 'browser_fill_models.dart';
+part 'credential_batches.dart';
+part 'credential_batch_access.dart';
 part 'focused_fill_access.dart';
 part 'focused_fill_runner.dart';
 part 'device_focused_fill_access.dart';
@@ -290,6 +292,7 @@ class InformationService {
   }
 
   final _credentialUseSessions = <String, String>{};
+  final _batchMaterialProofs = <String, _CredentialBatchProof>{};
   // Online host only: the original authenticated device for each use request.
   // This private binding is not reconstructed from portable history.
   final _deviceCredentialRequests = <String, String>{};
@@ -375,6 +378,7 @@ class InformationService {
     _endCapabilities.clear();
     _endedSessions.clear();
     _sessionBindings.clear();
+    _batchMaterialProofs.clear();
     _requests.clear();
     _grants.clear();
     _submitted.close();
