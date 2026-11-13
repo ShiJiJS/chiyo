@@ -95,6 +95,24 @@ void main() {
         isNot('available'),
       );
       expect(shown.render(), isNot(contains('PRIVATE-SYNTHETIC-REVEAL')));
+      final seed = await f.runtime.run(
+        () => f.runtime.service.owner.createInformation(
+          'Synthetic read target',
+          '',
+          [const FieldInput('Host', '', 'synthetic.invalid')],
+        ),
+      );
+      final private = await ChiyoContext.load(file, environment: {});
+      final collision = await f.agents.first.call('/request', {
+        'sessionSecret': private.secret,
+        'purpose': 'Synthetic unrelated read',
+        'fields': [
+          {'itemId': seed.id, 'fieldId': seed.fields.single.id},
+        ],
+        'operationId': 'submit-reveal',
+      });
+      expect(collision['status'], 'operation_conflict');
+
       expect(
         shown.render(),
         isNot(contains(original.submissionSessionBinding!)),

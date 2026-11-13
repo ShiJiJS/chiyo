@@ -187,8 +187,12 @@ extension CredentialBatchAgentAccess on AgentAccess {
       }
       return previous;
     }
-    if (_service._batchOperation(binding, operationId) != null ||
-        _ownOperationRecords(session).any((r) => r['id'] == operationId)) {
+    if (!_reserveAgentOperation(
+      session,
+      operationId,
+      'credential-use-submit',
+      _useFingerprint({'deviceId': deviceId, 'input': input.toJson()}),
+    )) {
       throw const CredentialUseFailure('operation_conflict');
     }
     if (repo.credentialBatches
@@ -335,12 +339,12 @@ extension CredentialBatchAgentAccess on AgentAccess {
         _service._batchOperationForDisplay(existing),
       );
     }
-    if (_service._batchRepository.credentialBatches.any(
-          (b) =>
-              b.sessionBinding == r.sessionBinding &&
-              b.operationId == operationId,
-        ) ||
-        _ownOperationRecords(session).any((o) => o['id'] == operationId)) {
+    if (!_reserveAgentOperation(
+      session,
+      operationId,
+      'credential-fill',
+      fingerprint,
+    )) {
       throw const CredentialUseFailure('operation_conflict');
     }
     void validate() {

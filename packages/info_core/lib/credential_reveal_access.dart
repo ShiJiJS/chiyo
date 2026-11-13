@@ -141,6 +141,15 @@ extension CredentialRevealAgentAccess on AgentAccess {
     if (!c.discoverable || c.form != CredentialForm.string) {
       throw const CredentialUseFailure('invalid_reference');
     }
+    if (input.operationId != null &&
+        !_reserveAgentOperation(
+          session,
+          input.operationId!,
+          'credential-reveal-submit',
+          input.submissionDigest,
+        )) {
+      throw const CredentialUseFailure('operation_conflict');
+    }
     final now = _service._clock().toUtc();
     final request = CredentialUseRequest(
       protocolVersion: 2,
@@ -208,6 +217,14 @@ extension CredentialRevealAgentAccess on AgentAccess {
     }
     if (r.revealReads.length >= 1000) {
       throw const CredentialUseFailure('limit_exceeded');
+    }
+    if (!_reserveAgentOperation(
+      session,
+      operationId,
+      'credential-reveal-read',
+      _useFingerprint({'requestId': requestId}),
+    )) {
+      throw const CredentialUseFailure('operation_conflict');
     }
     final c = _service._useEligible(r);
     if (c.form != CredentialForm.string) {

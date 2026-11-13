@@ -178,6 +178,15 @@ extension AgentImports on AgentAccess {
         return previous.id;
       }
     }
+    if (operationId != null &&
+        !_reserveAgentOperation(
+          session,
+          operationId!,
+          'import-submit',
+          digest,
+        )) {
+      throw const AccessFailure('operation_conflict');
+    }
     items = await _service.owner._resolveImportFiles(
       _service._sessionBindings[session]!,
       items,

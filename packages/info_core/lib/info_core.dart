@@ -106,6 +106,7 @@ part 'import_admission_access.dart';
 part 'update_admission_access.dart';
 part 'online_information_runtime.dart';
 part 'agent_record_queries.dart';
+part 'agent_operation_reservations.dart';
 
 class AccessFailure implements Exception {
   const AccessFailure(this.status);
@@ -293,6 +294,8 @@ class InformationService {
   }
 
   final _credentialUseSessions = <String, String>{};
+  final _agentOperationReservations =
+      <String, Map<String, ({String kind, String digest})>>{};
   final _batchMaterialProofs = <String, _CredentialBatchProof>{};
   // Online host only: the original authenticated device for each use request.
   // This private binding is not reconstructed from portable history.
@@ -437,6 +440,7 @@ class InformationService {
       throw const AccessFailure('unauthorized');
     }
     if (!_endedSessions.add(session)) return;
+    _agentOperationReservations.remove(_sessionBindings[session]);
     // Latch before audit persistence: every later request/read observes end.
     for (final request in _requests.values.where((r) => r.session == session)) {
       _expire(request);
@@ -554,6 +558,21 @@ class AgentAccess {
     }
     if (fields.any((f) => _service._field(f) == null)) {
       throw const AccessFailure('invalid_request');
+    }
+    if (operationId != null &&
+        !_reserveAgentOperation(
+          session,
+          operationId,
+          'access-submit',
+          _useFingerprint({
+            'purpose': purpose,
+            'agentName': agentName.trim(),
+            'externalChatId': externalChatId.trim(),
+            'fields': fields.map((f) => jsonEncode(f.toJson())).toSet().toList()
+              ..sort(),
+          }),
+        )) {
+      throw const AccessFailure('operation_conflict');
     }
     final id = _service._secret();
     final now = _service._clock();

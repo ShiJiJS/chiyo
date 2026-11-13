@@ -150,6 +150,15 @@ extension AgentUpdates on AgentAccess {
         return previous.id;
       }
     }
+    if (operationId != null &&
+        !_reserveAgentOperation(
+          session,
+          operationId!,
+          'update-submit',
+          digest,
+        )) {
+      throw const AccessFailure('operation_conflict');
+    }
     input = await _service.owner._resolveUpdateFiles(binding, input);
     input = _service.owner._compileTemplateUpdate(input);
     if (_service._repository.updateProposals
