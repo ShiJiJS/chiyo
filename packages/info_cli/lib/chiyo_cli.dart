@@ -9,6 +9,7 @@ import 'agent_client.dart';
 import 'chiyo_command_line.dart';
 import 'chiyo_context.dart';
 import 'chrome_browser_fill.dart';
+import 'chiyo_intents.dart';
 
 class ChiyoRunResult {
   const ChiyoRunResult(
@@ -73,6 +74,14 @@ class ChiyoCli {
         return _success(data, invocation);
       }
       final context = await _context(invocation);
+      _intents = ChiyoIntentStore(
+        Directory('${_contextFile!.parent.path}/chiyo-intents').absolute,
+        chiyoIntentDigest({
+          'session': context.secret,
+          'connection': context.connection?.toPrivateJson(),
+          'port': context.port,
+        }),
+      );
       client = context.client(
         stateDirectory: context.connection == null
             ? null
@@ -96,6 +105,7 @@ class ChiyoCli {
           'fill run',
           'exec run',
           'credentials reveal read',
+          'access read',
         }.contains(invocation.path),
       );
     } on ChiyoUsageFailure catch (error) {
@@ -104,6 +114,15 @@ class ChiyoCli {
         error.message,
         2,
         invocation?.json ?? arguments.contains('--json'),
+      );
+    } on ChiyoIntentFailure catch (error) {
+      return _failure(
+        error.code,
+        error.code == 'operation_conflict'
+            ? '原操作编号已经用于另一份内容，请核对原记录。'
+            : '无法保存或核对本次操作，因此没有再次提交。请先查询原操作。',
+        error.code == 'operation_conflict' ? 8 : 3,
+        invocation?.json ?? false,
       );
     } on _PublicFailure catch (error) {
       return _failure(
@@ -140,6 +159,7 @@ class ChiyoCli {
   }
 
   File? _contextFile;
+  late ChiyoIntentStore _intents;
   Future<ChiyoContext> _context(ChiyoInvocation i) async {
     final supplied =
         i.root['context'] as String? ?? environment['CHIYO_CONTEXT'];
@@ -298,12 +318,46 @@ class ChiyoCli {
       case 'proposals show':
         return client.execute({'command': 'requests-show', 'id': id});
       case 'operations list':
-        return client.execute({
+        final result = await client.execute({
           'command': 'operations-list',
           ..._page(i),
           if (o['request'] != null) 'requestId': o['request'],
         });
+        if (result['status'] != 'ok') return result;
+        final records = await _intents.list();
+        return {
+          ...result,
+          'localIntents': [
+            for (final record
+                in records
+                    .where(
+                      (r) =>
+                          o['request'] == null ||
+                          r.payload['requestId'] == o['request'],
+                    )
+                    .skip(_integer(i, 'offset', 0, 1000000))
+                    .take(_integer(i, 'limit', 1, 100)))
+              record.summary,
+          ],
+        };
       case 'operations show':
+        final result = await client.execute({
+          'command': 'operations-show',
+          'id': id,
+        });
+        if (result['status'] != 'not_found') return result;
+        final record = await _intents.read(id!);
+        return record == null
+            ? result
+            : {'status': 'ok', ...record.summary, 'serverRecord': 'not_found'};
+      case 'operations retry':
+        final record = await _intents.read(id!);
+        if (record == null) return {'status': 'not_found', 'operationId': id};
+        if (record.kind == 'access-request') {
+          return _submitAccess(client, record);
+        }
+        // An execution record is never an instruction to type again. Remaining
+        // adapters can recover their own immutable intent through this seam.
         return client.execute({'command': 'operations-show', 'id': id});
       case 'requests cancel':
         return client.execute({'command': 'cancel', 'requestId': id});
@@ -356,11 +410,112 @@ class ChiyoCli {
           'itemId': _required(i, 'item'),
           'fieldId': _required(i, 'field'),
         });
+      case 'access request':
+        final body = o['input'] == null
+            ? {
+                'fields': [
+                  {
+                    'itemId': _required(i, 'item'),
+                    'fieldId': _required(i, 'field'),
+                  },
+                ],
+              }
+            : await _businessInput(i, 65536);
+        final fields = body['fields'];
+        if (_required(i, 'purpose').length > 2000) {
+          throw const ChiyoUsageFailure('用途说明不能超过2000个字符。');
+        }
+        if (body.length != 1 ||
+            fields is! List ||
+            fields.isEmpty ||
+            fields.length > 200 ||
+            fields.any(
+              (value) =>
+                  value is! Map<String, dynamic> ||
+                  value.length != 2 ||
+                  value['itemId'] is! String ||
+                  (value['itemId'] as String).isEmpty ||
+                  (value['itemId'] as String).length > 200 ||
+                  value['fieldId'] is! String ||
+                  (value['fieldId'] as String).isEmpty ||
+                  (value['fieldId'] as String).length > 200,
+            )) {
+          throw const ChiyoUsageFailure(
+            '业务文件应只包含 fields，每项填写 itemId 和 fieldId。',
+          );
+        }
+        final intent = await _intents.remember('access-request', {
+          'command': 'request',
+          'protocolVersion': 2,
+          'purpose': _required(i, 'purpose'),
+          'fields': fields,
+        }, operationId: o['operation'] as String?);
+        return _submitAccess(client, intent);
       default:
         // New target and multi-credential semantics must be implemented by the
         // receiving service; never translate them to a broader old script plan.
         return {'status': 'unsupported_capability'};
     }
+  }
+
+  Future<Map<String, dynamic>> _businessInput(
+    ChiyoInvocation i,
+    int maxBytes,
+  ) async {
+    try {
+      final path = _required(i, 'input');
+      final text = await _read(
+        path == '-' ? input : File(path).openRead(),
+        maxBytes,
+      );
+      return decodeProtocolObject(text, maxBytes: maxBytes);
+    } on ChiyoUsageFailure {
+      rethrow;
+    } on Object {
+      throw const ChiyoUsageFailure('无法读取业务 JSON 文件，请检查文件和格式。');
+    }
+  }
+
+  Future<Map<String, dynamic>> _submitAccess(
+    AgentClient client,
+    ChiyoIntent intent,
+  ) async {
+    final original = await client.execute({
+      'command': 'operations-show',
+      'id': intent.operationId,
+    });
+    if (original['status'] == 'ok') {
+      if (original['requestId'] is! String ||
+          original['requestKind'] != 'access') {
+        return {
+          'status': 'operation_conflict',
+          'operationId': intent.operationId,
+        };
+      }
+    }
+    if (!{'not_found', 'ok'}.contains(original['status'])) {
+      return {...original, 'operationId': intent.operationId};
+    }
+    // The server also checks the stored content. A matching local ID cannot
+    // hide different content submitted on another device.
+    final response = await client.execute({
+      ...intent.payload,
+      'operationId': intent.operationId,
+    });
+    return {
+      ...response,
+      'operationId': intent.operationId,
+      if (original['status'] == 'ok' &&
+          {
+            'pending',
+            'approved',
+            'denied',
+            'expired',
+            'revoked',
+            'cancelled',
+          }.contains(response['status']))
+        'recovered': true,
+    };
   }
 
   Future<ChiyoRunResult> _doctor(
@@ -479,8 +634,8 @@ class ChiyoCli {
       'server_changed' ||
       'association_unavailable' ||
       'session_required' ||
-      'unauthorized' ||
       'unsupported_capability' => 3,
+      'unauthorized' => code == 'scope_not_approved' ? 4 : 3,
       'invalid_request' ||
       'invalid_query' ||
       'invalid_type' ||
@@ -492,8 +647,22 @@ class ChiyoCli {
       'template_changed' ||
       'proposal_conflict' ||
       'credential_version_changed' => 8,
+      'conflict' =>
+        {
+              'execution_unknown',
+              'fill_unknown',
+              'fill_needs_attention',
+            }.contains(code)
+            ? 7
+            : 8,
+      'request_unknown' || 'operation_unknown' => 7,
       'request_denied' || 'scope_not_approved' || 'grant_expired' => 4,
-      _ => null,
+      _ =>
+        status.startsWith('invalid_')
+            ? 2
+            : status.startsWith('unsupported_')
+            ? 3
+            : null,
     };
     if (failure != null) {
       return _failure(
@@ -503,6 +672,7 @@ class ChiyoCli {
           3 => '当前聊天、连接或所需能力不可用；请检查连接和软件版本。',
           4 => '本次操作没有有效批准；请查看原申请状态。',
           8 => '内容或版本已变化；请核对原记录，不要直接重复提交。',
+          7 => '结果尚未确认，请查询原操作，不要重新提交或执行。',
           _ => '本次操作未完成。',
         },
         failure,
@@ -520,6 +690,15 @@ class ChiyoCli {
       );
     }
     if (executing) {
+      if ({
+        'denied',
+        'expired',
+        'revoked',
+        'cancelled',
+        'ended',
+      }.contains(status)) {
+        return _failure(code, '本次使用没有有效批准，请查看原申请。', 4, i.json, data: data);
+      }
       final state = data['fillState'] ?? data['executionState'] ?? status;
       if (state == 'unknown' || state == 'request_unknown') {
         return _failure(
@@ -530,9 +709,37 @@ class ChiyoCli {
           data: data,
         );
       }
-      if ({'failed', 'refused', 'not_started'}.contains(state)) {
+      if ({'failed', 'refused', 'not_started', 'partial'}.contains(state)) {
         return _failure(code, '本次执行未完成，请查看原操作记录。', 5, i.json, data: data);
       }
+    }
+    if (!{
+      'ok',
+      'pending',
+      'approved',
+      'partially_approved',
+      'denied',
+      'expired',
+      'revoked',
+      'cancelled',
+      'ended',
+      'not_found',
+      'active',
+      'proposed',
+      'confirmed',
+      'conflicted',
+      'completed',
+      'rejected',
+      'approved_awaiting_admission',
+      'approvedAwaitingAdmission',
+    }.contains(status)) {
+      return _failure(
+        'invalid_response',
+        '软件返回了无法识别的结果，请检查运行版本。',
+        3,
+        i.json,
+        data: data,
+      );
     }
     return _success(data, i);
   }

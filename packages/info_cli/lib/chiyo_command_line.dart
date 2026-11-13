@@ -82,8 +82,19 @@ class ChiyoCommandLine {
     _command('templates show', '查看模板格式和字段说明。', argument: 'ID');
     _command('templates examples', '查看模板提供的完整填写示例。', argument: 'ID');
     _command('access', '申请读取资料或领取普通附件；不直接批准。');
-    final access = _command('access request', '提交字段清单，返回申请 ID；不代表已获准。');
+    final access = _command(
+      'access request',
+      '提交字段清单，返回申请 ID；不代表已获准。',
+      example:
+          'chiyo access request --item ITEM_ID --field FIELD_ID --purpose "核对服务地址" --json',
+    );
     _input(access);
+    access.addOption('item', help: '单项资料 ID；多字段使用 --input。');
+    access.addOption(
+      'field',
+      help:
+          '单个字段 ID；--input 文件格式为 {"fields":[{"itemId":"...","fieldId":"..."}]}。',
+    );
     _purpose(access);
     _operation(access);
     final accessRead = _command('access read', '读取已获准的普通字段。');
@@ -338,14 +349,20 @@ class ChiyoCommandLine {
       for (final key in ['request', 'item', 'field']) {
         required(key);
       }
+    } else if (path == 'access request') {
+      required('purpose');
+      if (options['input'] == null) {
+        required('item');
+        required('field');
+      } else if (options['item'] != null || options['field'] != null) {
+        throw const ChiyoUsageFailure('--input 不能和 --item / --field 混用。');
+      }
     } else if ({
-      'access request',
       'exec request',
       'proposals check',
       'proposals submit',
     }.contains(path)) {
       required('input');
-      if (path == 'access request') required('purpose');
     } else if (path == 'credentials reveal request') {
       for (final key in ['credential', 'purpose', 'reason']) {
         required(key);
