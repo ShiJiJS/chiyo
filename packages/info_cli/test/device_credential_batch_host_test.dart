@@ -4,7 +4,10 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:crypto/crypto.dart';
+import 'package:info_cli/chiyo_cli.dart';
+import 'package:info_cli/chiyo_context.dart';
 import 'package:info_cli/device_credential_batch_host.dart';
 import 'package:info_cli/chrome_browser_fill.dart';
 import 'package:info_cli/private_device_state.dart';
@@ -13,6 +16,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/automatic_connection.dart';
 import 'package:test/test.dart';
+
 import '../../../apps/server/test/support/tls_fixture.dart';
 
 void main() {
@@ -23,6 +27,89 @@ void main() {
   tearDown(() async {
     await f.close();
   });
+
+  test(
+    'browser inspection refusals reach the CLI before any request or material preparation',
+    () async {
+      final context = File('${f.root.path}/chat/context.json');
+      await ChiyoContext(
+        chatId: 'synthetic-preflight',
+        agentName: 'Synthetic Agent',
+        secret: f.session,
+        port: f.profile.address.port,
+        connection: f.profile,
+      ).saveNew(context);
+      var caseNumber = 0;
+      for (final via in ['ego', 'chrome']) {
+        for (final (code, expected) in [
+          ('ambiguous_form', 'ambiguous_form'),
+          ('unavailable_target', 'unavailable_target'),
+          ('browser_unavailable', 'browser_unavailable'),
+          ('browser_timeout', 'browser_operation_failed'),
+          ('RAW_PRIVATE_BROWSER_DETAIL', 'browser_operation_failed'),
+        ]) {
+          f.browser.inspectionError = code;
+          final operation = 'preflight-$via-${++caseNumber}';
+          final result =
+              await ChiyoCli(
+                environment: {
+                  'CHIYO_CONTEXT': context.path,
+                  'CHIYO_CONNECTION_DIRECTORY': f.root.path,
+                },
+              ).run([
+                'fill',
+                'request',
+                '--credential',
+                f.a,
+                '--via',
+                via,
+                if (via == 'ego') ...[
+                  '--space',
+                  '7',
+                  '--page',
+                  'p1',
+                ] else ...[
+                  '--browser',
+                  'http://127.0.0.1:9222',
+                  '--tab',
+                  'synthetic-tab',
+                ],
+                '--url',
+                'https://example.test/login',
+                '--form',
+                '#login',
+                '--selector',
+                '#password',
+                '--purpose',
+                'Inspect synthetic login',
+                '--operation',
+                operation,
+                '--json',
+              ]);
+          expect((result.output['error'] as Map)['code'], expected);
+          expect(result.exitCode, isNot(anyOf(0, 7)));
+          final data = result.output['data'] as Map;
+          expect(data['operationId'], operation);
+          expect(data['requestId'], isNull);
+          expect(data['status'], isNot('request_unknown'));
+          expect(
+            result.render(),
+            isNot(contains('RAW_PRIVATE_BROWSER_DETAIL')),
+          );
+        }
+      }
+      expect(f.browser.inspections, 10);
+      expect(f.count('request'), 0);
+      expect(f.count('begin'), 0);
+      expect(f.count('material'), 0);
+      expect(f.service.owner.credentialBatches, isEmpty);
+      expect(f.service.owner.credentialBatchOperations, isEmpty);
+      expect(await f.journals(), isEmpty);
+      expect(f.browser.materials, isEmpty);
+      expect(f.browser.fills, 0);
+      expect(f.native.sent, 0);
+    },
+  );
 
   test(
     'one private request contains multiple inspected destinations and does not execute on approval',
@@ -572,6 +659,7 @@ void main() {
 
 class _Browser implements DeviceCredentialBatchBrowser {
   int inspections = 0, fills = 0;
+  String? inspectionError;
   String digest = 'a' * 64;
   final received = <String>[], materials = <List<int>>[];
   Map<String, Object?> result = {'status': 'filled'};
@@ -579,6 +667,7 @@ class _Browser implements DeviceCredentialBatchBrowser {
   @override
   Future<BrowserFormInspection> inspect(Map<String, dynamic> locator) async {
     inspections++;
+    if (inspectionError case final code?) throw BrowserFillFailure(code);
     final ego = locator['via'] == 'ego';
     final target = BrowserFormTarget.fromJson({
       'provider': locator['via'],
