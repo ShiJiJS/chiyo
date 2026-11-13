@@ -305,20 +305,22 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
 
   Future<void> _tip(BuildContext context) async {
     final r = model.detail!.request;
-    final text = switch (r.kind) {
-      WorkspaceApprovalKind.information =>
-        '批准的是固定字段集合。当前会话和期限内读取这些字段的最新内容，后来新增的字段不会加入。',
-      WorkspaceApprovalKind.file =>
-        model.detail!.fileVersionPolicy == null
-            ? '批准指定字段和附件版本后，Agent通过CLI领取受管副本。撤销或到期会阻止后续交付，但不能收回已经读到或上传的内容。普通附件与凭据文件分别管理。'
-            : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
-      WorkspaceApprovalKind.organization =>
-        '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
-      WorkspaceApprovalKind.focus =>
-        '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
-      WorkspaceApprovalKind.credential =>
-        '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
-    };
+    final text = model.detail!.credentialBatch
+        ? '每项凭据固定版本、填写方式和目标。可以只批准部分；AI执行一次操作所需的凭据必须全部获准。批准不会自动填写，填写不会自动提交登录。'
+        : switch (r.kind) {
+            WorkspaceApprovalKind.information =>
+              '批准的是固定字段集合。当前会话和期限内读取这些字段的最新内容，后来新增的字段不会加入。',
+            WorkspaceApprovalKind.file =>
+              model.detail!.fileVersionPolicy == null
+                  ? '批准指定字段和附件版本后，Agent通过CLI领取受管副本。撤销或到期会阻止后续交付，但不能收回已经读到或上传的内容。普通附件与凭据文件分别管理。'
+                  : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
+            WorkspaceApprovalKind.organization =>
+              '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
+            WorkspaceApprovalKind.focus =>
+              '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
+            WorkspaceApprovalKind.credential =>
+              '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
+          };
     await showDesktopDialog<void>(
       context,
       builder: (c) => DesktopDialog(
@@ -647,6 +649,8 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             context,
             d.request.kind == WorkspaceApprovalKind.organization
                 ? '整理范围'
+                : d.credentialBatch
+                ? '凭据填写方式'
                 : d.credential == null
                 ? '普通字段与文件'
                 : '凭据使用方式',
@@ -666,7 +670,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   _credential(context, d.credential!)
                 else
                   Text(
-                    d.request.kind == WorkspaceApprovalKind.organization
+                    d.credentialBatch
+                        ? '只在上方指定的位置使用勾选的凭据。批准后由 AI 发起填写，每次填写分别记录结果。'
+                        : d.request.kind == WorkspaceApprovalKind.organization
                         ? '只读限定资料的元数据，并允许自动调整目录与标签；不读取字段值，不修改正文。'
                         : d.fileVersionPolicy == null
                         ? '只提供批准的固定字段和文件版本。新增内容不进入旧授权，撤销不能收回已经读到的副本。'

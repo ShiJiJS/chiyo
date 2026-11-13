@@ -130,6 +130,9 @@ class OwnerWorkspaceApprovals implements WorkspaceApprovalSource {
           r.id,
       for (final r in owner.credentialUseRequests)
         if ((r.credentialName ?? '').toLowerCase().contains(needle)) r.id,
+      for (final r in owner.credentialBatches)
+        if (r.items.any((i) => i.credentialName.toLowerCase().contains(needle)))
+          r.id,
       for (final t in owner.organizationTasks)
         if (t.itemNames.values.any((n) => n.toLowerCase().contains(needle)))
           t.id,

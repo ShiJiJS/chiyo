@@ -229,6 +229,7 @@ chiyo operations show O-42 --json
 
 - `chiyo credentials list --query TEXT [--directory ID] [--json]`：查询公开凭据元数据。
 - `chiyo connection show [--json]`：显示本次私密上下文绑定的库、模式、审批位置与执行设备。
+- `chiyo access request --item ITEM_ID --field FIELD_ID --purpose TEXT [--operation ID] [--json]`：单字段申请直接用参数；多个字段使用 `--input FILE`，业务文件只包含 `{"fields":[{"itemId":"...","fieldId":"..."}]}`。不要求填写内部协议 JSON。
 - `chiyo browsers list --via chrome --browser URL [--json]`：只连接调用方指定的 Chrome CDP HTTP(S) 入口并列出页面；不扫描端口或读取浏览器用户资料。第一轮仅接受本机回环地址。`--browser` 表示浏览器实例的连接地址，不是网页网址；连接后固定其 browser WebSocket 身份。
 - `chiyo fill request --credential ID [--version N] --via ego --space N --page p1 --url URL --form CSS --selector CSS --purpose TEXT [--operation ID] [--json]`。
 - `chiyo fill request --credential ID [--version N] --via chrome --browser http://127.0.0.1:9222 --tab TARGET_ID --url URL --form CSS --selector CSS --purpose TEXT [--operation ID] [--json]`。
@@ -257,6 +258,8 @@ Chrome 需要浏览器实际提供控制入口；CLI 通过 `doctor` 和目标�
 公开运行描述升级到 `schemaVersion: 2`，`cliPath` 指向 `chiyo`，`legacyCliPath` 仅记录兼容程序，`hookPath` 和 `workerPath` 保持各自职责；四份二进制和随包说明均记录摘要。描述只含公开位置和版本核对资料，不含聊天证明或连接密码。完整新包可以原位升级 schema1 描述；缺少新入口时拒绝更新，不退回旧入口假装完成。重复登记相同内容不重新写盘；替换使用同卷原子发布，失败保留旧描述。准备独立运行包时一并复制 `chiyo`，新说明的主要调用入口指向它。
 
 `--operation` 对申请提交和执行都有效。同编号同内容查询或返回原事实，改内容报冲突。CLI 先保存恢复记录再发送；号码丢失时可在本聊天操作列表找回。新建操作与恢复旧操作使用不同命令。一个申请可有多个操作，批准状态、每项授权状态、操作状态分别返回。
+
+CLI 的恢复记录按原私密聊天及连接隔离，只保存不含材料的业务意图；录入原文使用冻结来源引用，不复制密码材料。每条上限100 KiB，每个聊天上限1000条、合计8 MiB；占满时不自动删除尚待核对的记录，也不在保存失败后继续提交。`operations list` 的 `records` 保持服务端分页，另附同范围分页的 `localIntents`。后者的 `state: unconfirmed` 仅表示本机保留了意图，不代表服务器收到、用户已批准或曾经执行。`operations show` 优先查询服务器；明确未找到且有本机意图时才返回该未确认记录。幂等的申请提交可用原内容、原编号恢复；填写执行恢复只查原结果，不重新输入。申请提交的回复丢失也使用退出码7并保留原操作编号。
 
 JSON 输出的公共外层固定为 `schemaVersion: 1`、`ok`、`data`，失败时带 `error.code/message` 与可用的原操作编号；普通命令与 `--json` 具有相同语义。提交待审和查询到已拒绝均可为 `ok:true`。退出码：0 为命令按约定成功；2 为输入或用法错误；3 为连接/上下文不可用；4 为执行被拒绝或授权不足；5 为执行失败；6 为等待超时；7 为执行结果未知；8 为版本/操作内容冲突。查询到业务失败仍返回 0；只有执行或等待完成的命令按其约定返回相应失败码。
 

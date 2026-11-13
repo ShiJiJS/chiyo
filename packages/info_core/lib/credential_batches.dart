@@ -261,26 +261,40 @@ class CredentialBatchDecisionReceipt {
   const CredentialBatchDecisionReceipt(
     this.operationId,
     this.fingerprint,
-    this.at,
-  );
+    this.at, {
+    this.ownerReceipt,
+  });
   final String operationId, fingerprint;
   final DateTime at;
+  final InformationApprovalReceipt? ownerReceipt;
   Map<String, Object?> toJson() => {
     'operationId': operationId,
     'fingerprint': fingerprint,
     'at': _useTimestamp(at),
+    if (ownerReceipt != null) 'ownerReceipt': ownerReceipt!.toJson(),
   };
   factory CredentialBatchDecisionReceipt.fromJson(Map<String, dynamic> json) {
-    _useShape(json, {'operationId', 'fingerprint', 'at'});
+    _useShape(json, {'operationId', 'fingerprint', 'at'}, {'ownerReceipt'});
     if (!RegExp(
       r'^sha256:[0-9a-f]{64}$',
     ).hasMatch(json['fingerprint'] as String? ?? '')) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    final receipt = json['ownerReceipt'] == null
+        ? null
+        : InformationApprovalReceipt.fromJson(
+            Map<String, dynamic>.from(json['ownerReceipt'] as Map),
+          );
+    if (receipt != null &&
+        (receipt.operationId != json['operationId'] ||
+            receipt.recordedAt != _batchDate(json['at']))) {
       throw const CredentialUseFailure('invalid_plan');
     }
     return CredentialBatchDecisionReceipt(
       _batchOperationId(json['operationId']),
       json['fingerprint'] as String,
       _batchDate(json['at'])!,
+      ownerReceipt: receipt,
     );
   }
 }
@@ -411,6 +425,13 @@ class CredentialUseBatch {
         json['revision'] != decisions.length + 1 ||
         decisions.any((d) => d.at.isBefore(created))) {
       throw const CredentialUseFailure('invalid_plan');
+    }
+    for (final (index, d) in decisions.indexed) {
+      if (d.ownerReceipt != null &&
+          (d.ownerReceipt!.requestId != json['id'] ||
+              d.ownerReceipt!.revision != index + 2)) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
     }
     return CredentialUseBatch(
       id: _useId(json['id'], 'requestId'),

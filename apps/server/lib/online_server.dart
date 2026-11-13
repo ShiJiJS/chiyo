@@ -432,7 +432,9 @@ final class OnlineServer {
         'records':
             _service.owner.information.length +
             _service.owner.credentials.length,
-        'pending': _service.owner.queryInbox(limit: 1).pendingCount,
+        'pending':
+            _service.owner.queryInbox(limit: 1).pendingCount +
+            _service.owner.pendingCredentialBatchCount,
         'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
       },
       'directories': [
@@ -749,7 +751,9 @@ final class OnlineServer {
               'records':
                   _service.owner.information.length +
                   _service.owner.credentials.length,
-              'pending': _service.owner.queryInbox(limit: 1).pendingCount,
+              'pending':
+                  _service.owner.queryInbox(limit: 1).pendingCount +
+                  _service.owner.pendingCredentialBatchCount,
               'proposals': _service.owner.queryProposals(limit: 1).pendingCount,
             },
           });
@@ -989,11 +993,12 @@ final class OnlineServer {
           } else if (path.length == 5 &&
               path[3] == 'details' &&
               request.method == 'GET') {
+            final detail = await _approvals.read(path.last);
             await reply(
               200,
               approvalDetailToJson(
-                await _approvals.read(path.last),
-                version: 2,
+                detail,
+                version: detail.credentialBatch ? 3 : 2,
               ),
             );
           } else if (path.length == 4 && request.method == 'GET') {

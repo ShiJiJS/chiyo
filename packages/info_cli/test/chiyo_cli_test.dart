@@ -208,6 +208,99 @@ void main() {
         expect((await call(['connection', 'show'])).exitCode, 3);
       },
     );
+    test(
+      'access flags and business stdin persist before send and recover the original request without renewal',
+      () async {
+        final args = [
+          'access',
+          'request',
+          '--item',
+          'demo-server',
+          '--field',
+          'host',
+          '--purpose',
+          'Check the synthetic host',
+          '--operation',
+          'public-access',
+        ];
+        final created = await call(args);
+        expect(created.exitCode, 0, reason: created.render());
+        final data = created.output['data'] as Map;
+        expect(data['operationId'], 'public-access');
+        final id = data['requestId'] as String;
+        expect(service.owner.requests, hasLength(1));
+        final request = service.owner.requests.single;
+        final duplicate = await call(args);
+        expect((duplicate.output['data'] as Map)['requestId'], id);
+        expect(service.owner.requests, hasLength(1));
+        expect(
+          service.owner.requests.single.requestExpiresAt,
+          request.requestExpiresAt,
+        );
+        final changed = await call([
+          ...args.take(args.length - 2),
+          '--operation',
+          'public-access',
+          '--purpose',
+          'Changed purpose',
+        ]);
+        expect(changed.exitCode, 8);
+        final recovered = await call(['operations', 'retry', 'public-access']);
+        expect(recovered.exitCode, 0);
+        expect((recovered.output['data'] as Map)['requestId'], id);
+        final listed = await call(['operations', 'list']);
+        expect(
+          ((listed.output['data'] as Map)['localIntents'] as List)
+              .single['operationId'],
+          'public-access',
+        );
+        final stdinRequest =
+            await ChiyoCli(
+              environment: {'CHIYO_CONTEXT': contextFile.path},
+              input: Stream.value(
+                utf8.encode(
+                  jsonEncode({
+                    'fields': [
+                      {'itemId': 'demo-server', 'fieldId': 'host'},
+                    ],
+                  }),
+                ),
+              ),
+            ).run([
+              'access',
+              'request',
+              '--input',
+              '-',
+              '--purpose',
+              'A separate intent',
+              '--json',
+            ]);
+        expect(stdinRequest.exitCode, 0);
+        expect(
+          (stdinRequest.output['data'] as Map)['operationId'],
+          isNot('public-access'),
+        );
+        expect(service.owner.requests, hasLength(2));
+        final invalid =
+            await ChiyoCli(
+              environment: {'CHIYO_CONTEXT': contextFile.path},
+              input: Stream.value(
+                utf8.encode('{"fields":[],"password":"SYNTHETIC-NO-ECHO"}'),
+              ),
+            ).run([
+              'access',
+              'request',
+              '--input',
+              '-',
+              '--purpose',
+              'Invalid',
+              '--json',
+            ]);
+        expect(invalid.exitCode, 2);
+        expect(invalid.render(), isNot(contains('SYNTHETIC-NO-ECHO')));
+        expect(service.owner.requests, hasLength(2));
+      },
+    );
 
     test(
       'credential search excludes undiscoverable entries, accounts and material',

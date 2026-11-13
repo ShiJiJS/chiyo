@@ -113,6 +113,18 @@ class OwnerWorkspaceSettings implements WorkspaceSettingsSource {
   Future<WorkspaceNotificationPreview> notificationPreview() => _run(() async {
     final requests = owner.queryInbox(filter: core.InboxFilter.pending).entries;
     final r = requests.firstOrNull;
+    if (r == null) {
+      final batch = owner.credentialBatches
+          .where((r) => owner.credentialBatchState(r) == 'pending')
+          .firstOrNull;
+      if (batch != null) {
+        return WorkspaceNotificationPreview(
+          requestId: batch.id,
+          title: '有新的访问请求',
+          description: '打开访问审批查看用途与申请范围。',
+        );
+      }
+    }
     return r == null
         ? const WorkspaceNotificationPreview()
         : WorkspaceNotificationPreview(

@@ -567,6 +567,9 @@ extension CredentialBatchAgentAccess on AgentAccess {
 extension CredentialBatchOwnerAccess on OwnerAccess {
   List<CredentialUseBatch> get credentialBatches =>
       _service._batchRepository.credentialBatches;
+  int get pendingCredentialBatchCount => credentialBatches
+      .where((r) => _service._batchState(r) == 'pending')
+      .length;
   List<CredentialBatchOperation> get credentialBatchOperations =>
       _service._batchRepository.credentialBatchOperations;
   Map<String, Object?> credentialBatchOperationView(
@@ -580,6 +583,23 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     CredentialUseBatch r,
     CredentialBatchItem item,
   ) => _service._batchItemState(r, item);
+  void checkCredentialBatchItemEligibility(CredentialBatchItem item) {
+    _service._guardUseEligibility(
+      item.credentialId,
+      item.version,
+      generation: item.useGeneration,
+      requireMaterial: false,
+    );
+  }
+
+  InformationApprovalReceipt? credentialBatchApprovalReceipt(String id) {
+    for (final r in credentialBatches) {
+      for (final decision in r.decisions) {
+        if (decision.operationId == id) return decision.ownerReceipt;
+      }
+    }
+    return null;
+  }
 
   Future<CredentialBatchOperation> acknowledgeCredentialBatchOperation(
     String requestId,
@@ -645,6 +665,9 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     required int revision,
     required Iterable<String> approvedItems,
     Duration lifetime = AccessTiming.defaultLifetime,
+    String? reviewToken,
+    String? commandDigest,
+    void Function()? validateReview,
   }) => _decideBatch(
     id,
     operationId,
@@ -652,13 +675,29 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     approvedItems,
     'approve',
     lifetime,
+    reviewToken,
+    commandDigest,
+    validateReview,
   );
   Future<CredentialUseBatch> revokeCredentialBatch(
     String id, {
     required String operationId,
     required int revision,
     required Iterable<String> itemIds,
-  }) => _decideBatch(id, operationId, revision, itemIds, 'revoke', null);
+    String? reviewToken,
+    String? commandDigest,
+    void Function()? validateReview,
+  }) => _decideBatch(
+    id,
+    operationId,
+    revision,
+    itemIds,
+    'revoke',
+    null,
+    reviewToken,
+    commandDigest,
+    validateReview,
+  );
 
   Future<CredentialUseBatch> _decideBatch(
     String id,
@@ -667,9 +706,15 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     Iterable<String> itemIds,
     String action,
     Duration? lifetime,
+    String? reviewToken,
+    String? commandDigest,
+    void Function()? validateReview,
   ) => _serialize(() async {
     _batchOperationId(operationId);
     final repo = _service._batchRepository;
+    if ((reviewToken == null) != (commandDigest == null)) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     final selected = itemIds.toList()..sort();
     if (selected.toSet().length != selected.length ||
         selected.length > 20 ||
@@ -683,6 +728,8 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
       'action': action,
       'itemIds': selected,
       'lifetimeMs': lifetime?.inMilliseconds,
+      'reviewToken': ?reviewToken,
+      'commandDigest': ?commandDigest,
     });
     for (final existing in repo.credentialBatches) {
       final receipt = existing.decisions
@@ -707,6 +754,7 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     }
     final now = _batchTime(_service._clock());
     void validate() {
+      validateReview?.call();
       if (_service._batchRequest(id).revision != revision) {
         throw const CredentialUseFailure('operation_conflict');
       }
@@ -745,7 +793,26 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     ];
     final next = r.withDecision(
       items,
-      CredentialBatchDecisionReceipt(operationId, fingerprint, now),
+      CredentialBatchDecisionReceipt(
+        operationId,
+        fingerprint,
+        now,
+        ownerReceipt: reviewToken == null
+            ? null
+            : InformationApprovalReceipt(
+                operationId: operationId,
+                requestId: id,
+                action: action == 'revoke'
+                    ? InformationApprovalAction.revoke
+                    : selected.isEmpty
+                    ? InformationApprovalAction.deny
+                    : InformationApprovalAction.approve,
+                reviewToken: reviewToken,
+                commandDigest: commandDigest!,
+                revision: revision + 1,
+                recordedAt: now,
+              ),
+      ),
     );
     await repo.commitCredentialBatch(
       next,

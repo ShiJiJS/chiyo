@@ -141,6 +141,7 @@ class WorkspaceApprovalDetail {
     Iterable<String> approved = const [],
     Map<String, int> fileVersions = const {},
     this.credential,
+    this.credentialBatch = false,
     this.decidedAt,
     this.fieldExpiresAt,
     this.credentialExpiresAt,
@@ -159,6 +160,7 @@ class WorkspaceApprovalDetail {
   final Set<String> approved;
   final Map<String, int> fileVersions;
   final WorkspaceCredentialUseRequest? credential;
+  final bool credentialBatch;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
   final String? approveUnavailableReason, fileVersionPolicy;
 
@@ -173,6 +175,7 @@ class WorkspaceApprovalDetail {
         approved: approved,
         fileVersions: fileVersions,
         credential: credential,
+        credentialBatch: credentialBatch,
         decidedAt: decidedAt,
         fieldExpiresAt: fieldExpiresAt,
         credentialExpiresAt: credentialExpiresAt,

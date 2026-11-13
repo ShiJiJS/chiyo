@@ -116,7 +116,8 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
                       )
                       .length,
         pendingRequests: s.serviceAvailable
-            ? owner.queryInbox(limit: 1).pendingCount
+            ? owner.queryInbox(limit: 1).pendingCount +
+                  owner.pendingCredentialBatchCount
             : 0,
         materials: s.materials
             .where(
