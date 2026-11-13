@@ -127,6 +127,49 @@ Complete within the receiver's five-minute safety limit. Teardown closes its
 pipe and removes the isolated server state normally. This does not establish
 browser compatibility or installation against a live NAS.
 
+## Windows public batch CLI and real App host
+
+`apps/desktop/integration_test/windows_credential_batch_fill_test.dart` covers
+the v3 public command path with the real Windows runner, its build-bound native
+helper, the production `StorageDesktopLauncher` private batch host, and a
+separately compiled same-source `chiyo.exe`. It creates an independent HTTPS /
+SQLCipher / DPAPI library and private chat; it never loads the installed App's
+profiles or a production NAS. Approval uses the ordinary Workspace owner
+review/decision transport. Notifications and final process termination use the
+same desktop platform fixture as the earlier test; this is not OS notification
+or installed release acceptance.
+
+Prepare a same-source AOT CLI and an exclusively owned synthetic Ego TaskSpace
+using the installed Ego Skill. Supply its actual space and Page labels below.
+Chrome uses a new headless profile inside the new evidence directory; the App
+finds its own installed Ego helper, with no helper path in Agent business input.
+From `apps/desktop`, use a fresh evidence directory for every run:
+
+```powershell
+flutter test integration_test/windows_credential_batch_fill_test.dart -d windows --no-pub --dart-define=BATCH_EVIDENCE=C:/project/build/new-batch-app --dart-define=BATCH_CLI=C:/project/build/batch-cli/chiyo.exe '--dart-define=BATCH_CHROME=C:/Program Files/Google/Chrome/Application/chrome.exe' --dart-define=BATCH_RECEIVER=C:/project/build/focused-input-native/Release/info-focus-fixture.exe --dart-define=BATCH_EGO_SPACE=7 --dart-define=BATCH_EGO_PAGE=p1
+```
+
+Chrome and Ego are automatic. Each receiver checks exact fake Unicode, emoji
+and whitespace, the untouched other field, and exactly one input event after
+retrying the original operation. Their fake fields are cleared afterwards.
+When `state.json` reports `awaiting_win32_focus`, use authorized Computer Use
+only on the newly created synthetic Win32 receiver:
+
+1. Focus its masked control 101, then write `{"id":1,"action":"native-positive"}`
+   to the evidence directory's `command.json`. Wait for ID 1 in `state.json`.
+2. Focus ordinary control 103, then write `{"id":2,"action":"native-plain"}`.
+   The original approved request must be refused and every control stay empty.
+3. Write `{"id":3,"action":"finish"}`. The normal App quit lifecycle must close
+   the private host and make new capability requests unavailable.
+
+The native receiver checks an exact synthetic match, unchanged clipboard and
+no paste; control selection is separate from the production credential input.
+Complete this phase within four minutes. Normal teardown closes the owned
+Win32 receiver, the headless Chrome and the encrypted fixture. The caller must
+finish its Ego TaskSpace after observing the completed result. A passing test
+does not establish live-NAS deployment or compatibility with every website or
+ordinary application.
+
 ## Desktop build diagnostics
 
 Alternatively, after configuring the Windows Flutter build, run from `apps/desktop`
