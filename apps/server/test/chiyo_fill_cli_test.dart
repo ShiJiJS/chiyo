@@ -42,7 +42,84 @@ class _Browser implements DeviceCredentialBatchBrowser {
   }
 }
 
+class _DeniedFocus implements FocusedFillDiscoveryDriver {
+  int inspections = 0, prepares = 0;
+  @override
+  Future<FocusedFillTarget> inspectTarget() async {
+    inspections++;
+    throw const CredentialUseFailure('access_denied');
+  }
+
+  @override
+  Future<PreparedFocusedFill> prepare(
+    FocusedFillApplication application,
+  ) async {
+    prepares++;
+    throw StateError('Permission refusal cannot prepare an input target');
+  }
+}
+
 void main() {
+  test(
+    'native permission refusal gives an actionable capability error without creating an approval or input',
+    () async {
+      final f = await DeviceCredentialFixture.create();
+      addTearDown(f.dispose);
+      final directory = Directory('${f.root.path}/app-private');
+      await AutomaticConnectionStore(
+        directory.path,
+      ).publish({'mode': 'server'}, f.profiles.first);
+      final driver = _DeniedFocus();
+      final host = await DeviceCredentialBatchHost.start(
+        directory: directory,
+        driver: driver,
+      );
+      addTearDown(host.close);
+      final chat = await f.agents.first.call('/session/lifecycle', {
+        'chatLabel': 'Synthetic permission refusal',
+      });
+      final file = File('${f.root.path}/cli-chat/context.json');
+      await ChiyoContext(
+        chatId: 'permission-trial',
+        agentName: 'Trial Agent',
+        secret: chat['sessionSecret'] as String,
+        port: f.profiles.first.address.port,
+        connection: f.profiles.first,
+      ).saveNew(file);
+      final result =
+          await ChiyoCli(
+            environment: {
+              'CHIYO_CONTEXT': file.path,
+              'CHIYO_CONNECTION_DIRECTORY': directory.path,
+            },
+          ).run([
+            'fill',
+            'request',
+            '--credential',
+            'synthetic-not-delivered',
+            '--via',
+            'focus',
+            '--purpose',
+            'Verify permission refusal',
+            '--operation',
+            'permission-refused',
+            '--json',
+          ]);
+      expect(result.exitCode, 3, reason: result.render());
+      final error = result.output['error'] as Map;
+      expect(error['code'], 'access_denied');
+      expect(error['message'], contains('设置 → 凭据填写'));
+      expect(error['message'], isNot(contains('参数')));
+      expect(
+        (result.output['data'] as Map)['operationId'],
+        'permission-refused',
+      );
+      expect(driver.inspections, 1);
+      expect(driver.prepares, 0);
+      expect(f.runtime.service.owner.credentialBatches, isEmpty);
+      expect(f.repo.credentialBatchOperations, isEmpty);
+    },
+  );
   test(
     'public fill flags, normal HTTPS App approval and private App execution share one real operation',
     () async {

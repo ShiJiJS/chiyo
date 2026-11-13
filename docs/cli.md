@@ -97,7 +97,7 @@ App 运行后发送 `{"command":"plugin-list"}` 或 `{"command":"template-list"}
 
 ## 登记已准备好的 Codex 运行包
 
-正式个人 Skill 从系统默认的公开 `integration.json` 定位同版本运行包。安装者核对准备好的目录后，可显式运行同包 `info-prepare-codex --register-existing <运行包目录>`。支持交付包的 `template/` 或准备后的 `skills/agent-info-access/`，要求三个程序和完整说明齐全；登记只保存公开路径、大小和摘要，不建立会话、不编辑 Codex 配置，也不授予 hooks 信任。常规准备命令仍只向新目录输出，不自动登记。
+正式个人 Skill 从系统默认的公开 `integration.json` 定位同版本运行包。安装者核对准备好的目录后，可显式运行同包 `info-prepare-codex --register-existing <运行包目录>`。支持交付包的 `template/` 或准备后的 `skills/agent-info-access/`，schema2要求chiyo、旧兼容入口、hook、worker四个程序及完整说明齐全；登记只保存公开路径、大小和摘要，不建立会话、不编辑 Codex 配置，也不授予 hooks 信任。常规准备命令仍只向新目录输出，不自动登记。
 
 Mac 描述位于 `~/Library/Application Support/AgentInfo/codex/integration.json`，Windows 位于 `%LOCALAPPDATA%/AgentInfo/Codex/integration.json`。更新运行包须重新核对和登记，不能把旧描述当作新版已就绪。当前登记与定位的故障检查在 Mac 上运行；未据此宣称 Windows 原生安装验收通过。
 
