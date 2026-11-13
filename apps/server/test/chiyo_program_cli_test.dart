@@ -388,12 +388,12 @@ void main() {
                       .toList())
                   .single
               as File;
-      final before = await hostRecord.readAsString();
+      final before = await hostRecord.readAsBytes();
       expect(
         (await trial.call(['operations', 'show', 'one-program'])).exitCode,
         0,
       );
-      expect(await hostRecord.readAsString() == before, true);
+      expect(await hostRecord.readAsBytes(), before);
       expect(await trial.counter.readAsLines(), ['start']);
     },
     skip: !Platform.isMacOS && !Platform.isWindows,

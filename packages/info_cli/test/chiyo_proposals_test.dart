@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:info_cli/chiyo_cli.dart';
 import 'package:info_cli/chiyo_context.dart';
+import 'package:info_cli/chiyo_intents.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
+import 'package:info_remote/private_connection_files.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -270,7 +272,12 @@ void main() {
       await for (final file in contextFile.parent.list(recursive: true)) {
         if (file is File && file.path.endsWith('.json')) {
           expect(
-            await file.readAsString(),
+            jsonEncode(
+              await PrivateConnectionFiles.read(
+                file,
+                maxBytes: ChiyoIntentStore.maxCheckBytes,
+              ),
+            ),
             isNot(contains('PRIVATE-SYNTHETIC-NOTE')),
           );
         }
@@ -423,7 +430,12 @@ void main() {
       await for (final file in contextFile.parent.list(recursive: true)) {
         if (file is File && file.path.endsWith('.json')) {
           expect(
-            await file.readAsString(),
+            jsonEncode(
+              await PrivateConnectionFiles.read(
+                file,
+                maxBytes: ChiyoIntentStore.maxCheckBytes,
+              ),
+            ),
             isNot(contains('PRIVATE-SYNTHETIC-TOKEN')),
           );
         }

@@ -398,6 +398,10 @@ void main() {
       } finally {
         await reopened.close();
       }
+      // Read persisted bytes after releasing the OS lock on Windows, including
+      // the lock file rather than silently excluding files from this check.
+      await runtime.close();
+      await repo.close();
       for (final file in Directory(
         '${root.path}/source',
       ).listSync().whereType<File>()) {
