@@ -277,6 +277,35 @@ void main() {
         },
       );
       test(
+        'same URL reload during final authorization never receives input in the new document',
+        () async {
+          final checked = await inspect();
+          final result = await driver.fill(
+            checked.target,
+            synthetic,
+            beforeDispatch: () async {
+              await probe.call('Page.reload', {});
+              await _until(() async {
+                try {
+                  return await probe.evaluate(
+                        'location.href===${jsonEncode(url)} && document.readyState==="complete" && !!document.querySelector("#login")',
+                      ) ==
+                      true;
+                } on Object {
+                  return false;
+                }
+              });
+            },
+          );
+          expect(result['status'], isIn(['refused', 'unknown']));
+          expect(await probe.evaluate('window.inputEvents'), 0);
+          expect(
+            await probe.evaluate('document.querySelector("#password").value'),
+            isEmpty,
+          );
+        },
+      );
+      test(
         'a final authorization timeout never dispatches after the callback completes',
         () async {
           final checked = await inspect();

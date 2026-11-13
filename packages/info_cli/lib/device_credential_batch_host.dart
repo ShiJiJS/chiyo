@@ -230,6 +230,7 @@ final class DeviceCredentialBatchClient {
 /// The host validates locators and grants; adapters never receive a proof.
 abstract interface class DeviceCredentialBatchBrowser {
   Future<BrowserFormInspection> inspect(Map<String, dynamic> locator);
+
   /// Run the guard after the last target inspection, immediately before the
   /// final dispatch. A refused result must establish that no write occurred.
   Future<Map<String, Object?>> fill(
@@ -593,16 +594,13 @@ final class DeviceCredentialBatchHost {
             found['requestId'] is! String) {
           throw const CredentialUseFailure('operation_conflict');
         }
-        return _public(
-          await connection.call('$_base/status', {
-            'sessionSecret': session,
-            'requestId': found['requestId'],
-          }),
-        );
+      } else if (found['status'] != 'not_found') {
+        return _public(found);
       }
-      if (found['status'] != 'not_found') return _public(found);
     }
     // A lost submit reply only ever resends this exact frozen prepared input.
+    // A known server ID must also match that immutable digest: another caller
+    // may have submitted a different intent before the local journal existed.
     final frozen = CredentialBatchInput.fromJson(_map(journal['prepared']));
     await _profile(
       connection.profile.serverId,

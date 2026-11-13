@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'browser_form_script.dart';
@@ -128,6 +129,7 @@ class ChromeBrowserFill {
   ) async {
     final response = await page.call('Runtime.evaluate', {
       'expression': expression,
+      'uniqueContextId': page.context,
       'returnByValue': true,
       'awaitPromise': false,
     });
@@ -149,6 +151,7 @@ class ChromeBrowserFill {
     final selected = await _select(tab, url);
     final page = await _CdpPage.open(selected.socket, timeout);
     try {
+      await page.pinDocument();
       return await _inspect(page, selected.instance, tab, url, form, field);
     } finally {
       await page.close();
@@ -210,6 +213,7 @@ class ChromeBrowserFill {
         throw const BrowserFillFailure('destination_changed');
       }
       page = await _CdpPage.open(selected.socket, timeout);
+      await page.pinDocument();
       final checked = await _inspect(
         page,
         selected.instance,
@@ -273,6 +277,8 @@ class _CdpPage {
   final Duration timeout;
   late final StreamSubscription<Object?> subscription;
   final _pending = <int, Completer<Map<String, dynamic>>>{};
+  final _contexts = <Map<String, dynamic>>[];
+  late final String context;
   var _next = 0;
   static Future<_CdpPage> open(Uri uri, Duration timeout) async {
     try {
@@ -292,7 +298,14 @@ class _CdpPage {
         return;
       }
       final value = jsonDecode(event);
-      if (value is! Map<String, dynamic> || value['id'] is! int) return;
+      if (value is! Map<String, dynamic>) return;
+      if (value['method'] == 'Runtime.executionContextCreated') {
+        final observed = (value['params'] as Map?)?['context'];
+        if (observed is Map<String, dynamic> && _contexts.length < 1024) {
+          _contexts.add(observed);
+        }
+      }
+      if (value['id'] is! int) return;
       final pending = _pending.remove(value['id']);
       if (pending == null) return;
       if (value['error'] != null || value['result'] is! Map<String, dynamic>) {
@@ -313,6 +326,38 @@ class _CdpPage {
     for (final value in pending) {
       value.completeError(const BrowserFillFailure('browser_unavailable'));
     }
+  }
+
+  Future<void> pinDocument() async {
+    // Listen before Runtime.enable. Numeric context IDs can be reused after
+    // navigation; never fall back to a numeric ID or the default document.
+    await call('Runtime.enable', {});
+    final tree = await call('Page.getFrameTree', {});
+    final frame = ((tree['frameTree'] as Map?)?['frame'] as Map?)?['id'];
+    if (frame is! String || frame.isEmpty) {
+      throw const BrowserFillFailure('browser_operation_failed');
+    }
+    final name =
+        'chiyo-fill-${base64Url.encode(List.generate(16, (_) => Random.secure().nextInt(256)))}';
+    final world = await call('Page.createIsolatedWorld', {
+      'frameId': frame,
+      'worldName': name,
+    });
+    final matches = _contexts
+        .where(
+          (c) =>
+              c['id'] == world['executionContextId'] &&
+              c['name'] == name &&
+              (c['auxData'] as Map?)?['frameId'] == frame,
+        )
+        .toList();
+    if (matches.length != 1 ||
+        matches.single['uniqueId'] is! String ||
+        (matches.single['uniqueId'] as String).isEmpty) {
+      throw const BrowserFillFailure('browser_operation_failed');
+    }
+    context = matches.single['uniqueId'] as String;
+    _contexts.clear();
   }
 
   Future<Map<String, dynamic>> call(

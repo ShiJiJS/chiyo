@@ -92,7 +92,7 @@ void main() {
         recovered['requestId'],
         f.service.owner.credentialBatches.single.id,
       );
-      expect(f.count('request'), 1);
+      expect(f.count('request'), 2);
       expect(f.browser.inspections, 2);
     },
   );
@@ -144,6 +144,34 @@ void main() {
       }, session: f.stranger);
       expect(stranger['status'], 'pending');
       expect(f.service.owner.credentialBatches, hasLength(2));
+    },
+  );
+  test(
+    'recovering a known server request still verifies its frozen submission digest',
+    () async {
+      f.skipRequest = true;
+      final command = {
+        'command': 'batch-request',
+        'operationId': 'shared-op',
+        'input': f.plan(),
+      };
+      await f.call(command);
+      f.skipRequest = false;
+      final frozen =
+          (await f.journals()).single['prepared'] as Map<String, dynamic>;
+      await f.service.agent.requestCredentialBatch(
+        f.session,
+        'A' * 22,
+        CredentialBatchInput.fromJson({
+          ...frozen,
+          'purpose': 'Other original content',
+        }),
+        operationId: 'shared-op',
+      );
+      final count = f.browser.inspections;
+      expect((await f.call(command))['errorCode'], 'operation_conflict');
+      expect(f.browser.inspections, count);
+      expect(f.service.owner.credentialBatches, hasLength(1));
     },
   );
   test('all targets must still match before material is claimed', () async {
@@ -266,7 +294,7 @@ void main() {
     () async {
       final submitted = await Future.wait([f.request(), f.request()]);
       expect(submitted.first, submitted.last);
-      expect(f.count('request'), 1);
+      expect(f.count('request'), 2);
       expect(f.browser.inspections, 2);
       await f.approve(submitted.first, ['b1', 'b2']);
       await Future.wait([
