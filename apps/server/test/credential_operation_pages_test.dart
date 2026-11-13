@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/owner_client.dart';
-import 'package:info_workspace/approval_transport.dart';
 import 'package:info_workspace/workspace_source.dart';
 import 'package:test/test.dart';
 import '../../../packages/info_workspace/test_support/operation_history.dart';
 import 'support/device_credential_fixture.dart';
+import '../../desktop/lib/workspace/remote_workspace_approvals.dart';
 
 void main() {
   test(
@@ -14,6 +14,8 @@ void main() {
       final at = DateTime.utc(2026, 11, 14);
       final f = await DeviceCredentialFixture.create(clock: () => at);
       addTearDown(f.dispose);
+      var changes = 0;
+      final app = RemoteWorkspaceApprovals(f.owner, onChanged: () => changes++);
       for (final program in [false, true]) {
         final history = OperationHistoryFixture(f.runtime.service, f.repo, at);
         await f.runtime.run(() => history.open(program: program, count: 61));
@@ -24,7 +26,7 @@ void main() {
           '/v1/owner/approvals/details/${Uri.encodeComponent(history.request.id)}',
         );
         expect(raw['version'], 5);
-        var detail = approvalDetailFromJson(raw);
+        var detail = await app.read(history.request.id);
         expect(detail.operationsTotal, 61);
         expect(
           detail.batchOperations.length + detail.programOperations.length,
@@ -32,11 +34,10 @@ void main() {
         );
         final originalReview = detail.reviewToken;
         final firstCursor = detail.operationsCursor!;
-        final page = WorkspaceCredentialOperationPage.fromJson(
-          await f.owner.request('POST', '$path/operations/query', {
-            'cursor': firstCursor,
-            'limit': 17,
-          }),
+        final page = await app.operationPage(
+          history.request.id,
+          cursor: firstCursor,
+          limit: 17,
         );
         expect(page.length, 17);
         detail = detail.withOperationPage(page);
@@ -76,11 +77,9 @@ void main() {
         );
         while (detail.operationsCursor != null) {
           detail = detail.withOperationPage(
-            WorkspaceCredentialOperationPage.fromJson(
-              await f.owner.request('POST', '$path/operations/query', {
-                'cursor': detail.operationsCursor,
-                'limit': 25,
-              }),
+            await app.operationPage(
+              history.request.id,
+              cursor: detail.operationsCursor,
             ),
           );
         }
@@ -102,6 +101,7 @@ void main() {
           hasLength(1),
         );
       }
+      expect(changes, 0);
     },
   );
 }
