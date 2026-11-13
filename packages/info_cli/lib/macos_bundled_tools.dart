@@ -75,6 +75,7 @@ class MacBundledTools {
       }
       final name = binary.uri.pathSegments.last;
       if (!const {
+        'chiyo',
         'info',
         'info-codex',
         'info-codex-hook',

@@ -189,6 +189,7 @@ def main():
         cli = payload / "cli"
         cli.mkdir()
         for entry, name in [
+            ("chiyo", "chiyo"),
             ("info", "info"), ("codex_info", "info-codex"),
             ("codex_hook", "info-codex-hook"), ("runtime_worker", "info-runtime-worker"),
             ("prepare_codex", "info-prepare-codex"),
@@ -269,7 +270,7 @@ def main():
 
         primary = [
             app / "Contents/MacOS/info_desktop", app / "Contents/MacOS/info-runtime-worker",
-            *[cli / name for name in ["info", "info-codex", "info-codex-hook", "info-runtime-worker", "info-prepare-codex"]],
+            *[cli / name for name in ["chiyo", "info", "info-codex", "info-codex-hook", "info-runtime-worker", "info-prepare-codex"]],
             payload / "diagnostics/bin/macos-storage-check",
         ]
         if focus is not None:

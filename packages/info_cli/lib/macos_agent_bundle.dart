@@ -19,6 +19,7 @@ class MacAgentBundle {
   static const requiredFiles = [
     appExecutable,
     'app/chiyo.app/Contents/Info.plist',
+    'cli/chiyo',
     'cli/info',
     'cli/info-codex',
     'cli/info-codex-hook',
