@@ -980,6 +980,23 @@ class _CredentialOutputStore {
     }
   }
 
+  Map<String, dynamic> outputMetadata(String id) {
+    final cached = outputs[id];
+    if (cached?.finishedAt case final finished?) {
+      if (finished.isBefore(
+        DateTime.now().subtract(const Duration(minutes: 30)),
+      )) {
+        outputs.remove(id);
+      }
+    }
+    final current = outputs[id];
+    return {
+      'outputAvailable': current != null,
+      'outputComplete': current?.complete ?? false,
+      'outputTruncated': current?.truncated ?? false,
+    };
+  }
+
   Map<String, dynamic> output(String id, Object cursor, Object limit) {
     if (cursor is! int || limit is! int || limit < 1 || limit > 16) {
       throw const CredentialUseFailure('invalid_type');

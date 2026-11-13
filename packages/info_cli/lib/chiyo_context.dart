@@ -5,6 +5,10 @@ import 'package:info_remote/private_connection_files.dart';
 import 'agent_client.dart';
 import 'codex_association.dart';
 
+class ChiyoContextMismatch extends FormatException {
+  const ChiyoContextMismatch() : super('context_mismatch');
+}
+
 /// A caller-selected private context, not a global "last chat". Its connection
 /// is immutable: a later App mode switch cannot move this chat's approvals.
 class ChiyoContext {
@@ -82,7 +86,7 @@ class ChiyoContext {
     }
     final expected = env['CHIYO_CHAT_ID'] ?? env['CODEX_THREAD_ID'];
     if (expected != null && expected != data['chatId']) {
-      throw const FormatException('context_mismatch');
+      throw const ChiyoContextMismatch();
     }
     final profile = AgentConnectionProfile.fromPrivateJson(
       Map<String, dynamic>.from(data['connection'] as Map),

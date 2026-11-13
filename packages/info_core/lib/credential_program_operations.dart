@@ -36,7 +36,11 @@ class CredentialProgramOperation {
     'itemIds': itemIds,
   });
   Map<String, Object?> toPublicJson() => {
-    ...progress.toJson(),
+    for (final entry in progress.toJson().entries)
+      if (!{'outputAvailable', 'outputTruncated'}.contains(entry.key))
+        entry.key: entry.value,
+    // The server records execution facts, not the device's volatile output.
+    'outputLocation': 'execution-device',
     'protocolVersion': 3,
     'kind': 'program',
     'revision': revision,

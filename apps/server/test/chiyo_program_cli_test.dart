@@ -274,6 +274,14 @@ void main() {
       });
       expect(ended['executionState'], 'exited', reason: '$ended');
       expect(ended['exitCode'], 0, reason: '$ended');
+      expect(ended['outputAvailable'], true);
+      expect(ended['outputState'], 'retained');
+      final serverOnly = await f.agents.first.call('/operations/show', {
+        'sessionSecret': trial.context.secret,
+        'id': 'one-program',
+      });
+      expect(serverOnly['outputLocation'], 'execution-device');
+      expect(serverOnly.containsKey('outputAvailable'), false);
       final ownerOperation = WorkspaceCredentialProgramOperation.fromJson(
         await f.owner.request(
           'GET',
@@ -350,6 +358,43 @@ void main() {
         false,
       );
       expect(output.render(), isNot(contains(trial.context.secret)));
+      // Loss of the original volatile cache is reported honestly. Querying
+      // must not start another Host or repeat the successful business action.
+      await trial.close();
+      Map? afterStop;
+      for (var i = 0; i < 100; i++) {
+        afterStop =
+            (await trial.call([
+                  'operations',
+                  'show',
+                  'one-program',
+                ])).output['data']
+                as Map?;
+        if (afterStop?['outputAvailable'] == false) break;
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      expect(afterStop?['outputAvailable'], false);
+      expect(afterStop?['outputState'], 'not_retained');
+      final hostFolder = DeviceCredentialHost(
+        trial.profile,
+        trial.state,
+      ).directory;
+      final hostRecord =
+          (await hostFolder
+                      .list()
+                      .where(
+                        (file) => file is File && file.path.endsWith('.json'),
+                      )
+                      .toList())
+                  .single
+              as File;
+      final before = await hostRecord.readAsString();
+      expect(
+        (await trial.call(['operations', 'show', 'one-program'])).exitCode,
+        0,
+      );
+      expect(await hostRecord.readAsString() == before, true);
+      expect(await trial.counter.readAsLines(), ['start']);
     },
     skip: !Platform.isMacOS && !Platform.isWindows,
   );

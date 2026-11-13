@@ -44,6 +44,7 @@ class ChiyoCommandLine {
         help: switch (name) {
           'connection' => '独立 Agent 设备配置；省略则使用 App 当前配置。',
           'context-out' => '新私有文件的绝对路径；不能覆盖已有聊天。',
+          'id' => '当前聊天的真实标识；有 CHIYO_CHAT_ID 或 CODEX_THREAD_ID 时须一致。',
           _ => '本次聊天的 $name。',
         },
       );
@@ -229,7 +230,7 @@ class ChiyoCommandLine {
     _input(execRun);
     _operation(execRun);
     final execOutput = _command('exec output', '读取本次程序的有限输出；不会重新启动程序。');
-    _operation(execOutput);
+    execOutput.addOption('operation', help: '必填，原程序执行的操作编号；不会生成新编号或重新执行。');
     execOutput.addOption('cursor', defaultsTo: '0', help: '上次结果中的输出位置。');
     execOutput.addOption('limit', defaultsTo: '16', help: '本次读取 1–16 段。');
     _command('operations', '找回原操作；结果未知时查询，不重放输入。');

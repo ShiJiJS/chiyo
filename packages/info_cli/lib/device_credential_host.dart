@@ -107,6 +107,48 @@ final class DeviceCredentialHost {
     }
   }
 
+  /// Query only the original resident Host. Inspection never creates a Host,
+  /// acquires material, or turns a missing output cache into a new execution.
+  Future<Map<String, dynamic>> inspectProgram(
+    String session,
+    Map<String, dynamic> input,
+  ) async {
+    if (input['command'] != 'program-status') {
+      return _failure('invalid_plan');
+    }
+    try {
+      if (await FileSystemEntity.type(directory.path, followLinks: false) ==
+          FileSystemEntityType.notFound) {
+        return {'status': 'output_unavailable'};
+      }
+      final folder = await privateDeviceDirectory(directory);
+      final record = await readPrivateDeviceState(
+        File('${folder.path}/$_scope.json'),
+      );
+      if (record == null) return {'status': 'output_unavailable'};
+      _validate(record);
+      if (record['scope'] != _scope || record['profileHash'] != _profileHash) {
+        return _failure('service_unavailable');
+      }
+      final active = CredentialProcessIdentity.isActive(
+        record['workerPid'] as int,
+        record['workerIdentity'] as String,
+      );
+      if (active == false || record['phase'] == 'closed') {
+        return {'status': 'output_unavailable'};
+      }
+      if (active != true || record['phase'] != 'ready') {
+        return _failure('service_unavailable');
+      }
+      return await _control(record, '/execute', {
+        'sessionSecret': session,
+        'input': input,
+      });
+    } on Object {
+      return _failure('service_unavailable');
+    }
+  }
+
   /// Trusted lifecycle utility, not an Agent JSON-lines command. It refuses to
   /// stop any active execution; finished in-memory output may be discarded.
   Future<Map<String, dynamic>> stopIfIdle() async {

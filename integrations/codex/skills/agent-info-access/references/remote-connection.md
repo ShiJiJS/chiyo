@@ -1,57 +1,41 @@
-# 资料库连接与命令调用
+# 聊天、连接与恢复
 
-使用当前运行包末尾列出的 `Bundle executable` 和可选的 `Connection profile`、`Session state directory`。App 打开本地库或成功保存服务器连接后自动准备受限配置；CLI 默认自动发现，用户不需要生成配置。运行包明确指定配置路径时传给程序；配置内容只由程序读取，管理 Token 不属于 Agent 的接入资料。
+使用本包给出的 Bundle executable 或公开描述中已核对的 cliPath。先 `chiyo --help`，再用具体命令 `--help` 查看参数；不要求记住协议 JSON。命令示例里的路径和 ID 都是虚构的，运行时取实际值。
 
-本地模式使用 App 发布的本机连接，保持 App 在后台运行即可；显式退出后本地服务停止。重新打开库不会恢复已结束的聊天许可。已有聊天关联始终指向原库，不随默认库切换；原库不再可用时报告具体状态；关联确实无效时按主说明自动建立未授权连接。
+## 复用已有上下文
 
-已有有效 association 时直接复用。首次连接、引用丢失或确认会话无效时，Agent 自动执行一次下方连接调用，无需用户单独同意；结果是新的未授权会话，不恢复旧许可，也不自动重发原业务申请。普通网络中断或服务器维护继续保留原关联和操作编号，连接恢复后查原结果。身份或证书不符时停止并核对原目标，不关闭校验或改连其他库。
+宿主可为本聊天提供 `CHIYO_CONTEXT`，或通过独立 stdin 使用 `chiyo --context-stdin ...` 传入仅含 association 的私有引用。CLI 读取文件，不在正常输出里返回证明。引用保留在当前工具的私密调用环境中，不打印、不写普通脚本参数、提交或无关聊天。业务 `--input -` 和私有上下文不能同时占用 stdin；业务需要 stdin 时通过受保护环境提供上下文。
 
-下面是当前 Mac/Linux 的 Node 子进程调用方式。`cliPath` 是运行包给出的 Bundle executable；可选 `connectionFile` 和 `stateRoot` 取自该运行包，未提供时设为 undefined。只使用当前聊天标识；Node REPL 从 `nodeRepl.requestMeta.threadId` 取得，普通 Node 可取 `CODEX_THREAD_ID`。没有当前标识就停止接入。子进程通过 `/usr/bin/env` 继承正常环境并设置这一个公开标识，不要求 Node REPL 提供 process 全局对象。
+已有 Codex 引用继续核对当前 CODEX_THREAD_ID；公开 ID 只是误用检查。Node 工具没有继承环境时，从本次工具元数据取真实聊天 ID，并保留本机正常环境；不要把环境不完整误判成需要新许可。不能扫描关联目录、读取客户端登录文件或按公开 ID 找回证明。
 
-```js
-const { spawn } = await import('node:child_process');
-const chatId = (typeof nodeRepl !== 'undefined' && nodeRepl.requestMeta?.threadId)
-  || (typeof process !== 'undefined' && process.env.CODEX_THREAD_ID);
-if (!chatId) throw new Error('缺少当前聊天标识');
-async function invoke(executable, args, input) {
-  const child = spawn('/usr/bin/env', [`CODEX_THREAD_ID=${chatId}`, executable, ...args], {
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
-  let out = '';
-  child.stdout.setEncoding('utf8');
-  child.stdout.on('data', chunk => { out += chunk; });
-  child.stderr.resume();
-  const ended = new Promise((resolve, reject) => {
-    child.once('error', reject);
-    child.once('close', code => code === 0 ? resolve() : reject(new Error('CLI 未完成')));
-  });
-  child.stdin.end(input === undefined ? '' : JSON.stringify(input));
-  await ended;
-  return JSON.parse(out);
-}
+## 没有上下文时
+
+本次任务确实需要知予且没有有效私有引用时，Agent 自行创建一个初始未授权聊天，无需用户单独确认。先看 `chat start --help`，例如：
+
+```sh
+chiyo chat start --agent "Example Agent" --id actual-chat-id --label "整理资料" --context-out /absolute/private-chat/context.json --json
 ```
 
-本次任务需要连接且没有可用关联时，自动执行一次下面的调用，将新关联保留在同一私密脚本上下文；有效关联不重建，单纯网络失败不触发本步骤。不输出 hook 的完整结果或关联路径：
+context-out 必须是新文件的绝对路径，放在本聊天专用私有目录；程序不覆盖旧聊天文件，也不修改一般用户目录的权限。公开聊天 ID 由当前任务真实来源取得，没有宿主 ID 时为本次独立聊天生成唯一标识，不用其他聊天 ID 取权限。调用方在后续子进程环境设置 CHIYO_CONTEXT 指向自己刚指定的文件，再用 `connection show` 或 `chat show` 核对库、审批位置与设备；不要输出私有配置内容。
 
-```js
-const hookPath = cliPath.replace(/info-codex(\.exe)?$/, 'info-codex-hook$1');
-const args = ['--connect'];
-if (connectionFile) args.push('--connection', connectionFile);
-if (stateRoot) args.push('--state-root', stateRoot);
-const opened = await invoke(hookPath, args);
-const context = opened.hookSpecificOutput?.additionalContext;
-if (typeof context !== 'string') throw new Error('未取得新的聊天关联');
-const association = JSON.parse(context).association;
-if (typeof association !== 'string') throw new Error('聊天关联不可用');
-const execute = command => invoke(cliPath, [], { association, ...command });
+默认发现 App 已确认的 Agent 设备配置，不读 App 的管理密码或 Token。本包另给 Connection profile 时，chat start 使用 --connection 传其准确路径，由程序自己读取。它是接入配置，不授予业务内容访问。本地模式需要 App 在后台运行，服务器模式的申请由服务器接收；具体填写仍需要同一电脑的 App 执行能力。
+
+原配置固定资料库，不随 App 切换默认库。网络断开保留原上下文、申请和操作编号，恢复后先查原记录。证书或服务器身份不符时停止核对，不关闭校验、扫描其他入口或换成本地库。明确会话失效时最多自动新建一次未授权聊天，新聊天不继承旧批准；业务被拒绝、到期或撤销不是重连理由。
+
+## 提交与结果不确定
+
+每次创建或执行可用 --operation 指定稳定编号，省略则软件生成。新业务动作与故障恢复分开：保存返回编号，丢失编号时从本聊天 requests／proposals／operations 列表找回；不按参数相似判断两次调用是不是同一次。
+
+```sh
+chiyo requests list --json
+chiyo requests show REQUEST_ID --json
+chiyo requests wait REQUEST_ID --timeout 60 --json
+chiyo operations show OPERATION_ID --json
+chiyo operations retry OPERATION_ID --json
 ```
 
-后续命令的结果按任务需要返回；association 继续只留在私密调用上下文。先用 `execute({command:'capabilities'})` 核对实际能力，再查询 `catalog` 和 `directory-list`。从查询结果选择准确 ID，普通文字申请格式如下：
+retry 恢复原事实；未知填写或程序执行不重放。服务尚未找到记录也不证明网络中原提交永远不会到达。对于预检后提交，CLI 固定来源和模板摘要；普通本地记录不保存密码材料。stdin 来源未另存，必要时需要原内容和原编号，不靠摘要重建正文。
 
-```json
-{"command":"request","operationId":"read-001","purpose":"本次需要这些字段的用途","fields":[{"itemId":"查询所得资料ID","fieldId":"查询所得字段ID"}]}
-```
+JSON 公共外层为 schemaVersion=1、ok、data，失败另有 error.code/message。退出码 0 表示本次命令按约定成功，2 输入错误，3 连接／上下文／能力不可用，4 执行未获准，5 执行失败，6 等待超时，7 结果未知，8 版本或操作内容冲突。查询读到 denied 或 failed 可以仍为退出码0；要看业务状态，不把查询成功当作执行成功。普通诊断不输出原始异常、配置或密码。
 
-保留返回的 requestId，使用 `status` 或 `wait`（可给 timeoutMs）等待原申请。获批后 `claim` 核对 fields 和 expiresAt；`read` 提供 requestId、itemId、fieldId。CLI 私下领取读取凭证，不在结果中返回它。收到 request_unknown 或没有拿到 requestId 时，用 `request-status` 提供原 operationId 查询；等待、CLI 退出和服务器普通重启均不重新提交。
-
-申请编号、状态和批准范围可以报告；配置内容、hook 完整结果、association 以及私密证明不进入普通日志或 shell 命令。文件、凭据和模板能力以 capabilities 为准，没有相应能力时暂缓对应任务。
+通用聊天结束用 chat end；宿主有真实结束事件时可由适配器结束。CLI 命令退出不是聊天结束，不因等了一分钟就自动结束已批准任务。

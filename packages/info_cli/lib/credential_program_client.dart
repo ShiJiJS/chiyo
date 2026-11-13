@@ -57,6 +57,57 @@ extension _ProgramClient on AgentClient {
     return previous;
   }
 
+  Future<Map<String, dynamic>> _observedProgram(
+    Map<String, dynamic> input,
+  ) async {
+    final stored = await _existingProgram(input);
+    if (stored['status'] != 'ok') return stored;
+    final Map<String, dynamic> observed;
+    if (hostedCredentialExecutions) {
+      final profile = _remote?.profile ?? _local?.profile;
+      if (profile == null || deviceFileStateDirectory == null) {
+        return {...stored, 'outputState': 'unknown'};
+      }
+      observed = await DeviceCredentialHost(
+        profile,
+        deviceFileStateDirectory!,
+        workerExecutable: _runtimeWorkerExecutable,
+      ).inspectProgram(_session!, input);
+      if (observed['status'] == 'output_unavailable') {
+        return {
+          ...stored,
+          'outputAvailable': false,
+          'outputComplete': false,
+          'outputTruncated': false,
+          'outputState': 'not_retained',
+        };
+      }
+      if (observed['status'] != 'ok' ||
+          observed['executionId'] != stored['executionId'] ||
+          observed['outputAvailable'] is! bool ||
+          observed['outputComplete'] is! bool ||
+          observed['outputTruncated'] is! bool) {
+        return {...stored, 'outputState': 'unknown'};
+      }
+    } else {
+      observed = _programExecutions.outputMetadata(
+        stored['executionId'] as String,
+      );
+    }
+    return {
+      ...stored,
+      for (final key in [
+        'outputAvailable',
+        'outputComplete',
+        'outputTruncated',
+      ])
+        key: observed[key],
+      'outputState': observed['outputAvailable'] == true
+          ? 'retained'
+          : 'not_retained',
+    };
+  }
+
   Future<Map<String, dynamic>> _executeProgramCommand(
     Map<String, dynamic> input,
   ) async {
@@ -97,7 +148,7 @@ extension _ProgramClient on AgentClient {
       )) {
         throw const CredentialUseFailure('unsupported_capability');
       }
-      if (command == 'program-status') return await _existingProgram(input);
+      if (command == 'program-status') return await _observedProgram(input);
       if (command == 'program-request') {
         if (input['launch'] is! Map<String, dynamic> ||
             input['purpose'] is! String) {

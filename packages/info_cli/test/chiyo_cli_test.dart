@@ -66,6 +66,11 @@ void main() {
     ).run(['fill', 'request', '--help', '--json']);
     expect(json.output['schemaVersion'], 1);
     expect((json.output['data'] as Map)['help'], contains('--selector'));
+    final outputHelp = await ChiyoCli(
+      environment: {},
+    ).run(['exec', 'output', '--help']);
+    expect(outputHelp.help, contains('必填，原程序执行的操作编号'));
+    expect(outputHelp.help, isNot(contains('省略则自动生成')));
     final invalid = await ChiyoCli(
       environment: {},
     ).run(['fill', '--SECRET-DO-NOT-ECHO', '--json']);
@@ -93,6 +98,41 @@ void main() {
       expect(result.exitCode, 2);
     }
   });
+
+  test(
+    'chat setup rejects a mismatched host identity before connecting or writing an unusable context',
+    () async {
+      final root = await Directory.systemTemp.createTemp('chiyo-host-context-');
+      addTearDown(() => root.delete(recursive: true));
+      for (final variable in ['CODEX_THREAD_ID', 'CHIYO_CHAT_ID']) {
+        final target = File('${root.path}/$variable/context.json');
+        final result =
+            await ChiyoCli(environment: {variable: 'actual-current-chat'}).run([
+              'chat',
+              'start',
+              '--agent',
+              'Trial Agent',
+              '--id',
+              'different-chat',
+              '--label',
+              'New chat',
+              '--context-out',
+              target.path,
+              '--connection',
+              '${root.path}/missing-profile.json',
+              '--json',
+            ]);
+        expect(result.exitCode, 2, reason: result.render());
+        expect((result.output['error'] as Map)['code'], 'invalid_usage');
+        expect((result.output['error'] as Map)['message'], contains('尚未创建聊天'));
+        expect(
+          (result.output['error'] as Map)['message'],
+          isNot(contains('actual-current-chat')),
+        );
+        expect(await target.parent.exists(), false);
+      }
+    },
+  );
 
   group('unified CLI over an authenticated local service', () {
     late Directory root;
@@ -158,6 +198,31 @@ void main() {
       await service.close();
       await root.delete(recursive: true);
     });
+
+    test(
+      'an existing private context from another host chat reports the mismatch without exposing either identity or changing it',
+      () async {
+        final before = await contextFile.readAsBytes();
+        final result = await ChiyoCli(
+          environment: {
+            'CHIYO_CONTEXT': contextFile.path,
+            'CHIYO_CHAT_ID': 'another-current-host-chat',
+          },
+        ).run(['connection', 'show', '--json']);
+        expect(result.exitCode, 3, reason: result.render());
+        expect((result.output['error'] as Map)['code'], 'context_mismatch');
+        for (final value in [
+          context.secret,
+          context.chatId,
+          'another-current-host-chat',
+          contextFile.path,
+        ]) {
+          expect(result.render(), isNot(contains(value)));
+        }
+        expect(await contextFile.readAsBytes(), before);
+        expect(service.owner.requests, isEmpty);
+      },
+    );
 
     test(
       'an unavailable program capability is a connection/capability failure, not invalid user input',

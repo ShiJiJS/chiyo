@@ -116,6 +116,13 @@ class ChiyoCli {
           'access read',
         }.contains(invocation.path),
       );
+    } on ChiyoContextMismatch {
+      return _failure(
+        'context_mismatch',
+        '这份私有配置属于另一聊天，请使用本聊天的配置；不能用公开聊天编号找回或继承其他聊天的批准。',
+        3,
+        invocation?.json ?? false,
+      );
     } on ChiyoUsageFailure catch (error) {
       return _failure(
         'invalid_usage',
@@ -207,6 +214,13 @@ class ChiyoCli {
     final agent = _required(i, 'agent'),
         chat = _required(i, 'id'),
         label = _required(i, 'label');
+    final hostChat =
+        environment['CHIYO_CHAT_ID'] ?? environment['CODEX_THREAD_ID'];
+    if (hostChat != null && hostChat != chat) {
+      throw const ChiyoUsageFailure(
+        '--id 与当前宿主的聊天标识不一致；请使用当前 CHIYO_CHAT_ID 或 CODEX_THREAD_ID 提供的真实标识。尚未创建聊天。',
+      );
+    }
     if (!target.isAbsolute ||
         await FileSystemEntity.type(target.path, followLinks: false) !=
             FileSystemEntityType.notFound) {

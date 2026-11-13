@@ -327,11 +327,21 @@ class AgentClient {
         )) {
           return {'status': 'unsupported_capability'};
         }
-        return _call('/${(command as String).replaceAll('-', '/')}', {
-          'sessionSecret': _session,
-          for (final entry in input.entries)
-            if (entry.key != 'command') entry.key: entry.value,
-        });
+        final result =
+            await _call('/${(command as String).replaceAll('-', '/')}', {
+              'sessionSecret': _session,
+              for (final entry in input.entries)
+                if (entry.key != 'command') entry.key: entry.value,
+            });
+        if (command == 'operations-show' &&
+            result['status'] == 'ok' &&
+            result['kind'] == 'credential-program') {
+          return _executeProgramCommand({
+            'command': 'program-status',
+            'operationId': input['id'],
+          });
+        }
+        return result;
       case 'capabilities':
         if (input.keys.any((k) => k != 'command')) {
           return Map<String, dynamic>.from(

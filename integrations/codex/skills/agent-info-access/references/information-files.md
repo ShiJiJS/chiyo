@@ -1,13 +1,17 @@
-# Ordinary information files
+# 普通附件交付（旧聊天兼容）
 
 Read this branch for a catalog field with `kind:file`, such as a resume or a
 document the user wants read or uploaded. This grants access to the original
 file contents. Token strings and private-key files used to authenticate belong
 to [Credential use](credential-use.md), which supplies use rather than raw data.
 
-Use the main Skill's private association and separate stdin transport for every
-command. Examples below omit `association`; include the current private
-reference in that same stdin JSON object, never in shell arguments.
+This reference continues existing legacy attachment workflows through the verified
+`legacyCliPath`. Use that original chat's private association and separate stdin
+transport for every command. Examples omit `association`; include that same
+reference in each stdin JSON object, never in shell arguments. A new generic
+`chiyo` context is not a legacy association. Do not create another chat or claim
+its approvals to continue an old delivery; check the installed command help for
+the current supported entry points.
 
 ## Request and fetch
 
