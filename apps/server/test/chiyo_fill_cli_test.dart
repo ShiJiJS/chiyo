@@ -115,6 +115,14 @@ void main() {
         '--operation',
         'submit-fill',
       ];
+      final health = await call(['doctor']);
+      expect(health.exitCode, 0);
+      final fill = (health.output['data'] as Map)['fill'] as Map;
+      expect(fill['supported'], true);
+      expect(fill['appAvailable'], true);
+      expect((fill['chrome'] as Map)['targetReady'], null);
+      expect(browser.fills, 0);
+      expect(f.runtime.service.owner.credentialBatches, isEmpty);
       final requested = await call(command);
       expect(requested.exitCode, 0, reason: requested.render());
       final id = (requested.output['data'] as Map)['requestId'] as String;

@@ -550,25 +550,57 @@ class ChiyoCli {
       'credentialTools': capabilities['credentialTools'] ?? const [],
       'targetChecked': false,
     };
+    final batchSupported = (capabilities['capabilities'] as List? ?? [])
+        .contains('credential-batches.v3');
+    final host = batchSupported && context.connection != null
+        ? await _batchClient.execute(null, {'command': 'capabilities'})
+        : <String, dynamic>{'status': 'unsupported_capability'};
+    final appAvailable = host['status'] == 'ok';
+    final providers = host['providers'] as List? ?? [];
+    checks['fill'] = {
+      'supported': batchSupported,
+      'appAvailable': appAvailable,
+      'targetChecked': false,
+      for (final via in ['ego', 'chrome', 'focus'])
+        via: {
+          'supported': batchSupported,
+          'available': appAvailable && providers.contains(via),
+          'targetReady': null,
+          'reason': !batchSupported
+              ? 'update_required'
+              : !appAvailable
+              ? 'matching_app_unavailable'
+              : !providers.contains(via)
+              ? 'provider_not_installed'
+              : 'target_not_checked',
+        },
+    };
     if (i.options['via'] == 'chrome') {
       final browser = i.options['browser'] as String?;
       if (browser == null) {
         checks['chrome'] = {
-          'supported': true,
+          'supported': batchSupported,
           'available': false,
-          'reason': 'browser_address_required',
+          'reason': batchSupported
+              ? 'browser_address_required'
+              : 'update_required',
         };
       } else {
         try {
           final pages = await ChromeBrowserFill(browser).pages();
           checks['chrome'] = {
-            'supported': true,
-            'available': true,
+            'supported': batchSupported,
+            'available': appAvailable && providers.contains('chrome'),
+            'browserConnected': true,
             'pageCount': (pages['pages'] as List).length,
+            'targetReady': null,
+            'reason': appAvailable
+                ? 'target_not_checked'
+                : 'matching_app_unavailable',
           };
         } on Object {
           checks['chrome'] = {
-            'supported': true,
+            'supported': batchSupported,
             'available': false,
             'reason': 'browser_unavailable',
           };
