@@ -96,6 +96,7 @@ const _libraryRevisionSnapshotFormat = 62;
 const _libraryCredentialArchiveFormat = 63;
 const _credentialDeliveryLibraryFormat = 64;
 const _credentialBatchLibraryFormat = 65;
+const _agentSubmissionLibraryFormat = 66;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -704,7 +705,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _credentialBatchLibraryFormat) {
+      if (headerVersion > _agentSubmissionLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -719,7 +720,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _credentialBatchLibraryFormat ||
+            (marker.single['version'] as int) > _agentSubmissionLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }

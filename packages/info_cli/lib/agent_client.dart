@@ -224,8 +224,13 @@ class AgentClient {
       if (_session == null) return {'status': 'unauthorized'};
       final capabilities = await _call('/capabilities', {});
       if (!(capabilities['capabilities'] as List? ?? []).contains(
-        'credential-reveal.v1',
-      )) {
+            'credential-reveal.v1',
+          ) ||
+          command == 'request-reveal' &&
+              input.containsKey('operationId') &&
+              !(capabilities['capabilities'] as List? ?? []).contains(
+                'credential-reveal-operations.v1',
+              )) {
         return Map<String, dynamic>.from(
           const CredentialUseFailure(
             'unsupported_capability',

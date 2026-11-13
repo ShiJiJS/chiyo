@@ -44,9 +44,19 @@ class CredentialRevealInput {
     this.fallbackReason,
     this.agentName,
     this.externalChatId,
+    this.operationId,
   );
   final String credentialId, purpose, fallbackReason, agentName, externalChatId;
   final int version;
+  final String? operationId;
+  String get submissionDigest => _useFingerprint({
+    'credentialId': credentialId,
+    'version': version,
+    'purpose': purpose,
+    'fallbackReason': fallbackReason,
+    'agentName': agentName,
+    'externalChatId': externalChatId,
+  });
   factory CredentialRevealInput.fromJson(Map<String, dynamic> json) {
     _useShape(
       json,
@@ -58,7 +68,7 @@ class CredentialRevealInput {
         'purpose',
         'fallbackReason',
       },
-      {'agentName', 'externalChatId', 'submissionVersion'},
+      {'agentName', 'externalChatId', 'submissionVersion', 'operationId'},
     );
     if (json['protocolVersion'] != 2 ||
         json['command'] != 'request-reveal' ||
@@ -81,6 +91,14 @@ class CredentialRevealInput {
     if (purpose.trim().isEmpty || reason.trim().isEmpty) {
       throw const CredentialUseFailure('invalid_type');
     }
+    final operation = json['operationId'];
+    if (operation != null &&
+        (operation is! String ||
+            !RegExp(
+              r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+            ).hasMatch(operation))) {
+      throw const CredentialUseFailure('invalid_operation_id');
+    }
     return CredentialRevealInput._(
       _useId(json['credentialId'], 'credentialId'),
       json['version'] as int,
@@ -88,6 +106,7 @@ class CredentialRevealInput {
       reason,
       _useSourceText(json, 'agentName'),
       _useSourceText(json, 'externalChatId'),
+      operation as String?,
     );
   }
 }
@@ -100,6 +119,23 @@ extension CredentialRevealAgentAccess on AgentAccess {
     _service._runtimeRepository;
     if (!_service._sessionActive(session)) {
       throw const CredentialUseFailure('session_required');
+    }
+    final binding = _service._sessionBindings[session]!;
+    if (input.operationId != null) {
+      final prior = _service._runtimeRepository.credentialUseRequests
+          .where(
+            (r) =>
+                r.submissionSessionBinding == binding &&
+                r.submissionOperationId == input.operationId,
+          )
+          .firstOrNull;
+      if (prior != null) {
+        if (prior.submissionDigest != input.submissionDigest) {
+          throw const CredentialUseFailure('operation_conflict');
+        }
+        _service._credentialUseSessions[prior.id] = session;
+        return prior;
+      }
     }
     final c = _service._guardUseEligibility(input.credentialId, input.version);
     if (!c.discoverable || c.form != CredentialForm.string) {
@@ -122,6 +158,11 @@ extension CredentialRevealAgentAccess on AgentAccess {
       createdAt: now,
       requestExpiresAt: now.add(_service._requestLifetime),
       fields: const [],
+      submissionOperationId: input.operationId,
+      submissionDigest: input.operationId == null
+          ? null
+          : input.submissionDigest,
+      submissionSessionBinding: input.operationId == null ? null : binding,
     );
     void validate() {
       if (!_service._sessionActive(session)) {

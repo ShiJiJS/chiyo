@@ -387,6 +387,7 @@ class AgentProtocol {
             'submission-metadata.v1',
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
             if (enableReusableCredentialUse) 'credential-reveal.v1',
+            if (enableReusableCredentialUse) 'credential-reveal-operations.v1',
             if (enableReusableCredentialUse) 'credential-account.v1',
             if (enableReusableCredentialUse)
               'credential-ssh-session-validity.v1',

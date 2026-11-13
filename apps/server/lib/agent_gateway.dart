@@ -183,6 +183,10 @@ final class AgentGateway {
           if ((result['capabilities'] as List).contains('credential-reveal.v1'))
             'credential-reveal.v1',
           if ((result['capabilities'] as List).contains(
+            'credential-reveal-operations.v1',
+          ))
+            'credential-reveal-operations.v1',
+          if ((result['capabilities'] as List).contains(
             'credential-account.v1',
           ))
             'credential-account.v1',

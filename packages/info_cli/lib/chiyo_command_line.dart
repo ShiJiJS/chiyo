@@ -71,6 +71,7 @@ class ChiyoCommandLine {
       '说明无法直接使用的原因；批准后原文会进入聊天。',
     );
     _credential(reveal);
+    _operation(reveal);
     reveal.addOption('reason', help: '无法通过直接填写或程序接收完成的原因。');
     final read = _command('credentials reveal read', '领取单独获批的原文，保留独立操作记录。');
     _request(read);

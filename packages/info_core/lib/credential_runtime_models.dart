@@ -828,6 +828,9 @@ class CredentialUseRequest {
     this.revokedAt,
     this.attemptedAt,
     this.restoredAt,
+    this.submissionOperationId,
+    this.submissionDigest,
+    this.submissionSessionBinding,
   }) : specification = _credentialSpecification(
          protocolVersion,
          plan,
@@ -839,6 +842,22 @@ class CredentialUseRequest {
        revealReads = List.unmodifiable(revealReads),
        fields = List.unmodifiable(fields),
        approvedFields = List.unmodifiable(approvedFields) {
+    final submission = [
+      submissionOperationId,
+      submissionDigest,
+      submissionSessionBinding,
+    ];
+    if (submission.any((v) => v != null) &&
+        (!isReveal ||
+            submission.any((v) => v == null) ||
+            !RegExp(
+              r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
+            ).hasMatch(submissionOperationId!) ||
+            !RegExp(r'^sha256:[0-9a-f]{64}$').hasMatch(submissionDigest!) ||
+            submissionSessionBinding!.isEmpty ||
+            submissionSessionBinding!.length > 200)) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     if (!isReveal && revealReads.isNotEmpty ||
         revealReads.map((r) => r.operationId).toSet().length !=
             revealReads.length) {
@@ -859,6 +878,11 @@ class CredentialUseRequest {
   }
   final String id, chatLabel, purpose, alias, credentialId, state;
   final String agentName, externalChatId;
+
+  /// Private submission recovery facts; never authorization or portable data.
+  final String? submissionOperationId,
+      submissionDigest,
+      submissionSessionBinding;
   final int version, useGeneration;
   final int protocolVersion;
   final CredentialUseSpecification specification;
@@ -943,84 +967,110 @@ class CredentialUseRequest {
     if (restoredAt != null) 'restoredAt': _useTimestamp(restoredAt),
   };
   factory CredentialUseRequest.fromJson(Map<String, dynamic> j) =>
-      CredentialUseRequest(
-        protocolVersion: _useProtocol(j),
-        id: j['id'] as String,
-        chatLabel: j['chatLabel'] as String,
-        agentName: j['agentName'] as String? ?? '',
-        externalChatId: j['externalChatId'] as String? ?? '',
-        purpose: j['purpose'] as String,
-        alias: j['alias'] as String,
-        credentialId: j['credentialId'] as String,
-        version: j['version'] as int,
-        useGeneration: j['useGeneration'] as int,
-        plan: _storedFocusedFill(j) || j['useKind'] == 'credential_reveal'
-            ? null
-            : CredentialLaunchPlan.fromStorageJson(
-                j['plan'] as Map<String, dynamic>,
-              ),
-        fill: _storedFocusedFill(j)
-            ? FocusedFillPlan.fromJson(j['fill'] as Map<String, dynamic>)
-            : null,
-        revealReason: j['useKind'] == 'credential_reveal'
-            ? j['fallbackReason'] as String
-            : null,
-        revealReads: (j['revealReads'] as List? ?? const []).map(
-          (r) => CredentialRevealRead.fromJson(
-            Map<String, dynamic>.from(r as Map),
+      CredentialUseRequest._read(j);
+  factory CredentialUseRequest._read(
+    Map<String, dynamic> j, {
+    Map<String, dynamic>? submission,
+  }) => CredentialUseRequest(
+    protocolVersion: _useProtocol(j),
+    id: j['id'] as String,
+    chatLabel: j['chatLabel'] as String,
+    agentName: j['agentName'] as String? ?? '',
+    externalChatId: j['externalChatId'] as String? ?? '',
+    purpose: j['purpose'] as String,
+    alias: j['alias'] as String,
+    credentialId: j['credentialId'] as String,
+    version: j['version'] as int,
+    useGeneration: j['useGeneration'] as int,
+    plan: _storedFocusedFill(j) || j['useKind'] == 'credential_reveal'
+        ? null
+        : CredentialLaunchPlan.fromStorageJson(
+            j['plan'] as Map<String, dynamic>,
           ),
-        ),
-        requestedPlan: j['requestedPlan'] == null
-            ? null
-            : CredentialLaunchPlan.fromStorageJson(
-                j['requestedPlan'] as Map<String, dynamic>,
-              ),
-        createdAt: DateTime.parse(j['createdAt'] as String),
-        requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
-        fields: (j['fields'] as List).map(
-          (dynamic f) =>
-              FieldRef(f['itemId'] as String, f['fieldId'] as String),
-        ),
-        state: j['state'] as String,
-        credentialApproved: j['credentialApproved'] as bool,
-        approvedFields: (j['approvedFields'] as List).map(
-          (dynamic f) =>
-              FieldRef(f['itemId'] as String, f['fieldId'] as String),
-        ),
-        credentialExpiresAt: j['credentialExpiresAt'] == null
-            ? null
-            : DateTime.parse(j['credentialExpiresAt'] as String),
-        credentialValidity: !j.containsKey('credentialValidity')
-            ? CredentialUseValidity.timed
-            : j['credentialValidity'] == 'session'
-            ? CredentialUseValidity.session
-            : throw const CredentialUseFailure(
-                'invalid_plan',
-                fieldPath: 'credentialValidity',
-              ),
-        fieldExpiresAt: j['fieldExpiresAt'] == null
-            ? null
-            : DateTime.parse(j['fieldExpiresAt'] as String),
-        executionId: j['executionId'] as String?,
-        attemptConsumed: j['attemptConsumed'] as bool,
-        invalidatedCode: j['invalidatedCode'] as String?,
-        credentialName: j['credentialName'] as String?,
-        decidedAt: j['decidedAt'] == null
-            ? null
-            : DateTime.parse(j['decidedAt'] as String),
-        revokedAt: j['revokedAt'] == null
-            ? null
-            : DateTime.parse(j['revokedAt'] as String),
-        attemptedAt: j['attemptedAt'] == null
-            ? null
-            : DateTime.parse(j['attemptedAt'] as String),
-        restoredAt: j['restoredAt'] == null
-            ? null
-            : DateTime.parse(j['restoredAt'] as String),
-      );
+    fill: _storedFocusedFill(j)
+        ? FocusedFillPlan.fromJson(j['fill'] as Map<String, dynamic>)
+        : null,
+    revealReason: j['useKind'] == 'credential_reveal'
+        ? j['fallbackReason'] as String
+        : null,
+    revealReads: (j['revealReads'] as List? ?? const []).map(
+      (r) => CredentialRevealRead.fromJson(Map<String, dynamic>.from(r as Map)),
+    ),
+    requestedPlan: j['requestedPlan'] == null
+        ? null
+        : CredentialLaunchPlan.fromStorageJson(
+            j['requestedPlan'] as Map<String, dynamic>,
+          ),
+    createdAt: DateTime.parse(j['createdAt'] as String),
+    requestExpiresAt: DateTime.parse(j['requestExpiresAt'] as String),
+    fields: (j['fields'] as List).map(
+      (dynamic f) => FieldRef(f['itemId'] as String, f['fieldId'] as String),
+    ),
+    state: j['state'] as String,
+    credentialApproved: j['credentialApproved'] as bool,
+    approvedFields: (j['approvedFields'] as List).map(
+      (dynamic f) => FieldRef(f['itemId'] as String, f['fieldId'] as String),
+    ),
+    credentialExpiresAt: j['credentialExpiresAt'] == null
+        ? null
+        : DateTime.parse(j['credentialExpiresAt'] as String),
+    credentialValidity: !j.containsKey('credentialValidity')
+        ? CredentialUseValidity.timed
+        : j['credentialValidity'] == 'session'
+        ? CredentialUseValidity.session
+        : throw const CredentialUseFailure(
+            'invalid_plan',
+            fieldPath: 'credentialValidity',
+          ),
+    fieldExpiresAt: j['fieldExpiresAt'] == null
+        ? null
+        : DateTime.parse(j['fieldExpiresAt'] as String),
+    executionId: j['executionId'] as String?,
+    attemptConsumed: j['attemptConsumed'] as bool,
+    invalidatedCode: j['invalidatedCode'] as String?,
+    credentialName: j['credentialName'] as String?,
+    decidedAt: j['decidedAt'] == null
+        ? null
+        : DateTime.parse(j['decidedAt'] as String),
+    revokedAt: j['revokedAt'] == null
+        ? null
+        : DateTime.parse(j['revokedAt'] as String),
+    attemptedAt: j['attemptedAt'] == null
+        ? null
+        : DateTime.parse(j['attemptedAt'] as String),
+    restoredAt: j['restoredAt'] == null
+        ? null
+        : DateTime.parse(j['restoredAt'] as String),
+    submissionOperationId: submission?['id'] as String?,
+    submissionDigest: submission?['digest'] as String?,
+    submissionSessionBinding: submission?['sessionBinding'] as String?,
+  );
   CredentialUseRequest changed(Map<String, Object?> values) =>
-      CredentialUseRequest.fromJson({...toJson(), ...values});
-  Map<String, Object?> toStorageJson() => toJson();
+      CredentialUseRequest.fromStorageJson({...toStorageJson(), ...values});
+  Map<String, Object?> toStorageJson() => {
+    ...toJson(),
+    if (submissionOperationId != null)
+      'submissionOperation': {
+        'id': submissionOperationId,
+        'digest': submissionDigest,
+        'sessionBinding': submissionSessionBinding,
+      },
+  };
+  factory CredentialUseRequest.fromStorageJson(Map<String, dynamic> json) {
+    final raw = json['submissionOperation'];
+    if (!json.containsKey('submissionOperation')) {
+      return CredentialUseRequest.fromJson(json);
+    }
+    if (raw is! Map ||
+        raw.length != 3 ||
+        !raw.keys.toSet().containsAll({'id', 'digest', 'sessionBinding'})) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    return CredentialUseRequest._read(
+      json,
+      submission: Map<String, dynamic>.from(raw),
+    );
+  }
   Map<String, Object?> toRequestInputJson() => {
     'protocolVersion': protocolVersion,
     'command': isReveal ? 'request-reveal' : 'request-use',

@@ -39,6 +39,26 @@ final class OnlineInformationRuntime {
         throw const FormatException('Invalid online state');
       }
       runtime._restore(snapshot.payload['textRuntime']);
+      if (repository is CredentialRuntimeRepository) {
+        final runtimeFacts = repository as CredentialRuntimeRepository;
+        // Reattach only private submission history to the original session.
+        // Loading storage already invalidates legacy reveal grants; this does
+        // not turn a submission receipt into a usable reveal authorization.
+        for (final r in runtimeFacts.credentialUseRequests) {
+          if (!r.isReveal ||
+              r.submissionSessionBinding == null ||
+              r.restoredAt != null) {
+            continue;
+          }
+          final session = service._sessionBindings.entries
+              .where((e) => e.value == r.submissionSessionBinding)
+              .map((e) => e.key)
+              .firstOrNull;
+          if (session != null && service._sessions[session] == r.chatLabel) {
+            service._credentialUseSessions[r.id] = session;
+          }
+        }
+      }
       await runtime._maintainDeviceCredentialRequests(restoring: true);
       await runtime._save();
       return runtime;

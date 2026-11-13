@@ -8,6 +8,121 @@ import 'storage_test.dart' show TestKeyStore;
 import 'backup_setup.dart';
 
 void main() {
+  test(
+    'private reveal submission recovery survives storage reopen but never enters portable backup',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'private-reveal-submission-',
+      );
+      final keys = TestKeyStore();
+      var repo = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        keys,
+      );
+      var service = InformationService(repository: repo);
+      addTearDown(() async {
+        await service.close();
+        await repo.close();
+        await root.delete(recursive: true);
+      });
+      var c = await service.owner.createStringCredential(
+        name: 'Synthetic',
+        publicPurpose: '',
+        secret: 'PRIVATE-SYNTHETIC',
+      );
+      c = await service.owner.updateCredentialMetadata(
+        c.id,
+        c.revision,
+        name: c.name,
+        publicPurpose: '',
+        privateNote: '',
+        suggestedBinding: 'TOKEN',
+        discoverable: true,
+      );
+      final session = service.agent.openSession('Synthetic private recovery');
+      final request = await service.agent.requestCredentialReveal(
+        session,
+        CredentialRevealInput.fromJson({
+          'protocolVersion': 2,
+          'command': 'request-reveal',
+          'credentialId': c.id,
+          'version': 1,
+          'purpose': 'Synthetic fallback',
+          'fallbackReason': 'Synthetic target unsupported',
+          'operationId': 'create-reveal-once',
+        }),
+      );
+      await service.owner.decideCredentialUse(
+        request.id,
+        approveCredential: true,
+      );
+      final privateBinding =
+          repo.credentialUseRequests.single.submissionSessionBinding;
+      expect(privateBinding, isNotNull);
+      final recovery = await enableTestBackups(repo.backups);
+      final path = '${root.path}/portable.aimbackup';
+      await service.owner.exportLibrary(() => repo.backups.exportTo(path));
+      final archive = await AttachmentBackupContainer.openValidated(
+        path,
+        recovery,
+      );
+      expect(archive.formatVersion, 27);
+      archive.close();
+      final target = await EncryptedInformationRepository.open(
+        '${root.path}/restored',
+        TestKeyStore(),
+      );
+      final restored = InformationService(repository: target);
+      try {
+        await restored.owner.restoreLibrary(
+          () => target.backups.restoreFrom(path, recovery),
+        );
+        expect(
+          target.credentialUseRequests.single.submissionOperationId,
+          isNull,
+        );
+        expect(
+          target.credentialUseRequests.single.submissionSessionBinding,
+          isNull,
+        );
+        expect(
+          restored.owner.credentialGrantState(
+            target.credentialUseRequests.single,
+          ),
+          isNot('available'),
+        );
+      } finally {
+        await restored.close();
+        await target.close();
+      }
+      await service.close();
+      await repo.close();
+      final db = sqlite.sqlite3.open('${root.path}/source/library.db');
+      final hex = keys.key!
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+      db.execute('PRAGMA key = "x\'$hex\'"');
+      expect(db.select('PRAGMA user_version').single.values.single, 66);
+      db.close();
+      repo = await EncryptedInformationRepository.open(
+        '${root.path}/source',
+        keys,
+      );
+      service = InformationService(repository: repo);
+      expect(
+        repo.credentialUseRequests.single.submissionOperationId,
+        'create-reveal-once',
+      );
+      expect(
+        repo.credentialUseRequests.single.submissionSessionBinding,
+        privateBinding,
+      );
+      expect(
+        service.owner.credentialGrantState(repo.credentialUseRequests.single),
+        isNot('available'),
+      );
+    },
+  );
   test('program receiver facts also require the new backup reader', () async {
     final root = await Directory.systemTemp.createTemp(
       'synthetic-program-storage-',

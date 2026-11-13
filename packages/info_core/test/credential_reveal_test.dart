@@ -18,6 +18,88 @@ Matcher failure(String code) =>
 
 void main() {
   test(
+    'explicit reveal submission ids recover one immutable request in the original chat',
+    () async {
+      var now = DateTime.utc(2026, 11, 14);
+      final (service, session, command) = await tokenRequest(
+        clock: () => now,
+        protocolVersion: 2,
+      );
+      addTearDown(service.close);
+      Map<String, dynamic> input(String reason) => {
+        'protocolVersion': 2,
+        'command': 'request-reveal',
+        'credentialId': command.credentialId,
+        'version': 1,
+        'purpose': 'Synthetic fallback',
+        'fallbackReason': reason,
+        'operationId': 'reveal-once',
+      };
+      final results = await Future.wait(
+        List.generate(
+          4,
+          (_) => service.agent.requestCredentialReveal(
+            session,
+            CredentialRevealInput.fromJson(
+              input('Cannot fill synthetic target'),
+            ),
+          ),
+        ),
+      );
+      expect(results.map((r) => r.id).toSet(), hasLength(1));
+      final first = results.first;
+      expect(first.submissionOperationId, 'reveal-once');
+      expect(
+        service.agent.showOwnOperation(session, 'reveal-once')['requestId'],
+        first.id,
+      );
+      expect(
+        service.agent.showOwnOperation(
+          service.agent.openSession('Other chat'),
+          'reveal-once',
+        )['status'],
+        'not_found',
+      );
+      expect(
+        jsonEncode(first.toJson()),
+        isNot(contains('submissionOperation')),
+      );
+      final stored = CredentialUseRequest.fromStorageJson(
+        Map<String, dynamic>.from(first.toStorageJson()),
+      );
+      expect(stored.submissionOperationId, 'reveal-once');
+      expect(
+        stored.changed({'state': 'denied'}).submissionDigest,
+        first.submissionDigest,
+      );
+      now = now.add(const Duration(minutes: 10));
+      final c = service.owner.credential(command.credentialId);
+      await service.owner.rotateStringCredential(
+        c.id,
+        c.revision,
+        'SYNTHETIC-ROTATED',
+      );
+      final same = await service.agent.requestCredentialReveal(
+        session,
+        CredentialRevealInput.fromJson(input('Cannot fill synthetic target')),
+      );
+      expect(same.id, first.id);
+      expect(same.version, 1);
+      expect(same.requestExpiresAt, first.requestExpiresAt);
+      await expectLater(
+        service.agent.requestCredentialReveal(
+          session,
+          CredentialRevealInput.fromJson(input('Changed business reason')),
+        ),
+        failure('operation_conflict'),
+      );
+      expect(
+        service.owner.credentialUseRequests.where((r) => r.isReveal),
+        hasLength(1),
+      );
+    },
+  );
+  test(
     'use approval never becomes plaintext approval; reads are separate and audited',
     () async {
       final (service, session, command) = await tokenRequest(

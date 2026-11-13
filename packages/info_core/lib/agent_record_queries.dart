@@ -42,6 +42,8 @@ extension AgentRecordQueries on AgentAccess {
           'createdAt': _useTimestamp(r.createdAt),
           'credentialId': r.credentialId,
           'version': r.version,
+          if (r.submissionOperationId != null)
+            'operationId': r.submissionOperationId,
         };
       }
     }

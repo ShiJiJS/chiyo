@@ -14,6 +14,7 @@ import 'chiyo_intents.dart';
 import 'device_credential_batch_host.dart';
 part 'chiyo_fill.dart';
 part 'chiyo_proposals.dart';
+part 'chiyo_reveal.dart';
 
 class ChiyoRunResult {
   const ChiyoRunResult(
@@ -385,6 +386,12 @@ class ChiyoCli {
         if (record.kind == 'proposal-submit') {
           return _recoverProposal(client, record);
         }
+        if (record.kind == 'reveal-request') {
+          return _submitReveal(client, record);
+        }
+        if (record.kind == 'reveal-read') {
+          return _revealReceipt(client, record);
+        }
         // An execution record is never an instruction to type again. Remaining
         // adapters can recover their own immutable intent through this seam.
         return client.execute({'command': 'operations-show', 'id': id});
@@ -487,6 +494,10 @@ class ChiyoCli {
       case 'proposals check':
       case 'proposals submit':
         return _proposal(i, client);
+      case 'credentials reveal request':
+        return _requestReveal(i, client);
+      case 'credentials reveal read':
+        return _readReveal(i, client);
       default:
         // New target and multi-credential semantics must be implemented by the
         // receiving service; never translate them to a broader old script plan.
@@ -696,44 +707,56 @@ class ChiyoCli {
   }) {
     final status = data['status'] as String? ?? 'invalid_response';
     final code = data['errorCode'] as String? ?? status;
-    final int? failure = switch (status) {
-      'service_unavailable' ||
-      'connection_unavailable' ||
-      'server_changed' ||
-      'association_unavailable' ||
-      'session_required' ||
-      'unsupported_capability' => 3,
-      'unauthorized' => code == 'scope_not_approved' ? 4 : 3,
-      'invalid_request' ||
-      'invalid_query' ||
-      'invalid_type' ||
-      'invalid_cursor' ||
-      'invalid_submission_metadata' ||
-      'source_required' ||
-      'validation_failed' ||
-      'invalid_response' => 2,
+    final int? failure = switch (code) {
       'operation_conflict' ||
-      'template_changed' ||
-      'source_changed' ||
-      'check_changed' ||
-      'proposal_conflict' ||
-      'credential_version_changed' => 8,
-      'conflict' =>
-        {
-              'execution_unknown',
-              'fill_unknown',
-              'fill_needs_attention',
-            }.contains(code)
-            ? 7
-            : 8,
-      'request_unknown' || 'operation_unknown' => 7,
-      'request_denied' || 'scope_not_approved' || 'grant_expired' => 4,
-      _ =>
-        status.startsWith('invalid_')
-            ? 2
-            : status.startsWith('unsupported_')
-            ? 3
-            : null,
+      'credential_version_changed' ||
+      'template_changed' => 8,
+      'request_pending' ||
+      'request_denied' ||
+      'grant_expired' ||
+      'grant_revoked' ||
+      'credential_disabled' ||
+      'credential_deleted' ||
+      'scope_not_approved' => 4,
+      _ => switch (status) {
+        'service_unavailable' ||
+        'connection_unavailable' ||
+        'server_changed' ||
+        'association_unavailable' ||
+        'session_required' ||
+        'unsupported_capability' => 3,
+        'unauthorized' => code == 'scope_not_approved' ? 4 : 3,
+        'invalid_request' ||
+        'invalid_query' ||
+        'invalid_type' ||
+        'invalid_cursor' ||
+        'invalid_submission_metadata' ||
+        'source_required' ||
+        'validation_failed' ||
+        'invalid_response' => 2,
+        'operation_conflict' ||
+        'template_changed' ||
+        'source_changed' ||
+        'check_changed' ||
+        'proposal_conflict' ||
+        'credential_version_changed' => 8,
+        'conflict' =>
+          {
+                'execution_unknown',
+                'fill_unknown',
+                'fill_needs_attention',
+              }.contains(code)
+              ? 7
+              : 8,
+        'request_unknown' || 'operation_unknown' => 7,
+        'request_denied' || 'scope_not_approved' || 'grant_expired' => 4,
+        _ =>
+          status.startsWith('invalid_')
+              ? 2
+              : status.startsWith('unsupported_')
+              ? 3
+              : null,
+      },
     };
     if (failure != null) {
       return _failure(

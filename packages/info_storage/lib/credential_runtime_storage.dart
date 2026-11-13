@@ -49,7 +49,7 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
               'SELECT payload FROM credential_runtime_requests ORDER BY rowid',
             )
             .get()) {
-      var r = CredentialUseRequest.fromJson(
+      var r = CredentialUseRequest.fromStorageJson(
         jsonDecode(row.read<String>('payload')) as Map<String, dynamic>,
       );
       if ((!_preserveOnlineCredentialFacts || !r.isCommand) &&
@@ -64,6 +64,16 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
         r = r.changed({'invalidatedCode': 'grant_revoked'});
       }
       _credentialUseRequests.add(r);
+    }
+    if (_credentialUseRequests.any((r) => r.submissionOperationId != null) &&
+        (await _db
+                    .customSelect(
+                      'SELECT version FROM library_format WHERE singleton=1',
+                    )
+                    .getSingle())
+                .read<int>('version') <
+            _agentSubmissionLibraryFormat) {
+      throw const StorageFailure('unsupported_schema');
     }
     if (_credentialUseRequests.any(
           (r) => r.credentialValidity == CredentialUseValidity.session,
@@ -149,13 +159,16 @@ extension _CredentialRuntimeStorage on EncryptedInformationRepository {
         if (_hasPortableFocusedFill(requests)) {
           await _requirePortableFocusedFillFormat();
         }
+        if (requests.any((r) => r.submissionOperationId != null)) {
+          await _requireAdmissionFormat(_agentSubmissionLibraryFormat);
+        }
         await _db.customStatement('DELETE FROM credential_focused_fills');
         await _db.customStatement('DELETE FROM credential_operations');
         await _db.customStatement('DELETE FROM credential_runtime_requests');
         for (final r in requests) {
           await _db.customStatement(
             'INSERT INTO credential_runtime_requests(id,payload) VALUES(?,?)',
-            [r.id, jsonEncode(r.toJson())],
+            [r.id, jsonEncode(r.toStorageJson())],
           );
         }
         for (final e in executions) {
@@ -236,6 +249,14 @@ void _validateRuntimeSnapshot(
 }) {
   Never invalid() => throw const StorageFailure('invalid_runtime_snapshot');
   final byId = {for (final r in requests) r.id: r};
+  final submissions = <String>{};
+  for (final r in requests) {
+    if (r.submissionOperationId != null &&
+        !submissions.add(
+          jsonEncode([r.submissionSessionBinding, r.submissionOperationId]),
+        ))
+      invalid();
+  }
   if (byId.length != requests.length ||
       executions.map((e) => e.id).toSet().length != executions.length) {
     invalid();
