@@ -9,7 +9,7 @@ import 'package:info_workspace/workspace_source.dart';
 import 'package:info_desktop/workspace/approvals_controller.dart';
 import 'package:info_desktop/workspace/operation_pages_footer.dart';
 import 'package:info_desktop/workspace/zhiyu_theme.dart';
-import '../../../packages/info_workspace/test_support/operation_history.dart';
+import '../../../packages/info_core/test_support/operation_history.dart';
 
 class _Delayed extends OwnerWorkspaceApprovals {
   _Delayed({required super.owner});

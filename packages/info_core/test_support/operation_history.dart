@@ -7,6 +7,8 @@ class OperationHistoryFixture {
   final core.InformationService service;
   final Object repository;
   final DateTime at;
+  late String session;
+  late core.CredentialBatchInput input;
   late core.CredentialUseBatch request;
   late core.CredentialProgramPlan plan;
   Future<void> open({required bool program, int count = 0}) async {
@@ -24,7 +26,7 @@ class OperationHistoryFixture {
       suggestedBinding: 'TOKEN',
       discoverable: true,
     );
-    final input = program
+    input = program
         ? core.CredentialBatchInput.forProgram(
             plan =
                 core.CredentialProgramPlan.fromJson({
@@ -69,7 +71,7 @@ class OperationHistoryFixture {
             ],
           });
     request = await service.agent.requestCredentialBatch(
-      service.agent.openSession('合成记录分页'),
+      session = service.agent.openSession('合成记录分页'),
       'A' * 22,
       input,
       operationId: 'synthetic-history-submit-${program ? 'program' : 'fill'}',
@@ -85,7 +87,7 @@ class OperationHistoryFixture {
     }
   }
 
-  Future<void> append(String id) async {
+  Future<void> append(String id, {bool finish = true}) async {
     if (request.programPlan != null) {
       final initial = core.CredentialProgramOperation(
         sessionBinding: request.sessionBinding,
@@ -109,6 +111,9 @@ class OperationHistoryFixture {
         requestRevision: request.revision,
         validate: () {},
       );
+      if (!finish) {
+        return;
+      }
       await repo.commitCredentialProgramOperation(
         initial.withReport(
           core.CredentialExecutionReport(
@@ -141,6 +146,9 @@ class OperationHistoryFixture {
         expectedOperationRevision: 0,
         validate: () {},
       );
+      if (!finish) {
+        return;
+      }
       await repo.commitCredentialBatch(
         request,
         expectedRevision: request.revision,

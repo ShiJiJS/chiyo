@@ -3,7 +3,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_remote/owner_client.dart';
 import 'package:info_workspace/workspace_source.dart';
 import 'package:test/test.dart';
-import '../../../packages/info_workspace/test_support/operation_history.dart';
+import '../../../packages/info_core/test_support/operation_history.dart';
 import 'support/device_credential_fixture.dart';
 import '../../desktop/lib/workspace/remote_workspace_approvals.dart';
 

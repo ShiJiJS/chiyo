@@ -25,6 +25,7 @@ part 'credential_record_storage.dart';
 part 'credential_runtime_storage.dart';
 part 'credential_batches_storage.dart';
 part 'credential_program_storage.dart';
+part 'credential_batch_history_storage.dart';
 part 'focused_fill_storage.dart';
 part 'information_files_storage.dart';
 part 'information_import_files_storage.dart';
@@ -205,6 +206,11 @@ class EncryptedInformationRepository
   final _credentialBatches = <String, CredentialUseBatch>{};
   final _credentialBatchOperations = <String, CredentialBatchOperation>{};
   final _credentialProgramOperations = <String, CredentialProgramOperation>{};
+  @override
+  Future<void> pruneCredentialBatchHistory(
+    CredentialBatchHistoryPrune plan, {
+    required void Function() validate,
+  }) => _pruneCredentialBatchHistory(plan, validate: validate);
   @override
   List<CredentialProgramOperation> get credentialProgramOperations =>
       List.unmodifiable(_credentialProgramOperations.values);

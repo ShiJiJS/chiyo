@@ -58,6 +58,16 @@ extension _CredentialHistoryService on InformationService {
         _useGrantState(r) == 'available') {
       return false;
     }
+    // New CLI retries use durable submission and execution IDs. While the
+    // original chat can resume, retain these source facts to fence retries.
+    final session = _credentialUseSessions[r.id];
+    final binding = r.submissionSessionBinding ?? _sessionBindings[session];
+    if ((r.submissionOperationId != null ||
+            r.revealReads.isNotEmpty ||
+            e?.operationId != null) &&
+        !_credentialHistoryBindingCanPrune(binding)) {
+      return false;
+    }
     if (_repository.grantHistory.any(
       (g) => g.requestId == r.id && g.active && _clock().isBefore(g.expiresAt),
     )) {
@@ -154,9 +164,11 @@ extension _CredentialHistoryService on InformationService {
 }
 
 extension CredentialHistoryOwnerAccess on OwnerAccess {
-  Future<void> pruneCredentialUseHistory() => _serialize(
-    () => _service._pruneCredentialUseHistory(
-      _service._clock().subtract(Duration(days: auditRetentionDays)),
-    ),
-  );
+  Future<void> pruneCredentialUseHistory() => _serialize(() async {
+    final cutoff = _service._clock().subtract(
+      Duration(days: auditRetentionDays),
+    );
+    await _service._pruneCredentialUseHistory(cutoff);
+    await _service._pruneCredentialBatchHistory(cutoff);
+  });
 }

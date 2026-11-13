@@ -100,6 +100,7 @@ part 'credential_execution_report.dart';
 part 'credential_file_receivers.dart';
 part 'credential_material_access.dart';
 part 'credential_history_access.dart';
+part 'credential_batch_history.dart';
 part 'ssh_host_trust.dart';
 part 'proposal_access.dart';
 part 'proposal_operations.dart';

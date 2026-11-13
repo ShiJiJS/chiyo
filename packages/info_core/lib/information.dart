@@ -33,6 +33,7 @@ import 'info_core.dart'
         CredentialUseRequest,
         CredentialExecution,
         CredentialBatchRepository,
+        CredentialBatchHistoryPrune,
         CredentialProgramRepository,
         CredentialProgramOperation,
         validateCredentialProgramCommit,
@@ -482,6 +483,26 @@ class MemoryInformationRepository
   final _credentialBatches = <String, CredentialUseBatch>{};
   final _credentialBatchOperations = <String, CredentialBatchOperation>{};
   final _credentialProgramOperations = <String, CredentialProgramOperation>{};
+  @override
+  Future<void> pruneCredentialBatchHistory(
+    CredentialBatchHistoryPrune plan, {
+    required void Function() validate,
+  }) async {
+    plan.validateAgainst(
+      _credentialBatches.values,
+      _credentialBatchOperations.values,
+      _credentialProgramOperations.values,
+    );
+    validate();
+    _credentialBatchOperations.removeWhere(
+      (_, o) => plan.requestIds.contains(o.requestId),
+    );
+    _credentialProgramOperations.removeWhere(
+      (_, o) => plan.requestIds.contains(o.requestId),
+    );
+    _credentialBatches.removeWhere((id, _) => plan.requestIds.contains(id));
+  }
+
   @override
   List<CredentialProgramOperation> get credentialProgramOperations =>
       List.unmodifiable(_credentialProgramOperations.values);

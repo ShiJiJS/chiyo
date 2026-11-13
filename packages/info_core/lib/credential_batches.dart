@@ -805,6 +805,13 @@ const credentialBatchErrorCodes = {
 abstract interface class CredentialBatchRepository {
   List<CredentialUseBatch> get credentialBatches;
   List<CredentialBatchOperation> get credentialBatchOperations;
+
+  /// Atomically compare the complete retention unit and remove children before
+  /// their request. Recheck [validate] within the write before publication.
+  Future<void> pruneCredentialBatchHistory(
+    CredentialBatchHistoryPrune plan, {
+    required void Function() validate,
+  });
   Future<void> commitCredentialBatch(
     CredentialUseBatch request, {
     required int expectedRevision,

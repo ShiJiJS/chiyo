@@ -325,6 +325,8 @@ extension OwnerAuditAccess on OwnerAccess {
     final current = await history();
     final cutoff = _service._clock().subtract(Duration(days: days));
     final credentialIds = _service._credentialHistoryPruneIds(cutoff);
+    final batchIds = _service._credentialBatchHistoryPruneIds(cutoff);
+    final Object repository = _service._repository;
     final preview = AuditRetentionPreview(
       days,
       current.grants.where((g) => g.approvedAt.isBefore(cutoff)).length,
@@ -338,19 +340,29 @@ extension OwnerAuditAccess on OwnerAccess {
                 (t.approvedAt ?? t.createdAt).isBefore(cutoff),
           )
           .length,
-      credentialIds.length,
-      _service._repository is CredentialRuntimeRepository
-          ? (_service._repository as CredentialRuntimeRepository)
-                    .credentialExecutions
-                    .where((e) => credentialIds.contains(e.requestId))
-                    .length +
-                (_service._repository is FocusedFillRuntimeRepository
-                    ? (_service._repository as FocusedFillRuntimeRepository)
-                          .focusedFillOperations
-                          .where((o) => credentialIds.contains(o.requestId))
-                          .length
-                    : 0)
-          : 0,
+      credentialIds.length + batchIds.length,
+      (_service._repository is CredentialRuntimeRepository
+              ? (_service._repository as CredentialRuntimeRepository)
+                        .credentialExecutions
+                        .where((e) => credentialIds.contains(e.requestId))
+                        .length +
+                    (_service._repository is FocusedFillRuntimeRepository
+                        ? (_service._repository as FocusedFillRuntimeRepository)
+                              .focusedFillOperations
+                              .where((o) => credentialIds.contains(o.requestId))
+                              .length
+                        : 0)
+              : 0) +
+          (repository is CredentialBatchRepository
+              ? repository.credentialBatchOperations
+                    .where((o) => batchIds.contains(o.requestId))
+                    .length
+              : 0) +
+          (repository is CredentialProgramRepository
+              ? repository.credentialProgramOperations
+                    .where((o) => batchIds.contains(o.requestId))
+                    .length
+              : 0),
     );
     _service._retentionPreview = preview;
     return preview;
@@ -373,6 +385,9 @@ extension OwnerAuditAccess on OwnerAccess {
     await _service._repository.writeSetting('auditRetentionDays', days);
     await history();
     await _service._pruneCredentialUseHistory(
+      _service._clock().subtract(Duration(days: days)),
+    );
+    await _service._pruneCredentialBatchHistory(
       _service._clock().subtract(Duration(days: days)),
     );
   });
