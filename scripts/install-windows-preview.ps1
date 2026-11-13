@@ -115,6 +115,12 @@ try {
     $shortcut.IconLocation = if (Test-Path -LiteralPath $icon) { "$icon,0" } else { "$exe,0" }
     $shortcut.Description = '知予'
     $shortcut.Save()
+    if ($manifest.PSObject.Properties['cliEntrypoint']) {
+        if ($manifest.cliEntrypoint -ne 'cli/chiyo.exe') { throw 'Unknown primary CLI entry.' }
+        & (Join-Path $install 'current/cli/info-prepare-codex.exe') --register-existing (Join-Path $install 'current/cli')
+        if ($LASTEXITCODE -ne 0) { throw 'The installed CLI runtime could not be registered.' }
+        & (Join-Path $PSScriptRoot 'register-windows-cli.ps1') -InstallDirectory $install
+    }
     if ($removeLegacyShortcut) { Remove-Item -LiteralPath $legacyShortcutPath }
     # Only the verified, exact prior install is removed, after the new shortcut is saved.
     if (Test-Path -LiteralPath $previous) {

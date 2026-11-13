@@ -58,6 +58,7 @@ try {
     $checkArguments = @{ FlutterBin = $FlutterBin; WindowsRelease = $true }
     if ($Offline) { $checkArguments.Offline = $true }
     & (Join-Path $PSScriptRoot 'check.ps1') @checkArguments
+    & (Join-Path $PSScriptRoot 'tests/test_windows_cli_registration.ps1')
 
     # Refuse changes made while checks were running, including new files.
     Assert-CleanSources
@@ -101,7 +102,7 @@ try {
     New-Item -ItemType Directory -Path $cli | Out-Null
     Push-Location 'packages/info_cli'
     try {
-        foreach ($entry in @(@('info', 'info'), @('runtime_worker', 'info-runtime-worker'), @('codex_info', 'info-codex'), @('codex_hook', 'info-codex-hook'), @('prepare_codex', 'info-prepare-codex'))) {
+        foreach ($entry in @(@('chiyo', 'chiyo'), @('info', 'info'), @('runtime_worker', 'info-runtime-worker'), @('codex_info', 'info-codex'), @('codex_hook', 'info-codex-hook'), @('prepare_codex', 'info-prepare-codex'))) {
             Invoke-Checked $dart @('compile', 'exe', '--target-os', 'windows', '--target-arch', 'x64', "bin/$($entry[0]).dart", '-o', (Join-Path $cli "$($entry[1]).exe"))
         }
     } finally { Pop-Location }
@@ -204,6 +205,7 @@ try {
     Write-Json (Join-Path $payload 'manifest.json') ([ordered]@{
         format = 2; product = 'Agent Info Manage'; displayName = '知予'; release = $identity
         sourceCommit = $commit; sourceDirty = $false; architecture = 'windows-x64'
+        cliEntrypoint = 'cli/chiyo.exe'
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
         signing = 'unsigned development preview'
         runtimePrerequisite = 'Microsoft Visual C++ v14 x64 Redistributable (not included)'

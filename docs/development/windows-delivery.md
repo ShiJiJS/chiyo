@@ -18,6 +18,10 @@ Windows 固定安装位置为 `C:\Software\AgentInfoManage`：`current` 保存�
 
 用户已授权安装时，可省略 `-PackageOnly`，完整检查成功后脚本安装并清理。安装器先校验归档与全部载荷、暂存新目录、通过 CLI 正常退出旧实例，再切换目录和保存快捷方式。退出或保存失败时保留旧实例，不强杀。
 
+声明统一入口的新版包包含 `cli/chiyo.exe`，安装器调用同包登记工具更新公开运行目录，并把固定的 `current/cli` 路径幂等加入当前用户 PATH；系统 PATH 和其他条目保持。安装器所在进程立即能发现命令，并通知系统环境变化。已经运行的宿主可能仍持有旧环境，可继续使用公开运行描述中的绝对 `cliPath`，无需等待用户重启宿主。`register-windows-cli.ps1 -WhatIf` 只核对安装身份并预览登记，不写环境。
+
+`chiyo`、旧 `info`/`info-codex`、hook、准备工具及 worker 同源编译并随包交付；旧入口保持原协议和宿主职责，不把旧 JSON-lines 命令隐式重解释成新子命令。仅产包不修改用户 PATH、公开登记或聊天配置。
+
 单独安装已核对的归档：
 
 ```powershell
