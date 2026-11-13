@@ -48,6 +48,12 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
     final materials = available
         ? _materials.materials()
         : _last?.materials ?? <WorkspaceApprovalExecution>[];
+    final programs = available
+        ? _materials.programs()
+        : _last?.programs ?? <WorkspaceRuntimeProgram>[];
+    final unconfirmed = available
+        ? _materials.unconfirmedProcesses(programs)
+        : _last?.unconfirmedProcesses ?? 0;
     final copies = available
         ? _materials.copies()
         : _last?.copies ?? <WorkspaceCopyMaintenance>[];
@@ -60,6 +66,8 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
       runtime.informationDeliveryCleanupFailed,
       runtime.runtimeMaterialCleanupFailed,
       for (final e in materials) e.observationDigest,
+      for (final p in programs) p.observationDigest,
+      unconfirmed,
       for (final c in copies) [c.id, c.state.name, c.reason],
       if (available) ...[
         for (final e in executions) [e.id, e.state, e.cleanupState, e.exitCode],
@@ -67,6 +75,13 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
         for (final r in owner.requests) [r.id, r.state.name, r.sessionEnded],
         for (final r in owner.credentialUseRequests)
           [r.id, owner.credentialUseState(r), owner.credentialGrantState(r)],
+        for (final r in owner.credentialBatches)
+          [
+            r.id,
+            r.revision,
+            owner.credentialBatchState(r),
+            for (final i in r.items) owner.credentialBatchItemState(r, i),
+          ],
         for (final t in owner.organizationTasks)
           [t.id, owner.organizationState(t).name],
         owner.desktopPreferences.version,
@@ -81,6 +96,8 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
       menuBarAvailable: runtime.availability.tray,
       windowHidden: runtime.windowHidden,
       materials: materials,
+      programs: programs,
+      unconfirmedProcesses: unconfirmed,
       copies: copies,
       serviceReason: runtime.shutdownFailed
           ? runtime.stopped
@@ -114,31 +131,27 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
                       .where(
                         (r) => owner.credentialGrantState(r) == 'available',
                       )
+                      .length +
+                  owner.credentialBatches
+                      .where(
+                        (r) =>
+                            !r.archived &&
+                            r.items.any(
+                              (i) =>
+                                  owner.credentialBatchItemState(r, i) ==
+                                  'available',
+                            ),
+                      )
                       .length,
         pendingRequests: s.serviceAvailable
             ? owner.queryInbox(limit: 1).pendingCount +
                   owner.pendingCredentialBatchCount
             : 0,
-        materials: s.materials
-            .where(
-              (e) => !{
-                WorkspaceExecutionCleanup.complete,
-                WorkspaceExecutionCleanup.notNeeded,
-              }.contains(e.cleanup),
-            )
-            .length,
+        materials: s.pendingMaterialKeys.length,
         copies: s.copies
             .where((c) => c.state != WorkspaceCopyState.released)
             .length,
-        unconfirmedProcesses: !s.serviceAvailable
-            ? s.materials.where((e) => !e.processEnded).length
-            : owner.credentialExecutions
-                  .where(
-                    (e) =>
-                        e.restoredAt == null &&
-                        {'preparing', 'running', 'unknown'}.contains(e.state),
-                  )
-                  .length,
+        unconfirmedProcesses: s.unconfirmedProcesses,
       );
   @override
   Future<WorkspaceQuitPreview> previewQuit() async {
@@ -234,15 +247,7 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
       // Even a no-op observation check is a distinct completed attempt.
       if (_version <= c.expectedVersion) _version = c.expectedVersion + 1;
       final oldIds = c.action == WorkspaceRuntimeAction.checkMaterials
-          ? before.materials
-                .where(
-                  (e) => !{
-                    WorkspaceExecutionCleanup.complete,
-                    WorkspaceExecutionCleanup.notNeeded,
-                  }.contains(e.cleanup),
-                )
-                .map((e) => e.operationId)
-                .toSet()
+          ? before.legacyMaterialKeys
           : c.action == WorkspaceRuntimeAction.checkAttachments
           ? before.copies
                 .where((e) => e.state != WorkspaceCopyState.released)
@@ -250,16 +255,7 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
                 .toSet()
           : <String>{};
       final remaining = c.action == WorkspaceRuntimeAction.checkMaterials
-          ? after.materials
-                .where(
-                  (e) =>
-                      oldIds.contains(e.operationId) &&
-                      !{
-                        WorkspaceExecutionCleanup.complete,
-                        WorkspaceExecutionCleanup.notNeeded,
-                      }.contains(e.cleanup),
-                )
-                .length
+          ? after.legacyMaterialKeys.intersection(oldIds).length
           : after.copies
                 .where(
                   (e) =>
@@ -275,9 +271,19 @@ class OwnerWorkspaceRuntime implements WorkspaceRuntimeSource {
         version: _version,
         phase: _phase,
         windowHidden: runtime.windowHidden,
-        checked: oldIds.length,
+        checked:
+            oldIds.length +
+            (c.action == WorkspaceRuntimeAction.checkMaterials
+                ? before.programs.length
+                : 0),
         released: oldIds.length - remaining,
-        retained: remaining,
+        retained:
+            remaining +
+            (c.action == WorkspaceRuntimeAction.checkMaterials
+                ? before.programMaterialKeys
+                      .intersection(after.programMaterialKeys)
+                      .length
+                : 0),
         quitScope: quit,
       );
       _receipts[c.operationId] = r;

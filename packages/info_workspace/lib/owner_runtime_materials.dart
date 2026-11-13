@@ -1,5 +1,6 @@
 import 'package:info_core/info_core.dart' as core;
 import 'owner_credential_use_projection.dart';
+import 'owner_workspace_credential_batches.dart';
 import 'workspace_source.dart';
 
 /// Original Owner projections only. No process inspection, path traversal,
@@ -18,6 +19,35 @@ class OwnerRuntimeMaterials {
       ))
         if (r.plan.requiresMaterialFiles) _credentials.execution(r, e),
   ];
+  List<WorkspaceRuntimeProgram> programs() {
+    final projection = OwnerWorkspaceCredentialBatches(owner);
+    return [
+          for (final o in owner.credentialProgramOperations.where(
+            (o) => !o.archived,
+          ))
+            WorkspaceRuntimeProgram(
+              projection.programOperationView(o),
+              processUnconfirmed: owner.credentialProgramProcessUnconfirmed(o),
+            ),
+        ]
+        .where(
+          (p) =>
+              p.processUnconfirmed ||
+              p.operation.state == 'unknown' ||
+              p.holdsMaterial,
+        )
+        .toList();
+  }
+
+  int unconfirmedProcesses(List<WorkspaceRuntimeProgram> programs) =>
+      owner.credentialExecutions
+          .where(
+            (e) =>
+                e.restoredAt == null &&
+                {'preparing', 'running', 'unknown'}.contains(e.state),
+          )
+          .length +
+      programs.where((p) => p.processUnconfirmed).length;
   List<WorkspaceCopyMaintenance> copies() => [
     for (final d in owner.informationFileDeliveries)
       if (d.runtime && d.restoredAt == null)

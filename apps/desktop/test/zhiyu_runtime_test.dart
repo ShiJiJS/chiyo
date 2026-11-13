@@ -225,7 +225,10 @@ void main() {
         (e) => e.state == WorkspaceExecutionState.unknown,
       );
       expect(unknown.processEnded, false);
-      await tap(t, 'runtime-material-request-${unknown.operationId}');
+      await tap(
+        t,
+        'runtime-material-request-${unknown.requestId}-${unknown.operationId}',
+      );
       expect(find.byType(ApprovalsPage), findsOneWidget);
       expect(
         t

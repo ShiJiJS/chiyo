@@ -395,6 +395,20 @@ extension CredentialProgramOwnerAccess on OwnerAccess {
   Map<String, Object?> credentialProgramOperationView(
     CredentialProgramOperation operation,
   ) => _service._programView(operation);
+
+  /// A device report, never an inspection of a foreign PID or path by Owner.
+  /// Root-process exit alone does not prove its workers/descendants ended.
+  bool credentialProgramProcessUnconfirmed(CredentialProgramOperation record) {
+    final current = _service._programOperation(record.id);
+    if (current.archived ||
+        _service._credentialProgramProofs[current.id]?.treeEnded == true) {
+      return false;
+    }
+    final p = current.progress;
+    return {'preparing', 'running', 'unknown'}.contains(p.state) ||
+        p.processStarted ||
+        p.workerPid != null;
+  }
 }
 
 extension _ProgramRuntimeMaintenance on OnlineInformationRuntime {

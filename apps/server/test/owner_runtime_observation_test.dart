@@ -6,8 +6,99 @@ import 'package:info_workspace/runtime_transport.dart';
 import 'package:info_workspace/workspace_source.dart';
 import 'package:test/test.dart';
 import 'support/device_credential_fixture.dart';
+import '../../../packages/info_core/test_support/operation_history.dart';
 
 void main() {
+  test(
+    'new program runtime reports cross HTTPS without inspecting device paths and restored history is inactive',
+    () async {
+      final now = DateTime.utc(2026, 11, 14);
+      final f = await DeviceCredentialFixture.create(clock: () => now);
+      addTearDown(f.dispose);
+      final records = OperationHistoryFixture(f.runtime.service, f.repo, now);
+      await f.runtime.run(() => records.open(program: true, programFile: true));
+      final launch = records.businessPlan;
+      final claim = await f.runtime.run(
+        () => f.runtime.service.agent.beginCredentialProgramOperation(
+          records.session,
+          records.request.deviceId,
+          records.request.id,
+          launch,
+          DeviceCredentialLaunch.fromPrivateJson({
+            'version': 1,
+            'planHash': launch.planHash,
+            'executable': records.plan.identity!.toJson(),
+            'cwd': records.plan.cwd,
+          }),
+          'macos:AgentInfoRuntime-${'R' * 32}',
+          operationId: 'https-runtime-program',
+        ),
+      );
+      await f.runtime.run(
+        () => f.runtime.service.agent.registerCredentialProgramMaterials(
+          records.request.deviceId,
+          claim.operation.id,
+          claim.material!.executionCapability,
+          CredentialMaterialLease(
+            '/foreign-device-never-probe/runtime',
+            'folder-id',
+            {'credential-b1.bin': 'file-id'},
+          ),
+        ),
+      );
+      final wire = await f.owner.request('GET', '/v1/owner/runtime');
+      expect(wire['wireVersion'], 2);
+      final view = serverRuntimeFromJson(wire);
+      expect(view.programs.single.holdsMaterial, isTrue);
+      expect(view.programs.single.processUnconfirmed, isTrue);
+      expect(view.unconfirmedProcesses, 1);
+      expect(view.grants, 1);
+      for (final private in [
+        'NEVER-PAGE-THIS-MATERIAL',
+        'executionCapability',
+        'materialLease',
+        'workerPid',
+        'foreign-device-never-probe',
+      ]) {
+        expect(jsonEncode(wire), isNot(contains(private)));
+      }
+      expect(
+        (await f.owner.request('GET', '/v1/owner/runtime'))['revision'],
+        wire['revision'],
+      );
+      await f.reopen();
+      final reopened = serverRuntimeFromJson(
+        await f.owner.request('GET', '/v1/owner/runtime'),
+      );
+      expect(reopened.programs.single.holdsMaterial, isTrue);
+      expect(reopened.unconfirmedProcesses, 1);
+      final key = await f.runtime.run(() => f.repo.backups.enable());
+      final archive = '${f.root.path}/program-runtime.aimbackup';
+      await f.runtime.run(() async {
+        await f.repo.backups.saveRecoveryKeyTo(
+          '${f.root.path}/program-recovery.key',
+        );
+        await f.runtime.service.owner.exportLibrary(
+          () => f.repo.backups.exportTo(archive),
+        );
+      });
+      final target = await DeviceCredentialFixture.create(clock: () => now);
+      addTearDown(target.dispose);
+      await target.runtime.run(
+        () => target.runtime.service.owner.restoreLibrary(
+          () => target.repo.backups.restoreFrom(archive, key),
+        ),
+      );
+      final restored = serverRuntimeFromJson(
+        await target.owner.request('GET', '/v1/owner/runtime'),
+      );
+      expect(restored.programs, isEmpty);
+      expect(restored.unconfirmedProcesses, 0);
+      expect(restored.grants, 0);
+      expect(target.repo.credentialProgramOperations.single.archived, isTrue);
+    },
+  );
+
   test(
     'server observes synthetic remote file reports without requiring device paths and portable restore keeps history without active reports',
     () async {

@@ -42,7 +42,7 @@ WorkspaceCopyMaintenance copyMaintenanceFromJson(Object? raw) {
 
 Map<String, Object?> serverRuntimeToJson(WorkspaceServerRuntimeObservation s) =>
     {
-      'wireVersion': 1,
+      'wireVersion': s.programs.isEmpty ? 1 : 2,
       'revision': s.revision,
       'materials': s.materials.map(approvalExecutionToJson).toList(),
       'copies': s.copies.map(copyMaintenanceToJson).toList(),
@@ -50,6 +50,8 @@ Map<String, Object?> serverRuntimeToJson(WorkspaceServerRuntimeObservation s) =>
       'grants': s.grants,
       'pendingRequests': s.pendingRequests,
       'unconfirmedProcesses': s.unconfirmedProcesses,
+      if (s.programs.isNotEmpty)
+        'programs': s.programs.map((p) => p.toJson()).toList(),
     };
 List<dynamic> _list(Object? raw) {
   if (raw is! List || raw.length > 100000) {
@@ -60,7 +62,9 @@ List<dynamic> _list(Object? raw) {
 
 WorkspaceServerRuntimeObservation serverRuntimeFromJson(Object? raw) {
   try {
-    final b = historyEnvelope(raw, [
+    final version = raw is Map && raw['wireVersion'] == 2 ? 2 : 1;
+    final b = historyWire(raw, [
+      'wireVersion',
       'revision',
       'materials',
       'copies',
@@ -68,7 +72,11 @@ WorkspaceServerRuntimeObservation serverRuntimeFromJson(Object? raw) {
       'grants',
       'pendingRequests',
       'unconfirmedProcesses',
+      if (version == 2) 'programs',
     ]);
+    if (b['wireVersion'] != version) {
+      throw const FormatException('Invalid runtime version');
+    }
     final revision = historyText(b['revision']);
     if (!RegExp(r'^[0-9a-f]{64}$').hasMatch(revision)) {
       throw const FormatException();
@@ -77,19 +85,38 @@ WorkspaceServerRuntimeObservation serverRuntimeFromJson(Object? raw) {
       b['materials'],
     ).map(approvalExecutionFromJson).toList();
     final copies = _list(b['copies']).map(copyMaintenanceFromJson).toList();
+    final programs = version == 1
+        ? <WorkspaceRuntimeProgram>[]
+        : _list(b['programs'])
+              .map(
+                (p) => WorkspaceRuntimeProgram.fromJson(
+                  Map<String, dynamic>.from(p as Map),
+                ),
+              )
+              .toList();
     if (materials
                 .map((e) => '${e.requestId}/${e.operationId}')
                 .toSet()
                 .length !=
             materials.length ||
         copies.map((c) => c.id).toSet().length != copies.length ||
-        materials.any((e) => e.fromBackup)) {
+        materials.any((e) => e.fromBackup) ||
+        programs
+                .map(
+                  (p) => '${p.operation.requestId}/${p.operation.operationId}',
+                )
+                .toSet()
+                .length !=
+            programs.length ||
+        programs.where((p) => p.processUnconfirmed).length >
+            historyInt(b['unconfirmedProcesses'])) {
       throw const FormatException();
     }
     return WorkspaceServerRuntimeObservation(
       revision: revision,
       materials: List.unmodifiable(materials),
       copies: List.unmodifiable(copies),
+      programs: List.unmodifiable(programs),
       sessions: historyInt(b['sessions']),
       grants: historyInt(b['grants']),
       pendingRequests: historyInt(b['pendingRequests']),

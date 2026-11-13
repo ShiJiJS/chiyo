@@ -21,16 +21,11 @@ class OwnerRuntimeObservation {
       return await owner.inLibraryScope(_scope, () async {
         final sessions = await _sessions.read();
         final materials = _materials.materials(), copies = _materials.copies();
+        final programs = _materials.programs();
         final active = sessions.sessions.where(
           (s) => s.state == WorkspaceAgentSessionState.linked,
         );
-        final unconfirmed = owner.credentialExecutions
-            .where(
-              (e) =>
-                  e.restoredAt == null &&
-                  const {'preparing', 'running', 'unknown'}.contains(e.state),
-            )
-            .length;
+        final unconfirmed = _materials.unconfirmedProcesses(programs);
         final revision = sha256
             .convert(
               utf8.encode(
@@ -38,6 +33,7 @@ class OwnerRuntimeObservation {
                   sessions.revision,
                   unconfirmed,
                   materials.map((m) => m.observationDigest).toList(),
+                  programs.map((p) => p.observationDigest).toList(),
                   copies
                       .map(
                         (c) => [
@@ -60,6 +56,7 @@ class OwnerRuntimeObservation {
           revision: revision,
           materials: List.unmodifiable(materials),
           copies: List.unmodifiable(copies),
+          programs: List.unmodifiable(programs),
           sessions: active.length,
           grants: active.fold(0, (n, s) => n + s.activeGrants),
           pendingRequests: active.fold(0, (n, s) => n + s.pendingRequests),

@@ -118,20 +118,20 @@ class WorkspaceRuntimePage extends StatelessWidget {
                 ),
                 children: [
                   SettingsPreferenceRow(
-                    title: remote ? '凭据临时文件' : '临时凭据材料',
+                    title: '程序与临时材料',
                     description: remote
-                        ? '这里显示使用凭据文件的任务状态，临时文件的回收结果由运行任务的电脑提供。'
+                        ? '查看执行设备报告的程序状态和文件回收结果。'
                         : v == null
                         ? '正在核对已登记的执行…'
-                        : v.materials.isEmpty
-                        ? '暂无已登记材料。活动任务使用的文件保留至进程组结束。'
-                        : '已登记 ${v.materials.length} 项执行。核查只处理身份已确认结束的材料，不重跑命令或终止进程。',
+                        : v.maintenanceCount == 0
+                        ? '暂无需要查看的程序或临时材料。'
+                        : '已登记 ${v.maintenanceCount} 项。只核对状态及安全回收本机材料，不重跑命令或终止进程。',
                     control: DesktopButton(
                       key: const ValueKey('runtime-materials'),
                       onPressed: active
                           ? () => _maintenance(context, true)
                           : null,
-                      child: const Text('查看凭据文件任务'),
+                      child: const Text('查看执行状态'),
                     ),
                   ),
                   SettingsPreferenceRow(
@@ -486,7 +486,8 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
           v = m.value;
       final remote = v?.independentServer == true;
       final allCopies = <Object>[...?v?.copies, ...?v?.ownerCopies];
-      final count = materials ? v?.materials.length ?? 0 : allCopies.length,
+      final allPrograms = <Object>[...?v?.materials, ...?v?.programs];
+      final count = materials ? allPrograms.length : allCopies.length,
           pages = ((count + 4) ~/ 5).clamp(1, 1 << 30),
           page = _page.clamp(0, pages - 1);
       final action = materials
@@ -500,7 +501,7 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
         },
         child: DesktopDialog(
           width: 860,
-          title: Text(materials ? '临时凭据材料' : '普通附件维护'),
+          title: Text(materials ? '程序与临时材料' : '普通附件维护'),
           closeEnabled: !m.frozen,
           onClose: _close,
           content: Column(
@@ -513,7 +514,7 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
                           ? '这里读取执行设备上报的状态，不在此App检查这些进程或清理其材料。CLI执行程序负责核对和回收，不会因刷新而重新执行命令。'
                           : 'CLI副本按服务器收到的报告显示；重新核查只清理此App已登记且可以安全移除的临时文件，使用中或结果未确认的保留。'
                     : materials
-                    ? '只核查已登记的材料；活动进程或身份未确认时保留。回收不重跑命令、不终止进程，也不改变授权期限。'
+                    ? '由 CLI 运行的程序和文件以原执行设备报告为准；本机核查只处理自己登记的材料，不重跑命令、不终止进程。'
                     : '只处理已登记副本；有效授权继续保留，撤销、到期或范围失效后再回收。登记路径移除不承诺收回已读取内容。',
                 style: libraryText(context, 14, color: c.muted, height: 1.9),
               ),
@@ -521,12 +522,16 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
               if (m.loading || m.busy) const LinearProgressIndicator(),
               if (count == 0 && m.readFailure == null && !m.loading)
                 Text(
-                  materials ? '暂无已登记的临时材料。' : '暂无已登记的附件副本。',
+                  materials ? '暂无需要查看的程序或临时材料。' : '暂无已登记的附件副本。',
                   key: const ValueKey('runtime-maintenance-empty'),
                   style: libraryText(context, 15, height: 1.9),
                 ),
               if (materials && v != null)
-                for (final e in v.materials.skip(page * 5).take(5))
+                for (final e
+                    in allPrograms
+                        .skip(page * 5)
+                        .take(5)
+                        .whereType<WorkspaceApprovalExecution>())
                   SettingsPreferenceRow(
                     title: e.plan.label,
                     description:
@@ -537,11 +542,32 @@ class _MaintenanceFlowState extends State<_MaintenanceFlow> {
                             : '进程组尚未确认结束'} · ${e.cleanup.label}',
                     control: DesktopButton(
                       key: ValueKey(
-                        'runtime-material-request-${e.operationId}',
+                        'runtime-material-request-${e.requestId}-${e.operationId}',
                       ),
                       onPressed: m.frozen || m.shutdownGate
                           ? null
                           : () => _close(e.requestId),
+                      child: const Text('查看原申请'),
+                    ),
+                  ),
+              if (materials && v != null)
+                for (final p
+                    in allPrograms
+                        .skip(page * 5)
+                        .take(5)
+                        .whereType<WorkspaceRuntimeProgram>())
+                  SettingsPreferenceRow(
+                    title:
+                        '程序 · ${p.operation.plan.executable.split(RegExp(r'[/\\]')).last}',
+                    description:
+                        '${libraryLocalDateTime(p.operation.createdAt)} · ${p.operation.resultLabel} · ${p.processLabel} · ${p.operation.cleanupLabel}',
+                    control: DesktopButton(
+                      key: ValueKey(
+                        'runtime-program-request-${p.operation.requestId}-${p.operation.operationId}',
+                      ),
+                      onPressed: m.frozen || m.shutdownGate
+                          ? null
+                          : () => _close(p.operation.requestId),
                       child: const Text('查看原申请'),
                     ),
                   ),

@@ -11,7 +11,16 @@ class OperationHistoryFixture {
   late core.CredentialBatchInput input;
   late core.CredentialUseBatch request;
   late core.CredentialProgramPlan plan;
-  Future<void> open({required bool program, int count = 0}) async {
+  core.CredentialProgramPlan get businessPlan =>
+      core.CredentialProgramPlan.fromJson({
+        for (final e in plan.toJson().entries)
+          if (e.key != 'executableIdentity') e.key: e.value,
+      }, allowPortablePaths: true);
+  Future<void> open({
+    required bool program,
+    int count = 0,
+    bool programFile = false,
+  }) async {
     var credential = await service.owner.createStringCredential(
       name: '合成测试凭据',
       publicPurpose: '',
@@ -34,7 +43,14 @@ class OperationHistoryFixture {
                   'cwd': '/synthetic/work',
                   'argv': ['query'],
                   'env': {
-                    'TOKEN': {'credentialId': credential.id, 'version': 1},
+                    'TOKEN': programFile
+                        ? {
+                            'file': {
+                              'credentialId': credential.id,
+                              'version': 1,
+                            },
+                          }
+                        : {'credentialId': credential.id, 'version': 1},
                   },
                 }, allowPortablePaths: true).resolved(
                   core.ExecutableIdentity(

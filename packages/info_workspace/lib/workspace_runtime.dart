@@ -2,6 +2,59 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'workspace_approval_execution.dart';
 import 'workspace_records.dart';
+import 'workspace_credential_programs.dart';
+
+/// Original execution-device observations. No OS identity, cleanup handle,
+/// material or ability to act on that device is carried by this row.
+class WorkspaceRuntimeProgram {
+  const WorkspaceRuntimeProgram(
+    this.operation, {
+    required this.processUnconfirmed,
+  });
+  final WorkspaceCredentialProgramOperation operation;
+  final bool processUnconfirmed;
+  bool get holdsMaterial =>
+      operation.plan.requiresManagedFiles &&
+      !{'not_needed', 'complete'}.contains(operation.cleanup);
+  bool get valid =>
+      operation.valid &&
+      !operation.fromBackup &&
+      (!{'preparing', 'running'}.contains(operation.state) ||
+          processUnconfirmed);
+  String get processLabel => processUnconfirmed
+      ? '进程尚未确认结束'
+      : operation.processStarted
+      ? '进程已确认结束'
+      : operation.state == 'unknown'
+      ? '进程已结束，启动结果未知'
+      : '程序未启动';
+  String get observationDigest {
+    final value = operation.toJson()..remove('observedAt');
+    return sha256
+        .convert(utf8.encode(jsonEncode([value, processUnconfirmed])))
+        .toString();
+  }
+
+  Map<String, Object?> toJson() => {
+    'operation': operation.toJson(),
+    'processUnconfirmed': processUnconfirmed,
+  };
+  factory WorkspaceRuntimeProgram.fromJson(Map<String, dynamic> value) {
+    if (value.length != 2 ||
+        value['operation'] is! Map<String, dynamic> ||
+        value['processUnconfirmed'] is! bool) {
+      throw const FormatException('Invalid runtime program');
+    }
+    final result = WorkspaceRuntimeProgram(
+      WorkspaceCredentialProgramOperation.fromJson(
+        value['operation'] as Map<String, dynamic>,
+      ),
+      processUnconfirmed: value['processUnconfirmed'] as bool,
+    );
+    if (!result.valid) throw const FormatException('Invalid runtime program');
+    return result;
+  }
+}
 
 enum WorkspaceRuntimePhase {
   running('运行中'),
@@ -102,8 +155,11 @@ class WorkspaceRuntimeStatus {
     required Iterable<WorkspaceCopyMaintenance> copies,
     this.serviceReason,
     this.independentServer = false,
+    this.unconfirmedProcesses = 0,
+    Iterable<WorkspaceRuntimeProgram> programs = const [],
     Iterable<WorkspaceOwnerCopyMaintenance> ownerCopies = const [],
-  }) : ownerCopies = List.unmodifiable(ownerCopies),
+  }) : programs = List.unmodifiable(programs),
+       ownerCopies = List.unmodifiable(ownerCopies),
        materials = List.unmodifiable(materials),
        copies = List.unmodifiable(copies);
   final int version;
@@ -111,9 +167,29 @@ class WorkspaceRuntimeStatus {
   final bool serviceAvailable, menuBarAvailable, windowHidden;
   final String? serviceReason;
   final bool independentServer;
+  final int unconfirmedProcesses;
+  final List<WorkspaceRuntimeProgram> programs;
   final List<WorkspaceOwnerCopyMaintenance> ownerCopies;
   final List<WorkspaceApprovalExecution> materials;
   final List<WorkspaceCopyMaintenance> copies;
+  int get maintenanceCount => materials.length + programs.length;
+  Set<String> get legacyMaterialKeys => {
+    for (final e in materials)
+      if (!{
+        WorkspaceExecutionCleanup.complete,
+        WorkspaceExecutionCleanup.notNeeded,
+      }.contains(e.cleanup))
+        jsonEncode(['legacy', e.requestId, e.operationId]),
+  };
+  Set<String> get programMaterialKeys => {
+    for (final p in programs)
+      if (p.holdsMaterial)
+        jsonEncode(['program', p.operation.requestId, p.operation.operationId]),
+  };
+  Set<String> get pendingMaterialKeys => {
+    ...legacyMaterialKeys,
+    ...programMaterialKeys,
+  };
   bool get closed =>
       phase == WorkspaceRuntimePhase.stopped ||
       phase == WorkspaceRuntimePhase.terminationFailed;

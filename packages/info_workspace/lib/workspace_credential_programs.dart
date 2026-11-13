@@ -14,6 +14,7 @@ class WorkspaceCredentialProgramPlan {
   String get executable => _plan.path;
   String get workingDirectory => _plan.cwd;
   int get bindingCount => _plan.bindings.length;
+  bool get requiresManagedFiles => _plan.bindings.any((b) => b.via == 'file');
   String _value(core.CredentialProgramValue value, Map<String, String> names) =>
       value.kind == core.CredentialProgramValueKind.literal
       ? value.literal!

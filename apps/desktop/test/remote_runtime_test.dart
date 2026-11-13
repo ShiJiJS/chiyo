@@ -23,6 +23,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:info_workspace/file_transport.dart';
 import '../../server/test/support/device_credential_fixture.dart';
 import 'support/desktop_platform_fixture.dart';
+import '../../../packages/info_core/test_support/operation_history.dart';
 
 class _Http extends HttpOverrides {}
 
@@ -115,6 +116,68 @@ Matcher _fails(String code) =>
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test(
+    'remote App preserves new program reports and quit scope without acting on the execution device',
+    () async {
+      await HttpOverrides.runWithHttpOverrides(() async {
+        final now = DateTime.utc(2026, 11, 14);
+        final f = await DeviceCredentialFixture.create(clock: () => now);
+        addTearDown(f.dispose);
+        final records = OperationHistoryFixture(f.runtime.service, f.repo, now);
+        await f.runtime.run(() => records.open(program: true));
+        final launch = records.businessPlan;
+        await f.runtime.run(
+          () => f.runtime.service.agent.beginCredentialProgramOperation(
+            records.session,
+            records.request.deviceId,
+            records.request.id,
+            launch,
+            DeviceCredentialLaunch.fromPrivateJson({
+              'version': 1,
+              'planHash': launch.planHash,
+              'executable': records.plan.identity!.toJson(),
+              'cwd': records.plan.cwd,
+            }),
+            'macos:AgentInfoRuntime-${'R' * 32}',
+            operationId: 'remote-app-program',
+          ),
+        );
+        final app = await _App.open(f);
+        expect(
+          app.m.value!.programs.single.operation.operationId,
+          'remote-app-program',
+        );
+        expect(app.m.value!.unconfirmedProcesses, 1);
+        await app.m.write(WorkspaceRuntimeAction.checkMaterials);
+        expect(app.m.failure, isNull);
+        expect(app.m.result!.checked, 1);
+        expect(app.m.result!.released, 0);
+        await app.m.prepareQuit();
+        expect(app.m.quitPreview!.grants, 1);
+        expect(app.m.quitPreview!.materials, 0);
+        expect(app.m.quitPreview!.unconfirmedProcesses, 1);
+        await app.m.write(WorkspaceRuntimeAction.quit);
+        expect(app.m.failure, isNull);
+        expect(
+          app.m.value!.programs.single.operation.operationId,
+          'remote-app-program',
+        );
+        expect(
+          f
+              .runtime
+              .service
+              .owner
+              .credentialProgramOperations
+              .single
+              .progress
+              .state,
+          'preparing',
+        );
+        expect(f.runtime.service.owner.sessions.single.ended, isFalse);
+      }, _Http());
+    },
+  );
+
   test(
     'original runtime controller observes current App actions, rejects stale quit preview and never ends server chats',
     () async {

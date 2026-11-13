@@ -11,9 +11,11 @@ class WorkspaceServerRuntimeObservation {
     required this.grants,
     required this.pendingRequests,
     required this.unconfirmedProcesses,
+    this.programs = const [],
   });
   final String revision;
   final List<WorkspaceApprovalExecution> materials;
   final List<WorkspaceCopyMaintenance> copies;
+  final List<WorkspaceRuntimeProgram> programs;
   final int sessions, grants, pendingRequests, unconfirmedProcesses;
 }

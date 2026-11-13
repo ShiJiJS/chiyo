@@ -176,6 +176,8 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
         menuBarAvailable: desktop.availability.tray,
         windowHidden: desktop.windowHidden,
         materials: _last!.materials,
+        programs: _last!.programs,
+        unconfirmedProcesses: _last!.unconfirmedProcesses,
         copies: _last!.copies,
         ownerCopies: _last!.ownerCopies,
         independentServer: true,
@@ -208,6 +210,8 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
       menuBarAvailable: desktop.availability.tray,
       windowHidden: desktop.windowHidden,
       materials: remote.materials,
+      programs: remote.programs,
+      unconfirmedProcesses: remote.unconfirmedProcesses,
       copies: remote.copies,
       ownerCopies: local,
       independentServer: true,
@@ -227,14 +231,7 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
       sessions: _remote!.sessions,
       grants: _remote!.grants,
       pendingRequests: _remote!.pendingRequests,
-      materials: s.materials
-          .where(
-            (e) => !const {
-              WorkspaceExecutionCleanup.complete,
-              WorkspaceExecutionCleanup.notNeeded,
-            }.contains(e.cleanup),
-          )
-          .length,
+      materials: s.pendingMaterialKeys.length,
       copies: s.copies
           .where((c) => c.state != WorkspaceCopyState.released)
           .length,
@@ -338,7 +335,7 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
         try {
           switch (c.action) {
             case WorkspaceRuntimeAction.checkMaterials:
-              checked = before.materials.length;
+              checked = before.maintenanceCount;
             case WorkspaceRuntimeAction.checkAttachments:
               checked = before.ownerCopies.length;
               final remaining = await copies(maintain: true);
@@ -362,18 +359,8 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
           }
           final after = await _observe();
           if (c.action == WorkspaceRuntimeAction.checkMaterials) {
-            retained = before.materials
-                .where(
-                  (e) => after.materials.any(
-                    (r) =>
-                        r.requestId == e.requestId &&
-                        r.operationId == e.operationId &&
-                        !const {
-                          WorkspaceExecutionCleanup.complete,
-                          WorkspaceExecutionCleanup.notNeeded,
-                        }.contains(r.cleanup),
-                  ),
-                )
+            retained = before.pendingMaterialKeys
+                .intersection(after.pendingMaterialKeys)
                 .length;
           }
           if (_version <= c.expectedVersion) _version = c.expectedVersion + 1;
