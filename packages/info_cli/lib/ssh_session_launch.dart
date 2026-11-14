@@ -21,6 +21,14 @@ List<int> get sshSessionRemoteSource =>
     base64Decode(sshSessionRemoteSourceBase64);
 String _quote(String value) => "'${value.replaceAll("'", "'\\''")}'";
 
+// -o values pass through OpenSSH's config parser after native argv parsing.
+// Keep each path one config value. Only UserKnownHostsFile expands tokens.
+String _configPath(String value, {bool expandTokens = false}) {
+  var path = Platform.isWindows ? value.replaceAll('\\', '/') : value;
+  if (expandTokens) path = path.replaceAll('%', '%%');
+  return '"${path.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"';
+}
+
 /// Config and target arguments are constructed here, never appended by Agents.
 /// OpenSSH's first-value-wins options cannot be overridden by user config.
 SshTransportLaunch sshSessionLaunch({
@@ -64,8 +72,8 @@ SshTransportLaunch sshSessionLaunch({
       '-p',
       '${target.port}',
       '-oStrictHostKeyChecking=yes',
-      '-oUserKnownHostsFile=$knownHostsPath',
-      '-oGlobalKnownHostsFile=$emptyConfigPath',
+      '-oUserKnownHostsFile=${_configPath(knownHostsPath, expandTokens: true)}',
+      '-oGlobalKnownHostsFile=${_configPath(emptyConfigPath)}',
       '-oIdentitiesOnly=yes',
       '-oIdentityAgent=none',
       '-oKbdInteractiveAuthentication=no',
