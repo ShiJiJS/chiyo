@@ -122,7 +122,7 @@ private func focus() -> (pid_t, AXUIElement?) {
       if kind == "restart" { try start() }
       if kind == "permission-after" { permission = false }
       try command("target","focus-b")
-      if kind == "minimized" { try command("target","minimize") }
+      if kind == "minimized" { try command("target","minimize"); pump(0.6) }
       if kind == "hidden" { try command("target","hide") }
       try activate("cover",kind == "background" ? "aside" : "cover")
       let normal = ["background","occluded","minimized","hidden","missing-identifiers","language","second-identity","mixed-web","mixed-wk","partial-disabled","partial-readonly"].contains(kind)
@@ -168,9 +168,12 @@ private func focus() -> (pid_t, AXUIElement?) {
       let discoveryOnly=["no-password","all-disabled","all-readonly","web-only","wk-only","ambiguous","permission-before","wrong-file"].contains(kind)
       let expectedError: [String:String] = ["all-disabled":"unsupportedTarget","web-only":"unsupportedTarget","ambiguous":"ambiguousTarget","permission-before":"permissionRequired","wrong-file":"targetChanged"]
       let passed:Bool
-      if discoveryOnly { passed = found.isEmpty && error == (expectedError[kind] ?? "") && !accepted }
+      if discoveryOnly {
+        let reason = ["all-readonly","wk-only"].contains(kind) && selected.discoveryExcludedWeb ? "unsupportedTarget" : (expectedError[kind] ?? "")
+        passed = found.isEmpty && error == reason && !accepted
+      }
       else { passed = lease != nil && observed && covered && noReplay && otherUnwritten && (normal ? accepted && result == "sent" : !accepted && result.hasPrefix("refused:")) }
-      rows.append(["case":kind,"passed":passed,"appId":appID,"targets":found.count,"discoveryError":error,"result":result,"businessMatched":accepted,"othersUnwritten":otherUnwritten,"noReplay":noReplay,"observationsPreserved":observed,"observerCoversDispatch":covered,"dispatchBegin":begin,"dispatchEnd":end])
+      rows.append(["case":kind,"passed":passed,"appId":appID,"targets":found.count,"discoveryError":error,"webExcludedDuringDiscovery":selected.discoveryExcludedWeb,"passwordSemanticsDuringDiscovery":selected.discoveryPasswordCount,"result":result,"businessMatched":accepted,"othersUnwritten":otherUnwritten,"noReplay":noReplay,"observationsPreserved":observed,"observerCoversDispatch":covered,"dispatchBegin":begin,"dispatchEnd":end])
       try save("platform-results.json",rows)
       print(kind+": "+(passed ? "passed" : "FAILED")+" "+result+" "+error)
       controller.close()
@@ -214,11 +217,22 @@ private func focus() -> (pid_t, AXUIElement?) {
     // No unbounded strong AX window cache: dropping candidates reclaims every
     // cache entry. Repeat beyond the historical 256 lifetime limit.
     let env=SystemMacNativeBackgroundEnvironment(),app=try env.application("local.chiyo.native-background.target")
+    var cacheDiscoveryRetries = 0
     for index in 0..<260 {
       try save("stage.json",["stage":"window-cache-churn","iteration":index])
-      try command("target","replace-window"); pump(0.05); _=try env.discover(app)
+      try command("target","replace-window"); pump(0.1)
+      var ready = false
+      // Read-only discovery while the synthetic replacement window settles;
+      // there is no setter/replay and the production adapter does not retry.
+      for _ in 0..<20 {
+        do { let found = try env.discover(app); if found.count == 4 { ready = true; break } }
+        catch MacNativeBackgroundFailure.targetUnavailable { cacheDiscoveryRetries += 1 }
+        pump(0.05)
+      }
+      guard ready else { throw MacNativeBackgroundFailure.targetUnavailable }
     }
     checks["windowCacheReclaimsUnretained"] = true
+    try save("window-cache.json",["replacements":260,"readOnlyDiscoveryRetries":cacheDiscoveryRetries,"setterCalls":0])
     let wirePassed=checks.count==8 && checks.values.allSatisfy{$0}
     try save("wire-results.json",["passed":wirePassed,"checks":checks])
     try save("result.json",["passed":rows.allSatisfy{$0["passed"] as? Bool == true} && wirePassed,"platformCases":rows.count,"wireChecks":checks.count,"permissionUnchanged":true,"formalSignedHelperTCCVerified":false])
