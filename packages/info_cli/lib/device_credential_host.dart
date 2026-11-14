@@ -256,6 +256,8 @@ final class DeviceCredentialHost {
         ? <String, String>{
             'SystemRoot': system!,
             'WINDIR': system,
+            // Windows OpenSSH initializes ProgramData before its stdio layer.
+            'ProgramData': ?Platform.environment['ProgramData'],
             'COMSPEC': '$system\\System32\\cmd.exe',
             'PATH': '$system\\System32',
             'HOME': file.parent.path,

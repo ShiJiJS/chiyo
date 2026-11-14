@@ -128,11 +128,16 @@ class _MacProcess implements SshTransportProcess {
       /* Refuse. Never retry or include exception text. */
     }
     if (_ended) return;
-    await write({
-      'type': 'credential',
-      'challengeId': value['challengeId'],
-      if (secret != null) 'data': base64Encode(secret),
-    });
+    try {
+      await write({
+        'type': 'credential',
+        'challengeId': value['challengeId'],
+        if (secret != null) 'data': base64Encode(secret),
+      });
+    } on Object {
+      // The SSH child may exit while the asynchronous approval is returning.
+      // Do not retry this response or let a closed pipe escape an unawaited task.
+    }
   }
 
   Future<void> write(Map<String, Object?> value) {
@@ -155,7 +160,15 @@ class _MacProcess implements SshTransportProcess {
   Future<void> send(List<int> bytes) =>
       write({'type': 'send', 'data': base64Encode(bytes)});
   @override
-  Future<void> closeInput() => write({'type': 'close'});
+  Future<void> closeInput() => _cleanup('close');
   @override
-  Future<void> terminate() => write({'type': 'terminate'});
+  Future<void> terminate() => _cleanup('terminate');
+  Future<void> _cleanup(String type) async {
+    if (_ended) return;
+    try {
+      await write({'type': type});
+    } on Object {
+      if (!_ended) rethrow;
+    }
+  }
 }

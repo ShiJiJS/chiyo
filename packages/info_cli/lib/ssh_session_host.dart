@@ -658,8 +658,10 @@ class SshSessionHost {
         await maintain();
       }),
     );
+    var phase = 'bootstrap';
     try {
       await transport.send(sshSessionRemoteSource);
+      phase = 'ready';
       await session.ready.timeout(const Duration(seconds: 30));
       final result = {
         'status': 'ready',
@@ -667,14 +669,22 @@ class SshSessionHost {
         'operationId': input['operationId'],
         'capabilities': session.capabilities,
       };
+      phase = 'record_result';
       await _finish(proof, result, (claim['itemIds'] as List).cast<String>());
       return result;
-    } on Object {
+    } on Object catch (error) {
       await session.close(force: true);
       final result = <String, dynamic>{
         'status': 'session_lost',
         'sessionId': id,
         'reason': session.closeReason,
+        'phase': phase,
+        'cause': switch (error) {
+          SshTransportFailure() => error.code,
+          CredentialUseFailure() => error.code,
+          TimeoutException() => 'transport_timeout',
+          _ => 'service_unavailable',
+        },
       };
       await _finish(proof, result, (claim['itemIds'] as List).cast<String>());
       return result;
