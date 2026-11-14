@@ -802,6 +802,7 @@ class ChiyoCli {
     final int? failure = switch (code) {
       'unsupported_capability' ||
       'unsupported_protocol' ||
+      'browser_unavailable' ||
       'unsupported_tool_version' when status != 'ok' => 3,
       'operation_conflict' ||
       'credential_version_changed' ||
@@ -865,6 +866,8 @@ class ChiyoCli {
           2 => '内容或参数未通过检查；请查看返回的字段说明。',
           3 when code == 'access_denied' =>
             '系统未允许访问填写目标。请在 App「设置 → 凭据填写」检查系统权限，再重新检查目标。',
+          3 when code == 'browser_unavailable' =>
+            '指定浏览器不可用；请检查浏览器控制入口、实例和页面，再重新检查目标。',
           3 => '当前聊天、连接或所需能力不可用；请检查连接和软件版本。',
           4 => '本次操作没有有效批准；请查看原申请状态。',
           5 => '本次交付未完成，请查看原操作和清理状态。',

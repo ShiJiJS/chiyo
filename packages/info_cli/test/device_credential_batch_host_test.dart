@@ -41,12 +41,12 @@ void main() {
       ).saveNew(context);
       var caseNumber = 0;
       for (final via in ['ego', 'chrome']) {
-        for (final (code, expected) in [
-          ('ambiguous_form', 'ambiguous_form'),
-          ('unavailable_target', 'unavailable_target'),
-          ('browser_unavailable', 'browser_unavailable'),
-          ('browser_timeout', 'browser_operation_failed'),
-          ('RAW_PRIVATE_BROWSER_DETAIL', 'browser_operation_failed'),
+        for (final (code, expected, exit) in [
+          ('ambiguous_form', 'ambiguous_form', 2),
+          ('unavailable_target', 'unavailable_target', 2),
+          ('browser_unavailable', 'browser_unavailable', 3),
+          ('browser_timeout', 'browser_operation_failed', 2),
+          ('RAW_PRIVATE_BROWSER_DETAIL', 'browser_operation_failed', 2),
         ]) {
           f.browser.inspectionError = code;
           final operation = 'preflight-$via-${++caseNumber}';
@@ -87,7 +87,10 @@ void main() {
                 '--json',
               ]);
           expect((result.output['error'] as Map)['code'], expected);
-          expect(result.exitCode, isNot(anyOf(0, 7)));
+          expect(result.exitCode, exit, reason: result.render());
+          if (code == 'browser_unavailable') {
+            expect((result.output['error'] as Map)['message'], contains('浏览器'));
+          }
           final data = result.output['data'] as Map;
           expect(data['operationId'], operation);
           expect(data['requestId'], isNull);
@@ -197,6 +200,36 @@ void main() {
         (unavailable.output['error'] as Map)['code'],
         'unsupported_capability',
       );
+    },
+  );
+
+  test(
+    'browser unavailability after dispatch remains unknown instead of a capability refusal',
+    () async {
+      final id = await f.request();
+      await f.approve(id, ['b1', 'b2']);
+      f.browser.result = {'status': 'unknown', 'code': 'browser_unavailable'};
+      final arguments = [
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'disconnected-fill',
+      ];
+      expect((await f.cli(arguments)).exitCode, 0);
+      final done = await f.done('disconnected-fill');
+      expect(done['executionState'], 'unknown');
+      expect(done['errorCode'], 'browser_unavailable');
+      final execution = await f.cli(arguments);
+      expect(execution.exitCode, 7, reason: execution.render());
+      final query = await f.cli(['operations', 'show', 'disconnected-fill']);
+      expect(query.exitCode, 0, reason: query.render());
+      final data = query.output['data'] as Map;
+      expect(data['executionState'], 'unknown');
+      expect(data['errorCode'], 'browser_unavailable');
+      expect(f.browser.fills, 1);
+      expect(f.count('material'), 1);
     },
   );
 
