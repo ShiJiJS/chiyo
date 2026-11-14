@@ -243,6 +243,11 @@ class AgentServer extends AgentProtocol {
             : 'invalid_request',
       ).toJson();
     }
+    if (runtime && protocolVersion == 3) {
+      // v3 uses not_found for an operation that has not begun. Preserve its
+      // business status before the legacy runtime error normalization below.
+      result = {...result, 'protocolVersion': 3};
+    }
     if ((request.uri.path == '/credentials/catalog' || runtime) &&
         result['protocolVersion'] == null) {
       result = {
@@ -262,9 +267,6 @@ class AgentServer extends AgentProtocol {
       if (result.containsKey('attemptConsumed')) {
         result['operationClaimed'] = result.remove('attemptConsumed');
       }
-    }
-    if (runtime && protocolVersion == 3) {
-      result = {...result, 'protocolVersion': 3};
     }
     request.response.headers.contentType = ContentType.json;
     request.response.headers.set('Cache-Control', 'no-store');

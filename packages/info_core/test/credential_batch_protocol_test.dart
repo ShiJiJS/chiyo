@@ -62,6 +62,15 @@ void main() {
       final session = (await call('/session/lifecycle', {
         'chatLabel': 'Synthetic local chat',
       }))['sessionSecret'];
+      final notStarted = await call('$base/operation', {
+        'sessionSecret': session,
+        'operationId': 'local-first-execution',
+      });
+      expect(notStarted, {
+        'status': 'not_found',
+        'operationId': 'local-first-execution',
+        'protocolVersion': 3,
+      });
       final c = await service.owner.createStringCredential(
         name: 'Synthetic password',
         publicPurpose: '',
