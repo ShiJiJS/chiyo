@@ -87,6 +87,7 @@ class OwnerReplicationRoutes {
       27,
       28,
       29,
+      30,
     ],
     'chunkBytes': chunkBytes,
   };

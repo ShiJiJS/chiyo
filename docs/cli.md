@@ -34,6 +34,7 @@ chiyo chat start --agent "Example Agent" --id ACTUAL_CHAT_ID --label "核对 NAS
 | 领取普通附件 | 同样申请 file 字段，再 `files fetch --request ID --item ID --field ID`；使用返回的本机路径，用完 `files release --delivery ID` |
 | 填写网页密码框 | `fill request --via ego\|chrome`，提供具体页面、表单和字段；获批后 `fill run --request ID`，正常页面操作另行确认是否登录 |
 | 填写前台应用密码框 | `fill request --via focus` 捕获实际应用，获批后 `fill run`；由本机系统权限和实际控件决定是否可用 |
+| 原生后台填写 | `fill targets --via native --app APP_ID` 取得目标，再 `fill request --via native --target TARGET_ID --credential ID --purpose TEXT`；获批后沿用 `fill run`，setter 接受不等于登录成功 |
 | 将凭据交给业务程序 | `exec request` 声明程序、参数、目录和 stdin／env／file 接收方式，获批后 `exec run --request ID`；多凭据用 `--input`，不用中间别名 |
 | 单独读取凭据原文 | 直接使用无法完成时 `credentials reveal request` 说明原因，用户另行批准后 `credentials reveal read`；不得从填写自动降级 |
 | 核对能力与原记录 | `doctor`；`requests list/show/wait`；`proposals list/show`；`operations list/show/retry` |

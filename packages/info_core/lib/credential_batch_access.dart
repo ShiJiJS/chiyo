@@ -121,7 +121,13 @@ extension _CredentialBatchService on InformationService {
         )
       : operation;
   String _batchDestinationKey(CredentialBatchDestination destination) =>
-      destination.application != null
+      destination.native != null
+      ? _useFingerprint({
+          'via': 'native',
+          'helper': destination.native!.helperInstanceId,
+          'target': destination.native!.targetId,
+        })
+      : destination.application != null
       ? 'native-focus'
       : _useFingerprint({
           'via': destination.via,

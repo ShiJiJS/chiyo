@@ -20,12 +20,12 @@ const _commands = {
   'batch-request',
   'batch-run',
   'batch-status',
+  'native-targets',
 };
 const _publicCodes = {
   ...credentialBatchErrorCodes,
   'unsupported_capability',
   'unsupported_receiver',
-  'session_unavailable',
   'session_mismatch',
   'operation_conflict',
   'invalid_operation_id',
@@ -41,7 +41,6 @@ const _publicCodes = {
   'scope_not_approved',
   'busy',
   'application_changed',
-  'access_denied',
   'unsupported_desktop',
 };
 String _hash(Object? value) =>
@@ -288,6 +287,7 @@ final class DeviceCredentialBatchHost {
   DeviceCredentialBatchHost._(
     this.directory,
     this.driver,
+    this.nativeDriver,
     this.browser,
     this._providers,
     this._lock,
@@ -296,6 +296,7 @@ final class DeviceCredentialBatchHost {
   );
   final Directory directory;
   final FocusedFillDriver? driver;
+  final NativeFillDriver? nativeDriver;
   final DeviceCredentialBatchBrowser browser;
   final List<String> _providers;
   final RandomAccessFile _lock;
@@ -304,12 +305,15 @@ final class DeviceCredentialBatchHost {
   final _tasks = <Future<void>>{};
   final _connections = <AgentConnection>{};
   final _prepared = <PreparedFocusedFill>{};
+  final _nativePrepared = <PreparedNativeFill>{};
+  final _retainedNativeTargets = <String, Set<String>>{};
   final _serials = <String, Future<void>>{};
   bool _closed = false;
 
   static Future<DeviceCredentialBatchHost> start({
     required Directory directory,
     FocusedFillDriver? driver,
+    NativeFillDriver? nativeDriver,
     String? egoExecutable,
     DeviceCredentialBatchBrowser? browser,
   }) async {
@@ -353,11 +357,13 @@ final class DeviceCredentialBatchHost {
       final host = DeviceCredentialBatchHost._(
         directory,
         driver,
+        nativeDriver,
         browser ?? _InstalledBrowsers(egoExecutable),
         [
           'chrome',
           if (egoExecutable != null) 'ego',
           if (driver != null) 'focus',
+          if (nativeDriver != null) 'native',
         ],
         lock,
         server,
@@ -483,14 +489,54 @@ final class DeviceCredentialBatchHost {
         return {
           'status': 'ok',
           'protocolVersion': 3,
-          'capabilities': ['credential-batches.v3'],
-          'providers': _providers,
+          'capabilities': [
+            'credential-batches.v3',
+            if (nativeDriver != null &&
+                (support['capabilities'] as List).contains(
+                  'credential-native-fill.v1',
+                ))
+              'credential-native-fill.v1',
+          ],
+          'providers': [
+            for (final provider in _providers)
+              if (provider != 'native' ||
+                  (support['capabilities'] as List).contains(
+                    'credential-native-fill.v1',
+                  ))
+                provider,
+          ],
         };
       }
       if (session == null) throw const CredentialUseFailure('session_required');
       _requireOk(
         await connection.call('/session/check', {'sessionSecret': session}),
       );
+      if (command == 'native-targets') {
+        _requireNativeSupport(support);
+        final targets = await nativeDriver!.discover(
+          scope: _nativeScope(p, session),
+          appId: input['appId'] as String,
+          windowId: input['windowId'] as String?,
+        );
+        if (targets.length > 64 ||
+            targets.map((t) => t.targetId).toSet().length != targets.length ||
+            utf8
+                    .encode(jsonEncode(targets.map((t) => t.toJson()).toList()))
+                    .length >
+                131072) {
+          throw const CredentialUseFailure('limit_exceeded');
+        }
+        return {
+          'status': 'ok',
+          'targets': targets.map((t) => t.toJson()).toList(),
+        };
+      }
+      if (command == 'batch-request' &&
+          ((_map(input['input'])['items'] as List).any(
+            (item) => _map(_map(item)['destination'])['via'] == 'native',
+          ))) {
+        _requireNativeSupport(support);
+      }
       if (command == 'batch-status') {
         return _public(
           await connection.call('$_base/operation', {
@@ -568,7 +614,10 @@ final class DeviceCredentialBatchHost {
       final items = <Map<String, dynamic>>[];
       for (final value in raw['items'] as List) {
         final item = _map(value);
-        final prepared = await _inspectLocator(_map(item['destination']));
+        final prepared = await _inspectLocator(
+          _map(item['destination']),
+          nativeScope: _nativeScope(connection.profile, session),
+        );
         items.add({...item, 'destination': prepared.toJson()});
       }
       final prepared = CredentialBatchInput.fromJson({
@@ -617,8 +666,32 @@ final class DeviceCredentialBatchHost {
   }
 
   Future<CredentialBatchDestination> _inspectLocator(
-    Map<String, dynamic> locator,
-  ) async {
+    Map<String, dynamic> locator, {
+    String? nativeScope,
+  }) async {
+    if (locator['via'] == 'native') {
+      if (nativeDriver == null || nativeScope == null) {
+        throw const CredentialUseFailure('unsupported_capability');
+      }
+      final prepared = await nativeDriver!.prepare(
+        scope: nativeScope,
+        targetId: locator['targetId'] as String,
+      );
+      try {
+        if (prepared.target.targetId != locator['targetId']) {
+          throw const CredentialUseFailure('destination_changed');
+        }
+        _retainedNativeTargets
+            .putIfAbsent(nativeScope, () => {})
+            .add(prepared.target.targetId);
+        return CredentialBatchDestination.fromJson({
+          'via': 'native',
+          'target': prepared.target.toJson(),
+        });
+      } finally {
+        await prepared.close();
+      }
+    }
     if (locator['via'] != 'focus') {
       final BrowserFormInspection checked;
       try {
@@ -725,6 +798,7 @@ final class DeviceCredentialBatchHost {
     final selected = all.where((i) => ids.contains(i['id'])).toList();
     final destinations = <String, CredentialBatchDestination>{};
     final prepared = <String, PreparedFocusedFill>{};
+    final nativePrepared = <String, PreparedNativeFill>{};
     var detached = false;
     try {
       for (final item in selected) {
@@ -740,7 +814,25 @@ final class DeviceCredentialBatchHost {
         );
         final id = _text(item['id']);
         CredentialBatchDestination observed;
-        if (approved.application != null) {
+        if (approved.native case final target?) {
+          final support = await connection.call('/capabilities', {});
+          _requireOk(support);
+          _requireNativeSupport(support);
+          final native = await nativeDriver!.prepare(
+            scope: _nativeScope(p, session),
+            targetId: target.targetId,
+            expected: target,
+          );
+          nativePrepared[id] = native;
+          _retainedNativeTargets
+              .putIfAbsent(_nativeScope(p, session), () => {})
+              .add(target.targetId);
+          _nativePrepared.add(native);
+          observed = CredentialBatchDestination.fromJson({
+            'via': 'native',
+            'target': native.target.toJson(),
+          });
+        } else if (approved.application != null) {
           if (driver == null) {
             throw const CredentialUseFailure('unsupported_capability');
           }
@@ -775,7 +867,19 @@ final class DeviceCredentialBatchHost {
       });
       final proof = claim.remove('privateProof');
       if (proof is! String) {
-        return claim['status'] == 'service_unavailable'
+        final uncertain =
+            claim['status'] == 'service_unavailable' &&
+            (claim['errorCode'] == null ||
+                {
+                  'service_unavailable',
+                  'audit_unavailable',
+                }.contains(claim['errorCode']));
+        if (!uncertain) {
+          // A definite refusal (including busy) did not register an operation.
+          // Keep the intent, without pretending an input might have started.
+          await _writeJournal(file, {...journal, 'phase': 'intent'});
+        }
+        return uncertain
             ? _unknown(
                 input['operationId'] as String,
                 input['requestId'] as String,
@@ -794,13 +898,17 @@ final class DeviceCredentialBatchHost {
               journal,
               destinations,
               prepared,
+              nativePrepared,
             )
             .catchError((Object _) {})
             .whenComplete(() => _dispose(operationConnection)),
       );
       return _public(claim);
     } finally {
-      if (!detached) await _closePrepared(prepared.values);
+      if (!detached) {
+        await _closePrepared(prepared.values);
+        await _closeNativePrepared(nativePrepared.values);
+      }
     }
   }
 
@@ -813,6 +921,7 @@ final class DeviceCredentialBatchHost {
     Map<String, dynamic> journal,
     Map<String, CredentialBatchDestination> targets,
     Map<String, PreparedFocusedFill> prepared,
+    Map<String, PreparedNativeFill> nativePrepared,
   ) async {
     final materials = <String, List<int>>{};
     final results = {for (final id in targets.keys) id: 'not_attempted'};
@@ -887,6 +996,47 @@ final class DeviceCredentialBatchHost {
             code = _resultCode(result['code']);
             break;
           }
+        } else if (target.native != null) {
+          inputInFlight = true;
+          var dispatchChecked = false;
+          NativeFillResult result;
+          try {
+            result = await nativePrepared[id]!.setValue(
+              materials[id]!,
+              beforeDispatch: () async {
+                if (dispatchChecked) {
+                  throw const CredentialUseFailure('operation_conflict');
+                }
+                await authorize();
+                dispatchChecked = true;
+              },
+            );
+          } on Object catch (error) {
+            result = NativeFillResult(
+              dispatchChecked
+                  ? NativeFillState.unknown
+                  : NativeFillState.refused,
+              error is CredentialUseFailure
+                  ? _nativeResultCode(error.code)
+                  : 'fill_unknown',
+            );
+          }
+          inputInFlight = false;
+          final sent =
+              dispatchChecked &&
+              result.state == NativeFillState.sent &&
+              result.errorCode == null;
+          final refused = result.state == NativeFillState.refused;
+          results[id] = sent
+              ? 'sent'
+              : refused
+              ? 'refused'
+              : 'unknown';
+          if (!sent) {
+            state = refused ? (anySent ? 'partial' : 'refused') : 'unknown';
+            code = _nativeResultCode(result.errorCode ?? 'fill_unknown');
+            break;
+          }
         } else {
           inputInFlight = true;
           final result = await sendPreparedFocusedFill(
@@ -937,6 +1087,7 @@ final class DeviceCredentialBatchHost {
       }
       materials.clear();
       await _closePrepared(prepared.values);
+      await _closeNativePrepared(nativePrepared.values);
     }
     final reported = await connection.call('$_base/finish', {
       'privateProof': proof,
@@ -969,6 +1120,29 @@ final class DeviceCredentialBatchHost {
   }
 
   Future<void>? _closing;
+  Future<void> _closeNativePrepared(Iterable<PreparedNativeFill> values) async {
+    for (final value in values) {
+      try {
+        await value.close();
+      } on Object {
+        // Helper expiry independently invalidates the original reservation.
+      }
+      _nativePrepared.remove(value);
+    }
+  }
+
+  String _nativeScope(AgentConnectionProfile p, String session) =>
+      _hash({'profile': _profileHash(p), 'session': _hash(session)});
+
+  void _requireNativeSupport(Map<String, dynamic> support) {
+    if (nativeDriver == null ||
+        !(support['capabilities'] as List? ?? []).contains(
+          'credential-native-fill.v1',
+        )) {
+      throw const CredentialUseFailure('unsupported_capability');
+    }
+  }
+
   Future<void> close() => _closing ??= _close();
   Future<void> _close() async {
     _closed = true;
@@ -976,8 +1150,19 @@ final class DeviceCredentialBatchHost {
       c.close();
     }
     await _closePrepared(_prepared.toList());
+    await _closeNativePrepared(_nativePrepared.toList());
     await _server.close(force: true);
     await Future.wait(_tasks.toList());
+    for (final entry in _retainedNativeTargets.entries) {
+      for (final targetId in entry.value) {
+        try {
+          await nativeDriver?.release(scope: entry.key, targetId: targetId);
+        } on Object {
+          // Loss of the original private helper connection also drops targets.
+        }
+      }
+    }
+    _retainedNativeTargets.clear();
     try {
       await writePrivateDeviceState(
         File('${directory.path}/$_folder/endpoint.json'),
@@ -988,6 +1173,9 @@ final class DeviceCredentialBatchHost {
     }
   }
 }
+
+String _nativeResultCode(Object? code) =>
+    code == 'scope_not_approved' ? 'grant_revoked' : _resultCode(code);
 
 String _resultCode(Object? code) =>
     {
@@ -1014,6 +1202,15 @@ Map<String, dynamic> _locator(BrowserFormTarget t) => {
 };
 void _validateLocator(Map<String, dynamic> value) {
   final via = value['via'];
+  if (via == 'native') {
+    _shape(value, {'via', 'targetId'});
+    if (!RegExp(
+      r'^[A-Za-z0-9_-]{22,128}$',
+    ).hasMatch(value['targetId'] as String? ?? '')) {
+      throw const CredentialUseFailure('invalid_reference');
+    }
+    return;
+  }
   if (via == 'focus') {
     _shape(value, {'via'});
     return;
@@ -1047,6 +1244,12 @@ void _validateInput(Map<String, dynamic> value) {
   final command = value['command'];
   if (command == 'capabilities') {
     _shape(value, {'command'});
+    return;
+  }
+  if (command == 'native-targets') {
+    _shape(value, {'command', 'appId'}, {'windowId'});
+    _text(value['appId'], max: 4096);
+    if (value['windowId'] != null) _text(value['windowId'], max: 128);
     return;
   }
   _operation(value['operationId']);
@@ -1166,6 +1369,14 @@ Map<String, dynamic> _public(Map<String, dynamic> value) {
             _map(_map(row)['destination']),
           ).toJson(),
         },
+    ];
+  }
+  if (value['targets'] is List) {
+    final targets = value['targets'] as List;
+    if (targets.length > 64) return _failure('limit_exceeded');
+    result['targets'] = [
+      for (final target in targets)
+        NativeFillTarget.fromJson(_map(target)).toJson(),
     ];
   }
   if (value['itemResults'] is Map) {

@@ -6,6 +6,8 @@ import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
 import '../../info_core/test_support/operation_history.dart';
+import '../../info_core/test/native_fill_models_test.dart'
+    show nativeTargetFixture;
 import 'storage_test.dart' show TestKeyStore;
 
 class _Replica {
@@ -42,7 +44,7 @@ class _Replica {
       snapshot(() => LibraryReplication(repo).snapshotContents());
 }
 
-Future<void> _initial(_Replica a, _Replica b) async {
+Future<int> _initial(_Replica a, _Replica b) async {
   final file = File('${a.path}/initial.encrypted');
   final prepared = await a.snapshot(
     () => a.incremental.exportInitialWithBaseline(file.path),
@@ -60,6 +62,7 @@ Future<void> _initial(_Replica a, _Replica b) async {
     ),
   );
   await file.delete();
+  return prepared.initial.transfer.contentFormat;
 }
 
 Future<LibrarySyncReceipt> _transfer(
@@ -216,6 +219,66 @@ void _assertArchive(
 }
 
 void main() {
+  test(
+    'native snapshots use format 30 and incremental operations remain inactive on the replica',
+    () async {
+      final root = await Directory.systemTemp.createTemp('native-batch-sync-');
+      final now = DateTime.utc(2026, 11, 14);
+      final a = _Replica('${root.path}/a', () => now),
+          b = _Replica('${root.path}/b', () => now);
+      await a.open();
+      await b.open();
+      addTearDown(() async {
+        await a.close();
+        await b.close();
+        await root.delete(recursive: true);
+      });
+      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+      await a.runtime.run(() async {
+        await f.open(program: false);
+        f.input = CredentialBatchInput.fromJson({
+          ...f.input.toJson(),
+          'items': [
+            {
+              ...f.input.items.single.toJson(),
+              'destination': {'via': 'native', 'target': nativeTargetFixture()},
+            },
+          ],
+        });
+        f.request = await a.runtime.service.agent.requestCredentialBatch(
+          f.session,
+          'A' * 22,
+          f.input,
+          operationId: 'native-sync-submit',
+        );
+        f.request = await a.runtime.service.owner.decideCredentialBatch(
+          f.request.id,
+          operationId: 'native-sync-approve',
+          revision: 1,
+          approvedItems: ['b1'],
+        );
+        await f.append('native-first');
+      });
+      expect(await _initial(a, b), 30);
+      _assertArchive(b, f, program: false, count: 1);
+      expect(
+        b.repo.credentialBatches
+            .singleWhere((r) => r.id == f.request.id)
+            .items
+            .single
+            .destination
+            .native!
+            .fieldLabel,
+        'Password',
+      );
+      await a.runtime.run(() => f.append('native-second'));
+      for (final entry in await a.after(0)) {
+        expect((await _transfer(a, b, entry.batch)).conflict, false);
+      }
+      _assertArchive(b, f, program: false, count: 2);
+    },
+  );
+
   for (final program in [false, true]) {
     test(
       '${program ? 'program' : 'fill'} source retention synchronizes parent and child deletion without replaying old history',
