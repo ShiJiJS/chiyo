@@ -63,6 +63,7 @@ abstract interface class NativeFillDriver {
     NativeFillTarget? expected,
   });
   Future<void> release({required String scope, required String targetId});
+  Future<void> dispose();
 }
 
 abstract interface class PreparedNativeFill {
@@ -79,6 +80,8 @@ abstract interface class PreparedNativeFill {
 
 `scope` 摘要不是授权凭证。helper 所有命令仍必须经原私有 AppHost 连接鉴权，不能开放一个仅凭 scope/targetId 就能写值的公共入口。`prepare(expected:null)` 成功后将发现项提升为保留目标，保证提交申请及随后批准期间仍指向原对象；本次 `close()` 不删除它。显式 `release(scope,targetId)` 幂等忘记目标，AppHost 仅在没有其他原申请需要该目标时调用；原私有宿主连接结束时 helper 释放该连接保留的全部目标。每 scope 最多保留 256 项，达到上限拒绝新的提升，不驱逐有效目标。服务器批准失效后仍不得写入，保留引用不产生或续期授权。
 
+`dispose()` 幂等结束该 driver 持有的 resident AppHost→helper 私有连接，使该连接的全部发现项、保留目标和 lease 失效；共享 helper 服务只清理此连接，不代其他连接销毁目标。AppHost `start(nativeDriver:..., ownsNativeDriver:true)` 成功后取得驱动所有权，默认 true；其关闭路径在 finally 中调用 dispose，包括清理期间出错的情况。显式借用 `ownsNativeDriver:false` 时，AppHost 只关闭自身准备，保留目标及 resident driver 的销毁由调用方负责。start 失败时所有权尚未转移，装配方负责销毁。每条 CLI 命令结束、CLI 回复丢失或其短连接断开都不触发 resident driver dispose，不取消 AppHost 已接收的操作，也不删除仍有效的目标。
+
 ### 私有平台 wire（format 1）
 
 两端包装层将上述接口映射为同一消息字段。Windows 无窗口 helper 使用私有标准输入/输出上的有界 JSON 消息，Mac 使用 `agent_info_manage/native_background_fill` MethodChannel 到可信 helper；通道自身的私有连接鉴权仍由平台实现。字段中的编号均为 22–128 位 base64url 字符，scope 为 64 位小写十六进制。Mac 方法名与 command 相同；MethodChannel arguments 可包含 command，helper 统一校验。
@@ -90,6 +93,11 @@ abstract interface class PreparedNativeFill {
 | `setValue` | `scope, leaseId, bytes:[0..255]`（完整 UTF-8 字节） | `state:sent`，或 `state:refused/unknown,errorCode` |
 | `close` | `scope, leaseId` | `state:closed` |
 | `release` | `scope, targetId` | `state:released` |
+| `dispose` | 无额外字段（仅原 private owner 连接） | `state:disposed`；随后关闭该连接 |
+
+dispose 的确认是尽力而为；包装层即使收不到确认也必须关闭自己持有的私有传输/进程连接。helper 应在 owner 连接断开时执行同样的引用失效。Mac 对应 resident bridge 连接销毁，Windows 对应无窗口 helper 的 owner 管道/进程生命周期；不得把此规则套到每次 CLI→AppHost 的请求连接。
+
+dispose 不能排队等待某次 setter 的回复：AppHost 停止接受新操作后，先关闭 owned native driver，使待决 helper 读取能结束，再等待操作收尾。包装层必要时直接断开管道/连接或终止自己拥有的 helper，且须在异常路径的 finally 中释放传输；不终止目标 App。若 setter 已开始，关闭后无法确认结果就保留 unknown，不推断未写入，不重放。
 
 普通失败为 `format:1,state:refused,errorCode`，只使用 `nativeFillErrorCodes`。`setValue` 的 sent/refused/unknown 子对象可由 `NativeFillResult.fromJson` 解析，包装层先移除 wire 的 format。准备前拒绝为 refused；setter 开始后失联或异常为 unknown。失去 reply 后不能对同一 lease 再发送 setter；helper 必须记录 lease 已尝试一次并拒绝重放。close/release 幂等。leaseId 仅留在平台包装层与 helper，不进 CLI、服务器批准、备份或普通操作记录。bytes 不得写日志、异常正文或命令行；包装层与 helper 都按平台能力清零临时缓冲。
 
@@ -102,6 +110,10 @@ abstract interface class PreparedNativeFill {
 ## 引用生命周期
 
 helper 为每次运行生成新的 `helperInstanceId`；targetId 不跨 helper 重启恢复。未用于申请的发现项保留最多 5 分钟，每 scope 最多 64 项，单次发现最多返回 64 项；超限明确拒绝或清理已过期未使用项，不驱逐仍被准备的引用。
+
+发现返回的 windowTitle/fieldLabel 必须帮助 Agent 识别具体控件。平台已知的 AXIdentifier、AutomationId 应组合进可读描述，例如 `密码 [AutomationId=loginPassword]`，不因显示名称为空就丢弃这些标识；这些标识只用于描述，不能替代 helper 固定引用作写入授权。同窗或同 App 的候选若结合可见 App/窗口/字段描述和控件类型仍无法区分，应以现有 `unsupported_target` 明确拒绝该歧义发现，不返回一组只能靠随机 targetId 猜测的候选。不增加密码值、原生句柄或私有引用字段。
+
+Windows 本轮拒绝隐藏根窗口；平台内部 `target_not_visible` 在公共 wire 边界映射为已有 `target_unavailable`，不扩充原因码白名单。最小化窗口的支持由 Windows 专项验证决定，不能把隐藏根窗口误标成已支持。
 
 申请冻结后，helper 可以保留该固定目标供原有效授权复用，但每次操作仍检查原 scope、helper 实例、进程代际、窗口、控件类型和支持状态。保留引用不延长服务器批准期限。进程结束、窗口/字段对象重建、helper 重启、scope 结束或引用丢失均使原目标失效；旧批准及历史仍可查询，但不能按标题、名称或控件位置重新绑定。平台实现须有有界的已保留目标上限和明确拒绝，不无限持有对象。
 

@@ -103,6 +103,10 @@ abstract interface class NativeFillDriver {
   /// Explicitly forget a retained target once no original request needs it.
   /// close() on an individual preparation must never do this implicitly.
   Future<void> release({required String scope, required String targetId});
+
+  /// End this resident driver connection and invalidate all references it owns.
+  /// Idempotent; never called merely because one Agent CLI socket disconnects.
+  Future<void> dispose();
 }
 
 abstract interface class PreparedNativeFill {

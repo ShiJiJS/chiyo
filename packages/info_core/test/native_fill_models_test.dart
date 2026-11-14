@@ -19,6 +19,35 @@ Map<String, dynamic> nativeTargetFixture() => {
 
 void main() {
   test(
+    'legal AppKit and all three Windows snapshot kinds parse their field values',
+    () {
+      final mac = nativeTargetFixture();
+      expect(NativeFillTarget.fromJson(mac).toJson(), mac);
+      for (final kind in [
+        'win32_password',
+        'winforms_password',
+        'wpf_password',
+      ]) {
+        final windows = {
+          ...mac,
+          'platform': 'windows',
+          'controlKind': kind,
+          'application': {
+            'executable': r'C:\Synthetic\NativeFixture.exe',
+            'sha256': 'b' * 64,
+          },
+          'appId': r'C:\Synthetic\NativeFixture.exe',
+          'appName': 'Native Windows fixture',
+          'windowTitle': 'Synthetic login',
+          'fieldLabel': 'Password [AutomationId=loginPassword]',
+        };
+        final target = NativeFillTarget.fromJson(windows);
+        expect(target.toJson(), windows);
+        expect(target.application.executable, windows['appId']);
+      }
+    },
+  );
+  test(
     'native snapshots preserve identity without accepting raw handles or embedded web controls',
     () {
       final json = nativeTargetFixture();

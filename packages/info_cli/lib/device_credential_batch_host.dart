@@ -288,6 +288,7 @@ final class DeviceCredentialBatchHost {
     this.directory,
     this.driver,
     this.nativeDriver,
+    this.ownsNativeDriver,
     this.browser,
     this._providers,
     this._lock,
@@ -297,6 +298,7 @@ final class DeviceCredentialBatchHost {
   final Directory directory;
   final FocusedFillDriver? driver;
   final NativeFillDriver? nativeDriver;
+  final bool ownsNativeDriver;
   final DeviceCredentialBatchBrowser browser;
   final List<String> _providers;
   final RandomAccessFile _lock;
@@ -306,7 +308,6 @@ final class DeviceCredentialBatchHost {
   final _connections = <AgentConnection>{};
   final _prepared = <PreparedFocusedFill>{};
   final _nativePrepared = <PreparedNativeFill>{};
-  final _retainedNativeTargets = <String, Set<String>>{};
   final _serials = <String, Future<void>>{};
   bool _closed = false;
 
@@ -314,6 +315,7 @@ final class DeviceCredentialBatchHost {
     required Directory directory,
     FocusedFillDriver? driver,
     NativeFillDriver? nativeDriver,
+    bool ownsNativeDriver = true,
     String? egoExecutable,
     DeviceCredentialBatchBrowser? browser,
   }) async {
@@ -358,6 +360,7 @@ final class DeviceCredentialBatchHost {
         directory,
         driver,
         nativeDriver,
+        ownsNativeDriver,
         browser ?? _InstalledBrowsers(egoExecutable),
         [
           'chrome',
@@ -681,9 +684,6 @@ final class DeviceCredentialBatchHost {
         if (prepared.target.targetId != locator['targetId']) {
           throw const CredentialUseFailure('destination_changed');
         }
-        _retainedNativeTargets
-            .putIfAbsent(nativeScope, () => {})
-            .add(prepared.target.targetId);
         return CredentialBatchDestination.fromJson({
           'via': 'native',
           'target': prepared.target.toJson(),
@@ -824,9 +824,6 @@ final class DeviceCredentialBatchHost {
             expected: target,
           );
           nativePrepared[id] = native;
-          _retainedNativeTargets
-              .putIfAbsent(_nativeScope(p, session), () => {})
-              .add(target.targetId);
           _nativePrepared.add(native);
           observed = CredentialBatchDestination.fromJson({
             'via': 'native',
@@ -1146,30 +1143,37 @@ final class DeviceCredentialBatchHost {
   Future<void> close() => _closing ??= _close();
   Future<void> _close() async {
     _closed = true;
-    for (final c in _connections.toList()) {
-      c.close();
-    }
-    await _closePrepared(_prepared.toList());
-    await _closeNativePrepared(_nativePrepared.toList());
-    await _server.close(force: true);
-    await Future.wait(_tasks.toList());
-    for (final entry in _retainedNativeTargets.entries) {
-      for (final targetId in entry.value) {
+    Future<void>? nativeDisposal;
+    Future<void> disposeOwnedNative() => nativeDisposal ??= (() async {
+      if (ownsNativeDriver) await nativeDriver?.dispose();
+    })();
+    try {
+      for (final c in _connections.toList()) {
+        c.close();
+      }
+      // Break pending helper reads before waiting for accepted operations.
+      // Ending one CLI socket never enters this resident Host shutdown path.
+      try {
+        await disposeOwnedNative();
+      } finally {
+        await _closePrepared(_prepared.toList());
+        await _closeNativePrepared(_nativePrepared.toList());
+        await _server.close(force: true);
+        await Future.wait(_tasks.toList());
+      }
+    } finally {
+      try {
+        await disposeOwnedNative();
+      } finally {
         try {
-          await nativeDriver?.release(scope: entry.key, targetId: targetId);
-        } on Object {
-          // Loss of the original private helper connection also drops targets.
+          await writePrivateDeviceState(
+            File('${directory.path}/$_folder/endpoint.json'),
+            {..._record, 'phase': 'closed'},
+          );
+        } finally {
+          await _lock.close();
         }
       }
-    }
-    _retainedNativeTargets.clear();
-    try {
-      await writePrivateDeviceState(
-        File('${directory.path}/$_folder/endpoint.json'),
-        {..._record, 'phase': 'closed'},
-      );
-    } finally {
-      await _lock.close();
     }
   }
 }
