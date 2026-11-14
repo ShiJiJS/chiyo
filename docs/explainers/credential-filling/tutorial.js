@@ -58,7 +58,7 @@ document.addEventListener('alpine:init', () => {
     resetDelivery(){this.delivery='idle';},
     highlight(code){
       const escaped=code.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-      return escaped.replace(/\b(AXUIElementCopyAttributeValue|AXUIElementCreateApplication|AXUIElementIsAttributeSettable|AXUIElementSetAttributeValue|ElementFromHandle|FindAll|GetCurrentPatternAs|put_AutoSetFocus|SetValue)\b/g,'<strong class="method-name">$1</strong>');
+      return escaped.replace(/\b(AXUIElementCopyAttributeValue|AXUIElementCreateApplication|AXUIElementIsAttributeSettable|AXUIElementSetAttributeValue|ElementFromHandle|CreatePropertyCondition|FindAll|GetCurrentPatternAs|put_AutoSetFocus|SetValue)\b/g,'<strong class="method-name">$1</strong>');
     },
     demoSend(){this.delivery=this.targetRebuilt?'refused':'sent';},
     get deliveryText(){
@@ -66,11 +66,15 @@ document.addEventListener('alpine:init', () => {
       if(this.delivery==='sent')return '向原密码控件设置了 hello；用户当前窗口和输入焦点保持不变。这是教学模拟，业务结果仍需另查。';
       return '尚未写值。用户当前使用哪个窗口，不改变保存的目标对象。';
     },
-    get nativeTargetPreview(){return JSON.stringify({
+    get nativeAppName(){return this.os==='mac'?'归档实用工具':'7-Zip';},
+    get nativeAppId(){return this.os==='mac'?'com.apple.archiveutility':'C:\\Program Files\\7-Zip\\7zFM.exe';},
+    get nativeFieldLabel(){return this.os==='mac'?'密码 [AXIdentifier=_NS:280]':'密码 [AutomationId=120]';},
+    get nativeTargetsPreview(){return JSON.stringify({targets:[{
       targetId:'tgt_W8Jk2Nx6fR9qP4vL7cY1sA',
+      appName:this.nativeAppName,
       windowTitle:'本次压缩文件的密码窗口',
-      fieldLabel:this.os==='mac'?'密码 [AXIdentifier=_NS:280]':'密码 [AutomationId=120]'
-    },null,2);},
+      fieldLabel:this.nativeFieldLabel
+    }]},null,2);},
     get nativeDiscoverCommand(){return this.os==='mac'?`chiyo fill targets --via native \\\n  --app com.apple.archiveutility --json`:`chiyo fill targets --via native --app "C:\\Program Files\\7-Zip\\7zFM.exe" --json`;},
     get queryCode(){return this.os==='mac'?`// Swift：pid 来自指定应用的运行进程
 let app = AXUIElementCreateApplication(pid)
@@ -103,8 +107,8 @@ field->GetCurrentPatternAs(UIA_ValuePatternId,
 valuePattern->get_CurrentIsReadOnly(&readOnly);
 // 另核对进程、窗口和原生控件支持状态`;},
     get attributes(){return this.os==='mac'?
-      [['AXRole','AXTextField'],['AXSubrole','AXSecureTextField'],['AXEnabled','true'],['AXValue 可写','true']]:
-      [['IsPassword','TRUE'],['IsEnabled','TRUE'],['ValuePattern','支持'],['IsReadOnly','FALSE']];},
+      [['AXEnabled','true'],['AXValue 可写','true']]:
+      [['IsEnabled','TRUE'],['ValuePattern','支持'],['IsReadOnly','FALSE']];},
     get sendCode(){return this.os==='mac'?`// field 是发现阶段保存并重新核验的原对象
 let result = AXUIElementSetAttributeValue(
     field, kAXValueAttribute,
