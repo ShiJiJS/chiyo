@@ -50,6 +50,9 @@ await page.evaluate(({mac, win}) => {
     section.querySelectorAll('[id]').forEach(e => e.id += '-windows');
     section.id += '-windows'; main.append(section);
   }
+  // Shared security limits and references conclude both native platform examples.
+  const security = main.querySelector('#security-boundary');
+  if (security) main.append(security);
   document.querySelectorAll('footer,.topbar,.reading-toc,.toc-scrim,.skip,.os-selector,.native-window-tabs,.native-demo-actions,.choice-row,.query-run button,.fill-action button,.text-button').forEach(e=>e.remove());
   // Repository references must remain usable after downloading the PDF.
   main.querySelectorAll('a[href]').forEach(a => {
