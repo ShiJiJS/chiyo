@@ -39,18 +39,24 @@ Dart declarations follow in the next common commit.
 
 ## Isolation gate and remote helper
 
-First prove a session-scoped Python 3/POSIX helper using capability checks, not OS
-name allowlists. OpenSSH runs it over a nonterminal byte channel with strict host
-verification. The helper creates a remote PTY per run while retaining one Shell
-process. Thus SSH stdout carries framed control messages, while remote PTYs carry
-ordinary terminal bytes, including ANSI and merged stdout/stderr.
+The capability-checked Python 3/POSIX helper requires Bash, remote PTY/ioctl,
+process identity inspection, and Unix peer credentials; missing capabilities fail
+explicitly without installing dependencies or checking an OS-name allowlist.
+OpenSSH uses a nonterminal byte channel with strict host verification. The helper
+allocates a real controlling PTY for one persistent Shell and enables Bash job
+control. SSH stdout carries JSON-lines frames; terminal output is base64 inside
+output events and cannot become a completion report.
 
-Shell control input is separate from user input. Each run executes in the same
-Shell under redirections to a fresh PTY. Completion reports travel separately
-from command stdout/stderr. Forged output markers remain output. Input frames
-include runId; the helper checks it and writes only that run's PTY. Late input
-can at worst reach an obsolete terminal, never the Shell command stream or the
-next run's terminal. JSON-lines control messages are bounded; output is base64.
+The Shell reads commands from a separate pipe, never from its PTY. Each eval has
+stdin/stdout/stderr redirected to the controlling PTY; completion goes to the
+Shell's original stdout pipe, outside those redirections. Input frames bind runId;
+a single-threaded broker closes the input gate and flushes queued PTY input both
+at completion and before admitting another run. Thus a late input cannot become
+a Shell command or the next program's input. Background terminal readers have
+their own process groups and receive SIGTTIN rather than stealing foreground
+input. Ctrl+C targets the terminal foreground group; the persistent Shell handles
+INT and survives. Deliberately changing job control, traps, or control descriptors
+can invalidate the session; this is not a sandbox against the approved account.
 
 The helper is a connection child, not a permanent remote service. It changes no
 sudoers/SSH settings and installs no software. Its reviewable code and nonsecret
@@ -61,8 +67,9 @@ remote account's existing authority.
 
 ## sudo gate
 
-Never inject based on `Password:` terminal text. A managed sudo invocation uses
-`sudo -A` and a session ASKPASS helper with a dedicated receive channel bound to
+Never inject based on `Password:` terminal text. The session defines `sudo` (also `chiyo_sudo`) as a managed Shell function,
+so ordinary `sudo command` needs no Agent-written ASKPASS script. It invokes the
+verified system `sudo -A` and a session ASKPASS helper with a dedicated receive channel bound to
 runId, the requesting process, and one authentication action. Verify the receiver
 is still alive before requesting/rechecking authorization and sending one reply.
 The channel closes after that action; neither the business program nor Shell
