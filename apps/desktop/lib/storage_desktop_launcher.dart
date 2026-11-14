@@ -5,7 +5,9 @@ import 'package:info_cli/device_focused_fill_host.dart';
 import 'package:info_cli/device_credential_batch_host.dart';
 import 'package:info_cli/installed_ego_browser.dart';
 import 'bundled_focused_fill.dart';
+import 'bundled_windows_native_fill.dart';
 import 'macos_focused_fill.dart';
+import 'macos_native_background_fill.dart';
 import 'local_library_sync.dart';
 import 'package:info_remote/library_replication_client.dart';
 
@@ -68,11 +70,11 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   @override
   void initState() {
     super.initState();
-    unawaited(_startFocusedFillHost());
+    unawaited(_startCredentialFillHosts());
     _restore();
   }
 
-  Future<void> _startFocusedFillHost() async {
+  Future<void> _startCredentialFillHosts() async {
     if (widget.focusedFillDriver == null &&
         widget.nativeFillDriver == null &&
         widget.openNativeFillDriver == null &&
@@ -84,9 +86,20 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
     var nativeTransferred = false;
     try {
       try {
-        nativeDriver =
-            widget.nativeFillDriver ??
-            await widget.openNativeFillDriver?.call();
+        nativeDriver = widget.nativeFillDriver;
+        if (nativeDriver == null) {
+          final factory = widget.openNativeFillDriver;
+          if (factory != null) {
+            nativeDriver = await factory();
+          } else if (widget.platform == null ||
+              widget.platform is NativeDesktopPlatform) {
+            nativeDriver = Platform.isMacOS
+                ? MacOSNativeBackgroundFillDriver()
+                : Platform.isWindows
+                ? await loadBundledWindowsNativeFill()
+                : null;
+          }
+        }
       } on Object {
         // An unavailable native adapter leaves the other providers usable.
       }
@@ -132,6 +145,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
         directory: Directory(widget.profiles.directory),
         driver: driver,
         nativeDriver: nativeDriver,
+        ownsNativeDriver: true,
         egoExecutable: browser,
       );
       nativeTransferred = true;
