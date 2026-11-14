@@ -16,6 +16,28 @@
 - **本地使用或连接 NAS**：本机独立运行，也可以与自己部署的服务器同步资料；有冲突时保留双方内容，供你选择。
 - **备份与扩展**：完整加密备份、独立恢复密钥，以及提供字段、填写说明和示例的模板插件。
 
+## 界面预览
+
+以下截图来自 macOS 上运行的隔离预览，使用与正式 App 相同的界面组件。画面中的资料、域名和申请均为虚构示例，不包含个人真实数据。
+
+### 资料目录与详情
+
+按目录和标签查找资料，在同一个窗口查看服务器连接信息及关联凭据。
+
+![macOS 信息库：资料目录、标签、列表和服务器详情](docs/images/screenshots/macos-library.jpg)
+
+### AI 访问审批
+
+查看 AI 的申请用途，逐项选择允许访问的字段与凭据，并设置授权期限。
+
+![macOS 访问审批：申请用途、字段范围、凭据范围和授权期限](docs/images/screenshots/macos-approval.jpg)
+
+### 修改提案对照
+
+AI 提交修改后，先对照原内容和拟修改内容，再决定是否保存整份修改。
+
+![macOS 录入提案：服务器资料修改前后对照](docs/images/screenshots/macos-proposal.jpg)
+
 ## 开始使用
 
 1. 从 [Releases](https://github.com/ShiJiJS/chiyo/releases) 获取对应平台的开发包，按[安装手册](docs/deployment.md)启动 App。

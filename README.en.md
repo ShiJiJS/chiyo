@@ -16,6 +16,28 @@ You can also give the AI a set of files to organize into an import proposal usin
 - **Use locally or sync with your NAS:** run independently or synchronize with a self-hosted server. Conflicting edits retain both candidates for you to review.
 - **Back up and extend:** encrypted backups with a separate recovery key, plus template plugins that provide fields, instructions, and examples.
 
+## Screenshots
+
+Captured from an isolated preview running on macOS with the same UI components as the desktop App. All information, domains, and requests shown are fictional examples; no real personal data is included. The interface is in Chinese.
+
+### Information library
+
+Browse folders and tags, then inspect server connection details and linked credentials in the same window.
+
+![macOS information library: folders, tags, records, and server details](docs/images/screenshots/macos-library.jpg)
+
+### AI access approvals
+
+Review the AI's purpose, select individual fields and credentials, and set how long access lasts.
+
+![macOS access approval: purpose, requested fields, credentials, and access duration](docs/images/screenshots/macos-approval.jpg)
+
+### Proposed changes
+
+Compare the original information with the AI's proposed changes before saving the complete update.
+
+![macOS proposal review: side-by-side comparison of server information](docs/images/screenshots/macos-proposal.jpg)
+
 ## Getting started
 
 1. Get the appropriate development package from [Releases](https://github.com/ShiJiJS/chiyo/releases) and follow the [installation guide](docs/deployment.en.md).
