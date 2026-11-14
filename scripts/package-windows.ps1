@@ -238,7 +238,7 @@ try {
     Compress-Archive -LiteralPath $payload -DestinationPath $archive -CompressionLevel Optimal
     $digest = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText("$archive.sha256", "$digest  $([IO.Path]::GetFileName($archive))`n", $utf8)
-    & (Join-Path $PSScriptRoot 'test-windows-package.ps1') -ArchivePath $archive -DartExecutable $dart -RequireNativeBackgroundFill
+    & (Join-Path $PSScriptRoot 'test-windows-package.ps1') -ArchivePath $archive -DartExecutable $dart -RequireNativeBackgroundFill -RequireSshSessionTransport
     Assert-CleanSources
     if ((git rev-parse HEAD).Trim() -ne $commit) {
         throw 'Sources changed during extracted verification; the archive is not a verified delivery.'

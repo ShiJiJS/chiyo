@@ -60,6 +60,7 @@ def main():
         docker('exec', '-i', container, '/bin/sh', '-c', 'cat > /output/client.pub',
                input=(root / 'client.pub').read_bytes())
         host = docker('exec', container, 'cat', '/output/host.pub').decode().strip()
+        (root / 'host.pub').write_text(host + '\n', encoding='ascii')
         (root / 'known_hosts').write_text(f'[127.0.0.1]:{port} {host}\n', encoding='ascii')
         facts = {'port': port, 'container': container, 'loopback': True}
         (root / 'facts.json').write_text(json.dumps(facts))
