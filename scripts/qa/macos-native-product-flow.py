@@ -90,7 +90,15 @@ def main():
         if connection.name != state['profileName'] or connection.parent.name != 'profiles':
             parser.error('Default or unrelated App profile refused')
         identity = json.loads((connection / 'local-library.json').read_text())
-        agent = connection / 'agent/agent-connection.json'
+        active = connection / 'active.json'
+        if active.exists():
+            pointer = json.loads(active.read_text())
+            if (set(pointer) != {'version', 'generation'} or pointer['version'] != 1 or
+                    not re.fullmatch(r'[0-9a-f]{32}', pointer.get('generation', ''))):
+                parser.error('Invalid synthetic profile generation')
+            agent = connection / 'connections' / pointer['generation'] / 'agent/agent-connection.json'
+        else:
+            agent = connection / 'agent-connection.json'
         profile = json.loads(agent.read_text())
         address = urlparse(profile.get('address', ''))
         if (profile.get('role') != 'local-agent' or address.scheme != 'http' or address.hostname != '127.0.0.1'
@@ -99,7 +107,7 @@ def main():
         if state.get('requestAttempted'):
             parser.error('Request already attempted; query its stable operation instead of creating another')
         state.update(cli=str(cli), cliSHA256=digest(cli), connectionDirectory=str(connection),
-                     libraryId=identity['libraryId'])
+                     agentConnectionFile=str(agent), libraryId=identity['libraryId'])
         write(out / 'qa.json', state)
     cli = Path(state['cli'])
     if digest(cli) != state['cliSHA256']:
@@ -131,7 +139,7 @@ def main():
         (out / 'chat').mkdir(mode=0o700, exist_ok=False)
         successful('chat', ['chat', 'start', '--agent', 'Synthetic Native QA', '--id', 'native-qa-' + state['nonce'],
                             '--label', 'Synthetic native product acceptance', '--context-out', str(context),
-                            '--connection', str(connection / 'agent/agent-connection.json')])
+                            '--connection', state['agentConnectionFile']])
         env['CHIYO_CONTEXT'] = str(context)
         doctor = successful('doctor', ['doctor'])
         if doctor.get('fill', {}).get('native', {}).get('available') is not True:

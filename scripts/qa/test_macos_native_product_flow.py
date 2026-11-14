@@ -22,9 +22,9 @@ class ProductFlowChecks(unittest.TestCase):
         self.assertEqual(self.run_flow('prepare').returncode, 0)
         state = json.loads((self.out / 'qa.json').read_text())
         self.connection = self.root / 'profiles' / state['profileName']
-        (self.connection / 'agent').mkdir(parents=True)
+        self.connection.mkdir(parents=True)
         (self.connection / 'local-library.json').write_text(json.dumps({'libraryId': 'synthetic-only'}))
-        (self.connection / 'agent/agent-connection.json').write_text(json.dumps({
+        (self.connection / 'agent-connection.json').write_text(json.dumps({
             'role': 'local-agent', 'address': 'http://127.0.0.1:12345', 'serverId': 'local-synthetic-only'}))
         self.cli = self.root / 'fake-cli'
         self.cli.write_text('''#!/usr/bin/python3
@@ -79,6 +79,16 @@ print(json.dumps({'ok':code==0,'data':data})); sys.exit(code)
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             self.assertNotEqual(self.run_flow('run').returncode, 0)
         self.assertEqual((self.root / 'calls.jsonl').read_bytes(), before)
+
+    def test_active_generation_is_used_without_legacy_agent_path(self):
+        generation = 'a' * 32
+        agent = self.connection / 'connections' / generation / 'agent/agent-connection.json'
+        agent.parent.mkdir(parents=True)
+        (self.connection / 'agent-connection.json').rename(agent)
+        (self.connection / 'active.json').write_text(json.dumps({'version': 1, 'generation': generation}))
+        self.request()
+        state = json.loads((self.out / 'qa.json').read_text())
+        self.assertEqual(state['agentConnectionFile'], str(agent))
 
 
 if __name__ == '__main__':
