@@ -2,6 +2,7 @@
 #include <sddl.h>
 #include <bcrypt.h>
 #include <shellapi.h>
+#include <shlobj.h>
 #include <tlhelp32.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
@@ -353,6 +354,34 @@ int Broker() {
   environment[L"SSH_ASKPASS"] = state->helper;
   environment[L"SSH_ASKPASS_REQUIRE"] = L"force";
   environment[L"CHIYO_SSH_ASKPASS_PIPE"] = pipeName;
+  // Win32 OpenSSH exits before authentication when ProgramData is absent.
+  // The resident host deliberately uses a minimal environment: obtain this
+  // nonsecret OS directory directly instead of inheriting arbitrary variables.
+  PWSTR programData = nullptr;
+  if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_ProgramData, 0, nullptr, &programData)) && programData && *programData) {
+    environment[L"ProgramData"] = programData;
+    CoTaskMemFree(programData);
+  } else {
+    CoTaskMemFree(programData);
+    // Known Folder resolution may itself need the omitted environment value.
+    // The machine Shell Folders cache contains the configured absolute path;
+    // read it without expanding or changing any registry/environment settings.
+    DWORD bytes = 0;
+    const wchar_t* key = L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
+    if (RegGetValueW(HKEY_LOCAL_MACHINE, key, L"Common AppData", RRF_RT_REG_SZ, nullptr, nullptr, &bytes) != ERROR_SUCCESS ||
+        bytes < sizeof(wchar_t) || bytes > 65536) {
+      state->Error("ssh_program_data_unavailable"); return 2;
+    }
+    std::wstring path(bytes / sizeof(wchar_t), L'\0');
+    if (RegGetValueW(HKEY_LOCAL_MACHINE, key, L"Common AppData", RRF_RT_REG_SZ, nullptr, path.data(), &bytes) != ERROR_SUCCESS) {
+      state->Error("ssh_program_data_unavailable"); return 2;
+    }
+    path.resize(wcslen(path.c_str()));
+    if (path.size() < 3 || path[1] != L':' || (path[2] != L'\\' && path[2] != L'/')) {
+      state->Error("ssh_program_data_unavailable"); return 2;
+    }
+    environment[L"ProgramData"] = path;
+  }
   std::wstring env;
   for (const auto& pair : environment) { env += pair.first + L"=" + pair.second; env += L'\0'; }
   env += L'\0';
