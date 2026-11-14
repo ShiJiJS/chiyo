@@ -2,6 +2,8 @@
 
 平台实现基于公共合同 `dd03d22e`。Dart 入口是 `MacOSNativeBackgroundFillDriver`，实现 `NativeFillDriver`，供公共 Launcher/AppHost 注入；本目录不修改公共审批、持久操作或 CLI。Runner 注册私有 MethodChannel，使用既有签名校验的 XPC 服务；所有 AX 发现、引用和写入都只在非沙盒 helper 中执行。未正式安装应用或修改系统权限。
 
+正式构造为 `MacOSNativeBackgroundFillDriver()`，不需要异步 factory、路径、摘要或 Agent 配置。可选 `MethodChannel`、timeout 参数仅为 Owner 测试 seam。每个 AppHost 持有一个 driver；交给 `ownsNativeDriver: true` 的 AppHost 成功之前由装配方拥有，启动失败须 `dispose()`，成功后由 AppHost 关闭流程销毁。单次 prepared.close 只关闭票据，CLI 短连接结束不能销毁 resident driver。公共 Launcher 由公共会话唯一修改。
+
 ## 首批真实兼容范围
 
 `NativeBackgroundCompatibility.swift` 是可信构建维护的版本名单，当前只登记：
@@ -61,3 +63,27 @@ python3 scripts/qa/check-macos-focused-xpc.py --native-archive-target
 它只接受包含该合成归档名的唯一目标；不读取用户资料，不自动提交。需要独立前台/焦点/鼠标/剪贴板观测时加 `--dispatch-gate`，并按 `tests/DispatchObserver.swift` 驱动合成 Cover 和 gate；gate 超时不会输入。提交仍是独立 UI 步骤，之后必须比较解压内容哈希，不能只看 sent。测试生成物与一次性程序均放 build，不正式安装。
 
 本轮已验证签名的沙盒合成宿主和实际 XPC helper 的真实填写；正式完整 Flutter AppHost/CLI 装配、最终分发签名和升级后的 TCC 归属仍须在统筹冻结候选上验收。原生后台仅需要 helper 辅助功能权限，不需要键盘或录屏权限；本路径从不请求/修改系统权限。
+
+## 普通产品构建和后续完整流程
+
+普通 `lib/main.dart` Release 构建、helper 同包和签名检查：
+
+```sh
+./scripts/dev-macos.sh build --target lib/main.dart
+python3 scripts/qa/check-macos-native-product.py apps/desktop/build/macos/Build/Products/Release/info_desktop.app --output build/native-package-check.json
+```
+
+检查普通入口生成元数据、owner/worker/helper/Dart AOT 的 arm64、实际摘要和 CodeDirectory requirement、深度严格签名、helper 源码回执及 fixture 文件排除。owner 保持沙盒、worker 保持继承、helper 无额外 entitlement。开发包为本地 ad-hoc 签名，此检查不启动 App/helper、不访问库，不等于分发签名、TCC 或产品端到端验收。若公共接线尚未合并，Dart driver 可能被 AOT 树摇移除，不能把原生 bridge 已打包当作 capability 已可用。
+
+公共接线冻结后，在同一最终源码上重新构建普通 App 和 AOT `packages/info_cli/bin/chiyo.dart`，再按以下步骤执行。全过程使用新建的专属 profile，不覆盖默认库，不设置 HOME，不迁移或枚举真实库，不在 QA 中伪造批准。
+
+1. `python3 scripts/qa/macos-native-product-flow.py prepare build/native-product-flow-<unique>`。它创建私有 QA 根、合成 ZIP、唯一 profileName 和 credentialName，不启动产品。
+2. 使用普通 App 的 `--connection-profile <返回的 profileName>` 参数启动本次 build 产品（不安装）。可通过 `open -n <准确 App> --args --connection-profile <profileName>` 在执行验收时启动；准备阶段不执行。只选择本地模式、创建新合成库，在正常凭据 UI 新建返回的唯一名称、字符串值 `Synthetic-Zip-42!`、公开目录可见。该库由正常 App 使用自己的独立 libraryId/系统钥匙串项；不读取任何已有库或钥匙串项。若出现未授权的系统权限/钥匙串提示，停止并记录，不代替用户批准。
+3. 用 Archive Utility 正常打开本 QA 根的唯一合成 ZIP，保持密码框存活。明确找到该 profile 的实际 connectionDirectory（正常沙盒 App 通常位于其 Container 的 Application Support/Chiyo/online/profiles 下），向脚本传此路径；不读取管理凭据，只核对本 profile 的 local-library.json 与 Agent 连接文件。
+4. `python3 scripts/qa/macos-native-product-flow.py request <QA根> --cli <本次同源build下的chiyo绝对路径> --connection-directory <该profile绝对路径>`。脚本建立独立聊天，检查 doctor 的 native capability，仅接受一个指定合成凭据和对应 ZIP 的唯一目标，然后走真实 fill targets → fill request。pending 的 CLI exit 6 是正常等待批准。回执给出 requestId。
+5. 在普通 App 的真实审批界面核对应用、ZIP、稳定字段标记及 b1，再实际批准；确认批准后尚未填写。保持原 helper/AppHost，不重启。不得由脚本调用 Owner API 或数据库改状态。
+6. 独立观察器先做稳定/焦点切换校准，然后采样真实填写区间；该阶段不进行其他 UI 自动操作。`python3 scripts/qa/macos-native-product-flow.py run <QA根>` 只读查询真实批准后执行一次 fill run，先落盘 runAttempted 和稳定 operation ID。超时或 unknown 后只能 status，脚本拒绝再次 run，不生成替代操作。并发执行由独占 QA 锁拒绝。
+7. `python3 scripts/qa/macos-native-product-flow.py status <QA根>` 查询 operations show。必须见 executionState=filled、itemResults.b1=sent，同时独立观察器有效样本保持前台/焦点/鼠标/剪贴板。sent 仍不代表解压成功。
+8. 结束观察区间后单独在归档工具提交，再执行 `python3 scripts/qa/macos-native-product-flow.py business <QA根>`。只将本次 ZIP 解压出的固定文本与原始字节比较并记 SHA256，不读取密码控件值。
+
+脚本的 prepare 与命令格式/拒绝路径可以在接线前检查；request/run/business 的真实产品通过必须在最终接线和实际审批后另行记录。结束时正常退出该合成 AppHost/聊天，确认没有本次 helper/夹具残留，再清理专属 profile 与它自己的合成库/钥匙串项；不使用宽泛进程名退出或清理真实库。
