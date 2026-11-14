@@ -1,17 +1,20 @@
 import Foundation
 
-/// Main-thread reservations cover all scopes and owner connections in this
-/// helper process. Different random target IDs cannot hide one AX object.
+/// Reservations cover all scopes and owner connections in this helper process.
+/// Capture is main-thread-only, but final owner destruction may release on XPC
+/// invalidation threads; all shared dictionary access is synchronized. Different random target IDs cannot hide one AX object.
 private final class NativeReservations {
   static let shared = NativeReservations()
+  private let lock = NSLock()
   private var values: [UUID: MacNativeBackgroundCandidate] = [:]
   func reserve(_ id: UUID, _ candidate: MacNativeBackgroundCandidate, environment: MacNativeBackgroundEnvironment) throws {
+    lock.lock(); defer { lock.unlock() }
     guard !values.values.contains(where: { environment.sameTarget(candidate, $0) }) else {
       throw MacNativeBackgroundFailure.busy
     }
     values[id] = candidate
   }
-  func release(_ id: UUID) { values.removeValue(forKey: id) }
+  func release(_ id: UUID) { lock.lock(); defer { lock.unlock() }; values.removeValue(forKey: id) }
 }
 
 /// One authenticated private-chat connection owns this main-thread registry.

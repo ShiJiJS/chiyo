@@ -29,6 +29,17 @@ private final class MockEnvironment: MacNativeBackgroundEnvironment {
   }
 }
 
+/// Last strong owner moves to a background queue, as on an XPC invalidation.
+private final class BackgroundOwner {
+  private let lock = NSLock()
+  private var controller: MacNativeBackgroundController?
+  init(_ controller: MacNativeBackgroundController) { self.controller = controller }
+  func disconnect() {
+    lock.lock(); let released = controller; controller = nil; lock.unlock()
+    withExtendedLifetime(released) {}
+  }
+}
+
 @main enum ControllerChecks {
   static func main() throws {
     let application = try MacFocusApplication(executable: "/synthetic/app", sha256: String(repeating: "a", count: 64))
@@ -136,6 +147,35 @@ private final class MockEnvironment: MacNativeBackgroundEnvironment {
       _ = try b.capture(y, access: right)
       b.close(); a.close()
       check(env.calls == 0)
+    }
+    do {
+      let original = MockEnvironment()
+      let owner = MacNativeBackgroundAccess(scopeID: UUID(), application: application, isAuthorized: { true })
+      let other = MockEnvironment(); other.rotate = true
+      let otherOwner = MacNativeBackgroundAccess(scopeID: UUID(), application: application, isAuthorized: { true })
+      let active = MacNativeBackgroundController(environment: other, connected: { true })
+      for _ in 0..<100 {
+        var ending: MacNativeBackgroundController? = MacNativeBackgroundController(environment: original, connected: { true })
+        let target = try ending!.discover(owner)[0].candidateID
+        _ = try ending!.capture(target, access: owner) // Live lease at disconnect.
+        let background = BackgroundOwner(ending!); ending = nil
+        let started = DispatchSemaphore(value: 0), done = DispatchSemaphore(value: 0)
+        DispatchQueue.global().async { started.signal(); background.disconnect(); done.signal() }
+        started.wait()
+        for _ in 0..<8 {
+          let id = try active.discover(otherOwner)[0].candidateID
+          let lease = try active.capture(id, access: otherOwner)
+          active.closePreparation(lease)
+          try active.release(id, access: otherOwner)
+        }
+        done.wait()
+        let replacement = MacNativeBackgroundController(environment: original, connected: { true })
+        let fresh = try replacement.discover(owner)[0].candidateID
+        _ = try replacement.capture(fresh, access: owner)
+        replacement.close() // Old owner reservation was actually reclaimed.
+      }
+      active.close()
+      check(original.calls == 0 && other.calls == 0)
     }
     let data = try JSONSerialization.data(withJSONObject: ["checks": tests, "passed": true, "systemInput": false])
     print(String(data: data, encoding: .utf8)!)
