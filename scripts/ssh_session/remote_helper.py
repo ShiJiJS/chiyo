@@ -18,6 +18,7 @@ import shlex
 import shutil
 import signal
 import socket
+import stat
 import struct
 import subprocess
 import sys
@@ -42,10 +43,14 @@ def peer_pid(connection):
     return struct.unpack('i', connection.getsockopt(0, 2, 4))[0]
 
 
+def process_stat(pid):
+    with open('/proc/%d/stat' % pid, 'r') as source:
+        value = source.read()
+    return value[value.rfind(')') + 2:].split()
+
+
 def parent_pid(pid):
-    result = subprocess.run(['ps', '-o', 'ppid=', '-p', str(pid)],
-                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    return int(result.stdout.strip() or b'0')
+    return int(process_stat(pid)[1])
 
 
 def rpc(path, payload):
@@ -56,9 +61,12 @@ def rpc(path, payload):
 
 
 def process_identity(pid):
-    result = subprocess.run(['ps', '-o', 'lstart=', '-p', str(pid)],
-                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    return result.stdout.strip().decode()
+    try:
+        with open('/proc/sys/kernel/random/boot_id', 'r') as source:
+            boot = source.read().strip()
+        return boot + ':' + process_stat(pid)[19]
+    except (OSError, IndexError, ValueError):
+        return ''
 
 
 def process_alive(pid, identity):
@@ -170,7 +178,7 @@ class Broker:
             env=environment, preexec_fn=child_setup, pass_fds=(self.slave,))
         os.tcsetpgrp(self.slave, self.shell.pid)
         os.kill(self.shell.pid, signal.SIGCONT)
-        setup = "set -m\ntrap ':' INT\nchiyo_sudo() { " + shlex.quote(sys.executable)
+        setup = "set -m\n_chiyo_evaluate() { eval \"$1\"; }\ntrap 'return 130' INT\nchiyo_sudo() { " + shlex.quote(sys.executable)
         setup += ' ' + shlex.quote(self.path) + ' --sudo "$@"; }\nsudo() { chiyo_sudo "$@"; }\n'
         self.shell.stdin.write(setup.encode())
         self.shell.stdin.flush()
@@ -221,7 +229,7 @@ class Broker:
                 os.kill(self.shell.pid, signal.SIGCONT)
 
 
-        emit({'type': 'exited', 'runId': current, 'exitCode': code, 'reusable': not self.draining})
+        emit({'type': 'exited', 'runId': current, 'exitCode': code, 'reusable': not self.draining and self.shell.poll() is None})
         if self.unusable:
             emit({'type': 'unusable', 'reason': 'terminal_descendants_active'})
 
@@ -277,7 +285,7 @@ class Broker:
             self.run = run_id
             self.inputs.clear()
             self.writes.clear()
-            script = 'eval ' + shlex.quote(command)
+            script = '_chiyo_evaluate ' + shlex.quote(command)
             script += ' <' + shlex.quote(self.tty) + ' >' + shlex.quote(self.tty)
             script += ' 2>&1\nprintf "%s\\n" "$?"\n'
             self.shell.stdin.write(script.encode())
@@ -317,6 +325,8 @@ class Broker:
             if input_id in self.inputs:
                 status = 'duplicate' if self.inputs[input_id] == hashlib.sha256(data).digest() else 'input_conflict'
                 return self.reply(request, status)
+            if sum(len(value) for value in self.writes) + len(data) > 65536:
+                return self.reply(request, 'input_backpressure')
             self.inputs[input_id] = hashlib.sha256(data).digest()
             self.writes.append(memoryview(data))
             self.reply(request, 'accepted')
@@ -341,11 +351,22 @@ class Broker:
             if not self.run:
                 return self.send_client(client, {'exitCode': 125})
             sudo = self.synthetic_sudo or shutil.which('sudo')
+            if sudo:
+                sudo = os.path.realpath(sudo)
             if not sudo:
                 return self.send_client(client, {'exitCode': 127})
             info = os.stat(sudo)
-            if not self.synthetic_sudo and (info.st_uid != 0 or info.st_mode & 0o022):
+            if not self.synthetic_sudo and (info.st_uid != 0 or info.st_mode & 0o022 or not info.st_mode & stat.S_ISUID or os.path.basename(sudo) != 'sudo'):
                 return self.send_client(client, {'exitCode': 126})
+            if not self.synthetic_sudo:
+                parent = os.path.dirname(sudo)
+                while True:
+                    info = os.stat(parent)
+                    if info.st_uid != 0 or info.st_mode & 0o022:
+                        return self.send_client(client, {'exitCode': 126})
+                    if parent == '/':
+                        break
+                    parent = os.path.dirname(parent)
             argv, cwd, env = message.get('argv'), message.get('cwd'), message.get('env')
             if (not isinstance(argv, list) or not argv or
                     any(not isinstance(a, str) for a in argv) or

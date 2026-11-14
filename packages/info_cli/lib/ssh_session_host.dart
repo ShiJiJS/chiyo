@@ -249,11 +249,12 @@ class SshSessionHost {
             'credential',
             () => throw StateError('claim gate'),
             request: input['requestId'] as String,
-            materialWork: (secret) => session.credential(
+            materialWork: (secret, deliveryGuard) => session.credential(
               input['runId'] as String,
               input['operationId'] as String,
               input['actionId'] as String,
               () async => secret,
+              authorizeDelivery: deliveryGuard,
             ),
           );
         default:
@@ -424,8 +425,15 @@ class SshSessionHost {
     return base64Decode((result['materials'] as Map).values.single as String);
   }
 
-  Future<void> _authorize(String proof) async =>
-      _ok(await _call('$_base/authorize', {'privateProof': proof}));
+  Future<void> _authorize(String proof, {_Entry? credentialEntry}) async => _ok(
+    await _call('$_base/authorize', {
+      'privateProof': proof,
+      if (credentialEntry != null) ...{
+        'sshLoginSession': credentialEntry.controller,
+        'sshLoginRequestId': credentialEntry.request,
+      },
+    }),
+  );
   Future<void> _finish(
     String proof,
     Map<String, dynamic> result,
@@ -455,7 +463,8 @@ class SshSessionHost {
     String kind,
     Future<Map<String, dynamic>> Function() work, {
     String? request,
-    Future<Map<String, dynamic>> Function(List<int>)? materialWork,
+    Future<Map<String, dynamic>> Function(List<int>, Future<void> Function())?
+    materialWork,
   }) => _once(entry.controller, input['operationId'] as String, input, (
     file,
     record,
@@ -473,6 +482,10 @@ class SshSessionHost {
           ? null
           : utf8.encode(input['text'] as String).length,
     );
+    await _grant(entry.controller, entry.request);
+    if (targetRequest != entry.request) {
+      await _grant(entry.controller, targetRequest);
+    }
     final claim = await _begin(
       entry.controller,
       targetRequest,
@@ -486,10 +499,16 @@ class SshSessionHost {
     final secret = materialWork == null
         ? null
         : await _material(proof, entry.controller, targetRequest);
-    await _authorize(proof);
+    await _authorize(
+      proof,
+      credentialEntry: kind == 'credential' ? entry : null,
+    );
     final result = materialWork == null
         ? await work()
-        : await materialWork(secret!);
+        : await materialWork(
+            secret!,
+            () => _authorize(proof, credentialEntry: entry),
+          );
     await _finish(proof, result, (claim['itemIds'] as List).cast<String>());
     return {...result, 'operationId': operation};
   });
@@ -598,6 +617,8 @@ class SshSessionHost {
           record['brokerPid'] = processId;
           record['brokerIdentity'] = identity;
           await writePrivateDeviceState(file, record);
+          await _grant(controller, request);
+          await _authorize(proof);
           registered = true;
         },
         onLoginChallenge: (challenge) async {

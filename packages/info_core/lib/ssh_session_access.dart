@@ -53,6 +53,9 @@ extension SshSessionAgentAccess on AgentAccess {
       throw const CredentialUseFailure('unsupported_receiver');
     }
     final item = request.items.single;
+    if (item.decision == CredentialBatchItemDecision.revoked) {
+      throw const CredentialUseFailure('grant_revoked');
+    }
     _service._requireBatchItem(request, item);
     return {
       'status': 'ok',

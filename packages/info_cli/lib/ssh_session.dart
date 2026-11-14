@@ -27,15 +27,15 @@ class SshSession {
     required this.authorize,
     Iterable<List<int>> secrets = const [],
     this.outputLimit = 1024 * 1024,
+    this.responseTimeout = const Duration(seconds: 10),
   }) {
     for (final secret in secrets) {
       registerSecret(secret);
     }
     transport.output.listen(_receive, onError: (_) => _lost(), onDone: _lost);
-    transport.diagnostics.listen(
-      (bytes) => _append(_diagnosticFilter.add(bytes)),
-      onError: (_) {},
-    );
+    transport.diagnostics.listen((bytes) {
+      if (!_transportEnded) _append(_diagnosticFilter.add(bytes));
+    }, onError: (_) {});
     unawaited(transport.exitCode.then((_) => _lost(), onError: (_) => _lost()));
   }
   final String id;
@@ -43,17 +43,18 @@ class SshSession {
   final SshTransportProcess transport;
   final SshAuthorizationCheck authorize;
   final int outputLimit;
+  final Duration responseTimeout;
   final _ready = Completer<void>();
   final _pending = <String, Completer<Map<String, dynamic>>>{};
   final _operations =
       <String, ({String digest, Map<String, dynamic> result})>{};
   final _runs = <String, _Run>{};
-  final _secrets = <List<int>>[];
+  final _secretDigests = <String>{};
   final _chunks = <({int cursor, String text, int size, String? runId})>[];
   final _terminalBytes = <int>[];
   List<int> _frame = [];
-  CredentialOutputFilter _filter = CredentialOutputFilter(const []);
-  CredentialOutputFilter _diagnosticFilter = CredentialOutputFilter(const []);
+  final CredentialOutputFilter _filter = CredentialOutputFilter(const []);
+  final CredentialOutputFilter _diagnosticFilter = CredentialOutputFilter(const []);
   Future<void> _writing = Future.value();
   String state = 'opening';
   String? closeReason;
@@ -69,12 +70,12 @@ class SshSession {
   }
 
   void registerSecret(List<int> secret) {
-    if (secret.isEmpty) return;
-    _append(_filter.finish());
-    _append(_diagnosticFilter.finish());
-    _secrets.add(List<int>.of(secret));
-    _filter = CredentialOutputFilter(_secrets);
-    _diagnosticFilter = CredentialOutputFilter(_secrets);
+    if (secret.isEmpty ||
+        !_secretDigests.add(sha256.convert(secret).toString())) {
+      return;
+    }
+    _filter.addSecret(secret);
+    _diagnosticFilter.addSecret(secret);
   }
 
   void _append(List<int> bytes, {String? runId}) {
@@ -120,6 +121,7 @@ class SshSession {
   }
 
   void _receive(List<int> bytes) {
+    if (_transportEnded) return;
     try {
       for (final byte in bytes) {
         if (byte != 10) {
@@ -163,8 +165,6 @@ class SshSession {
       case 'exited':
         final run = _runs[value['runId']];
         if (run == null || run != _current) throw const FormatException();
-        _append(_filter.finish(), runId: run.id);
-        _filter = CredentialOutputFilter(_secrets);
         run.state = 'exited';
         run.exitCode = value['exitCode'] as int;
         run.receiver = null;
@@ -213,7 +213,10 @@ class SshSession {
     _pending.clear();
   }
 
-  Future<Map<String, dynamic>> _send(Map<String, Object?> value) async {
+  Future<Map<String, dynamic>> _send(
+    Map<String, Object?> value, {
+    Future<void> Function()? authorizeDelivery,
+  }) async {
     if (_transportEnded) return {'status': 'operation_unknown'};
     final key = 'c${++_counter}';
     final response = Completer<Map<String, dynamic>>();
@@ -223,6 +226,7 @@ class SshSession {
       final op = value['op'];
       if (op == 'run' || op == 'input' || op == 'credential') {
         await authorize(op as String);
+        if (authorizeDelivery != null) await authorizeDelivery();
         final stale =
             state != 'busy' ||
             _current?.id != value['runId'] ||
@@ -256,7 +260,7 @@ class SshSession {
       }
     }
     return response.future.timeout(
-      const Duration(seconds: 10),
+      responseTimeout,
       onTimeout: () {
         _pending.remove(key);
         return {'status': 'operation_unknown'};
@@ -339,10 +343,10 @@ class SshSession {
       if (result['status'] == 'accepted' && run.state == 'accepted') {
         run.state = 'running';
       }
-      if (result['status'] != 'accepted' && _current == run) {
-        run.state = result['status'] == 'operation_unknown'
-            ? 'unknown'
-            : 'failed';
+      if (result['status'] == 'operation_unknown' && _current == run) {
+        run.state = 'unknown';
+      } else if (result['status'] != 'accepted' && _current == run) {
+        run.state = 'failed';
         _current = null;
         if (state == 'busy') state = 'ready';
       }
@@ -385,8 +389,9 @@ class SshSession {
     String runId,
     String operation,
     String actionId,
-    Future<List<int>> Function() claim,
-  ) async {
+    Future<List<int>> Function() claim, {
+    required Future<void> Function() authorizeDelivery,
+  }) async {
     final old = _previous(operation, ['credential', runId, actionId]);
     if (old != null) return old;
     await authorize('credential');
@@ -409,7 +414,7 @@ class SshSession {
       'runId': runId,
       'actionId': actionId,
       'data': base64Encode(secret),
-    });
+    }, authorizeDelivery: authorizeDelivery);
     if (result['status'] == 'delivered') _current?.receiver = null;
     return _remember(operation, result);
   }
