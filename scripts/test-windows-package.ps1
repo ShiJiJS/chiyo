@@ -1,16 +1,21 @@
 param(
     [Parameter(Mandatory = $true)][string]$ArchivePath,
-    [Parameter(Mandatory = $true)][string]$DartExecutable
+    [string]$DartExecutable,
+    [switch]$RequireNativeBackgroundFill,
+    [switch]$PayloadOnly
 )
 
 # Developer-side headless verification. Never starts the desktop executable.
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-if (-not (Test-Path -LiteralPath $DartExecutable -PathType Leaf) -or
-    [IO.Path]::GetExtension($DartExecutable) -ine '.exe') {
-    throw 'Use the Dart SDK executable (cache/dart-sdk/bin/dart.exe), not the Flutter dart.bat wrapper.'
+$dart = $null
+if (-not $PayloadOnly) {
+    if (-not $DartExecutable -or -not (Test-Path -LiteralPath $DartExecutable -PathType Leaf) -or
+        [IO.Path]::GetExtension($DartExecutable) -ine '.exe') {
+        throw 'Use the Dart SDK executable (cache/dart-sdk/bin/dart.exe), not the Flutter dart.bat wrapper.'
+    }
+    $dart = (Get-Item -LiteralPath $DartExecutable).FullName
 }
-$dart = (Get-Item -LiteralPath $DartExecutable).FullName
 $archive = (Get-Item -LiteralPath $ArchivePath).FullName
 $expectedArchive = ((Get-Content -LiteralPath "$archive.sha256" -Raw).Split(' ')[0]).Trim()
 if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedArchive) {
@@ -51,8 +56,46 @@ try {
             (Get-FileHash -LiteralPath $focusPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $focus.sha256) {
             throw 'Focused input helper checksum mismatch.'
         }
-        foreach ($binary in Get-ChildItem -LiteralPath (Join-Path $payload 'app') -Filter '*.exe' -Recurse) {
-            if ($binary.Name -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')) {
+    }
+    # Keep format 2 readable by existing Apps. The added block records build
+    # provenance; only the runner's compiled identity grants runtime trust.
+    $nativeProperty = $manifest.PSObject.Properties['nativeBackgroundFill']
+    $nativePath = Join-Path $payload 'app/info-native-background-broker.exe'
+    if ($RequireNativeBackgroundFill -and -not $nativeProperty) {
+        throw 'Missing native background helper provenance.'
+    }
+    if (-not $nativeProperty -and (Test-Path -LiteralPath $nativePath)) {
+        throw 'Missing native background helper provenance.'
+    }
+    if ($nativeProperty) {
+        $native = $nativeProperty.Value
+        $hasFields = $null -ne $native
+        foreach ($field in @('helperProtocol', 'helper', 'sha256', 'trustSource')) {
+            if ($null -eq $native -or -not $native.PSObject.Properties[$field]) { $hasFields = $false }
+        }
+        if (-not $hasFields -or $manifest.format -ne 2 -or
+            $native.helperProtocol -ne 1 -or $native.helper -cne 'app/info-native-background-broker.exe' -or
+            $native.sha256 -isnot [string] -or $native.sha256 -cnotmatch '^[0-9a-f]{64}$' -or
+            $native.trustSource -cne 'SHA-256 compiled into the native desktop runner; this manifest is provenance only') {
+            throw 'Invalid native background helper provenance.'
+        }
+        if (-not (Test-Path -LiteralPath $nativePath -PathType Leaf) -or
+            (Get-FileHash -LiteralPath $nativePath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $native.sha256) {
+            throw 'Native background helper checksum mismatch.'
+        }
+        $nativeEntries = @($manifest.files | Where-Object { $_.path -ieq 'app/info-native-background-broker.exe' })
+        if ($nativeEntries.Count -ne 1 -or $nativeEntries[0].path -cne 'app/info-native-background-broker.exe' -or
+            $nativeEntries[0].sha256 -cne $native.sha256 -or $nativeEntries[0].bytes -ne (Get-Item -LiteralPath $nativePath).Length) {
+            throw 'Native background helper must have one matching files entry.'
+        }
+    }
+    if ($manifest.format -eq 2) {
+        $app = Join-Path $payload 'app'
+        $allowedExecutables = @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')
+        if ($nativeProperty) { $allowedExecutables += 'info-native-background-broker.exe' }
+        foreach ($binary in Get-ChildItem -LiteralPath $app -Filter '*.exe' -Recurse) {
+            $relativeBinary = $binary.FullName.Substring($app.Length + 1).Replace('\', '/')
+            if ($relativeBinary -notin $allowedExecutables) {
                 throw 'Test or unknown executable in desktop payload.'
             }
         }
@@ -87,6 +130,10 @@ try {
     }
     if (-not (Test-Path -LiteralPath (Join-Path $payload 'cli/template/references/information-files.md') -PathType Leaf)) {
         throw 'The extracted SDK-free bundle is missing the information-files Skill reference.'
+    }
+    if ($PayloadOnly) {
+        Write-Host 'PASS: extracted payload integrity only; no executables started and no full acceptance receipt produced.'
+        return
     }
     # Restrict only this process and its children. Do not change the user's PATH.
     $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot;$env:SystemRoot\System32\WindowsPowerShell\v1.0"

@@ -12,6 +12,10 @@ Windows x64 开发包包含完整桌面程序、CLI、worker、固定 GH/AWS 工
 
 首次缺少缓存依赖时去掉 `-Offline`；版本和摘要仍按锁定配置核对。`-PackageOnly` 只产包。脚本验证归档和解包载荷，生成 ZIP、SHA256、manifest 与核对回执；这些结果不替代真实桌面、Codex 宿主或干净机器验收。
 
+原生后台填写 helper 随包放在 `app/info-native-background-broker.exe`；原生测试夹具和外部 QA 软件不进入 App 载荷。打包必须核对 helper 实际 SHA256 与当前 Release 构建的 `native-background-fill-identity/Release/native_background_fill_identity.sha256` 一致。manifest 保持 format 2，新增 `nativeBackgroundFill` 记录协议、固定相对路径、摘要与来源说明，并在 `files` 中记录同一文件的长度和摘要。该记录只用于来源核对；运行时信任仍来自 runner 编入的固定路径和摘要，不读取构建 sidecar。
+
+`test-windows-package.ps1 -ArchivePath <ZIP> -PayloadOnly -RequireNativeBackgroundFill` 可单独检查归档、解包文件和 helper 来源，不启动载荷程序，不生成完整验收回执。正常打包不使用 `-PayloadOnly`，仍执行 SDK-free CLI 与存储检查。独立核对旧版包时可省略 `-RequireNativeBackgroundFill`；新包构建强制要求原生 helper，载荷含 helper 却缺少来源记录时也拒绝。
+
 ## 本机安装与清理
 
 Windows 固定安装位置为 `C:\Software\AgentInfoManage`：`current` 保存完整程序，`package` 保存当前版本 ZIP、SHA 和安装核对信息。桌面“知予”快捷方式指向 `current/app/info_desktop.exe`。

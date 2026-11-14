@@ -59,6 +59,7 @@ try {
     if ($Offline) { $checkArguments.Offline = $true }
     & (Join-Path $PSScriptRoot 'check.ps1') @checkArguments
     & (Join-Path $PSScriptRoot 'tests/test_windows_cli_registration.ps1')
+    & (Join-Path $PSScriptRoot 'tests/test_windows_native_background_package.ps1')
 
     # Refuse changes made while checks were running, including new files.
     Assert-CleanSources
@@ -84,7 +85,7 @@ try {
     if ($cipherLoader.Count -ne 2 -or $cipherLoader[0] -ne 'absolute' -or $cipherLoader[1] -ne 'sqlcipher.dll') {
         throw 'The release SQLCipher loader must resolve the bundled DLL, without a build-machine path.'
     }
-    foreach ($required in @('info_desktop.exe', 'info-focus-broker.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
+    foreach ($required in @('info_desktop.exe', 'info-focus-broker.exe', 'info-native-background-broker.exe', 'flutter_windows.dll', 'sqlcipher.dll', 'data/app.so', 'data/icudtl.dat')) {
         if (-not (Test-Path -LiteralPath (Join-Path $app $required))) { throw "Missing desktop payload: $required" }
     }
     $focusDigestPath = Join-Path $projectRoot 'apps/desktop/build/windows/x64/focused-input-identity/Release/focused_fill_identity.sha256'
@@ -93,8 +94,15 @@ try {
     if ($focusDigest -notmatch '^[0-9a-f]{64}$' -or $focusDigest -ne $actualFocusDigest) {
         throw 'The packaged focused input helper differs from the runner build identity.'
     }
+    $nativeDigestPath = Join-Path $projectRoot 'apps/desktop/build/windows/x64/native-background-fill-identity/Release/native_background_fill_identity.sha256'
+    $nativeDigest = ([IO.File]::ReadAllText($nativeDigestPath)).Trim()
+    $actualNativeDigest = (Get-FileHash -LiteralPath (Join-Path $app 'info-native-background-broker.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($nativeDigest -cnotmatch '^[0-9a-f]{64}$' -or $nativeDigest -cne $actualNativeDigest) {
+        throw 'The packaged native background helper differs from the runner build identity.'
+    }
     foreach ($binary in Get-ChildItem -LiteralPath $app -Filter '*.exe' -Recurse) {
-        if ($binary.Name -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')) {
+        $relativeBinary = $binary.FullName.Substring($app.Length + 1).Replace('\', '/')
+        if ($relativeBinary -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-native-background-broker.exe', 'info-runtime-worker.exe')) {
             throw "Unexpected executable in desktop payload: $($binary.Name)"
         }
     }
@@ -217,6 +225,10 @@ try {
             helperProtocol = 1; helper = 'app/info-focus-broker.exe'; sha256 = $actualFocusDigest
             trustSource = 'SHA-256 compiled into the native desktop runner; this manifest is provenance only'
         }
+        nativeBackgroundFill = [ordered]@{
+            helperProtocol = 1; helper = 'app/info-native-background-broker.exe'; sha256 = $actualNativeDigest
+            trustSource = 'SHA-256 compiled into the native desktop runner; this manifest is provenance only'
+        }
         verification = 'Full headless check.ps1 and Windows release compilation; no desktop/Codex/clean-machine acceptance implied'
         files = $files
     })
@@ -224,7 +236,7 @@ try {
     Compress-Archive -LiteralPath $payload -DestinationPath $archive -CompressionLevel Optimal
     $digest = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText("$archive.sha256", "$digest  $([IO.Path]::GetFileName($archive))`n", $utf8)
-    & (Join-Path $PSScriptRoot 'test-windows-package.ps1') -ArchivePath $archive -DartExecutable $dart
+    & (Join-Path $PSScriptRoot 'test-windows-package.ps1') -ArchivePath $archive -DartExecutable $dart -RequireNativeBackgroundFill
     Assert-CleanSources
     if ((git rev-parse HEAD).Trim() -ne $commit) {
         throw 'Sources changed during extracted verification; the archive is not a verified delivery.'
