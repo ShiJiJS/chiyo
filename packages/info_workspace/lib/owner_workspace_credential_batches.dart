@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart' as core;
+
 import 'workspace_source.dart';
 
 /// The same inbox/selectable scope contract as ordinary requests. All decisions
@@ -127,6 +129,9 @@ class OwnerWorkspaceCredentialBatches {
   }
 
   static String destinationLabel(core.CredentialBatchDestination d) {
+    if (d.native case final target?) {
+      return '原生后台填写 · ${target.appName}\n窗口：${target.windowTitle}\n密码框：${target.fieldLabel}\n${target.application.executable}';
+    }
     if (d.program case final program?) {
       final binding = program.binding;
       final position = binding.location == 'stdin'

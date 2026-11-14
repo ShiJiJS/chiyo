@@ -36,6 +36,7 @@ class StorageDesktopLauncher extends StatefulWidget {
     this.platform,
     this.openLocal,
     this.focusedFillDriver,
+    this.nativeFillDriver,
   });
 
   final PrivateConnectionProfileStore profiles;
@@ -45,6 +46,7 @@ class StorageDesktopLauncher extends StatefulWidget {
 
   /// Owner-side test seam. Agent commands cannot select a driver or helper.
   final FocusedFillDriver? focusedFillDriver;
+  final NativeFillDriver? nativeFillDriver;
   final Future<DesktopLibrary> Function(LocalLibraryConfiguration, bool)?
   openLocal;
 
@@ -99,6 +101,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       final batches = await DeviceCredentialBatchHost.start(
         directory: Directory(widget.profiles.directory),
         driver: driver,
+        nativeDriver: widget.nativeFillDriver,
         egoExecutable: browser,
       );
       if (_hostDisposed) {

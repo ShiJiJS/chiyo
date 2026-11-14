@@ -180,6 +180,10 @@ class ChiyoCommandLine {
       help: '本机 Chrome 控制地址，例如 http://127.0.0.1:9222。',
     );
     _command('fill', '申请并执行指定网页表单或本机密码框填写。');
+    final targets = _command('fill targets', '发现指定应用的原生后台密码框，不读取值或改变焦点。');
+    targets.addOption('via', allowed: ['native']);
+    targets.addOption('app', help: '应用过滤条件；Mac bundle ID 或 Windows 程序完整路径。');
+    targets.addOption('window', help: '同一 helper 返回的不透明窗口 ID。');
     final fill = _command(
       'fill request',
       '检查目标并提交申请；保存计划，批准不自动填写。',
@@ -191,9 +195,10 @@ class ChiyoCommandLine {
     _operation(fill);
     fill.addOption(
       'via',
-      allowed: ['ego', 'chrome', 'focus'],
+      allowed: ['ego', 'chrome', 'focus', 'native'],
       help: '选择实际填写途径，不选择内部脚本。',
     );
+    fill.addOption('target', help: 'fill targets 返回的原生目标 ID，不使用 PID、句柄或坐标。');
     for (final key in [
       'space',
       'page',
@@ -260,7 +265,7 @@ class ChiyoCommandLine {
     final doctor = _command('doctor', '检查连接和当前电脑能力；不弹权限、不申请资料、不执行填写。');
     doctor.addOption(
       'via',
-      allowed: ['ego', 'chrome', 'focus'],
+      allowed: ['ego', 'chrome', 'focus', 'native'],
       help: '检查特定填写途径。',
     );
     doctor.addOption('browser', help: '检查 Chrome 时明确提供本机控制地址。');
@@ -513,12 +518,16 @@ class ChiyoCommandLine {
       for (final key in ['credential', 'purpose', 'reason']) {
         required(key);
       }
+    } else if (path == 'fill targets') {
+      required('via');
+      required('app');
     } else if (path == 'fill request') {
       const single = [
         'credential',
         'version',
         'purpose',
         'via',
+        'target',
         'space',
         'page',
         'browser',
@@ -537,7 +546,11 @@ class ChiyoCommandLine {
         required(key);
       }
       final via = options['via'];
-      if (via == 'focus') {
+      if (via == 'focus' || via == 'native') {
+        if (via == 'native') required('target');
+        if (via == 'focus' && options['target'] != null) {
+          throw const ChiyoUsageFailure('focus 不接受原生后台目标 ID。');
+        }
         if ([
           'space',
           'page',
@@ -550,6 +563,9 @@ class ChiyoCommandLine {
           throw const ChiyoUsageFailure('本机密码框填写不能使用网页表单参数。');
         }
       } else {
+        if (options['target'] != null) {
+          throw const ChiyoUsageFailure('网页填写不接受原生后台目标 ID。');
+        }
         for (final key in ['url', 'form', 'selector']) {
           required(key);
         }

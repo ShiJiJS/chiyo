@@ -543,6 +543,12 @@ class ChiyoCli {
         });
       case 'fill request':
         return _requestFill(i);
+      case 'fill targets':
+        return _batchClient.execute(_activeContext.secret, {
+          'command': 'native-targets',
+          'appId': _required(i, 'app'),
+          if (o['window'] != null) 'windowId': o['window'],
+        });
       case 'fill run':
         return _runFill(i);
       case 'exec request':
@@ -664,6 +670,8 @@ class ChiyoCli {
     };
     final batchSupported = (capabilities['capabilities'] as List? ?? [])
         .contains('credential-batches.v3');
+    final nativeSupported = (capabilities['capabilities'] as List? ?? [])
+        .contains('credential-native-fill.v1');
     final host = batchSupported && context.connection != null
         ? await _batchClient.execute(null, {'command': 'capabilities'})
         : <String, dynamic>{'status': 'unsupported_capability'};
@@ -673,12 +681,12 @@ class ChiyoCli {
       'supported': batchSupported,
       'appAvailable': appAvailable,
       'targetChecked': false,
-      for (final via in ['ego', 'chrome', 'focus'])
+      for (final via in ['ego', 'chrome', 'focus', 'native'])
         via: {
-          'supported': batchSupported,
+          'supported': batchSupported && (via != 'native' || nativeSupported),
           'available': appAvailable && providers.contains(via),
           'targetReady': null,
-          'reason': !batchSupported
+          'reason': !batchSupported || via == 'native' && !nativeSupported
               ? 'update_required'
               : !appAvailable
               ? 'matching_app_unavailable'
@@ -796,14 +804,20 @@ class ChiyoCli {
           'operations retry',
           'files status',
         }.contains(i.path);
-    final code = querySucceeded
+    final unknownExecution =
+        executing &&
+        status == 'ok' &&
+        (data['fillState'] ?? data['executionState']) == 'unknown';
+    final code = querySucceeded || unknownExecution
         ? status
         : data['errorCode'] as String? ?? status;
     final int? failure = switch (code) {
       'unsupported_capability' ||
       'unsupported_protocol' ||
       'browser_unavailable' ||
+      'session_unavailable' ||
       'unsupported_tool_version' when status != 'ok' => 3,
+      'target_unavailable' || 'destination_changed' when status != 'ok' => 5,
       'operation_conflict' ||
       'credential_version_changed' ||
       'template_changed' => 8,

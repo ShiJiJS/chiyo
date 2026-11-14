@@ -48,6 +48,7 @@ void main() {
       ['--help'],
       ['fill', '--help'],
       ['fill', 'request', '--help'],
+      ['fill', 'targets', '--help'],
       ['exec', 'request', '--help'],
       ['requests', 'wait', '--help'],
       ['templates', 'examples', '--help'],

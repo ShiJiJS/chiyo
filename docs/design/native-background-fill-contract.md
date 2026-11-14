@@ -29,13 +29,13 @@ chiyo operations show OPERATION_ID --json
 
 ```json
 {
-  "targetId": "opaque-random-id",
-  "helperInstanceId": "opaque-helper-instance",
+  "targetId": "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
+  "helperInstanceId": "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH",
   "platform": "macos",
-  "application": {"executable": "/Applications/Example.app/Contents/MacOS/Example", "sha256": "64 lowercase hex digits"},
+  "application": {"executable": "/Applications/Example.app/Contents/MacOS/Example", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
   "appId": "example.bundle.id",
   "appName": "Example",
-  "windowId": "opaque-window-id",
+  "windowId": "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
   "windowTitle": "登录",
   "fieldLabel": "密码",
   "controlKind": "appkit_secure_text"
@@ -109,11 +109,11 @@ helper 为每次运行生成新的 `helperInstanceId`；targetId 不跨 helper �
 
 复用 `CredentialBatchDestination` 增加 `native` 目标类型；不得把 native 存为 focus application。批准展示 App、窗口、字段和后台 setter 方式，仍固定凭据版本、原设备、原私密聊天和逐项期限。服务器保管批准和持久操作，helper 仅在原设备执行。
 
-执行依次核对原批准、重新准备所有目标、持久登记稳定操作、领取全部材料、在每个 setter 前重新授权，再调用对应 prepared setter。任何必要项不可用则不开始输入；已经完成前面项后失败使用现有 `partial`。busy 按原固定原生目标隔离，不按当前前台焦点隔离。使用现有未知/部分结果核对机制，未知结果不重放，不靠新操作编号绕过。
+执行依次核对原批准、重新准备所有目标、持久登记稳定操作、领取全部材料、在每个 setter 前重新授权，再调用对应 prepared setter。任何必要项不可用则不开始输入；已经完成前面项后失败使用现有 `partial`。busy 按原固定原生目标隔离，不按当前前台焦点隔离。不同 scope 或发现项若指向同一底层控件，helper 必须按持有的原生对象身份拒绝并发，不仅比较 targetId 字符串；不得排队到稍后的控件。使用现有未知/部分结果核对机制，未知结果不重放，不靠新操作编号绕过。
 
 CLI/AppHost/服务器显式协商 `credential-native-fill.v1`，且继续要求 `credential-batches.v3`。未接入 native 驱动的平台不广告执行能力，发现/申请返回不支持；旧服务缺能力时在发现或申请检查前停止，不降级。
 
-native 快照进入既有加密申请与操作。第一次保存新事实提高资料库格式；含 native 历史的备份/同步使用新的内容格式，旧读取器明确拒绝。普通旧资料不因安装新版升级。可移植历史仅供查看，不携带 helper 引用、恢复私密聊天或重新填值的能力。具体版本号在公共持久测试中冻结。
+native 快照进入既有加密申请与操作。第一次保存新事实要求资料库格式 69；含 native 目标快照的备份/同步使用内容格式 30，复用既有批次表，旧读取器明确拒绝。只有既有结构的操作结果或删除编号、没有目标快照的增量仍可使用原结构内容版本；接收端必须已持有对应的只读父申请，不能从孤立操作恢复 native 批准。普通旧资料不因安装新版升级。可移植历史仅供查看，不携带 helper 引用、恢复私密聊天或重新填值的能力。批次外层沿用 filled 表示本批流程结束，native 逐项结果只返回 sent；审批/历史文案据此说明 setter 接受，不宣称登录或业务识别成功。
 
 ## 首个可交付检查点
 

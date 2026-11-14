@@ -400,6 +400,8 @@ class AgentProtocol {
             'agent-record-queries.v1',
             if (enableCredentialBatches && _agent.credentialBatchesAvailable)
               'credential-batches.v3',
+            if (enableCredentialBatches && _agent.credentialBatchesAvailable)
+              'credential-native-fill.v1',
             if (enableCredentialBatches && _agent.credentialProgramsAvailable)
               'credential-programs.v3',
             'credential-catalog-search.v1',
