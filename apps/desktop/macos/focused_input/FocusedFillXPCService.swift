@@ -46,14 +46,14 @@ final class MacFocusPrivateService: NSObject, NSXPCListenerDelegate {
     connection.invalidationHandler = ended
     // Interruption is terminal, even if XPC could reconnect the service later.
     connection.interruptionHandler = { [weak connection] in ended(); connection?.invalidate() }
-    connection.exportedInterface = NSXPCInterface(with: MacFocusPrivateProtocol.self)
+    connection.exportedInterface = NSXPCInterface(with: MacNativeBackgroundPrivateProtocol.self)
     connection.exportedObject = session
     connection.resume()
     return true
   }
 }
 
-private final class MacFocusPrivateSession: NSObject, MacFocusPrivateProtocol {
+private final class MacFocusPrivateSession: NSObject, MacNativeBackgroundPrivateProtocol {
   private weak var connection: NSXPCConnection?
   private let owner: MacFocusProcessWitness
   private let supportedSession: (MacFocusSessionFacts) -> Bool
@@ -62,6 +62,7 @@ private final class MacFocusPrivateSession: NSObject, MacFocusPrivateProtocol {
   private var controller: MacFocusedFillController?
   private var pending = false
   private var ownerExit: DispatchSourceProcess?
+  private var native: MacNativeBackgroundWire?
 
   init(connection: NSXPCConnection, owner: MacFocusProcessWitness,
        supportedSession: @escaping (MacFocusSessionFacts) -> Bool) {
@@ -84,6 +85,32 @@ private final class MacFocusPrivateSession: NSObject, MacFocusPrivateProtocol {
     state.unlock()
     ownerExit?.cancel()
     active?.close()
+    DispatchQueue.main.async { [weak self] in self?.native?.close(); self?.native = nil }
+  }
+
+  func nativeRequest(_ request: Data, reply: @escaping (Data) -> Void) {
+    let received = ProcessInfo.processInfo.systemUptime
+    state.lock()
+    guard !ended, !pending, request.count <= 131072 else {
+      let code = ended ? "session_unavailable" : "busy"
+      state.unlock()
+      reply((try? JSONSerialization.data(withJSONObject: ["format": 1, "state": "refused", "errorCode": code])) ?? Data())
+      return
+    }
+    pending = true
+    state.unlock()
+    DispatchQueue.main.async { [self] in
+      let result: Data
+      if live() && ProcessInfo.processInfo.systemUptime - received < 0.15 {
+        if native == nil { native = MacNativeBackgroundWire(profiles: MacNativeBackgroundCompatibility.profiles,
+          live: { [weak self] in self?.live() ?? false }) }
+        result = native!.handle(request)
+      } else {
+        result = (try? JSONSerialization.data(withJSONObject: ["format": 1, "state": "refused", "errorCode": "session_unavailable"])) ?? Data()
+      }
+      state.lock(); pending = false; state.unlock()
+      reply(result)
+    }
   }
 
   private func live() -> Bool {

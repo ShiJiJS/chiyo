@@ -7,6 +7,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
   private var textEditingMenu: NativeTextEditingMenu?
   private var secretEditor: NativeSecretEditor?
   private var textFieldAccessibility: NativeTextFieldAccessibility?
+  private var nativeBackgroundFill: MacNativeBackgroundBridge?
   private var focusedFill: MacFocusedFillBridge?
   private var desktopChannel: FlutterMethodChannel?
   private var statusItem: NSStatusItem?
@@ -86,6 +87,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
     // Registers a local owner channel only. Permission checks and filling run
     // on demand; requesting OS permission requires the explicit Settings action.
     focusedFill = MacFocusedFillBridge(messenger: flutterViewController.engine.binaryMessenger)
+    nativeBackgroundFill = MacNativeBackgroundBridge(messenger: flutterViewController.engine.binaryMessenger)
     textFieldAccessibility = NativeTextFieldAccessibility(view: flutterViewController.view)
     let accessibility = FlutterMethodChannel(name: "agent_info_manage/text_field_accessibility",
                                              binaryMessenger: flutterViewController.engine.binaryMessenger)
@@ -411,6 +413,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate, UNUserNotificationCenterDel
         }
       case "terminate":
         self.focusedFill?.close()
+        self.nativeBackgroundFill?.close()
         self.textFieldAccessibility?.update([] as [[String: Any]])
         self.desktopReady = false
         self.navigationEnabled = false

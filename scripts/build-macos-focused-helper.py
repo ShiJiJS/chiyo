@@ -23,6 +23,10 @@ EXECUTABLE = "AgentInfoFocusedFill"
 SOURCE_NAMES = ["FocusedFillContract.swift", "FocusProcessIdentity.swift", "FocusedFillController.swift",
                 "FocusSerialGate.swift", "SystemFocusEnvironment.swift", "FocusedFillXPC.swift",
                 "FocusedFillXPCService.swift", "ServiceMain.swift"]
+NATIVE = SOURCE.parent / "native_background"
+NATIVE_NAMES = ["NativeBackgroundTypes.swift", "NativeBackgroundController.swift",
+                "SystemNativeBackgroundEnvironment.swift", "NativeBackgroundWire.swift", "NativeBackgroundXPC.swift",
+                "NativeBackgroundCompatibility.swift"]
 
 
 def digest(path):
@@ -76,7 +80,8 @@ def build(requested):
         raise ValueError("Build the candidate on ARM64 macOS with Xcode")
     output = output_path(requested)
     info = service_info()
-    inputs = [SOURCE / name for name in SOURCE_NAMES + ["ServiceInfo.plist"]] + [Path(__file__).resolve()]
+    native = [NATIVE / name for name in NATIVE_NAMES]
+    inputs = [SOURCE / name for name in SOURCE_NAMES + ["ServiceInfo.plist"]] + native + [Path(__file__).resolve()]
     source_hashes = {str(path.relative_to(ROOT)): digest(path) for path in inputs}
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     tracked = subprocess.run(["git", "ls-files", "--error-unmatch", *source_hashes], cwd=ROOT,
@@ -114,7 +119,7 @@ def build(requested):
             run("compile", ["xcrun", "swiftc", "-O", "-target", "arm64-apple-macos14.0",
                             "-swift-version", "5", "-warnings-as-errors", "-module-name", EXECUTABLE,
                             "-module-cache-path", str(Path(work) / "modules"),
-                            *[str(SOURCE / name) for name in SOURCE_NAMES], "-o", str(program)])
+                            *[str(SOURCE / name) for name in SOURCE_NAMES], *map(str, native), "-o", str(program)])
         run("sign", ["/usr/bin/codesign", "--force", "--sign", "-", "--timestamp=none", str(bundle)])
         run("signature-check", ["/usr/bin/codesign", "--verify", "--strict", "--verbose=2", str(bundle)])
         architectures = run("architecture", ["/usr/bin/lipo", "-archs", str(program)]).split()
