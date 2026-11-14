@@ -195,6 +195,8 @@ class OwnerWorkspaceSource
 
   /// Also used after native resume. No body, capability or key is retained in
   /// the observation signature, and it is never written to disk or logs.
+  /// Operation read timestamps are excluded: only effective state changes
+  /// (including elapsed deadlines) should invalidate the workspace.
   void refreshFromOwner() {
     if (_disposed) return;
     String observed;
@@ -277,11 +279,12 @@ class OwnerWorkspaceSource
               ],
               [
                 for (final op in owner.credentialBatchOperations)
-                  owner.credentialBatchOperationView(op),
+                  owner.credentialBatchOperationView(op)..remove('observedAt'),
               ],
               [
                 for (final operation in owner.credentialProgramOperations)
-                  owner.credentialProgramOperationView(operation),
+                  owner.credentialProgramOperationView(operation)
+                    ..remove('observedAt'),
               ],
               [
                 for (final e in owner.credentialExecutions)

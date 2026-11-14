@@ -9,6 +9,44 @@ import 'support/device_credential_fixture.dart';
 import '../../../packages/info_core/test_support/operation_history.dart';
 
 void main() {
+  for (final program in [false, true]) {
+    test(
+      'server update tokens ignore read time but track ${program ? 'program' : 'fill'} state',
+      () async {
+        var now = DateTime.utc(2026, 11, 14);
+        final f = await DeviceCredentialFixture.create(clock: () => now);
+        addTearDown(f.dispose);
+        final history = OperationHistoryFixture(f.runtime.service, f.repo, now);
+        await f.runtime.run(() => history.open(program: program, count: 1));
+        Future<List<Object?>> observations() async => [
+          (await f.owner.request(
+            'GET',
+            '/v1/owner/updates',
+          ))['workspaceObservation'],
+          (await f.owner.request('GET', '/v1/server'))['workspaceObservation'],
+        ];
+        final before = await observations();
+        now = now.add(const Duration(seconds: 1));
+        expect(await observations(), before);
+        await f.runtime.run(() => history.append('completed-operation'));
+        final pending = await observations();
+        for (var i = 0; i < before.length; i++) {
+          expect(pending[i], isNot(before[i]));
+        }
+        now = now.add(const Duration(seconds: 1));
+        expect(await observations(), pending);
+        now = now.add(const Duration(minutes: 1));
+        final expired = await observations();
+        expect(
+          expired,
+          pending,
+          reason: 'Completed operations stay unchanged across poll intervals',
+        );
+        now = now.add(const Duration(seconds: 1));
+        expect(await observations(), expired);
+      },
+    );
+  }
   test(
     'new program runtime reports cross HTTPS without inspecting device paths and restored history is inactive',
     () async {

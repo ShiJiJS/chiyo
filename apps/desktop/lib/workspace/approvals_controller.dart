@@ -1,5 +1,6 @@
 import 'package:info_core/access_timing.dart';
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
@@ -284,7 +285,14 @@ class ApprovalsController extends ChangeNotifier {
     if (!_closed) notifyListeners();
   }
 
-  Future<void> load({bool accepted = false, bool background = false}) async {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load({bool accepted = false, bool background = false}) =>
+      _refresh.run(
+        () => _load(accepted: accepted, background: background),
+        background: background,
+      );
+
+  Future<void> _load({required bool accepted, required bool background}) async {
     if (_closed || frozen) {
       _refreshPending = true;
       return;
@@ -679,6 +687,7 @@ class ApprovalsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     _generation++;
     unawaited(_subscription.cancel());

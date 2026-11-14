@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
@@ -24,7 +25,7 @@ enum PluginTab {
 /// Metadata-only projection retained by the composition root across navigation.
 class PluginsController extends ChangeNotifier {
   PluginsController(this.source, Stream<WorkspaceRecordRef?> changes) {
-    _subscription = changes.listen((_) => unawaited(load()));
+    _subscription = changes.listen((_) => unawaited(load(background: true)));
   }
   final WorkspacePluginSource source;
   late final StreamSubscription<WorkspaceRecordRef?> _subscription;
@@ -71,7 +72,11 @@ class PluginsController extends ChangeNotifier {
   WorkspacePluginTemplate? get selectedTemplate =>
       selected?.templates.where((t) => t.id == templateId).firstOrNull ??
       selected?.templates.firstOrNull;
-  Future<void> load() async {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load({bool background = false}) =>
+      _refresh.run(_load, background: background);
+
+  Future<void> _load() async {
     if (_closed) return;
     final generation = ++_generation;
     loading = true;
@@ -134,6 +139,7 @@ class PluginsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     ++_generation;
     unawaited(_subscription.cancel());

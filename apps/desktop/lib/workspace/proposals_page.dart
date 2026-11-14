@@ -559,7 +559,8 @@ class _ProposalsPageState extends State<ProposalsPage> {
     final r = m.results,
         head = <Widget>[
           _header(context),
-          if (m.loading) const LinearProgressIndicator(),
+          if (m.loading && (!m.backgroundLoading || m.results == null))
+            const LinearProgressIndicator(),
         ];
     final empty = Padding(
       padding: const EdgeInsets.all(22),

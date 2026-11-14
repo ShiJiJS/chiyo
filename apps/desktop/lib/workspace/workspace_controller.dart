@@ -1,3 +1,4 @@
+import 'workspace_refresh.dart';
 import 'package:flutter/material.dart';
 import 'workspace_source.dart';
 
@@ -56,7 +57,11 @@ class WorkspaceController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refresh() async {
+  final _refresh = WorkspaceRefresh();
+  Future<void> refresh({bool background = false}) =>
+      _refresh.run(_loadSummary, background: background);
+
+  Future<void> _loadSummary() async {
     if (_closed) return;
     final generation = ++_generation;
     load = WorkspaceLoad.loading;
@@ -81,6 +86,7 @@ class WorkspaceController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     _generation++;
     super.dispose();

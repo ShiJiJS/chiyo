@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
@@ -24,7 +25,7 @@ class WorkspaceSettingsController extends ChangeNotifier {
     required this.onTheme,
   }) {
     _subscription = changes.listen((_) {
-      if (!frozen) unawaited(load());
+      if (!frozen) unawaited(load(background: true));
     });
   }
   final WorkspaceSettingsSource source;
@@ -68,7 +69,11 @@ class WorkspaceSettingsController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> load() async {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load({bool background = false}) =>
+      _refresh.run(_load, background: background);
+
+  Future<void> _load() async {
     if (_closed || frozen) return;
     final generation = ++_generation;
     loading = true;
@@ -310,6 +315,7 @@ class WorkspaceSettingsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     _generation++;
     _subscription.cancel();

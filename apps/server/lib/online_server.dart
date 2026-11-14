@@ -473,6 +473,9 @@ final class OnlineServer {
     },
   );
 
+  // Operation views include the time of this read for clients. It is not a
+  // change token: retain effective state/deadlines but omit observedAt in both
+  // the inbox and full-workspace observations.
   Future<String> _requestObservation() async {
     final owner = _service.owner;
     return sha256
@@ -518,7 +521,12 @@ final class OnlineServer {
               ],
               [
                 for (final op in owner.credentialBatchOperations)
-                  owner.credentialBatchOperationView(op),
+                  owner.credentialBatchOperationView(op)..remove('observedAt'),
+              ],
+              [
+                for (final op in owner.credentialProgramOperations)
+                  owner.credentialProgramOperationView(op)
+                    ..remove('observedAt'),
               ],
               [
                 for (final e in owner.credentialExecutions)
@@ -598,7 +606,12 @@ final class OnlineServer {
               ],
               [
                 for (final op in owner.credentialBatchOperations)
-                  owner.credentialBatchOperationView(op),
+                  owner.credentialBatchOperationView(op)..remove('observedAt'),
+              ],
+              [
+                for (final op in owner.credentialProgramOperations)
+                  owner.credentialProgramOperationView(op)
+                    ..remove('observedAt'),
               ],
               [
                 for (final e in owner.credentialExecutions)

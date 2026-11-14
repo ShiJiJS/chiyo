@@ -115,13 +115,21 @@ class LibraryController extends WorkspaceRecordsController {
   );
 
   @override
-  Future<void> load(WorkspaceQuery next, {WorkspaceRecordRef? keepSelection}) {
+  Future<void> load(
+    WorkspaceQuery next, {
+    WorkspaceRecordRef? keepSelection,
+    bool background = false,
+  }) {
     if (_scopeKey(next) != _scopeKey(query) && selectedCount > 0) {
       _selectedRecords.clear();
       _selectedDirectories.clear();
       selectionNotice = '显示范围已改变，已清除多选。';
     }
-    return super.load(next, keepSelection: keepSelection);
+    return super.load(
+      next,
+      keepSelection: keepSelection,
+      background: background,
+    );
   }
 
   @override

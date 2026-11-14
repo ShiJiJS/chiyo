@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
@@ -10,7 +11,7 @@ class WorkspaceClassificationRow {
 
 class ClassificationController extends ChangeNotifier {
   ClassificationController(this.source) {
-    _changes = source.changes.listen((_) => unawaited(load()));
+    _changes = source.changes.listen((_) => unawaited(load(background: true)));
   }
   final WorkspaceSource source;
   late final StreamSubscription<WorkspaceRecordRef?> _changes;
@@ -76,10 +77,11 @@ class ClassificationController extends ChangeNotifier {
     if (!_closed) notifyListeners();
   }
 
-  Future<void> load({String? reveal}) {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load({String? reveal, bool background = false}) {
     if (_closed) return Future.value();
     if (reveal != null) _pendingReveal = reveal;
-    final read = _read();
+    final read = _refresh.run(_read, background: background);
     _latestRead = read;
     return _settle(read);
   }
@@ -159,6 +161,7 @@ class ClassificationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     _generation++;
     _changes.cancel();

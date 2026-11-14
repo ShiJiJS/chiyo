@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 import 'proposal_batch.dart';
@@ -35,7 +36,7 @@ class ProposalsController extends ChangeNotifier {
       _invalidateOwnerBefore(ref);
       if (frozen) return;
       unawaited(batch.refreshMetadata());
-      unawaited(load());
+      unawaited(load(background: true));
     });
   }
   final WorkspaceProposalSource source;
@@ -297,9 +298,15 @@ class ProposalsController extends ChangeNotifier {
     limit: limit,
   );
 
-  Future<void> load() async {
+  final _refresh = WorkspaceRefresh();
+  bool backgroundLoading = false;
+  Future<void> load({bool background = false}) =>
+      _refresh.run(() => _load(background: background), background: background);
+
+  Future<void> _load({required bool background}) async {
     if (_closed || frozen) return;
     final generation = ++_generation;
+    backgroundLoading = background;
     loading = true;
     readFailure = null;
     _notify();
@@ -703,6 +710,7 @@ class ProposalsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     for (final state in _readingStates.values) {
       state.dispose();

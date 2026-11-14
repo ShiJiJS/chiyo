@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
@@ -9,7 +10,7 @@ class WorkspaceRuntimeController extends ChangeNotifier {
       if (frozen) return;
       // A broadcast can be an unchanged maintenance/metadata refresh. Disable
       // submission while reading, then compare the actual runtime version.
-      unawaited(load());
+      unawaited(load(background: true));
     });
   }
   final WorkspaceRuntimeSource source;
@@ -45,7 +46,11 @@ class WorkspaceRuntimeController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> load() async {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load({bool background = false}) =>
+      _refresh.run(_load, background: background);
+
+  Future<void> _load() async {
     if (_closed || frozen) return;
     final generation = ++_generation;
     loading = true;
@@ -231,6 +236,7 @@ class WorkspaceRuntimeController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     _generation++;
     _previewGeneration++;

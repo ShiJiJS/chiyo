@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'approvals_controller.dart';
 import 'workspace_source.dart';
@@ -14,7 +15,7 @@ class GrantHistoryController extends ChangeNotifier {
     decision.addListener(_notify);
     _subscription = changes.listen((_) {
       if (!frozen) {
-        unawaited(load());
+        unawaited(load(background: true));
       }
     });
   }
@@ -62,7 +63,11 @@ class GrantHistoryController extends ChangeNotifier {
     limit: limit,
   );
 
-  Future<void> load({bool review = false}) async {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load({bool review = false, bool background = false}) =>
+      _refresh.run(() => _load(review: review), background: background);
+
+  Future<void> _load({required bool review}) async {
     if (_closed) return;
     if (frozen) return;
     final generation = ++_generation;
@@ -262,6 +267,7 @@ class GrantHistoryController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _closed = true;
     _generation++;
     decision.removeListener(_notify);
