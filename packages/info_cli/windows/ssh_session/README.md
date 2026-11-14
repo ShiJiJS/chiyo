@@ -8,6 +8,11 @@ Only the three intended stdio handles are inherited. An owned kill-on-close job
 keeps SSH children tied to this transport, not to one CLI request. A bounded
 stdin writer runs separately from authentication/control so pre-authentication
 SSH backpressure cannot prevent ASKPASS replies.
+Win32 OpenSSH needs the nonsecret `ProgramData` directory even with explicit
+configuration files. The broker obtains it from Known Folder resolution, with a
+read-only machine Shell Folders lookup when the minimal environment prevents
+that resolution; it does not inherit the caller's full environment or modify
+machine settings.
 
 Common launch configuration must disable keyboard-interactive authentication:
 ASKPASS cannot distinguish its arbitrary prompts from password authentication.
