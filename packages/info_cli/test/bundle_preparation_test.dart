@@ -81,6 +81,16 @@ void main() {
           ).copy('${source.path}/$name$suffix');
         }
       }
+      final sshHelper = File('${source.path}/info-ssh-session$suffix');
+      if (delivered == null) {
+        // This case verifies preparation preserves the native dependency; the
+        // extracted-package run copies the actual platform helper instead.
+        await sshHelper.writeAsBytes(utf8.encode('synthetic SSH dependency'));
+      } else {
+        await File(
+          '$delivered/cli/info-ssh-session$suffix',
+        ).copy(sshHelper.path);
+      }
       final output = Platform.isMacOS
           ? "${root.path}/最终 bundle ' \$(touch injected)"
           : '${root.path}/最终 bundle with spaces';
@@ -98,6 +108,39 @@ void main() {
       );
       final prepared = await prepare();
       expect(prepared.exitCode, 0, reason: '${prepared.stderr}');
+      expect(
+        await File('$output/info-ssh-session$suffix').readAsBytes(),
+        await sshHelper.readAsBytes(),
+        reason: 'A stable bundle must retain the matching native SSH helper.',
+      );
+      if (delivered != null) {
+        final capabilities = await Process.run(
+          '$output/info-ssh-session$suffix',
+          ['--capabilities'],
+          environment: {'PATH': restrictedPath},
+        );
+        expect(capabilities.exitCode, 0, reason: '${capabilities.stderr}');
+        expect(jsonDecode(capabilities.stdout)['transport'], 1);
+        expect(jsonDecode(capabilities.stdout)['askpass'], 1);
+        expect(jsonDecode(capabilities.stdout)['headless'], true);
+      }
+      final heldHelper = await sshHelper.rename('${sshHelper.path}.held');
+      final missingHelperOutput = '$output-missing-ssh';
+      final missingHelper = await Process.run(
+        delivered == null
+            ? Platform.resolvedExecutable
+            : '$delivered/cli/info-prepare-codex$suffix',
+        [
+          if (delivered == null) ...['run', 'bin/prepare_codex.dart'],
+          '--source-bundle',
+          source.path,
+          missingHelperOutput,
+        ],
+        environment: {'PATH': restrictedPath},
+      );
+      expect(missingHelper.exitCode, 1);
+      expect(await Directory(missingHelperOutput).exists(), isFalse);
+      await heldHelper.rename(sshHelper.path);
       expect(
         await File('$output/info-runtime-worker$suffix').exists(),
         isTrue,

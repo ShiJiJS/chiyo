@@ -39,6 +39,30 @@ Future<void> main(List<String> args) async {
       return;
     }
   }
+  // The resident worker resolves its platform SSH transport beside itself.
+  // A source-built stable bundle needs the same dependency as a delivered one.
+  final ssh = await Process.run(
+    Platform.isWindows ? 'powershell.exe' : '/bin/bash',
+    Platform.isWindows
+        ? [
+            '-NoProfile',
+            '-NonInteractive',
+            '-File',
+            '${repository.path}/scripts/package-windows-ssh-session.ps1',
+            '-DestinationDirectory',
+            output.path,
+          ]
+        : [
+            '${repository.path}/scripts/build-macos-ssh-session.sh',
+            '${output.path}/info-ssh-session',
+          ],
+    workingDirectory: repository.path,
+  );
+  if (ssh.exitCode != 0) {
+    stderr.write(ssh.stderr);
+    exitCode = ssh.exitCode;
+    return;
+  }
   final source = await File(
     '${repository.path}/integrations/codex/skills/agent-info-access/SKILL.md',
   ).readAsString();

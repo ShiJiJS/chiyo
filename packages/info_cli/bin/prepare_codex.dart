@@ -76,6 +76,7 @@ Future<void> main(List<String> args) async {
       'info-codex$suffix',
       'info-codex-hook$suffix',
       'info-runtime-worker$suffix',
+      'info-ssh-session$suffix',
     ];
     for (final name in binaries) {
       if (!await File('${source.path}/$name').exists()) {
