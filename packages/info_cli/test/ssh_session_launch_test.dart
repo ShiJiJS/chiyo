@@ -1,6 +1,7 @@
 @TestOn('windows || mac-os')
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:info_cli/ssh_session_launch.dart';
@@ -39,7 +40,7 @@ void main() {
       expect(launch.arguments[launch.arguments.indexOf('-i') + 1], key);
       final result = await Process.run(executable, ['-G', ...launch.arguments]);
       expect(result.exitCode, 0, reason: '${result.stderr}');
-      final output = (result.stdout as String).split('\n');
+      final output = const LineSplitter().convert(result.stdout as String);
       String normalized(String path) =>
           Platform.isWindows ? path.replaceAll('\\', '/') : path;
       expect(output, contains('userknownhostsfile ${normalized(hosts)}'));
