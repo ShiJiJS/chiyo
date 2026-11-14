@@ -800,6 +800,7 @@ class ChiyoCli {
       'not_authorized' || 'session_ended' => 4,
       'field_removed' => 8,
       'delivery_unknown' => 7,
+      'access_denied' => 3,
       'delivery_io_failed' || 'attachment_integrity_failed' => 5,
       _ => switch (status) {
         'service_unavailable' ||
@@ -846,6 +847,8 @@ class ChiyoCli {
         code,
         switch (failure) {
           2 => '内容或参数未通过检查；请查看返回的字段说明。',
+          3 when code == 'access_denied' =>
+            '系统未允许访问填写目标。请在 App「设置 → 凭据填写」检查系统权限，再重新检查目标。',
           3 => '当前聊天、连接或所需能力不可用；请检查连接和软件版本。',
           4 => '本次操作没有有效批准；请查看原申请状态。',
           5 => '本次交付未完成，请查看原操作和清理状态。',
