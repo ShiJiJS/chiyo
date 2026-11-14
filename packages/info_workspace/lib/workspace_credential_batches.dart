@@ -58,7 +58,7 @@ class WorkspaceCredentialBatchOperation {
   String get summaryLabel =>
       state == 'filled' &&
           itemResults.isNotEmpty &&
-          itemResults.values.every((result) => result == 'sent')
+          itemResults.values.any((result) => result == 'sent')
       ? resultLabel('sent')
       : resultLabel(state);
   String? get errorLabel => switch (errorCode) {
