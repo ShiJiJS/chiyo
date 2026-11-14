@@ -25,8 +25,12 @@ def digest(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--platform', action='store_true')
+    parser.add_argument('--cache-only', action='store_true', help='Only the read-only replacement-window regression')
     args = parser.parse_args()
     output = ROOT / 'build/native-background-macos'
+    if args.cache_only:
+        args.platform = True
+        output = output / 'cache-recheck'
     output.mkdir(parents=True, exist_ok=True)
     common = ['xcrun', 'swiftc', '-parse-as-library', '-swift-version', '5', '-warnings-as-errors',
               '-target', 'arm64-apple-macos14.0']
@@ -75,9 +79,9 @@ def main():
                     for _ in range(200):
                         if (work / 'cover-state.json').exists(): break
                         time.sleep(.02)
-                    result = subprocess.run([work / 'platform', work], capture_output=True, text=True, timeout=300)
+                    result = subprocess.run([work / 'platform', work, *(['--cache-only'] if args.cache_only else [])], capture_output=True, text=True, timeout=300)
                     (output / 'platform-log.txt').write_text(result.stdout + result.stderr)
-                    for name in ['calibration.json', 'platform-results.json', 'foreground-typing.json', 'wire-results.json', 'window-cache.json', 'stage.json', 'result.json']:
+                    for name in ['calibration.json', 'platform-results.json', 'foreground-typing.json', 'wire-results.json', 'wire-before-cache.json', 'window-cache.json', 'stage.json', 'result.json']:
                         if (work / name).exists(): shutil.copy(work / name, output / name)
                     for observer in list(work.glob('observer-*.json')) + list(work.glob('ax-metadata-*.json')):
                         shutil.copy(observer, output / observer.name)

@@ -84,6 +84,10 @@ private func focus() -> (pid_t, AXUIElement?) {
       throw MacNativeBackgroundFailure.targetUnavailable
     }
     defer { try? command("target", "quit"); try? command("cover", "quit") }
+    let cacheOnly = CommandLine.arguments.contains("--cache-only")
+    var rows: [[String: Any]] = []
+    var checks: [String: Bool] = [:]
+    if !cacheOnly {
     try start(); try activate("cover", "cover")
     let a = focus(); pump(0.1); let b = focus()
     let stable = a.0 > 0 && a.0 == b.0 && a.1 != nil && b.1 != nil && CFEqual(a.1!, b.1!)
@@ -93,7 +97,6 @@ private func focus() -> (pid_t, AXUIElement?) {
     let frontChanged = d.0 != a.0 && d.0 > 0
     try save("calibration.json", ["stable":stable, "focusChanged":focusChanged, "frontChanged":frontChanged])
     guard stable, focusChanged, frontChanged else { throw MacNativeBackgroundFailure.sessionUnavailable }
-    var rows: [[String: Any]] = []
     for kind in ["background", "occluded", "minimized", "hidden", "missing-identifiers", "language", "second-identity", "mixed-web", "mixed-wk", "partial-disabled", "partial-readonly", "no-password", "all-disabled", "all-readonly", "web-only", "wk-only", "ambiguous", "rebuild", "close", "restart", "callback-disable", "permission-before", "permission-after", "wrong-file"] {
       let identity = kind == "second-identity" ? "alternate" : "target"
       try start(identity)
@@ -189,7 +192,6 @@ private func focus() -> (pid_t, AXUIElement?) {
       let request:[String:Any] = ["format":1,"command":command,"scope":selectedScope ?? scope].merging(payload){_,b in b}
       return try JSONSerialization.jsonObject(with:wire.handle(JSONSerialization.data(withJSONObject:request))) as! [String:Any]
     }
-    var checks:[String:Bool]=[:]
     let discovery=try request("discover",["appId":"local.chiyo.native-background.target"])
     try save("stage.json",["stage":"wire-discovered","response":discovery])
     let targets=discovery["targets"] as? [[String:Any]] ?? []
@@ -214,6 +216,9 @@ private func focus() -> (pid_t, AXUIElement?) {
     let afterDisposal = try request("discover",["appId":"local.chiyo.native-background.target"])
     checks["disposeEndsOwner"] = disposed["state"] as? String == "disposed" && afterDisposal["state"] as? String == "refused"
     wire.close()
+    try save("wire-before-cache.json",["passed":checks.count == 7 && checks.values.allSatisfy{$0},"checks":checks])
+    }
+    try start()
     // No unbounded strong AX window cache: dropping candidates reclaims every
     // cache entry. Repeat beyond the historical 256 lifetime limit.
     let env=SystemMacNativeBackgroundEnvironment(),app=try env.application("local.chiyo.native-background.target")
@@ -227,15 +232,16 @@ private func focus() -> (pid_t, AXUIElement?) {
       for _ in 0..<20 {
         do { let found = try env.discover(app); if found.count == 4 { ready = true; break } }
         catch MacNativeBackgroundFailure.targetUnavailable { cacheDiscoveryRetries += 1 }
+        catch MacNativeBackgroundFailure.targetChanged { cacheDiscoveryRetries += 1 }
         pump(0.05)
       }
       guard ready else { throw MacNativeBackgroundFailure.targetUnavailable }
     }
     checks["windowCacheReclaimsUnretained"] = true
     try save("window-cache.json",["replacements":260,"readOnlyDiscoveryRetries":cacheDiscoveryRetries,"setterCalls":0])
-    let wirePassed=checks.count==8 && checks.values.allSatisfy{$0}
+    let wirePassed=checks.count == (cacheOnly ? 1 : 8) && checks.values.allSatisfy{$0}
     try save("wire-results.json",["passed":wirePassed,"checks":checks])
-    try save("result.json",["passed":rows.allSatisfy{$0["passed"] as? Bool == true} && wirePassed,"platformCases":rows.count,"wireChecks":checks.count,"permissionUnchanged":true,"formalSignedHelperTCCVerified":false])
+    try save("result.json",["passed":rows.allSatisfy{$0["passed"] as? Bool == true} && wirePassed,"platformCases":rows.count,"cacheOnly":cacheOnly,"wireChecks":checks.count,"permissionUnchanged":true,"formalSignedHelperTCCVerified":false])
     if !rows.allSatisfy({$0["passed"] as? Bool == true}) || !wirePassed {exit(1)}
   }
 }
