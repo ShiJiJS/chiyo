@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:info_cli/agent_client.dart';
 import 'package:info_cli/chiyo_context.dart';
 import 'package:info_cli/device_credential_host.dart';
+import 'package:info_cli/private_device_state.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
@@ -76,7 +77,8 @@ void main() {
           if (await journals.exists()) {
             await for (final file in journals.list()) {
               if (file is! File || !file.path.endsWith('.json')) continue;
-              final record = jsonDecode(await file.readAsString()) as Map;
+              final record = await readPrivateDeviceState(file);
+              if (record == null) continue;
               if (record['sessionId'] is String) {
                 await host.execute(client.sessionSecret!, {
                   'command': 'ssh-close',
