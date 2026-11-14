@@ -1,6 +1,6 @@
 <h1 align="center">知予 · chiyo</h1>
 <p align="center"><img src="apps/desktop/assets/branding/chiyo-icon.png" alt="知予图标" width="160" /></p>
-<p align="center">把资料交给知予，AI 需要什么，你来批准什么。</p>
+<p align="center">知你所藏，予有所度。</p>
 <p align="center"><strong>简体中文</strong> · <a href="README.en.md">English</a></p>
 <p align="center"><a href="https://github.com/ShiJiJS/chiyo/releases">下载</a> · <a href="docs/deployment.md">安装与部署</a> · <a href="docs/usage.md">使用指南</a> · <a href="docs/explainers/credential-filling/credential-filling.pdf">填写原理图解（PDF）</a> · <a href="docs/README.md">文档</a> · <a href="https://github.com/ShiJiJS/chiyo/issues">反馈</a></p>
 

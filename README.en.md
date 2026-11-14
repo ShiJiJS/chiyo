@@ -1,6 +1,6 @@
 <h1 align="center">知予 · chiyo</h1>
 <p align="center"><img src="apps/desktop/assets/branding/chiyo-icon.png" alt="Chiyo icon" width="160" /></p>
-<p align="center">Keep your information in Chiyo. AI requests what it needs; you approve what it can use.</p>
+<p align="center">Know what you keep. Share on your terms.</p>
 <p align="center"><a href="README.md">简体中文</a> · <strong>English</strong></p>
 <p align="center"><a href="https://github.com/ShiJiJS/chiyo/releases">Downloads</a> · <a href="docs/deployment.en.md">Installation & deployment</a> · <a href="docs/usage.md">User guide (中文)</a> · <a href="docs/explainers/credential-filling/credential-filling.pdf">How filling works (PDF, 中文)</a> · <a href="docs/README.md">Documentation</a> · <a href="https://github.com/ShiJiJS/chiyo/issues">Issues</a></p>
 
