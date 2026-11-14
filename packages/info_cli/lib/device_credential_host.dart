@@ -92,11 +92,31 @@ final class DeviceCredentialHost {
   ) async {
     try {
       final record = await _serialize(_record);
-      return await _control(record, '/execute', {
-        'sessionSecret': session,
-        'input': input,
-      }, uncertain: {'run-use', 'program-run'}.contains(input['command']));
+      return await _control(
+        record,
+        '/execute',
+        {'sessionSecret': session, 'input': input},
+        uncertain: {
+          'run-use',
+          'program-run',
+          'ssh-open',
+          'ssh-run',
+          'ssh-input',
+          'ssh-credential-use',
+        }.contains(input['command']),
+      );
     } on Object {
+      if ({
+        'ssh-open',
+        'ssh-run',
+        'ssh-input',
+        'ssh-credential-use',
+      }.contains(input['command'])) {
+        return {
+          'status': 'operation_unknown',
+          'operationId': input['operationId'],
+        };
+      }
       // No timeout/failed probe creates a replacement while the original Host
       // identity or its lifetime lock is still live or inconclusive.
       final uncertain = {'run-use', 'program-run'}.contains(input['command']);
@@ -511,7 +531,7 @@ final class _Resident {
       final body = decodeProtocolObject(
         utf8.decode(await _bounded(request, 262144)),
       );
-      final result = await serialize<Map<String, dynamic>>(() async {
+      Future<Map<String, dynamic>> action() async {
         if (closing) return _failure('service_unavailable');
         if (request.uri.path == '/stop') {
           if (body.isNotEmpty) throw const FormatException();
@@ -531,7 +551,16 @@ final class _Resident {
           body['sessionSecret'] as String,
           body['input'] as Map<String, dynamic>,
         );
-      });
+      }
+
+      final ssh =
+          body['input'] is Map &&
+          ((body['input'] as Map)['command'] as String? ?? '').startsWith(
+            'ssh-',
+          );
+      final result = ssh
+          ? await action()
+          : await serialize<Map<String, dynamic>>(action);
       request.response.headers.contentType = ContentType.json;
       request.response.write(jsonEncode(result));
       await request.response.close();

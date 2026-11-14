@@ -454,6 +454,10 @@ extension LibraryIncrementalReceive on LibraryIncremental {
         portable == 'credential_batch_operations') {
       await _repo._createCredentialBatchTables();
       if (portable == 'credential_batches' &&
+          _storedBatch(row).items.any((i) => i.destination.ssh != null)) {
+        await _repo._requireAdmissionFormat(_sshInteractiveLibraryFormat);
+      }
+      if (portable == 'credential_batches' &&
           _storedBatch(row).items.any((i) => i.destination.native != null)) {
         await _repo._requireAdmissionFormat(_nativeFillLibraryFormat);
       }

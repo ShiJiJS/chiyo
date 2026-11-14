@@ -42,7 +42,9 @@ class OwnerWorkspaceCredentialBatches {
     core.CredentialUseBatch r,
   ) => WorkspaceApprovalSummary(
     id: r.id,
-    title: r.programPlan != null
+    title: r.items.any((i) => i.destination.ssh != null)
+        ? "SSH · ${r.items.first.credentialName}"
+        : r.programPlan != null
         ? '${r.programPlan!.path.split(RegExp(r'[/\\]')).last} · 程序使用'
         : r.items.length == 1
         ? '${r.items.single.credentialName} · 凭据使用'
@@ -129,6 +131,10 @@ class OwnerWorkspaceCredentialBatches {
   }
 
   static String destinationLabel(core.CredentialBatchDestination d) {
+    final ssh = d.ssh;
+    if (ssh != null) {
+      return "SSH · ${ssh.user}@${ssh.host}:${ssh.port}\n${ssh.credentialUse == 'sudo' ? 'sudo 认证' : '登录并持续执行命令'} · ${ssh.authentication == 'publickey' ? '私钥' : '密码'}";
+    }
     if (d.native case final target?) {
       return '原生后台填写 · ${target.appName}\n窗口：${target.windowTitle}\n密码框：${target.fieldLabel}\n${target.application.executable}\n仅确认原生控件接受输入，不代表登录成功。';
     }
@@ -145,6 +151,23 @@ class OwnerWorkspaceCredentialBatches {
     return browser == null
         ? '本机密码框 · ${d.application!.executable}'
         : '${d.via == 'ego' ? 'Ego' : 'Chrome'} · ${browser.url}\n表单：${browser.formSelector}\n密码框：${browser.fieldSelector}';
+  }
+
+  static bool sessionBound(core.CredentialUseBatch request) {
+    final granted = request.items
+        .where(
+          (item) => {
+            core.CredentialBatchItemDecision.approved,
+            core.CredentialBatchItemDecision.revoked,
+          }.contains(item.decision),
+        )
+        .toList();
+    return granted.isNotEmpty &&
+        granted.every(
+          (item) =>
+              item.destination.ssh?.validity == 'session' &&
+              item.expiresAt == null,
+        );
   }
 
   static String scopeLabel(core.CredentialBatchItem item) =>
@@ -309,6 +332,11 @@ class OwnerWorkspaceCredentialBatches {
       reviewToken: reviewToken(id),
       scopes: scopes,
       credentialBatch: true,
+      sshSession: r.items.any((i) => i.destination.ssh != null),
+      batchSupportsSessionValidity: r.items.every(
+        (i) => i.destination.ssh?.validity == 'session',
+      ),
+      batchSessionBound: sessionBound(r),
       programPlan: r.programPlan == null
           ? null
           : WorkspaceCredentialProgramPlan.fromJson(
@@ -377,7 +405,8 @@ class OwnerWorkspaceCredentialBatches {
                     (id) =>
                         !detail.scopes.any((s) => s.id == id && s.available),
                   ) ||
-                  change.credentialMinutes == null
+                  (change.credentialMinutes == null &&
+                      !detail.supportsSessionValidity)
             : change.action == WorkspaceApprovalAction.deny
             ? change.selected.isNotEmpty
             : change.selected.any(
@@ -414,10 +443,9 @@ class OwnerWorkspaceCredentialBatches {
           operationId: change.operationId,
           revision: r.revision,
           approvedItems: approve ? change.selected : const [],
-          lifetime: Duration(
-            minutes:
-                change.credentialMinutes ?? core.AccessTiming.defaultMinutes,
-          ),
+          lifetime: change.credentialMinutes == null
+              ? null
+              : Duration(minutes: change.credentialMinutes!),
           reviewToken: change.reviewToken,
           commandDigest: change.digest,
           validateReview: guard,

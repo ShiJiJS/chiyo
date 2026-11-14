@@ -14,14 +14,29 @@ class CredentialBatchDestination {
     this.application, [
     this.program,
     this.native,
+    this.ssh,
   ]);
   final String via;
   final BrowserFormTarget? browser;
   final FocusedFillApplication? application;
   final CredentialProgramDestination? program;
   final NativeFillTarget? native;
+  final SshSessionTarget? ssh;
   factory CredentialBatchDestination.fromJson(Map<String, dynamic> json) {
     final via = json['via'];
+    if (via == 'ssh') {
+      _useShape(json, {'via', 'target'});
+      return CredentialBatchDestination._(
+        'ssh',
+        null,
+        null,
+        null,
+        null,
+        SshSessionTarget.fromJson(
+          Map<String, dynamic>.from(json['target'] as Map),
+        ),
+      );
+    }
     if (via == 'native') {
       _useShape(json, {'via', 'target'});
       if (json['target'] is! Map<String, dynamic>) {
@@ -81,6 +96,7 @@ class CredentialBatchDestination {
     'via': via,
     if (browser != null) 'target': browser!.toJson(),
     if (native != null) 'target': native!.toJson(),
+    if (ssh != null) 'target': ssh!.toJson(),
     if (application != null) 'application': application!.toJson(),
     if (program != null) 'program': program!.toJson(),
   };
@@ -288,9 +304,14 @@ class CredentialBatchItem {
       throw const CredentialUseFailure('invalid_plan');
     }
     final expiresAt = _batchDate(json['expiresAt'], optional: true);
+    final destination = CredentialBatchDestination.fromJson(
+      json['destination'] as Map<String, dynamic>,
+    );
+    final sessionBound = destination.ssh?.validity == 'session';
     if ((decision == CredentialBatchItemDecision.approved ||
-            decision == CredentialBatchItemDecision.revoked) !=
-        (expiresAt != null)) {
+            decision == CredentialBatchItemDecision.revoked)
+        ? expiresAt == null && !sessionBound
+        : expiresAt != null) {
       throw const CredentialUseFailure('invalid_plan');
     }
     return CredentialBatchItem(
@@ -304,9 +325,7 @@ class CredentialBatchItem {
       ),
       version: json['version'] as int,
       useGeneration: json['useGeneration'] as int,
-      destination: CredentialBatchDestination.fromJson(
-        json['destination'] as Map<String, dynamic>,
-      ),
+      destination: destination,
       decision: decision,
       expiresAt: expiresAt,
     );
@@ -615,6 +634,7 @@ class CredentialBatchOperation {
     this.errorCode,
     this.attentionOperationId,
     this.attentionAcknowledgedAt,
+    this.sshContext,
   }) : itemIds = List.unmodifiable(itemIds),
        itemResults = Map.unmodifiable(itemResults);
   final String operationId, requestId, sessionBinding, fingerprint;
@@ -623,12 +643,14 @@ class CredentialBatchOperation {
   final bool materialClaimed;
   final int revision;
   final Map<String, String> itemResults;
+  final SshSessionOperationContext? sshContext;
   final String? errorCode;
   final String? attentionOperationId;
   final DateTime? attentionAcknowledgedAt;
   final DateTime createdAt;
   final DateTime? finishedAt;
   Map<String, Object?> toJson() => {
+    if (sshContext != null) 'sshContext': sshContext!.toJson(),
     'operationId': operationId,
     'requestId': requestId,
     'sessionBinding': sessionBinding,
@@ -646,6 +668,7 @@ class CredentialBatchOperation {
   };
   Map<String, Object?> toPublicJson() => {
     'status': 'ok',
+    if (sshContext != null) 'sshContext': sshContext!.toJson(),
     'operationId': operationId,
     'requestId': requestId,
     'itemIds': itemIds,
@@ -657,22 +680,31 @@ class CredentialBatchOperation {
     'attentionAcknowledgedAt': _useTimestamp(attentionAcknowledgedAt),
   };
   factory CredentialBatchOperation.fromJson(Map<String, dynamic> json) {
-    _useShape(json, {
-      'operationId',
-      'requestId',
-      'sessionBinding',
-      'fingerprint',
-      'itemIds',
-      'state',
-      'materialClaimed',
-      'revision',
-      'createdAt',
-      'finishedAt',
-      'itemResults',
-      'errorCode',
-      'attentionOperationId',
-      'attentionAcknowledgedAt',
-    });
+    _useShape(
+      json,
+      {
+        'operationId',
+        'requestId',
+        'sessionBinding',
+        'fingerprint',
+        'itemIds',
+        'state',
+        'materialClaimed',
+        'revision',
+        'createdAt',
+        'finishedAt',
+        'itemResults',
+        'errorCode',
+        'attentionOperationId',
+        'attentionAcknowledgedAt',
+      },
+      {'sshContext'},
+    );
+    final sshContext = json['sshContext'] == null
+        ? null
+        : SshSessionOperationContext.fromJson(
+            Map<String, dynamic>.from(json['sshContext'] as Map),
+          );
     final state = CredentialBatchOperationState.values
         .where((s) => s.name == json['state'])
         .firstOrNull;
@@ -722,12 +754,14 @@ class CredentialBatchOperation {
             finished == null ||
         finished != null && finished.isBefore(created) ||
         state == CredentialBatchOperationState.dispatched &&
-            json['materialClaimed'] != true ||
+            json['materialClaimed'] != true &&
+            sshContext?.requiresMaterial != false ||
         {
               CredentialBatchOperationState.filled,
               CredentialBatchOperationState.partial,
             }.contains(state) &&
-            json['materialClaimed'] != true ||
+            json['materialClaimed'] != true &&
+            sshContext?.requiresMaterial != false ||
         state == CredentialBatchOperationState.filled &&
             (results.length != ids.length ||
                 results.values.any((v) => v != 'filled' && v != 'sent')) ||
@@ -743,6 +777,7 @@ class CredentialBatchOperation {
       throw const CredentialUseFailure('invalid_plan');
     }
     return CredentialBatchOperation(
+      sshContext: sshContext,
       operationId: _batchOperationId(json['operationId']),
       requestId: _useId(json['requestId'], 'requestId'),
       sessionBinding: _useId(json['sessionBinding'], 'sessionBinding'),
@@ -770,6 +805,7 @@ class CredentialBatchOperation {
     String? attentionOperationId,
     DateTime? attentionAcknowledgedAt,
   }) => CredentialBatchOperation(
+    sshContext: sshContext,
     operationId: operationId,
     requestId: requestId,
     sessionBinding: sessionBinding,
@@ -930,6 +966,8 @@ void validateCredentialBatchCommit(
     };
     if (operation.revision != previousOperation.revision + 1 ||
         operation.fingerprint != previousOperation.fingerprint ||
+        _useFingerprint(operation.sshContext?.toJson()) !=
+            _useFingerprint(previousOperation.sshContext?.toJson()) ||
         operation.requestId != previousOperation.requestId ||
         operation.sessionBinding != previousOperation.sessionBinding ||
         operation.createdAt != previousOperation.createdAt ||

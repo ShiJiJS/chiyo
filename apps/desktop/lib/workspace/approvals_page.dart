@@ -1,6 +1,9 @@
 import 'package:info_core/access_timing.dart';
+
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
 import '../desktop_controls.dart';
 import '../desktop_motion.dart';
 import '../ui_palette.dart';
@@ -321,7 +324,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
 
   Future<void> _tip(BuildContext context) async {
     final r = model.detail!.request;
-    final text = model.detail!.programPlan != null
+    final text = model.detail!.sshSession
+        ? '批准在指定服务器和账号下使用所选凭据。登录许可可在有效期内建立持续 SSH 会话并连续执行命令；sudo 密码按获准用途单独交付。连接由 AI 所在电脑的后台程序保持，密码不作为普通回复返回。撤销后禁止新命令和输入，当前命令自然结束后关闭；需要时可主动中断。'
+        : model.detail!.programPlan != null
         ? '批准固定程序、凭据版本和接收位置。有效期内，AI 可以调整业务参数和工作目录再次使用；不代表只允许上方显示的这一条命令。所需凭据全部有效才启动，程序在 AI 所在电脑运行。批准不会立即启动程序，查询原结果不会再次运行。'
         : model.detail!.credentialBatch
         ? '每项凭据固定版本、填写方式和目标。可以只批准部分；AI执行一次操作所需的凭据必须全部获准。批准不会自动填写，填写不会自动提交登录。'
@@ -334,10 +339,8 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
             WorkspaceApprovalKind.organization =>
               '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
-            WorkspaceApprovalKind.focus =>
-              '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
-            WorkspaceApprovalKind.credential =>
-              '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
+            WorkspaceApprovalKind.focus => '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
+            WorkspaceApprovalKind.credential => '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
           };
     await showDesktopDialog<void>(
       context,
@@ -383,8 +386,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           style: libraryText(context, 14, weight: FontWeight.w600),
         ),
         block(reveal ? '原文读取范围' : '注入位置', switch (r.delivery) {
-          WorkspaceCredentialDelivery.reveal =>
-            '允许 AI 读取这项已保存凭据的原文。原文会进入当前聊天上下文，撤销许可不能删除已经交付的原文。此申请与直接填写或程序使用许可分开审批。',
+          WorkspaceCredentialDelivery.reveal => '允许 AI 读取这项已保存凭据的原文。原文会进入当前聊天上下文，撤销许可不能删除已经交付的原文。此申请与直接填写或程序使用许可分开审批。',
           WorkspaceCredentialDelivery.standardInput => 'stdin → 已核对程序的标准输入',
           WorkspaceCredentialDelivery.environment =>
             '${r.receiver.binding} → 仅CLI创建的子进程环境变量',
@@ -445,7 +447,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
               : '${r.kind == WorkspaceApprovalKind.organization ? '整理' : '普通范围'}期限',
         ),
         items: [
-          if (credential && detail.credential?.supportsSessionValidity == true)
+          if (credential && detail.supportsSessionValidity)
             const DropdownMenuItem(value: 'session', child: Text('不限时（限本聊天）')),
           for (final m in AccessTiming.grantMinutes)
             DropdownMenuItem(
@@ -679,6 +681,8 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             context,
             d.request.kind == WorkspaceApprovalKind.organization
                 ? '整理范围'
+                : d.sshSession
+                ? 'SSH 使用方式'
                 : d.programPlan != null
                 ? '程序接收方式'
                 : d.credentialBatch
@@ -702,7 +706,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   _credential(context, d.credential!)
                 else
                   Text(
-                    d.programPlan != null
+                    d.sshSession
+                        ? '凭据用于上方服务器的登录或 sudo 认证。批准后由 AI 发起操作，本机后台保持连接，后续命令沿用同一 Shell；普通确认可继续输入。登录许可不会自动批准 sudo 密码使用。'
+                        : d.programPlan != null
                         ? '凭据只交给上方程序的指定位置。批准固定程序和接收位置，业务参数及工作目录可以调整；每次启动前检查所需的批准。程序在 AI 所在电脑运行。'
                         : d.credentialBatch
                         ? '只在上方指定的位置使用勾选的凭据。批准后由 AI 发起填写，每次填写分别记录结果。'

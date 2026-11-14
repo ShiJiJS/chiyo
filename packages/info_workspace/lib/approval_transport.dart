@@ -101,10 +101,11 @@ Map<String, Object?> approvalDetailToJson(
 }) {
   // The original endpoint stays v1 and refuses credential details. Only the
   // explicit v2 endpoint can deliver the complete mixed review to a new App.
-  if (!{1, 2, 3, 4, 5}.contains(version)) {
+  if (!{1, 2, 3, 4, 5, 6}.contains(version)) {
     throw const FormatException('Invalid approval version');
   }
-  if (d.credentialBatch && version < 3 ||
+  if (d.sshSession && version < 6 ||
+      d.credentialBatch && version < 3 ||
       d.programPlan != null && version < 4) {
     throw const WorkspaceFailure('unsupported', '请更新 App 后核对这份多凭据申请。');
   }
@@ -136,6 +137,11 @@ Map<String, Object?> approvalDetailToJson(
     if (version >= 5) ...{
       'operationTotal': d.operationsTotal,
       'operationsCursor': d.operationsCursor,
+    },
+    if (version >= 6) ...{
+      'sshSession': d.sshSession,
+      'batchSupportsSessionValidity': d.batchSupportsSessionValidity,
+      'batchSessionBound': d.batchSessionBound,
     },
     'request': approvalSummaryToJson(d.request),
     'reviewToken': d.reviewToken,
@@ -184,7 +190,15 @@ WorkspaceApprovalDetail approvalDetailFromJson(
   Map<String, dynamic> j,
 ) => _parse(() {
   final version = j['version'] ?? 1;
-  if (!{1, 2, 3, 4, 5}.contains(version) ||
+  if (!{1, 2, 3, 4, 5, 6}.contains(version) ||
+      version >= 6 &&
+          (j['sshSession'] is! bool ||
+              j['batchSupportsSessionValidity'] is! bool ||
+              j['batchSessionBound'] is! bool) ||
+      version < 6 &&
+          (j.containsKey('sshSession') ||
+              j.containsKey('batchSupportsSessionValidity') ||
+              j.containsKey('batchSessionBound')) ||
       version >= 2 && !j.containsKey('credential') ||
       version >= 3 && j['credentialBatch'] is! bool ||
       version >= 3 && j['batchOperations'] is! List ||
@@ -250,6 +264,10 @@ WorkspaceApprovalDetail approvalDetailFromJson(
     operationTotal: version >= 5 ? j['operationTotal'] as int : null,
     operationsCursor: version >= 5 ? j['operationsCursor'] as String? : null,
     credentialBatch: version >= 3 && j['credentialBatch'] == true,
+    sshSession: version >= 6 && j['sshSession'] == true,
+    batchSupportsSessionValidity:
+        version >= 6 && j['batchSupportsSessionValidity'] == true,
+    batchSessionBound: version >= 6 && j['batchSessionBound'] == true,
     programPlan: version >= 4 && j['programPlan'] != null
         ? WorkspaceCredentialProgramPlan.fromJson(
             Map<String, dynamic>.from(j['programPlan'] as Map),
@@ -276,7 +294,12 @@ WorkspaceApprovalDetail approvalDetailFromJson(
         ? (j['executions'] as List).map(approvalExecutionFromJson)
         : const [],
   );
-  if (({
+  if ((result.sshSession &&
+          (!result.credentialBatch || result.programPlan != null)) ||
+      (!result.sshSession &&
+          (result.batchSupportsSessionValidity || result.batchSessionBound)) ||
+      (result.batchSessionBound && !result.batchSupportsSessionValidity) ||
+      ({
             WorkspaceApprovalKind.credential,
             WorkspaceApprovalKind.focus,
           }.contains(result.request.kind)) !=

@@ -41,8 +41,14 @@ extension _CredentialBatchService on InformationService {
     if (item.decision != CredentialBatchItemDecision.approved) {
       throw const CredentialUseFailure('scope_not_approved');
     }
-    if (!_clock().isBefore(item.expiresAt!)) {
+    if (item.expiresAt != null && !_clock().isBefore(item.expiresAt!)) {
       throw const CredentialUseFailure('grant_expired');
+    }
+    if (item.destination.ssh case final ssh?) {
+      if (ssh.trustId != _sshHostTrust?.id ||
+          ssh.trustHash != _sshHostTrust?.sha256) {
+        throw const CredentialUseFailure('receiver_not_ready');
+      }
     }
     _guardUseEligibility(
       item.credentialId,
@@ -121,7 +127,9 @@ extension _CredentialBatchService on InformationService {
         )
       : operation;
   String _batchDestinationKey(CredentialBatchDestination destination) =>
-      destination.native != null
+      destination.ssh != null
+      ? _useFingerprint(destination.toJson())
+      : destination.native != null
       ? _useFingerprint({
           'via': 'native',
           'helper': destination.native!.helperInstanceId,
@@ -228,6 +236,10 @@ extension CredentialBatchAgentAccess on AgentAccess {
         if (!program.binding.acceptsForm(c.form)) {
           throw const CredentialUseFailure('invalid_reference');
         }
+      } else if (candidate.destination.ssh case final ssh?) {
+        if (!ssh.accepts(c.form) || _service._sshHostTrust == null) {
+          throw const CredentialUseFailure('receiver_not_ready');
+        }
       } else if (c.form != CredentialForm.string) {
         throw const CredentialUseFailure('invalid_reference');
       }
@@ -238,7 +250,16 @@ extension CredentialBatchAgentAccess on AgentAccess {
           credentialName: c.name,
           version: c.version,
           useGeneration: c.useGeneration,
-          destination: candidate.destination.program == null
+          destination: candidate.destination.ssh != null
+              ? CredentialBatchDestination._(
+                  'ssh',
+                  null,
+                  null,
+                  null,
+                  null,
+                  candidate.destination.ssh!.trusted(_service._sshHostTrust!),
+                )
+              : candidate.destination.program == null
               ? candidate.destination
               : CredentialBatchDestination._(
                   'program',
@@ -348,6 +369,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
     String requestId, {
     required String operationId,
     Iterable<String>? itemIds,
+    SshSessionOperationContext? sshContext,
   }) => _service.owner._serialize(() async {
     _batchOperationId(operationId);
     final r = _service._sessionBatch(session, deviceId, requestId);
@@ -355,9 +377,18 @@ extension CredentialBatchAgentAccess on AgentAccess {
       throw const CredentialUseFailure('unsupported_receiver');
     }
     final selected = _service._selectedBatchItems(r, itemIds);
+    final ssh = selected.length == 1 ? selected.single.destination.ssh : null;
+    if ((sshContext != null) != (ssh != null) ||
+        sshContext != null &&
+            (sshContext.kind == 'credential'
+                ? ssh!.credentialUse != 'sudo'
+                : ssh!.credentialUse != 'login')) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     final ids = selected.map((i) => i.id).toList()..sort();
     final fingerprint = _useFingerprint({
       'requestId': r.id,
+      if (sshContext != null) 'sshContext': sshContext.toJson(),
       'itemIds': ids,
       'destinations': [for (final item in selected) item.destination.toJson()],
     });
@@ -392,7 +423,10 @@ extension CredentialBatchAgentAccess on AgentAccess {
     final targets = selected
         .map((i) => _service._batchDestinationKey(i.destination))
         .toSet();
-    for (final active in _service._batchRepository.credentialBatchOperations) {
+    for (final active
+        in sshContext != null
+            ? <CredentialBatchOperation>[]
+            : _service._batchRepository.credentialBatchOperations) {
       if (active.attentionAcknowledgedAt != null) continue;
       final observedState = _service._batchOperationForDisplay(active).state;
       if (!{
@@ -423,6 +457,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
     }
     final now = _batchTime(_service._clock());
     final operation = CredentialBatchOperation(
+      sshContext: sshContext,
       operationId: operationId,
       requestId: r.id,
       sessionBinding: r.sessionBinding,
@@ -471,7 +506,8 @@ extension CredentialBatchAgentAccess on AgentAccess {
     Map<String, CredentialBatchDestination> observations,
   ) => _service.owner._serialize(() async {
     final (_, r, operation) = _service._batchProof(deviceId, proof);
-    if (operation.materialClaimed ||
+    if (operation.sshContext?.requiresMaterial == false ||
+        operation.materialClaimed ||
         operation.state != CredentialBatchOperationState.checking) {
       throw const CredentialUseFailure('execution_unknown');
     }
@@ -514,7 +550,8 @@ extension CredentialBatchAgentAccess on AgentAccess {
   Future<void> authorizeCredentialBatchInput(String deviceId, String proof) =>
       _service.owner._serialize(() async {
         final (_, r, operation) = _service._batchProof(deviceId, proof);
-        if (!operation.materialClaimed) {
+        if (!operation.materialClaimed &&
+            operation.sshContext?.requiresMaterial != false) {
           throw const CredentialUseFailure('material_prepare_failed');
         }
         void validate() {
@@ -700,7 +737,7 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     required String operationId,
     required int revision,
     required Iterable<String> approvedItems,
-    Duration lifetime = AccessTiming.defaultLifetime,
+    Duration? lifetime = AccessTiming.defaultLifetime,
     String? reviewToken,
     String? commandDigest,
     void Function()? validateReview,
@@ -754,7 +791,9 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     final selected = itemIds.toList()..sort();
     if (selected.toSet().length != selected.length ||
         selected.length > 20 ||
-        action == 'approve' && !AccessTiming.isGrant(lifetime!) ||
+        action == 'approve' &&
+            lifetime != null &&
+            !AccessTiming.isGrant(lifetime) ||
         action == 'revoke' && selected.isEmpty) {
       throw const CredentialUseFailure('invalid_plan');
     }
@@ -787,6 +826,13 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
         r.archived ||
         selected.any((id) => !r.items.any((i) => i.id == id))) {
       throw const CredentialUseFailure('operation_conflict');
+    }
+    if (action == 'approve' &&
+        lifetime == null &&
+        r.items
+            .where((i) => selected.contains(i.id))
+            .any((i) => i.destination.ssh?.validity != 'session')) {
+      throw const CredentialUseFailure('invalid_plan');
     }
     final now = _batchTime(_service._clock());
     void validate() {
@@ -821,7 +867,9 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
                 selected.contains(item.id)
                     ? CredentialBatchItemDecision.approved
                     : CredentialBatchItemDecision.denied,
-                selected.contains(item.id) ? now.add(lifetime!) : null,
+                selected.contains(item.id) && lifetime != null
+                    ? now.add(lifetime)
+                    : null,
               )
             : selected.contains(item.id)
             ? item.decided(CredentialBatchItemDecision.revoked, item.expiresAt)

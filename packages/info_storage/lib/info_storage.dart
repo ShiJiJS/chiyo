@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:info_core/info_core.dart';
@@ -12,6 +13,7 @@ import 'package:info_core/protocol_json.dart';
 import 'package:info_core/server_state.dart';
 import 'package:info_core/library_replication.dart';
 import 'package:info_core/library_sync_changes.dart';
+
 import 'backup_publish.dart';
 import 'macos_backup_publication.dart';
 import 'platform_keys.dart';
@@ -102,6 +104,7 @@ const _agentSubmissionLibraryFormat = 66;
 const _credentialProgramBatchLibraryFormat = 67;
 const _deleteSubmissionLibraryFormat = 68;
 const _nativeFillLibraryFormat = 69;
+const _sshInteractiveLibraryFormat = 70;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -732,7 +735,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _nativeFillLibraryFormat) {
+      if (headerVersion > _sshInteractiveLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -747,8 +750,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) >
-                _nativeFillLibraryFormat ||
+            (marker.single['version'] as int) > _sshInteractiveLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1353,12 +1355,11 @@ class EncryptedInformationRepository
     return List.unmodifiable(_tags.values);
   }
 
-  Future<void> _writeDirectory(
-    InformationDirectory directory,
-  ) => _db.customStatement(
-    'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
-    [directory.id, directory.name, directory.parentId, directory.version],
-  );
+  Future<void> _writeDirectory(InformationDirectory directory) =>
+      _db.customStatement(
+        'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
+        [directory.id, directory.name, directory.parentId, directory.version],
+      );
   Future<void> _writeTag(InformationTag tag) => _db.customStatement(
     'INSERT INTO information_tags(id,name,version) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,version=excluded.version',
     [tag.id, tag.name, tag.version],
@@ -2515,9 +2516,8 @@ class _InformationDatabase extends GeneratedDatabase {
   );
 
   Future<void> _createInformationLayout() async {
-    final columns = await customSelect(
-      'PRAGMA table_info(information_items)',
-    ).get();
+    final columns = await customSelect('PRAGMA table_info(information_items)')
+        .get();
     if (columns.any((r) => r.read<String>('name') == 'layout_json')) {
       // Development/legacy fixtures can carry the empty additive column, but a
       // downgraded marker must never hide already persisted layout content.

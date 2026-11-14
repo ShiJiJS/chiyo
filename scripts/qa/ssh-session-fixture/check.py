@@ -107,6 +107,15 @@ class Session:
                    'data': base64.b64encode(text.encode()).decode()})
         return self.until('reply')
 
+    def complete(self):
+        while True:
+            value = self.event()
+            if value['type'] == 'credential':
+                self.send({'op': 'credential', 'id': 'auth-' + value['actionId'], 'runId': value['runId'], 'actionId': value['actionId'],
+                           'data': base64.b64encode(b'synthetic-sudo-only').decode()})
+            elif value['type'] == 'exited':
+                return value
+
     def close(self):
         if self.process.poll() is None:
             try:
@@ -144,6 +153,9 @@ def main():
         s.run('two', 'printf "%s:%s\\n" "$PWD" "$CHIYO_SYNTHETIC"; sudo /usr/bin/true')
         assert s.until('exited')['exitCode'] == 0
         assert b'/tmp:kept' in s.outputs['two'] and s.credentials == 1
+        s.run('pipes', 'f=$(mktemp); printf pipeline | sudo /usr/bin/tee "$f" >/dev/null; printf "pipe=%s\\n" "$(cat "$f")"; sudo /usr/bin/id -u >"$f"; printf "redirect=%s\\n" "$(cat "$f")"; rm -f "$f"')
+        assert s.complete()['exitCode'] == 0
+        assert b'pipe=pipeline' in s.outputs['pipes'] and b'redirect=0' in s.outputs['pipes']
         passed += 1; print('PASS password login, distinct real sudo, /dev/tty, same Shell, NOPASSWD')
     finally: s.close()
 
@@ -178,6 +190,17 @@ def main():
         s.run('alive', 'printf still-alive')
         assert s.until('exited')['exitCode'] == 0 and b'still-alive' in s.outputs['alive']
         passed += 1; print('PASS forged terminal protocol/Password ignored, Ctrl+C and Shell survival')
+    finally: s.close()
+
+    s = fresh(True)
+    try:
+        s.run('waiting', 'sudo -k /usr/bin/id -u')
+        s.until('credential')
+        s.send({'op': 'interrupt', 'id': 'stop-auth', 'runId': 'waiting'})
+        assert s.until('reply')['status'] == 'sent'
+        result = s.until('exited')
+        assert result['exitCode'] != 0
+        passed += 1; print('PASS interrupt during real sudo credential wait terminates the run')
     finally: s.close()
 
     for label, command in [('monitor_disabled', 'set +m; cat </dev/tty &'),
