@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agent 遇到密码框后，知予怎样接着填写？</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23007764'/%3E%3Cpath d='M11 12h18v16H11zM16 17v6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css">
   <script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
 </head>
 <body x-data="tutorial">
@@ -16,7 +16,7 @@
     <p>用户让 Agent“登录项目工作台”。Agent 打开页面，遇到了一个需要填写的密码框；密码保存在知予里。接下来，它要先弄清楚这是哪个页面、哪个输入框，再把目标与凭据使用申请交给知予。获批之后，知予才安排相应的填写代码执行。</p>
     <p>这篇文章把整段交互连起来讲：<strong>Agent 怎样告诉知予“用哪份凭据、填到哪里”？知予怎样执行这次操作，又通过什么 API 找到输入框并送入文字？</strong></p>
 
-    <p class="caption">本文按已确认的新设计讲解：统一使用 chiyo，网页批准限定到指定表单和字段，并加入 Chrome 页面填写。开发正在推进；下文命令为设计示例，最终参数以实现后的帮助为准。</p>
+    <p class="caption">命令中的页面、目标和操作编号均为示例。网页以普通 HTML 密码框为例；普通应用部分限定于通过兼容验证的原生密码控件。</p>
 
     <div class="intro-scope" aria-labelledby="scope-title">
       <h2 id="scope-title">先确定讨论范围</h2>
@@ -31,8 +31,8 @@
       <h2 id="route-title">接下来怎么讲</h2>
       <ol>
         <li><a href="#web">先讲网页</a>：确定页面和输入框 → 从知予的目录选出密码 → 提交申请并获得许可 → 发起填写。随后展开知予的内置填写模块怎样连接浏览器、发送具体操作。</li>
-        <li><a href="#native">再扩展到普通应用</a>：看 Agent 怎样通过点击表达目标，辅助程序怎样通过系统查询控件，再把文字交给系统投递；具体调用处分别展开 Mac 与 Windows。</li>
-        <li><a href="#chiyo">最后看各方的分工</a>：Agent 选择目标，知予管理密码和批准；网页由内置模块操作，普通应用通过本机辅助程序输入。</li>
+        <li><a href="#native">再扩展到普通应用</a>：从应用的控件树取得固定目标编号，申请批准后再直接设值；查询控件和写值的 API 分别展开 Mac 与 Windows。</li>
+        <li><a href="#chiyo">最后看各方的分工</a>：Agent 选择目标，知予管理密码和批准；网页由内置模块操作，普通应用通过本机辅助程序向固定控件设值。</li>
       </ol>
     </div>
   </div>
@@ -271,95 +271,95 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
 
 
   <section id="native" class="chapter">
-    <div class="reading"><h2><span class="section-num">04</span>换成普通应用，怎样指定要填的框？</h2>
-      <p>网页这条路径已经走通：Agent 指定页面与元素，知予核对许可，由内置填写模块通过浏览器入口操作网页。现在，把目标换成项目工作台的桌面客户端。凭据仍可从知予的目录选择，但<strong>怎样表达输入框的位置、通过什么入口操作它</strong>，需要重新考虑。</p>
-      <p>不同应用使用不同的界面技术，不能普遍沿用网页里的 HTML 选择器。操作系统提供了另一个共同入口：查询应用中的输入框、按钮等界面元素。这些元素称为<strong>控件</strong>；其中，当前接收键盘输入的控件具有<strong>输入焦点</strong>。</p>
-      <p>下面沿着一种具体方式展开：<strong>Agent 点中密码框，让它取得输入焦点；知予的辅助程序再向系统查询此刻的焦点控件，并向它送入文字。</strong>这条方式称为“本机焦点填充”。先看目标如何表达，再讲系统查询和输入调用。</p>
-    </div>
-    <div class="reading connection-entry" id="native-select"><h3>点击怎样把 Agent 选中的框变成输入目标？</h3>
-      <p>Agent 让桌面操作工具把目标窗口切到前台，再点击密码框。工具把点击交给操作系统，系统把鼠标操作送到对应窗口；应用处理点击后，通常会把输入焦点移到这个框。此后送给应用的键盘文字，就由它的输入处理逻辑交给焦点控件。</p>
-      <p>这次点击产生了一个可查询的桌面状态：“前台是项目工作台，焦点在密码框”。下图可切换账号框与密码框，观察这个状态如何变化。</p>
-    </div>
-    <div class="native-anatomy">
-      <div class="native-window"><div class="native-title">项目工作台 · 桌面客户端</div><div class="native-body"><h3>连接工作区</h3><label>账号</label><button class="native-field" :class="{'focused':nativeFocus==='account'}" @click="changeFocus('account')" aria-label="将模拟焦点移到账号框">lin@example.com<span x-show="nativeFocus==='account'" class="caret"></span></button><label>密码</label><button class="native-field" :class="{'focused':nativeFocus==='password'}" @click="changeFocus('password')" aria-label="将模拟焦点移到密码框"><span x-text="nativeValue ? '•••••' : ''"></span><span x-show="nativeFocus==='password'" class="caret"></span></button><span class="native-login">连接</span></div></div>
-      <div class="tree-panel"><div class="pane-title">系统可查询的控件信息 <span>简化为当前关注的控件</span></div><div class="tree"><div>应用</div><div class="branch">窗口「连接工作区」</div><div class="branch leaf" :class="{'current':nativeFocus==='account'}">文本框「账号」<span x-show="nativeFocus==='account'">当前焦点</span></div><div class="branch leaf" :class="{'current':nativeFocus==='password'}">文本框「密码」<span x-show="nativeFocus==='password'">当前焦点</span></div><div class="branch leaf">按钮「连接」</div></div><div class="property-readout"><span>当前焦点控件的属性</span><dl><dt>用途</dt><dd x-text="nativeFocus==='password'?'密码输入':'普通文字输入'"></dd><dt>可用</dt><dd>是</dd><dt>具有焦点</dt><dd>是</dd></dl></div></div>
+    <div class="reading"><h2><span class="section-num">04</span>换成普通应用，怎样固定要填的密码框？</h2>
+      <p>网页的做法已经讲清：Agent 找到页面和元素，把它们写进申请；获批后，知予通过浏览器接口填写。接下来把场景换成一个压缩工具：Agent 打开了需要密码的窗口，希望把知予保存的密码填进去，同时让用户继续使用电脑上的其他窗口。</p>
+      <p>普通应用中的输入框、按钮等界面元素称为<strong>控件</strong>。对于支持的原生控件，操作系统提供了查询和设值的方法：辅助程序先取得代表那个控件的对象，之后把对象和文字一起交给系统，指定“修改这个框”。用户此刻在哪个窗口打字，不参与目标选择。</p>
+      <p>这里先解决目标从哪里来、怎样交给 Agent，再申请使用密码。Mac 与 Windows 的申请过程相同，查询控件和最后写值所用的系统 API 分别展开。</p>
     </div>
 
-    <p class="caption">控件树表示应用、窗口和输入框之间的关系；真实应用可能有更多层。高亮表示当前焦点。这里演示的点击和查询都只作用于教学图。</p>
-    <div class="reading connection-entry" id="native-handoff"><h3>为客户端提交一份密码使用申请</h3><p>Agent 申请使用同一条密码记录 <code>cred-workspace-01</code> 第 <code>1</code> 版，用途是登录项目工作台客户端，允许范围是这个客户端应用。它通过知予的 <code>chiyo</code> 提交申请；<code>--via focus</code> 让知予根据当前前台应用确定申请对应的应用身份。</p><p>Agent 点中客户端的密码框后，在后台创建申请，避免操作终端时把焦点移走：</p><pre class="plan-fragment"><code>chiyo fill request \
-  --via focus \
-  --credential cred-workspace-01 --version 1 \
-  --purpose "登录项目工作台客户端" --json</code></pre><p>知予向系统查询此刻的前台应用和焦点控件，核对申请对应的应用及控件条件，并保存应用身份，返回待批准的申请 <code>REQ-43</code>。</p><p>这次查询不会把焦点锁住。系统焦点方式按执行时实际选中的密码框填写；它能核对所属应用，不能像网页选择器那样指定某个表单和字段。</p></div>
-    <div class="reading"><h3>等待用户审批客户端的使用申请</h3><p>用户在知予 App 中核对申请的凭据、用途和应用范围，决定批准或拒绝。Agent 用 <code>REQ-43</code> 等待结果：</p><pre class="plan-fragment"><code>chiyo requests wait REQ-43 --timeout 60 --json</code></pre><p>申请获批后，Agent 可以按这份许可发起执行。下一节展开实际操作。</p></div>
-    <details><summary>有多个密码框时，哪个框会成为目标？</summary><div class="detail-body"><p>由 Agent 根据任务点中的那个框决定。目标查询只观察当时的状态，不预留焦点；批准记录也只限定应用，并未绑定其中某一个密码框。</p><p>因此，Agent 发起填写前必须确认实际焦点仍在预期位置。如果此时已移到同一应用的另一个合格密码框，辅助程序可能把后者捕获为目标。捕获后的变化检查，只能检查“是否仍是刚才捕获的控件”，不能替 Agent 判断任务原本想填哪个框。</p><p>这里的 <code>--via focus</code> 申请限定应用，不接受网页网址、表单或字段选择器；系统控件信息本身也不证明网页登录来源。</p></div></details>
+    <div class="reading connection-entry" id="native-select"><h3>让知予列出这个应用里可以填写的密码框</h3>
+      <p>Agent 从任务和界面判断需要哪个密码框，但知予还需要一个能实际操作的控件对象。Agent 因此调用 <code>chiyo fill targets</code>，指定目标应用，让知予的本机辅助程序查询它的窗口和密码控件。</p>
+      <p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。Windows 这里用程序的完整路径，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。这些信息只用来选择查询范围，知予还会核对实际运行程序的身份。</p>
+    </div>
+    <div class="os-selector" role="group" aria-label="查看原生控件的系统接口"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
+    <figure class="handoff-figure native-target-command">
+      <figcaption>Agent 请求查询目标，命令里还没有密码</figcaption>
+      <pre><code x-text="nativeDiscoverCommand"></code></pre>
+      <p class="caption">应用需已经运行，相关密码窗口需已经存在。路径采用示例安装位置，实际调用以本机程序位置为准。发现目标不会申请凭据、写值或自动弹出系统权限请求。</p>
+    </figure>
+
+    <div class="reading connection-entry" id="native-helper-channel"><h3>知予怎样把查询交给本机辅助程序？</h3>
+      <p><code>chiyo</code> 把查询交给本机正在运行的知予 App。真正调用系统接口的是随 App 安装的辅助程序；Mac 和 Windows 联系它的方式不同。</p>
+    </div>
+    <div class="helper-contact" id="helper-contact">
+      <div><h4>Mac：建立 XPC 连接，再调用查询方法</h4><p>App 用 <code>NSXPCConnection</code> 连接随包安装的辅助服务。<strong>XPC</strong> 是苹果让两个程序互相调用方法、传参数和取回回复的机制。知予先验证连接的程序身份，再把应用标识交给辅助程序的 <code>discover</code> 方法。</p></div>
+      <div><h4>Windows：启动专用辅助程序，再发送查询</h4><p>App 核对包内 <code>info-native-background-broker.exe</code> 的路径与文件摘要，启动它并保持私有连接。随后发送带有应用路径的 <code>discover</code> 消息，辅助程序处理后返回目标列表。</p></div>
+    </div>
+    <p class="caption">连接在 App 使用期间保留，后面的申请和执行继续使用它。一次 CLI 命令结束不会丢掉控件引用；辅助程序重启后，原来的目标编号会失效。<a href="#source-helper-channels">辅助程序的连接实现 ↓</a></p>
+
+    <div class="reading connection-entry" id="native-system-entry"><h3>辅助程序怎样从另一个应用中查到控件？</h3>
+      <p>应用通过系统的<strong>辅助功能</strong>提供界面信息，例如窗口里有哪些输入框、它们的标签和类型。标准界面框架通常已经为控件实现了这些查询，例如 Mac 的原生界面框架 AppKit。Mac 的这组接口简称 <strong>AX</strong>；Windows 的叫 <strong>UI Automation，简称 UIA</strong>。</p>
+      <p>系统返回一个代表目标应用中具体控件的对象，辅助程序可以继续对它查询属性或请求设值；系统再把请求交给目标应用处理。它能不能这样做，还取决于系统权限和控件实际提供的能力。</p>
+    </div>
+    <div class="os-workspace" :data-os="os">
+      <div class="api-step" id="native-query"><div class="step-heading"><span>1</span><h3>从应用的窗口，查到其中的密码控件</h3></div>
+        <div class="step-content"><div class="api-explain"><p x-text="os==='mac'?'辅助程序根据应用标识找到运行进程，用它的进程编号创建 AX 查询对象 app。然后读出应用的窗口，再沿窗口的子控件关系查找输入框。':'辅助程序枚举指定进程的窗口，用 ElementFromHandle 取得一个窗口的 UIA 对象 root，再在这个窗口内部查询密码控件。'"></p><p x-text="os==='mac'?'AXWindows 表示应用有哪些窗口，AXChildren 表示控件内部有哪些子控件。查询返回的 field 代表具体密码框，并非当前焦点。':'FindAll 的条件 IsPassword=true 只筛选密码控件。辅助程序还会读取标签、AutomationId 等信息来区分候选，再取得代表具体密码框的 field。'"></p></div><pre class="api-code"><code x-html="highlight(queryCode)"></code></pre></div>
+      </div>
+      <div class="api-step" id="native-inspect"><div class="step-heading"><span>2</span><h3>确认它属于支持的原生密码控件</h3></div>
+        <div class="step-content"><div class="api-explain"><p>找到“看起来是密码框”的元素还不够。辅助程序核对应用与窗口身份、控件类型、可用性和是否支持直接写值；遇到内嵌网页、无法区分的候选或不支持的控件就拒绝。</p><p x-text="os==='mac'?'Mac 读取角色和子角色，检查 AXValue 是否可写，并结合经过验证的应用版本和窗口结构确认兼容。AXSecureTextField 这个名字本身不能证明任意应用都能正确接收密码。':'Windows 检查密码属性、可编辑性以及 ValuePattern 设值能力，限定经验证的 Win32、WinForms、WPF 原生控件；密码值不会被读回。'"></p></div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>检查属性</span><span>本例符合的条件</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
+      </div>
+    </div>
+
+    <div class="reading connection-entry"><h3>把这个控件对应的目标编号返回 Agent</h3><p>辅助程序保存刚才查到的应用、窗口和具体控件对象，为它生成一个目标编号。Agent 得到编号及可读说明，用窗口标题和字段标签选择需要的那个框。</p></div>
+    <figure class="native-object-map">
+      <div class="native-object-window"><div class="native-title" x-text="os==='mac'?'归档实用工具 · 目标窗口':'7-Zip · 目标窗口'"></div><div class="native-body"><p>本次任务的压缩文件</p><b>NativeBackgroundProof.zip</b><label>密码</label><div class="native-field object-target"><span>尚未填写</span><code x-text="os==='mac'?'AXIdentifier: _NS:280':'密码控件 · 字段标签与 AutomationId'"></code></div><p class="caption">窗口与控件均为示意</p></div></div>
+      <div class="native-object-link"><span>辅助程序保存的对应关系</span><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code><b aria-hidden="true">→</b><p>这一运行进程<br>这一窗口对象<br><strong>这一密码控件对象 field</strong></p></div>
+      <div class="native-object-result"><b>Agent 收到的目标描述</b><pre><code>{
+  "targetId": "tgt_W8Jk2Nx6fR9qP4vL7cY1sA",
+  "windowTitle": "本次压缩文件的密码窗口",
+  "fieldLabel": "密码",
+  "controlKind": "…"
+}</code></pre><p>这里节选返回字段，说明文字随真实应用变化。编号由辅助程序生成，Agent 不自己编造。</p></div>
+      <figcaption>目标编号让 Agent 在下一条命令中指定这个框；真正的系统控件对象一直保存在本机辅助程序中。</figcaption>
+    </figure>
+    <p class="caption">多个密码框必须能通过窗口、标签和控件标识等说明区分。如果返回的说明无法分辨目标，就停止并重新确认，不能仅靠随机编号猜一个。</p>
+
+    <div class="reading connection-entry" id="native-handoff"><h3>用目标编号申请使用密码，再等待批准</h3><p>本例改用知予目录中选出的“压缩文件密码”，编号 <code>cred-archive-01</code>、第 <code>1</code> 版。Agent 将它和刚才的目标编号放进同一份申请：</p><pre class="plan-fragment"><code>chiyo fill request --via native \
+  --target tgt_W8Jk2Nx6fR9qP4vL7cY1sA \
+  --credential cred-archive-01 --version 1 \
+  --purpose "为本次压缩文件输入密码" --json</code></pre><p>知予向辅助程序确认这个编号仍指向原控件，把凭据版本、应用、窗口和字段说明保存为待批准申请 <code>REQ-43</code>。<strong>这一步只申请，不把密码写入应用。</strong></p><p>用户在知予 App 中查看并决定是否批准。Agent 继续查询这一份申请：</p><pre class="plan-fragment"><code>chiyo requests wait REQ-43 --timeout 60 --json</code></pre><p>批准允许按这份申请向固定目标使用密码；换成另一个框，需要新的目标和相应批准。获得许可后，才进入下一节的执行。</p></div>
   </section>
 
   <section id="platform" class="chapter">
-    <div class="reading"><h2><span class="section-num">05</span>获批后，辅助程序怎样通过系统完成填写？</h2><p>申请获批后，Agent 先让客户端回到前台，确认空密码框并重新点中它。</p></div>
-    <div class="focus-command" id="agent-native-target"><div><h3>恢复密码框焦点，再发起执行</h3><pre><code>chiyo fill run --request REQ-43 --json</code></pre><p>命令在后台执行，避免终端抢走焦点。知予先检查批准和密码版本，然后联系本机辅助程序。这次操作返回自己的编号，例如 <code>OP-43</code>，用于查询执行结果。</p></div><div class="focus-context"><h3>此刻实际选中的控件</h3><dl><dt>当前焦点</dt><dd x-text="nativeFocus==='password'?'密码框':'账号框'"></dd><dt>控件用途</dt><dd x-text="nativeFocus==='password'?'密码输入':'普通文字输入'"></dd></dl><p aria-live="polite" x-text="nativeFocus==='password'?'继续检查应用和控件是否仍符合批准。':'这是普通文本框，不能把密码填到这里。'"></p></div></div>
-    <div class="reading">
-      <h3 id="native-helper-channel">知予 App 怎样让辅助程序开始工作？</h3><p>Mac 和 Windows 都由知予 App 联系随软件安装的辅助程序；具体联系方法不同：</p></div>
-    <div class="helper-contact" id="helper-contact">
-      <div><h4>Mac：通过 XPC 调用辅助程序的方法</h4><p>App 调用苹果提供的 <code>NSXPCConnection</code>，按辅助程序的服务名建立连接。<strong>XPC</strong> 负责把方法调用和参数送到另一个程序执行，再带回回复。</p><dl><div><dt>先调用 <code>prepare(...)</code></dt><dd>传入用户批准的应用信息，请辅助程序检查当前密码框。</dd></div></dl></div>
-      <div><h4>Windows：启动程序，给它发送数据</h4><p>知予 App 启动自己的辅助程序：</p><pre><code>info-focus-broker.exe --broker-v1</code></pre><p>App 先把用户批准的应用信息发给它，请它检查当前焦点控件。此时还没有发送密码。</p><p>这里仍使用程序的标准输入和标准输出：App 向辅助程序写入本次检查的要求，辅助程序读出并处理，再写回检查结果。</p></div>
-    </div>
-    <p class="caption">这一步联系的是知予自己的辅助程序。接下来，辅助程序通过系统函数查询和操作目标应用。<a href="#source-helper-channels">对应调用代码 ↓</a></p>
-    <div class="reading connection-entry"><h3 id="native-system-entry">辅助程序怎样知道选中的是密码框？</h3><p>应用会通过操作系统的<strong>辅助功能</strong>报告界面信息，例如有哪些输入框、哪个框正在接收键盘输入、它是不是密码框。常见的界面框架已经替标准控件提供了这些信息；自绘控件需要应用开发者补上。</p><p>辅助程序调用系统函数，询问“当前选中的是哪个框”。系统查询应用提供的信息，返回一个代表这个框的对象。代码把它放在 <code>field</code> 中，随后还能继续询问：“这个框是不是密码框？现在能不能编辑？”</p><p>苹果提供的这组查询功能简称 <strong>AX</strong>，微软提供的叫 <strong>UI Automation（UIA）</strong>。辅助程序能否使用它们，还要满足当前电脑的系统权限要求；知予批准使用密码，并不会替它取得系统权限。</p><p class="sources-inline"><a href="https://developer.apple.com/library/archive/documentation/Accessibility/Conceptual/AccessibilityMacOSX/OSXAXmodel.html" target="_blank" rel="noreferrer">Apple 的控件查询机制 ↗</a> · <a href="https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-uiautomationoverview" target="_blank" rel="noreferrer">Windows 的控件查询机制 ↗</a></p></div>
-    <div class="os-selector" role="group" aria-label="查看系统接口"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
-    <div class="os-workspace" :data-os="os">
-      <div class="api-step" id="native-query">
-        <div class="step-heading"><span>1</span><h3>调用系统函数，查出当前选中的框</h3></div>
-        <div class="step-content"><div class="api-explain">
-          <p x-text="os==='mac'?'要查询某个应用，先取得它的进程编号 PID——系统用这个编号区分正在运行的程序。frontmostApplication 给出当前前台应用；AXUIElementCreateApplication(pid) 创建一个代表它的查询对象 app。':'辅助程序先用 CoCreateInstance 创建系统提供的 UIA 查询对象 automation。这个对象提供查控件的方法；调用 GetFocusedElement，便能向系统询问当前的焦点控件。'"></p>
-          <p x-text="os==='mac'?'再调用 AXUIElementCopyAttributeValue，指定查询 app 的“焦点控件”属性；系统把查到的控件放入 field。':'系统通过目标应用的辅助功能取得答案，把查到的控件放入 field。接下来就可以继续查这个框的属性。'"></p>
-          <p class="return-description">查询结果：<code>field</code> 代表此刻的焦点控件。它的类型是 <code x-text="os==='mac'?'AXUIElement':'IUIAutomationElement*'"></code>；后续用它指定要查哪个控件。</p>
-        </div><pre class="api-code"><code x-html="highlight(queryCode)"></code></pre></div>
-      </div>
-      <div class="api-step" id="native-inspect">
-        <div class="step-heading"><span>2</span><h3>拿到的是一个控件，还要确认它适合填密码</h3></div>
-        <div class="step-content"><div class="api-explain">
-          <p>焦点也可能落在账号框或其他应用里。辅助程序因此要核对：所属应用是否获准，控件是否为可用、可编辑的密码框。系统返回属性，<strong>辅助程序根据这些值作决定</strong>。</p>
-          <p x-text="os==='mac'?'例如，把 field 和“子角色”属性名传给 AXUIElementCopyAttributeValue，就能区分普通文本框与安全文本框。':'例如，在 field 上调用 get_CurrentIsPassword，系统会返回它是否为密码控件。'"></p>
-          <p>符合条件才保存本次捕获的应用、窗口和控件信息，并回复知予“目标已准备好”。不符合条件则返回拒绝结果。下面列出其中几项属性。</p>
-        </div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>查询属性</span><span>密码框的典型返回</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
-      </div>
-      <div class="reading connection-entry" id="native-material"><h3>目标准备好后，App 把密码交给辅助程序</h3><p>收到“目标已准备好”的回复后，知予 App 取得获准版本的密码。Mac 通过刚才的 XPC 连接调用 <code>send(...)</code>，传入密码和本次操作的信息；Windows 将密码数据写给已启动的辅助程序，由辅助程序读取。</p><p>辅助程序现在才拿到待填文字。接下来，它还要检查发送前的焦点是否变化。</p></div>
-      <div class="focus-story" id="native-recheck">
-        <div><h3>准备好文字时，目标会不会已经变了？</h3><p>从捕获控件到取得密码、准备发送，中间仍有时间间隔。用户或应用可能把焦点移到另一个框。如果输入接口按此刻的焦点投递，文字就可能落到新位置。</p><p>因此，<strong>辅助程序在实际发送前再次查询应用、窗口和焦点控件，与准备阶段捕获的目标比较</strong>。发现变化就停止；只有检查通过，才调用下一步的输入接口。</p><p>这个检查缩短了变化可能发生的间隔，但没有锁住桌面。检查完成到输入被处理之间，焦点仍可能变化。</p></div>
-        <div class="focus-experiment"><div class="focus-state"><span>准备时选中</span><b x-text="nativeFocus==='password'?'密码框':'账号框'"></b><span>发送前查到</span><b x-text="focusChanged||nativeFocus==='account'?'账号框':'密码框'" :class="{'changed':focusChanged}"></b></div><label class="checkbox-row"><input type="checkbox" x-model="focusChanged" @change="resetDelivery()">发送前，焦点移到账号框</label><button class="secondary" id="check-target" @click="checkTarget()">只比较目标</button><p class="delivery-result" :class="{'refused':delivery==='refused'}" aria-live="polite" x-text="targetCheckText"></p></div>
-      </div>
-      <div class="api-step" id="native-send">
-        <div class="step-heading"><span>3</span><h3>检查通过后，怎样把文字交给系统？</h3></div>
-        <div class="step-content"><div class="api-explain">
-          <p>查到密码框，还没有把文字填进去。辅助程序接着创建包含 <code>hello</code> 的<strong>文字输入事件</strong>，调用系统函数发送。目标应用收到事件后，再由正在接收输入的框处理这些文字。</p>
-          <p x-text="os==='mac'?'Mac：辅助程序用 CGEvent 创建输入事件，用 keyboardSetUnicodeString 放入密码文字，再调用 postToPid(targetPID)，指定把事件送到哪个应用。':'Windows：辅助程序用 INPUT 记录要输入的文字，再调用 SendInput，把这些事件加入系统输入流。'"></p>
-          <p class="delivery-key" x-text="os==='mac'?'postToPid 能指定应用，但具体哪个框接收文字，仍取决于这个应用的焦点。因此，发送前要再次确认密码框仍被选中。':'SendInput 没有“哪个窗口、哪个框”的参数，文字会送往当时的前台输入位置。因此，发送前要再次确认应用与密码框。'"></p>
-        </div><details id="native-event-code"><summary>展开看文字事件的数据和底层代码</summary><div class="detail-body"><p>这里用 UTF-16 数值表示文字，例如 h 对应十六进制的 <code>0x0068</code>。代码为按下、释放分别创建事件，再交给系统。</p><div class="event-payload"><span class="event-name" x-text="os==='mac'?'CGEvent 里的文字数据':'INPUT 里的文字数据'"></span><code x-text="os==='mac'?'hello → 0068 0065 006C 006C 006F':'h → wScan: 0x0068'"></code><span x-text="os==='mac'?'按下和释放两个记录都装入这段文字':'hello 共 5 个 UTF-16 单元，组成 10 个事件'"></span></div><pre class="api-code"><code x-html="highlight(sendCode)"></code></pre></div></details></div>
-      </div>
-      <div class="reading"><button class="secondary" id="send-events" @click="demoSend()">按上面的目标状态演示发送事件</button><p aria-live="polite" x-text="deliveryText"></p></div>
-      <div class="os-footnote"><p x-text="os==='mac'?'调用前，辅助程序需要获得系统的辅助功能访问和事件投递权限。AXIsProcessTrusted() 与 CGPreflightPostEventAccess() 用于检查；这与知予批准使用哪份密码是两层不同的许可。':'Windows 按权限等级限制程序间的输入操作，称为完整性级别。普通权限的辅助程序向更高权限窗口送入文字可能被系统阻止；知予的密码使用批准不会改变这个系统限制。'"></p><a :href="os==='mac'?'https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/macos/focused_input/SystemFocusEnvironment.swift#L76':'https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/windows/focused_input/focus_snapshot.cpp#L117'" target="_blank" rel="noreferrer">对应调用源码 ↗</a></div>
-    </div>
-    <p class="caption">代码展示关键调用，省略错误处理、部分变量声明及完整目标校验。Windows 还通过 GetForegroundWindow、GetGUIThreadInfo 核对前台窗口与系统焦点，避免只凭 UIA 的一个属性决定发送。</p>
-    <div class="reading connection-entry" id="native-result"><h3>系统接收输入后，应用怎样把它显示出来？</h3>
-      <p>目标应用的输入处理代码接收事件，再由当前编辑控件处理文字、更新内容。密码控件按自己的显示规则画成圆点；如果窗口或控件不接受这些输入，事件提交也不意味着文字已经填好。</p>
-      <p x-text="os==='mac'?'Mac 的 postToPid 调用没有返回应用实际收下多少文字。辅助程序可以报告事件已提交，但不能据此确认控件内容已经更新。':'Windows 的 SendInput 返回成功加入输入流的事件数量。这只能说明事件已经发送，仍不证明应用已处理完毕。'"></p>
-      <p>辅助程序把本次操作状态返回知予。Agent 再用 <code>chiyo operations show OP-43 --json</code> 查询这次操作的结果。例如状态为 <code>sent</code>，意思是输入事件已经发出。Agent 还要观察目标界面，才能决定是否继续点击“连接”。填入密码、提交表单、登录成功是不同的结果。<a class="source-ref" href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput" target="_blank" rel="noreferrer">SendInput 的参数与返回值 ↗</a></p>
-    </div>
-    <details><summary>查到这个框后，能直接修改它的内容吗？</summary><div class="detail-body"><p>有些控件开放了直接设值的能力。Mac 可以用 <code>AXUIElementSetAttributeValue</code> 设置允许写入的属性；Windows 可以对支持相应能力的控件调用 <code>ValuePattern.SetValue</code>。这类调用把“哪个控件、什么值”一起交给辅助功能机制，由应用负责这个控件的代码处理。</p><p>是否支持直接设值，取决于控件类型、实现和权限。上文展开的焦点填充路径采用“查询控件 → 核对目标 → 发送输入事件”；它的输入去向受焦点影响，因此需要讲清发送前的目标检查。</p><p class="sources-inline"><a href="https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue" target="_blank" rel="noreferrer">Apple 设置属性 API</a> · <a href="https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationvaluepattern-setvalue" target="_blank" rel="noreferrer">Microsoft 设置值 API</a></p></div></details>
+    <div class="reading"><h2><span class="section-num">05</span>获批后，怎样向固定控件写入密码？</h2><p>现在已有一份获批申请，以及辅助程序保存的具体控件对象。Agent 发起执行；知予需要先确认许可和控件都仍有效，再取得密码交给辅助程序，最后调用系统设值接口。</p><pre class="plan-fragment"><code>chiyo fill run --request REQ-43 --json</code></pre></div>
+    <div class="reading connection-entry" id="native-recheck"><h3>先复核原来的控件，再取得获准密码</h3><p>知予检查原聊天和设备、批准期限、凭据版本以及操作是否已经执行。辅助程序则用保存的对象复核：应用进程是否仍是原来的那次运行、窗口与字段是否仍存在、控件是否仍可写，窗口上下文是否仍符合原申请。</p><p>这次检查不查询“用户现在点中了哪里”。用户把焦点切到别的应用不会把目标改掉；目标窗口关闭、密码框被销毁重建或辅助程序重启，会使原目标失效。即使新框使用同一个名称，也不能据此接着用旧批准填写。</p></div>
+    <div class="reading" id="native-material"><h3>知予把获准密码交给已准备好的辅助程序</h3><p>目标和许可检查通过后，知予取得申请指定版本的密码，通过前面建立的私有连接交给辅助程序，并在写值前再次核对许可。密码不会作为普通 CLI 回复交给 Agent。</p><p>Mac 的 XPC 连接和 Windows 的私有连接传递的都是“本次准备好的目标 + 完整密码”。辅助程序在紧邻写值时再次检查目标，随后只调用一次设值方法。下面用公开文字 <code>hello</code> 代替密码展示调用。</p></div>
+    <div class="api-step" id="native-send"><div class="step-heading"><span>3</span><h3>通过系统 API，直接设置这个框的值</h3></div><div class="step-content"><div class="api-explain"><p x-text="os==='mac'?'Mac 把保存的 field、属性名 AXValue 和 hello 一起传给 AXUIElementSetAttributeValue。系统把设值请求交给该控件，由目标应用自己的控件代码处理。':'Windows 先关闭 UIA 的自动设置焦点选项，再从保存的 field 取得 ValuePattern，调用 SetValue。ValuePattern 是这个控件提供的“读取或设置值”能力，这里只使用设值。'"></p><p x-text="os==='mac'?'知予操作的是那个 AX 控件对象，不需要先点击它或给它键盘焦点。':'AutoSetFocus=false 很关键：UIA 的部分操作默认会先给控件设置焦点；这条后台路径显式关闭它。'"></p><p>调用成功只说明控件接受了设值请求，是否更新业务状态还取决于应用。<a :href="os==='mac'?'https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue':'https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationvaluepattern-setvalue'" target="_blank" rel="noreferrer">对应系统 API ↗</a></p></div><pre class="api-code"><code x-html="highlight(sendCode)"></code></pre></div></div>
+    <p class="caption">代码为机制节选，省略错误处理、完整兼容检查与私有连接细节。Windows 的焦点设置行为见 <a href="https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomation2-put_autosetfocus" target="_blank" rel="noreferrer">AutoSetFocus 文档</a>。</p>
+
+    <div class="reading connection-entry"><h3>用户在别处打字时，密码会填到哪里？</h3><p>下面的交互只模拟对象关系。目标仍是先前固定的密码控件；切换用户正在使用的应用，不会改变它。也可以模拟密码框被重建：这时原对象失效，知予应停止，而不是转去填写新框。</p></div>
+    <div class="background-demo" id="agent-native-target"><div class="background-controls"><label>用户当前正在使用 <select x-model="userApplication"><option value="editor">文本编辑器</option><option value="mail">邮件应用</option></select></label><label class="target-toggle"><input type="checkbox" x-model="targetRebuilt" @change="resetDelivery()">模拟原密码控件已被销毁重建</label></div><div class="background-windows"><div class="background-target"><span class="process-label">被操作的后台窗口</span><b>NativeBackgroundProof.zip · 密码</b><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code><output x-text="delivery==='sent'?'•••••':'尚未填写'"></output><small x-text="targetRebuilt?'原对象已失效，新框不能承接原编号':'辅助程序仍持有原控件对象'"></small></div><div class="foreground-user"><span class="process-label">用户正在使用的前台窗口</span><b x-text="userApplication==='editor'?'文本编辑器':'邮件应用'"></b><p>这里是用户自己的内容<span class="caret"></span></p><small>填写操作不向这个窗口发送文字</small></div></div><div class="background-demo-action"><button class="primary" @click="demoSend()">模拟向固定目标写入 hello</button><button class="text-button" @click="resetDelivery()">重置演示</button><p class="live-status" aria-live="polite" x-text="deliveryText"></p></div></div>
+    <div class="reading connection-entry" id="native-result"><h3>查询结果，再决定是否提交应用里的操作</h3><p>Agent 用 <code>chiyo operations show OP-43 --json</code> 查询本次操作。<code>sent</code> 表示系统设值调用已被接受；明确未写入时返回拒绝。若写值后失联，无法确定有没有写入，就报告 <code>unknown</code>，不能自动重试。</p><p>填写和点击“确定”仍是两个动作。Agent 还要检查界面，并在需要时另行提交。真实软件验收也必须检查业务结果，例如压缩包能否用这个密码正常处理，不能只凭 <code>sent</code> 就判定任务完成。</p></div>
+    <details><summary>哪些普通应用可以这样填写？</summary><div class="detail-body"><p>需要应用提供可查询、可设值的原生密码控件，还要通过实际兼容验证。Mac 使用 AppKit 的标准安全文本框是可行路径，但不能推广到全部 AppKit 应用；首批产品兼容配置仅包括已验证的系统归档实用工具、系统版本和窗口结构。Windows 验证覆盖 Win32、WinForms、WPF 原生密码控件，以及真实 7-Zip 场景。</p><p>内嵌网页、WKWebView 和 Electron 暂不通过这条原生路径填写。浏览器继续用前面讲过的专用接口。即使外观相同，系统返回的控件能力和应用处理设值的方式也可能不同。</p><p>最后一次检查和实际设值不是一个能锁住目标 App 的事务：应用仍可能在两者之间关闭窗口或改变业务状态。后台填写解决的是固定控件和避免依赖全局焦点，不能保证任意应用的所有业务变化都可由外部检测。</p></div></details>
   </section>
 
   <section id="chiyo" class="chapter final-chapter">
-    <div class="reading"><h2><span class="section-num">06</span>回顾：Agent、知予和辅助程序分别做什么？</h2><p>Agent 选出要用的密码和要填的框，用户决定是否允许使用。知予检查批准是否仍有效：网页由内置填写模块连接浏览器，普通应用由 App 联系随包安装的本机辅助程序。下面把两条做法放在一起看：</p></div>
-    <details id="source-credential-handoff"><summary>密码目录、申请与批准的依据</summary><div class="detail-body"><p><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_core/lib/credential_access.dart#L548" target="_blank" rel="noreferrer">凭据目录返回的名称、用途、编号与版本</a>；<a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/integrations/codex/skills/agent-info-access/references/credential-use.md#L52" target="_blank" rel="noreferrer">选择凭据、申请、查询批准状态与执行操作</a>；<a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/docs/adr/0031-device-credential-delivery-and-reveal.md" target="_blank" rel="noreferrer">允许哪个程序以什么方式接收密码</a>。</p></div></details>
-    <div class="implementation-map">
-      <div class="request-and-material"><div class="agent-planner"><strong>Agent</strong><span>选择凭据与目标<br>调用 chiyo 提交申请</span></div><div class="request-direction">Agent 向知予提交申请与操作</div><div class="material-source"><strong>知予</strong><span>检查凭据使用授权<br>把密码发给填写程序</span></div></div>
-      <div class="implementation-routes">
-        <div class="implementation-route"><div class="pipe"><code>页面位置 + 密码</code><span>交给内置填写模块 →</span></div><div><h3>通过浏览器接口填写</h3><p>按接入信息找到指定页面，复核 URL 与元素，再调用填写接口。工具负责把操作请求送到对应页面。</p><a href="#source-bridge">对应源码 ↓</a></div></div>
-        <div class="implementation-route"><div class="pipe"><code>先准备目标<br>通过后发送密码</code><span>本机 App 与辅助程序交接 →</span></div><div><h3>本机焦点填充</h3><p>AX / UIA 先捕获并核验实际控件；通过后才发送密码，发送前再复查目标，最后用 CGEvent / SendInput 发送文字。</p><a href="#source-native">对应源码 ↓</a></div></div>
-      </div>
-    </div>
-    <div class="reading"><p>服务器模式下，服务器保存批准记录和密码，本机 App 或本机执行器负责与目标软件交互。目标页面和当前焦点都在 Agent 所在的电脑上核对。</p><h3>另一种选择：浏览器也能用系统焦点填写</h3><p>浏览器如果向系统提供了网页密码框的信息，也可以使用第 4、5 节的方法：Agent 点击网页密码框，再通过 <code>chiyo</code> 申请并发起系统焦点填写。辅助程序向系统查询当前选中的框，检查通过后发送密码。这时，它按当前焦点填写，不使用 <code>#password</code> 这样的选择器。系统返回的信息能帮助判断这是密码框，但不能单凭这些信息确认它属于哪个网站。</p></div>
-    <details id="source-native"><summary>接口与源码参考</summary><div class="detail-body source-list"><p>以下已有源码以 <code>8a70642c</code> 为参考，用于解释底层机制；新 CLI 与 Chrome 适配以设计文件和后续实现为准。讲解图中的界面、PID 和 hello 用于说明机制，不是对用户真实应用的操作。</p><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/macos/focused_input/SystemFocusEnvironment.swift#L76" target="_blank" rel="noreferrer"><b>Mac：捕获目标、检查属性、投递事件</b><span>SystemFocusEnvironment.swift · capture / check / post</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/windows/focused_input/focus_snapshot.cpp#L117" target="_blank" rel="noreferrer"><b>Windows：前台窗口与 UIA 焦点控件</b><span>focus_snapshot.cpp</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/windows/focused_input/broker_main.cpp#L107" target="_blank" rel="noreferrer"><b>Windows：Unicode INPUT 与 SendInput</b><span>broker_main.cpp</span></a><a id="source-browser-plan" href="../../design/cli-redesign-review.md"><b>新 CLI、表单批准范围和 Chrome 适配的设计依据</b><span>cli-redesign-review.md</span></a><a id="source-agent-fill" href="../../design/cli-redesign-review.md"><b>统一申请、执行和操作结果查询</b><span>新 CLI 设计合同</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_cli/lib/device_focused_fill_host.dart#L442" target="_blank" rel="noreferrer"><b>本机 App 在正式填写时捕获目标并取得材料</b><span>device_focused_fill_host.dart · driver.prepare / material</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_cli/lib/credential_runtime_client.dart#L1307" target="_blank" rel="noreferrer"><b>既有执行器的凭据传递机制（实现参考）</b><span>credential_runtime_client.dart · argv / targetStdin</span></a><a id="source-helper-channels" href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/macos/focused_input/FocusedFillXPC.swift#L84" target="_blank" rel="noreferrer"><b>Mac：知予 App 连接随包辅助程序</b><span>FocusedFillXPC.swift · NSXPCConnection</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_cli/lib/windows_focused_fill.dart#L22" target="_blank" rel="noreferrer"><b>Windows：启动辅助程序并传递操作与文字数据</b><span>windows_focused_fill.dart · Process.start / stdin</span></a><a id="source-bridge" href="https://github.com/ShiJiJS/chiyo/blob/296ba1c893cb5ee3131f2d9e25c5039202b465e1/packages/info_cli/lib/ego_browser_fill.dart#L203" target="_blank" rel="noreferrer"><b>知予经 ego 发送页面检查和写入代码</b><span>page.cdp / Runtime.evaluate</span></a><p>网页例子采用主页面中的普通密码 input。iframe、Shadow DOM 和自绘控件涉及额外的页面上下文或定位规则。上述源码用于对照凭据交付、目标检查与系统 API；Chrome 的协议示例对应正文所列的官方接口资料。</p></div></details>
+    <div class="reading"><h2><span class="section-num">06</span>Agent、知予和辅助程序分别负责什么？</h2><p>Agent 根据任务选择凭据和目标，用户决定是否批准。知予保存批准并在执行时检查；真正与外部软件交互的部分，再按目标类型选择接口。</p></div>
+    <div class="implementation-map"><div class="request-and-material"><div class="agent-planner"><strong>Agent</strong><span>选择密码与具体目标<br>提交申请、查询结果</span></div><div class="request-direction">提交申请 → 用户批准 → 发起执行</div><div class="material-source"><strong>知予</strong><span>检查批准与目标<br>取得指定版本密码</span></div></div><div class="implementation-routes"><div class="implementation-route"><div class="pipe"><code>页面 + 表单 + 字段</code><span>交给浏览器填写模块 →</span></div><div><h3>浏览器中的网页</h3><p>按浏览器接入方式连接指定页面，复核页面与元素，再让页面执行写入代码。Ego 和 Chrome 的连接方式不同，普通 HTML 密码框的 DOM 写入原理相同。</p></div></div><div class="implementation-route"><div class="pipe"><code>目标编号 → 固定控件对象</code><span>交给本机辅助程序 →</span></div><div><h3>支持的原生应用</h3><p>发现阶段保存具体控件对象；批准后复核并直接设值。Mac 用 AXValue，Windows 用 UIA ValuePattern，写入不依赖用户当前的输入焦点。</p></div></div></div></div>
+    <div class="reading"><p>服务器模式下，服务器保存凭据、批准和操作记录，目标查询与实际填写仍发生在 Agent 所在电脑上的知予 App。无论哪条路径，填写结果都要与提交动作、登录或其他业务成功分别判断。</p></div>
+    <details id="source-credential-handoff"><summary>申请与目标范围的设计依据</summary><div class="detail-body"><p><a href="../../design/cli-redesign-review.md">统一 CLI、网页表单和字段批准范围</a>；<a href="../../design/native-background-fill-contract.md">原生后台填写合同：目标发现、申请、执行和生命周期</a>；<a href="../../adr/0032-native-background-credential-fill.md">固定原生控件对象的领域决策</a>。</p></div></details>
+    <details id="source-native"><summary>接口与源码参考</summary><div class="detail-body source-list"><p>示意代码用于解释调用关系，省略完整错误处理。示例编号、界面和 hello 都是教学数据。</p>
+      <a id="source-browser-plan" href="../../design/cli-redesign-review.md"><b>浏览器填写和表单范围</b><span>CLI 与批准合同</span></a>
+      <a id="source-agent-fill" href="../../design/native-background-fill-contract.md"><b>原生目标编号、申请和执行</b><span>native-background-fill-contract.md</span></a>
+      <a id="source-bridge" href="https://github.com/ShiJiJS/chiyo/blob/296ba1c893cb5ee3131f2d9e25c5039202b465e1/packages/info_cli/lib/ego_browser_fill.dart#L203" target="_blank" rel="noreferrer"><b>知予经 ego 发送查询和写入代码</b><span>page.cdp / Runtime.evaluate</span></a>
+      <a href="https://github.com/ShiJiJS/chiyo/blob/ca3f9747/apps/desktop/macos/native_background/SystemNativeBackgroundEnvironment.swift" target="_blank" rel="noreferrer"><b>Mac：遍历控件、保留对象与 AXValue 设值</b><span>SystemNativeBackgroundEnvironment.swift</span></a>
+      <a href="https://github.com/ShiJiJS/chiyo/blob/ca348816ad742176f2175a51b27ba6313b73403d/apps/desktop/windows/native_background_fill/target.cpp" target="_blank" rel="noreferrer"><b>Windows：UIA 目标校验与 ValuePattern 设值</b><span>target.cpp</span></a>
+      <a id="source-helper-channels" href="https://github.com/ShiJiJS/chiyo/blob/ca3f9747/apps/desktop/macos/native_background/NativeBackgroundBridge.swift" target="_blank" rel="noreferrer"><b>Mac：App 通过私有桥接联系 XPC helper</b><span>NativeBackgroundBridge.swift</span></a>
+      <a href="https://github.com/ShiJiJS/chiyo/blob/ca348816ad742176f2175a51b27ba6313b73403d/apps/desktop/lib/bundled_windows_native_fill.dart" target="_blank" rel="noreferrer"><b>Windows：验证、启动并连接辅助程序</b><span>bundled_windows_native_fill.dart</span></a>
+      <a href="https://developer.apple.com/documentation/applicationservices/axuielement_h" target="_blank" rel="noreferrer"><b>Apple：AX 控件查询和属性接口</b><span>AXUIElement</span></a>
+      <a href="https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-uiautomationoverview" target="_blank" rel="noreferrer"><b>Microsoft：UI Automation 查询和控件能力</b><span>UI Automation</span></a>
+      <p>网页例子采用主页面中的普通密码 input。iframe、Shadow DOM 和自绘控件涉及额外上下文或定位规则，本文不展开。</p>
+    </div></details>
   </section>
   <footer><span>知予 · 跨应用填写图解</span><a href="#main">回到开头 ↑</a></footer>
 </main>

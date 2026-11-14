@@ -5,12 +5,12 @@ const DEMO_HTML = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><styl
 document.addEventListener('alpine:init', () => {
   Alpine.data('tutorial', () => ({
     selected:'password', selector:'#password', queried:false, matches:[], filled:false,
-    fillStatus:'会先复核上方选择的目标，再填写教学表单。', os:'mac', nativeFocus:'password',nativeValue:'',focusChanged:false,delivery:'idle',
+    fillStatus:'会先复核上方选择的目标，再填写教学表单。', os:'mac', userApplication:'editor',targetRebuilt:false,delivery:'idle',
     init(){
       this.$nextTick(() => {this.$refs.demo.srcdoc=DEMO_HTML;});
       const state=new URLSearchParams(location.search).get('state');
       if(state==='windows')this.os='win';
-      if(state==='refused'){this.focusChanged=true;this.delivery='refused';}
+      if(state==='refused'){this.targetRebuilt=true;this.delivery='refused';}
     },
     readyDemo(){
       this.inspect('password');
@@ -54,64 +54,64 @@ document.addEventListener('alpine:init', () => {
       this.selector='#password';this.queried=false;this.matches=[];this.filled=false;
       this.fillStatus='会先复核上方选择的目标，再填写教学表单。';this.inspect('password');
     },
-    changeFocus(value){this.nativeFocus=value;this.delivery='idle';this.focusChanged=false;},
     setOS(value){this.os=value;this.delivery='idle';},
     resetDelivery(){this.delivery='idle';},
     highlight(code){
       const escaped=code.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-      return escaped.replace(/\b(AXUIElementCopyAttributeValue|AXUIElementCreateApplication|frontmostApplication|GetFocusedElement|get_CurrentIsPassword|GetForegroundWindow|GetGUIThreadInfo|CoCreateInstance|keyboardSetUnicodeString|postToPid|SendInput)\b/g,'<strong class="method-name">$1</strong>');
+      return escaped.replace(/\b(AXUIElementCopyAttributeValue|AXUIElementCreateApplication|AXUIElementIsAttributeSettable|AXUIElementSetAttributeValue|ElementFromHandle|FindAll|GetCurrentPatternAs|put_AutoSetFocus|SetValue)\b/g,'<strong class="method-name">$1</strong>');
     },
-    checkTarget(){this.delivery=this.nativeFocus!=='password'||this.focusChanged?'refused':'ready';},
-    get targetCheckText(){if(this.nativeFocus!=='password')return '选中的是账号框，不符合密码输入条件，不能发送。';return this.delivery==='idle'?'先选择是否改变焦点，再比较。':this.focusChanged?'目标已变化，不能发送。':'目标一致，可以进入发送步骤；比较本身不输入文字。';},
-    demoSend(){this.delivery=this.nativeFocus!=='password'||this.focusChanged?'refused':'sent';},
+    demoSend(){this.delivery=this.targetRebuilt?'refused':'sent';},
     get deliveryText(){
-      if(this.delivery==='refused')return this.nativeFocus!=='password'?'当前是账号框：停止发送，hello 没有送入。':'检查发现控件已变：停止发送。hello 没有送入账号框。';
-      if(this.delivery==='sent')return this.os==='mac'?'检查通过：向目标 PID 提交文字事件。应用仍需处理这些事件。':'检查通过：把 10 个事件加入输入流。应用仍需处理这些事件。';
-      if(this.delivery==='ready')return '目标检查通过，尚未发送事件。';
-      return '尚未发送事件。';
+      if(this.delivery==='refused')return '原目标对象已失效：停止填写，不按相同名称寻找新框。前台用户窗口没有收到 hello。';
+      if(this.delivery==='sent')return '向原密码控件设置了 hello；用户当前窗口和输入焦点保持不变。这是教学模拟，业务结果仍需另查。';
+      return '尚未写值。用户当前使用哪个窗口，不改变保存的目标对象。';
     },
-    get queryCode(){return this.os==='mac'?`// Swift：省略错误处理与类型转换
-let running = NSWorkspace.shared
-    .frontmostApplication!
-let app = AXUIElementCreateApplication(
-    running.processIdentifier)
+    get nativeDiscoverCommand(){return this.os==='mac'?`chiyo fill targets --via native \\\n  --app com.apple.archiveutility --json`:`chiyo fill targets --via native --app "C:\\Program Files\\7-Zip\\7zFM.exe" --json`;},
+    get queryCode(){return this.os==='mac'?`// Swift：pid 来自指定应用的运行进程
+let app = AXUIElementCreateApplication(pid)
 AXUIElementCopyAttributeValue(
-    app, kAXFocusedUIElementAttribute,
-    &field)`:`// C++：省略初始化与错误处理
-CoCreateInstance(__uuidof(CUIAutomation8),
-    nullptr, CLSCTX_INPROC_SERVER,
-    IID_PPV_ARGS(&automation));
-automation->GetFocusedElement(&field);`;},
-    get propertyCode(){return this.os==='mac'?`// 查询这个控件的子角色
+    app, kAXWindowsAttribute, &windows)
+// 对窗口逐层读取 AXChildren；省略遍历细节
 AXUIElementCopyAttributeValue(
+    window, kAXChildrenAttribute, &children)
+// 从子控件中筛选已支持的安全文本框，得到 field`:`// C++：automation 为已创建的 UIA 对象
+// hwnd 来自指定应用的窗口
+ automation->put_AutoSetFocus(FALSE);
+ automation->ElementFromHandle(hwnd, &root);
+ VARIANT passwordFlag{};
+ passwordFlag.vt = VT_BOOL;
+ passwordFlag.boolVal = VARIANT_TRUE;
+ automation->CreatePropertyCondition(
+     UIA_IsPasswordPropertyId, passwordFlag,
+     &passwordCondition);
+ root->FindAll(TreeScope_Descendants,
+     passwordCondition.Get(), &fields);
+// 结合窗口和字段描述选择具体的 field`;},
+    get propertyCode(){return this.os==='mac'?`AXUIElementCopyAttributeValue(
     field, kAXSubroleAttribute, &subrole)
-// 密码框的典型返回：AXSecureTextField`:`// 查询这个控件是否为密码框
-BOOL isPassword = FALSE;
-field->get_CurrentIsPassword(&isPassword);
-// 密码框的典型返回：TRUE`;},
+// 本例：AXSecureTextField
+AXUIElementIsAttributeSettable(
+    field, kAXValueAttribute, &writable)
+// 另核对已验证的应用版本、结构和上下文`:`field->get_CurrentIsPassword(&isPassword);
+field->GetCurrentPatternAs(UIA_ValuePatternId,
+    IID_PPV_ARGS(&valuePattern));
+valuePattern->get_CurrentIsReadOnly(&readOnly);
+// 另核对进程、窗口和原生控件支持状态`;},
     get attributes(){return this.os==='mac'?
-      [['kAXRoleAttribute','AXTextField'],['kAXSubroleAttribute','AXSecureTextField'],['kAXFocusedAttribute','true'],['kAXEnabledAttribute','true']]:
-      [['get_CurrentControlType','UIA_EditControlTypeId'],['get_CurrentIsPassword','TRUE'],['get_CurrentHasKeyboardFocus','TRUE'],['get_CurrentIsEnabled','TRUE']];},
-    get sendCode(){return this.os==='mac'?`let units = Array("hello".utf16)
-// down / up 是按下和释放两个 CGEvent
-// buffer 指向 units 中的文字数据
-down.keyboardSetUnicodeString(
-    stringLength: units.count,
-    unicodeString: buffer)
-// up 也调用同一方法装入文字
-down.postToPid(targetPID)
-up.postToPid(targetPID)`:`const wchar_t* text = L"hello";
-INPUT events[10]{};
-for (int i = 0; i < 5; ++i) {
-  auto& down = events[2 * i];
-  down.type = INPUT_KEYBOARD;
-  down.ki.wScan = text[i];
-  down.ki.dwFlags = KEYEVENTF_UNICODE;
-  events[2 * i + 1] = down;
-  events[2 * i + 1].ki.dwFlags |= KEYEVENTF_KEYUP;
-}
-UINT inserted = SendInput(
-    10, events, sizeof(INPUT));`;}
+      [['AXRole','AXTextField'],['AXSubrole','AXSecureTextField'],['AXEnabled','true'],['AXValue 可写','true']]:
+      [['IsPassword','TRUE'],['IsEnabled','TRUE'],['ValuePattern','支持'],['IsReadOnly','FALSE']];},
+    get sendCode(){return this.os==='mac'?`// field 是发现阶段保存并重新核验的原对象
+let result = AXUIElementSetAttributeValue(
+    field, kAXValueAttribute,
+    "hello" as CFString)
+// result == .success：设值调用已被接受`:`// field 是保存并重新核验的原对象
+// 关闭 UIA 操作前自动设置焦点的行为
+ automation->put_AutoSetFocus(FALSE);
+ field->GetCurrentPatternAs(UIA_ValuePatternId,
+     IID_PPV_ARGS(&valuePattern));
+ HRESULT result = valuePattern->SetValue(L"hello");
+// result == S_OK：设值调用已被接受`;}
+
 
   }));
 });
