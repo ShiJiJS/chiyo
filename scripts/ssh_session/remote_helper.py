@@ -5,6 +5,7 @@ command pipe; terminal input NEVER enters that pipe. A controlling PTY supports
 /dev/tty. Its input queue is flushed with the input gate closed before each run.
 """
 import base64
+import ctypes
 import errno
 import fcntl
 import hashlib
@@ -74,26 +75,44 @@ def client_mode(mode):
         # Only sudo owns this stdout pipe. Never use the terminal as fallback.
         os.write(1, base64.b64decode(response['data']) + b'\n')
         return 0
-    connection = rpc(os.environ['CHIYO_SUDO_SOCKET'], {'kind': 'sudo', 'argv': sys.argv[2:]})
-    stream = connection.makefile('rb')
-    result = json.loads(stream.readline(MAX_FRAME))
-    if result.get('status') != 'prepared':
-        return 125
-    env = dict(os.environ)
-    env['SUDO_ASKPASS'] = result['askpass']
-    env['CHIYO_SUDO_ACTION'] = result['actionId']
-    # sudo belongs to the Shell process group, has its controlling terminal, and
-    # receives exactly the caller's cwd/env/stdio. The broker never sees env.
-    process = subprocess.Popen([result['executable'], '-A', *sys.argv[2:]], env=env)
-    connection.sendall((json.dumps({'pid': process.pid,
-                                   'identity': process_identity(process.pid)}) + '\n').encode())
-    code = process.wait()
-    connection.close()
-    return code if code >= 0 else 128 - code
+    connection = rpc(os.environ['CHIYO_SUDO_SOCKET'], {
+        'kind': 'sudo', 'argv': sys.argv[2:], 'cwd': os.getcwd(),
+        'env': dict(os.environ)})
+    result = json.loads(connection.makefile('rb').readline(MAX_FRAME))
+    return int(result.get('exitCode', 125))
+
+
+def require_descendant_supervision():
+    # Without kernel adoption of orphaned descendants, an old setsid/double-fork
+    # reader could be invisible. Never continue a shared PTY on that assumption.
+    libc = ctypes.CDLL(None, use_errno=True)
+    prctl = getattr(libc, 'prctl', None)
+    if prctl is None or prctl(36, 1, 0, 0, 0) != 0:  # PR_SET_CHILD_SUBREAPER
+        raise RuntimeError('missing_descendant_subreaper')
+    children(os.getpid())
+
+
+def children(pid):
+    with open('/proc/%d/task/%d/children' % (pid, pid), 'r') as source:
+        return [int(value) for value in source.read().split()]
+
+
+def session_leader():
+    if os.getsid(0) == os.getpid():
+        return
+    try:
+        os.setsid()
+    except PermissionError:
+        child = os.fork()
+        if child:
+            _, status = os.waitpid(child, 0)
+            sys.exit(os.waitstatus_to_exitcode(status))
+        os.setsid()
 
 
 class Broker:
     def __init__(self, synthetic_sudo=None):
+        require_descendant_supervision()
         self.synthetic_sudo = synthetic_sudo
         self.selector = selectors.DefaultSelector()
         self.root = tempfile.mkdtemp(prefix='chiyo-ssh-')
@@ -113,8 +132,12 @@ class Broker:
         self.listener.setblocking(False)
         self.master, self.slave = pty.openpty()
         self.tty = os.ttyname(self.slave)
+        fcntl.ioctl(self.slave, termios.TIOCSCTTY, 0)
+        signal.signal(signal.SIGTTOU, signal.SIG_IGN)
         self.run = None
         self.draining = False
+        self.unusable = False
+        self.close_requested = False
         self.inputs = {}
         self.actions = {}
         self.clients = {}
@@ -126,16 +149,23 @@ class Broker:
             raise RuntimeError('missing_bash')
 
         def child_setup():
-            os.setsid()
-            fcntl.ioctl(self.slave, termios.TIOCSCTTY, 0)
+            os.setpgid(0, 0)
+            signal.signal(signal.SIGTTOU, signal.SIG_DFL)
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            signal.signal(signal.SIGQUIT, signal.SIG_DFL)
 
         environment = dict(os.environ)
         environment['CHIYO_SUDO_SOCKET'] = self.socket_path
         environment['HISTFILE'] = '/dev/null'
+        environment['HISTSIZE'] = '0'
+        environment['PS1'] = ''
+        environment['PS2'] = ''
         self.shell = subprocess.Popen(
-            [shell, '--noprofile', '--norc'], stdin=subprocess.PIPE,
+            [shell, '--noprofile', '--norc', '-i'], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             env=environment, preexec_fn=child_setup, pass_fds=(self.slave,))
+        os.tcsetpgrp(self.slave, self.shell.pid)
+        os.kill(self.shell.pid, signal.SIGCONT)
         setup = "set -m\ntrap ':' INT\nchiyo_sudo() { " + shlex.quote(sys.executable)
         setup += ' ' + shlex.quote(self.path) + ' --sudo "$@"; }\nsudo() { chiyo_sudo "$@"; }\n'
         self.shell.stdin.write(setup.encode())
@@ -164,6 +194,29 @@ class Broker:
             if action['runId'] == current:
                 self.end_action(action)
         emit({'type': 'exited', 'runId': current, 'exitCode': code})
+        if self.shell.poll() is None:
+            # Freeze the only process allowed to create a new run. Kernel child
+            # lists plus subreaper adoption account for ordinary, setsid, and
+            # double-fork descendants, including inherited terminal descriptors.
+            os.kill(self.shell.pid, signal.SIGSTOP)
+            os.waitpid(self.shell.pid, os.WUNTRACED)
+            try:
+                leftovers = children(self.shell.pid)
+                while True:
+                    try:
+                        reaped, _ = os.waitpid(-1, os.WNOHANG)
+                        if reaped <= 0:
+                            break
+                    except ChildProcessError:
+                        break
+                leftovers += [p for p in children(os.getpid()) if p != self.shell.pid]
+                if leftovers:
+                    self.draining = True
+                    self.unusable = True
+                    emit({'type': 'unusable', 'reason': 'terminal_descendants_active'})
+            finally:
+                os.kill(self.shell.pid, signal.SIGCONT)
+
 
     def drain_terminal(self, run_id):
         while True:
@@ -266,6 +319,7 @@ class Broker:
             self.reply(request, 'ok')
         elif op == 'close':
             self.draining = True
+            self.close_requested = True
             self.reply(request, 'draining' if self.run else 'closed')
             if request.get('force'):
                 raise EOFError()
@@ -273,50 +327,56 @@ class Broker:
             self.reply(request, 'invalid_request')
 
     def sudo_client(self, client, message):
-        state = self.clients[client.fileno()]
-        if state[2] == 'register':
-            action = self.actions.get(state[3])
-            pid = message.get('pid', 0)
-            identity = message.get('identity', '')
-            if (not action or action['runId'] != self.run or
-                    parent_pid(pid) != action['wrapperPid'] or
-                    not process_alive(pid, identity)):
-                if action:
-                    self.end_action(action)
-                return self.close_client(client)
-            action['pid'], action['identity'] = pid, identity
-            state[2] = 'waiting'
-            receiver = action.get('pendingReceiver')
-            if receiver:
-                self.receive_askpass(receiver, action)
-            self.selector.register(client.fileno(), selectors.EVENT_READ, 'client')
-            return
         if message.get('kind') == 'sudo':
             if not self.run:
-                return self.send_client(client, {'status': 'stale_run'})
+                return self.send_client(client, {'exitCode': 125})
             sudo = self.synthetic_sudo or shutil.which('sudo')
             if not sudo:
-                return self.send_client(client, {'status': 'sudo_unavailable'})
+                return self.send_client(client, {'exitCode': 127})
             info = os.stat(sudo)
             if not self.synthetic_sudo and (info.st_uid != 0 or info.st_mode & 0o022):
-                return self.send_client(client, {'status': 'sudo_identity_untrusted'})
+                return self.send_client(client, {'exitCode': 126})
+            argv, cwd, env = message.get('argv'), message.get('cwd'), message.get('env')
+            if (not isinstance(argv, list) or not argv or
+                    any(not isinstance(a, str) for a in argv) or
+                    not isinstance(cwd, str) or not isinstance(env, dict)):
+                return self.send_client(client, {'exitCode': 125})
+            wrapper_pid = peer_pid(client)
+            # The wrapper must belong to this active Shell's process tree.
+            ancestor = wrapper_pid
+            for _ in range(128):
+                if ancestor == self.shell.pid:
+                    break
+                ancestor = parent_pid(ancestor)
+                if ancestor <= 1:
+                    return self.send_client(client, {'exitCode': 125})
+            else:
+                return self.send_client(client, {'exitCode': 125})
             action_id = uuid.uuid4().hex
-            action = {'id': action_id, 'runId': self.run, 'wrapper': client,
-                      'wrapperPid': peer_pid(client), 'used': False, 'argv': message.get('argv', [])}
-            self.actions[action_id] = action
-            state[2], state[3] = 'register', action_id
-            client.sendall((json.dumps({'status': 'prepared', 'actionId': action_id,
-                                      'askpass': self.path, 'executable': sudo}) + '\n').encode())
-            self.selector.register(client.fileno(), selectors.EVENT_READ, 'client')
+            env['SUDO_ASKPASS'] = self.path
+            env['CHIYO_SUDO_ACTION'] = action_id
+            env['CHIYO_SUDO_SOCKET'] = self.socket_path
+            group = os.getpgid(wrapper_pid)
+            def sudo_setup():
+                os.setpgid(0, group)
+                signal.signal(signal.SIGTTOU, signal.SIG_DFL)
+                signal.signal(signal.SIGINT, signal.SIG_DFL)
+                signal.signal(signal.SIGQUIT, signal.SIG_DFL)
+            # The broker creates and holds the actual selected sudo process.
+            # No run-owned client can nominate or register an authentication PID.
+            process = subprocess.Popen([sudo, '-A', *argv], cwd=cwd, env=env,
+                                       stdin=self.slave, stdout=self.slave,
+                                       stderr=self.slave, preexec_fn=sudo_setup)
+            self.actions[action_id] = {
+                'id': action_id, 'runId': self.run, 'wrapper': client,
+                'pid': process.pid, 'identity': process_identity(process.pid),
+                'process': process, 'used': False, 'argv': argv}
             return
         if message.get('kind') != 'askpass':
             return self.close_client(client)
         action = self.actions.get(message.get('action'))
         if not action or action['runId'] != self.run or action.get('used'):
             return self.send_client(client, {'status': 'expired'})
-        if 'pid' not in action:
-            action['pendingReceiver'] = client
-            return
         self.receive_askpass(client, action)
 
     def receive_askpass(self, client, action):
@@ -330,7 +390,7 @@ class Broker:
     def loop(self):
         emit({'type': 'ready', 'protocol': 1, 'capabilities': {
             'shell': 'bash', 'pty': True, 'controllingTerminal': True,
-            'managedSudo': bool(self.synthetic_sudo or shutil.which('sudo')), 'mergedOutput': True}})
+            'managedSudo': bool(self.synthetic_sudo or shutil.which('sudo')), 'mergedOutput': True, 'descendantSupervision': True}})
         while True:
             if self.shell.poll() is not None:
                 # exit/exec/EOF are explicit Shell termination, never a new Shell.
@@ -389,6 +449,11 @@ class Broker:
                     emit({'type': 'output', 'runId': self.run,
                           'data': base64.b64encode(data).decode()})
                 # Shell startup stderr is not a trusted completion channel.
+            for action in list(self.actions.values()):
+                code = action['process'].poll()
+                if code is not None:
+                    self.send_client(action['wrapper'], {'exitCode': code if code >= 0 else 128 - code})
+                    self.end_action(action)
             if self.writes and self.run:
                 data = self.writes[0]
                 try:
@@ -399,14 +464,14 @@ class Broker:
                         self.writes[0] = data[count:]
                 except BlockingIOError:
                     pass
-            if self.draining and self.run is None:
+            if self.draining and self.run is None and (not self.unusable or self.close_requested):
                 return
 
     def close(self):
         for client, _, _, _ in list(self.clients.values()):
             self.close_client(client)
         try:
-            os.killpg(self.shell.pid, signal.SIGKILL)
+            os.kill(self.shell.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
         os.close(self.master)
@@ -422,7 +487,12 @@ def main():
         return client_mode('--sudo')
     if os.environ.get('CHIYO_SUDO_ACTION'):
         return client_mode('--askpass')
-    broker = Broker()
+    session_leader()
+    try:
+        broker = Broker()
+    except RuntimeError as error:
+        emit({'type': 'unsupported', 'capability': str(error)})
+        return 78
     try:
         broker.loop()
     except EOFError:
