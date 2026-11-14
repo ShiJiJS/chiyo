@@ -130,7 +130,7 @@ class OwnerWorkspaceCredentialBatches {
 
   static String destinationLabel(core.CredentialBatchDestination d) {
     if (d.native case final target?) {
-      return '原生后台填写 · ${target.appName}\n窗口：${target.windowTitle}\n密码框：${target.fieldLabel}\n${target.application.executable}';
+      return '原生后台填写 · ${target.appName}\n窗口：${target.windowTitle}\n密码框：${target.fieldLabel}\n${target.application.executable}\n仅确认原生控件接受输入，不代表登录成功。';
     }
     if (d.program case final program?) {
       final binding = program.binding;

@@ -37,6 +37,7 @@ class StorageDesktopLauncher extends StatefulWidget {
     this.openLocal,
     this.focusedFillDriver,
     this.nativeFillDriver,
+    this.openNativeFillDriver,
   });
 
   final PrivateConnectionProfileStore profiles;
@@ -47,6 +48,7 @@ class StorageDesktopLauncher extends StatefulWidget {
   /// Owner-side test seam. Agent commands cannot select a driver or helper.
   final FocusedFillDriver? focusedFillDriver;
   final NativeFillDriver? nativeFillDriver;
+  final Future<NativeFillDriver?> Function()? openNativeFillDriver;
   final Future<DesktopLibrary> Function(LocalLibraryConfiguration, bool)?
   openLocal;
 
@@ -72,38 +74,67 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
 
   Future<void> _startFocusedFillHost() async {
     if (widget.focusedFillDriver == null &&
+        widget.nativeFillDriver == null &&
+        widget.openNativeFillDriver == null &&
         widget.platform != null &&
         widget.platform is! NativeDesktopPlatform) {
       return;
     }
+    NativeFillDriver? nativeDriver;
+    var nativeTransferred = false;
     try {
-      final driver =
-          widget.focusedFillDriver ??
-          (Platform.isMacOS
+      try {
+        nativeDriver =
+            widget.nativeFillDriver ??
+            await widget.openNativeFillDriver?.call();
+      } on Object {
+        // An unavailable native adapter leaves the other providers usable.
+      }
+      if (_hostDisposed) return;
+      var driver = widget.focusedFillDriver;
+      if (driver == null &&
+          (widget.platform == null ||
+              widget.platform is NativeDesktopPlatform)) {
+        try {
+          driver = Platform.isMacOS
               ? MacOSFocusedFillDriver()
               : Platform.isWindows
               ? await loadBundledFocusedFill()
-              : null);
+              : null;
+        } on Object {
+          // A missing focus broker must not disable native or browser filling.
+        }
+      }
       if (_hostDisposed) return;
       if (driver != null) {
-        final host = await DeviceFocusedFillHost.start(
-          directory: Directory(widget.profiles.directory),
-          driver: driver,
-        );
-        if (_hostDisposed) {
-          await host.close();
-          return;
+        try {
+          final host = await DeviceFocusedFillHost.start(
+            directory: Directory(widget.profiles.directory),
+            driver: driver,
+          );
+          if (_hostDisposed) {
+            await host.close();
+            return;
+          }
+          _focusedFillHost = host;
+        } on Object {
+          // The batch Host has an independent endpoint and provider lifetime.
         }
-        _focusedFillHost = host;
       }
-      final browser = await findInstalledEgoBrowser();
+      String? browser;
+      try {
+        browser = await findInstalledEgoBrowser();
+      } on Object {
+        // Chrome and native providers do not depend on an installed Ego helper.
+      }
       if (_hostDisposed) return;
       final batches = await DeviceCredentialBatchHost.start(
         directory: Directory(widget.profiles.directory),
         driver: driver,
-        nativeDriver: widget.nativeFillDriver,
+        nativeDriver: nativeDriver,
         egoExecutable: browser,
       );
+      nativeTransferred = true;
       if (_hostDisposed) {
         await batches.close();
       } else {
@@ -112,6 +143,14 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
     } on Object {
       // An absent optional helper or occupied locator never impersonates a live
       // filling capability and must not prevent the owner opening their library.
+    } finally {
+      if (!nativeTransferred) {
+        try {
+          await nativeDriver?.dispose();
+        } on Object {
+          // The adapter also invalidates references when its owner pipe closes.
+        }
+      }
     }
   }
 

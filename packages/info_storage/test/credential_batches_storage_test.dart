@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'storage_test.dart' show TestKeyStore;
 import 'backup_setup.dart';
-import '../../info_core/test/native_fill_models_test.dart'
+import '../../info_core/test_support/native_fill.dart'
     show nativeTargetFixture;
 
 const _device = 'AAAAAAAAAAAAAAAAAAAAAA';
