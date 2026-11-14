@@ -13,7 +13,7 @@ target_compile_options(native_background_target PRIVATE /W4 /WX /EHsc /utf-8)
 target_include_directories(native_background_target PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(native_background_target PUBLIC user32 ole32 oleaut32 advapi32 bcrypt wtsapi32)
 
-# Standalone platform work only. Packaging and public host wiring are separate.
+# The desktop parent enables its private helper; standalone checks opt in.
 option(CHIYO_NATIVE_BACKGROUND_BUILD_BROKER "Build the private App helper" OFF)
 if(CHIYO_NATIVE_BACKGROUND_BUILD_BROKER)
   add_executable(native_background_broker WIN32 broker_main.cpp)

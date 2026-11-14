@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "desktop_instance.h"
 #include "focused_fill_identity.h"
+#include "native_background_fill_identity.h"
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -38,6 +39,24 @@ std::optional<flutter::EncodableValue> FocusedFillHelperIdentity() {
       {flutter::EncodableValue("executable"), flutter::EncodableValue(utf8)},
       {flutter::EncodableValue("sha256"),
        flutter::EncodableValue(kFocusedFillHelperSha256)},
+  });
+}
+
+std::optional<flutter::EncodableValue> NativeBackgroundFillHelperIdentity() {
+  wchar_t path[32768]{};
+  const DWORD length = GetModuleFileNameW(nullptr, path, 32768);
+  if (length == 0 || length >= 32768) return std::nullopt;
+  std::wstring executable(path, length);
+  const auto separator = executable.find_last_of(L"\\/");
+  if (separator == std::wstring::npos) return std::nullopt;
+  executable.resize(separator + 1);
+  executable += L"info-native-background-broker.exe";
+  const auto utf8 = Utf8FromUtf16(executable.c_str());
+  if (utf8.empty()) return std::nullopt;
+  return flutter::EncodableValue(flutter::EncodableMap{
+      {flutter::EncodableValue("executable"), flutter::EncodableValue(utf8)},
+      {flutter::EncodableValue("sha256"),
+       flutter::EncodableValue(kNativeBackgroundFillHelperSha256)},
   });
 }
 }
@@ -230,6 +249,15 @@ bool FlutterWindow::OnCreate() {
           !std::holds_alternative<std::monostate>(*call.arguments())) {
         result->Error("invalid_arguments", "No arguments are accepted.");
       } else if (const auto identity = FocusedFillHelperIdentity()) {
+        result->Success(*identity);
+      } else {
+        result->Error("bundle_unavailable", "Application identity unavailable.");
+      }
+    } else if (method == "nativeBackgroundFillHelper") {
+      if (call.arguments() &&
+          !std::holds_alternative<std::monostate>(*call.arguments())) {
+        result->Error("invalid_arguments", "No arguments are accepted.");
+      } else if (const auto identity = NativeBackgroundFillHelperIdentity()) {
         result->Success(*identity);
       } else {
         result->Error("bundle_unavailable", "Application identity unavailable.");

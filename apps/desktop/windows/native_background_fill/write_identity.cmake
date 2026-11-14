@@ -1,0 +1,22 @@
+# The runner compiles this digest after the selected helper is linked. Adjacent
+# sidecars, configuration and environment values are never runtime authority.
+if(NOT DEFINED BROKER OR NOT EXISTS "${BROKER}" OR NOT DEFINED OUTPUT_DIR)
+  message(FATAL_ERROR "Native background fill identity inputs are missing")
+endif()
+file(SHA256 "${BROKER}" broker_sha256)
+string(LENGTH "${broker_sha256}" digest_length)
+if(NOT digest_length EQUAL 64 OR NOT broker_sha256 MATCHES "^[0-9a-f]+$")
+  message(FATAL_ERROR "Invalid native background fill helper digest")
+endif()
+file(MAKE_DIRECTORY "${OUTPUT_DIR}")
+set(contents "#pragma once\ninline constexpr char kNativeBackgroundFillHelperSha256[] = \"${broker_sha256}\";\n")
+set(header "${OUTPUT_DIR}/native_background_fill_identity.h")
+set(old_contents "")
+if(EXISTS "${header}")
+  file(READ "${header}" old_contents)
+endif()
+if(NOT old_contents STREQUAL contents)
+  file(WRITE "${header}" "${contents}")
+endif()
+# Build/provenance evidence only. The running App does not read this sidecar.
+file(WRITE "${OUTPUT_DIR}/native_background_fill_identity.sha256" "${broker_sha256}\n")

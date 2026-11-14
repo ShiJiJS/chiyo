@@ -47,13 +47,25 @@ helper 核对真实直接父进程，父进程结束或管道断开即退出；�
 后续使用公共合同的有界长度帧。输出只含元数据及白名单事实，异常文本和 stderr 不返回给 Agent。
 尽力清零可变材料缓冲区；Dart/WinRT 不可变字符串及目标 App 内存不承诺可验证清零。
 
+App 接线通过 `package:info_desktop/bundled_windows_native_fill.dart` 的
+`Future<WindowsNativeFillDriver> loadBundledWindowsNativeFill()` 取得驱动。
+此工厂调用 `agent_info_manage/desktop` 通道的无参数 `nativeBackgroundFillHelper`，
+核对构建绑定的身份、固定同目录文件名和实际字节，再完成私有握手；没有配置或环境查找。
+身份、路径、字节或握手不可用返回安全的 `CredentialUseFailure('session_unavailable')`，
+非 Windows 返回 `unsupported_capability`。可选参数仅是 Owner 测试注入点。
+
 AppHost 持有一个常驻驱动，启动时传入 `nativeDriver` 并设置 `ownsNativeDriver: true`。
 单个 CLI 连接不能拥有或关闭它。宿主退出时幂等 `dispose` 立即终止自有 helper，
 不等待可能卡住的 setter；已发送操作仍按未知结果处理。helper 重启后所有旧快照失效，
 只有显式新发现能创建新 incarnation。
 
-本目录可独立构建。父级 runner 的 helper 身份通道、同包安装规则、manifest 和
-App 启动工厂必须一起接入后才能宣告平台能力可用；仅构建本目录不会自动启用产品入口。
+工厂在失败时自行销毁已创建的 driver；工厂成功而 AppHost.start 失败时，调用方仍拥有
+driver，必须在失败路径 dispose。AppHost.start 成功后才转移所有权。
+
+本目录可独立构建。父 Windows CMake 构建并同目录安装 helper，按配置生成
+`native-background-fill-identity/<CONFIG>/native_background_fill_identity.h` 与 `.sha256`；
+摘要编入 runner，sidecar 仅用于构建/包装核对。产品 launcher 和包 manifest/验真规则
+由各自接线维护者一起接入后才能宣告完整可用；仅构建本目录不会自动启用产品入口。
 正式签名、打包和安装验收遵循 [Windows 交付](windows-delivery.md)。
 
 ## 可重复的合成检查
@@ -71,6 +83,18 @@ $nativeOut = (Resolve-Path build/native-background-windows/out).Path
 dart --packages=apps/desktop/.dart_tool/package_config.json apps/desktop/windows/native_background_fill/tests/driver_live_check.dart "$nativeOut/Release/info-native-background-broker.exe" "$nativeOut/tests/Release/native_background_fixture.exe" "$nativeOut/tests/managed/native-managed-fixture.exe"
 dart analyze apps/desktop/lib/windows_native_background_fill.dart apps/desktop/windows/native_background_fill/tests/driver_live_check.dart
 ```
+
+可信 bundle 工厂的定向检查在 `apps/desktop` 下运行；测试 helper 只用于 Owner 测试，
+产品工厂不读取该环境变量：
+
+```powershell
+$env:CHIYO_NATIVE_BUNDLE_TEST_HELPER = (Resolve-Path ../../build/native-background-windows/out/Release/info-native-background-broker.exe).Path
+flutter test --no-pub test/bundled_windows_native_fill_test.dart test/bundled_focused_fill_test.dart
+```
+
+该检查覆盖无参数通道调用、真实私有握手、缺失/变更/越出同目录的 helper、错误身份与
+不可用执行文件的安全失败，以及 driver 销毁后的拒绝；原焦点 bundle 检查一同回归。
+没有显式提供测试 helper 时，真实握手用例跳过，不能宣称真实握手已通过。
 
 原生检查包括三类夹具的整值替换、内部焦点变化、遮挡/最小化、隐藏拒绝、失效、
 进程代际、身份摘要、保留及单票据行为。可用 `ctest -R native_background_limits`
