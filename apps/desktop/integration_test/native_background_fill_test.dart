@@ -470,17 +470,19 @@ void main() {
             await ui.resolve(() => platform.events!(DesktopEvent.quit));
             expect(platform.terminationReached, true);
           }
-          await tester.pumpWidget(const SizedBox.shrink());
-          if (receiver != null) await ui.resolve(receiver.close);
         } finally {
           try {
             await tester.pumpWidget(const SizedBox.shrink());
-            if (fixture != null) await ui.resolve(fixture.dispose);
+            if (receiver != null) await ui.resolve(receiver.close);
           } finally {
             try {
-              semantics.finishAfterUnmount();
+              if (fixture != null) await ui.resolve(fixture.dispose);
             } finally {
-              HttpOverrides.global = previousHttp;
+              try {
+                semantics.finishAfterUnmount();
+              } finally {
+                HttpOverrides.global = previousHttp;
+              }
             }
           }
         }
