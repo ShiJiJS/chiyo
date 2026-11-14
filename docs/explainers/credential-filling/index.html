@@ -31,6 +31,7 @@
         <li data-toc-group="platform"><a class="toc-chapter" href="#platform"><span class="toc-number">05</span><span>应用：执行填写</span></a>
           <ul class="toc-sections"><li><a href="#native-recheck">复核与设值</a></li><li><a href="#native-background-scenario">能继续在别处打字吗？</a></li><li><a href="#native-result">获取填写结果</a></li></ul>
         </li>
+        <li data-toc-group="security-boundary"><a class="toc-chapter" href="#security-boundary"><span class="toc-number">06</span><span>安全边界：信任 Agent</span></a></li>
       </ol>
     </nav>
   </aside>
@@ -464,6 +465,17 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
       <p>收到 <code>sent</code> 后，Agent 还要检查应用界面。填写密码和点击“确定”是两个动作，需要提交时再另行操作；压缩包是否成功解压，则要根据应用的后续结果判断。</p>
     </div>
     <details><summary>哪些普通应用可以这样填写？</summary><div class="detail-body"><p>需要应用提供可查询、可设值的原生密码控件，还要通过实际兼容验证。Mac 使用 AppKit 的标准安全文本框是可行路径，但不能推广到全部 AppKit 应用；首批产品兼容配置仅包括已验证的系统归档实用工具、系统版本和窗口结构。Windows 验证覆盖 Win32、WinForms、WPF 原生密码控件，以及真实 7-Zip 场景。</p><p>内嵌网页、WKWebView 和 Electron 暂不通过这条原生路径填写。浏览器继续用前面讲过的专用接口。即使外观相同，系统返回的控件能力和应用处理设值的方式也可能不同。</p><p>最后一次检查和实际设值不是一个能锁住目标 App 的事务：应用仍可能在两者之间关闭窗口或改变业务状态。后台填写解决的是固定控件和避免依赖全局焦点，不能保证任意应用的所有业务变化都可由外部检测。</p></div></details>
+
+  </section>
+
+  <section id="security-boundary" class="chapter">
+    <div class="reading">
+      <h2><span class="section-num">06</span>知予能防止恶意 Agent 窃取密码吗？</h2>
+      <p><strong>不能保证。</strong>无论网页还是原生填写，知予都可以避免密码通过正常填写命令的回复进入 Agent 上下文，减少正常协作中的意外暴露；这不等于 Agent 无法从其他途径取得密码。</p>
+      <p>填写后，密码已经进入目标页面或应用。如果 Agent 还具备足够的页面脚本执行或应用控制能力，仍可能从目标一侧取得内容。例如，网页密码框显示为圆点，并不阻止有相应权限的页面脚本读取其值；原生密码控件是否可被其他工具读取，则取决于系统、应用和工具能力。</p>
+      <p>恶意 Agent 也可能谎报任务用途，诱导用户批准向不符合真实意图的页面或应用填写。前文的身份核验、固定目标与审批仍然有效，但它们不能判断 Agent 的真实意图，也不能约束 Agent 通过其他工具进行的操作。</p>
+      <p>因此，<strong>应使用可以信任的 Agent，并核对申请中的用途与目标。</strong>通俗地说，这更接近“防君子不防小人”：它能降低正常流程中的密码暴露风险，不能作为隔离恶意 Agent 的安全保证。</p>
+    </div>
 
     <details id="source-credential-handoff"><summary>申请与目标范围的设计依据</summary><div class="detail-body"><p><a href="../../design/cli-redesign-review.md">统一 CLI、网页表单和字段批准范围</a>；<a href="../../design/native-background-fill-contract.md">原生后台填写合同：目标发现、申请、执行和生命周期</a>；<a href="../../adr/0032-native-background-credential-fill.md">固定原生控件对象的领域决策</a>。</p></div></details>
     <details id="source-native"><summary>接口与源码参考</summary><div class="detail-body source-list"><p>示意代码用于解释调用关系，省略完整错误处理。示例编号、界面和 hello 都是教学数据。</p>
