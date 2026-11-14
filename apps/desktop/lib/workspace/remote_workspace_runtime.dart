@@ -40,11 +40,13 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
   WorkspaceRuntimeStatus? _last;
   WorkspaceServerRuntimeObservation? _remote;
   Directory? _folder;
-  Future<void> _drain = Future.value();
-  bool _releasing = false;
+  final _pending = <Future<void>>{};
+  bool _releasing = false, _dispatchingQuit = false;
   Future<void> release() async {
     _releasing = true;
-    if (!desktop.quitting) await _drain;
+    // Only a runtime command already holding this journal may bypass its own
+    // completion. A native/window quit must still drain status/receipt reads.
+    if (!_dispatchingQuit) await Future.wait(_pending.toList());
   }
 
   WorkspaceRuntimePhase get _phase => desktop.shutdownFailed
@@ -54,7 +56,18 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
       : desktop.closed
       ? WorkspaceRuntimePhase.stopped
       : WorkspaceRuntimePhase.running;
-  Future<T> _locked<T>(Future<T> Function() action) async {
+  Future<T> _locked<T>(Future<T> Function() action) {
+    // Register ownership before directory setup's first await, too. Closing
+    // must not miss an accepted read that has not acquired its file lock yet.
+    final done = Completer<void>();
+    _pending.add(done.future);
+    return _withLock(action).whenComplete(() {
+      _pending.remove(done.future);
+      done.complete();
+    });
+  }
+
+  Future<T> _withLock<T>(Future<T> Function() action) async {
     if (directory == null) {
       throw const WorkspaceFailure('unavailable', '本机运行记录目录未就绪。');
     }
@@ -80,7 +93,7 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
       (_) {},
       onError: (Object _, StackTrace _) {},
     );
-    _queues[key] = _drain = settled;
+    _queues[key] = settled;
     try {
       return await next;
     } on WorkspaceFailure {
@@ -220,7 +233,8 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
   }
 
   @override
-  Future<WorkspaceRuntimeStatus> status() => _locked(_observe);
+  Future<WorkspaceRuntimeStatus> status() =>
+      _releasing ? _observe() : _locked(_observe);
   @override
   Future<WorkspaceQuitPreview> previewQuit() => _locked(() async {
     final s = await _observe();
@@ -355,7 +369,17 @@ class RemoteWorkspaceRuntime implements WorkspaceRuntimeSource {
               await desktop.showWindow();
             case WorkspaceRuntimeAction.quit:
             case WorkspaceRuntimeAction.finishExit:
-              await desktop.quit();
+              // A native quit may have begun during observation/publication.
+              // Let that quit drain this operation instead of awaiting it back.
+              if (desktop.quitting && !desktop.shutdownFailed) {
+                throw const WorkspaceFailure('busy', 'App正在退出，请等待原操作。');
+              }
+              _dispatchingQuit = true;
+              try {
+                await desktop.quit();
+              } finally {
+                _dispatchingQuit = false;
+              }
           }
           final after = await _observe();
           if (c.action == WorkspaceRuntimeAction.checkMaterials) {
