@@ -1,6 +1,6 @@
 # 凭据使用
 
-先确定密码真正送到哪里，再申请。网页用 fill，本机密码框用 fill 的 focus 方式，业务程序用 exec。软件内部管理驱动、材料与操作记录；Agent 不指定 Python 或内部 worker。批准和实际执行分开，凭据版本和真实接收位置参与检查。
+先确定密码真正送到哪里，再申请。Ego／Chrome 网页使用专用表单方式；支持的原生应用使用 fill 的 native 方式固定控件、后台填写；业务程序用 exec。软件内部管理驱动、材料与操作记录；Agent 不指定 Python 或内部 worker。批准和实际执行分开，凭据版本和真实接收位置参与检查。
 
 ## 先查本机条件
 
@@ -39,9 +39,30 @@ chiyo operations show OPERATION_ID --json
 
 批准范围固定凭据版本、浏览器／页面和指定表单字段；不是整个网站权限。关闭／重开标签页、换区域、网址变化或无法确认刷新后仍为同一目标时停止，不找另一个同网址页面代替，不自动降级为焦点填写或原文读取。
 
-## 本机应用密码框
+## 原生应用后台填写
 
-让真正目的应用的密码控件处于前台；按 `fill request --help` 使用 `--via focus --credential ID --purpose TEXT`。软件捕获实际应用身份供审批，不接受 Agent 自报一个应用名代替检查。首次及后续执行都用 `fill run --request ID`，发送前重新检查当前前台应用、密码控件与焦点；焦点变化时停止，不排队到别的窗口输入。
+先查 `doctor` 和 `fill methods --json` 的当前能力，再以运行中的实际应用查询控件。Mac 的 `--app` 使用 bundle ID，Windows 使用程序完整路径；它只是查询范围，不授予填写权限：
+
+```sh
+chiyo fill targets --via native --app APP_ID --json
+```
+
+结合返回的 appName、windowTitle、fieldLabel 和 controlKind 选择唯一的实际密码框，使用该项的 targetId。编号由本机辅助程序产生并绑定原进程、窗口和控件对象；不要自编编号或用 PID、句柄、坐标代替。候选无法区分时先澄清目标，不猜随机编号；没有目标时确认窗口是否已存在及兼容条件。
+
+```sh
+chiyo fill request --via native --target TARGET_ID --credential CREDENTIAL_ID --version 1 --purpose "为指定应用填写密码" --json
+chiyo requests wait REQUEST_ID --timeout 60 --json
+chiyo fill run --request REQUEST_ID --json
+chiyo operations show OPERATION_ID --json
+```
+
+先核对申请返回的 App、窗口、字段与凭据版本，用户批准后才 run。发现和批准都不写值。每次 run 使用原目标并重新核对许可，用户当前焦点不是目标条件；不要为此点击密码框或激活目标窗口。控件重建、窗口关闭或 helper 重启使旧目标失效，重新发现和申请，不能按相同标签恢复旧许可。sent 只表示 setter 接受，仍需独立检查业务结果；unknown 沿原操作查询，不换编号重新填写。
+
+Mac 仅启用通过版本与业务验证的 AppKit 原生密码控件，首批为已验证系统版本的归档实用工具；不能泛化到全部 AppKit 软件。Windows 限经验证的 Win32、WinForms、WPF 原生密码控件。内嵌网页、WKWebView、Electron 暂不支持；浏览器继续使用上面的专用接口。不支持或缺权限时报告具体条件，不自动改用 focus、键盘、剪贴板或原文读取。多控件批次的 destination 使用 `{"via":"native","targetId":"TARGET_ID"}`，每项引用真实发现目标。
+
+## 已有的前台焦点方式
+
+只在用户明确选择前台焦点方式或继续原有此类任务时使用。让真正目的应用的密码控件处于前台；按 `fill request --help` 使用 `--via focus --credential ID --purpose TEXT`。软件捕获实际应用身份供审批，不接受 Agent 自报一个应用名代替检查。首次及后续执行都用 `fill run --request ID`，发送前重新检查当前前台应用、密码控件与焦点；焦点变化时停止，不排队到别的窗口输入。
 
 系统接口只能证明控件与应用，不能证明网页来源。权限、控件类型或受保护窗口不支持时明确报告。普通文本框、无法确认身份的目标以及焦点不符不会用键盘盲输绕过。
 
