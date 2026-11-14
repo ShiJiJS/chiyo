@@ -134,3 +134,26 @@ fixture 中的激活、输入、读取假值与提交仅用于测试布置或 or
 
 真实软件检查脚本、下载文件、压缩包和详细结果是一次性任务证据，放在被忽略的 `build/`，
 不作为产品依赖。具体提交、运行结果与后续集成进度记录在 [#144](https://github.com/ShiJiJS/chiyo/issues/144)。
+
+## 普通 main 候选的业务验收准备
+
+`scripts/qa/windows-native-product-flow.py` 分阶段驱动公开 CLI，复用交付会话已验真的
+同一冻结提交候选，不另编普通 main。先运行
+`python -m unittest discover -s scripts/qa -p test_windows_native_product_flow.py -v`。
+
+`prepare <本工作树build下的新QA目录> --receiver <已核验的build内7zG.exe>` 创建合成输入、
+唯一 profile/凭据名称和 APPDATA、LOCALAPPDATA 子目录。只把返回的两个目录作为
+本次 App 与 CLI 子进程的环境；不更改用户环境。以 `--connection-profile <profileName>`
+启动候选 `app/info_desktop.exe`，在真实 UI 创建独立本地库及唯一字符串凭据，
+公开测试值为 `Synthetic-Zip-42!`。通过已核验的 7-Zip 打开该新压缩包的压缩对话框。
+
+`request <QA目录> --candidate-root <交付候选AgentInfoManage目录> --source-commit <冻结40位SHA> --connection-directory <QA目录/appdata/Chiyo/online/profiles/profileName>`
+核对候选来源、必要载荷字节与 runner 摘要绑定，再走 doctor、credentials、targets、request。
+同窗 AutomationId 120/121 两项复用该合成凭据；通过普通 App 真实审批 UI 批准 b1、b2。
+脚本不调用 Owner API、不改数据库状态，也不代替界面批准。
+
+独立前台/焦点观察器校准后开始测量，`run <QA目录>` 先持久记录单次发送标记，再执行
+公开 fill run；超时或未知后只能 `status <QA目录>`，不能再次 run 或换 operation ID。
+状态须为 filled、b1/b2 均 sent 且独立观察保持。测量结束后单独在 7-Zip 提交压缩，
+`business <QA目录>` 经私有 stdin 验证正确密码成功、错误密码失败，并解出合成文件比较字节和哈希。
+脚本仅有准备/保护性自检通过时不能宣称产品端到端已通过；实际候选、批准、操作和业务结果须另记 #144。
