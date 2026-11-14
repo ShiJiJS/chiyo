@@ -1,6 +1,11 @@
 // Synthetic receiver only. Only this process reads its own fake password.
 #include <windows.h>
+#include <shellapi.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.Data.Json.h>
 #include <atomic>
+#include <exception>
 #include <string>
 #include <thread>
 
@@ -10,6 +15,8 @@ std::wstring expected;
 WNDPROC edit_proc = nullptr;
 unsigned changes = 0, pastes = 0;
 bool disable_after_set = false, delay_next_set = false;
+bool json_mode = false, armed = false, focused_since_armed = false;
+std::wstring nonce, window_title;
 struct Snapshot { HWND foreground = nullptr, focus = nullptr; POINT cursor{}; DWORD clipboard = 0; bool valid = false; };
 Snapshot watched;
 std::atomic<bool> watching{false}, observation_changed{false};
@@ -59,7 +66,7 @@ std::string ReadLine() {
   while (ReadByte(&c)) {
     if (c == '\n') break;
     if (c != '\r') line += c;
-    if (line.size() > 32768) return "";
+    if (line.size() > 131072) return "";
   }
   return line;
 }
@@ -69,6 +76,7 @@ std::wstring Text(HWND control) {
   GetWindowTextW(control, text.data(), length + 1); text.resize(length); return text;
 }
 LRESULT CALLBACK Edit(HWND control, UINT message, WPARAM w, LPARAM l) {
+  if (control == first && message == WM_SETFOCUS && armed) focused_since_armed = true;
   if (message == WM_PASTE) ++pastes;
   if (control == first && message == WM_SETTEXT && delay_next_set) {
     delay_next_set = false; Reply("setter_entered"); Sleep(1200);
@@ -147,9 +155,57 @@ std::string Command(const std::string& command) {
   } else return "unsupported";
   return "ok";
 }
+
+using winrt::Windows::Data::Json::JsonObject;
+using winrt::Windows::Data::Json::JsonValue;
+using winrt::Windows::Data::Json::JsonValueType;
+JsonObject State(const wchar_t* state) {
+  JsonObject result; result.Insert(L"state", JsonValue::CreateStringValue(state)); return result;
+}
+std::string JsonCommand(const std::string& line) {
+  try {
+    const auto request = JsonObject::Parse(winrt::to_hstring(line));
+    const auto command = request.GetNamedString(L"command");
+    if (command == L"expect" && request.Size() == 2) {
+      const auto bytes = request.GetNamedArray(L"bytes");
+      if (bytes.Size() == 0 || bytes.Size() > 16384) throw std::exception();
+      std::string utf8; utf8.reserve(bytes.Size());
+      for (const auto& byte : bytes) {
+        if (byte.ValueType() != JsonValueType::Number) throw std::exception();
+        const auto number = byte.GetNumber();
+        if (!(number >= 0 && number <= 255) || number != static_cast<int>(number)) throw std::exception();
+        utf8 += static_cast<char>(number);
+      }
+      const int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8.data(),
+          static_cast<int>(utf8.size()), nullptr, 0);
+      if (count <= 0 || count > 4096) { SecureZeroMemory(utf8.data(), utf8.size()); throw std::exception(); }
+      if (!expected.empty()) SecureZeroMemory(expected.data(), expected.size() * sizeof(wchar_t));
+      expected.resize(count);
+      MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8.data(), static_cast<int>(utf8.size()), expected.data(), count);
+      SecureZeroMemory(utf8.data(), utf8.size());
+      for (uint32_t i = 0; i < bytes.Size(); ++i) bytes.SetAt(i, JsonValue::CreateNumberValue(0));
+      focused_since_armed = false; armed = true; changes = 0;
+      return winrt::to_string(State(L"armed").Stringify());
+    }
+    if (command == L"check" && request.Size() == 1) {
+      auto value = Text(first); const bool matched = armed && value == expected;
+      SecureZeroMemory(value.data(), value.size() * sizeof(wchar_t));
+      auto result = State(L"checked");
+      result.Insert(L"matched", JsonValue::CreateBooleanValue(matched));
+      result.Insert(L"active", JsonValue::CreateBooleanValue(GetForegroundWindow() == window));
+      result.Insert(L"focusedSinceArmed", JsonValue::CreateBooleanValue(focused_since_armed));
+      return winrt::to_string(result.Stringify());
+    }
+    if (command == L"rebuild" && request.Size() == 1) {
+      Command("recreate"); return winrt::to_string(State(L"rebuilt").Stringify());
+    }
+  } catch (...) { /* The request and exception never become diagnostics. */ }
+  return "{\"state\":\"refused\",\"errorCode\":\"fixture_input_rejected\"}";
+}
 LRESULT CALLBACK Window(HWND owner, UINT message, WPARAM w, LPARAM l) {
   if (message == WM_APP + 1) {
-    auto request = reinterpret_cast<Request*>(l); request->response = Command(request->command); return 0;
+    auto request = reinterpret_cast<Request*>(l);
+    request->response = json_mode ? JsonCommand(request->command) : Command(request->command); return 0;
   }
   if (message == WM_COMMAND && HIWORD(w) == EN_CHANGE && reinterpret_cast<HWND>(l) == first) ++changes;
   if (message == WM_DESTROY) {
@@ -162,19 +218,42 @@ LRESULT CALLBACK Window(HWND owner, UINT message, WPARAM w, LPARAM l) {
 }
 int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE, wchar_t* args, int) {
   const std::wstring mode(args);
+  if (mode.rfind(L"--native-fill-fixture", 0) == 0) {
+    int argc = 0; auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    const bool valid = argv && argc == 6 && std::wstring(argv[1]) == L"--native-fill-fixture" &&
+        std::wstring(argv[2]) == L"--nonce" && std::wstring(argv[4]) == L"--kind" &&
+        std::wstring(argv[5]) == L"win32_password";
+    if (valid) nonce = argv[3];
+    if (argv) LocalFree(argv);
+    if (!valid || nonce.empty() || nonce.size() > 128) return 64;
+    for (auto c : nonce) if (!((c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z') ||
+        (c >= L'0' && c <= L'9') || c == L'_' || c == L'-')) return 64;
+    json_mode = true; winrt::init_apartment(winrt::apartment_type::single_threaded);
+  }
   const bool typing = mode == L"--typing";
   WNDCLASSW type{}; type.hInstance = instance; type.lpfnWndProc = Window;
   type.lpszClassName = mode == L"--browser-root" ? L"Chrome_WidgetWin_0" : L"ChiyoNativeBackgroundTest";
   type.hCursor = LoadCursor(nullptr, IDC_ARROW); type.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
   if (!RegisterClassW(&type)) return 70;
-  window = CreateWindowW(type.lpszClassName,
-      typing ? L"Chiyo native background test typing" : L"Chiyo native background test receiver",
+  window_title = json_mode ? L"Chiyo native acceptance " + nonce :
+      typing ? L"Chiyo native background test typing" : L"Chiyo native background test receiver";
+  window = CreateWindowW(type.lpszClassName, window_title.c_str(),
       WS_OVERLAPPEDWINDOW, 120, 120, 540, 330, nullptr, nullptr, instance, nullptr);
   first = Password(101, 60); second = Password(102, 130);
   plain = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL,
       20, 180, 470, 30, window, reinterpret_cast<HMENU>(103), instance, nullptr);
   ShowWindow(window, SW_SHOWNOACTIVATE); UpdateWindow(window);
-  Reply("ready " + std::to_string(reinterpret_cast<uintptr_t>(window)));
+  if (json_mode) {
+    wchar_t path[32768]{}; const DWORD length = GetModuleFileNameW(nullptr, path, 32768);
+    if (length == 0 || length >= 32768) return 70;
+    auto ready = State(L"ready");
+    ready.Insert(L"nonce", JsonValue::CreateStringValue(nonce));
+    ready.Insert(L"appId", JsonValue::CreateStringValue(path));
+    ready.Insert(L"windowTitle", JsonValue::CreateStringValue(window_title));
+    ready.Insert(L"fieldIdentifier", JsonValue::CreateStringValue(L"101"));
+    ready.Insert(L"controlKind", JsonValue::CreateStringValue(L"win32_password"));
+    Reply(winrt::to_string(ready.Stringify()));
+  } else Reply("ready " + std::to_string(reinterpret_cast<uintptr_t>(window)));
   std::thread([] {
     for (;;) {
       auto command = ReadLine(); if (command.empty() || command == "close") break;
@@ -187,5 +266,6 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE, wchar_t* args, int) {
   }).detach();
   MSG message{};
   while (GetMessageW(&message, nullptr, 0, 0) > 0) { TranslateMessage(&message); DispatchMessageW(&message); }
+  if (json_mode) winrt::uninit_apartment();
   return 0;
 }

@@ -96,6 +96,21 @@ flutter test --no-pub test/bundled_windows_native_fill_test.dart test/bundled_fo
 不可用执行文件的安全失败，以及 driver 销毁后的拒绝；原焦点 bundle 检查一同回归。
 没有显式提供测试 helper 时，真实握手用例跳过，不能宣称真实握手已通过。
 
+公共 App→Host→CLI 审批 harness 使用同一组 fixture 的显式 JSON 模式，无需另建接收程序：
+
+| NATIVE_FILL_KIND | NATIVE_FILL_RECEIVER（相对上述 out） |
+| --- | --- |
+| `win32_password` | `tests/Release/native_background_fixture.exe` |
+| `winforms_password` | `tests/managed/native-managed-fixture.exe` |
+| `wpf_password` | `tests/managed/native-managed-fixture.exe` |
+
+三者接受 `--native-fill-fixture --nonce NONCE --kind KIND`，直接由当前 fixture 进程创建
+控件，真实目标 exe 与 receiver 路径一致。JSONL `ready` 返回 nonce、含 nonce 的窗口标题、
+appId、`fieldIdentifier:"101"` 和 controlKind；`expect` 只保留私有比较目标并清空焦点观察，
+`check` 只返回匹配、激活和获得焦点的布尔值，`rebuild` 重建同名控件，EOF 正常退出。
+完整字段与运行参数以 [公共验收合同](native-background-fill-acceptance.md) 为准。
+未传该模式时保留平台定向检查使用的旧文本协议；两者都仅为合成测试，不进入生产 helper wire。
+
 原生检查包括三类夹具的整值替换、内部焦点变化、遮挡/最小化、隐藏拒绝、失效、
 进程代际、身份摘要、保留及单票据行为。可用 `ctest -R native_background_limits`
 单独重跑新增长度边界。Dart 检查使用真实 helper 管道，覆盖公共快照、scope、busy、
