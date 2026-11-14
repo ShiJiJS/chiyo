@@ -19,13 +19,12 @@ const NATIVE_DEMO_CONTROLS = [
 document.addEventListener('alpine:init', () => {
   Alpine.data('tutorial', () => ({
     selected:'password', selector:'#password', queried:false, matches:[], filled:false,
-    fillStatus:'会先复核上方选择的目标，再填写教学表单。', os:'mac', userApplication:'editor',targetRebuilt:false,delivery:'idle',
+    fillStatus:'会先复核上方选择的目标，再填写教学表单。', os:'mac',delivery:'idle',
     nativeStage:0,nativeWindow:'task',nativeComponent:'file',
     init(){
       this.$nextTick(() => {this.$refs.demo.srcdoc=DEMO_HTML;});
       const state=new URLSearchParams(location.search).get('state');
       if(state==='windows')this.os='win';
-      if(state==='refused'){this.targetRebuilt=true;this.delivery='refused';}
     },
     readyDemo(){
       this.inspect('password');
@@ -75,11 +74,10 @@ document.addEventListener('alpine:init', () => {
       const escaped=code.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
       return escaped.replace(/\b(AXUIElementCopyAttributeValue|AXUIElementCreateApplication|AXUIElementIsAttributeSettable|AXUIElementSetAttributeValue|ElementFromHandle|CreatePropertyCondition|FindAll|GetCurrentPatternAs|put_AutoSetFocus|SetValue)\b/g,'<strong class="method-name">$1</strong>');
     },
-    demoSend(){this.delivery=this.targetRebuilt?'refused':'sent';},
+    demoSend(){this.delivery='sent';},
     get deliveryText(){
-      if(this.delivery==='refused')return '原目标对象已失效：停止填写，不按相同名称寻找新框。前台用户窗口没有收到 hello。';
-      if(this.delivery==='sent')return '向原密码控件设置了 hello；用户当前窗口和输入焦点保持不变。这是教学模拟，业务结果仍需另查。';
-      return '尚未写值。用户当前使用哪个窗口，不改变保存的目标对象。';
+      if(this.delivery==='sent')return '演示结果：hello 填入左侧后台密码框，显示为 5 个圆点；右侧邮件正文保持原样，你仍可继续写邮件。';
+      return '尚未演示。点击按钮，看左侧密码框变化；右侧邮件正文将保持原样。';
     },
     get nativeAppName(){return this.os==='mac'?'归档实用工具':'7-Zip';},
     get nativeAppId(){return this.os==='mac'?'com.apple.archiveutility':'C:\\Program Files\\7-Zip\\7zFM.exe';},
