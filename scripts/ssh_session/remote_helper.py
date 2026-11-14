@@ -4,6 +4,7 @@ Protocol is JSON lines on stdin/stdout. One persistent Shell reads a private
 command pipe; terminal input NEVER enters that pipe. A controlling PTY supports
 /dev/tty. Its input queue is flushed with the input gate closed before each run.
 """
+import array
 import base64
 import ctypes
 import errno
@@ -75,9 +76,11 @@ def client_mode(mode):
         # Only sudo owns this stdout pipe. Never use the terminal as fallback.
         os.write(1, base64.b64decode(response['data']) + b'\n')
         return 0
-    connection = rpc(os.environ['CHIYO_SUDO_SOCKET'], {
-        'kind': 'sudo', 'argv': sys.argv[2:], 'cwd': os.getcwd(),
-        'env': dict(os.environ)})
+    connection = socket.socket(socket.AF_UNIX)
+    connection.connect(os.environ['CHIYO_SUDO_SOCKET'])
+    payload = {'kind': 'sudo', 'argv': sys.argv[2:], 'cwd': os.getcwd(), 'env': dict(os.environ)}
+    connection.sendmsg([(json.dumps(payload) + '\n').encode()],
+                       [(socket.SOL_SOCKET, socket.SCM_RIGHTS, array.array('i', [0, 1, 2]))])
     result = json.loads(connection.makefile('rb').readline(MAX_FRAME))
     return int(result.get('exitCode', 125))
 
@@ -153,6 +156,7 @@ class Broker:
             signal.signal(signal.SIGTTOU, signal.SIG_DFL)
             signal.signal(signal.SIGINT, signal.SIG_DFL)
             signal.signal(signal.SIGQUIT, signal.SIG_DFL)
+            signal.signal(signal.SIGHUP, signal.SIG_DFL)
 
         environment = dict(os.environ)
         environment['CHIYO_SUDO_SOCKET'] = self.socket_path
@@ -244,7 +248,10 @@ class Broker:
         self.close_client(client)
 
     def close_client(self, client):
-        self.clients.pop(client.fileno(), None)
+        state = self.clients.pop(client.fileno(), None)
+        if state:
+            for descriptor in state[4]:
+                os.close(descriptor)
         try:
             self.selector.unregister(client.fileno())
         except (KeyError, ValueError):
@@ -362,11 +369,18 @@ class Broker:
                 signal.signal(signal.SIGTTOU, signal.SIG_DFL)
                 signal.signal(signal.SIGINT, signal.SIG_DFL)
                 signal.signal(signal.SIGQUIT, signal.SIG_DFL)
+                signal.signal(signal.SIGHUP, signal.SIG_DFL)
             # The broker creates and holds the actual selected sudo process.
             # No run-owned client can nominate or register an authentication PID.
+            descriptors = self.clients[client.fileno()][4]
+            if len(descriptors) != 3:
+                return self.send_client(client, {'exitCode': 125})
             process = subprocess.Popen([sudo, '-A', *argv], cwd=cwd, env=env,
-                                       stdin=self.slave, stdout=self.slave,
-                                       stderr=self.slave, preexec_fn=sudo_setup)
+                                       stdin=descriptors[0], stdout=descriptors[1],
+                                       stderr=descriptors[2], preexec_fn=sudo_setup)
+            for descriptor in descriptors:
+                os.close(descriptor)
+            self.clients[client.fileno()][4] = []
             self.actions[action_id] = {
                 'id': action_id, 'runId': self.run, 'wrapper': client,
                 'pid': process.pid, 'identity': process_identity(process.pid),
@@ -401,14 +415,28 @@ class Broker:
             for key, _ in self.selector.select(0.02):
                 fd, kind = key.fd, key.data
                 if kind == 'listener':
-                    client, _ = self.listener.accept()
+                    try:
+                        client, _ = self.listener.accept()
+                    except BlockingIOError:
+                        continue
                     client.setblocking(False)
-                    self.clients[client.fileno()] = [client, b'', 'new', None]
+                    self.clients[client.fileno()] = [client, b'', 'new', None, []]
                     self.selector.register(client.fileno(), selectors.EVENT_READ, 'client')
                     continue
                 if kind == 'client':
-                    client, buffer, _, _ = self.clients[fd]
-                    chunk = client.recv(MAX_FRAME)
+                    client, buffer, _, _, descriptors = self.clients[fd]
+                    try:
+                        chunk, ancillary, flags, _ = client.recvmsg(MAX_FRAME, socket.CMSG_SPACE(3 * 4))
+                    except BlockingIOError:
+                        continue
+                    for level, kind, payload in ancillary:
+                        if level == socket.SOL_SOCKET and kind == socket.SCM_RIGHTS:
+                            received = array.array('i')
+                            received.frombytes(payload[:len(payload) - len(payload) % received.itemsize])
+                            descriptors.extend(received)
+                    if flags & socket.MSG_CTRUNC or len(descriptors) > 3:
+                        self.close_client(client)
+                        continue
                     if not chunk:
                         self.close_client(client)
                         continue
@@ -423,6 +451,8 @@ class Broker:
                     continue
                 try:
                     data = os.read(fd, 8192)
+                except BlockingIOError:
+                    continue
                 except OSError as error:
                     if error.errno == errno.EIO:
                         data = b''
@@ -468,7 +498,7 @@ class Broker:
                 return
 
     def close(self):
-        for client, _, _, _ in list(self.clients.values()):
+        for client, _, _, _, _ in list(self.clients.values()):
             self.close_client(client)
         try:
             os.kill(self.shell.pid, signal.SIGKILL)
@@ -488,6 +518,9 @@ def main():
     if os.environ.get('CHIYO_SUDO_ACTION'):
         return client_mode('--askpass')
     session_leader()
+    # SSH EOF owns broker lifetime; terminal job-control hangups must not bypass
+    # its explicit unusable/close protocol. Child processes retain normal HUP.
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
     try:
         broker = Broker()
     except RuntimeError as error:

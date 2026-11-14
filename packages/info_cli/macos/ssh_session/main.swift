@@ -83,7 +83,9 @@ if ProcessInfo.processInfo.environment["CHIYO_SSH_SOCKET"] != nil {
 }
 
 final class Broker {
-  let emitLock = NSLock(), stateLock = NSLock()
+  let emitLock = NSLock(), stateLock = NSLock(), writerLock = NSLock()
+  let writer = DispatchQueue(label: "chiyo.ssh.stdin")
+  var queuedBytes = 0
   let process = Process(), input = Pipe(), output = Pipe(), diagnostic = Pipe()
   var pending: [String: (DispatchSemaphore, Data?)] = [:]
   var witness: Witness?
@@ -182,7 +184,16 @@ final class Broker {
     switch value["type"] as? String {
     case "send":
       if let raw = value["data"] as? String, let data = Data(base64Encoded: raw) {
-        try? input.fileHandleForWriting.write(contentsOf: data)
+        writerLock.lock()
+        if queuedBytes + data.count > 524288 {
+          writerLock.unlock(); emit(["type": "failure", "code": "input_limit"])
+          if process.isRunning { process.terminate() }; return
+        }
+        queuedBytes += data.count; writerLock.unlock()
+        writer.async {
+          try? self.input.fileHandleForWriting.write(contentsOf: data)
+          self.writerLock.lock(); self.queuedBytes -= data.count; self.writerLock.unlock()
+        }
       }
     case "credential":
       guard let id = value["challengeId"] as? String else { return }
@@ -192,8 +203,8 @@ final class Broker {
         pending[id] = (previous.0, data); previous.0.signal()
       }
       stateLock.unlock()
-    case "close": try? input.fileHandleForWriting.close()
-    case "terminate": if process.isRunning { process.terminate() }
+    case "close": writer.async { try? self.input.fileHandleForWriting.close() }
+    case "terminate": if process.isRunning { process.terminate() }; try? input.fileHandleForWriting.close()
     default: break
     }
   }
