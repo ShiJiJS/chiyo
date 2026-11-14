@@ -34,13 +34,13 @@ class PreparationTests(unittest.TestCase):
             (bundle / (name + suffix)).write_bytes(path.read_bytes())
         template = delivery / 'cli/template'
         (template / 'references').mkdir(parents=True)
-        (template / 'SKILL.md').write_text('Synthetic skill\n')
+        (template / 'SKILL.md').write_text('Synthetic skill\n', encoding='utf-8')
         for name in ['credential-use.md', 'information-files.md', 'remote-connection.md', 'information-file-intake.md']:
-            (template / 'references' / name).write_text(name)
+            (template / 'references' / name).write_text(name, encoding='utf-8')
         skill = bundle / 'skills/agent-info-access'
         (skill / 'references').mkdir(parents=True)
         (skill / 'SKILL.md').write_text(
-            f'Synthetic skill\n\nBundle executable: `{bundle.as_posix()}/chiyo{suffix}`.\n')
+            f'Synthetic skill\n\nBundle executable: `{bundle.as_posix()}/chiyo{suffix}`.\n', encoding='utf-8')
         for name in ['credential-use.md', 'information-files.md', 'remote-connection.md', 'information-file-intake.md']:
             (skill / 'references' / name).write_bytes((template / 'references' / name).read_bytes())
         for path in sorted(delivery.rglob('*')):
@@ -49,7 +49,7 @@ class PreparationTests(unittest.TestCase):
                 files.append(dict(path=path.relative_to(delivery).as_posix(), bytes=len(data),
                                   sha256=hashlib.sha256(data).hexdigest()))
         (delivery / 'manifest.json').write_text(json.dumps(dict(
-            architecture=architecture, release='synthetic', sourceCommit='fixture', files=files)))
+            architecture=architecture, release='synthetic', sourceCommit='fixture', files=files)), encoding='utf-8')
         hook_path = f'{bundle.as_posix()}/info-codex-hook{suffix}'
         posix = "'" + hook_path.replace("'", "'\"'\"'") + "'"
         windows = "& '" + hook_path.replace("'", "''") + "'"
@@ -62,7 +62,7 @@ class PreparationTests(unittest.TestCase):
             if event == 'SessionStart':
                 group['matcher'] = '^(startup|resume|clear|compact|fork)$'
             hooks[event] = [group]
-        (bundle / 'hooks.json').write_text(json.dumps(dict(description='fixture', hooks=hooks)))
+        (bundle / 'hooks.json').write_text(json.dumps(dict(description='fixture', hooks=hooks)), encoding='utf-8')
         return delivery, bundle
 
     def test_windows_layout_and_literal_path_preserved(self):
@@ -70,10 +70,10 @@ class PreparationTests(unittest.TestCase):
         workspace = self.root / 'workspace'
         result = module.prepare(delivery, bundle, workspace)
         self.assertEqual(result['architecture'], 'windows-x64')
-        self.assertIn('app/info_desktop.exe', (workspace / 'README.txt').read_text())
+        self.assertIn('app/info_desktop.exe', (workspace / 'README.txt').read_text(encoding='utf-8'))
         self.assertFalse(result['trusted'])
         self.assertEqual((workspace / '.codex/hooks.json').read_bytes(), (bundle / 'hooks.json').read_bytes())
-        self.assertIn('/chiyo.exe', (workspace / '.agents/skills/agent-info-access/SKILL.md').read_text())
+        self.assertIn('/chiyo.exe', (workspace / '.agents/skills/agent-info-access/SKILL.md').read_text(encoding='utf-8'))
         self.assertEqual((workspace / '.agents/skills/agent-info-access/references/remote-connection.md').read_bytes(),
                          (bundle / 'skills/agent-info-access/references/remote-connection.md').read_bytes())
 
@@ -82,9 +82,9 @@ class PreparationTests(unittest.TestCase):
         workspace = self.root / 'workspace'
         result = module.prepare(delivery, bundle, workspace)
         self.assertEqual(result['architecture'], 'macos-arm64')
-        self.assertIn('app/info_desktop.app', (workspace / 'README.txt').read_text())
+        self.assertIn('app/info_desktop.app', (workspace / 'README.txt').read_text(encoding='utf-8'))
         self.assertEqual(result['casesRun'], 0)
-        cases = json.loads((workspace / 'acceptance-cases.json').read_text())
+        cases = json.loads((workspace / 'acceptance-cases.json').read_text(encoding='utf-8'))
         self.assertEqual(len(cases), 13)
         self.assertTrue(all(c['state'] == 'not_run' for c in cases))
 
@@ -100,7 +100,7 @@ class PreparationTests(unittest.TestCase):
     def test_changed_or_missing_new_reference_is_refused_before_writes(self):
         delivery, bundle = self.fixture('macos-arm64')
         reference = bundle / 'skills/agent-info-access/references/remote-connection.md'
-        reference.write_text('changed instructions')
+        reference.write_text('changed instructions', encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'reference differs'):
             module.prepare(delivery, bundle, self.root / 'changed-reference')
         self.assertFalse((self.root / 'changed-reference').exists())
@@ -108,7 +108,7 @@ class PreparationTests(unittest.TestCase):
     def test_hook_mutations_refused_before_writes(self):
         delivery, bundle = self.fixture('macos-arm64')
         hook_file = bundle / 'hooks.json'
-        original = json.loads(hook_file.read_text())
+        original = json.loads(hook_file.read_text(encoding='utf-8'))
         for mutation in ['posix-target', 'windows-target', 'matcher', 'async', 'duplicate', 'stop-event']:
             with self.subTest(mutation=mutation):
                 config = copy.deepcopy(original)
@@ -120,7 +120,7 @@ class PreparationTests(unittest.TestCase):
                 elif mutation == 'async': handler['async'] = True
                 elif mutation == 'duplicate': group['hooks'].append(copy.deepcopy(handler))
                 else: config['hooks']['Stop'] = copy.deepcopy(config['hooks']['SessionEnd'])
-                hook_file.write_text(json.dumps(config))
+                hook_file.write_text(json.dumps(config), encoding='utf-8')
                 destination = self.root / mutation
                 expected_error = {'posix-target': 'POSIX hook target', 'windows-target': 'Windows command wrapper',
                     'matcher': 'SessionStart matcher', 'async': 'handler fields',
@@ -138,9 +138,9 @@ class PreparationTests(unittest.TestCase):
             module.prepare(delivery, bundle, self.root / 'changed')
         binary.write_bytes(original)
         manifest_path = delivery / 'manifest.json'
-        manifest = json.loads(manifest_path.read_text())
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
         manifest['architecture'] = 'unrecognized'
-        manifest_path.write_text(json.dumps(manifest))
+        manifest_path.write_text(json.dumps(manifest), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'Unsupported delivery'):
             module.prepare(delivery, bundle, self.root / 'unknown')
         self.assertFalse((self.root / 'changed').exists())
