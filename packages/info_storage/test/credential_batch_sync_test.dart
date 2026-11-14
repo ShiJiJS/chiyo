@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:info_core/info_core.dart';
 import 'package:info_core/library_sync_changes.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
+
 import '../../info_core/test_support/operation_history.dart';
-import '../../info_core/test_support/native_fill.dart'
-    show nativeTargetFixture;
+import '../../info_core/test_support/native_fill.dart' show nativeTargetFixture;
 import 'storage_test.dart' show TestKeyStore;
+import '../../info_core/test/fixtures/ssh_session_fixture.dart'
+    show knownHostBytes;
 
 class _Replica {
   _Replica(this.path, this.clock);
@@ -219,6 +222,117 @@ void _assertArchive(
 }
 
 void main() {
+  test(
+    'SSH initial and incremental history use format 32 without restoring permission',
+    () async {
+      final root = await Directory.systemTemp.createTemp('ssh-batch-sync-');
+      final now = DateTime.utc(2026, 11, 15);
+      final a = _Replica('${root.path}/a', () => now),
+          b = _Replica('${root.path}/b', () => now);
+      await a.open();
+      await b.open();
+      addTearDown(() async {
+        await a.close();
+        await b.close();
+        await root.delete(recursive: true);
+      });
+      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+      Future<void> append(String id) async {
+        final op = await a.runtime.service.agent.beginCredentialBatchOperation(
+          f.session,
+          'A' * 22,
+          f.request.id,
+          operationId: id,
+          sshContext: SshSessionOperationContext(
+            kind: 'run',
+            sessionId: 'ssh-synthetic',
+            runId: id,
+            digest: 'sha256:${'a' * 64}',
+            byteLength: 4,
+          ),
+        );
+        await a.runtime.service.agent.authorizeCredentialBatchInput(
+          'A' * 22,
+          op.privateProof!,
+        );
+        await a.runtime.service.agent.finishCredentialBatchOperation(
+          'A' * 22,
+          op.privateProof!,
+          CredentialBatchOperationState.filled,
+          itemResults: {'b1': 'sent'},
+        );
+      }
+
+      await a.runtime.run(() async {
+        await f.open(program: false);
+        await a.runtime.service.owner.configureSshKnownHosts(
+          'Synthetic',
+          knownHostBytes(),
+        );
+        f.input = CredentialBatchInput.fromJson({
+          'protocolVersion': 3,
+          'purpose': 'Synthetic SSH sync',
+          'items': [
+            {
+              'credentialId': f.input.items.single.credentialId,
+              'version': 1,
+              'destination': {
+                'via': 'ssh',
+                'target': SshSessionTarget(
+                  host: 'example.test',
+                  port: 22,
+                  user: 'fixture',
+                  authentication: 'password',
+                  credentialUse: 'login',
+                  validity: 'session',
+                ).toJson(),
+              },
+            },
+          ],
+        });
+        f.request = await a.runtime.service.agent.requestCredentialBatch(
+          f.session,
+          'A' * 22,
+          f.input,
+          operationId: 'ssh-submit',
+        );
+        f.request = await a.runtime.service.owner.decideCredentialBatch(
+          f.request.id,
+          operationId: 'ssh-approve',
+          revision: 1,
+          approvedItems: ['b1'],
+          lifetime: null,
+        );
+        await append('ssh-first');
+      });
+      expect(await _initial(a, b), 32);
+      _assertArchive(b, f, program: false, count: 1);
+      await a.runtime.run(() => append('ssh-second'));
+      for (final entry in await a.after(0)) {
+        expect((await _transfer(a, b, entry.batch)).conflict, false);
+      }
+      _assertArchive(b, f, program: false, count: 2);
+      final operations = b.repo.credentialBatchOperations.where(
+        (o) => o.requestId == f.request.id,
+      );
+      expect(
+        operations.every(
+          (o) => o.sshContext?.kind == 'run' && !o.materialClaimed,
+        ),
+        isTrue,
+      );
+      expect(
+        b.repo.credentialBatches
+            .singleWhere((r) => r.id == f.request.id)
+            .items
+            .single
+            .destination
+            .ssh!
+            .host,
+        'example.test',
+      );
+    },
+  );
   test(
     'native snapshots use format 30 and incremental operations remain inactive on the replica',
     () async {

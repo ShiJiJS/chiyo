@@ -658,7 +658,7 @@ class InformationBackups {
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
         formatVersion = hasSshHistory
-            ? 31
+            ? 32
             : hasNativeHistory
             ? 30
             : hasProgramBatchHistory
@@ -1277,7 +1277,7 @@ class InformationBackups {
         if (contents.formatVersion >= 28) {
           await _repository._createCredentialBatchTables();
         }
-        if (contents.formatVersion >= 31) {
+        if (contents.formatVersion >= 32) {
           await _repository._requireAdmissionFormat(
             _sshInteractiveLibraryFormat,
           );
@@ -1397,6 +1397,7 @@ class InformationBackups {
           29,
           30,
           31,
+          32,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1423,7 +1424,7 @@ class InformationBackups {
       25 => _v25Columns,
       26 || 27 => _v26Columns,
       28 => _v28Columns,
-      29 || 30 || 31 => _v29Columns,
+      29 || 30 || 31 || 32 => _v29Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

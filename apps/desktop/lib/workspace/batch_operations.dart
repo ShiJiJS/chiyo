@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'approval_presentation.dart';
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'approvals_controller.dart';
@@ -51,12 +53,20 @@ class _BatchOperationsState extends State<BatchOperations> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '填写记录',
+            detail.sshSession ? 'SSH 使用记录' : '填写记录',
             style: libraryText(context, 17, weight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '批准与使用分别记录。刷新状态只读取已有结果，不会再次发送或执行。',
+            style: libraryText(context, 13, color: c.muted, height: 1.8),
           ),
           const SizedBox(height: 12),
           if (operations.isEmpty)
-            Text('尚无填写记录。', style: libraryText(context, 14, color: c.muted)),
+            Text(
+              detail.sshSession ? '尚无 SSH 使用记录。批准后，仍由 Agent 发起连接。' : '尚无填写记录。',
+              style: libraryText(context, 14, color: c.muted),
+            ),
           for (final o
               in detail.operationTotal == null
                   ? operations.take(_shown)
@@ -85,9 +95,13 @@ class _BatchOperationsState extends State<BatchOperations> {
     final checked = _confirmed.contains((o.operationId, o.revision));
     final enabled = !model.frozen && !model.readingExecution(o.operationId);
     final canAcknowledge =
-        model.source is WorkspaceCredentialBatchActions && !o.fromBackup;
+        model.source is WorkspaceCredentialBatchActions &&
+        !o.fromBackup &&
+        o.sshContext == null;
     final color = o.needsAttention
         ? c.warning
+        : o.sshContext != null
+        ? c.accent
         : o.state == 'filled'
         ? c.success
         : c.muted;
@@ -106,7 +120,9 @@ class _BatchOperationsState extends State<BatchOperations> {
             runSpacing: 6,
             children: [
               Text(
-                o.itemIds.map((id) => names[id] ?? '凭据').join('、'),
+                o.sshContext != null
+                    ? o.operationLabel
+                    : o.itemIds.map((id) => names[id] ?? '凭据').join('、'),
                 style: libraryText(context, 15, weight: FontWeight.w600),
               ),
               Text(
@@ -125,6 +141,26 @@ class _BatchOperationsState extends State<BatchOperations> {
             libraryLocalDateTime(o.createdAt),
             style: libraryText(context, 12, color: c.muted),
           ),
+          if (o.sshContext case final ssh?) ...[
+            Text(
+              ssh.requiresMaterial
+                  ? '所用凭据：${o.itemIds.map((id) => names[id] ?? '凭据').join('、')}'
+                  : '本次沿用登录许可，没有再次领取私钥或密码。',
+              style: libraryText(context, 13, color: c.muted, height: 1.8),
+            ),
+            if (o.state == 'filled')
+              Text(switch (ssh.kind) {
+                'run' => '已发送到这次 SSH 连接，尚无命令完成结果。',
+                'input' => '已发送到原 SSH 运行，不代表运行已经结束。',
+                'credential' => '密码已发送给原认证接收程序，不代表认证成功。',
+                _ => '凭据已交给连接程序，不代表连接成功。',
+              }, style: libraryText(context, 13, color: c.muted, height: 1.8)),
+            if (o.needsAttention)
+              Text(
+                '尚未确认是否发送，请让 Agent 查询原连接或命令，不要重新发送。',
+                style: libraryText(context, 13, color: c.warning, height: 1.8),
+              ),
+          ],
           if (o.errorLabel != null)
             Text(
               o.errorLabel!,
@@ -150,28 +186,45 @@ class _BatchOperationsState extends State<BatchOperations> {
                 child: const Text('详情'),
               ),
               if (!o.fromBackup)
-                DesktopButton(
+                OperationRefresh(
                   key: ValueKey('batch-query-${o.operationId}'),
-                  kind: DesktopButtonKind.quiet,
-                  busy: model.readingExecution(o.operationId),
-                  onPressed: enabled
-                      ? () => model.refreshBatchOperation(o.operationId)
-                      : null,
-                  child: const Text('查询结果'),
+                  controller: model,
+                  operationId: o.operationId,
+                  refresh: () => model.refreshBatchOperation(o.operationId),
+                  observation: () {
+                    final current = model.detail!.batchOperations.firstWhere(
+                      (item) => item.operationId == o.operationId,
+                    );
+                    return jsonEncode(current.toJson()..remove('observedAt'));
+                  },
                 ),
             ],
           ),
           if (expanded) ...[
             SelectableText(
-              '操作 ${o.operationId}',
+              [
+                '操作 ${o.operationId}',
+                if (o.sshContext case final ssh?) ...[
+                  '操作类型：${o.operationLabel}',
+                  'SSH 会话：${ssh.sessionId}',
+                  if (ssh.runId != null) '运行编号：${ssh.runId}',
+                  if (model.detail!.sshTarget case final target?)
+                    '连接：${target.user}@${target.host}:${target.port}',
+                ],
+              ].join('\n'),
               style: libraryText(context, 12, color: c.muted),
             ),
             for (final id in o.itemIds)
               Text(
-                '${names[id] ?? '凭据'}：${WorkspaceCredentialBatchOperation.resultLabel(o.itemResults[id] ?? o.state)}',
+                '${names[id] ?? '凭据'}：${o.itemResultLabel(o.itemResults[id] ?? o.state)}',
                 style: libraryText(context, 13, height: 1.8),
               ),
           ],
+          if (expanded && o.sshContext != null)
+            Text(
+              '授权历史仅保留操作信息，不保存命令正文或输出。命令结果由 Agent 查询。',
+              style: libraryText(context, 13, color: c.muted, height: 1.8),
+            ),
           if (o.fromBackup)
             Text(
               '这是备份中的历史，不能恢复原聊天的许可。',
