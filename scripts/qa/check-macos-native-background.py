@@ -77,7 +77,7 @@ def main():
                         time.sleep(.02)
                     result = subprocess.run([work / 'platform', work], capture_output=True, text=True, timeout=300)
                     (output / 'platform-log.txt').write_text(result.stdout + result.stderr)
-                    for name in ['calibration.json', 'platform-results.json', 'foreground-typing.json', 'wire-results.json', 'stage.json', 'result.json']:
+                    for name in ['calibration.json', 'platform-results.json', 'foreground-typing.json', 'wire-results.json', 'window-cache.json', 'stage.json', 'result.json']:
                         if (work / name).exists(): shutil.copy(work / name, output / name)
                     for observer in list(work.glob('observer-*.json')) + list(work.glob('ax-metadata-*.json')):
                         shutil.copy(observer, output / observer.name)

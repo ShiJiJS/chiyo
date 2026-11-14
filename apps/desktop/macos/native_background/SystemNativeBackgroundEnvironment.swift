@@ -36,6 +36,9 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
       self.windowLabel = windowLabel; self.fieldLabel = fieldLabel
     }
   }
+  // Internal read-only test evidence, not part of the public target/wire.
+  private(set) var discoveryExcludedWeb = false
+  private(set) var discoveryPasswordCount = 0
   private var deadline: TimeInterval = 0
   private var epoch: UInt64 = 0
   private var observations: [NSObjectProtocol] = []
@@ -86,6 +89,7 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
     let executable = try NativeExecutableWitness(application.executable, deadline: deadline)
     guard executable.sha256 == application.sha256 else { throw MacNativeBackgroundFailure.targetChanged }
     let app = AXUIElementCreateApplication(witness.pid)
+    discoveryExcludedWeb = false; discoveryPasswordCount = 0
     var result: [MacNativeBackgroundCandidate] = []
     var descriptions = Set<String>()
     var unsupported = false
@@ -94,7 +98,9 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
       guard try text(window, kAXRoleAttribute) == kAXWindowRole else { throw MacNativeBackgroundFailure.unsupportedTarget }
       let tree = try nativeTree(window)
       unsupported = unsupported || tree.excludedWeb
+      discoveryExcludedWeb = discoveryExcludedWeb || tree.excludedWeb
       for field in tree.nodes where try password(field) {
+        discoveryPasswordCount += 1
         let windowLabel: String, fieldLabel: String
         do {
           try writable(field)
