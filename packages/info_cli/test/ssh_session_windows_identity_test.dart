@@ -14,6 +14,14 @@ void main() {
       Platform.environment['D7_WINDOWS_SSH_HELPER'] ??
       '$root/build/ssh-session/native/Release/info-ssh-session.exe';
   final child = '${File(helper).parent.path}/ssh_session_test_child.exe';
+  if (!File(child).existsSync() || !File(helper).existsSync()) {
+    test(
+      'Windows ASKPASS identity acceptance',
+      () {},
+      skip: 'Build scripts/build-windows-ssh-session.ps1 -BuildTests first',
+    );
+    return;
+  }
   final copy = File(
     '$root/build/ssh-session/identity-${DateTime.now().microsecondsSinceEpoch}.exe',
   );
