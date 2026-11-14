@@ -1,6 +1,6 @@
 # Windows 原生后台填写
 
-设计更新（2026-11-14）：[ADR0033](../adr/0033-native-fill-by-control-capability.md) 已确定按实际 UIA 密码控件能力开放。当前实现没有逐应用允许名单，但下述三家族与 AutomationId 硬限制仍待按新合同解除；本页先保留现有实现及测试证据，不代表通用路径已经完成。
+按 [ADR0033](../adr/0033-native-fill-by-control-capability.md) 依据实际 UIA 密码控件能力开放，不按应用、版本或框架名称设置允许名单。新发现统一输出 `windows_uia_password`；旧类型保留历史解析，不可活用为新目标。
 
 Windows 平台实现位于 `apps/desktop/windows/native_background_fill/`，Dart
 适配器为 `apps/desktop/lib/windows_native_background_fill.dart`。它实现
@@ -10,15 +10,9 @@ Windows 平台实现位于 `apps/desktop/windows/native_background_fill/`，Dart
 
 ## 支持边界
 
-| 控件 | 限定条件 |
-| --- | --- |
-| Win32 | `Win32` UIA provider、原生 `Edit`、`IsPassword`、可写 `ValuePattern` |
-| WinForms | `WinForm` provider、`WindowsForms10.EDIT.*` 原生密码文本框 |
-| WPF | `WPF` provider、`HwndWrapper[` 根窗口下的标准 `PasswordBox` |
+目标必须是 `IsPassword` 为真的 `Edit` 控件，提供可写 `ValuePattern`，并能固定原进程、窗口、控件与祖先对象。`AutomationId` 可选；没有编号时用实际标签及分组描述供用户选择。完整公开描述仍有歧义时拒绝，不猜测、不按名称重找失效控件。
 
-控件必须具有可唯一解析的 AutomationId 路径。发现结果组合真实标签与该路径；
-两个窗口的完整公开描述相同（含标题截断、控制字符规范化后的碰撞）时拒绝发现。
-浏览器、Document 子树、已知 WebView/Electron 宿主及其他自绘 provider 不在支持范围。
+Win32、WinForms、WPF 和其他符合能力条件的原生 UIA provider 都走这条路径。浏览器、Document 祖先及已识别的 WebView/Electron 节点拒绝；同窗另一区域的网页不影响独立原生字段。
 进程必须属于同一用户与会话，完整性级别不能高于 helper；只支持已解锁的 Default 桌面。
 锁屏、UAC 安全桌面与跨用户使用不支持。
 
@@ -30,7 +24,7 @@ SHA256 和只读文件句柄，固定进程代际、窗口、UIA 对象及完整
 
 helper 使用窗口外的 MTA，显式关闭 UIA `AutoSetFocus`。唯一写入路径为
 `ValuePattern.SetValue` 整值替换；不读取字段值，不调用聚焦、激活、键盘输入或剪贴板写入。
-Win32/WinForms 在发送前用只读 `EM_GETLIMITTEXT` 检查标准 Edit 的声明上限；
+仅在已确认是标准或兼容 Edit 时，发送前用只读 `EM_GETLIMITTEXT` 检查声明上限；
 这不是写入通道。输入须为合法 UTF-8，解码后不超过 4096 个 UTF-16 单元，
 不接受空值、NUL、C0 控制字符或 DEL；保留空格、引号、反斜线和 Unicode。
 WPF 的键入长度限制不等同于编程设置限制；标准夹具核对实际整值，不据此承诺其他 provider 行为。
@@ -46,7 +40,7 @@ setter；关闭票据保留原目标，下次获准操作使用新票据。跨 s
 不能由 Agent 请求、环境变量或用户任意配置提供。驱动在启动前后核验该身份，
 通过继承的私有 stdin/stdout 管道启动 helper，并发送父进程及 helper 摘要的二进制握手。
 helper 核对真实直接父进程，父进程结束或管道断开即退出；不监听公共端口或公开命名管道。
-后续使用公共合同的有界长度帧。输出只含元数据及白名单事实，异常文本和 stderr 不返回给 Agent。
+仅接受 `--native-background-v2` 入口，旧 live v1 入口拒绝；私有握手与帧 envelope 保持 format 1。后续使用公共合同的有界长度帧。输出只含元数据及白名单事实，异常文本和 stderr 不返回给 Agent。
 尽力清零可变材料缓冲区；Dart/WinRT 不可变字符串及目标 App 内存不承诺可验证清零。
 
 App 接线通过 `package:info_desktop/bundled_windows_native_fill.dart` 的
@@ -100,7 +94,9 @@ flutter test --no-pub test/bundled_windows_native_fill_test.dart test/bundled_fo
 
 公共 App→Host→CLI 审批 harness 使用同一组 fixture 的显式 JSON 模式，无需另建接收程序：
 
-| NATIVE_FILL_KIND | NATIVE_FILL_RECEIVER（相对上述 out） |
+公开 `NATIVE_FILL_KIND` 统一设为 `windows_uia_password`；`NATIVE_FILL_RECEIVER_KIND` 只用于选择夹具实现，不代表生产资格。
+
+| NATIVE_FILL_RECEIVER_KIND | NATIVE_FILL_RECEIVER（相对上述 out） |
 | --- | --- |
 | `win32_password` | `tests/Release/native_background_fixture.exe` |
 | `winforms_password` | `tests/managed/native-managed-fixture.exe` |
@@ -124,7 +120,9 @@ appId、`fieldIdentifier:"101"` 和 controlKind；`expect` 只保留私有比较
 控件定向 `WM_CHAR` surrogate，不能作为物理键盘、全局输入注入或任意第三方 App 并发输入的验收。
 fixture 中的激活、输入、读取假值与提交仅用于测试布置或 oracle，不参与生产填写。
 
-## 真实软件兼容性核对
+## 历史参考：真实软件兼容性核对
+
+下述是旧版本的既有证据，本轮不下载、安装或启动第三方软件；不将其扩大为通用路径验收。
 
 已用官方 [7-Zip 下载页](https://www.7-zip.org/download.html) 的 26.06 x64 GUI
 “添加到压缩包”对话框核对标准 Win32 密码框与确认框，AutomationId 分别为 `120`、`121`。
@@ -137,7 +135,9 @@ fixture 中的激活、输入、读取假值与提交仅用于测试布置或 or
 真实软件检查脚本、下载文件、压缩包和详细结果是一次性任务证据，放在被忽略的 `build/`，
 不作为产品依赖。具体提交、运行结果与后续集成进度记录在 [#144](https://github.com/ShiJiJS/chiyo/issues/144)。
 
-## 普通 main 候选的业务验收准备
+## 历史参考：普通 main 候选的业务验收准备
+
+以下第三方软件流程本轮不执行。通用控件使用自制夹具与生产 driver/helper 定向验收。
 
 `scripts/qa/windows-native-product-flow.py` 分阶段驱动公开 CLI，复用交付会话已验真的
 同一冻结提交候选，不另编普通 main。先运行

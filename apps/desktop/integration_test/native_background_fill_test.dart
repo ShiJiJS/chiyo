@@ -111,6 +111,7 @@ void main() {
   const executable = String.fromEnvironment('NATIVE_FILL_RECEIVER');
   const evidence = String.fromEnvironment('NATIVE_FILL_EVIDENCE');
   const kind = String.fromEnvironment('NATIVE_FILL_KIND');
+  const receiverKind = String.fromEnvironment('NATIVE_FILL_RECEIVER_KIND');
   testWidgets(
     'the full App fills one fixed synthetic native field in the background',
     (tester) async {
@@ -148,14 +149,15 @@ void main() {
         );
         expect(
           Platform.isMacOS
-              ? kind == 'appkit_secure_text'
-              : {
-                  'win32_password',
-                  'winforms_password',
-                  'wpf_password',
-                }.contains(kind),
+              ? kind == 'macos_ax_password'
+              : kind == 'windows_uia_password',
           true,
         );
+        final fixtureKind = receiverKind.isNotEmpty
+            ? receiverKind
+            : Platform.isMacOS
+            ? 'appkit_secure_text'
+            : 'win32_password';
         final receiverPath = await ui.resolve(
           () => File(executable).resolveSymbolicLinks(),
         );
@@ -176,7 +178,7 @@ void main() {
               '--nonce',
               nonce,
               '--kind',
-              kind,
+              fixtureKind,
             ]),
             scan,
           ),
@@ -185,7 +187,7 @@ void main() {
         final ready = await ui.resolve(targetReceiver.reply);
         expect(ready['state'], 'ready');
         expect(ready['nonce'], nonce);
-        expect(ready['controlKind'], kind);
+        expect(ready['controlKind'], fixtureKind);
         expect((ready['windowTitle'] as String).contains(nonce), true);
         final identifier = ready['fieldIdentifier'] as String;
         expect(identifier.isNotEmpty, true);
@@ -446,6 +448,7 @@ void main() {
         expect(f.repo.credentialBatchOperations, hasLength(1));
         final receipt = jsonEncode({
           'kind': kind,
+          'receiverKind': fixtureKind,
           'requestId': request,
           'operationId': 'native-setter-$nonce',
           'itemResults': done!['itemResults'],

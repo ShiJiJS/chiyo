@@ -23,6 +23,7 @@
 - `NATIVE_FILL_CLI`：同一提交构建的公开 chiyo/chiyo.exe 绝对路径。
 - `NATIVE_FILL_RECEIVER`：`build/` 下对应 Win32、WinForms 或 WPF 合成接收程序的实际可执行文件路径。
 - `NATIVE_FILL_KIND`：新版公开目标类型，Windows 为 `windows_uia_password`，Mac 为 `macos_ax_password`。夹具家族选择须与公开类型分开，由同提交 harness 和 receiver 的参数约定说明，不能把所有目标标成 WPF 来通过。
+- `NATIVE_FILL_RECEIVER_KIND`：选择夹具实现（Windows 的 `win32_password` / `winforms_password` / `wpf_password`，Mac 的 `appkit_secure_text`）；与生产公开类型分开，缺省分别为 Win32 / AppKit。
 - `NATIVE_FILL_EVIDENCE`：本工作树 `build/` 下本次公开回执目录。
 
 未给参数时此项显式跳过，不视为真实平台通过。清理等待正常 quit 的资源关闭 Future；测试只延后最终 OS 进程终止，以便 Flutter 返回回执，原生驱动仍由正式工厂加载。
