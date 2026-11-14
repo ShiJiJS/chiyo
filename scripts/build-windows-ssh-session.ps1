@@ -1,6 +1,7 @@
 param(
     [string]$OutputDirectory = 'build/ssh-session/native',
-    [string]$CMake = ''
+    [string]$CMake = '',
+    [switch]$BuildTests
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
@@ -11,7 +12,8 @@ if (-not $CMake) {
     }
 }
 if (-not [IO.Path]::IsPathRooted($OutputDirectory)) { $OutputDirectory = Join-Path $projectRoot $OutputDirectory }
-& $CMake -S (Join-Path $projectRoot 'packages/info_cli/windows/ssh_session') -B $OutputDirectory -G 'Visual Studio 17 2022' -A x64
+$testOption = if ($BuildTests) { 'ON' } else { 'OFF' }
+& $CMake -S (Join-Path $projectRoot 'packages/info_cli/windows/ssh_session') -B $OutputDirectory -G 'Visual Studio 17 2022' -A x64 "-DCHIYO_SSH_BUILD_TESTS=$testOption"
 if ($LASTEXITCODE -ne 0) { throw 'SSH transport CMake configuration failed.' }
 & $CMake --build $OutputDirectory --config Release
 if ($LASTEXITCODE -ne 0) { throw 'SSH transport build failed.' }
