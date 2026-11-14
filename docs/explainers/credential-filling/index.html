@@ -4,12 +4,37 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agent 遇到密码框后，知予怎样接着填写？</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23007764'/%3E%3Cpath d='M11 12h18v16H11zM16 17v6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css">
-  <script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css"><link rel="stylesheet" href="reading-nav.css">
+  <script defer src="reading-nav.js"></script><script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
 </head>
 <body x-data="tutorial">
 <a class="skip" href="#main">跳到正文</a>
-<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 填写机制图解</span></a><nav aria-label="章节"><a href="#web">网页</a><a href="#native">普通应用</a><a href="#platform">系统 API</a></nav></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 填写机制图解</span></a><button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="false" aria-controls="reading-toc"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>目录</button></div></header>
+<div class="page-layout">
+  <aside class="reading-toc" id="reading-toc" aria-labelledby="toc-title">
+    <div class="toc-heading"><span id="toc-title">本文目录</span><button class="toc-close" type="button" aria-label="关闭目录"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+    <nav class="toc-nav" aria-label="文章目录">
+      <a class="toc-overview" href="#main">开篇说明</a>
+      <ol class="toc-chapters">
+        <li data-toc-group="web"><a class="toc-chapter" href="#web"><span class="toc-number">01</span><span>网页：找到密码框</span></a>
+          <ul class="toc-sections"><li><a href="#browser-page-location">页面标识与定位</a></li></ul>
+        </li>
+        <li data-toc-group="connection"><a class="toc-chapter" href="#connection"><span class="toc-number">02</span><span>申请使用密码</span></a>
+          <ul class="toc-sections"><li><a href="#credential-selection">查找凭据</a></li><li><a href="#submit-browser-request">提交申请</a></li><li><a href="#credential-approval">等待用户批准</a></li></ul>
+        </li>
+        <li data-toc-group="browser-execution"><a class="toc-chapter" href="#browser-execution"><span class="toc-number">03</span><span>网页：执行填写</span></a>
+          <ul class="toc-sections"><li><a href="#browser-connection">连接浏览器</a></li><li><a href="#verify-destination">复核页面与字段</a></li><li><a href="#send-fill">写入密码</a></li><li><a href="#browser-result">获取填写结果</a></li></ul>
+        </li>
+        <li data-toc-group="native"><a class="toc-chapter" href="#native"><span class="toc-number">04</span><span>应用：查询目标</span></a>
+          <ul class="toc-sections"><li><a href="#native-select">网页与原生的差异</a></li><li><a href="#native-helper-channel">联系辅助程序</a></li><li><a href="#native-system-entry">扫描控件、选择目标</a></li><li><a href="#native-handoff">提交申请</a></li></ul>
+        </li>
+        <li data-toc-group="platform"><a class="toc-chapter" href="#platform"><span class="toc-number">05</span><span>应用：执行填写</span></a>
+          <ul class="toc-sections"><li><a href="#native-recheck">复核与设值</a></li><li><a href="#native-background-scenario">能继续在别处打字吗？</a></li><li><a href="#native-result">获取填写结果</a></li></ul>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+  <button class="toc-scrim" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
 <main id="main">
   <div class="intro">
     <h1><span class="keep-phrase">Agent 遇到密码框后，</span><wbr><span class="keep-phrase">知予怎样接着填写？</span></h1>
@@ -456,5 +481,6 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
   </section>
   <footer><span>知予 · 跨应用填写图解</span><a href="#main">回到开头 ↑</a></footer>
 </main>
+</div>
 </body>
 </html>
