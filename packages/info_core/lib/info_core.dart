@@ -85,6 +85,7 @@ part 'credential_program_operations.dart';
 part 'credential_program_materials.dart';
 part 'credential_program_access.dart';
 part 'focused_fill_models.dart';
+part 'native_fill_models.dart';
 part 'browser_fill_models.dart';
 part 'credential_batches.dart';
 part 'credential_batch_access.dart';
