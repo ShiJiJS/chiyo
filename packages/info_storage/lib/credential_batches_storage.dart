@@ -75,7 +75,7 @@ void _validateBackupCredentialBatches(
     for (final row
         in tables['credential_batches'] ?? const <Map<String, Object?>>[]) {
       final r = _storedBatch(row);
-      if (r.items.any((i) => i.destination.ssh != null) && formatVersion < 31 ||
+      if (r.items.any((i) => i.destination.ssh != null) && formatVersion < 32 ||
           r.programPlan != null && formatVersion < 29 ||
           r.items.any((i) => i.destination.native != null) &&
               formatVersion < 30 ||
