@@ -110,7 +110,7 @@ class _BatchOperationsState extends State<BatchOperations> {
                 style: libraryText(context, 15, weight: FontWeight.w600),
               ),
               Text(
-                WorkspaceCredentialBatchOperation.resultLabel(o.state),
+                o.summaryLabel,
                 style: libraryText(
                   context,
                   14,

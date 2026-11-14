@@ -6,7 +6,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
 import '../../info_core/test_support/operation_history.dart';
-import '../../info_core/test/native_fill_models_test.dart'
+import '../../info_core/test_support/native_fill.dart'
     show nativeTargetFixture;
 import 'storage_test.dart' show TestKeyStore;
 

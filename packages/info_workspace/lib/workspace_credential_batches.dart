@@ -55,6 +55,12 @@ class WorkspaceCredentialBatchOperation {
     'failed' => '填写失败',
     _ => '填写结果未知',
   };
+  String get summaryLabel =>
+      state == 'filled' &&
+          itemResults.isNotEmpty &&
+          itemResults.values.every((result) => result == 'sent')
+      ? resultLabel('sent')
+      : resultLabel(state);
   String? get errorLabel => switch (errorCode) {
     null => null,
     'destination_changed' || 'form_changed' || 'focus_changed' => '填写目标已变化。',
