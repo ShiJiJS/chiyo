@@ -198,6 +198,8 @@ def main():
                 "--target-os", "macos", "--target-arch", "arm64",
                 f"bin/{entry}.dart", "-o", str(cli / name)], cwd=ROOT / "packages/info_cli")
             run(f"sign-{name}", ["/usr/bin/codesign", "--force", "--sign", "-", str(cli / name)])
+        run("compile-ssh-session", [str(ROOT / "scripts/build-macos-ssh-session.sh"), str(cli / "info-ssh-session")])
+        run("sign-ssh-session", ["/usr/bin/codesign", "--force", "--sign", "-", str(cli / "info-ssh-session")])
         shutil.copytree(ROOT / "integrations/codex/skills/agent-info-access", cli / "template")
         run("diagnostic-build", [LAUNCHER, "dart", "build", "cli", "--target-os", "macos",
             "--target-arch", "arm64", "--target", "bin/macos-storage-check.dart",
@@ -277,6 +279,7 @@ def main():
 
         primary = [
             app / "Contents/MacOS/info_desktop", app / "Contents/MacOS/info-runtime-worker",
+            app / "Contents/MacOS/info-ssh-session", cli / "info-ssh-session",
             *[cli / name for name in ["chiyo", "info", "info-codex", "info-codex-hook", "info-runtime-worker", "info-prepare-codex"]],
             payload / "diagnostics/bin/macos-storage-check",
         ]
