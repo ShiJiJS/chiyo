@@ -213,9 +213,12 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.text(r'C:\Program Files\Service Tool\service.exe'),
+        find.textContaining(r'C:\Program Files\Service Tool\service.exe'),
         findsOneWidget,
       );
+      await tester.ensureVisible(find.text('查看完整命令与脚本'));
+      await tester.tap(find.text('查看完整命令与脚本'));
+      await tester.pumpAndSettle();
       expect(find.textContaining('DB_PASSWORD = 合成数据库密码（第1版）'), findsOneWidget);
       expect(find.textContaining('KEY_PATH = 文件：合成服务密钥（第1版）'), findsOneWidget);
       expect(

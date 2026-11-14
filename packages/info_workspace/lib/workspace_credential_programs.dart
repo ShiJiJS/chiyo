@@ -15,6 +15,31 @@ class WorkspaceCredentialProgramPlan {
   String get workingDirectory => _plan.cwd;
   int get bindingCount => _plan.bindings.length;
   bool get requiresManagedFiles => _plan.bindings.any((b) => b.via == 'file');
+  String get programName {
+    final name = executable.split(RegExp(r'[/\\]')).last;
+    return switch (name.toLowerCase().replaceFirst(RegExp(r'\.exe$'), '')) {
+      'python' || 'python3' => 'Python',
+      'node' => 'Node.js',
+      'pwsh' || 'powershell' => 'PowerShell',
+      _ => name,
+    };
+  }
+
+  /// Receiving positions are approved facts; literal scripts are never
+  /// summarized as promises about what the program will do.
+  List<({String credentialId, int version, String destination})>
+  get receivingPositions => [
+    for (final binding in _plan.bindings)
+      (
+        credentialId: binding.reference.credentialId,
+        version: binding.reference.version!,
+        destination: binding.location == 'stdin'
+            ? '程序启动时的输入（stdin）'
+            : binding.location.startsWith('env.')
+            ? '环境变量 ${binding.location.substring(4)}${binding.via == 'file' ? '（临时凭据文件路径）' : ''}'
+            : '参数 ${int.parse(binding.location.substring(5, binding.location.length - 1)) + 1}（临时凭据文件路径）',
+      ),
+  ];
   String _value(core.CredentialProgramValue value, Map<String, String> names) =>
       value.kind == core.CredentialProgramValueKind.literal
       ? value.literal!
@@ -265,9 +290,8 @@ class WorkspaceCredentialProgramOperation {
       fromBackup: json['fromBackup'] as bool,
     );
     if (!result.valid ||
-        !RegExp(
-          r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$',
-        ).hasMatch(result.operationId)) {
+        !RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$')
+            .hasMatch(result.operationId)) {
       throw const FormatException('Invalid program observation');
     }
     return result;

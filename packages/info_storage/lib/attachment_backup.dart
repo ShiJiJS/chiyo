@@ -1,7 +1,9 @@
 part of 'info_storage.dart';
 
-typedef AttachmentBackupChunkReader =
-    Future<Uint8List> Function(int offset, int length);
+typedef AttachmentBackupChunkReader = Future<Uint8List> Function(
+  int offset,
+  int length,
+);
 
 /// Trusted source of one fixed ordinary-file version. The caller owns a stable
 /// source snapshot. This reader is never an Agent-controlled path or command.
@@ -395,6 +397,7 @@ final class _AttachmentBackupManifest {
           29,
           30,
           31,
+          32,
         }.contains(json['version'])) {
       throw const StorageFailure('unsupported_backup');
     }

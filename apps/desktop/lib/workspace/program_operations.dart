@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'approval_presentation.dart';
 import '../desktop_controls.dart';
 import '../ui_palette.dart';
 import 'approvals_controller.dart';
@@ -52,10 +54,20 @@ class _ProgramOperationsState extends State<ProgramOperations> {
             '程序执行记录',
             style: libraryText(context, 17, weight: FontWeight.w700),
           ),
+          const SizedBox(height: 6),
+          Text(
+            '批准与执行分别记录。刷新状态只读取已有结果，不会再次运行。',
+            style: libraryText(
+              context,
+              13,
+              color: UiPalette.of(context).muted,
+              height: 1.8,
+            ),
+          ),
           const SizedBox(height: 12),
           if (operations.isEmpty)
             Text(
-              '尚无执行记录。',
+              '尚无执行记录。批准后，仍由 Agent 发起执行。',
               style: libraryText(
                 context,
                 14,
@@ -137,6 +149,13 @@ class _ProgramOperationsState extends State<ProgramOperations> {
                 : operation.cleanupLabel,
             style: libraryText(context, 13, color: c.muted, height: 1.8),
           ),
+          if (operation.state == 'exited')
+            Text(
+              operation.exitCode == 0
+                  ? '退出码为 0，程序未报告执行错误；不等于已经确认 Agent 说明的任务完成。'
+                  : '程序以非零退出码结束，请结合原程序输出核对。',
+              style: libraryText(context, 13, color: c.muted, height: 1.8),
+            ),
           if (operation.errorLabel != null && !operation.fromBackup)
             Text(
               operation.errorLabel!,
@@ -164,20 +183,18 @@ class _ProgramOperationsState extends State<ProgramOperations> {
               ),
               if (!operation.fromBackup &&
                   model.source is WorkspaceCredentialProgramActions)
-                DesktopButton(
+                OperationRefresh(
                   key: ValueKey('program-query-${operation.operationId}'),
-                  kind: DesktopButtonKind.quiet,
-                  busy: model.readingExecution(operation.operationId),
-                  onPressed:
-                      model.frozen ||
-                          model.loading ||
-                          model.reading ||
-                          model.readingExecution(operation.operationId)
-                      ? null
-                      : () => model.refreshProgramOperation(
-                          operation.operationId,
-                        ),
-                  child: const Text('查询结果'),
+                  controller: model,
+                  operationId: operation.operationId,
+                  refresh: () =>
+                      model.refreshProgramOperation(operation.operationId),
+                  observation: () {
+                    final current = model.detail!.programOperations.firstWhere(
+                      (o) => o.operationId == operation.operationId,
+                    );
+                    return jsonEncode(current.toJson()..remove('observedAt'));
+                  },
                 ),
             ],
           ),

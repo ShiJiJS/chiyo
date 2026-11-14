@@ -66,6 +66,9 @@ func connectSocket(_ path: String) -> Int32? {
   if result != 0 { close(fd); return nil }
   return fd
 }
+if CommandLine.arguments == [CommandLine.arguments[0], "--capabilities"] {
+  _ = writeAll(STDOUT_FILENO, json(["transport": 1, "askpass": 1, "headless": true])); exit(0)
+}
 let executable = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath().path
 if ProcessInfo.processInfo.environment["CHIYO_SSH_SOCKET"] != nil {
   // OpenSSH invokes this same binary as ASKPASS. Its stdout is OpenSSH's private
@@ -82,11 +85,71 @@ if ProcessInfo.processInfo.environment["CHIYO_SSH_SOCKET"] != nil {
   exit(0)
 }
 
+// Foundation Process creates a child process group on Darwin. Use an explicit
+// spawn group so broker death cannot make live SSH/ASKPASS consumers disappear
+// from the registered group used for identity-bound material cleanup.
+final class OwnedProcess {
+  var executableURL: URL?
+  var arguments: [String]?
+  var environment: [String: String]?
+  var standardInput: Pipe?
+  var standardOutput: Pipe?
+  var standardError: Pipe?
+  private(set) var processIdentifier: pid_t = 0
+  private let condition = NSCondition()
+  private var running = false, reaping = false
+  private var status: Int32 = 255
+  var isRunning: Bool { condition.lock(); defer { condition.unlock() }; return running }
+  var terminationStatus: Int32 { condition.lock(); defer { condition.unlock() }; return status }
+  func run() throws {
+    guard let path = executableURL?.path, let input = standardInput,
+          let output = standardOutput, let error = standardError else {
+      throw NSError(domain: "spawn", code: 1)
+    }
+    var actions: posix_spawn_file_actions_t?
+    var attributes: posix_spawnattr_t?
+    posix_spawn_file_actions_init(&actions); posix_spawnattr_init(&attributes)
+    defer { posix_spawn_file_actions_destroy(&actions); posix_spawnattr_destroy(&attributes) }
+    posix_spawn_file_actions_adddup2(&actions, input.fileHandleForReading.fileDescriptor, STDIN_FILENO)
+    posix_spawn_file_actions_adddup2(&actions, output.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
+    posix_spawn_file_actions_adddup2(&actions, error.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
+    posix_spawnattr_setflags(&attributes, Int16(POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_CLOEXEC_DEFAULT))
+    posix_spawnattr_setpgroup(&attributes, getpgrp())
+    let args = ([path] + (arguments ?? [])).map { strdup($0) } + [nil]
+    let env = (environment ?? [:]).map { strdup("\($0.key)=\($0.value)") } + [nil]
+    defer { for pointer in args { free(pointer) }; for pointer in env { free(pointer) } }
+    var child: pid_t = 0
+    let result = args.withUnsafeBufferPointer { argv in
+      env.withUnsafeBufferPointer { envp in
+        posix_spawn(&child, path, &actions, &attributes,
+          UnsafeMutablePointer(mutating: argv.baseAddress!), UnsafeMutablePointer(mutating: envp.baseAddress!))
+      }
+    }
+    guard result == 0 else { throw NSError(domain: "spawn", code: Int(result)) }
+    processIdentifier = child; running = true
+    try? input.fileHandleForReading.close()
+    try? output.fileHandleForWriting.close(); try? error.fileHandleForWriting.close()
+  }
+  func terminate() { if isRunning { kill(processIdentifier, SIGTERM) } }
+  func waitUntilExit() {
+    condition.lock()
+    if reaping { while running { condition.wait() }; condition.unlock(); return }
+    if !running { condition.unlock(); return }
+    reaping = true; condition.unlock()
+    var value: Int32 = 0
+    var result: pid_t
+    repeat { result = waitpid(processIdentifier, &value, 0) } while result < 0 && errno == EINTR
+    condition.lock()
+    status = result < 0 ? 255 : ((value & 0x7f) == 0 ? (value >> 8) & 0xff : 128 + (value & 0x7f))
+    running = false; condition.broadcast(); condition.unlock()
+  }
+}
+
 final class Broker {
   let emitLock = NSLock(), stateLock = NSLock(), writerLock = NSLock()
   let writer = DispatchQueue(label: "chiyo.ssh.stdin")
   var queuedBytes = 0
-  let process = Process(), input = Pipe(), output = Pipe(), diagnostic = Pipe()
+  let process = OwnedProcess(), input = Pipe(), output = Pipe(), diagnostic = Pipe()
   var pending: [String: (DispatchSemaphore, Data?)] = [:]
   var witness: Witness?
   var authenticated = false

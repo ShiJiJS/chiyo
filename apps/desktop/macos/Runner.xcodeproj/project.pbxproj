@@ -364,6 +364,7 @@
 			name = "Bundle credential worker";
 			outputPaths = (
 				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_FOLDER_PATH)/info-runtime-worker",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_FOLDER_PATH)/info-ssh-session",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;

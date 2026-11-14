@@ -12,6 +12,7 @@ import 'approvals_controller.dart';
 import 'approval_executions.dart';
 import 'approval_directory_location.dart';
 import 'program_plan.dart';
+import 'approval_presentation.dart';
 import 'workspace_source.dart';
 
 class ApprovalsPage extends StatefulWidget {
@@ -37,6 +38,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
   final _search = TextEditingController(),
       _list = ScrollController(),
       _detail = ScrollController();
+  final _scopeOptions = GlobalKey();
   ApprovalsController get model => widget.controller;
   String? _selection;
   WorkspaceApprovalState? _decisionState;
@@ -256,6 +258,7 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       (grouped[(x.record, x.section)] ??= []).add(x);
     }
     return Column(
+      key: _scopeOptions,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (model.detail!.fileVersionPolicy case final policy?)
@@ -339,8 +342,10 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   : '批准固定字段和期限后，Agent通过CLI领取字段的当前附件版本。页面版本用于审批核对，保留旧版本不在此次领取范围。撤销或到期阻止后续交付，不能收回已经读到的内容。',
             WorkspaceApprovalKind.organization =>
               '只读取获准资料的元数据，并在固定资料范围和期限内自动调整目录与标签；不读改字段正文。整理完成后查看结果，不再进行第二次批准。',
-            WorkspaceApprovalKind.focus => '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
-            WorkspaceApprovalKind.credential => '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
+            WorkspaceApprovalKind.focus =>
+              '批准后，AI可以让本机App将这项密码填入指定应用的密码框。服务器模式下，本机App需要保持运行并连接同一服务器。填写不会自动提交登录。',
+            WorkspaceApprovalKind.credential =>
+              '批准的是凭据固定版本、方式、接收配置和期限。CLI创建子进程并注入，密码和凭据不作为普通字段返回。首个命令不是整个授权期的命令白名单；有效期内复用不续期，每次操作有独立结果，未知不重放。直接在系统shell执行含占位符的命令不会注入。',
           };
     await showDesktopDialog<void>(
       context,
@@ -381,37 +386,190 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          '${r.credentialName} · 材料v${r.materialVersion}',
-          style: libraryText(context, 14, weight: FontWeight.w600),
-        ),
-        block(reveal ? '原文读取范围' : '注入位置', switch (r.delivery) {
-          WorkspaceCredentialDelivery.reveal => '允许 AI 读取这项已保存凭据的原文。原文会进入当前聊天上下文，撤销许可不能删除已经交付的原文。此申请与直接填写或程序使用许可分开审批。',
-          WorkspaceCredentialDelivery.standardInput => 'stdin → 已核对程序的标准输入',
-          WorkspaceCredentialDelivery.environment =>
-            '${r.receiver.binding} → 仅CLI创建的子进程环境变量',
-          WorkspaceCredentialDelivery.file =>
-            '${r.receiver.binding} → 临时凭据文件路径 → 已核对的参数位置',
-          WorkspaceCredentialDelivery.focus => '本机前台窗口中经核验的密码输入框',
-          WorkspaceCredentialDelivery.storage => '仅保管，不提供运行时使用',
-        }),
+        if (focus || reveal)
+          Text(
+            '${r.credentialName} · 第 ${r.materialVersion} 版',
+            style: libraryText(context, 14, weight: FontWeight.w600),
+          ),
+        if (focus || reveal)
+          block(reveal ? '原文读取范围' : '注入位置', switch (r.delivery) {
+            WorkspaceCredentialDelivery.reveal =>
+              '允许 AI 读取这项已保存凭据的原文。原文会进入当前聊天上下文，撤销许可不能删除已经交付的原文。此申请与直接填写或程序使用许可分开审批。',
+            WorkspaceCredentialDelivery.standardInput => 'stdin → 已核对程序的标准输入',
+            WorkspaceCredentialDelivery.environment =>
+              '${r.receiver.binding} → 仅CLI创建的子进程环境变量',
+            WorkspaceCredentialDelivery.file =>
+              '${r.receiver.binding} → 临时凭据文件路径 → 已核对的参数位置',
+            WorkspaceCredentialDelivery.focus => '本机前台窗口中经核验的密码输入框',
+            WorkspaceCredentialDelivery.storage => '仅保管，不提供运行时使用',
+          }),
+        if (!focus && !reveal)
+          CredentialBindingCard(
+            name: r.credentialName,
+            version: r.materialVersion,
+            destination: switch (r.delivery) {
+              WorkspaceCredentialDelivery.standardInput => '交给程序的标准输入 stdin。',
+              WorkspaceCredentialDelivery.environment =>
+                '${r.receiver.binding} → 子进程环境变量',
+              WorkspaceCredentialDelivery.file =>
+                '${r.receiver.binding} → 受管凭据文件路径',
+              _ => r.receiver.binding,
+            },
+          ),
         if (reveal)
           block('无法直接填写或交给程序的原因（AI 提供）', r.receiver.arguments.join('\n')),
         if (!focus && !reveal) ...[
-          block(
-            '由 CLI 启动',
-            '${r.receiver.executable} ${r.receiver.arguments.map((a) => a.contains(RegExp(r'\s')) ? jsonEncode(a) : a).join(' ')}',
+          const SizedBox(height: 18),
+          ApprovalDetailRow(label: '运行程序', value: r.receiver.executable),
+          ApprovalDetailRow(
+            label: '在哪里运行',
+            value: 'AI 所在的电脑\n工作目录：${r.receiver.workingDirectory}',
           ),
-          block(
-            '工作位置与接收方',
-            '${r.receiver.workingDirectory}\n${r.receiver.label}',
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '显示的是首个启动计划。许可绑定本聊天、凭据版本和接收程序，每次操作独立记录。撤销或聊天结束会阻止后续使用。撤销不会撤回已经完成的远端操作，也不会自动终止已运行的命令或SSH连接。',
-            style: libraryText(context, 13, color: c.muted, height: 1.9),
+          ApprovalExactDetails(
+            key: ValueKey('legacy-program-exact-${r.id}'),
+            title: '完整命令与脚本',
+            hint: '这是首个启动计划；凭据只显示引用名称。',
+            text: [
+              '程序：${r.receiver.executable}',
+              '工作目录：${r.receiver.workingDirectory}',
+              '接收方：${r.receiver.label}',
+              '使用凭据：${r.credentialName}（第 ${r.materialVersion} 版）',
+              '接收位置：${r.receiver.binding}',
+              for (final (i, argument) in r.receiver.arguments.indexed)
+                '\n参数 ${i + 1}：\n$argument',
+            ].join('\n'),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _credentialBoundary(BuildContext context) {
+    final d = model.detail!, c = UiPalette.of(context);
+    final program =
+        d.programPlan != null ||
+        d.credential != null &&
+            !{
+              WorkspaceCredentialDelivery.focus,
+              WorkspaceCredentialDelivery.reveal,
+              WorkspaceCredentialDelivery.storage,
+            }.contains(d.credential!.delivery);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: c.line, width: 2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '这次批准允许什么',
+            style: libraryText(context, 15, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 9),
+          Text(
+            d.sshSession
+                ? d.sshTarget?.credentialUse == 'sudo'
+                      ? '在有效期内，将所选凭据用于指定服务器和账号的 sudo 认证。'
+                      : '在有效期内登录这个服务器账号，连续执行命令，并把输出返回 Agent。'
+                : program
+                ? '在有效期内，让这个程序通过指定接收位置使用所选版本的凭据。'
+                : '在有效期内，通过批准的方式和目标使用所选凭据。',
+            style: libraryText(context, 14, color: c.accent, height: 1.8),
+          ),
+          const SizedBox(height: 9),
+          if (d.sshSession)
+            Text(
+              '操作受服务器账号权限约束，不限于 Agent 说明的任务。sudo 密码需另行申请；已有的免密码权限仍可使用。',
+              style: libraryText(context, 14, height: 1.8),
+            ),
+          if (program)
+            Text(
+              'Agent 可以换用其他脚本、参数和工作目录，再次使用凭据。许可并不只限于上面这次命令。',
+              style: libraryText(context, 14, height: 1.8),
+            ),
+          const SizedBox(height: 9),
+          Text(
+            program || d.sshSession
+                ? '用途由 Agent 提供，不限制程序实际能执行的操作。批准后，仍由 Agent 发起${d.sshSession ? '连接或认证' : '执行'}。凭据不会作为普通回复交给 Agent。'
+                : '批准后，仍由 Agent 发起使用；每次操作分别记录结果。',
+            style: libraryText(context, 13, color: c.muted, height: 1.8),
+          ),
+          if (d.sshSession)
+            Text(
+              '撤销会禁止新命令和输入；当前命令结束后断开。',
+              style: libraryText(context, 13, color: c.muted, height: 1.8),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _credentialPresentation(BuildContext context, bool sideBySide) {
+    final d = model.detail!;
+    final Widget summary;
+    if (d.programPlan case final plan?) {
+      summary = ProgramPlan(
+        plan: plan,
+        names: {
+          for (final scope in d.scopes) scope.record.id: scope.recordName,
+        },
+      );
+    } else if (d.sshTarget case final target?) {
+      summary = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ApprovalDetailRow(
+            label: '连接到',
+            value: '${target.host}\n登录账号 ${target.user} · 端口 ${target.port}',
+          ),
+          ApprovalDetailRow(
+            label: '怎样连接',
+            value:
+                '通过 SSH ${target.authentication == 'publickey' ? '私钥' : '密码'}${target.credentialUse == 'sudo' ? '提供 sudo 认证' : '登录'}\n由 AI 所在电脑保持连接，可连续执行命令。',
+          ),
+          for (final scope in d.scopes.where(
+            (scope) => scope.kind == WorkspaceApprovalScopeKind.credential,
+          ))
+            CredentialBindingCard(
+              name: scope.recordName,
+              version: scope.recordVersion,
+              destination: target.credentialUse == 'sudo'
+                  ? '用于这个服务器账号的 sudo 认证。'
+                  : '用于这个服务器账号的 SSH 登录。',
+            ),
+        ],
+      );
+    } else {
+      summary = _credential(context, d.credential!);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (sideBySide)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 5, child: summary),
+              const SizedBox(width: 24),
+              Expanded(flex: 4, child: _credentialBoundary(context)),
+            ],
+          )
+        else ...[
+          summary,
+          const SizedBox(height: 20),
+          _credentialBoundary(context),
+        ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: DesktopButton(
+            key: const ValueKey('approval-tip'),
+            kind: DesktopButtonKind.quiet,
+            leading: const Icon(Icons.info_outline, size: 17),
+            onPressed: model.frozen ? null : () => _tip(context),
+            child: const Text('了解使用流程'),
+          ),
+        ),
       ],
     );
   }
@@ -507,6 +665,31 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                 ),
               ],
             ),
+            if (detail.credentialBatch && detail.scopes.length > 1) ...[
+              const SizedBox(height: 8),
+              Text(
+                '可在申请范围取消勾选，只批准部分凭据。',
+                style: libraryText(context, 13, color: c.muted, height: 1.8),
+              ),
+              DesktopButton(
+                key: const ValueKey('approval-choose-credentials'),
+                kind: DesktopButtonKind.quiet,
+                alignment: Alignment.centerLeft,
+                onPressed: model.frozen
+                    ? null
+                    : () {
+                        final scope = _scopeOptions.currentContext;
+                        if (scope != null) {
+                          Scrollable.ensureVisible(
+                            scope,
+                            alignment: .08,
+                            duration: DesktopMotion.feedbackOf(context),
+                          );
+                        }
+                      },
+                child: const Text('选择要批准的凭据'),
+              ),
+            ],
             if (usesFields) duration(false),
             if (usesCredential && r.kind != WorkspaceApprovalKind.focus)
               duration(true),
@@ -530,7 +713,16 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   enabled && detail.canApprove && draft.selected.isNotEmpty
                   ? () => model.decide(WorkspaceApprovalAction.approve)
                   : null,
-              child: const Text('批准所选范围'),
+              child: Text(
+                detail.sshSession
+                    ? '允许所选凭据用于 SSH'
+                    : detail.programPlan != null ||
+                          detail.credential != null &&
+                              detail.credential!.delivery !=
+                                  WorkspaceCredentialDelivery.reveal
+                    ? '允许使用所选凭据'
+                    : '批准所选范围',
+              ),
             ),
             const SizedBox(height: 10),
             DesktopButton(
@@ -643,10 +835,14 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                 d.request.state.label,
                 color: d.request.state == WorkspaceApprovalState.pending
                     ? c.warning
-                    : c.success,
+                    : d.request.state == WorkspaceApprovalState.approved
+                    ? c.success
+                    : c.muted,
                 background: d.request.state == WorkspaceApprovalState.pending
                     ? c.credentialSurface
-                    : c.successSurface,
+                    : d.request.state == WorkspaceApprovalState.approved
+                    ? c.successSurface
+                    : c.rail,
               ),
               Text(
                 [
@@ -661,67 +857,78 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
           Text(d.request.title, style: libraryHeading(context, 28)),
           const SizedBox(height: 14),
           Text(
-            d.request.purpose,
+            '${d.programPlan != null || d.sshSession || d.credential != null ? 'Agent 说明：' : ''}${d.request.purpose}',
             style: libraryText(context, 14, height: 1.95),
           ),
-          if (d.programPlan != null)
+          if (d.programPlan != null ||
+              d.sshSession ||
+              d.credential != null &&
+                  !{
+                    WorkspaceCredentialDelivery.focus,
+                    WorkspaceCredentialDelivery.reveal,
+                    WorkspaceCredentialDelivery.storage,
+                  }.contains(d.credential!.delivery)) ...[
             _section(
               context,
-              '申请的程序',
-              ProgramPlan(
-                plan: d.programPlan!,
-                names: {
-                  for (final scope in d.scopes)
-                    scope.record.id: scope.recordName,
-                },
+              d.sshSession ? 'SSH 连接与凭据' : '程序与凭据',
+              _credentialPresentation(context, !fold && width >= 1050),
+            ),
+            _section(context, '申请范围', _scopes(context)),
+          ] else
+            _section(
+              context,
+              d.request.kind == WorkspaceApprovalKind.organization
+                  ? '整理范围'
+                  : d.sshSession
+                  ? 'SSH 使用方式'
+                  : d.programPlan != null
+                  ? '程序接收方式'
+                  : d.credentialBatch
+                  ? '凭据填写方式'
+                  : d.credential == null
+                  ? '普通字段与文件'
+                  : '凭据使用方式',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DesktopButton(
+                    key: const ValueKey('approval-tip'),
+                    kind: DesktopButtonKind.quiet,
+                    leading: const Icon(Icons.info_outline, size: 17),
+                    alignment: Alignment.centerLeft,
+                    onPressed: model.frozen ? null : () => _tip(context),
+                    child: const Text('了解使用流程'),
+                  ),
+                  const SizedBox(height: 12),
+                  if (d.credential != null)
+                    _credential(context, d.credential!)
+                  else
+                    Text(
+                      d.sshSession
+                          ? '凭据用于上方服务器的登录或 sudo 认证。批准后由 AI 发起操作，本机后台保持连接，后续命令沿用同一 Shell；普通确认可继续输入。登录许可不会自动批准 sudo 密码使用。'
+                          : d.programPlan != null
+                          ? '凭据只交给上方程序的指定位置。批准固定程序和接收位置，业务参数及工作目录可以调整；每次启动前检查所需的批准。程序在 AI 所在电脑运行。'
+                          : d.credentialBatch
+                          ? '只在上方指定的位置使用勾选的凭据。批准后由 AI 发起填写，每次填写分别记录结果。'
+                          : d.request.kind == WorkspaceApprovalKind.organization
+                          ? '只读限定资料的元数据，并允许自动调整目录与标签；不读取字段值，不修改正文。'
+                          : d.fileVersionPolicy == null
+                          ? '只提供批准的固定字段和文件版本。新增内容不进入旧授权，撤销不能收回已经读到的副本。'
+                          : '只提供批准的固定字段及其当前内容。后续新增字段不进入旧授权，撤销不能收回已读取的副本。',
+                      style: libraryText(context, 14, height: 1.95),
+                    ),
+                ],
               ),
             ),
-          _section(context, '申请范围', _scopes(context)),
-          _section(
-            context,
-            d.request.kind == WorkspaceApprovalKind.organization
-                ? '整理范围'
-                : d.sshSession
-                ? 'SSH 使用方式'
-                : d.programPlan != null
-                ? '程序接收方式'
-                : d.credentialBatch
-                ? '凭据填写方式'
-                : d.credential == null
-                ? '普通字段与文件'
-                : '凭据使用方式',
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                DesktopButton(
-                  key: const ValueKey('approval-tip'),
-                  kind: DesktopButtonKind.quiet,
-                  leading: const Icon(Icons.info_outline, size: 17),
-                  alignment: Alignment.centerLeft,
-                  onPressed: model.frozen ? null : () => _tip(context),
-                  child: const Text('了解使用流程'),
-                ),
-                const SizedBox(height: 12),
-                if (d.credential != null)
-                  _credential(context, d.credential!)
-                else
-                  Text(
-                    d.sshSession
-                        ? '凭据用于上方服务器的登录或 sudo 认证。批准后由 AI 发起操作，本机后台保持连接，后续命令沿用同一 Shell；普通确认可继续输入。登录许可不会自动批准 sudo 密码使用。'
-                        : d.programPlan != null
-                        ? '凭据只交给上方程序的指定位置。批准固定程序和接收位置，业务参数及工作目录可以调整；每次启动前检查所需的批准。程序在 AI 所在电脑运行。'
-                        : d.credentialBatch
-                        ? '只在上方指定的位置使用勾选的凭据。批准后由 AI 发起填写，每次填写分别记录结果。'
-                        : d.request.kind == WorkspaceApprovalKind.organization
-                        ? '只读限定资料的元数据，并允许自动调整目录与标签；不读取字段值，不修改正文。'
-                        : d.fileVersionPolicy == null
-                        ? '只提供批准的固定字段和文件版本。新增内容不进入旧授权，撤销不能收回已经读到的副本。'
-                        : '只提供批准的固定字段及其当前内容。后续新增字段不进入旧授权，撤销不能收回已读取的副本。',
-                    style: libraryText(context, 14, height: 1.95),
-                  ),
-              ],
-            ),
-          ),
+          if (!(d.programPlan != null ||
+              d.sshSession ||
+              d.credential != null &&
+                  !{
+                    WorkspaceCredentialDelivery.focus,
+                    WorkspaceCredentialDelivery.reveal,
+                    WorkspaceCredentialDelivery.storage,
+                  }.contains(d.credential!.delivery)))
+            _section(context, '申请范围', _scopes(context)),
           ApprovalExecutions(controller: model),
           _section(
             context,

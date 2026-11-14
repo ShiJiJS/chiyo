@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'approval_presentation.dart';
 import 'package:flutter/material.dart';
 import '../desktop_controls.dart';
 import '../desktop_motion.dart';
@@ -43,7 +43,7 @@ class ApprovalExecutions extends StatelessWidget {
           for (final e in detail.executions) _operation(context, e),
           if (detail.executions.isNotEmpty)
             Text(
-              '每条操作独立记录；查询不会启动程序、再次填充或延长授权期限。',
+              '每条操作独立记录；刷新状态只读取已有结果，不会再次运行或延长授权。',
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
         ],
@@ -115,6 +115,13 @@ class ApprovalExecutions extends StatelessWidget {
                         : '尚未确认结束'} · 临时材料：${e.cleanup.label}',
               style: libraryText(context, 13, color: c.muted, height: 1.9),
             ),
+            if (e.state == WorkspaceExecutionState.exited)
+              Text(
+                e.exitCode == 0
+                    ? '退出码为 0，程序未报告执行错误；不等于已经确认 Agent 说明的任务完成。'
+                    : '程序以非零退出码结束，请结合原程序输出核对。',
+                style: libraryText(context, 13, color: c.muted, height: 1.8),
+              ),
             if (unknown) ...[
               const SizedBox(height: 8),
               Text(
@@ -142,26 +149,31 @@ class ApprovalExecutions extends StatelessWidget {
                       : () => controller.expand(key),
                   child: Text(expanded ? '收起本次启动计划' : '查看本次启动计划'),
                 ),
-                DesktopButton(
+                OperationRefresh(
                   key: ValueKey('approval-operation-refresh-${e.operationId}'),
-                  kind: DesktopButtonKind.quiet,
-                  busy: controller.readingExecution(e.operationId),
-                  onPressed:
-                      controller.frozen ||
-                          controller.loading ||
-                          controller.reading ||
-                          controller.readingExecution(e.operationId)
-                      ? null
-                      : () => controller.refreshExecution(e.operationId),
-                  child: Text(e.fromBackup ? '重新读取历史事实' : '查询原操作'),
+                  controller: controller,
+                  operationId: e.operationId,
+                  refresh: () => controller.refreshExecution(e.operationId),
+                  observation: () {
+                    final current = controller.detail!.executions.firstWhere(
+                      (o) => o.operationId == e.operationId,
+                    );
+                    return '${current.state}/${current.processStarted}/${current.processEnded}/${current.cleanup}/${current.exitCode}/${current.errorCode}';
+                  },
                 ),
               ],
             ),
             if (expanded) ...[
               const SizedBox(height: 10),
-              SelectableText(
-                '${e.plan.executable} ${e.plan.arguments.map((a) => a.contains(RegExp(r"\s")) ? jsonEncode(a) : a).join(' ')}',
-                style: libraryText(context, 13, height: 1.9),
+              ApprovalExactDetails(
+                title: '完整命令与脚本',
+                initiallyExpanded: true,
+                text: [
+                  '程序：${e.plan.executable}',
+                  '工作目录：${e.plan.workingDirectory}',
+                  for (final (i, argument) in e.plan.arguments.indexed)
+                    '\n参数 ${i + 1}：\n$argument',
+                ].join('\n'),
               ),
               Text(
                 '接收方：${e.plan.id} · ${e.credential.delivery.label}\n工作位置：${e.plan.workingDirectory}\n引用：${e.plan.binding}\n授权：${e.grantId}',

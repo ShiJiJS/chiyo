@@ -11,9 +11,22 @@ bool _hasCredentialDeliveryRows(Iterable<Map<String, Object?>> rows) =>
 int _syncContentFormat(Map tables) {
   final batches = tables['credential_batches'] as List? ?? const [];
   if (batches.any(
-    (r) => _storedBatch(
-      Map<String, Object?>.from(r as Map),
-    ).items.any((i) => i.destination.native != null),
+        (r) =>
+            _storedBatch(Map<String, Object?>.from(r as Map)).items
+                .any((i) => i.destination.ssh != null),
+      ) ||
+      (tables['credential_batch_operations'] as List? ?? const []).any(
+        (r) =>
+            _storedBatchOperation(Map<String, Object?>.from(r as Map))
+                .sshContext !=
+            null,
+      )) {
+    return 32;
+  }
+  if (batches.any(
+    (r) =>
+        _storedBatch(Map<String, Object?>.from(r as Map)).items
+            .any((i) => i.destination.native != null),
   )) {
     return 30;
   }
@@ -40,7 +53,7 @@ int _syncContentFormat(Map tables) {
 }
 
 Map<String, List<String>> _syncColumns(int format) => switch (format) {
-  29 || 30 => InformationBackups._v29Columns,
+  29 || 30 || 31 || 32 => InformationBackups._v29Columns,
   28 => InformationBackups._v28Columns,
   _ => InformationBackups._v26Columns,
 };
