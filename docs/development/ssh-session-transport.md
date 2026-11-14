@@ -35,7 +35,7 @@ MFA, and private-key passphrase challenges fail explicitly until supported.
 
 Windows exports `WindowsSshTransportLauncher`; its constructor may require an
 explicit bundled helper path. It must run without a foreground terminal. Exact
-Dart declarations follow in the next common commit.
+Dart declarations are in `ssh_session_transport.dart`.
 
 ## Isolation gate and remote helper
 
@@ -90,3 +90,20 @@ filtering, and cursor gaps. CLI exit does not close the resident host. Revocatio
 rejects run/input/credential but permits the original controller to query,
 interrupt, or close; an existing run may finish naturally. Lost transports never
 reconnect or replay, and unfinished runs become unknown.
+
+## Authentication regression fixture
+
+`ssh_session_authentication_test.dart` uses the self-made loopback
+`scripts/qa/ssh-session-fixture/keyboard_interactive.py`, an isolated Python with
+Paramiko, the built native helper, and real system OpenSSH. From
+`packages/info_cli`, set `CHIYO_SSH_TEST_HELPER` and
+`CHIYO_SSH_AUTH_TEST_PYTHON` to those absolute executables, then run
+`dart test test/ssh_session_authentication_test.dart`. It skips when either
+explicit prerequisite is absent.
+
+The positive control offers keyboard-interactive with the same text as a login
+password prompt and returns no secret. The production launch must reject that
+authentication method before any challenge or credential claim. The audit records
+only attempt counts; no fixture password, real server, or system SSH setting is
+used. `ssh_session_launch_test.dart` separately checks OpenSSH's actual config
+parsing for material paths containing spaces and literal percent characters.
