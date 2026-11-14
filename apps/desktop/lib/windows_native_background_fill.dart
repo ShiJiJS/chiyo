@@ -23,6 +23,15 @@ class WindowsNativeFillDriver implements NativeFillDriver {
   Future<void>? _disposing;
   bool _disposed = false;
 
+  /// Startup-only private handshake, before advertising the platform driver.
+  /// It discovers no targets and never resurrects a lost helper incarnation.
+  Future<void> initialize() async {
+    if (_broker != null && !_broker!.alive) {
+      throw const CredentialUseFailure('session_unavailable');
+    }
+    await _connection(discover: true);
+  }
+
   Future<_NativeBroker> _connection({bool discover = false}) async {
     if (_disposed) {
       throw const CredentialUseFailure('session_unavailable');
