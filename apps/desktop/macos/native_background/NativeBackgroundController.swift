@@ -1,5 +1,19 @@
 import Foundation
 
+/// Main-thread reservations cover all scopes and owner connections in this
+/// helper process. Different random target IDs cannot hide one AX object.
+private final class NativeReservations {
+  static let shared = NativeReservations()
+  private var values: [UUID: MacNativeBackgroundCandidate] = [:]
+  func reserve(_ id: UUID, _ candidate: MacNativeBackgroundCandidate, environment: MacNativeBackgroundEnvironment) throws {
+    guard !values.values.contains(where: { environment.sameTarget(candidate, $0) }) else {
+      throw MacNativeBackgroundFailure.busy
+    }
+    values[id] = candidate
+  }
+  func release(_ id: UUID) { values.removeValue(forKey: id) }
+}
+
 /// One authenticated private-chat connection owns this main-thread registry.
 /// Targets and operation tickets have separate lifetimes. Nothing is persisted
 /// or recoverable across helper/connection lifetimes.
@@ -38,7 +52,7 @@ final class MacNativeBackgroundController {
     self.environment = environment; self.connected = connected; self.clock = clock
     self.discoveryLifetime = discoveryLifetime; self.preparationLifetime = preparationLifetime
   }
-  deinit { timer?.cancel() }
+  deinit { timer?.cancel(); for id in tickets.keys { NativeReservations.shared.release(id) } }
 
   func discover(_ access: MacNativeBackgroundAccess) throws -> [MacNativeBackgroundDescriptor] {
     try available(access)
@@ -80,6 +94,7 @@ final class MacNativeBackgroundController {
     do { try environment.recheck(target.candidate); _ = try active(targetID, access) }
     catch { targets.removeValue(forKey: targetID); throw error }
     let token = UUID()
+    try NativeReservations.shared.reserve(token, target.candidate, environment: environment)
     tickets[token] = Ticket(targetID: targetID, expires: min(target.expires, clock() + preparationLifetime))
     return token
   }
@@ -97,6 +112,7 @@ final class MacNativeBackgroundController {
     try available(access)
     if let target = targets[targetID], target.application != access.application { throw MacNativeBackgroundFailure.unauthorized }
     targets.removeValue(forKey: targetID)
+    for (id, ticket) in tickets where ticket.targetID == targetID { NativeReservations.shared.release(id) }
     tickets = tickets.filter { $0.value.targetID != targetID }
   }
 
@@ -104,6 +120,7 @@ final class MacNativeBackgroundController {
   func closePreparation(_ token: UUID) {
     precondition(Thread.isMainThread)
     tickets.removeValue(forKey: token)
+    NativeReservations.shared.release(token)
   }
 
   /// Whole-value one-shot ticket. Owner beforeDispatch rechecks the durable
@@ -114,6 +131,7 @@ final class MacNativeBackgroundController {
     do { try available(access) }
     catch { return .refused(failure(error)) }
     guard let ticket = tickets.removeValue(forKey: token) else { return .refused(.consumed) }
+    defer { NativeReservations.shared.release(token) }
     let target: Target
     do {
       target = try active(ticket.targetID, access)
@@ -133,7 +151,7 @@ final class MacNativeBackgroundController {
 
   func close() {
     precondition(Thread.isMainThread)
-    closed = true; targets.removeAll(); tickets.removeAll(); timer?.cancel(); timer = nil
+    closed = true; targets.removeAll(); for id in tickets.keys { NativeReservations.shared.release(id) }; tickets.removeAll(); timer?.cancel(); timer = nil
   }
   private func active(_ id: UUID, _ access: MacNativeBackgroundAccess) throws -> Target {
     try available(access)
@@ -155,9 +173,12 @@ final class MacNativeBackgroundController {
   }
   private func expire() {
     let now = clock()
-    guard now.isFinite, now >= lastNow else { targets.removeAll(); tickets.removeAll(); return }
+    guard now.isFinite, now >= lastNow else {
+      targets.removeAll(); for id in tickets.keys { NativeReservations.shared.release(id) }; tickets.removeAll(); return
+    }
     lastNow = now
     targets = targets.filter { now < $0.value.expires && ($0.value.retainedAuthorization?() ?? true) }
+    for (id, ticket) in tickets where now >= ticket.expires || targets[ticket.targetID] == nil { NativeReservations.shared.release(id) }
     tickets = tickets.filter { now < $0.value.expires && targets[$0.value.targetID] != nil }
   }
   private func failure(_ error: Error) -> MacNativeBackgroundFailure {

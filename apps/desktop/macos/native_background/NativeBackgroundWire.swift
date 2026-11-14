@@ -17,19 +17,15 @@ final class MacNativeBackgroundWire {
     let id = UUID()
     var records: [String: Record] = [:]
     var leases: [String: (target: String, expires: TimeInterval)] = [:]
-    var windows: [String: String] = [:]
-    init(_ profiles: [MacNativeBackgroundProfile], _ live: @escaping () -> Bool) {
-      environment = SystemMacNativeBackgroundEnvironment(profiles: profiles)
+    init(_ live: @escaping () -> Bool) {
+      environment = SystemMacNativeBackgroundEnvironment()
       controller = MacNativeBackgroundController(environment: environment, connected: live)
     }
   }
-  private let profiles: [MacNativeBackgroundProfile]
   private let live: () -> Bool
   private var scopes: [String: Scope] = [:]
   private var closed = false
-  init(profiles: [MacNativeBackgroundProfile] = [], live: @escaping () -> Bool) {
-    self.profiles = profiles; self.live = live
-  }
+  init(live: @escaping () -> Bool) { self.live = live }
   func close() {
     precondition(Thread.isMainThread)
     closed = true
@@ -58,7 +54,7 @@ final class MacNativeBackgroundWire {
       if let existing = scopes[scopeID] { scope = existing }
       else {
         guard command == "discover", scopes.count < 32 else { throw MacNativeBackgroundFailure.targetUnavailable }
-        scope = Scope(profiles, live); scopes[scopeID] = scope
+        scope = Scope(live); scopes[scopeID] = scope
       }
       scope.records = scope.records.filter { $0.value.promoted || ProcessInfo.processInfo.systemUptime - $0.value.created < 300 }
       scope.leases = scope.leases.filter { $0.value.expires > ProcessInfo.processInfo.systemUptime && scope.records[$0.value.target] != nil }
@@ -73,28 +69,23 @@ final class MacNativeBackgroundWire {
         guard keys == base.union(["appId"]) || keys == base.union(["appId", "windowId"]),
               let appID = object["appId"] as? String, !appID.isEmpty, appID.utf8.count <= 4096,
               object["windowId"] == nil || object["windowId"] is String else { throw MacNativeBackgroundFailure.unsupportedTarget }
-        let matching = profiles.filter { $0.bundleIdentifier == appID }
-        guard matching.count <= 1 else { throw MacNativeBackgroundFailure.ambiguousTarget }
-        if let profile = matching.first {
-          let allowed = MacNativeBackgroundAccess(scopeID: scope.id, application: profile.application, isAuthorized: live)
-          let candidates = try scope.controller.discover(allowed)
-          var targets: [[String: Any]] = []
-          for item in candidates {
-            let key = profile.application.sha256 + ":" + item.windowIdentifier
-            let windowID = scope.windows[key] ?? UUID().uuidString
-            scope.windows[key] = windowID
-            if let selected = object["windowId"] as? String, selected != windowID { continue }
-            let snapshot: [String: Any] = ["targetId": item.candidateID.uuidString,
-              "helperInstanceId": Self.instance, "platform": "macos", "application": profile.application.wire,
-              "appId": appID, "appName": Self.limit(URL(fileURLWithPath: profile.application.executable).lastPathComponent, units: 256),
-              "windowId": windowID, "windowTitle": Self.label(item.windowTitle, marker: item.windowIdentifier),
-              "fieldLabel": Self.label(item.fieldLabel, marker: item.fieldIdentifier),
-              "controlKind": "appkit_secure_text"]
-            scope.records[item.candidateID.uuidString] = Record(snapshot, profile.application)
-            targets.append(snapshot)
-          }
-          response = ["format": 1, "state": "ready", "targets": targets]
-        } else { response = ["format": 1, "state": "ready", "targets": []] }
+        let application = try scope.environment.application(appID)
+        let allowed = MacNativeBackgroundAccess(scopeID: scope.id, application: application, isAuthorized: live)
+        let candidates = try scope.controller.discover(allowed)
+        var targets: [[String: Any]] = []
+        for item in candidates {
+          let windowID = item.windowIdentifier
+          if let selected = object["windowId"] as? String, selected != windowID { continue }
+          let snapshot: [String: Any] = ["targetId": item.candidateID.uuidString,
+            "helperInstanceId": Self.instance, "platform": "macos", "application": application.wire,
+            "appId": appID, "appName": MacNativeBackgroundCapability.limit(URL(fileURLWithPath: application.executable).lastPathComponent, units: 256),
+            "windowId": windowID, "windowTitle": item.windowTitle,
+            "fieldLabel": item.fieldLabel, "controlKind": MacNativeBackgroundCapability.controlKind]
+          scope.records[item.candidateID.uuidString] = Record(snapshot, application)
+          targets.append(snapshot)
+        }
+        if object["windowId"] != nil && targets.isEmpty { throw MacNativeBackgroundFailure.targetUnavailable }
+        response = ["format": 1, "state": "ready", "targets": targets]
       case "prepare":
         guard keys == base.union(["targetId"]) || keys == base.union(["targetId", "expected"]),
               let id = object["targetId"] as? String, let targetID = UUID(uuidString: id),
@@ -152,25 +143,12 @@ final class MacNativeBackgroundWire {
     case .permissionRequired: code = "access_denied"
     case .unauthorized: code = "scope_not_approved"
     case .sessionUnavailable, .wrongThread: code = "session_unavailable"
-    case .unsupportedApplication, .unsupportedTarget: code = "unsupported_target"
+    case .unsupportedApplication, .unsupportedTarget, .ambiguousTarget: code = "unsupported_target"
     case .targetChanged: code = "destination_changed"
     case .unsupportedSecret: code = "unsupported_secret"
-    case .busy, .ambiguousTarget: code = "busy"
+    case .busy: code = "busy"
     default: code = "target_unavailable"
     }
     return ["format": 1, "state": "refused", "errorCode": code]
-  }
-  private static func label(_ description: String, marker: String) -> String {
-    let suffix = " [" + marker + "]"
-    return limit(description, units: max(0, 256 - suffix.utf16.count)) + suffix
-  }
-  private static func limit(_ text: String, units: Int) -> String {
-    var result = "", count = 0
-    for character in text {
-      let size = String(character).utf16.count
-      if count + size > units { break }
-      result.append(character); count += size
-    }
-    return result
   }
 }

@@ -4,34 +4,47 @@ import CryptoKit
 import Darwin
 import Security
 
-/// Link only into the authenticated, unsandboxed helper, never Runner. Default
-/// compatibility is empty; a role resembling a password box does not enable it.
+/// Authenticated helper only. Eligibility comes from the live AX interface;
+/// application identity is observed and pinned, never looked up in a list.
 final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment {
+  private final class WindowIdentity {
+    let window: AXUIElement
+    let id = UUID().uuidString
+    init(_ window: AXUIElement) { self.window = window }
+  }
+  private final class WeakWindowIdentity {
+    weak var value: WindowIdentity?
+    init(_ value: WindowIdentity) { self.value = value }
+  }
+  private struct NativeTree { let nodes: [AXUIElement]; let excludedWeb: Bool }
   private final class Reference {
     let process: MacFocusProcessWitness
     let executable: NativeExecutableWitness
-    let profile: MacNativeBackgroundProfile
+    let signature: NativeSignatureWitness
     let app: AXUIElement
-    let window: AXUIElement
+    let windowIdentity: WindowIdentity
+    var window: AXUIElement { windowIdentity.window }
     let field: AXUIElement
     let epoch: UInt64
-    let context: [String: String]
+    let windowLabel: String
+    let fieldLabel: String
     init(_ process: MacFocusProcessWitness, _ executable: NativeExecutableWitness,
-         _ profile: MacNativeBackgroundProfile, _ app: AXUIElement,
-         _ window: AXUIElement, _ field: AXUIElement, _ epoch: UInt64, _ context: [String: String]) {
-      self.process = process; self.executable = executable; self.profile = profile
-      self.app = app; self.window = window; self.field = field; self.epoch = epoch
-      self.context = context
+         _ signature: NativeSignatureWitness, _ app: AXUIElement, _ window: WindowIdentity,
+         _ field: AXUIElement, _ epoch: UInt64, _ windowLabel: String, _ fieldLabel: String) {
+      self.process = process; self.executable = executable; self.signature = signature
+      self.app = app; self.windowIdentity = window; self.field = field; self.epoch = epoch
+      self.windowLabel = windowLabel; self.fieldLabel = fieldLabel
     }
   }
-  private let profiles: [MacNativeBackgroundProfile]
   private var deadline: TimeInterval = 0
   private var epoch: UInt64 = 0
   private var observations: [NSObjectProtocol] = []
+  private var windowIDs: [WeakWindowIdentity] = []
+  private let permission: () -> Bool
   private let workspace = NSWorkspace.shared.notificationCenter
 
-  init(profiles: [MacNativeBackgroundProfile] = []) {
-    self.profiles = profiles
+  init(permission: @escaping () -> Bool = { AXIsProcessTrusted() }) {
+    self.permission = permission
     for name in [NSWorkspace.willSleepNotification, NSWorkspace.screensDidSleepNotification,
                  NSWorkspace.sessionDidResignActiveNotification] {
       observations.append(workspace.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
@@ -42,91 +55,97 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
   deinit { for token in observations { workspace.removeObserver(token) } }
   func checkAvailability() throws { try begin() }
 
+  /// appId is only a discovery selector. Resolve the actual running process and
+  /// file locally; a selector supplies neither an executable nor authorization.
+  func application(_ appID: String) throws -> MacFocusApplication {
+    try begin()
+    let running = NSWorkspace.shared.runningApplications.filter {
+      !$0.isTerminated && $0.processIdentifier != getpid() && $0.bundleIdentifier == appID
+    }
+    guard !running.isEmpty else { throw MacNativeBackgroundFailure.targetUnavailable }
+    guard running.count == 1, let process = running.first else { throw MacNativeBackgroundFailure.ambiguousTarget }
+    let witness = try processWitness(process.processIdentifier)
+    guard process.executableURL?.resolvingSymlinksInPath().standardizedFileURL.path == witness.path else {
+      throw MacNativeBackgroundFailure.targetChanged
+    }
+    let file = try NativeExecutableWitness(witness.path, deadline: deadline)
+    _ = try NativeSignatureWitness(witness.pid)
+    return try MacFocusApplication(executable: witness.path, sha256: file.sha256)
+  }
+
   func discover(_ application: MacFocusApplication) throws -> [MacNativeBackgroundCandidate] {
     try begin()
-    let matching = profiles.filter { $0.application == application }
-    guard matching.count == 1, let profile = matching.first,
-          !profile.bundleIdentifier.isEmpty,
-          profile.codeRequirement.range(of: "^cdhash H\"[0-9a-f]{40}\"$", options: .regularExpression) != nil,
-          !profile.windowIdentifiers.isEmpty,
-          !profile.fieldIdentifiers.isEmpty,
-          !profile.windowIdentifiers.contains(""), !profile.fieldIdentifiers.contains("") else {
-      throw MacNativeBackgroundFailure.unsupportedApplication
-    }
-    try platform(profile)
     let running = NSWorkspace.shared.runningApplications.filter {
       !$0.isTerminated && $0.processIdentifier != getpid() &&
-      $0.bundleIdentifier == profile.bundleIdentifier &&
       $0.executableURL?.resolvingSymlinksInPath().standardizedFileURL.path == application.executable
     }
-    if running.isEmpty { return [] }
-    guard running.count == 1, let process = running.first else {
-      throw MacNativeBackgroundFailure.ambiguousTarget
-    }
+    guard !running.isEmpty else { throw MacNativeBackgroundFailure.targetUnavailable }
+    guard running.count == 1, let process = running.first else { throw MacNativeBackgroundFailure.ambiguousTarget }
     let witness = try processWitness(process.processIdentifier)
-    try signedProcess(witness.pid, requirement: profile.codeRequirement)
+    let signature = try NativeSignatureWitness(witness.pid)
     let executable = try NativeExecutableWitness(application.executable, deadline: deadline)
     guard executable.sha256 == application.sha256 else { throw MacNativeBackgroundFailure.targetChanged }
     let app = AXUIElementCreateApplication(witness.pid)
-    let windows = try children(app, kAXWindowsAttribute)
     var result: [MacNativeBackgroundCandidate] = []
-    var identities = Set<String>()
-    for window in windows {
-      let identifier = try text(window, kAXIdentifierAttribute)
-      guard profile.windowIdentifiers.contains(identifier) else { continue }
-      let nodes = try nativeTree(window)
-      let observedContext = try context(profile, nodes)
-      for field in nodes where try text(field, kAXRoleAttribute) == kAXTextFieldRole && text(field, kAXSubroleAttribute, optional: true) == kAXSecureTextFieldSubrole {
-        let fieldID = try text(field, kAXIdentifierAttribute)
-        guard profile.fieldIdentifiers.contains(fieldID) else { continue }
-        guard identifier.utf16.count <= 128, fieldID.utf16.count <= 128,
-              !(identifier + fieldID).unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }) else {
+    var descriptions = Set<String>()
+    var unsupported = false
+    windowIDs.removeAll { $0.value == nil }
+    for window in try children(app, kAXWindowsAttribute) {
+      guard try text(window, kAXRoleAttribute) == kAXWindowRole else { throw MacNativeBackgroundFailure.unsupportedTarget }
+      let tree = try nativeTree(window)
+      unsupported = unsupported || tree.excludedWeb
+      for field in tree.nodes where try password(field) {
+        let windowLabel: String, fieldLabel: String
+        do {
+          try writable(field)
+          try ancestry(field, window: window, pid: witness.pid)
+          windowLabel = try windowDescription(window)
+          fieldLabel = try fieldDescription(field)
+        } catch MacNativeBackgroundFailure.unsupportedTarget {
+          unsupported = true; continue
+        }
+        guard descriptions.insert(windowLabel + "\u{0}" + fieldLabel).inserted else {
           throw MacNativeBackgroundFailure.ambiguousTarget
         }
-        // Known unavailable fields are not initial discovery candidates. Unknown
-        // metadata remains a failure. Captured fields are always rechecked.
-        if try !boolean(field, kAXEnabledAttribute) { continue }
-        var writable = DarwinBoolean(false)
-        guard AXUIElementIsAttributeSettable(field, kAXValueAttribute as CFString, &writable) == .success else {
-          throw MacNativeBackgroundFailure.targetUnavailable
+        let identity: WindowIdentity
+        if let existing = windowIDs.compactMap({ $0.value }).first(where: { CFEqual($0.window, window) }) { identity = existing }
+        else {
+          guard windowIDs.count < 256 else { throw MacNativeBackgroundFailure.busy }
+          identity = WindowIdentity(window); windowIDs.append(WeakWindowIdentity(identity))
         }
-        if !writable.boolValue { continue }
-        guard identities.insert(identifier + "\u{0}" + fieldID).inserted else {
-          throw MacNativeBackgroundFailure.ambiguousTarget
-        }
-        let reference = Reference(witness, executable, profile, app, window, field, epoch, observedContext)
+        let reference = Reference(witness, executable, signature, app, identity, field, epoch, windowLabel, fieldLabel)
         try check(reference)
-        let descriptor = MacNativeBackgroundDescriptor(candidateID: UUID(), windowIdentifier: identifier,
-          windowTitle: try text(window, kAXTitleAttribute, optional: true), fieldIdentifier: fieldID,
-          fieldLabel: (try profile.fieldLabels[fieldID] ?? text(field, kAXDescriptionAttribute, optional: true)) +
-            (observedContext.isEmpty ? "" : " — " + observedContext.values.sorted().joined(separator: " / ")))
+        let descriptor = MacNativeBackgroundDescriptor(candidateID: UUID(), windowIdentifier: identity.id,
+          windowTitle: windowLabel, fieldIdentifier: try text(field, kAXIdentifierAttribute, optional: true), fieldLabel: fieldLabel)
         result.append(MacNativeBackgroundCandidate(descriptor: descriptor, reference: reference))
         guard result.count <= 64 else { throw MacNativeBackgroundFailure.ambiguousTarget }
       }
     }
+    if result.isEmpty && unsupported { throw MacNativeBackgroundFailure.unsupportedTarget }
     return result
   }
-
+  func sameTarget(_ a: MacNativeBackgroundCandidate, _ b: MacNativeBackgroundCandidate) -> Bool {
+    guard let left = a.reference as? Reference, let right = b.reference as? Reference else { return false }
+    return left.process == right.process && CFEqual(left.field, right.field)
+  }
   func recheck(_ candidate: MacNativeBackgroundCandidate) throws {
     try begin()
     guard let ref = candidate.reference as? Reference else { throw MacNativeBackgroundFailure.targetUnavailable }
     try check(ref)
   }
-
   func write(_ secret: String, to candidate: MacNativeBackgroundCandidate,
              authorized: () -> Bool) -> MacNativeBackgroundWriteResult {
     do { try recheck(candidate) }
     catch { return .refused((error as? MacNativeBackgroundFailure) ?? .targetUnavailable) }
     guard authorized(), let ref = candidate.reference as? Reference else { return .refused(.unauthorized) }
-    // The only mutation in this adapter. This is deliberately NOT an atomic
-    // window-liveness/authorization lock: close/revocation can race this call.
+    // Single whole-value mutation; no activation, focus, keyboard or clipboard.
+    // The last recheck and external setter cannot form an atomic business lock.
     let status = AXUIElementSetAttributeValue(ref.field, kAXValueAttribute as CFString, secret as CFString)
     return status == .success ? .setterAccepted : .unknown
   }
-
   private func begin() throws {
     guard Thread.isMainThread else { throw MacNativeBackgroundFailure.wrongThread }
-    guard AXIsProcessTrusted() else { throw MacNativeBackgroundFailure.permissionRequired }
+    guard permission() else { throw MacNativeBackgroundFailure.permissionRequired }
     deadline = ProcessInfo.processInfo.systemUptime + 2
     try session()
   }
@@ -140,68 +159,116 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
   }
   private func check(_ ref: Reference) throws {
     try budget(); try session()
-    try platform(ref.profile)
+    guard permission() else { throw MacNativeBackgroundFailure.permissionRequired }
     guard ref.epoch == epoch, try processWitness(ref.process.pid) == ref.process,
           let running = NSRunningApplication(processIdentifier: ref.process.pid), !running.isTerminated,
-          running.bundleIdentifier == ref.profile.bundleIdentifier,
           running.executableURL?.resolvingSymlinksInPath().standardizedFileURL.path == ref.process.path else {
       throw MacNativeBackgroundFailure.targetChanged
     }
     try ref.executable.recheck()
-    try signedProcess(ref.process.pid, requirement: ref.profile.codeRequirement)
-    for item in [ref.app, ref.window, ref.field] {
-      var pid: pid_t = -1
-      guard AXUIElementGetPid(item, &pid) == .success, pid == ref.process.pid else {
-        throw MacNativeBackgroundFailure.targetChanged
+    guard try NativeSignatureWitness(ref.process.pid) == ref.signature else { throw MacNativeBackgroundFailure.targetChanged }
+    for item in [ref.app, ref.window, ref.field] { try owner(item, pid: ref.process.pid) }
+    guard try children(ref.app, kAXWindowsAttribute).filter({ CFEqual($0, ref.window) }).count == 1,
+          try text(ref.window, kAXRoleAttribute) == kAXWindowRole,
+          try nativeTree(ref.window).nodes.filter({ CFEqual($0, ref.field) }).count == 1,
+          try password(ref.field), try windowDescription(ref.window) == ref.windowLabel,
+          try fieldDescription(ref.field) == ref.fieldLabel else { throw MacNativeBackgroundFailure.targetChanged }
+    try ancestry(ref.field, window: ref.window, pid: ref.process.pid)
+    try writable(ref.field)
+    // Recheck public descriptions of other live candidates too. Newly inserted
+    // indistinguishable controls must not inherit a prepared target's label.
+    var descriptions = Set<String>()
+    for window in try children(ref.app, kAXWindowsAttribute) {
+      for field in try nativeTree(window).nodes where try password(field) {
+        do { try writable(field) } catch MacNativeBackgroundFailure.unsupportedTarget { continue }
+        do {
+          let label = try windowDescription(window) + "\u{0}" + fieldDescription(field)
+          guard descriptions.insert(label).inserted else { throw MacNativeBackgroundFailure.ambiguousTarget }
+        } catch MacNativeBackgroundFailure.unsupportedTarget { continue }
       }
     }
-    let windows = try children(ref.app, kAXWindowsAttribute)
-    let windowID = try text(ref.window, kAXIdentifierAttribute)
-    guard windows.filter({ CFEqual($0, ref.window) }).count == 1,
-          ref.profile.windowIdentifiers.contains(windowID),
-          try text(ref.window, kAXRoleAttribute) == kAXWindowRole,
-          try windows.filter({ try text($0, kAXIdentifierAttribute) == windowID }).count == 1 else {
-      throw MacNativeBackgroundFailure.targetChanged
-    }
-    let nodes = try nativeTree(ref.window)
-    guard try context(ref.profile, nodes) == ref.context else { throw MacNativeBackgroundFailure.targetChanged }
-    let id = try text(ref.field, kAXIdentifierAttribute)
-    let matching = try nodes.filter { try text($0, kAXIdentifierAttribute, optional: true) == id }
-    guard matching.count == 1, CFEqual(matching[0], ref.field),
-          ref.profile.fieldIdentifiers.contains(id),
-          try text(ref.field, kAXRoleAttribute) == kAXTextFieldRole,
-          try text(ref.field, kAXSubroleAttribute) == kAXSecureTextFieldSubrole,
-          try boolean(ref.field, kAXEnabledAttribute),
-          let owner = try axElement(ref.field, kAXWindowAttribute), CFEqual(owner, ref.window) else {
-      throw MacNativeBackgroundFailure.targetChanged
-    }
-    var settable = DarwinBoolean(false)
-    guard AXUIElementIsAttributeSettable(ref.field, kAXValueAttribute as CFString, &settable) == .success,
-          settable.boolValue else { throw MacNativeBackgroundFailure.unsupportedTarget }
     try budget(); try session()
     guard ref.epoch == epoch else { throw MacNativeBackgroundFailure.sessionUnavailable }
   }
-
-  /// Whole-window rejection is intentionally conservative for mixed windows.
-  /// Public AX cannot establish the native implementation class; the exact
-  /// tested profile supplies positive evidence, this scan supplies exclusions.
-  private func nativeTree(_ root: AXUIElement) throws -> [AXUIElement] {
+  private func password(_ field: AXUIElement) throws -> Bool {
+    let role = try text(field, kAXRoleAttribute)
+    let subrole = try text(field, kAXSubroleAttribute, optional: true)
+    return role == kAXSecureTextFieldSubrole || role == kAXTextFieldRole && subrole == kAXSecureTextFieldSubrole
+  }
+  private func writable(_ field: AXUIElement) throws {
+    guard try boolean(field, kAXEnabledAttribute) else { throw MacNativeBackgroundFailure.unsupportedTarget }
+    var writable = DarwinBoolean(false)
+    let status = AXUIElementIsAttributeSettable(field, kAXValueAttribute as CFString, &writable)
+    if status == .apiDisabled { throw MacNativeBackgroundFailure.permissionRequired }
+    if status == .attributeUnsupported { throw MacNativeBackgroundFailure.unsupportedTarget }
+    guard status == .success else { throw MacNativeBackgroundFailure.targetUnavailable }
+    guard writable.boolValue else { throw MacNativeBackgroundFailure.unsupportedTarget }
+  }
+  private func owner(_ item: AXUIElement, pid: pid_t) throws {
+    var actual: pid_t = -1
+    guard AXUIElementGetPid(item, &actual) == .success, actual == pid else { throw MacNativeBackgroundFailure.targetChanged }
+  }
+  private func web(_ node: AXUIElement) throws -> Bool {
+    let role = try text(node, kAXRoleAttribute)
+    var names: CFArray?
+    guard AXUIElementCopyAttributeNames(node, &names) == .success, let attributes = names as? [String] else {
+      throw MacNativeBackgroundFailure.targetUnavailable
+    }
+    return ["AXWebArea", "AXWebView", "AXHTMLArea"].contains(role) ||
+      attributes.contains("AXDOMIdentifier") || attributes.contains("AXDOMClassList") || attributes.contains("ChromeAXNodeId")
+  }
+  /// Skip a known web subtree only. A native sibling remains eligible.
+  private func nativeTree(_ root: AXUIElement) throws -> NativeTree {
+    var excludedWeb = false
+    var visited = 0
     var result: [AXUIElement] = [], pending: [(AXUIElement, Int)] = [(root, 0)]
     while let (node, depth) = pending.popLast() {
       try budget()
-      guard depth <= 24, result.count < 2048, !result.contains(where: { CFEqual($0, node) }) else {
+      guard depth <= 24, visited < 2048, !result.contains(where: { CFEqual($0, node) }) else {
         throw MacNativeBackgroundFailure.unsupportedTarget
       }
-      let role = try text(node, kAXRoleAttribute)
-      var names: CFArray?
-      guard AXUIElementCopyAttributeNames(node, &names) == .success,
-            let attributes = names as? [String],
-            role != "AXWebArea", !attributes.contains("AXDOMIdentifier"),
-            !attributes.contains("ChromeAXNodeId") else { throw MacNativeBackgroundFailure.unsupportedTarget }
+      visited += 1
+      if try web(node) { excludedWeb = true; continue }
       result.append(node)
-      for child in try children(node, kAXChildrenAttribute, optional: true) { pending.append((child, depth + 1)) }
+      let descendants = try children(node, kAXChildrenAttribute, optional: true)
+      guard pending.count + descendants.count + visited <= 2048 else { throw MacNativeBackgroundFailure.unsupportedTarget }
+      for child in descendants { pending.append((child, depth + 1)) }
     }
-    return result
+    return NativeTree(nodes: result, excludedWeb: excludedWeb)
+  }
+  private func ancestry(_ field: AXUIElement, window: AXUIElement, pid: pid_t) throws {
+    var current = field, seen: [AXUIElement] = []
+    for _ in 0..<25 {
+      try owner(current, pid: pid)
+      guard !seen.contains(where: { CFEqual($0, current) }), try !web(current) else {
+        throw MacNativeBackgroundFailure.unsupportedTarget
+      }
+      if CFEqual(current, window) { return }
+      seen.append(current)
+      guard let parent = try axElement(current, kAXParentAttribute) else { throw MacNativeBackgroundFailure.targetChanged }
+      current = parent
+    }
+    throw MacNativeBackgroundFailure.unsupportedTarget
+  }
+  private func windowDescription(_ window: AXUIElement) throws -> String {
+    let title = try text(window, kAXTitleAttribute, optional: true)
+    let description = try text(window, kAXDescriptionAttribute, optional: true)
+    return try MacNativeBackgroundCapability.label(title.isEmpty ? description : title,
+      identifier: text(window, kAXIdentifierAttribute, optional: true))
+  }
+  private func fieldDescription(_ field: AXUIElement) throws -> String {
+    var labels: [String] = []
+    for name in [kAXTitleAttribute, kAXDescriptionAttribute, kAXHelpAttribute, "AXPlaceholderValue"] {
+      let value = try text(field, name, optional: true)
+      if !value.isEmpty && !labels.contains(value) { labels.append(value) }
+    }
+    if let label = try axElement(field, kAXTitleUIElementAttribute, optional: true),
+       try text(label, kAXRoleAttribute) == kAXStaticTextRole {
+      let value = try text(label, kAXValueAttribute, optional: true)
+      if !value.isEmpty && !labels.contains(value) { labels.append(value) }
+    }
+    return try MacNativeBackgroundCapability.label(labels.joined(separator: " / "),
+      identifier: text(field, kAXIdentifierAttribute, optional: true))
   }
   private func budget() throws {
     guard ProcessInfo.processInfo.systemUptime < deadline else { throw MacNativeBackgroundFailure.targetUnavailable }
@@ -211,6 +278,7 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
     guard AXUIElementSetMessagingTimeout(e, 0.15) == .success else { throw MacNativeBackgroundFailure.targetUnavailable }
     var value: CFTypeRef?
     let status = AXUIElementCopyAttributeValue(e, name as CFString, &value)
+    if status == .apiDisabled { throw MacNativeBackgroundFailure.permissionRequired }
     if optional && (status == .attributeUnsupported || status == .noValue) { return nil }
     guard status == .success, let value else { throw MacNativeBackgroundFailure.targetUnavailable }
     return value
@@ -222,7 +290,7 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
   }
   private func text(_ e: AXUIElement, _ name: String, optional: Bool = false) throws -> String {
     guard let value = try attribute(e, name, optional: optional) else { return "" }
-    guard let result = value as? String, result.utf8.count <= 1024 else { throw MacNativeBackgroundFailure.unsupportedTarget }
+    guard let result = value as? String, result.utf8.count <= 4096 else { throw MacNativeBackgroundFailure.unsupportedTarget }
     return result
   }
   private func boolean(_ e: AXUIElement, _ name: String) throws -> Bool {
@@ -231,57 +299,37 @@ final class SystemMacNativeBackgroundEnvironment: MacNativeBackgroundEnvironment
     }
     return b
   }
-  private func axElement(_ e: AXUIElement, _ name: String) throws -> AXUIElement? {
-    guard let v = try attribute(e, name), CFGetTypeID(v) == AXUIElementGetTypeID() else {
-      throw MacNativeBackgroundFailure.unsupportedTarget
-    }
+  private func axElement(_ e: AXUIElement, _ name: String, optional: Bool = false) throws -> AXUIElement? {
+    guard let v = try attribute(e, name, optional: optional) else { return nil }
+    guard CFGetTypeID(v) == AXUIElementGetTypeID() else { throw MacNativeBackgroundFailure.unsupportedTarget }
     return unsafeBitCast(v, to: AXUIElement.self)
   }
   private func processWitness(_ pid: pid_t) throws -> MacFocusProcessWitness {
     do { return try MacFocusProcessWitness(pid) }
     catch { throw MacNativeBackgroundFailure.targetChanged }
   }
-  private func context(_ profile: MacNativeBackgroundProfile, _ nodes: [AXUIElement]) throws -> [String: String] {
-    if let expected = profile.requiredSecureFieldIdentifiers {
-      let secure = try nodes.filter { try text($0, kAXRoleAttribute) == kAXTextFieldRole && text($0, kAXSubroleAttribute, optional: true) == kAXSecureTextFieldSubrole }
-      let ids = try secure.map { try text($0, kAXIdentifierAttribute) }
-      guard ids.count == expected.count, Set(ids) == expected else { throw MacNativeBackgroundFailure.unsupportedTarget }
-    }
-    var result: [String: String] = [:]
-    for id in profile.contextIdentifiers {
-      let matching = try nodes.filter { try text($0, kAXIdentifierAttribute, optional: true) == id }
-      guard matching.count == 1, try text(matching[0], kAXRoleAttribute) == kAXStaticTextRole else {
-        throw MacNativeBackgroundFailure.unsupportedTarget
-      }
-      // Explicitly typed STATIC label metadata only, never a password field.
-      let value = try text(matching[0], kAXValueAttribute)
-      guard !value.isEmpty else { throw MacNativeBackgroundFailure.unsupportedTarget }
-      if let pattern = profile.contextPatterns[id], value.range(of: pattern, options: .regularExpression) == nil {
-        throw MacNativeBackgroundFailure.unsupportedTarget
-      }
-      result[id] = value
-    }
-    return result
-  }
-  private func signedProcess(_ pid: pid_t, requirement: String) throws {
+}
+
+/// Pin the actual running code when signed. An explicitly unsigned process is
+/// still bound by its process generation, executable descriptor and AX objects.
+private struct NativeSignatureWitness: Equatable {
+  let cdhash: Data?
+  init(_ pid: pid_t) throws {
     var code: SecCode?
-    var expected: SecRequirement?
     let attributes = [kSecGuestAttributePid as String: NSNumber(value: pid)] as CFDictionary
-    guard SecCodeCopyGuestWithAttributes(nil, attributes, [], &code) == errSecSuccess, let code,
-          SecRequirementCreateWithString(requirement as CFString, [], &expected) == errSecSuccess, let expected,
-          SecCodeCheckValidity(code, SecCSFlags(rawValue: kSecCSStrictValidate), expected) == errSecSuccess else {
+    let status = SecCodeCopyGuestWithAttributes(nil, attributes, [], &code)
+    if status == errSecCSUnsigned { cdhash = nil; return }
+    guard status == errSecSuccess, let code else { throw MacNativeBackgroundFailure.targetChanged }
+    let valid = SecCodeCheckValidity(code, SecCSFlags(rawValue: kSecCSStrictValidate), nil)
+    if valid == errSecCSUnsigned { cdhash = nil; return }
+    guard valid == errSecSuccess else { throw MacNativeBackgroundFailure.targetChanged }
+    var staticCode: SecStaticCode?, info: CFDictionary?
+    guard SecCodeCopyStaticCode(code, [], &staticCode) == errSecSuccess, let staticCode,
+          SecCodeCopySigningInformation(staticCode, [], &info) == errSecSuccess,
+          let hash = (info as? [String: Any])?[kSecCodeInfoUnique as String] as? Data, !hash.isEmpty else {
       throw MacNativeBackgroundFailure.targetChanged
     }
-  }
-  private func platform(_ profile: MacNativeBackgroundProfile) throws {
-    guard let expected = profile.operatingSystemBuild else { return }
-    var length = 0
-    guard sysctlbyname("kern.osversion", nil, &length, nil, 0) == 0, length > 0, length < 128 else {
-      throw MacNativeBackgroundFailure.unsupportedApplication
-    }
-    var bytes = [CChar](repeating: 0, count: length)
-    guard sysctlbyname("kern.osversion", &bytes, &length, nil, 0) == 0,
-          String(cString: bytes) == expected else { throw MacNativeBackgroundFailure.unsupportedApplication }
+    cdhash = hash
   }
 }
 

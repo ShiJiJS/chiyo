@@ -1,33 +1,20 @@
 # Mac 原生后台填写（#144）
 
-设计更新（2026-11-14）：[ADR0033](../../../../docs/adr/0033-native-fill-by-control-capability.md) 已确定取消逐应用名单，改为按实际 AX 密码控件能力判断。以下记录的是尚未完成该改造的现有实现与测试证据；归档实用工具名单不再是后续产品设计要求。新的实施要求见[公共合同](../../../../docs/design/native-background-fill-contract.md)。
+本实现按 [ADR0033](../../../../docs/adr/0033-native-fill-by-control-capability.md) 和[公共合同](../../../../docs/design/native-background-fill-contract.md) 判断当前 AX 控件能力。`NativeBackgroundCompatibility.swift` 仅定义 `macos_ax_password` 和公开标签处理，不含应用、版本、签名、系统构建、语言或 AXIdentifier 允许名单。旧证据仍保留，不能把接口资格当作任意应用的业务成功保证。
 
-平台实现基于公共合同 `dd03d22e`。Dart 入口是 `MacOSNativeBackgroundFillDriver`，实现 `NativeFillDriver`，供公共 Launcher/AppHost 注入；本目录不修改公共审批、持久操作或 CLI。Runner 注册私有 MethodChannel，使用既有签名校验的 XPC 服务；所有 AX 发现、引用和写入都只在非沙盒 helper 中执行。未正式安装应用或修改系统权限。
+Dart 入口 `MacOSNativeBackgroundFillDriver()` 由公共 Launcher/AppHost 注入。可选 channel/timeout 仅为测试 seam；每个 AppHost 拥有自己的 driver。Runner 通过私有 MethodChannel 连接同包签名校验的 XPC helper；所有 AX 读取及 setter 位于非沙盒 helper。公共模型/协商改造由公共分支负责；本平台发现项采用新 kind，旧解析器应明确拒绝，不能伪装成旧 kind。
 
-正式构造为 `MacOSNativeBackgroundFillDriver()`，不需要异步 factory、路径、摘要或 Agent 配置。可选 `MethodChannel`、timeout 参数仅为 Owner 测试 seam。每个 AppHost 持有一个 driver；交给 `ownsNativeDriver: true` 的 AppHost 成功之前由装配方拥有，启动失败须 `dispose()`，成功后由 AppHost 关闭流程销毁。单次 prepared.close 只关闭票据，CLI 短连接结束不能销毁 resident driver。公共 Launcher 由公共会话唯一修改。
+## 当前能力与身份
 
-## 首批真实兼容范围
+`appId` 只是发现选择器。helper 根据实际运行应用取得唯一进程、同用户与启动代际、规范路径、持有文件描述符及文件摘要；签名程序还固定实际运行代码的 CDHash 并复核有效性。无签名本身不排除，仍须可靠取得其余身份事实。不会接受 Agent 指定的 PID、路径、摘要或 profile 作为授权。
 
-`NativeBackgroundCompatibility.swift` 是可信构建维护的版本名单，当前只登记：
+字段须有密码语义（AXTextField + AXSecureTextField subrole，或 AXSecureTextField role）、启用且 AXValue 可写。发现只查询能力，不试写、不读取密码。单个明确不支持的字段被排除；仍有可用字段则返回它们。没有密码候选返回空列表，发现密码/网页候选但全部不支持返回 unsupported_target；权限和枚举通信失败单独传播。
 
-- 系统归档实用工具 `com.apple.archiveutility`，10.15（178）。
-- macOS 构建 `26A434`、该条目固定的可执行文件 SHA-256 和实际 arm64e CodeDirectory hash。
-- 中文 UI 的归档密码提示；窗口 `_NS:8`、唯一安全文本字段 `_NS:280`、提示静态文本 `_NS:270`。提示必须匹配已验证的密码请求形状，并在每次检查中保持原文相等。
-- 本轮实际业务验收为合成加密 ZIP：后台填写后，由独立 UI 操作提交，解压文件与输入内容哈希精确一致。也通过了“签名沙盒测试宿主 → 真实 XPC helper → 真实归档工具”路径。
+AXIdentifier 可选；实际窗口和字段由 helper 持有原 AX 对象，校验进程、窗口成员关系、祖先链和存活状态。缺少开发者标识但窗口/字段标签可区分时可用。公开标签附带已有标识，按 UTF-16 限长；仍歧义则拒绝，不用坐标、排序或随机编号让 Agent 猜框。窗口 opaque ID 缓存弱持有身份，寿命随有界目标引用结束，不能累计已关闭窗口而永久耗尽。
 
-这不是所有 AppKit 应用或所有系统版本的通用支持。OS/App 更新、不同签名切片、UI 形状不符、多个同标识窗口或目标不可核验时拒绝；不会放宽到相似角色或自动改绑新控件。Preview 的 PDF 密码场景虽然 setter 接受、UI 就绪，但指定打开密码的业务验收未通过，因此未登记。
+网页排除仅针对目标及通向其窗口的祖先（AXWebArea/WebView、DOM、Chrome 标记等）；已识别网页子树跳过，旁边独立原生密码字段仍可用。AX 元数据不能绝对证明内部框架实现，也不能保证未知应用会把 setter 的值用于业务。
 
-正面依据来自准确版本的原生 AppKit 资源、原生安全文本行为和真实业务测试。公共 AX 不能证明任意对象的具体实现类；仅有 AXSecureTextField 绝不构成兼容证据。运行时还排除整窗 AXWebArea、AXDOMIdentifier、ChromeAXNodeId。内嵌网页/WK/Electron 不支持，浏览器继续专用 API。
-
-名单是 helper 源码的一部分，经可信 App 构建、签名和分发。更新条目需重新验证版本、结构及业务接收。Agent、请求 JSON、用户偏好、PID、scope 摘要或“我是原生”的声明都不能注册或覆盖它。
-
-## 发现与身份
-
-helper 从获准应用的身份匹配实际运行进程，核验同用户、启动代际、规范可执行路径、文件见证和实际进程签名。窗口/字段元数据只用于第一次唯一定位；之后保持原 AX 对象，重新核对树成员、唯一性、类型、可用/可写及上下文，不按名字恢复已失效目标。
-
-快照只包含公共合同的 opaque ID、App 身份、窗口及字段说明；不含 PID、AX 地址、密码值或 private lease。可读描述总是附带稳定标记，不能只靠随机 targetId 猜同名框。标记及标题按 UTF-16 边界限制长度。
-
-不读取密码控件 AXValue、选中文字或原值。兼容规则可读取经 AXStaticText 角色校验的非值标签元数据，用来展示归档名并冻结可见上下文；这些静态标签不能代替授权。
+不读取密码控件 AXValue、选中文字或原值。仅在 AXTitleUIElement 确认为 AXStaticText 后读取其标签值。写入前重新核验实际文件、签名、进程代际、原对象、公开描述、密码语义及可写性；失效后不按名称重建引用。
 
 ## 生命周期与授权
 
@@ -54,7 +41,13 @@ python3 scripts/qa/check-macos-native-background.py --platform
 python3 scripts/qa/check-macos-focused-xpc.py --native-status
 ```
 
-默认仅运行无系统输入的控制器检查和源码类型检查。`--platform` 运行合成 AppKit/WK 排除夹具，覆盖后台/遮挡/最小化/隐藏、B 保留响应者、前台合成输入、鼠标/剪贴板保持、整值替换、只读/禁用/重复/重建/关闭/重启/上下文改变，以及 beforeDispatch 后再次复核。观察器运行 RunLoop，验证焦点元素自身 PID，nil 不算保持。临时 App、二进制和缓存自动清理，JSON 和源哈希留在 `build/native-background-macos/`。
+默认运行无系统输入的控制器断言及系统/桥接源码类型检查。`--platform` 启动两个不同 bundle 身份/路径的合成 AppKit 接收器、原生前台 Cover 和 WK 子树。覆盖后台/遮挡/最小化/隐藏、无 AXIdentifier、语言变更、原生与网页混合、部分/全部禁用和只读、普通文本、歧义、重建/关闭/重启、回调期间变化、权限拒绝及文件身份不匹配。权限拒绝通过收紧的测试 seam 验证，不改系统权限。
+
+独立进程观察器持续采样前台、真实焦点对象/PID、鼠标及剪贴板，开始就绪后才允许进入 controller.write，结束标记在 write 返回之后；测试断言采样时间覆盖整个调用区间，nil 焦点不算保持。先校准稳定、焦点切换及前台切换。窗口轮换测试超过256次；wire 测试覆盖新 kind/format1、scope、保留/释放、helper重启及dispose。测试夹具/临时可执行文件与缓存清理，回执和源哈希留在 `build/native-background-macos/`。这些不是正式产品签名/TCC或最终业务验收。
+
+## 历史真实软件证据（不参与运行资格）
+
+首轮 Archive Utility 10.15(178)、OS build 26A434、中文合成 ZIP 已验证实际解压与原文哈希；旧 b857/434/9619 回执保留原归属。Preview PDF 密码场景曾出现 setter 接受、UI 就绪但业务未打开，失败证据保留。二者都不再是支持名单：本次新通用路径的第三方软件、版本、来源和实际结果必须在 #144 另行记录。
 
 真实软件验收使用公开测试口令 `Synthetic-Zip-42!` 和唯一名 `NativeBackgroundProofSigned.zip`，只在本工作树 build 下生成固定文本与加密 ZIP，先由测试操作者在归档工具打开该 ZIP。随后可运行：
 
@@ -83,7 +76,7 @@ python3 scripts/qa/check-macos-native-product.py apps/desktop/build/macos/Build/
 2. 使用普通 App 的 `--connection-profile <返回的 profileName>` 参数启动本次 build 产品（不安装）。可通过 `open -n <准确 App> --args --connection-profile <profileName>` 在执行验收时启动；准备阶段不执行。只选择本地模式、创建新合成库，在正常凭据 UI 新建返回的唯一名称、字符串值 `Synthetic-Zip-42!`、公开目录可见。该库由正常 App 使用自己的独立 libraryId/系统钥匙串项；不读取任何已有库或钥匙串项。若出现未授权的系统权限/钥匙串提示，停止并记录，不代替用户批准。
 3. 用 Archive Utility 正常打开本 QA 根的唯一合成 ZIP，保持密码框存活。明确找到该 profile 的实际 connectionDirectory（正常沙盒 App 通常位于其 Container 的 Application Support/Chiyo/online/profiles 下），向脚本传此路径；不读取管理凭据，只核对本 profile 的 local-library.json 与 Agent 连接文件。
 4. `python3 scripts/qa/macos-native-product-flow.py request <QA根> --cli <本次同源build下的chiyo绝对路径> --connection-directory <该profile绝对路径>`。脚本建立独立聊天，检查 doctor 的 native capability，仅接受一个指定合成凭据和对应 ZIP 的唯一目标，然后走真实 fill targets → fill request。pending 的 CLI exit 6 是正常等待批准。回执给出 requestId。
-5. 在普通 App 的真实审批界面核对应用、ZIP、稳定字段标记及 b1，再实际批准；确认批准后尚未填写。保持原 helper/AppHost，不重启。不得由脚本调用 Owner API 或数据库改状态。
+5. 在普通 App 的真实审批界面核对应用、ZIP、实际窗口/字段说明及 b1，再实际批准；确认批准后尚未填写。保持原 helper/AppHost，不重启。不得由脚本调用 Owner API 或数据库改状态。
 6. 独立观察器先做稳定/焦点切换校准，然后采样真实填写区间；该阶段不进行其他 UI 自动操作。`python3 scripts/qa/macos-native-product-flow.py run <QA根>` 只读查询真实批准后执行一次 fill run，先落盘 runAttempted 和稳定 operation ID。超时或 unknown 后只能 status，脚本拒绝再次 run，不生成替代操作。并发执行由独占 QA 锁拒绝。
 7. `python3 scripts/qa/macos-native-product-flow.py status <QA根>` 查询 operations show。必须见 executionState=filled、itemResults.b1=sent，同时独立观察器有效样本保持前台/焦点/鼠标/剪贴板。sent 仍不代表解压成功。
 8. 结束观察区间后单独在归档工具提交，再执行 `python3 scripts/qa/macos-native-product-flow.py business <QA根>`。只将本次 ZIP 解压出的固定文本与原始字节比较并记 SHA256，不读取密码控件值。
