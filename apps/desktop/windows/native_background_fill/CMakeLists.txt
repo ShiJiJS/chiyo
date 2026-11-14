@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
+set(NATIVE_BACKGROUND_STANDALONE OFF)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   project(chiyo_native_background_fill LANGUAGES CXX)
+  set(NATIVE_BACKGROUND_STANDALONE ON)
   enable_testing()
 endif()
 
@@ -21,4 +23,7 @@ if(CHIYO_NATIVE_BACKGROUND_BUILD_BROKER)
   set_target_properties(native_background_broker PROPERTIES OUTPUT_NAME "info-native-background-broker")
 endif()
 
-add_subdirectory(tests)
+option(CHIYO_NATIVE_BACKGROUND_BUILD_TESTS "Build owned synthetic fixtures and checks" ${NATIVE_BACKGROUND_STANDALONE})
+if(CHIYO_NATIVE_BACKGROUND_BUILD_TESTS)
+  add_subdirectory(tests)
+endif()
