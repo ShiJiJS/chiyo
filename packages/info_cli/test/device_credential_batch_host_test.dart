@@ -444,6 +444,87 @@ void main() {
     },
   );
   test(
+    'only resident Host shutdown disposes an owned native driver and repeat close is idempotent',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      final entered = Completer<void>(), release = Completer<void>();
+      addTearDown(() {
+        if (!release.isCompleted) release.complete();
+      });
+      f.background.beforeDispatch = () async {
+        entered.complete();
+        await release.future;
+      };
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'resident-native',
+      ]);
+      await entered.future;
+      expect(f.background.disposals, 0);
+      expect(f.background.refs, isNotEmpty);
+      final observation = await f.cli([
+        'operations',
+        'show',
+        'resident-native',
+      ]);
+      expect(observation.exitCode, 0);
+      expect(f.background.disposals, 0);
+      release.complete();
+      expect((await f.done('resident-native'))['itemResults'], {'b1': 'sent'});
+      await Future.wait([f.host.close(), f.host.close()]);
+      expect(f.background.disposals, 1);
+      expect(f.background.refs, isEmpty);
+    },
+  );
+  test(
+    'a borrowed native driver remains the caller responsibility after Host shutdown',
+    () async {
+      await f.close();
+      f = await _Fixture.start(ownsNativeDriver: false);
+      await f.backgroundRequest();
+      await f.host.close();
+      expect(f.background.disposals, 0);
+      expect(f.background.refs, isNotEmpty);
+      await f.background.dispose();
+      expect(f.background.disposals, 1);
+      expect(f.background.refs, isEmpty);
+    },
+  );
+  test(
+    'resident shutdown closes a pending native helper read before waiting for the operation',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      f.background.setterEntered = Completer<void>();
+      f.background.pendingSetter = Completer<NativeFillResult>();
+      addTearDown(() {
+        if (!f.background.pendingSetter!.isCompleted) {
+          f.background.pendingSetter!.complete(
+            const NativeFillResult(NativeFillState.unknown, 'fill_unknown'),
+          );
+        }
+      });
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'pending-native-helper',
+      ]);
+      await f.background.setterEntered!.future;
+      await f.host.close().timeout(const Duration(seconds: 3));
+      expect(f.background.disposals, 1);
+      expect(f.background.refs, isEmpty);
+      expect(f.background.pendingSetter!.isCompleted, true);
+    },
+  );
+  test(
     'one private request contains multiple inspected destinations and does not execute on approval',
     () async {
       final id = await f.request();
@@ -1058,10 +1139,13 @@ class _Native implements FocusedFillDiscoveryDriver {
 class _Background implements NativeFillDriver {
   NativeFillTarget target = _target('H');
   final refs = <(String, String), NativeFillTarget>{};
-  int discoveries = 0, setters = 0;
+  int discoveries = 0, setters = 0, disposals = 0;
+  bool disposed = false;
   String? received;
   List<int>? material;
   Future<void> Function()? beforeDispatch;
+  Completer<void>? setterEntered;
+  Completer<NativeFillResult>? pendingSetter;
   NativeFillResult result = const NativeFillResult(NativeFillState.sent);
   static NativeFillTarget _target(String epoch) => NativeFillTarget.fromJson({
     'targetId': 'N' * 32,
@@ -1119,6 +1203,19 @@ class _Background implements NativeFillDriver {
   }) async {
     refs.remove((scope, targetId));
   }
+
+  @override
+  Future<void> dispose() async {
+    if (disposed) return;
+    disposed = true;
+    disposals++;
+    refs.clear();
+    if (pendingSetter != null && !pendingSetter!.isCompleted) {
+      pendingSetter!.complete(
+        const NativeFillResult(NativeFillState.unknown, 'fill_unknown'),
+      );
+    }
+  }
 }
 
 class _BackgroundPrepared implements PreparedNativeFill {
@@ -1149,7 +1246,8 @@ class _BackgroundPrepared implements PreparedNativeFill {
     }
     driver.setters++;
     driver.received = utf8.decode(utf8Bytes);
-    return driver.result;
+    driver.setterEntered?.complete();
+    return driver.pendingSetter?.future ?? driver.result;
   }
 
   @override
@@ -1190,6 +1288,7 @@ class _Fixture {
   final browser = _Browser(), native = _Native();
   final background = _Background();
   bool backgroundSupport = false;
+  bool ownsNativeDriver = true;
   final paths = <String>[];
   final counts = <String, int>{};
   bool support = true,
@@ -1200,8 +1299,11 @@ class _Fixture {
       _closed = false;
   Future<void> Function()? afterAuthorize;
   Future<void> Function()? afterBegin;
-  static Future<_Fixture> start({bool remote = false}) async {
-    final f = _Fixture();
+  static Future<_Fixture> start({
+    bool remote = false,
+    bool ownsNativeDriver = true,
+  }) async {
+    final f = _Fixture()..ownsNativeDriver = ownsNativeDriver;
     final base = Directory('../../build/batch-host-tests').absolute;
     await base.create(recursive: true);
     f.root = await Directory(
@@ -1356,6 +1458,7 @@ class _Fixture {
       directory: root,
       driver: native,
       nativeDriver: background,
+      ownsNativeDriver: ownsNativeDriver,
       browser: browser,
     );
   }
