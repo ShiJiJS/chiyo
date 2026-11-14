@@ -282,10 +282,42 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
       <p>这里先解决目标从哪里来、怎样交给 Agent，再申请使用密码。Mac 与 Windows 的申请过程相同，查询控件和最后写值所用的系统 API 分别展开。</p>
     </div>
 
-    <div class="reading connection-entry" id="native-select"><h3>让知予列出这个应用里可以填写的密码框</h3>
-      <p>网页部分提交申请时，Agent 直接在 <code>chiyo fill request</code> 中提供浏览器与页面标识、网址，以及表单和字段选择器，例如 <code>#login</code> 和 <code>#password</code>。知予处理这条命令时，再到指定页面查询并核验目标，保存填写计划。</p>
-      <p>原生后台填写采用两步调用：<strong>先用 <code>chiyo fill targets</code> 指定应用，取得目标列表；再用 <code>chiyo fill request</code> 的 <code>--target</code> 参数提交选中的目标编号。</strong>目标列表由辅助程序查询后返回，包含编号、窗口标题和字段说明；Agent 根据这些说明选出任务需要的密码框。因此，这里的申请使用列表返回的目标编号来指定控件。下面先看查询怎样发起，再展开辅助程序怎样找到控件、生成编号。</p>
-      <p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。Windows 这里用程序的完整路径，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。这些信息只用来选择查询范围，知予还会核对实际运行程序的身份。</p>
+    <div class="connection-entry native-handoff-compare" id="native-select">
+      <div class="reading"><h3>网页与原生，怎样把目标交给知予？</h3><p>网页的目标定位信息已由 Agent 从浏览器工具取得；原生先取得目标列表，再用选中的目标编号申请。</p></div>
+      <figure class="native-handoff-board" aria-label="Agent 与知予在网页和原生申请中的命令、参数和返回信息对照">
+        <section class="native-handoff-case" aria-labelledby="native-handoff-web-title">
+          <h4 id="native-handoff-web-title">网页：把页面与元素位置放进申请</h4>
+          <div class="native-handoff-parties"><b>Agent</b><b>知予 <span>处理 chiyo 命令</span></b></div>
+          <div class="native-handoff-flow">
+            <div class="native-handoff-packet"><code class="native-handoff-command">chiyo fill request</code><dl class="native-handoff-data"><div><dt>页面</dt><dd>Ego 工作区 <code>7</code> / 页面 <code>p1</code></dd></div><div><dt>URL</dt><dd><code>https://workspace.example/login</code></dd></div><div><dt>表单 / 字段</dt><dd><code>#login</code> 内的 <code>#password</code></dd></div></dl></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-action"><strong>查询并核验目标<br>保存填写计划</strong></div>
+          </div>
+          <p class="native-handoff-return"><span aria-hidden="true">←</span>知予返回 <code>REQ-42</code><span class="native-handoff-pending">待批准</span><span class="native-handoff-return-next">Agent 用申请号等待审批结果</span></p>
+        </section>
+        <section class="native-handoff-case" aria-labelledby="native-handoff-native-title">
+          <h4 id="native-handoff-native-title">原生：先查询目标，再用编号申请</h4>
+          <div class="native-handoff-parties"><b>Agent</b><b>知予 <span>处理 chiyo 命令</span></b></div>
+          <div class="native-handoff-flow">
+            <div class="native-handoff-packet"><div class="native-handoff-command-row"><code class="native-handoff-command">chiyo fill targets</code><span>Mac 压缩工具例子</span></div><dl class="native-handoff-data"><div><dt>应用</dt><dd><code>com.apple.archiveutility</code></dd></div></dl></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-action"><strong>辅助程序查询支持的密码控件，<br>保留对象并生成目标编号</strong></div>
+          </div>
+          <div class="native-handoff-flow native-handoff-back">
+            <div class="native-handoff-action"><strong>收到列表后，按窗口标题和字段说明，<br>选中这项目标</strong><span class="native-handoff-down" aria-hidden="true">↓</span></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-target"><span class="native-handoff-label">返回目标列表 · 这里展开选中的一项</span><dl class="native-handoff-data"><div class="native-handoff-target-id"><dt>targetId</dt><dd><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code></dd></div><div><dt>窗口标题</dt><dd>本次压缩文件的密码窗口</dd></div><div><dt>字段</dt><dd>密码</dd></div></dl></div>
+          </div>
+          <div class="native-handoff-flow">
+            <div class="native-handoff-packet"><code class="native-handoff-command">chiyo fill request</code><dl class="native-handoff-data"><div class="native-handoff-target-id"><dt>--target</dt><dd><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code></dd></div></dl></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-action"><strong>核验选中的目标<br>保存申请</strong></div>
+          </div>
+          <p class="native-handoff-return"><span aria-hidden="true">←</span>知予返回 <code>REQ-43</code><span class="native-handoff-pending">待批准</span><span class="native-handoff-return-next">Agent 用申请号等待审批结果</span></p>
+        </section>
+        <figcaption>两条申请仍需凭据编号、版本和用途；此处只展开目标信息。两条申请都还未批准，也未写入密码。下面继续展开原生目标查询怎样发起、辅助程序怎样找到控件并生成编号。</figcaption>
+      </figure>
+      <div class="reading"><p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。Windows 这里用程序的完整路径，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。这些信息只用来选择查询范围，知予还会核对实际运行程序的身份。</p></div>
     </div>
     <div class="os-selector" role="group" aria-label="查看原生控件的系统接口"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
     <figure class="handoff-figure native-target-command">
