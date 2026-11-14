@@ -23,12 +23,17 @@ class _RealHttp extends HttpOverrides {}
 
 class _Native implements NativeFillDriver {
   int disposals = 0;
+  int discoveries = 0;
   @override
   Future<List<NativeFillTarget>> discover({
     required String scope,
     required String appId,
     String? windowId,
-  }) async => [];
+  }) async {
+    discoveries++;
+    return [];
+  }
+
   @override
   Future<PreparedNativeFill> prepare({
     required String scope,
@@ -105,10 +110,20 @@ void main() {
         );
         expect(capability['status'], 'ok');
         expect(capability['providers'], contains('native'));
+        expect(capability['providers'], isNot(contains('focus')));
         expect(
           capability['capabilities'],
           contains('credential-native-fill.v1'),
         );
+        final targets = await ui.resolve(
+          () => DeviceCredentialBatchClient(profile, directory: root).execute(
+            service.agent.openSession('Synthetic no-focus discovery'),
+            {'command': 'native-targets', 'appId': 'synthetic.native'},
+          ),
+        );
+        expect(targets['status'], 'ok');
+        expect(targets['targets'], isEmpty);
+        expect(native.discoveries, 1);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
         if (boot != null) await ui.resolve(boot!.close);
