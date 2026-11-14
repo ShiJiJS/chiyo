@@ -49,10 +49,15 @@ SshTransportLaunch sshSessionLaunch({
   }
   final source = sshSessionRemoteSource;
   final system = Platform.environment['SystemRoot'];
+  final programData = Platform.environment['ProgramData'];
+  if (Platform.isWindows && (programData == null || programData.isEmpty)) {
+    throw const SshTransportFailure('ssh_windows_programdata_missing');
+  }
   final environment = Platform.isWindows
       ? <String, String>{
           'SystemRoot': ?system,
           'WINDIR': ?system,
+          'ProgramData': programData!,
           'PATH': '$system\\System32',
           'TEMP': Directory.systemTemp.path,
           'TMP': Directory.systemTemp.path,
