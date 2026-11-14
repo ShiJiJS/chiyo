@@ -119,8 +119,9 @@ void main() {
           expect(Process.killPid(p), isTrue);
           final deadline = DateTime.now().add(const Duration(seconds: 3));
           while (CredentialProcessIdentity.isActive(p, value) == true) {
-            if (DateTime.now().isAfter(deadline))
+            if (DateTime.now().isAfter(deadline)) {
               fail('Owned broker did not end');
+            }
             await Future<void>.delayed(const Duration(milliseconds: 10));
           }
         }),

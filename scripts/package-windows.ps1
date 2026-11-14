@@ -102,7 +102,7 @@ try {
     }
     foreach ($binary in Get-ChildItem -LiteralPath $app -Filter '*.exe' -Recurse) {
         $relativeBinary = $binary.FullName.Substring($app.Length + 1).Replace('\', '/')
-        if ($relativeBinary -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-native-background-broker.exe', 'info-runtime-worker.exe')) {
+        if ($relativeBinary -notin @('info_desktop.exe', 'info-focus-broker.exe', 'info-native-background-broker.exe', 'info-runtime-worker.exe', 'info-ssh-session.exe')) {
             throw "Unexpected executable in desktop payload: $($binary.Name)"
         }
     }
@@ -117,6 +117,8 @@ try {
     # One-shot adapters use the resident execution host in the desktop app.
     # Its worker is a shipped asset next to the app, independent of SDK/PATH.
     Copy-Item -LiteralPath (Join-Path $cli 'info-runtime-worker.exe') -Destination (Join-Path $app 'info-runtime-worker.exe')
+    & (Join-Path $PSScriptRoot 'package-windows-ssh-session.ps1') -DestinationDirectory $cli | Out-Null
+    Copy-Item -LiteralPath (Join-Path $cli 'info-ssh-session.exe') -Destination (Join-Path $app 'info-ssh-session.exe')
     New-Item -ItemType Directory -Path (Join-Path $cli 'template') | Out-Null
     Copy-Item -LiteralPath 'integrations/codex/skills/agent-info-access/SKILL.md' -Destination (Join-Path $cli 'template/SKILL.md')
     New-Item -ItemType Directory -Path (Join-Path $cli 'template/references') | Out-Null
