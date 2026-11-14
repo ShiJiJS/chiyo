@@ -39,8 +39,9 @@ Dart declarations follow in the next common commit.
 
 ## Isolation gate and remote helper
 
-The capability-checked Python 3/POSIX helper requires Bash, remote PTY/ioctl,
-process identity inspection, and Unix peer credentials; missing capabilities fail
+The capability-checked Python 3 helper requires Bash, remote PTY/ioctl,
+kernel descendant subreaping (`prctl`), `/proc` child inspection, process identity
+inspection, and Unix peer credentials; missing capabilities fail
 explicitly without installing dependencies or checking an OS-name allowlist.
 OpenSSH uses a nonterminal byte channel with strict host verification. The helper
 allocates a real controlling PTY for one persistent Shell and enables Bash job
@@ -52,9 +53,12 @@ stdin/stdout/stderr redirected to the controlling PTY; completion goes to the
 Shell's original stdout pipe, outside those redirections. Input frames bind runId;
 a single-threaded broker closes the input gate and flushes queued PTY input both
 at completion and before admitting another run. Thus a late input cannot become
-a Shell command or the next program's input. Background terminal readers have
-their own process groups and receive SIGTTIN rather than stealing foreground
-input. Ctrl+C targets the terminal foreground group; the persistent Shell handles
+a Shell command or the next program's input. Before reuse the broker freezes the Shell and checks kernel child lists, with
+subreaper adoption covering orphaned/setsid descendants. Any remaining run
+descendant makes the session unusable: its actual command exit code is preserved,
+new runs/inputs are refused, and the connection remains for inspection and
+explicit close. It does not kill a business daemon in order to reuse the Shell.
+Ctrl+C targets the terminal foreground group; the persistent Shell handles
 INT and survives. Deliberately changing job control, traps, or control descriptors
 can invalidate the session; this is not a sandbox against the approved account.
 
@@ -69,7 +73,8 @@ remote account's existing authority.
 
 Never inject based on `Password:` terminal text. The session defines `sudo` (also `chiyo_sudo`) as a managed Shell function,
 so ordinary `sudo command` needs no Agent-written ASKPASS script. It invokes the
-verified system `sudo -A` and a session ASKPASS helper with a dedicated receive channel bound to
+verified system `sudo -A`. The broker itself starts and holds that exact
+process; run-owned wrappers cannot register a PID. A session ASKPASS helper with a dedicated receive channel bound to
 runId, the requesting process, and one authentication action. Verify the receiver
 is still alive before requesting/rechecking authorization and sending one reply.
 The channel closes after that action; neither the business program nor Shell
