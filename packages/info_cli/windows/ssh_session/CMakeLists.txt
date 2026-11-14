@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(chiyo_ssh_session LANGUAGES CXX)
+add_executable(ssh_session WIN32 main.cpp)
+target_compile_features(ssh_session PRIVATE cxx_std_17)
+target_compile_definitions(ssh_session PRIVATE UNICODE _UNICODE NOMINMAX)
+target_compile_options(ssh_session PRIVATE /W4 /WX /EHsc /utf-8)
+target_link_libraries(ssh_session PRIVATE advapi32 bcrypt shell32 windowsapp)
+set_target_properties(ssh_session PROPERTIES OUTPUT_NAME info-ssh-session)
