@@ -33,7 +33,7 @@ class NativeFillTarget {
       'controlKind',
     });
     String id(String key) {
-      final value = _useText(json, key, max: 128, empty: false);
+      final value = _useText(json[key], key, max: 128, empty: false);
       if (!RegExp(r'^[A-Za-z0-9_-]{22,128}$').hasMatch(value)) {
         throw CredentialUseFailure('invalid_reference', fieldPath: key);
       }
@@ -62,11 +62,11 @@ class NativeFillTarget {
       helperInstanceId: id('helperInstanceId'),
       platform: platform as String,
       application: application,
-      appId: _useText(json, 'appId', max: 4096, empty: false),
-      appName: _useText(json, 'appName', max: 256),
+      appId: _useText(json['appId'], 'appId', max: 4096, empty: false),
+      appName: _useText(json['appName'], 'appName', max: 256),
       windowId: id('windowId'),
-      windowTitle: _useText(json, 'windowTitle', max: 256),
-      fieldLabel: _useText(json, 'fieldLabel', max: 256),
+      windowTitle: _useText(json['windowTitle'], 'windowTitle', max: 256),
+      fieldLabel: _useText(json['fieldLabel'], 'fieldLabel', max: 256),
       controlKind: kind as String,
     );
   }
