@@ -1,5 +1,7 @@
 # Windows 原生后台填写
 
+设计更新（2026-11-14）：[ADR0033](../adr/0033-native-fill-by-control-capability.md) 已确定按实际 UIA 密码控件能力开放。当前实现没有逐应用允许名单，但下述三家族与 AutomationId 硬限制仍待按新合同解除；本页先保留现有实现及测试证据，不代表通用路径已经完成。
+
 Windows 平台实现位于 `apps/desktop/windows/native_background_fill/`，Dart
 适配器为 `apps/desktop/lib/windows_native_background_fill.dart`。它实现
 [公共合同](../design/native-background-fill-contract.md) 中的 `NativeFillDriver`，

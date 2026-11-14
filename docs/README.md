@@ -21,6 +21,7 @@
 | [Mac 开发](development/macos-local-setup.md) | 固定 Flutter / Dart、Xcode、运行和打包 |
 | [Windows 开发](development/windows-local-setup.md) | C++ 工具链、加密本地库、联网和构建 |
 | [Windows 交付](development/windows-delivery.md) | 打包、安装及产物清理 |
+| [原生后台填写设计](design/native-background-fill-contract.md) | Mac AX / Windows UIA 按控件能力填写、目标身份与授权、错误处理及兼容迁移；区分目标设计与当前实现 |
 | [界面约定](development/ui.md) | 共用控件、插件展示、浮层、输入与界面验证 |
 | [服务接口](../apps/server/README.md) | HTTPS、用户与 Agent 接口、同步和运行约束 |
 

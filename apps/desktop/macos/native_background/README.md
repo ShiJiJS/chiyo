@@ -1,5 +1,7 @@
 # Mac 原生后台填写（#144）
 
+设计更新（2026-11-14）：[ADR0033](../../../../docs/adr/0033-native-fill-by-control-capability.md) 已确定取消逐应用名单，改为按实际 AX 密码控件能力判断。以下记录的是尚未完成该改造的现有实现与测试证据；归档实用工具名单不再是后续产品设计要求。新的实施要求见[公共合同](../../../../docs/design/native-background-fill-contract.md)。
+
 平台实现基于公共合同 `dd03d22e`。Dart 入口是 `MacOSNativeBackgroundFillDriver`，实现 `NativeFillDriver`，供公共 Launcher/AppHost 注入；本目录不修改公共审批、持久操作或 CLI。Runner 注册私有 MethodChannel，使用既有签名校验的 XPC 服务；所有 AX 发现、引用和写入都只在非沙盒 helper 中执行。未正式安装应用或修改系统权限。
 
 正式构造为 `MacOSNativeBackgroundFillDriver()`，不需要异步 factory、路径、摘要或 Agent 配置。可选 `MethodChannel`、timeout 参数仅为 Owner 测试 seam。每个 AppHost 持有一个 driver；交给 `ownsNativeDriver: true` 的 AppHost 成功之前由装配方拥有，启动失败须 `dispose()`，成功后由 AppHost 关闭流程销毁。单次 prepared.close 只关闭票据，CLI 短连接结束不能销毁 resident driver。公共 Launcher 由公共会话唯一修改。
