@@ -131,6 +131,8 @@ void main() {
           final result = await Process.run(
             '$bin/chiyo${Platform.isWindows ? '.exe' : ''}',
             [...args, '--json'],
+            stdoutEncoding: utf8,
+            stderrEncoding: utf8,
             environment: {
               'CHIYO_CONTEXT': context.path,
               'CHIYO_CHAT_ID': 'ssh-cli-test',
