@@ -28,13 +28,26 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--synthetic-target", action="store_true", help="Focus a temporary AppKit secure field and send a fixed synthetic value")
     parser.add_argument("--plain-target", action="store_true", help="Verify an ordinary text field is refused without input")
+    parser.add_argument("--native-status", action="store_true", help="Query frozen native wire from the signed sandboxed owner; no input")
+    parser.add_argument("--native-archive-target", action="store_true", help="Fill only the pre-opened NativeBackgroundProofSigned.zip synthetic prompt")
+    parser.add_argument("--dispatch-gate", action="store_true", help="Native archive QA only: wait for an independent observer's gate")
     args = parser.parse_args()
     if args.plain_target:
         args.synthetic_target = True
+    if args.native_status and args.synthetic_target:
+        parser.error("native status never sends input")
+    if args.native_archive_target and (args.native_status or args.synthetic_target):
+        parser.error("native archive target is a separate synthetic check")
     output = ROOT / ("build/macos-adaptation/focused-target-check" if args.synthetic_target else "build/macos-adaptation/focused-xpc-check")
     if args.plain_target:
         output = ROOT / "build/macos-adaptation/focused-plain-target-check"
     output.mkdir(parents=True, exist_ok=True)
+    if args.native_status:
+        output = ROOT / "build/macos-adaptation/native-background-xpc-check"
+        output.mkdir(parents=True, exist_ok=True)
+    if args.native_archive_target:
+        output = ROOT / "build/macos-adaptation/native-background-archive-check"
+        output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="run-", dir=output) as temporary:
         work = Path(temporary)
         app = work / "info_desktop.app"
@@ -94,10 +107,69 @@ import Darwin
   }
 }
 ''')
+        if args.native_status:
+            fixture.write_text('''import Foundation
+import Darwin
+@main enum Probe {
+  static func main() {
+    do {
+      let client = try MacNativeBackgroundOwnerClient()
+      let request = try JSONSerialization.data(withJSONObject: ["format": 1, "command": "discover",
+        "scope": String(repeating: "a", count: 64), "appId": "unregistered.synthetic.application"])
+      client.request(request, sending: false) { data in
+        guard let result = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { exit(4) }
+        print(String(data: data, encoding: .utf8)!); fflush(stdout)
+        let valid = (result["state"] as? String == "ready" && (result["targets"] as? [Any])?.isEmpty == true) ||
+          (result["state"] as? String == "refused" && result["errorCode"] as? String == "access_denied")
+        exit(valid ? 0 : 2)
+      }
+      withExtendedLifetime(client) { RunLoop.main.run() }
+    } catch { print("initialization_failed"); exit(3) }
+  }
+}
+''')
+        if args.native_archive_target:
+            fixture.write_text('''import Foundation
+import Darwin
+@main enum Probe {
+  static func main() {
+    do {
+      let client = try MacNativeBackgroundOwnerClient()
+      let scope = String(repeating: "a", count: 64)
+      func send(_ command: String, _ payload: [String: Any], completion: @escaping ([String: Any]) -> Void) {
+        let object = ["format": 1, "command": command, "scope": scope].merging(payload) { _, b in b }
+        client.request(try! JSONSerialization.data(withJSONObject: object), sending: command == "setValue") { data in
+          guard let reply = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { exit(4) }
+          completion(reply)
+        }
+      }
+      send("discover", ["appId": "com.apple.archiveutility"]) { found in
+        guard let targets = found["targets"] as? [[String: Any]], targets.count == 1,
+              let target = targets.first, let id = target["targetId"] as? String,
+              (target["fieldLabel"] as? String)?.contains("NativeBackgroundProofSigned.zip") == true else {
+          print("synthetic_target_unavailable"); fflush(stdout); exit(2)
+        }
+        send("prepare", ["targetId": id, "expected": target]) { prepared in
+          guard let lease = prepared["leaseId"] as? String else { print("prepare_refused"); fflush(stdout); exit(2) }
+          // Synthetic owner's explicit approval. The real AppHost awaits its
+          // durable beforeDispatch callback; no caller PID/profile is accepted.
+          send("setValue", ["leaseId": lease, "bytes": Array("Synthetic-Zip-42!".utf8)]) { result in
+            print(String(data: try! JSONSerialization.data(withJSONObject: result), encoding: .utf8)!); fflush(stdout)
+            exit(result["state"] as? String == "sent" ? 0 : 2)
+          }
+        }
+      }
+      withExtendedLifetime(client) { RunLoop.main.run() }
+    } catch { print("initialization_failed"); exit(3) }
+  }
+}
+''')
         command = ["xcrun", "swiftc", "-target", "arm64-apple-macos14.0", "-swift-version", "5", "-warnings-as-errors",
                    "-module-cache-path", str(work / "modules")]
         subprocess.run(command + [str(SOURCE / name) for name in ["FocusedFillContract.swift", "FocusProcessIdentity.swift",
-                       "FocusedFillXPC.swift", "FocusedFillOwnerClient.swift"]] + [str(fixture), "-o", str(contents / "MacOS/info_desktop")], check=True)
+                       "FocusedFillXPC.swift", "FocusedFillOwnerClient.swift"]]
+                       + [str(SOURCE.parent / "native_background/NativeBackgroundXPC.swift")]
+                       + [str(fixture), "-o", str(contents / "MacOS/info_desktop")], check=True)
         worker_source = work / "worker.c"
         worker_source.write_text("int main(void) { return 0; }\n")
         subprocess.run(["xcrun", "clang", "-target", "arm64-apple-macos14.0", str(worker_source), "-o", str(contents / "MacOS/info-runtime-worker")], check=True)
@@ -106,6 +178,16 @@ import Darwin
                             str(ROOT / "apps/desktop/macos/Runner" / entitlement), str(path)])
         BUNDLE.assemble(app)
         BUNDLE.command(["codesign", "--verify", "--deep", "--strict", str(app)])
+        if args.native_archive_target and args.dispatch_gate:
+            ready, go = output / "dispatch-ready", output / "dispatch-go"
+            go.unlink(missing_ok=True)
+            (output / "dispatch-completed").unlink(missing_ok=True)
+            ready.write_text("ready")
+            deadline = time.monotonic() + 30
+            while not go.exists() and time.monotonic() < deadline:
+                time.sleep(.02)
+            if not go.exists():
+                raise RuntimeError("Observer did not open the synthetic dispatch gate; no input sent")
         target_process = None
         if args.synthetic_target:
             target_app = work / "SyntheticSecureTarget.app"
@@ -159,16 +241,18 @@ import Darwin
                 target_process.kill()
                 target_process.communicate()
             raise
+        if args.native_archive_target and args.dispatch_gate:
+            (output / "dispatch-completed").write_text(str(result.returncode))
         report = {"format": 1, "kind": "synthetic-sandboxed-owner-private-xpc", "exit": result.returncode,
                   "macOS": platform.mac_ver()[0],
                   "sourceCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   "sourceInputs": {str(path.relative_to(ROOT)): BUNDLE.BUILDER.digest(path)
-                                   for path in sorted(SOURCE.glob("*.swift"))},
+                                   for path in sorted(list(SOURCE.glob("*.swift")) + list((SOURCE.parent / "native_background").glob("*.swift")))},
                   "ownerExecutableSHA256": BUNDLE.BUILDER.digest(contents / "MacOS/info_desktop"),
                   "helperExecutableSHA256": BUNDLE.BUILDER.digest(app / BUNDLE.HELPER / "Contents/MacOS/AgentInfoFocusedFill"),
                   "ownerSandbox": BUNDLE.entitlements(app).get("com.apple.security.app-sandbox"),
                   "helperEntitlements": BUNDLE.entitlements(app / BUNDLE.HELPER),
-                  "permissionPrompted": False, "inputAttempted": args.synthetic_target, "temporaryAppRemoved": True,
+                  "permissionPrompted": False, "inputAttempted": args.synthetic_target or args.native_archive_target, "temporaryAppRemoved": True,
                   "stdout": result.stdout.strip(), "stderr": result.stderr.strip()}
         if target_process is not None:
             try:
