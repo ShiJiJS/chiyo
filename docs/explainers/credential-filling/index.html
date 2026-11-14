@@ -107,7 +107,7 @@
     </figure>
         <p>定位时，<strong>工作区编号先确定哪一组标签页，页面标记再确定组里的哪一张。</strong>不同工作区都可能有各自的 <code>p1</code>，所以这里要一起交出 <code>7</code> 和 <code>p1</code>。这些值来自浏览器工具提供的工作区信息与页面列表。</p>
         <p class="sources-inline"><a href="https://github.com/citrolabs/ego-lite/wiki/Ego-Native-API-Reference" target="_blank" rel="noreferrer">ego 的工作区与页面信息 ↗</a></p>
-        <h3>Chrome 怎样给页面标明位置？</h3><p>Agent 还需要知道怎样连接这个 Chrome。这里沿用浏览器工具提供的本机控制地址 <code>http://127.0.0.1:9222</code>，通过知予列出该实例的页面：</p><pre class="plan-fragment"><code>chiyo browsers list --via chrome \
+        <h3>Chrome 怎样给页面标明位置？</h3><p>Agent 还需要知道怎样连接这个 Chrome。这里沿用浏览器工具提供的本机控制地址 <code>http://127.0.0.1:9222</code>，调用知予提供的命令行工具 <code>chiyo</code>，列出这个浏览器中的页面：</p><pre class="plan-fragment"><code>chiyo browsers list --via chrome \
   --browser http://127.0.0.1:9222 --json</code></pre><p>页面列表返回标识、标题和网址，Agent 从中选定自己正在操作的登录页。控制地址表示哪一个浏览器；页面标识表示其中哪一页。</p>    <details id="chrome-entry"><summary>Chrome 的本机调试入口怎样准备？</summary><div class="detail-body"><p>可以由浏览器工具启动一个开放控制入口的 Chrome，也可以按浏览器提供的设置允许外部工具连接。这里选用开放调试端口、从页面列表取得连接地址的方式。</p><p>使用调试端口启动时，Chrome 136 起要求配合独立的用户数据目录。较新的 Chrome 还提供由用户启用、工具请求并由用户确认的连接方式。<a href="https://developer.chrome.com/blog/remote-debugging-port" target="_blank" rel="noreferrer">调试端口配置 ↗</a> · <a href="https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session" target="_blank" rel="noreferrer">连接已有 Chrome ↗</a></p></div></details>
         <p>通过本文采用的 Chrome 控制方式，工具可以取得各个打开页面的记录。每条记录包含该页面的标识、标题和网址。假设 Agent 刚才操作的登录页标识是 <code>A7C93D1E8B624F06B3D28AC572E4910F</code>，把它交给知予的浏览器填写模块，就能在所操作的 Chrome 中指定这张页面。</p>
         <p>即使另一个标签页打开了相同网址，它也有自己的页面标识。因此，知予的浏览器填写模块用 <code>A7C93D1E8B624F06B3D28AC572E4910F</code> 确定具体页面，再用网址核对是否仍是预期的网站。图中使用完整的示例页面标识，并在后续连接与填写步骤中沿用。<a class="source-ref" href="https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/Target.pdl" target="_blank" rel="noreferrer">Chrome 的页面信息字段 ↗</a></p>
@@ -147,7 +147,7 @@
   </section>
 
   <section id="connection" class="chapter">
-    <div class="reading"><h2><span class="section-num">02</span>目标找到了，怎样向知予申请使用密码？</h2><p>目标位置已经确定，但密码由知予管理，Agent 需要先取得使用许可。它通过知予提供的命令行工具 <code>chiyo</code>，提交一份<strong>密码使用申请</strong>，由用户在知予 App 中审批。</p>
+    <div class="reading"><h2><span class="section-num">02</span>目标找到了，怎样向知予申请使用密码？</h2><p>目标位置已经确定，但密码由知予管理，Agent 需要先取得使用许可。它继续通过 <code>chiyo</code> 提交一份<strong>密码使用申请</strong>，由用户在知予 App 中审批。</p>
       <h3 id="credential-selection">先查知予里保存了哪些密码</h3><p>例如，查找“项目工作台”的密码记录：</p></div>
     <figure class="credential-discovery" id="credential-discovery"><figcaption class="figure-heading">调用 chiyo，按名称查找密码</figcaption><pre class="plan-fragment"><code>chiyo credentials list --query "项目工作台" --json</code></pre>
       <div class="catalog-result"><div><span class="catalog-label">返回的条目之一，摘取相关信息</span><pre><code>{
@@ -183,7 +183,7 @@
   </section>
 
   <section id="browser-execution" class="chapter">
-    <div class="reading"><h2><span class="section-num">03</span>获批后，知予怎样实际填入密码？</h2><p>现在申请 <code>REQ-42</code> 已获批准，接下来才执行。Agent 按申请编号发出命令：</p><pre class="plan-fragment" id="credential-execution"><code>chiyo fill run --request REQ-42 --json</code></pre><p>知予取出申请里保存的目标，检查批准仍有效、密码版本仍相符，再把保存的目标和获准使用的密码交给内置的浏览器填写模块。这是知予中负责连接浏览器、查询页面和写入文字的代码；它拿到数据后，仍要检查实际目标，才能写入网页。</p><p>这次操作有自己的编号，例如 <code>OP-42</code>，用于后续查询结果。收到操作编号只表示可以追踪这次操作；下面继续看文字怎样真正进入网页。</p></div>
+    <div class="reading"><h2><span class="section-num">03</span>获批后，知予怎样实际填入密码？</h2><p>现在申请 <code>REQ-42</code> 已获批准，接下来才执行。Agent 按申请编号发出命令：</p><pre class="plan-fragment" id="credential-execution"><code>chiyo fill run --request REQ-42 --json</code></pre><p>知予先检查批准仍有效、密码版本仍相符，再把申请里保存的目标交给内置的浏览器填写模块。这段代码负责连接浏览器、查询页面和写入文字；它先检查现在的页面和表单，检查通过后才会收到本次获准的密码并执行写入。</p><p>这次操作有自己的编号，例如 <code>OP-42</code>，用于后续查询结果。收到操作编号只表示可以追踪这次操作；下面继续看文字怎样真正进入网页。</p></div>
     <div class="reading connection-entry" id="browser-connection"><h3>知予的填写模块怎样接上指定的浏览器？</h3><p>执行时，填写模块要通过连接向目标浏览器发送操作。申请阶段查询目标也使用这套连接方式；这里展开它具体怎样工作。ego 和 Chrome 提供的连接方式不同，下面分别看知予的填写模块怎样调用它们。</p></div>
     <div class="destination-plan browser-connection-pair" id="connection-methods">
       <div class="outer-process"><div class="process-label">ego：由配套命令行工具建立连接</div><h3>启动一个能连接 ego 的程序</h3><p>ego 主程序提供了供配套工具接入的本机通信入口。知予的填写模块启动 <code>ego-browser</code>，指定 <code>nodejs</code> 模式；这个命令行工具负责接入入口，与正在运行的 ego 主程序建立连接。</p><pre><code>ego-browser nodejs</code></pre><p>知予的填写模块把要执行的 JavaScript 代码传给 <code>ego-browser nodejs</code>。ego 主程序收到后，会安排一个 <strong>Node.js 执行环境</strong>来运行脚本——也就是能执行 JavaScript、并能调用 ego 操作功能的环境。</p><p><strong>连接建立后：</strong>知予的填写模块可以提交控制脚本，脚本的输出和执行结果也能沿原通道返回。网页和标签页仍由浏览器管理。</p><a class="source-ref" href="https://github.com/citrolabs/ego-lite/wiki/Ego-Browser-CLI-Architecture" target="_blank" rel="noreferrer">ego 的连接与脚本执行机制 ↗</a></div>
@@ -233,7 +233,7 @@ const state = reply.result.value;</code></pre><p><code>page.cdp()</code> 把命�
     <p class="caption">这里展开网址与匹配数量，便于看清“发起查询 → 浏览器执行 → 取回结果 → 决定是否继续”的关系。<a href="https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-evaluate" target="_blank" rel="noreferrer">Chrome 执行页面代码的命令 ↗</a></p>
 
     <details><summary>同一份批准下再次填写，检查会省略吗？</summary><div class="detail-body"><p>不会。批准仍有效时，再次发起填写仍要检查浏览器、页面、网址及表单和字段。页面刷新后，只有页面身份和保存的结构信息仍符合时才能继续；换了标签页、表单发生变化或无法确认时就停止。这里的检查针对每次执行，第一次填写也一样。</p></div></details>
-    <div class="reading connection-entry" id="send-fill"><h3>检查通过后，把密码写入确认过的框</h3><p>目标检查通过后，填写模块才把获准密码写入网页。下面用公开文字 <code>hello</code> 代表这次写入的密码，先对照它与目标的关系，再展开填写方法：</p></div>
+    <div class="reading connection-entry" id="send-fill"><h3>检查通过后，把密码写入确认过的框</h3><p>目标检查通过后，知予取得申请指定版本的密码，交给填写模块写入网页。下面用公开文字 <code>hello</code> 代表这次写入的密码，先对照它与目标的关系，再展开填写方法：</p></div>
     <figure class="delivery-board" id="browser-delivery-diagram"><figcaption class="figure-heading">本次写入使用的目标与文字</figcaption>
       <div class="delivery-grid"><div class="delivery-origin"><b>检查已经通过</b><span>使用获批版本的密码</span></div><div class="delivery-streams"><div class="delivery-stream"><b>要填哪里</b><code>ego：7 / p1<br>表单：#login<br>字段：#password<br>网址：workspace.example/login</code><span class="stream-tip" aria-hidden="true">→</span></div><div class="delivery-stream secret-stream"><b>要填什么</b><code>hello</code><span>从知予保存的密码记录取得</span><span class="stream-tip" aria-hidden="true">→</span></div></div><div class="delivery-receiver"><b>内置浏览器填写模块</b><span>知予负责执行与结果</span><dl><dt>ego</dt><dd>由控制脚本向选定页面发送写入代码</dd><dt>Chrome</dt><dd>通过已建立的连接发送相同的写入代码</dd></dl><span class="next-operation">下一步：向确认过的元素写入文字 ↓</span></div></div>
       <p class="figure-note">Agent 的命令只带密码记录编号。图中的 hello 是知予交给填写模块的密码，不是 Agent 在命令里写出的密码。</p>
@@ -293,7 +293,7 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
     </div>
     <div class="helper-contact" id="helper-contact">
       <div><h4>Mac：建立 XPC 连接，再调用查询方法</h4><p>App 用 <code>NSXPCConnection</code> 连接随包安装的辅助服务。<strong>XPC</strong> 是苹果让两个程序互相调用方法、传参数和取回回复的机制。知予先验证连接的程序身份，再把应用标识交给辅助程序的 <code>discover</code> 方法。</p></div>
-      <div><h4>Windows：启动专用辅助程序，再发送查询</h4><p>App 核对包内 <code>info-native-background-broker.exe</code> 的路径与文件摘要，启动它并保持私有连接。随后发送带有应用路径的 <code>discover</code> 消息，辅助程序处理后返回目标列表。</p></div>
+      <div><h4>Windows：启动专用辅助程序，再发送查询</h4><p>App 检查随包安装的 <code>info-native-background-broker.exe</code> 是否仍是原来的辅助程序文件，然后启动它并保持私有连接。随后发送带有应用路径的 <code>discover</code> 消息，辅助程序处理后返回目标列表。</p></div>
     </div>
     <p class="caption">连接在 App 使用期间保留，后面的申请和执行继续使用它。一次 CLI 命令结束不会丢掉控件引用；辅助程序重启后，原来的目标编号会失效。<a href="#source-helper-channels">辅助程序的连接实现 ↓</a></p>
 
@@ -326,7 +326,7 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
   </section>
 
   <section id="platform" class="chapter">
-    <div class="reading"><h2><span class="section-num">05</span>获批后，怎样向固定控件写入密码？</h2><p>现在已有一份获批申请，以及辅助程序保存的具体控件对象。Agent 发起执行；知予需要先确认许可和控件都仍有效，再取得密码交给辅助程序，最后调用系统设值接口。</p><pre class="plan-fragment"><code>chiyo fill run --request REQ-43 --json</code></pre></div>
+    <div class="reading"><h2><span class="section-num">05</span>获批后，怎样向固定控件写入密码？</h2><p>现在已有一份获批申请，以及辅助程序保存的具体控件对象。Agent 发起执行；知予需要先确认许可和控件都仍有效，再取得密码交给辅助程序，最后调用系统设值接口。</p><pre class="plan-fragment"><code>chiyo fill run --request REQ-43 --json</code></pre><p>执行命令返回这次操作的编号，例如 <code>OP-43</code>；后面用它查询结果。申请编号 <code>REQ-43</code> 指向用户批准的记录，操作编号则对应这一次具体填写。</p></div>
     <div class="reading connection-entry" id="native-recheck"><h3>先复核原来的控件，再取得获准密码</h3><p>知予检查原聊天和设备、批准期限、凭据版本以及操作是否已经执行。辅助程序则用保存的对象复核：应用进程是否仍是原来的那次运行、窗口与字段是否仍存在、控件是否仍可写，窗口上下文是否仍符合原申请。</p><p>这次检查不查询“用户现在点中了哪里”。用户把焦点切到别的应用不会把目标改掉；目标窗口关闭、密码框被销毁重建或辅助程序重启，会使原目标失效。即使新框使用同一个名称，也不能据此接着用旧批准填写。</p></div>
     <div class="reading" id="native-material"><h3>知予把获准密码交给已准备好的辅助程序</h3><p>目标和许可检查通过后，知予取得申请指定版本的密码，通过前面建立的私有连接交给辅助程序，并在写值前再次核对许可。密码不会作为普通 CLI 回复交给 Agent。</p><p>Mac 的 XPC 连接和 Windows 的私有连接传递的都是“本次准备好的目标 + 完整密码”。辅助程序在紧邻写值时再次检查目标，随后只调用一次设值方法。下面用公开文字 <code>hello</code> 代替密码展示调用。</p></div>
     <div class="api-step" id="native-send"><div class="step-heading"><span>3</span><h3>通过系统 API，直接设置这个框的值</h3></div><div class="step-content"><div class="api-explain"><p x-text="os==='mac'?'Mac 把保存的 field、属性名 AXValue 和 hello 一起传给 AXUIElementSetAttributeValue。系统把设值请求交给该控件，由目标应用自己的控件代码处理。':'Windows 先关闭 UIA 的自动设置焦点选项，再从保存的 field 取得 ValuePattern，调用 SetValue。ValuePattern 是这个控件提供的“读取或设置值”能力，这里只使用设值。'"></p><p x-text="os==='mac'?'知予操作的是那个 AX 控件对象，不需要先点击它或给它键盘焦点。':'AutoSetFocus=false 很关键：UIA 的部分操作默认会先给控件设置焦点；这条后台路径显式关闭它。'"></p><p>调用成功只说明控件接受了设值请求，是否更新业务状态还取决于应用。<a :href="os==='mac'?'https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue':'https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationvaluepattern-setvalue'" target="_blank" rel="noreferrer">对应系统 API ↗</a></p></div><pre class="api-code"><code x-html="highlight(sendCode)"></code></pre></div></div>
