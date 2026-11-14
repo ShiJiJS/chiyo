@@ -455,7 +455,9 @@ extension LibraryIncrementalReceive on LibraryIncremental {
       await _repo._createCredentialBatchTables();
       if (portable == 'credential_batches' &&
           _storedBatch(row).items.any((i) => i.destination.native != null)) {
-        await _repo._requireAdmissionFormat(_nativeFillLibraryFormat);
+        await _repo._requireAdmissionFormat(
+          _nativeBatchLibraryFormat(_storedBatch(row)),
+        );
       }
       if (portable == 'credential_batches' &&
           _storedBatch(row).programPlan != null) {

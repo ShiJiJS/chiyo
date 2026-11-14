@@ -13,6 +13,13 @@ int _syncContentFormat(Map tables) {
   if (batches.any(
     (r) => _storedBatch(
       Map<String, Object?>.from(r as Map),
+    ).items.any((i) => i.destination.native?.requiresV2 ?? false),
+  )) {
+    return 31;
+  }
+  if (batches.any(
+    (r) => _storedBatch(
+      Map<String, Object?>.from(r as Map),
     ).items.any((i) => i.destination.native != null),
   )) {
     return 30;
@@ -40,7 +47,7 @@ int _syncContentFormat(Map tables) {
 }
 
 Map<String, List<String>> _syncColumns(int format) => switch (format) {
-  29 || 30 => InformationBackups._v29Columns,
+  29 || 30 || 31 => InformationBackups._v29Columns,
   28 => InformationBackups._v28Columns,
   _ => InformationBackups._v26Columns,
 };

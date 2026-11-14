@@ -496,15 +496,15 @@ final class DeviceCredentialBatchHost {
             'credential-batches.v3',
             if (nativeDriver != null &&
                 (support['capabilities'] as List).contains(
-                  'credential-native-fill.v1',
+                  'credential-native-fill.v2',
                 ))
-              'credential-native-fill.v1',
+              'credential-native-fill.v2',
           ],
           'providers': [
             for (final provider in _providers)
               if (provider != 'native' ||
                   (support['capabilities'] as List).contains(
-                    'credential-native-fill.v1',
+                    'credential-native-fill.v2',
                   ))
                 provider,
           ],
@@ -521,6 +521,9 @@ final class DeviceCredentialBatchHost {
           appId: input['appId'] as String,
           windowId: input['windowId'] as String?,
         );
+        if (targets.any((target) => !target.requiresV2)) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
         if (targets.length > 64 ||
             targets.map((t) => t.targetId).toSet().length != targets.length ||
             utf8
@@ -681,6 +684,9 @@ final class DeviceCredentialBatchHost {
         targetId: locator['targetId'] as String,
       );
       try {
+        if (!prepared.target.requiresV2) {
+          throw const CredentialUseFailure('unsupported_capability');
+        }
         if (prepared.target.targetId != locator['targetId']) {
           throw const CredentialUseFailure('destination_changed');
         }
@@ -1134,7 +1140,7 @@ final class DeviceCredentialBatchHost {
   void _requireNativeSupport(Map<String, dynamic> support) {
     if (nativeDriver == null ||
         !(support['capabilities'] as List? ?? []).contains(
-          'credential-native-fill.v1',
+          'credential-native-fill.v2',
         )) {
       throw const CredentialUseFailure('unsupported_capability');
     }

@@ -48,7 +48,8 @@ class WorkspaceCredentialBatchOperation {
       {'partial', 'unknown'}.contains(state);
   static String resultLabel(String state) => switch (state) {
     'checking' => '正在核对目标',
-    'dispatched' || 'sent' => '已发送填写，结果待确认',
+    'dispatched' => '已发送填写，结果待确认',
+    'sent' => '已向所选控件送入密码',
     'filled' => '已填写',
     'refused' || 'not_attempted' => '未填写',
     'partial' => '部分完成',
@@ -63,15 +64,22 @@ class WorkspaceCredentialBatchOperation {
       : resultLabel(state);
   String? get errorLabel => switch (errorCode) {
     null => null,
-    'destination_changed' || 'form_changed' || 'focus_changed' => '填写目标已变化。',
+    'target_unavailable' ||
+    'application_changed' ||
+    'destination_changed' ||
+    'form_changed' ||
+    'focus_changed' => '原来的输入框已失效，请重新选择并申请。',
     'grant_revoked' ||
     'credential_disabled' ||
     'credential_deleted' => '许可或凭据已失效。',
     'grant_expired' => '使用期限已到。',
     'credential_version_changed' => '凭据已更新，需要重新申请。',
     'permission_required' => '这台电脑尚未允许此填写方式。',
+    'access_denied' => '系统权限不允许访问所选填写目标。',
+    'session_unavailable' => '当前会话不可用。',
     'browser_unavailable' || 'unavailable_target' => '浏览器或目标密码框不可用。',
     'unsupported_target' || 'not_password_field' => '此目标不支持密码填写。',
+    'input_rejected' => '该控件拒绝了本次填写。',
     'ambiguous_form' || 'ambiguous_field' => '无法确定唯一的表单或密码框。',
     'fill_unknown' ||
     'execution_unknown' ||

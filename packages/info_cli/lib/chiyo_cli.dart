@@ -671,7 +671,7 @@ class ChiyoCli {
     final batchSupported = (capabilities['capabilities'] as List? ?? [])
         .contains('credential-batches.v3');
     final nativeSupported = (capabilities['capabilities'] as List? ?? [])
-        .contains('credential-native-fill.v1');
+        .contains('credential-native-fill.v2');
     final host = batchSupported && context.connection != null
         ? await _batchClient.execute(null, {'command': 'capabilities'})
         : <String, dynamic>{'status': 'unsupported_capability'};
@@ -877,6 +877,10 @@ class ChiyoCli {
       return _failure(
         code,
         switch (failure) {
+          2 when code == 'unsupported_target' && i.options['via'] == 'native' =>
+            '这个控件暂不支持后台填写。',
+          2 when code == 'input_rejected' && i.path.startsWith('fill ') =>
+            '该控件拒绝了本次填写。',
           2 => '内容或参数未通过检查；请查看返回的字段说明。',
           3 when code == 'access_denied' =>
             '系统未允许访问填写目标。请在 App「设置 → 凭据填写」检查系统权限，再重新检查目标。',
@@ -884,6 +888,13 @@ class ChiyoCli {
             '指定浏览器不可用；请检查浏览器控制入口、实例和页面，再重新检查目标。',
           3 => '当前聊天、连接或所需能力不可用；请检查连接和软件版本。',
           4 => '本次操作没有有效批准；请查看原申请状态。',
+          5
+              when i.path.startsWith('fill ') &&
+                  {
+                    'target_unavailable',
+                    'destination_changed',
+                  }.contains(code) =>
+            '原来的输入框已失效，请重新选择并申请。',
           5 => '本次交付未完成，请查看原操作和清理状态。',
           8 => '内容或版本已变化；请核对原记录，不要直接重复提交。',
           7 => '结果尚未确认，请查询原操作，不要重新提交或执行。',

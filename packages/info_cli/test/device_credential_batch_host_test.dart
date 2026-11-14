@@ -403,6 +403,111 @@ void main() {
       expect(f.background.setters, 1);
     },
   );
+
+  test('a v1-only service cannot enable v2 discovery or submit', () async {
+    f.backgroundSupport = true;
+    f.nativeCapability = 'credential-native-fill.v1';
+    final capabilities = await f.call({'command': 'capabilities'});
+    expect(
+      capabilities['capabilities'],
+      isNot(contains('credential-native-fill.v2')),
+    );
+    expect(capabilities['providers'], isNot(contains('native')));
+    final discovered = await f.cli([
+      'fill',
+      'targets',
+      '--via',
+      'native',
+      '--app',
+      'synthetic.native',
+    ]);
+    expect(discovered.exitCode, 3);
+    final submitted = await f.call({
+      'command': 'batch-request',
+      'operationId': 'v1-only-submit',
+      'input': f.plan(
+        destination: {
+          'via': 'native',
+          'targetId': f.background.target.targetId,
+        },
+      ),
+    });
+    expect(submitted['errorCode'], 'unsupported_capability');
+    expect(f.background.discoveries, 0);
+    expect(f.count('request'), 0);
+    expect(f.service.owner.credentialBatches, isEmpty);
+  });
+
+  test(
+    'new native discovery and request reject legacy driver snapshots',
+    () async {
+      f.backgroundSupport = true;
+      f.background.target = NativeFillTarget.fromJson({
+        ...f.background.target.toJson(),
+        'controlKind': 'appkit_secure_text',
+      });
+      final discovered = await f.cli([
+        'fill',
+        'targets',
+        '--via',
+        'native',
+        '--app',
+        'synthetic.native',
+      ]);
+      expect(discovered.exitCode, 3);
+      final submitted = await f.call({
+        'command': 'batch-request',
+        'operationId': 'legacy-driver-submit',
+        'input': f.plan(
+          destination: {
+            'via': 'native',
+            'targetId': f.background.target.targetId,
+          },
+        ),
+      });
+      expect(submitted['errorCode'], 'unsupported_capability');
+      expect(f.count('request'), 0);
+      expect(f.background.setters, 0);
+    },
+  );
+
+  test(
+    'a legacy approval cannot be rebound to a v2 control with the same IDs',
+    () async {
+      await f.backgroundRequest();
+      final request = await f.service.agent.requestCredentialBatch(
+        f.session,
+        'A' * 22,
+        CredentialBatchInput.fromJson({
+          'protocolVersion': 3,
+          ...f.plan(
+            destination: {
+              'via': 'native',
+              'target': {
+                ...f.background.target.toJson(),
+                'controlKind': 'appkit_secure_text',
+              },
+            },
+          ),
+        }),
+        operationId: 'legacy-approved-submit',
+      );
+      await f.approve(request.id, ['b1']);
+      final result = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        request.id,
+        '--operation',
+        'legacy-approved-fill',
+      ]);
+      expect(result.exitCode, 5, reason: result.render());
+      expect((result.output['error'] as Map)['code'], 'destination_changed');
+      expect((result.output['error'] as Map)['message'], contains('原来的输入框已失效'));
+      expect(f.count('material'), 0);
+      expect(f.background.setters, 0);
+    },
+  );
   test(
     'mixed plans retain native setter acceptance when a later explicit destination refuses',
     () async {
@@ -1160,7 +1265,7 @@ class _Background implements NativeFillDriver {
     'windowId': 'W' * 32,
     'windowTitle': 'Synthetic login',
     'fieldLabel': 'Password',
-    'controlKind': 'appkit_secure_text',
+    'controlKind': 'macos_ax_password',
   });
   void restart() {
     refs.clear();
@@ -1288,6 +1393,7 @@ class _Fixture {
   final browser = _Browser(), native = _Native();
   final background = _Background();
   bool backgroundSupport = false;
+  String nativeCapability = 'credential-native-fill.v2';
   bool ownsNativeDriver = true;
   final paths = <String>[];
   final counts = <String, int>{};
@@ -1395,7 +1501,7 @@ class _Fixture {
             if (support) ...[
               'credential-batches.v3',
               'agent-record-queries.v1',
-              if (backgroundSupport) 'credential-native-fill.v1',
+              if (backgroundSupport) nativeCapability,
             ],
           ],
         };
