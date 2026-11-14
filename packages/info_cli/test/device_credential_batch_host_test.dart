@@ -112,6 +112,95 @@ void main() {
   );
 
   test(
+    'successful history queries retain partial expiry while new execution and waiting still fail',
+    () async {
+      final id = await f.request(native: true);
+      final pending = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'pending-fill',
+      ]);
+      expect(pending.exitCode, 4);
+      expect((pending.output['error'] as Map)['code'], 'request_pending');
+      final wait = await f.cli(['requests', 'wait', id, '--timeout', '0']);
+      expect(wait.exitCode, 6);
+      expect((wait.output['data'] as Map)['status'], 'pending');
+      expect(f.count('begin'), 0);
+      expect(f.count('material'), 0);
+      expect(f.native.sent, 0);
+
+      await f.approve(id, ['b1']);
+      f.now = f.now.add(
+        AccessTiming.defaultLifetime - const Duration(seconds: 1),
+      );
+      f.native.afterBatch = () async {
+        f.now = f.now.add(const Duration(seconds: 1));
+      };
+      final started = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'partial-expiry',
+      ]);
+      expect(started.exitCode, 0, reason: started.render());
+      final done = await f.done('partial-expiry');
+      expect(done['executionState'], 'partial');
+      expect(done['errorCode'], 'grant_expired');
+      expect(f.native.sent, 1);
+      for (final verb in ['show', 'retry']) {
+        final query = await f.cli(['operations', verb, 'partial-expiry']);
+        expect(query.exitCode, 0, reason: query.render());
+        expect(query.output['ok'], true);
+        final data = query.output['data'] as Map;
+        expect(data['status'], 'ok');
+        expect(data['executionState'], 'partial');
+        expect(data['errorCode'], 'grant_expired');
+        expect(data['operationId'], 'partial-expiry');
+        expect(data['itemResults'], done['itemResults']);
+        expect(data['finishedAt'], done['finishedAt']);
+      }
+      final originalRun = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'partial-expiry',
+      ]);
+      expect(originalRun.exitCode, 4);
+      expect((originalRun.output['data'] as Map)['executionState'], 'partial');
+      final expired = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'new-expired-fill',
+      ]);
+      expect(expired.exitCode, 4, reason: expired.render());
+      expect((expired.output['error'] as Map)['code'], 'scope_not_approved');
+      expect(f.count('begin'), 1);
+      expect(f.count('material'), 1);
+      expect(f.native.sent, 1);
+      expect(f.service.owner.credentialBatchOperations, hasLength(1));
+
+      f.support = false;
+      final unavailable = await f.cli(['operations', 'show', 'partial-expiry']);
+      expect(unavailable.exitCode, 3);
+      expect(unavailable.output['ok'], false);
+      expect(
+        (unavailable.output['error'] as Map)['code'],
+        'unsupported_capability',
+      );
+    },
+  );
+
+  test(
     'one private request contains multiple inspected destinations and does not execute on approval',
     () async {
       final id = await f.request();
@@ -852,7 +941,12 @@ class _Fixture {
       if (path == '/capabilities') {
         result = {
           'status': 'ok',
-          'capabilities': [if (support) 'credential-batches.v3'],
+          'capabilities': [
+            if (support) ...[
+              'credential-batches.v3',
+              'agent-record-queries.v1',
+            ],
+          ],
         };
       } else if (path == '/session/check') {
         result = {
@@ -862,6 +956,11 @@ class _Fixture {
         };
       } else if (path == '/operations/show') {
         result = service.agent.showOwnOperation(
+          body['sessionSecret'] as String,
+          body['id'] as String,
+        );
+      } else if (path == '/requests/show') {
+        result = service.agent.showOwnRequest(
           body['sessionSecret'] as String,
           body['id'] as String,
         );
@@ -953,6 +1052,25 @@ class _Fixture {
     profile,
     directory: root,
   ).execute(session ?? this.session, input);
+  Future<ChiyoRunResult> cli(List<String> arguments) async {
+    final context = File('${root.path}/chat/context.json');
+    if (!await context.exists()) {
+      await ChiyoContext(
+        chatId: 'synthetic-history',
+        agentName: 'Synthetic Agent',
+        secret: session,
+        port: profile.address.port,
+        connection: profile,
+      ).saveNew(context);
+    }
+    return ChiyoCli(
+      environment: {
+        'CHIYO_CONTEXT': context.path,
+        'CHIYO_CONNECTION_DIRECTORY': root.path,
+      },
+    ).run([...arguments, '--json']);
+  }
+
   Future<String> request({bool native = false}) async {
     final result = await call({
       'command': 'batch-request',

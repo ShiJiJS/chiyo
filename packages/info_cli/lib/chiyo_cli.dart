@@ -782,7 +782,23 @@ class ChiyoCli {
     bool executing = false,
   }) {
     final status = data['status'] as String? ?? 'invalid_response';
-    final code = data['errorCode'] as String? ?? status;
+    // A successful record query can carry a stored execution error. Keep that
+    // fact in data without treating it as a failure of this query or recovery.
+    final querySucceeded =
+        status == 'ok' &&
+        {
+          'requests list',
+          'requests show',
+          'proposals list',
+          'proposals show',
+          'operations list',
+          'operations show',
+          'operations retry',
+          'files status',
+        }.contains(i.path);
+    final code = querySucceeded
+        ? status
+        : data['errorCode'] as String? ?? status;
     final int? failure = switch (code) {
       'unsupported_capability' ||
       'unsupported_protocol' ||
