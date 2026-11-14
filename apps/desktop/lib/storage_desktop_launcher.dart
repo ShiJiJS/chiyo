@@ -59,6 +59,9 @@ class StorageDesktopLauncher extends StatefulWidget {
 }
 
 class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
+  late final DesktopPlatform _platform =
+      widget.platform ?? NativeDesktopPlatform();
+  late final Future<void> _credentialFillStartup, _restoreStartup;
   DesktopBootstrap? _local;
   DeviceFocusedFillHost? _focusedFillHost;
   DeviceCredentialBatchHost? _credentialBatchHost;
@@ -66,12 +69,55 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   bool _online = false;
   String? _failure;
   ServerSetupController? _initialSetup;
+  Completer<void>? _setupSettled;
+  Future<void>? _initialClosing, _fillHostsClosing;
+  bool _initialQuitting = false, _initialExitFailed = false;
 
   @override
   void initState() {
     super.initState();
-    unawaited(_startCredentialFillHosts());
-    _restore();
+    _credentialFillStartup = _startCredentialFillHosts();
+    // Publish a resource-aware handler before persisted-profile I/O or the
+    // first setup screen. The selected runtime replaces it on handoff.
+    _restoreStartup = Future<void>.value()
+        .then((_) => _initializeUnconfiguredDesktop())
+        .then((_) => _restore());
+  }
+
+  Future<void> _initializeUnconfiguredDesktop() async {
+    try {
+      await _platform.initialize((event) async {
+        if (event == DesktopEvent.quit || event == DesktopEvent.closeWindow) {
+          await _closeUnconfiguredDesktop();
+        } else if (event == DesktopEvent.openApprovals ||
+            event == DesktopEvent.openSettings ||
+            event == DesktopEvent.searchApprovals) {
+          await _platform.showWindow();
+        }
+      });
+    } on Object {
+      // Retain the setup/error screen if the optional OS integration fails.
+    }
+  }
+
+  Future<void> _closeUnconfiguredDesktop() => _initialClosing ??=
+      _finishUnconfiguredDesktop().catchError((Object error, StackTrace stack) {
+        _initialClosing = null;
+        _initialExitFailed = true;
+        if (mounted) setState(() {});
+        Error.throwWithStackTrace(error, stack);
+      });
+
+  Future<void> _finishUnconfiguredDesktop() async {
+    _initialQuitting = true;
+    _initialExitFailed = false;
+    if (mounted) setState(() {});
+    // Stop new execution/late Host publication while recovery/setup settles.
+    await _closeFocusedFillHost();
+    await _restoreStartup;
+    await _setupSettled?.future;
+    await _local?.close();
+    await _platform.terminate();
   }
 
   Future<void> _startCredentialFillHosts() async {
@@ -170,16 +216,19 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
 
   Future<void> _restore() async {
     try {
+      if (_initialQuitting) return;
       final active = await AutomaticConnectionStore(
         widget.profiles.directory,
       ).readOwner();
+      if (_initialQuitting) return;
       if (active?['mode'] != 'local') {
         final saved = await widget.profiles.read();
+        if (_initialQuitting) return;
         if (saved != null) {
           final recovered = await _recoverLocal(saved);
           if (recovered != null) {
             _startLocal(recovered);
-          } else if (mounted) {
+          } else if (mounted && !_initialQuitting) {
             setState(() => _online = true);
           }
           return;
@@ -191,19 +240,31 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
                 followLinks: false,
               ) ==
               FileSystemEntityType.notFound) {
-        if (mounted) {
+        if (mounted && !_initialQuitting) {
           setState(
             () => _initialSetup = ServerSetupController(
+              onBusy: (busy) {
+                if (busy) {
+                  _setupSettled = Completer<void>();
+                } else {
+                  final settled = _setupSettled;
+                  _setupSettled = null;
+                  settled?.complete();
+                }
+              },
               onLocal: () async {
+                if (_initialQuitting) return;
                 final configuration = await LocalLibraryConfiguration.open(
                   widget.profiles.directory,
                 );
                 _startLocal(configuration);
               },
               onConnected: (profile, client) async {
+                if (_initialQuitting) return;
                 // Remember a successful authenticated server connection before the
                 // potentially interrupted first content transfer; never a password.
                 await widget.profiles.save(profile);
+                if (_initialQuitting) return;
                 await _adoptServer(profile, client, true);
               },
             ),
@@ -228,7 +289,9 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       }
       _startLocal(configuration);
     } on Object {
-      if (mounted) setState(() => _failure = '无法打开资料库设置，请检查本机资料目录或使用备份恢复。');
+      if (mounted && !_initialQuitting) {
+        setState(() => _failure = '无法打开资料库设置，请检查本机资料目录或使用备份恢复。');
+      }
     }
   }
 
@@ -246,6 +309,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       final stored = await PrivateConnectionFiles.read(
         File('${widget.profiles.directory}/library-sync.json'),
       );
+      if (_initialQuitting) return null;
       if (stored == null ||
           stored['version'] != 1 ||
           await FileSystemEntity.type(
@@ -258,6 +322,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       final configuration = await LocalLibraryConfiguration.open(
         widget.profiles.directory,
       );
+      if (_initialQuitting) return null;
       if (stored['localLibraryId'] != configuration.libraryId) return null;
       final library = await _openLocal(configuration, false);
       try {
@@ -278,7 +343,8 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   }
 
   void _startLocal(LocalLibraryConfiguration configuration) {
-    final platform = widget.platform ?? NativeDesktopPlatform();
+    if (!mounted || _initialQuitting) return;
+    final platform = _platform;
     final bootstrap = DesktopBootstrap(
       openLibrary: () => _openLocal(configuration, false),
       openLibraryWithKeyAccess: Platform.isMacOS
@@ -313,9 +379,11 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
   ) async {
     // Verify support before opening a new system key or selecting local data.
     await LibraryReplicationClient(client).status();
+    if (_initialQuitting) return;
     final configuration = await LocalLibraryConfiguration.open(
       widget.profiles.directory,
     );
+    if (_initialQuitting) return;
     final library = await _openLocal(configuration, false);
     try {
       final replication = library.replication;
@@ -329,7 +397,7 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
       await library.service.close();
       await library.close();
     }
-    if (!mounted) return;
+    if (!mounted || _initialQuitting) return;
     // Retire the server workspace first. Its client/menu must not be disposed
     // after the new local runtime has already installed its handlers.
     setState(() {
@@ -346,10 +414,16 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
     if (mounted) _startLocal(configuration);
   }
 
-  Future<void> _closeFocusedFillHost() async {
+  Future<void> _closeFocusedFillHost() {
     _hostDisposed = true;
-    await _credentialBatchHost?.close();
-    await _focusedFillHost?.close();
+    return _fillHostsClosing ??= (() async {
+      await _credentialFillStartup;
+      try {
+        await _credentialBatchHost?.close();
+      } finally {
+        await _focusedFillHost?.close();
+      }
+    })();
   }
 
   @override
@@ -365,12 +439,34 @@ class _StorageDesktopLauncherState extends State<StorageDesktopLauncher> {
 
   @override
   Widget build(BuildContext context) {
+    if (_initialQuitting) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: zhiyuTheme(Brightness.light),
+        home: Scaffold(
+          body: ConnectionSurface(
+            title: _initialExitFailed ? '退出未完成' : '正在退出应用…',
+            description: _initialExitFailed
+                ? '本机资源尚未关闭或应用未能退出，请重试。'
+                : '正在关闭本机连接。',
+            loading: !_initialExitFailed,
+            children: [
+              if (_initialExitFailed)
+                TextButton(
+                  onPressed: _closeUnconfiguredDesktop,
+                  child: const Text('重试退出'),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
     if (_online) {
       return OnlineDesktopLauncher(
         profiles: widget.profiles,
         onSaveStorage: _adoptServer,
         appControlDirectory: widget.appControlDirectory,
-        desktopPlatform: widget.platform,
+        desktopPlatform: _platform,
         closeDeviceFocusedFillHost: _closeFocusedFillHost,
       );
     }
