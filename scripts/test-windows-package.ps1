@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory = $true)][string]$ArchivePath,
     [string]$DartExecutable,
     [switch]$RequireNativeBackgroundFill,
+    [switch]$RequireSshSessionTransport,
     [switch]$PayloadOnly
 )
 
@@ -89,9 +90,20 @@ try {
             throw 'Native background helper must have one matching files entry.'
         }
     }
+    $appSsh = Join-Path $payload 'app/info-ssh-session.exe'
+    $cliSsh = Join-Path $payload 'cli/info-ssh-session.exe'
+    $hasSsh = (Test-Path -LiteralPath $appSsh -PathType Leaf) -or (Test-Path -LiteralPath $cliSsh -PathType Leaf)
+    if ($RequireSshSessionTransport -or $hasSsh) {
+        if (-not (Test-Path -LiteralPath $appSsh -PathType Leaf) -or
+            -not (Test-Path -LiteralPath $cliSsh -PathType Leaf) -or
+            (Get-FileHash -LiteralPath $appSsh -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $cliSsh -Algorithm SHA256).Hash) {
+            throw 'The SSH session transport must ship identical helpers beside the desktop and CLI.'
+        }
+    }
     if ($manifest.format -eq 2) {
         $app = Join-Path $payload 'app'
         $allowedExecutables = @('info_desktop.exe', 'info-focus-broker.exe', 'info-runtime-worker.exe')
+        if ($hasSsh) { $allowedExecutables += 'info-ssh-session.exe' }
         if ($nativeProperty) { $allowedExecutables += 'info-native-background-broker.exe' }
         foreach ($binary in Get-ChildItem -LiteralPath $app -Filter '*.exe' -Recurse) {
             $relativeBinary = $binary.FullName.Substring($app.Length + 1).Replace('\', '/')
