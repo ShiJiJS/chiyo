@@ -302,21 +302,34 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
           <div class="native-handoff-flow">
             <div class="native-handoff-packet"><div class="native-handoff-command-row"><code class="native-handoff-command">chiyo fill targets</code><span x-text="nativeAppName"></span></div><dl class="native-handoff-data"><div><dt>应用标识</dt><dd><code x-text="nativeAppId"></code></dd></div></dl></div>
             <span class="native-handoff-arrow" aria-hidden="true"></span>
-            <div class="native-handoff-action"><strong>辅助程序查询支持的密码控件，<br>保留对象并生成目标编号</strong></div>
+            <div class="native-handoff-action native-scan-summary"><strong>helper 限定指定应用，逐项扫描筛选</strong><p>进程／窗口 → 控件树 → 密码语义<br>→ 支持、可用与直接设值检查 → targets</p></div>
           </div>
-          <div class="native-handoff-flow native-handoff-back">
-            <div class="native-handoff-action"><strong>收到列表后，按窗口标题和字段说明，<br>选中这项目标</strong><span class="native-handoff-down" aria-hidden="true">↓</span></div>
+          <p class="native-example-assumption">以下假设指定应用内发现两个已通过支持检查、可区分的密码窗口。窗口名称、属性与层级为教学示意；实际支持仍以已验证应用、版本和结构为准。</p>
+          <div class="native-handoff-flow native-handoff-back native-multi-return" id="native-targets-result">
+            <div class="native-agent-choice">
+              <span class="native-handoff-label">Agent 的任务</span><strong>为 <code x-text="nativeTaskTarget.file"></code> 输入密码</strong>
+              <div class="native-mini-window"><div x-text="nativeTaskTarget.windowTitle"></div><b x-text="nativeTaskTarget.file"></b><span>密码</span><i>尚未填写</i><small>□ 记住本次设置 <em>取消　确定</em></small></div>
+              <p>对照窗口与字段说明，选中<strong>第二项</strong>：文件名与任务一致，字段是密码框。</p><p class="native-choice-other"><code>OtherArchive.zip</code> 属于另一文件，不用于本任务。</p>
+              <span class="native-handoff-down" aria-hidden="true">↓</span>
+            </div>
             <span class="native-handoff-arrow" aria-hidden="true"></span>
-            <div class="native-handoff-target"><span class="native-handoff-label">返回目标列表 · 这里展开选中的一项</span><dl class="native-handoff-data"><div class="native-handoff-target-id"><dt>targetId</dt><dd><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code></dd></div><div><dt>窗口标题</dt><dd>本次压缩文件的密码窗口</dd></div><div><dt>字段</dt><dd x-text="nativeFieldLabel"></dd></div></dl></div>
+            <div class="native-returned-targets">
+              <div class="native-target-list-heading"><b><code>targets</code> · 本次目标列表</b><span>2 项 · <span x-text="nativeAppName"></span></span></div>
+              <template x-for="(target,index) in nativeTargets" :key="target.key"><div class="native-returned-item" :class="{'is-task':target.key==='task'}">
+                <div class="native-target-item-top"><b x-text="'候选 '+(index+1)"></b><span x-show="target.key==='task'">← Agent 按任务选中</span></div>
+                <dl class="native-handoff-data"><div><dt>窗口</dt><dd x-text="target.windowTitle"></dd></div><div><dt>字段</dt><dd x-text="target.fieldLabel"></dd></div><div class="native-handoff-target-id"><dt>targetId</dt><dd><code x-text="target.targetId"></code></dd></div></dl>
+              </div></template>
+              <p class="native-target-list-note">targets 是本次查询通过支持检查的候选密码框集合，可能有 0、1 或多项；候选不代表已批准。</p>
+            </div>
           </div>
           <div class="native-handoff-flow">
-            <div class="native-handoff-packet"><code class="native-handoff-command">chiyo fill request</code><dl class="native-handoff-data"><div class="native-handoff-target-id"><dt>--target</dt><dd><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code></dd></div></dl></div>
+            <div class="native-handoff-packet"><code class="native-handoff-command">chiyo fill request</code><dl class="native-handoff-data"><div class="native-handoff-target-id"><dt>--target</dt><dd><code x-text="nativeTaskTarget.targetId"></code></dd></div></dl></div>
             <span class="native-handoff-arrow" aria-hidden="true"></span>
             <div class="native-handoff-action"><strong>核验选中的目标<br>保存申请</strong></div>
           </div>
           <p class="native-handoff-return"><span aria-hidden="true">←</span>知予返回 <code>REQ-43</code><span class="native-handoff-pending">待批准</span><span class="native-handoff-return-next">Agent 用申请号等待审批结果</span></p>
         </section>
-        <figcaption>两条申请仍需凭据编号、版本和用途；此处只展开目标信息。两条申请都还未批准，也未写入密码。下面继续展开原生目标查询怎样发起、辅助程序怎样找到控件并生成编号。</figcaption>
+        <figcaption>两条申请仍需凭据编号、版本和用途。列表没有密码或系统控件对象；说明不足以区分候选时，查询应拒绝歧义，Agent 不能凭随机编号猜测。两条申请均待批准，尚未写入密码。</figcaption>
       </figure>
       <div class="reading"><template x-if="os==='mac'"><p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。</p></template><template x-if="os==='win'"><p>Windows 这里用程序的完整路径指定查询哪个应用，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。</p></template><p>应用标识只选择查询范围，知予还会核对实际运行程序的身份。</p></div>
     </div>
@@ -325,12 +338,6 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
       <pre><code x-text="nativeDiscoverCommand"></code></pre>
       <p class="caption">应用需已经运行，相关密码窗口需已经存在。发现目标不会申请凭据、写值或自动弹出系统权限请求。<span x-show="os==='win'">路径采用示例安装位置，实际调用以本机程序位置为准。</span></p>
     </figure>
-
-    <div class="connection-entry native-targets-example" id="native-targets-result">
-      <div class="reading"><h3>返回的目标列表是什么样？</h3><p>假设这次查询找到一个支持的密码框。下面节选命令返回 <code>data</code> 中的 <code>targets</code> 列表，只展示识别目标需要的字段；应用、窗口和字段说明是教学示例。</p></div>
-      <div class="native-targets-layout"><pre class="api-code"><code x-text="nativeTargetsPreview"></code></pre><div class="native-targets-meaning"><p><code>targets</code> 是目标条目的列表。</p><dl><div><dt><code>appName</code></dt><dd>应用名称。</dd></div><div><dt><code>windowTitle</code></dt><dd>窗口说明。</dd></div><div><dt><code>fieldLabel</code></dt><dd>字段说明，附带系统控件标识，帮助区分候选。</dd></div><div><dt><code>targetId</code></dt><dd>选中这一项后，把编号传给 <code>fill request</code> 的 <code>--target</code>。</dd></div></dl></div></div>
-      <p class="caption">列表不包含密码，也不把系统控件对象交给 Agent。若应用、窗口和字段说明不足以区分候选，就先确认，不能只凭随机编号猜测。</p>
-    </div>
 
     <div class="reading connection-entry" id="native-helper-channel"><h3>知予怎样把查询交给辅助程序？</h3>
       <p>现在已经看到了 Agent 会收到的目标列表，接下来展开它怎样产生。<code>fill targets</code> 只查询可操作控件：<code>chiyo</code> 把查询交给本机知予 App，App 再把查询消息交给辅助程序。辅助程序查询目标应用并返回控件说明。</p>
@@ -343,47 +350,74 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
       <div class="native-channel-link"><b x-text="os==='mac'?'XPC':'私有输入／输出'"></b><code x-show="os==='mac'">NSXPCConnection</code><span class="native-map-message">查询 →</span><code>command=discover<br>appId=应用标识</code><span class="native-map-response">← 控件说明</span></div>
       <div class="native-boundary native-helper-boundary"><div class="native-boundary-title">独立辅助程序</div><div class="native-boundary-body"><p>调用系统查询 API</p><p>保留应用、窗口和<br>密码框的原对象</p><p class="native-internal-note">返回编号与可读说明</p></div></div>
       <div class="native-system-link"><b x-text="os==='mac'?'macOS · AX':'Windows · UIA'"></b><span>查询 →</span><span>← 控件对象</span></div>
-      <div class="native-boundary native-target-boundary"><div class="native-boundary-title">目标应用 · <span x-text="nativeAppName"></span></div><div class="native-query-window"><div class="native-query-window-title">本次压缩文件的密码窗口</div><div class="native-query-window-body"><b>NativeBackgroundProof.zip</b><label>密码</label><div class="native-query-field"><span>尚未填写</span><code>field</code></div><div class="native-window-action">确定</div></div></div></div>
-      <figcaption>Agent 发出 <code>chiyo fill targets</code> 后，查询按图中方向交接；目标说明沿原路返回。窗口为本例示意，图中没有读取密码或设值。</figcaption>
+      <div class="native-boundary native-target-boundary"><div class="native-boundary-title">目标应用 · <span x-text="nativeAppName"></span></div>
+        <div class="native-query-window"><div class="native-query-window-title" x-text="nativeTaskTarget.windowTitle"></div><div class="native-query-window-body">
+          <b x-text="nativeTaskTarget.file"></b><label>输出目录</label><div class="native-ordinary-field">文档 / 本次解压</div>
+          <label>密码</label><div class="native-query-field"><span>尚未填写</span><code>field</code></div>
+          <div class="native-window-check">□ 记住本次设置</div><div class="native-window-actions"><span>取消</span><span>确定</span></div>
+        </div></div>
+      </div>
+      <figcaption>Agent 发出 <code>chiyo fill targets</code> 后，查询按图中方向交接；目标说明沿原路返回。目标窗口展示同一任务文件及多种组件，用于随后与控件树对应；窗口为教学示意，图中没有读取密码或设值。</figcaption>
     </figure>
     <p class="caption">连接由运行中的 App 保留，一条 CLI 命令退出不会丢掉 helper 中的控件对象；helper 重启会使原目标编号失效。<a href="#source-helper-channels">辅助程序的连接实现 ↓</a></p>
 
     <div class="reading connection-entry" id="native-system-entry"><h3>辅助程序怎样找到窗口里的密码控件？</h3>
-      <p>辅助程序通过操作系统的<strong>辅助功能接口</strong>查询应用的界面结构。系统返回代表窗口、按钮、输入框的对象；辅助程序沿对象关系查询，最终得到代表具体密码框的 <code>field</code>。</p>
-      <p x-text="os==='mac'?'Mac 的这组接口简称 AX。AXWindows 表示“应用有哪些窗口”，AXChildren 表示“这个对象内部有哪些控件”。下图把系统返回的对象和上面的密码框对应起来。':'Windows 的这组接口叫 UI Automation，简称 UIA。先取得窗口的根对象 root，再在它的后代控件中查询 IsPassword=true 的对象。下图把系统返回的对象和上面的密码框对应起来。'"></p>
+      <p>辅助程序通过操作系统的<strong>辅助功能接口</strong>查询应用的界面结构。系统返回代表窗口、按钮、输入框的对象；辅助程序沿对象关系查询，筛出支持的密码控件对象；每个候选都有自己的说明与目标编号。</p>
+      <p x-text="os==='mac'?'Mac 的这组接口简称 AX。AXWindows 表示“应用有哪些窗口”，AXChildren 表示“这个对象内部有哪些控件”。下图把系统返回的对象与窗口组件对应起来。':'Windows 的这组接口叫 UI Automation，简称 UIA。先取得窗口的根对象 root，再在它的后代控件中查询 IsPassword=true 的对象。下图把系统返回的对象与窗口组件对应起来。'"></p>
     </div>
     <div class="os-workspace" :data-os="os">
-      <div class="api-step" id="native-query"><div class="step-heading"><span>1</span><h3>沿控件树查询，取得具体的 field</h3></div>
+      <div class="api-step" id="native-query"><div class="step-heading"><span>1</span><h3>从多个组件筛出候选，再由 Agent 按任务选择</h3></div>
         <figure class="native-control-query" id="native-query-map">
-          <template x-if="os==='mac'"><div>
-            <p class="native-query-origin">helper 根据 <code>bundle ID</code> 查到运行进程，取得 <code>pid</code>。</p>
-            <div class="native-query-tree native-mac-tree">
-              <div class="native-tree-node native-tree-root"><code>app</code><span>应用对象</span></div><div class="native-tree-call"><span aria-hidden="true">←</span><div><code>AXUIElementCreateApplication(pid)</code><small>返回应用的 AX 对象 app</small></div></div>
-              <div class="native-tree-node native-tree-child"><code>window</code><span>本次压缩文件的密码窗口</span></div><div class="native-tree-call"><span aria-hidden="true">←</span><div><b>AXWindows → 窗口列表 → 选定窗口</b><code>AXUIElementCopyAttributeValue(<br>  app, kAXWindowsAttribute, &amp;windows)</code></div></div>
-              <div class="native-tree-node native-tree-container"><span>中间容器…</span><small>层级简化</small></div><div class="native-tree-call"><span aria-hidden="true">←</span><div><b>AXChildren → 沿子控件逐层查询</b><code>AXUIElementCopyAttributeValue(<br>  window, kAXChildrenAttribute, &amp;children)</code><small>对窗口和下层容器继续读取子控件</small></div></div>
-              <div class="native-tree-node native-tree-field"><div><code>field</code><b>密码框</b></div><dl><div><dt>AXRole</dt><dd>AXTextField</dd></div><div><dt>AXSubrole</dt><dd>AXSecureTextField</dd></div><div><dt>AXIdentifier</dt><dd>_NS:280</dd></div></dl></div><div class="native-tree-call native-field-call"><span aria-hidden="true">←</span><div><b>从查询结果中筛选支持的安全文本框</b><p>这个 <code>field</code> 对应上图窗口里尚未填写的密码框。</p></div></div>
+          <div class="native-inspector">
+            <div class="native-inspector-heading"><div><b>窗口组件 ↔ 系统提供的控件树</b><span>点击任一侧，查看对应对象与属性</span></div><span class="native-stage-label" x-text="['结构初态','helper：已筛选','Agent：已选择'][nativeStage]"></span></div>
+            <div class="native-inspector-grid">
+              <div class="native-inspector-window-pane">
+                <div class="native-window-tabs" role="group" aria-label="查看哪个教学窗口"><template x-for="target in nativeTargets" :key="target.key"><button type="button" :aria-pressed="nativeWindow===target.key" :class="{'is-active':nativeWindow===target.key}" @click="inspectNative(target.key,nativeComponent)" x-text="target.key==='task'?'任务文件窗口':'另一文件窗口'"></button></template></div>
+                <div class="native-demo-window" :class="{'is-target-window':nativeStage===2&&nativeWindow==='task'}">
+                  <div class="native-demo-title"><span class="native-window-dots" aria-hidden="true">● ● ●</span><span x-text="nativeViewedTarget.windowTitle"></span></div>
+                  <div class="native-demo-body"><template x-for="control in nativeControls" :key="control.key"><button type="button" class="native-demo-control" :class="{...nativeControlClass(nativeWindow,control.key),['native-control-'+control.kind]:true}" @click="inspectNative(nativeWindow,control.key)" :aria-label="'查看'+control.label+'的系统属性'" :aria-pressed="nativeComponent===control.key">
+                    <template x-if="control.kind==='text'"><span class="native-demo-filename" x-text="nativeViewedTarget.file"></span></template>
+                    <template x-if="control.kind==='edit'"><span class="native-demo-edit"><span class="native-field-label" x-text="control.label"></span><span class="native-field-box"><span x-text="control.key==='password'?'尚未填写':'文档 / 本次解压'"></span><code x-show="control.key==='password'" x-text="os==='mac'?nativeViewedTarget.macId:nativeViewedTarget.winId"></code></span></span></template>
+                    <template x-if="control.kind==='check'"><span class="native-demo-check">□ <span x-text="control.label"></span></span></template>
+                    <template x-if="control.kind==='action'"><span class="native-demo-button" x-text="control.label"></span></template>
+                  </button></template></div>
+                </div>
+                <p class="native-window-help">点击是在查看教学对象，不会向应用写入密码或点击“确定”。</p>
+              </div>
+              <div class="native-inspector-tree-pane">
+                <div class="native-tree-app"><code x-text="os==='mac'?'app · 应用对象':'指定应用的窗口集合'"></code><span x-text="nativeAppName"></span></div>
+                <p class="native-tree-api" x-text="os==='mac'?'AXWindows → 各窗口；AXChildren → 逐层查询子控件':'各 hwnd → ElementFromHandle → root；查询其后代控件'"></p>
+                <div class="native-object-tree"><template x-for="target in nativeTargets" :key="target.key"><div class="native-object-window">
+                  <button type="button" class="native-object-window-title" :class="{'is-task-window':nativeStage===2&&target.key==='task'}" @click="inspectNative(target.key,'password')"><code x-text="os==='mac'?'window':'root'"></code><span x-text="target.windowTitle"></span></button>
+                  <div class="native-object-children"><template x-for="control in nativeTreeControls(target.key)" :key="control.key"><button type="button" class="native-object-row" :class="nativeControlClass(target.key,control.key)" @click="inspectNative(target.key,control.key)" :aria-pressed="nativeWindow===target.key&&nativeComponent===control.key">
+                    <span class="native-object-description"><code x-text="nativeRole(control)"></code><span x-text="control.label"></span><small x-show="control.key==='password'" x-text="os==='mac'?target.macId:target.winId"></small></span><span class="native-object-status" x-text="nativeControlStatus(target.key,control.key)"></span>
+                  </button></template></div>
+                </div></template></div>
+              </div>
             </div>
-          </div></template>
-          <template x-if="os==='win'"><div>
-            <p class="native-query-origin">helper 按 <code>exe</code> 完整路径核对进程，再通过 <code>EnumWindows</code> 等查询取得它的窗口句柄 <code>hwnd</code>。</p>
-            <div class="native-query-tree native-win-tree">
-              <div class="native-tree-node native-tree-root"><code>root</code><span>本次密码窗口的根对象</span></div><div class="native-tree-call"><span aria-hidden="true">←</span><div><code>automation-&gt;ElementFromHandle(hwnd, &amp;root)</code><small>窗口句柄 → 窗口的 UIA 对象 root</small></div></div>
-              <div class="native-tree-node native-tree-container"><span>中间容器…</span><small>层级简化</small></div><div class="native-tree-call native-query-condition"><span aria-hidden="true">↓</span><div><b>创建查询条件：IsPassword=true</b><code>CreatePropertyCondition(<br>  UIA_IsPasswordPropertyId, passwordFlag, …)</code><small>此处先准备条件，没有取得新的控件对象</small></div></div>
-              <div class="native-tree-node native-tree-field"><div><code>field</code><b>密码框</b></div><dl><div><dt>ControlType</dt><dd>Edit</dd></div><div><dt>IsPassword</dt><dd>true</dd></div><div><dt>AutomationId</dt><dd>120</dd></div></dl></div><div class="native-tree-call native-field-call"><span aria-hidden="true">←</span><div><code>root-&gt;FindAll(TreeScope_Descendants,<br>  passwordCondition.Get(), &amp;fields)</code><p>在窗口后代控件中找匹配项，再结合窗口与字段说明选定 <code>field</code>，对应上图密码框。</p></div></div>
+            <div class="native-object-properties"><div><span class="native-properties-label">正在查看的对象</span><b><span x-text="nativeInspectedControl.label"></span><span class="native-property-window" x-text="' · '+nativeViewedTarget.file"></span></b><p x-text="nativeInspectionNote"></p></div><dl><template x-for="row in nativeInspectedAttributes" :key="row[0]"><div><dt x-text="row[0]"></dt><dd x-text="row[1]"></dd></div></template></dl></div>
+            <div class="native-selection-process">
+              <div class="native-demo-task"><span>Agent 的任务</span><b>为 <code x-text="nativeTaskTarget.file"></code> 输入密码</b></div>
+              <div class="native-selection-actions"><button type="button" id="native-scan-button" class="primary" @click="scanNativeTargets()" :disabled="nativeStage>=1">1 · 扫描并筛选</button><span aria-hidden="true">→</span><button type="button" id="native-choose-button" class="primary" @click="selectNativeTask()" :disabled="nativeStage!==1">2 · 按任务选择目标</button><button type="button" class="text-button" @click="resetNativeSelection()">重置</button></div>
+              <p class="native-selection-live" aria-live="polite" x-text="nativeSelectionStatus"></p>
+              <div class="native-filter-result" x-show="nativeStage>=1" x-cloak><div class="native-filter-result-heading"><b>helper 返回 <code>targets</code> · 2 项</b><span>候选不代表已批准</span></div><div class="native-filter-targets"><template x-for="(target,index) in nativeTargets" :key="target.key"><button type="button" class="native-filter-item" :class="{'is-selected':nativeStage===2&&target.key==='task','is-viewed':nativeWindow===target.key&&nativeComponent==='password'}" @click="inspectNative(target.key,'password')">
+                <span class="native-filter-item-heading"><b x-text="'候选 '+(index+1)"></b><em x-text="nativeStage===2&&target.key==='task'?'Agent 按任务选中':'可填写候选'"></em></span><strong x-text="target.windowTitle"></strong><span x-text="target.fieldLabel"></span><code x-text="target.targetId"></code>
+              </button></template></div><p class="native-selected-command" x-show="nativeStage===2">下一步申请使用 <code>--target <span x-text="nativeTaskTarget.targetId"></span></code>，仍须等待用户批准。</p></div>
             </div>
-          </div></template>
-          <figcaption>窗口与控件树用来对照位置，中间容器层级作简化，并非目标应用的精确层级。<span x-text="os==='mac'?'pid':'hwnd'"></span> 由系统取得并留在 helper 内，不是 Agent 提交的写入授权。</figcaption>
+          </div>
+          <div class="native-api-path"><template x-if="os==='mac'"><div><p><b>Mac 的查询入口</b> <code>bundle ID → pid → AXUIElementCreateApplication(pid) → app</code></p><p><code>AXWindows</code> 返回窗口；对窗口与下层容器读取 <code>AXChildren</code>。helper 逐项保留支持的候选原对象，返回说明与 targetId。</p></div></template><template x-if="os==='win'"><div><p><b>Windows 的查询入口</b> <code>exe 路径核对进程 → EnumWindows → hwnd → ElementFromHandle → root</code></p><p>先 <code>CreatePropertyCondition(IsPassword=true)</code> 准备条件，再 <code>FindAll(TreeScope_Descendants,…)</code> 查询匹配项；创建条件没有取得控件。helper 逐项完成其余支持检查并返回候选，Agent 再按任务选择。</p></div></template></div>
+          <figcaption>窗口、属性值和中间层级均为教学简化；另一窗口在树中只展开密码节点，切换后可查看其全部组件。演示不调用系统、不写值、不申请或批准凭据。<span x-text="os==='mac'?'pid':'hwnd'"></span> 留在 helper 内，不能作为写入授权。</figcaption>
         </figure>
         <details class="native-query-code"><summary x-text="os==='mac'?'查看对应的 Swift 查询代码节选':'查看对应的 C++ 查询代码节选'"></summary><pre class="api-code"><code x-html="highlight(queryCode)"></code></pre></details>
       </div>
       <div class="api-step" id="native-inspect"><div class="step-heading"><span>2</span><h3>确认它属于支持的原生密码控件</h3></div>
-        <div class="step-content"><div class="api-explain"><p x-text="os==='mac'?'AXRole、AXSubrole、AXIdentifier 是属性名，分别描述控件种类、细分种类和应用／控件框架提供的标识。_NS:280 是本例的属性值，不是知予生成的 targetId。':'ControlType、IsPassword、AutomationId 是 UIA 属性，分别描述控件种类、是否为密码控件，以及应用／界面框架提供的标识。120 是 AutomationId 的本例值，不是 helper 返回的 targetId。'"></p><p>找到密码框还不够。辅助程序继续核对应用与窗口身份、控件可用性和直接写值的能力；遇到无法区分的候选或不支持的控件就拒绝。</p><p x-text="os==='mac'?'Mac 检查 AXValue 是否可写，并结合经过验证的应用版本和窗口结构确认兼容。AXSecureTextField 这个名字本身不能证明任意应用都能接收密码。':'Windows 限定经验证的 Win32、WinForms、WPF 原生控件，并检查 ValuePattern 设值能力。本轮查询不读取密码值。'"></p></div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>继续检查</span><span>本例符合的条件</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
+        <div class="step-content"><div class="api-explain"><p>上图“扫描并筛选”会先完成下面这些支持检查，再形成 <code>targets</code> 交给 Agent 选择。</p><p x-text="os==='mac'?'AXRole、AXSubrole、AXIdentifier 是属性名，分别描述控件种类、细分种类和应用／控件框架提供的标识。_NS:280 是本例的属性值，不是知予生成的 targetId。':'ControlType、IsPassword、AutomationId 是 UIA 属性，分别描述控件种类、是否为密码控件，以及应用／界面框架提供的标识。120 是 AutomationId 的本例值，不是 helper 返回的 targetId。'"></p><p>找到密码框还不够。扫描时，辅助程序还要核对应用与窗口身份、控件可用性和直接写值的能力；遇到无法区分的候选或不支持的控件就拒绝。</p><p x-text="os==='mac'?'Mac 检查 AXValue 是否可写，并结合经过验证的应用版本和窗口结构确认兼容。AXSecureTextField 这个名字本身不能证明任意应用都能接收密码。':'Windows 限定经验证的 Win32、WinForms、WPF 原生控件，并检查 ValuePattern 设值能力。本轮查询不读取密码值。'"></p></div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>继续检查</span><span>本例符合的条件</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
       </div>
     </div>
 
-    <div class="reading connection-entry" id="native-object-map"><h3>把原对象留在 helper，把目标编号返回 Agent</h3><p>helper 保存应用、窗口和 <code>field</code> 的原对象，为该目标生成 <code>targetId</code>。名称与字段说明帮助 Agent 选择；真正的系统控件对象继续留在 helper。</p><div class="native-retained-target"><div><span>Agent 下一条命令使用</span><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code></div><b aria-hidden="true">→</b><div><span>helper 保留并复核</span><strong>原应用／窗口／密码控件 field</strong></div></div><p>后续申请用这个编号，批准后执行仍须复核原对象。</p></div>
+    <div class="reading connection-entry" id="native-object-map"><h3>把原对象留在 helper，把目标编号返回 Agent</h3><p>helper 保存应用、窗口和 <code>field</code> 的原对象，为该目标生成 <code>targetId</code>。名称与字段说明帮助 Agent 选择；真正的系统控件对象继续留在 helper。</p><div class="native-retained-target"><div><span>Agent 下一条命令使用</span><code x-text="nativeTaskTarget.targetId"></code></div><b aria-hidden="true">→</b><div><span>helper 保留并复核</span><strong>原应用／窗口／密码控件 field</strong></div></div><p>后续申请用这个编号，批准后执行仍须复核原对象。</p></div>
 
-    <div class="reading connection-entry" id="native-handoff"><h3>用目标编号申请使用密码，再等待批准</h3><p>本例改用知予目录中选出的“压缩文件密码”，编号 <code>cred-archive-01</code>、第 <code>1</code> 版。Agent 将它和刚才的目标编号放进同一份申请：</p><pre class="plan-fragment"><code>chiyo fill request --via native \
+    <div class="reading connection-entry" id="native-handoff"><h3>用目标编号申请使用密码，再等待批准</h3><p>本例改用知予目录中选出的“压缩文件密码”，编号 <code>cred-archive-01</code>、第 <code>1</code> 版。Agent 将它和第二个候选（<code>NativeBackgroundProof.zip</code> 的密码框）的目标编号放进同一份申请：</p><pre class="plan-fragment"><code>chiyo fill request --via native \
   --target tgt_W8Jk2Nx6fR9qP4vL7cY1sA \
   --credential cred-archive-01 --version 1 \
   --purpose "为本次压缩文件输入密码" --json</code></pre><p>知予向辅助程序确认这个编号仍指向原控件，把凭据版本、应用、窗口和字段说明保存为待批准申请 <code>REQ-43</code>。<strong>这一步只申请，不把密码写入应用。</strong></p><p>用户在知予 App 中查看并决定是否批准。Agent 继续查询这一份申请：</p><pre class="plan-fragment"><code>chiyo requests wait REQ-43 --timeout 60 --json</code></pre><p>批准允许按这份申请向固定目标使用密码；换成另一个框，需要新的目标和相应批准。获得许可后，才进入下一节的执行。</p></div>
@@ -397,7 +431,7 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
     <p class="caption">代码为机制节选，省略错误处理、完整兼容检查与私有连接细节。<span x-show="os==='win'">Windows 的焦点设置行为见 <a href="https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomation2-put_autosetfocus" target="_blank" rel="noreferrer">AutoSetFocus 文档</a>。</span></p>
 
     <div class="reading connection-entry"><h3>用户在别处打字时，密码会填到哪里？</h3><p>下面的交互只模拟对象关系。目标仍是先前固定的密码控件；切换用户正在使用的应用，不会改变它。也可以模拟密码框被重建：这时原对象失效，知予应停止，而不是转去填写新框。</p></div>
-    <div class="background-demo" id="agent-native-target"><div class="background-controls"><label>用户当前正在使用 <select x-model="userApplication"><option value="editor">文本编辑器</option><option value="mail">邮件应用</option></select></label><label class="target-toggle"><input type="checkbox" x-model="targetRebuilt" @change="resetDelivery()">模拟原密码控件已被销毁重建</label></div><div class="background-windows"><div class="background-target"><span class="process-label">被操作的后台窗口</span><b>NativeBackgroundProof.zip · 密码</b><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code><output x-text="delivery==='sent'?'•••••':'尚未填写'"></output><small x-text="targetRebuilt?'原对象已失效，新框不能承接原编号':'辅助程序仍持有原控件对象'"></small></div><div class="foreground-user"><span class="process-label">用户正在使用的前台窗口</span><b x-text="userApplication==='editor'?'文本编辑器':'邮件应用'"></b><p>这里是用户自己的内容<span class="caret"></span></p><small>填写操作不向这个窗口发送文字</small></div></div><div class="background-demo-action"><button class="primary" @click="demoSend()">模拟向固定目标写入 hello</button><button class="text-button" @click="resetDelivery()">重置演示</button><p class="live-status" aria-live="polite" x-text="deliveryText"></p></div></div>
+    <div class="background-demo" id="agent-native-target"><div class="background-controls"><label>用户当前正在使用 <select x-model="userApplication"><option value="editor">文本编辑器</option><option value="mail">邮件应用</option></select></label><label class="target-toggle"><input type="checkbox" x-model="targetRebuilt" @change="resetDelivery()">模拟原密码控件已被销毁重建</label></div><div class="background-windows"><div class="background-target"><span class="process-label">被操作的后台窗口</span><b x-text="nativeTaskTarget.windowTitle"></b><code x-text="nativeTaskTarget.targetId"></code><output x-text="delivery==='sent'?'•••••':'尚未填写'"></output><small x-text="targetRebuilt?'原对象已失效，新框不能承接原编号':'辅助程序仍持有原控件对象'"></small></div><div class="foreground-user"><span class="process-label">用户正在使用的前台窗口</span><b x-text="userApplication==='editor'?'文本编辑器':'邮件应用'"></b><p>这里是用户自己的内容<span class="caret"></span></p><small>填写操作不向这个窗口发送文字</small></div></div><div class="background-demo-action"><button class="primary" @click="demoSend()">模拟向固定目标写入 hello</button><button class="text-button" @click="resetDelivery()">重置演示</button><p class="live-status" aria-live="polite" x-text="deliveryText"></p></div></div>
     <div class="reading connection-entry" id="native-result"><h3>查询结果，再决定是否提交应用里的操作</h3><p>Agent 用 <code>chiyo operations show OP-43 --json</code> 查询本次操作。<code>sent</code> 表示系统设值调用已被接受；明确未写入时返回拒绝。若写值后失联，无法确定有没有写入，就报告 <code>unknown</code>，不能自动重试。</p><p>填写和点击“确定”仍是两个动作。Agent 还要检查界面，并在需要时另行提交。真实软件验收也必须检查业务结果，例如压缩包能否用这个密码正常处理，不能只凭 <code>sent</code> 就判定任务完成。</p></div>
     <details><summary>哪些普通应用可以这样填写？</summary><div class="detail-body"><p>需要应用提供可查询、可设值的原生密码控件，还要通过实际兼容验证。Mac 使用 AppKit 的标准安全文本框是可行路径，但不能推广到全部 AppKit 应用；首批产品兼容配置仅包括已验证的系统归档实用工具、系统版本和窗口结构。Windows 验证覆盖 Win32、WinForms、WPF 原生密码控件，以及真实 7-Zip 场景。</p><p>内嵌网页、WKWebView 和 Electron 暂不通过这条原生路径填写。浏览器继续用前面讲过的专用接口。即使外观相同，系统返回的控件能力和应用处理设值的方式也可能不同。</p><p>最后一次检查和实际设值不是一个能锁住目标 App 的事务：应用仍可能在两者之间关闭窗口或改变业务状态。后台填写解决的是固定控件和避免依赖全局焦点，不能保证任意应用的所有业务变化都可由外部检测。</p></div></details>
   </section>
