@@ -13,13 +13,28 @@ class CredentialBatchDestination {
     this.browser,
     this.application, [
     this.program,
+    this.native,
   ]);
   final String via;
   final BrowserFormTarget? browser;
   final FocusedFillApplication? application;
   final CredentialProgramDestination? program;
+  final NativeFillTarget? native;
   factory CredentialBatchDestination.fromJson(Map<String, dynamic> json) {
     final via = json['via'];
+    if (via == 'native') {
+      _useShape(json, {'via', 'target'});
+      if (json['target'] is! Map<String, dynamic>) {
+        throw const CredentialUseFailure('invalid_type');
+      }
+      return CredentialBatchDestination._(
+        'native',
+        null,
+        null,
+        null,
+        NativeFillTarget.fromJson(json['target'] as Map<String, dynamic>),
+      );
+    }
     if (via == 'program') {
       _useShape(json, {'via', 'program'});
       if (json['program'] is! Map<String, dynamic>) {
@@ -65,6 +80,7 @@ class CredentialBatchDestination {
   Map<String, Object?> toJson() => {
     'via': via,
     if (browser != null) 'target': browser!.toJson(),
+    if (native != null) 'target': native!.toJson(),
     if (application != null) 'application': application!.toJson(),
     if (program != null) 'program': program!.toJson(),
   };
@@ -773,6 +789,11 @@ class CredentialBatchOperation {
 }
 
 const credentialBatchErrorCodes = {
+  'target_unavailable',
+  'access_denied',
+  'session_unavailable',
+  'input_rejected',
+  'unsupported_secret',
   'destination_changed',
   'browser_unavailable',
   'browser_operation_failed',

@@ -234,6 +234,297 @@ void main() {
   );
 
   test(
+    'native targets stay in the original private scope and one setter uses the approved snapshot',
+    () async {
+      final id = await f.backgroundRequest();
+      expect(f.background.setters, 0);
+      expect(f.native.sent, 0);
+      expect(f.browser.inspections, 0);
+      final foreign = await f.call({
+        'command': 'batch-request',
+        'operationId': 'foreign-native',
+        'input': f.plan(
+          destination: {
+            'via': 'native',
+            'targetId': f.background.target.targetId,
+          },
+        ),
+      }, session: f.stranger);
+      expect(foreign['errorCode'], 'target_unavailable');
+      await f.approve(id, ['b1']);
+      final args = [
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'native-setter',
+      ];
+      expect((await f.cli(args)).exitCode, 0);
+      final done = await f.done('native-setter');
+      expect(done['executionState'], 'filled');
+      expect(done['itemResults'], {'b1': 'sent'});
+      expect(f.background.received, _Fixture.aSecret);
+      expect(f.background.setters, 1);
+      expect(f.background.material!.every((b) => b == 0), true);
+      expect((await f.cli(args)).exitCode, 0);
+      expect(f.background.setters, 1);
+      f.background.restart();
+      final stale = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'stale-native',
+      ]);
+      expect(stale.exitCode, 5);
+      expect((stale.output['error'] as Map)['code'], 'target_unavailable');
+      expect(f.count('begin'), 1);
+      expect(f.count('material'), 1);
+      expect(f.native.sent, 0);
+    },
+  );
+  test(
+    'native authorization is rechecked before the complete setter',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      f.background.beforeDispatch = () async {
+        final request = f.service.owner.credentialBatches.single;
+        await f.service.owner.revokeCredentialBatch(
+          id,
+          operationId: 'revoke-native',
+          revision: request.revision,
+          itemIds: ['b1'],
+        );
+      };
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'revoked-native',
+      ]);
+      final done = await f.done('revoked-native');
+      expect(done['executionState'], 'refused');
+      expect(done['errorCode'], 'grant_revoked');
+      expect(f.background.setters, 0);
+      expect(f.background.material!.every((b) => b == 0), true);
+    },
+  );
+  test(
+    'unknown native setter results cannot be replayed or hidden by a new ID',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      f.background.result = const NativeFillResult(
+        NativeFillState.unknown,
+        'access_denied',
+      );
+      final args = [
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'unknown-native',
+      ];
+      await f.cli(args);
+      expect((await f.done('unknown-native'))['executionState'], 'unknown');
+      expect((await f.cli(args)).exitCode, 7);
+      final replacement = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'replacement-native',
+      ]);
+      expect(replacement.exitCode, 7);
+      expect(f.background.setters, 1);
+      expect(f.count('material'), 1);
+    },
+  );
+  test(
+    'native capability is explicit before discovery or request creation',
+    () async {
+      final unavailable = await f.cli([
+        'fill',
+        'targets',
+        '--via',
+        'native',
+        '--app',
+        'synthetic.native',
+      ]);
+      expect(unavailable.exitCode, 3);
+      expect(f.background.discoveries, 0);
+      expect(f.service.owner.credentialBatches, isEmpty);
+    },
+  );
+
+  test(
+    'native operations do not queue a second write to a busy target',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      final entered = Completer<void>(), release = Completer<void>();
+      addTearDown(() {
+        if (!release.isCompleted) release.complete();
+      });
+      f.background.beforeDispatch = () async {
+        if (!entered.isCompleted) entered.complete();
+        await release.future;
+      };
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'busy-native-first',
+      ]);
+      await entered.future;
+      final busy = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'busy-native-second',
+      ]);
+      expect((busy.output['error'] as Map)['code'], 'busy');
+      expect(f.background.setters, 0);
+      release.complete();
+      expect((await f.done('busy-native-first'))['itemResults'], {
+        'b1': 'sent',
+      });
+      expect(f.background.setters, 1);
+    },
+  );
+  test(
+    'mixed plans retain native setter acceptance when a later explicit destination refuses',
+    () async {
+      f.backgroundSupport = true;
+      await f.cli([
+        'fill',
+        'targets',
+        '--via',
+        'native',
+        '--app',
+        'synthetic.native',
+      ]);
+      final input = f.plan();
+      (input['items'] as List).first['destination'] = {
+        'via': 'native',
+        'targetId': f.background.target.targetId,
+      };
+      final submitted = await f.call({
+        'command': 'batch-request',
+        'operationId': 'mixed-native-submit',
+        'input': input,
+      });
+      final id = submitted['requestId'] as String;
+      await f.approve(id, ['b1', 'b2']);
+      f.browser.result = {'status': 'refused', 'code': 'value_not_retained'};
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'partial-native',
+      ]);
+      final done = await f.done('partial-native');
+      expect(done['executionState'], 'partial');
+      expect(done['itemResults'], {'b1': 'sent', 'b2': 'refused'});
+      expect(f.background.setters, 1);
+      expect(f.native.sent, 0);
+    },
+  );
+  test(
+    'only resident Host shutdown disposes an owned native driver and repeat close is idempotent',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      final entered = Completer<void>(), release = Completer<void>();
+      addTearDown(() {
+        if (!release.isCompleted) release.complete();
+      });
+      f.background.beforeDispatch = () async {
+        entered.complete();
+        await release.future;
+      };
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'resident-native',
+      ]);
+      await entered.future;
+      expect(f.background.disposals, 0);
+      expect(f.background.refs, isNotEmpty);
+      final observation = await f.cli([
+        'operations',
+        'show',
+        'resident-native',
+      ]);
+      expect(observation.exitCode, 0);
+      expect(f.background.disposals, 0);
+      release.complete();
+      expect((await f.done('resident-native'))['itemResults'], {'b1': 'sent'});
+      await Future.wait([f.host.close(), f.host.close()]);
+      expect(f.background.disposals, 1);
+      expect(f.background.refs, isEmpty);
+    },
+  );
+  test(
+    'a borrowed native driver remains the caller responsibility after Host shutdown',
+    () async {
+      await f.close();
+      f = await _Fixture.start(ownsNativeDriver: false);
+      await f.backgroundRequest();
+      await f.host.close();
+      expect(f.background.disposals, 0);
+      expect(f.background.refs, isNotEmpty);
+      await f.background.dispose();
+      expect(f.background.disposals, 1);
+      expect(f.background.refs, isEmpty);
+    },
+  );
+  test(
+    'resident shutdown closes a pending native helper read before waiting for the operation',
+    () async {
+      final id = await f.backgroundRequest();
+      await f.approve(id, ['b1']);
+      f.background.setterEntered = Completer<void>();
+      f.background.pendingSetter = Completer<NativeFillResult>();
+      addTearDown(() {
+        if (!f.background.pendingSetter!.isCompleted) {
+          f.background.pendingSetter!.complete(
+            const NativeFillResult(NativeFillState.unknown, 'fill_unknown'),
+          );
+        }
+      });
+      await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'pending-native-helper',
+      ]);
+      await f.background.setterEntered!.future;
+      await f.host.close().timeout(const Duration(seconds: 3));
+      expect(f.background.disposals, 1);
+      expect(f.background.refs, isEmpty);
+      expect(f.background.pendingSetter!.isCompleted, true);
+    },
+  );
+  test(
     'one private request contains multiple inspected destinations and does not execute on approval',
     () async {
       final id = await f.request();
@@ -845,6 +1136,126 @@ class _Native implements FocusedFillDiscoveryDriver {
   }
 }
 
+class _Background implements NativeFillDriver {
+  NativeFillTarget target = _target('H');
+  final refs = <(String, String), NativeFillTarget>{};
+  int discoveries = 0, setters = 0, disposals = 0;
+  bool disposed = false;
+  String? received;
+  List<int>? material;
+  Future<void> Function()? beforeDispatch;
+  Completer<void>? setterEntered;
+  Completer<NativeFillResult>? pendingSetter;
+  NativeFillResult result = const NativeFillResult(NativeFillState.sent);
+  static NativeFillTarget _target(String epoch) => NativeFillTarget.fromJson({
+    'targetId': 'N' * 32,
+    'helperInstanceId': epoch * 32,
+    'platform': 'macos',
+    'application': {
+      'executable': '/Applications/Synthetic.app/Contents/MacOS/Synthetic',
+      'sha256': 'a' * 64,
+    },
+    'appId': 'synthetic.native',
+    'appName': 'Synthetic Native',
+    'windowId': 'W' * 32,
+    'windowTitle': 'Synthetic login',
+    'fieldLabel': 'Password',
+    'controlKind': 'appkit_secure_text',
+  });
+  void restart() {
+    refs.clear();
+    target = _target('J');
+  }
+
+  @override
+  Future<List<NativeFillTarget>> discover({
+    required String scope,
+    required String appId,
+    String? windowId,
+  }) async {
+    discoveries++;
+    if (appId != target.appId ||
+        windowId != null && windowId != target.windowId) {
+      return [];
+    }
+    refs[(scope, target.targetId)] = target;
+    return [target];
+  }
+
+  @override
+  Future<PreparedNativeFill> prepare({
+    required String scope,
+    required String targetId,
+    NativeFillTarget? expected,
+  }) async {
+    final found = refs[(scope, targetId)];
+    if (found == null) throw const CredentialUseFailure('target_unavailable');
+    if (expected != null && !expected.matches(found)) {
+      throw const CredentialUseFailure('destination_changed');
+    }
+    return _BackgroundPrepared(this, found);
+  }
+
+  @override
+  Future<void> release({
+    required String scope,
+    required String targetId,
+  }) async {
+    refs.remove((scope, targetId));
+  }
+
+  @override
+  Future<void> dispose() async {
+    if (disposed) return;
+    disposed = true;
+    disposals++;
+    refs.clear();
+    if (pendingSetter != null && !pendingSetter!.isCompleted) {
+      pendingSetter!.complete(
+        const NativeFillResult(NativeFillState.unknown, 'fill_unknown'),
+      );
+    }
+  }
+}
+
+class _BackgroundPrepared implements PreparedNativeFill {
+  _BackgroundPrepared(this.driver, this.target);
+  final _Background driver;
+  @override
+  final NativeFillTarget target;
+  bool closed = false;
+  @override
+  Future<NativeFillResult> setValue(
+    List<int> utf8Bytes, {
+    required Future<void> Function() beforeDispatch,
+  }) async {
+    driver.material = utf8Bytes;
+    if (closed) {
+      return const NativeFillResult(
+        NativeFillState.refused,
+        'target_unavailable',
+      );
+    }
+    await driver.beforeDispatch?.call();
+    await beforeDispatch();
+    if (!driver.target.matches(target)) {
+      return const NativeFillResult(
+        NativeFillState.refused,
+        'destination_changed',
+      );
+    }
+    driver.setters++;
+    driver.received = utf8.decode(utf8Bytes);
+    driver.setterEntered?.complete();
+    return driver.pendingSetter?.future ?? driver.result;
+  }
+
+  @override
+  Future<void> close() async {
+    closed = true;
+  }
+}
+
 class _Prepared implements PreparedFocusedFill {
   _Prepared(this.driver);
   final _Native driver;
@@ -875,6 +1286,9 @@ class _Fixture {
   late String session, stranger, a, b;
   DateTime now = DateTime.utc(2026, 11, 13);
   final browser = _Browser(), native = _Native();
+  final background = _Background();
+  bool backgroundSupport = false;
+  bool ownsNativeDriver = true;
   final paths = <String>[];
   final counts = <String, int>{};
   bool support = true,
@@ -885,8 +1299,11 @@ class _Fixture {
       _closed = false;
   Future<void> Function()? afterAuthorize;
   Future<void> Function()? afterBegin;
-  static Future<_Fixture> start({bool remote = false}) async {
-    final f = _Fixture();
+  static Future<_Fixture> start({
+    bool remote = false,
+    bool ownsNativeDriver = true,
+  }) async {
+    final f = _Fixture()..ownsNativeDriver = ownsNativeDriver;
     final base = Directory('../../build/batch-host-tests').absolute;
     await base.create(recursive: true);
     f.root = await Directory(
@@ -978,6 +1395,7 @@ class _Fixture {
             if (support) ...[
               'credential-batches.v3',
               'agent-record-queries.v1',
+              if (backgroundSupport) 'credential-native-fill.v1',
             ],
           ],
         };
@@ -1039,6 +1457,8 @@ class _Fixture {
     host = await DeviceCredentialBatchHost.start(
       directory: root,
       driver: native,
+      nativeDriver: background,
+      ownsNativeDriver: ownsNativeDriver,
       browser: browser,
     );
   }
@@ -1112,6 +1532,48 @@ class _Fixture {
     });
     expect(result['status'], 'pending', reason: '$result');
     return result['requestId'] as String;
+  }
+
+  Future<String> backgroundRequest() async {
+    backgroundSupport = true;
+    final discovered = await cli([
+      'fill',
+      'targets',
+      '--via',
+      'native',
+      '--app',
+      'synthetic.native',
+    ]);
+    expect(discovered.exitCode, 0, reason: discovered.render());
+    final found =
+        ((discovered.output['data'] as Map)['targets'] as List).single as Map;
+    expect(found['fieldLabel'], 'Password');
+    for (final key in [
+      'value',
+      'bytes',
+      'scope',
+      'leaseId',
+      'processId',
+      'hwnd',
+    ]) {
+      expect(found.containsKey(key), false);
+    }
+    final submitted = await cli([
+      'fill',
+      'request',
+      '--via',
+      'native',
+      '--target',
+      found['targetId'] as String,
+      '--credential',
+      a,
+      '--purpose',
+      'Synthetic native login',
+      '--operation',
+      'submit-native',
+    ]);
+    expect(submitted.exitCode, 0, reason: submitted.render());
+    return (submitted.output['data'] as Map)['requestId'] as String;
   }
 
   Future<void> approve(String id, List<String> ids) async {

@@ -3,34 +3,40 @@ import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'package:info_storage/info_storage.dart';
 import 'package:test/test.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'storage_test.dart' show TestKeyStore;
 import 'backup_setup.dart';
+import '../../info_core/test/native_fill_models_test.dart'
+    show nativeTargetFixture;
 
 const _device = 'AAAAAAAAAAAAAAAAAAAAAA';
-CredentialBatchInput _input(String id) => CredentialBatchInput.fromJson({
-  'protocolVersion': 3,
-  'purpose': 'Synthetic login',
-  'agentName': 'Trial Agent',
-  'externalChatId': 'synthetic-chat',
-  'items': [
-    {
-      'credentialId': id,
-      'destination': {
-        'via': 'ego',
-        'target': {
-          'provider': 'ego',
-          'instanceId': 'synthetic-browser',
-          'space': 7,
-          'pageId': 'p1',
-          'url': 'https://example.test/login',
-          'form': '#login',
-          'field': '#password',
-          'structureDigest': 'a' * 64,
+CredentialBatchInput _input(String id, {bool native = false}) =>
+    CredentialBatchInput.fromJson({
+      'protocolVersion': 3,
+      'purpose': 'Synthetic login',
+      'agentName': 'Trial Agent',
+      'externalChatId': 'synthetic-chat',
+      'items': [
+        {
+          'credentialId': id,
+          'destination': native
+              ? {'via': 'native', 'target': nativeTargetFixture()}
+              : {
+                  'via': 'ego',
+                  'target': {
+                    'provider': 'ego',
+                    'instanceId': 'synthetic-browser',
+                    'space': 7,
+                    'pageId': 'p1',
+                    'url': 'https://example.test/login',
+                    'form': '#login',
+                    'field': '#password',
+                    'structureDigest': 'a' * 64,
+                  },
+                },
         },
-      },
-    },
-  ],
-});
+      ],
+    });
 Future<ManagedCredential> _credential(InformationService service) async {
   final c = await service.owner.createStringCredential(
     name: 'Synthetic login',
@@ -49,8 +55,14 @@ Future<ManagedCredential> _credential(InformationService service) async {
 }
 
 void main() {
+  for (final native in [false, true]) {
+    _tests(native);
+  }
+}
+
+void _tests(bool native) {
   test(
-    'encrypted batches preserve live server grants, not an interrupted input capability',
+    '${native ? 'native ' : ''}encrypted batches preserve live server grants, not an interrupted input capability',
     () async {
       final root = await Directory.systemTemp.createTemp('encrypted-batches-');
       addTearDown(() => root.delete(recursive: true));
@@ -68,7 +80,7 @@ void main() {
         () => runtime.service.agent.requestCredentialBatch(
           session,
           _device,
-          _input(c.id),
+          _input(c.id, native: native),
           operationId: 'submit-1',
         ),
       );
@@ -90,6 +102,16 @@ void main() {
       );
       await runtime.close();
       await repo.close();
+      final database = sqlite.sqlite3.open('${root.path}/library.db');
+      final keyHex = keys.key!
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+      database.execute('PRAGMA key = "x\'$keyHex\'"');
+      expect(
+        database.select('PRAGMA user_version').single.values.single,
+        native ? 69 : 65,
+      );
+      database.close();
       repo = await EncryptedInformationRepository.openOnline(root.path, keys);
       runtime = await OnlineInformationRuntime.open(repository: repo);
       addTearDown(() async {
@@ -142,7 +164,7 @@ void main() {
   );
 
   test(
-    'portable backup keeps decided batch history, drops pending work, and restores no usable grant',
+    '${native ? 'native ' : ''}portable backup keeps decided batch history, drops pending work, and restores no usable grant',
     () async {
       final root = await Directory.systemTemp.createTemp('batch-backup-');
       addTearDown(() => root.delete(recursive: true));
@@ -160,7 +182,7 @@ void main() {
       final r = await service.agent.requestCredentialBatch(
         session,
         _device,
-        _input(c.id),
+        _input(c.id, native: native),
         operationId: 'submit-1',
       );
       await service.owner.decideCredentialBatch(
@@ -172,7 +194,7 @@ void main() {
       await service.agent.requestCredentialBatch(
         session,
         _device,
-        _input(c.id),
+        _input(c.id, native: native),
         operationId: 'pending-2',
       );
       final operation = await service.agent.beginCredentialBatchOperation(
@@ -190,7 +212,7 @@ void main() {
       );
       expect(repo.credentialBatches, hasLength(2));
       final preview = await repo.backups.inspect(path, recovery);
-      expect(preview.formatVersion, 28);
+      expect(preview.formatVersion, native ? 30 : 28);
       expect(preview.credentialUseHistoryCount, 1);
       expect(preview.credentialExecutionCount, 1);
       final target = await EncryptedInformationRepository.open(

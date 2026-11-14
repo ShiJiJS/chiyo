@@ -10,6 +10,13 @@ bool _hasCredentialDeliveryRows(Iterable<Map<String, Object?>> rows) =>
     });
 int _syncContentFormat(Map tables) {
   final batches = tables['credential_batches'] as List? ?? const [];
+  if (batches.any(
+    (r) => _storedBatch(
+      Map<String, Object?>.from(r as Map),
+    ).items.any((i) => i.destination.native != null),
+  )) {
+    return 30;
+  }
   if ((tables['credential_program_operations'] as List? ?? const [])
           .isNotEmpty ||
       batches.any(
@@ -33,7 +40,7 @@ int _syncContentFormat(Map tables) {
 }
 
 Map<String, List<String>> _syncColumns(int format) => switch (format) {
-  29 => InformationBackups._v29Columns,
+  29 || 30 => InformationBackups._v29Columns,
   28 => InformationBackups._v28Columns,
   _ => InformationBackups._v26Columns,
 };

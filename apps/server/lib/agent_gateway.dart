@@ -202,6 +202,8 @@ final class AgentGateway {
           if (_deviceCredentials != null) ...[
             if (_deviceCredentials.credentialBatchesAvailable)
               'credential-batches.v3',
+            if (_deviceCredentials.credentialBatchesAvailable)
+              'credential-native-fill.v1',
             if (_deviceCredentials.credentialProgramsAvailable)
               'credential-programs.v3',
             'credential-device-execution.v1',

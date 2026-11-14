@@ -33,7 +33,8 @@ extension _ChiyoFill on ChiyoCli {
               'version': int.parse(o['version'] as String),
             'destination': {
               'via': via,
-              if (via != 'focus') ...{
+              if (via == 'native') 'targetId': _required(i, 'target'),
+              if (via != 'focus' && via != 'native') ...{
                 'url': _required(i, 'url'),
                 'form': _required(i, 'form'),
                 'selector': _required(i, 'selector'),
@@ -138,6 +139,15 @@ void _validateFillBusiness(Map<String, dynamic> body) {
     final via = d['via'];
     if (via == 'focus') {
       if (d.length != 1) invalid();
+      continue;
+    }
+    if (via == 'native') {
+      if (d.length != 2 ||
+          !RegExp(
+            r'^[A-Za-z0-9_-]{22,128}$',
+          ).hasMatch(d['targetId'] as String? ?? '')) {
+        invalid();
+      }
       continue;
     }
     if (!{'ego', 'chrome'}.contains(via) ||
