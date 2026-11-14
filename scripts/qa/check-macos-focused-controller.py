@@ -23,7 +23,12 @@ def main():
     common = ["xcrun", "swiftc", "-target", "arm64-apple-macos14.0", "-swift-version", "5", "-warnings-as-errors"]
     module = [str(source / "FocusedFillContract.swift"), str(source / "FocusedFillController.swift"),
               str(source / "FocusSerialGate.swift")]
+    native = source.parent / "native_background"
+    helper_native = [str(native / name) for name in ["NativeBackgroundTypes.swift", "NativeBackgroundController.swift",
+                     "SystemNativeBackgroundEnvironment.swift", "NativeBackgroundWire.swift", "NativeBackgroundXPC.swift", "NativeBackgroundCompatibility.swift"]]
     framework = root / ".tools/flutter/bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64"
+    if not framework.exists():
+        framework = root.parent.parent / ".tools/flutter/bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64"
     owner = ["FocusedFillContract.swift", "FocusProcessIdentity.swift", "FocusedFillXPC.swift",
              "FocusedFillOwnerClient.swift", "FocusedFillBridge.swift"]
     project = json.loads(subprocess.check_output(["/usr/bin/plutil", "-convert", "json", "-o", "-",
@@ -38,7 +43,7 @@ def main():
                    str(source / "FocusProcessIdentity.swift"), str(source / "FocusedFillXPC.swift"),
                    str(source / "FocusedFillXPCService.swift"), str(source / "ServiceMain.swift"),
                    str(source / "FocusedFillOwnerClient.swift"),
-                   str(source / "FocusedFillBridge.swift"), "-F", str(framework)],
+                   str(source / "FocusedFillBridge.swift"), *helper_native, "-F", str(framework)],
                    check=True, cwd=root, timeout=60)
     # Runner has existing deprecated Keychain/panel APIs. New focused-fill code
     # is checked with warnings-as-errors above; retain full Runner diagnostics.
@@ -46,7 +51,8 @@ def main():
         subprocess.run([arg for arg in common if arg != "-warnings-as-errors"] + ["-typecheck", "-F", str(framework)]
                        + [str(path) for path in sorted((root / "apps/desktop/macos/Runner").glob("*.swift"))]
                        + [str(root / "apps/desktop/macos/Flutter/GeneratedPluginRegistrant.swift")]
-                       + [str(source / name) for name in owner], check=True, cwd=root, timeout=60,
+                       + [str(source / name) for name in owner]
+                       + [str(native / name) for name in ["NativeBackgroundXPC.swift", "NativeBackgroundBridge.swift"]], check=True, cwd=root, timeout=60,
                        stdout=log, stderr=subprocess.STDOUT)
     with tempfile.TemporaryDirectory(prefix="headless-", dir=output) as temporary:
         executable = str(Path(temporary) / "controller-checks")
