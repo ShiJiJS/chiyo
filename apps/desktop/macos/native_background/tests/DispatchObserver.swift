@@ -23,7 +23,7 @@ private struct Snapshot {
     clipboard = NSPasteboard.general.changeCount
   }
   var valid: Bool { front > 0 && field != nil && fieldPID == front }
-  var wire: [String: Any] { ["at": Date().timeIntervalSince1970, "front": front, "focusPID": fieldPID,
+  var wire: [String: Any] { ["at": Date().timeIntervalSince1970, "uptime": ProcessInfo.processInfo.systemUptime, "front": front, "focusPID": fieldPID,
     "valid": valid, "focusHash": field.map { CFHash($0) } ?? 0, "x": mouse.x, "y": mouse.y, "clipboard": clipboard] }
   func same(_ other: Snapshot) -> Bool {
     guard valid, other.valid, let field, let otherField = other.field else { return false }
@@ -34,6 +34,19 @@ private struct Snapshot {
  static func main() throws {
   _=NSApplication.shared
   let root=URL(fileURLWithPath:CommandLine.arguments[1]), gate=URL(fileURLWithPath:CommandLine.arguments[2])
+  if CommandLine.arguments.contains("--passive") {
+    let baseline = Snapshot(); var trace = [baseline.wire], same = baseline.valid
+    try Data("ready".utf8).write(to:gate.appendingPathComponent("observer-ready"),options:.atomic)
+    let deadline = Date().addingTimeInterval(12)
+    while !FileManager.default.fileExists(atPath:gate.appendingPathComponent("dispatch-completed").path) && Date() < deadline {
+      pump(0.002); let value = Snapshot(); trace.append(value.wire); same = same && baseline.same(value)
+    }
+    let last = Snapshot(); trace.append(last.wire); same = same && baseline.same(last)
+    let receipt: [String: Any] = ["observationsPreserved":same,
+      "completed": FileManager.default.fileExists(atPath:gate.appendingPathComponent("dispatch-completed").path), "trace":trace]
+    try JSONSerialization.data(withJSONObject:receipt,options:[.sortedKeys,.prettyPrinted]).write(to:gate.appendingPathComponent("observer.json"))
+    return
+  }
   func command(_ action:String) throws {
    let id=UUID().uuidString
    try JSONSerialization.data(withJSONObject:["id":id,"action":action]).write(to:root.appendingPathComponent("cover-command.json"),options:.atomic)

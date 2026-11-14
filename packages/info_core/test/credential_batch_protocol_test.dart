@@ -51,6 +51,10 @@ void main() {
         (await call('$base/request', {}))['errorCode'],
         'unsupported_capability',
       );
+      expect(
+        (await call('/capabilities', {}))['capabilities'],
+        isNot(contains('credential-native-fill.v2')),
+      );
       await server.close();
       server = await AgentServer.start(
         service.agent,
@@ -59,6 +63,9 @@ void main() {
         libraryId: libraryId,
         enableCredentialBatches: true,
       );
+      final capabilities = (await call('/capabilities', {}))['capabilities'];
+      expect(capabilities, contains('credential-native-fill.v2'));
+      expect(capabilities, isNot(contains('credential-native-fill.v1')));
       final session = (await call('/session/lifecycle', {
         'chatLabel': 'Synthetic local chat',
       }))['sessionSecret'];

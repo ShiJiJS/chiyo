@@ -19,6 +19,12 @@ class NativeFillTarget {
   final String windowId, windowTitle, fieldLabel, controlKind;
   final FocusedFillApplication application;
 
+  /// Capability-based controls are a new approval scope. Legacy kinds remain
+  /// readable without acquiring the semantics of the new native interface.
+  bool get requiresV2 =>
+      controlKind == 'macos_ax_password' ||
+      controlKind == 'windows_uia_password';
+
   factory NativeFillTarget.fromJson(Map<String, dynamic> json) {
     _useShape(json, {
       'targetId',
@@ -41,12 +47,14 @@ class NativeFillTarget {
     }
 
     final platform = json['platform'], kind = json['controlKind'];
-    if (!(platform == 'macos' && kind == 'appkit_secure_text' ||
+    if (!(platform == 'macos' &&
+                {'appkit_secure_text', 'macos_ax_password'}.contains(kind) ||
             platform == 'windows' &&
                 {
                   'win32_password',
                   'winforms_password',
                   'wpf_password',
+                  'windows_uia_password',
                 }.contains(kind)) ||
         json['application'] is! Map<String, dynamic>) {
       throw const CredentialUseFailure('unsupported_target');

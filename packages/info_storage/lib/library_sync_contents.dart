@@ -26,6 +26,13 @@ int _syncContentFormat(Map tables) {
   if (batches.any(
     (r) =>
         _storedBatch(Map<String, Object?>.from(r as Map)).items
+            .any((i) => i.destination.native?.requiresV2 ?? false),
+  )) {
+    return 31;
+  }
+  if (batches.any(
+    (r) =>
+        _storedBatch(Map<String, Object?>.from(r as Map)).items
             .any((i) => i.destination.native != null),
   )) {
     return 30;

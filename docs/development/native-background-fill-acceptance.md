@@ -2,15 +2,27 @@
 
 对应 [#144](https://github.com/ShiJiJS/chiyo/issues/144) 和[公共合同](../design/native-background-fill-contract.md)。只使用合成资料、临时加密资料库和专属 App 配置，不连接真实资料库或操作用户文档。验收使用同一候选源码构建的正式驱动、helper 和公开 CLI。
 
-## Windows：三类合成控件完整链路
+## 通用控件改造的验收要求
 
-入口为 [native_background_fill_test.dart](../../apps/desktop/integration_test/native_background_fill_test.dart)，使用合成 receiver 和临时 HTTPS 服务。Windows 的 `win32_password`、`winforms_password`、`wpf_password` 必须各运行一次；不能用注入的假 driver 或 focus shim 通过此项。
+本轮按 [ADR0033](../adr/0033-native-fill-by-control-capability.md) 验收。2026-11-14 用户明确收回第三方软件业务测试要求：只使用自制测试程序，不下载、安装或启动其他软件。生产 helper 不得登记测试应用的名称、路径、摘要、版本或控件编号来使测试通过。证据注明源码提交、系统版本、真实驱动/helper、夹具、场景及结果；测试清单不参与运行资格判断。
+
+- Mac：至少两个未在生产代码登记的不同应用身份的 AppKit 夹具，核对后台填写与原目标。
+- Windows：既有 Win32/WinForms/WPF 夹具回归；增加一个不匹配原三家族名称但提供原生 UIA 密码写值能力的 provider。
+- 两端覆盖缺少 AXIdentifier/AutomationId 但描述明确的目标，以及歧义、只读、禁用、网页、目标重建、进程/helper 重启、权限不足、批准过期或撤销等拒绝用例。证明拒绝时未调用 setter；不更改用户系统权限来布置用例。
+- 前台应用、焦点、鼠标和剪贴板观察覆盖 setter 开始至结束，观察器先做正反校准。后台、遮挡、最小化和隐藏分别记录，不拼接调用前后的稳定片段冒充完整证据。
+- setter 返回 sent 与合成控件收到正确值分别记录，不推断第三方软件业务成功，不读回真实密码或自动重试 unknown。
+
+平台夹具通过后，公共 CLI → AppHost → 批准 → 可信 helper → 控件的链路还需使用同一整合提交验证。隔离候选可以验收；本轮不替换用户正在用的 App，不发布 Release。
+
+## Windows：合成控件完整链路
+
+入口为 [native_background_fill_test.dart](../../apps/desktop/integration_test/native_background_fill_test.dart)，使用合成 receiver 和临时 HTTPS 服务。Windows 的 Win32、WinForms、WPF 和通用 UIA provider 夹具必须各运行一次；新版公开 controlKind 统一为 `windows_uia_password`，夹具实现家族另行选择。不能用注入的假 driver 或 focus shim 通过此项。
 
 在 Windows 正常的 Flutter 集成测试命令上提供以下 dart-define：
 
 - `NATIVE_FILL_CLI`：同一提交构建的公开 chiyo/chiyo.exe 绝对路径。
 - `NATIVE_FILL_RECEIVER`：`build/` 下对应 Win32、WinForms 或 WPF 合成接收程序的实际可执行文件路径。
-- `NATIVE_FILL_KIND`：本次运行的 `win32_password`、`winforms_password` 或 `wpf_password`。
+- `NATIVE_FILL_KIND`：新版公开目标类型，Windows 为 `windows_uia_password`，Mac 为 `macos_ax_password`。夹具家族选择须与公开类型分开，由同提交 harness 和 receiver 的参数约定说明，不能把所有目标标成 WPF 来通过。
 - `NATIVE_FILL_EVIDENCE`：本工作树 `build/` 下本次公开回执目录。
 
 未给参数时此项显式跳过，不视为真实平台通过。清理等待正常 quit 的资源关闭 Future；测试只延后最终 OS 进程终止，以便 Flutter 返回回执，原生驱动仍由正式工厂加载。
@@ -19,7 +31,7 @@
 
 receiver 提供对应原生控件；该接口仅用于测试，不进入产品 helper wire。进程参数为 `--native-fill-fixture --nonce NONCE --kind KIND`。应创建可见且不激活的原生根窗口及密码框；窗口标题必须包含 nonce。不能读取或操作其他 App。标准输出只写 JSON-lines，不输出密码或字节。
 
-1. 就绪回执：`{"state":"ready","nonce":"...","appId":"...","windowTitle":"...","fieldIdentifier":"...","controlKind":"..."}`。fieldIdentifier 对应已知 AXIdentifier/AutomationId，须能在 helper 的可见字段描述中找到。
+1. 就绪回执：`{"state":"ready","nonce":"...","appId":"...","windowTitle":"...","fieldIdentifier":"...","controlKind":"..."}`。有开发者标识时，fieldIdentifier 对应 AXIdentifier/AutomationId；缺失标识的专项用例使用明确的可见标签和分组说明选择目标，不为通过验收而给控件补编号。harness 与 receiver 须在同一提交约定该用例的描述匹配字段。
 2. 私有 stdin `{"command":"expect","bytes":[...]}`：只设置接收程序内部的比较目标、清空测试观察计数，不向控件写值；返回 `{"state":"armed"}`。密码不在程序参数、普通 CLI 输出或证据文件中。
 3. `{"command":"check"}`：接收程序只检查自己的合成控件，返回 `{"state":"checked","matched":false,"active":false,"focusedSinceArmed":false}`。matched 表示值是否准确相等；后两项观察目标 App 是否被激活、目标是否在 expect 后获得过键盘焦点。不得返回字段值。
 4. `{"command":"rebuild"}`：销毁并重建原密码控件，保留同名标识和窗口说明；返回 `{"state":"rebuilt"}`。旧目标必须失效，不可按名字恢复旧批准。
@@ -35,9 +47,9 @@ receiver 提供对应原生控件；该接口仅用于测试，不进入产品 h
 
 公开 sent 仅表示 setter 接受；接收程序的 matched 是合成夹具的独立验真，不扩大生产 helper 对任意 App 业务识别的承诺。
 
-## Mac：普通主入口与归档实用工具
+## 历史参考：Mac 普通主入口与归档实用工具
 
-Mac 生产兼容名单目前仅包含经验证版本的系统归档实用工具（Archive Utility，AU），具体版本、系统构建与身份条件见 [Mac 原生后台填写说明](../../apps/desktop/macos/native_background/README.md#首批真实兼容范围)。自建 AppKit receiver 不在生产名单内，不能按上面的通用 fixture harness 宣称 Mac 产品验收通过，也不能为跑绿测试放宽兼容名单。
+下述是既有 AU 业务流程记录，本轮不执行。新版使用生产通用 AX 路径与 AppKit receiver 验证整值与目标失效，不能注入宽松测试 profile，也不能给测试程序新增兼容名单。历史真实软件结果不代表通用路径已在任意应用中验证。
 
 使用普通 `lib/main.dart` App、同源 AOT `chiyo`、本次唯一的 `--connection-profile <profileName>`，按 [Mac 产品完整流程](../../apps/desktop/macos/native_background/README.md#普通产品构建和后续完整流程) 和 [macos-native-product-flow.py](../../scripts/qa/macos-native-product-flow.py) 执行：
 

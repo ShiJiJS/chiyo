@@ -43,7 +43,7 @@ void main() {
         );
         final session = service.agent.openSession('合成原生审批');
         final target = {
-          ...nativeTargetFixture(),
+          ...nativeTargetFixture(controlKind: 'macos_ax_password'),
           'appName': 'Chiyo Synthetic Native Receiver',
           'windowTitle': 'Synthetic native login',
           'fieldLabel': 'Password [AXIdentifier=loginPassword]',
@@ -108,7 +108,9 @@ void main() {
           'Synthetic native login',
           'AXIdentifier=loginPassword',
           '/Applications/Synthetic.app/',
-          '不代表登录成功',
+          '不代表登录或应用业务已成功',
+          '知予不主动切换窗口或焦点',
+          '批准本身不输入',
         ]) {
           expect(find.textContaining(description), findsWidgets);
         }
@@ -148,7 +150,7 @@ void main() {
           await controller.open(request.id);
         });
         await tester.pumpAndSettle();
-        expect(find.text('已发送填写，结果待确认'), findsOneWidget);
+        expect(find.text('已向所选控件送入密码'), findsOneWidget);
         expect(find.text('已填写'), findsNothing);
         expect(find.textContaining(secret), findsNothing);
         expect(tester.takeException(), null);

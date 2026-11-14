@@ -58,7 +58,9 @@ chiyo operations show OPERATION_ID --json
 
 先核对申请返回的 App、窗口、字段与凭据版本，用户批准后才 run。发现和批准都不写值。每次 run 使用原目标并重新核对许可，用户当前焦点不是目标条件；不要为此点击密码框或激活目标窗口。控件重建、窗口关闭或 helper 重启使旧目标失效，重新发现和申请，不能按相同标签恢复旧许可。sent 只表示 setter 接受，仍需独立检查业务结果；unknown 沿原操作查询，不换编号重新填写。
 
-Mac 仅启用通过版本与业务验证的 AppKit 原生密码控件，首批为已验证系统版本的归档实用工具；不能泛化到全部 AppKit 软件。Windows 限经验证的 Win32、WinForms、WPF 原生密码控件。内嵌网页、WKWebView、Electron 暂不支持；浏览器继续使用上面的专用接口。不支持或缺权限时报告具体条件，不自动改用 focus、键盘、剪贴板或原文读取。多控件批次的 destination 使用 `{"via":"native","targetId":"TARGET_ID"}`，每项引用真实发现目标。
+通用控件路径要求当前服务与执行端支持 `credential-native-fill.v2`。Mac 按实际 AX 密码控件的可写能力判断，Windows 按实际 UIA 密码控件及 ValuePattern 判断；软件不必预先登记，不能因不在测试软件列表中就放弃发现。新目标类型为 `macos_ax_password` 或 `windows_uia_password`。历史旧目标不能转换为新目标来沿用批准。
+
+内嵌网页不走原生路径，浏览器继续使用上面的专用接口。`unsupported_target` 表示该控件暂不支持；权限不足、会话不可用和原目标失效分别报告实际原因，不把它们都说成软件不兼容。不要自行添加应用允许名单、提升权限或改用 focus、键盘、剪贴板、原文读取。多控件批次的 destination 使用 `{"via":"native","targetId":"TARGET_ID"}`，每项引用真实发现目标。
 
 ## 已有的前台焦点方式
 

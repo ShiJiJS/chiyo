@@ -104,7 +104,8 @@ const _agentSubmissionLibraryFormat = 66;
 const _credentialProgramBatchLibraryFormat = 67;
 const _deleteSubmissionLibraryFormat = 68;
 const _nativeFillLibraryFormat = 69;
-// Native capability targets reserve library 70 / content 31.
+const _nativeFillV2LibraryFormat = 70;
+// SSH uses the next admission format after capability-based native targets.
 const _sshInteractiveLibraryFormat = 71;
 
 class StorageFailure implements Exception {

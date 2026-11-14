@@ -2,6 +2,16 @@ part of 'info_storage.dart';
 
 String _batchOperationKey(String binding, String id) => '$binding\u0000$id';
 
+int _nativeBatchLibraryFormat(CredentialUseBatch request) =>
+    request.items.any((i) => i.destination.native?.requiresV2 ?? false)
+    ? _nativeFillV2LibraryFormat
+    : _nativeFillLibraryFormat;
+
+int _nativeBatchContentFormat(CredentialUseBatch request) =>
+    request.items.any((i) => i.destination.native?.requiresV2 ?? false)
+    ? 31
+    : 30;
+
 CredentialUseBatch _storedBatch(Map<String, Object?> row) {
   final request = CredentialUseBatch.fromJson(
     decodeProtocolObject(row['payload'] as String, maxBytes: 1048576),
@@ -78,7 +88,7 @@ void _validateBackupCredentialBatches(
       if (r.items.any((i) => i.destination.ssh != null) && formatVersion < 32 ||
           r.programPlan != null && formatVersion < 29 ||
           r.items.any((i) => i.destination.native != null) &&
-              formatVersion < 30 ||
+              formatVersion < _nativeBatchContentFormat(r) ||
           !r.archived ||
           r.decisions.isEmpty ||
           requests.containsKey(r.id) ||
@@ -165,7 +175,7 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
           throw const StorageFailure('unsupported_schema');
         }
         if (batch.items.any((i) => i.destination.native != null) &&
-            marker < _nativeFillLibraryFormat) {
+            marker < _nativeBatchLibraryFormat(batch)) {
           throw const StorageFailure('unsupported_schema');
         }
         if (batch.programPlan != null &&
@@ -251,7 +261,7 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
           await _requireAdmissionFormat(_sshInteractiveLibraryFormat);
         }
         if (request.items.any((i) => i.destination.native != null)) {
-          await _requireAdmissionFormat(_nativeFillLibraryFormat);
+          await _requireAdmissionFormat(_nativeBatchLibraryFormat(request));
         }
         if (request.programPlan != null) {
           await _requireAdmissionFormat(_credentialProgramBatchLibraryFormat);

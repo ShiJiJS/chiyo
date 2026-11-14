@@ -71,8 +71,9 @@ Future<int> _initial(_Replica a, _Replica b) async {
 Future<LibrarySyncReceipt> _transfer(
   _Replica a,
   _Replica b,
-  LibrarySyncBatch batch,
-) async {
+  LibrarySyncBatch batch, {
+  int? contentFormat,
+}) async {
   final file = File('${a.path}/delta.encrypted');
   final prepared = await a.snapshot(
     () => a.incremental.exportDelta(
@@ -81,6 +82,9 @@ Future<LibrarySyncReceipt> _transfer(
       operationId: batch.operationId,
     ),
   );
+  if (contentFormat != null) {
+    expect(prepared.transfer.archive.contentFormat, contentFormat);
+  }
   try {
     final receipt = await b.snapshot(
       () => b.incremental.installDelta(
@@ -222,177 +226,209 @@ void _assertArchive(
 }
 
 void main() {
-  test(
-    'SSH initial and incremental history use format 32 without restoring permission',
-    () async {
-      final root = await Directory.systemTemp.createTemp('ssh-batch-sync-');
-      final now = DateTime.utc(2026, 11, 15);
-      final a = _Replica('${root.path}/a', () => now),
-          b = _Replica('${root.path}/b', () => now);
-      await a.open();
-      await b.open();
-      addTearDown(() async {
-        await a.close();
-        await b.close();
-        await root.delete(recursive: true);
+  test('SSH initial and incremental history use format 32 without restoring permission', () async {
+    final root = await Directory.systemTemp.createTemp('ssh-batch-sync-');
+    final now = DateTime.utc(2026, 11, 15);
+    final a = _Replica('${root.path}/a', () => now),
+        b = _Replica('${root.path}/b', () => now);
+    await a.open();
+    await b.open();
+    addTearDown(() async {
+      await a.close();
+      await b.close();
+      await root.delete(recursive: true);
+    });
+    final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+    Future<void> append(String id) async {
+      final op = await a.runtime.service.agent.beginCredentialBatchOperation(
+        f.session,
+        'A' * 22,
+        f.request.id,
+        operationId: id,
+        sshContext: SshSessionOperationContext(
+          kind: 'run',
+          sessionId: 'ssh-synthetic',
+          runId: id,
+          digest: 'sha256:${'a' * 64}',
+          byteLength: 4,
+        ),
+      );
+      await a.runtime.service.agent.authorizeCredentialBatchInput(
+        'A' * 22,
+        op.privateProof!,
+      );
+      await a.runtime.service.agent.finishCredentialBatchOperation(
+        'A' * 22,
+        op.privateProof!,
+        CredentialBatchOperationState.filled,
+        itemResults: {'b1': 'sent'},
+      );
+    }
+
+    await a.runtime.run(() async {
+      await f.open(program: false);
+      await a.runtime.service.owner.configureSshKnownHosts(
+        'Synthetic',
+        knownHostBytes(),
+      );
+      f.input = CredentialBatchInput.fromJson({
+        'protocolVersion': 3,
+        'purpose': 'Synthetic SSH sync',
+        'items': [
+          {
+            'credentialId': f.input.items.single.credentialId,
+            'version': 1,
+            'destination': {
+              'via': 'ssh',
+              'target': SshSessionTarget(
+                host: 'example.test',
+                port: 22,
+                user: 'fixture',
+                authentication: 'password',
+                credentialUse: 'login',
+                validity: 'session',
+              ).toJson(),
+            },
+          },
+        ],
       });
-      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
-      Future<void> append(String id) async {
-        final op = await a.runtime.service.agent.beginCredentialBatchOperation(
-          f.session,
-          'A' * 22,
-          f.request.id,
-          operationId: id,
-          sshContext: SshSessionOperationContext(
-            kind: 'run',
-            sessionId: 'ssh-synthetic',
-            runId: id,
-            digest: 'sha256:${'a' * 64}',
-            byteLength: 4,
+      f.request = await a.runtime.service.agent.requestCredentialBatch(
+        f.session,
+        'A' * 22,
+        f.input,
+        operationId: 'ssh-submit',
+      );
+      f.request = await a.runtime.service.owner.decideCredentialBatch(
+        f.request.id,
+        operationId: 'ssh-approve',
+        revision: 1,
+        approvedItems: ['b1'],
+        lifetime: null,
+      );
+      await append('ssh-first');
+    });
+    expect(await _initial(a, b), 32);
+    _assertArchive(b, f, program: false, count: 1);
+    await a.runtime.run(() => append('ssh-second'));
+    for (final entry in await a.after(0)) {
+      expect((await _transfer(a, b, entry.batch)).conflict, false);
+    }
+    _assertArchive(b, f, program: false, count: 2);
+    final operations = b.repo.credentialBatchOperations.where(
+      (o) => o.requestId == f.request.id,
+    );
+    expect(
+      operations.every(
+        (o) => o.sshContext?.kind == 'run' && !o.materialClaimed,
+      ),
+      isTrue,
+    );
+    expect(
+      b.repo.credentialBatches
+          .singleWhere((r) => r.id == f.request.id)
+          .items
+          .single
+          .destination
+          .ssh!
+          .host,
+      'example.test',
+    );
+  });
+
+  for (final nativeKind in [
+    'appkit_secure_text',
+    'macos_ax_password',
+    'windows_uia_password',
+  ]) {
+    final format = nativeKind == 'appkit_secure_text' ? 30 : 31;
+    test(
+      '$nativeKind snapshots use format $format and incremental operations remain inactive on the replica',
+      () async {
+        final root = await Directory.systemTemp.createTemp(
+          'native-batch-sync-',
+        );
+        final now = DateTime.utc(2026, 11, 14);
+        final a = _Replica('${root.path}/a', () => now),
+            b = _Replica('${root.path}/b', () => now);
+        await a.open();
+        await b.open();
+        addTearDown(() async {
+          await a.close();
+          await b.close();
+          await root.delete(recursive: true);
+        });
+        final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+        await a.runtime.run(() async {
+          await f.open(program: false);
+          f.input = CredentialBatchInput.fromJson({
+            ...f.input.toJson(),
+            'items': [
+              {
+                ...f.input.items.single.toJson(),
+                'destination': {
+                  'via': 'native',
+                  'target': nativeTargetFixture(controlKind: nativeKind),
+                },
+              },
+            ],
+          });
+          f.request = await a.runtime.service.agent.requestCredentialBatch(
+            f.session,
+            'A' * 22,
+            f.input,
+            operationId: 'native-sync-submit',
+          );
+          f.request = await a.runtime.service.owner.decideCredentialBatch(
+            f.request.id,
+            operationId: 'native-sync-approve',
+            revision: 1,
+            approvedItems: ['b1'],
+          );
+          await f.append('native-first');
+        });
+        expect(await _initial(a, b), format);
+        _assertArchive(b, f, program: false, count: 1);
+        expect(
+          b.repo.credentialBatches
+              .singleWhere((r) => r.id == f.request.id)
+              .items
+              .single
+              .destination
+              .native!
+              .fieldLabel,
+          'Password',
+        );
+        await a.runtime.run(() => f.append('native-second'));
+        final operations = await a.after(0);
+        for (final entry in operations) {
+          expect(
+            (await _transfer(a, b, entry.batch, contentFormat: 28)).conflict,
+            false,
+          );
+        }
+        _assertArchive(b, f, program: false, count: 2);
+        await a.runtime.run(
+          () => a.runtime.service.owner.revokeCredentialBatch(
+            f.request.id,
+            operationId: 'native-revoke',
+            revision: f.request.revision,
+            itemIds: ['b1'],
           ),
         );
-        await a.runtime.service.agent.authorizeCredentialBatchInput(
-          'A' * 22,
-          op.privateProof!,
+        final snapshots = await a.after(operations.last.cursor);
+        expect(snapshots, hasLength(1));
+        expect(
+          (await _transfer(
+            a,
+            b,
+            snapshots.single.batch,
+            contentFormat: format,
+          )).conflict,
+          false,
         );
-        await a.runtime.service.agent.finishCredentialBatchOperation(
-          'A' * 22,
-          op.privateProof!,
-          CredentialBatchOperationState.filled,
-          itemResults: {'b1': 'sent'},
-        );
-      }
-
-      await a.runtime.run(() async {
-        await f.open(program: false);
-        await a.runtime.service.owner.configureSshKnownHosts(
-          'Synthetic',
-          knownHostBytes(),
-        );
-        f.input = CredentialBatchInput.fromJson({
-          'protocolVersion': 3,
-          'purpose': 'Synthetic SSH sync',
-          'items': [
-            {
-              'credentialId': f.input.items.single.credentialId,
-              'version': 1,
-              'destination': {
-                'via': 'ssh',
-                'target': SshSessionTarget(
-                  host: 'example.test',
-                  port: 22,
-                  user: 'fixture',
-                  authentication: 'password',
-                  credentialUse: 'login',
-                  validity: 'session',
-                ).toJson(),
-              },
-            },
-          ],
-        });
-        f.request = await a.runtime.service.agent.requestCredentialBatch(
-          f.session,
-          'A' * 22,
-          f.input,
-          operationId: 'ssh-submit',
-        );
-        f.request = await a.runtime.service.owner.decideCredentialBatch(
-          f.request.id,
-          operationId: 'ssh-approve',
-          revision: 1,
-          approvedItems: ['b1'],
-          lifetime: null,
-        );
-        await append('ssh-first');
-      });
-      expect(await _initial(a, b), 32);
-      _assertArchive(b, f, program: false, count: 1);
-      await a.runtime.run(() => append('ssh-second'));
-      for (final entry in await a.after(0)) {
-        expect((await _transfer(a, b, entry.batch)).conflict, false);
-      }
-      _assertArchive(b, f, program: false, count: 2);
-      final operations = b.repo.credentialBatchOperations.where(
-        (o) => o.requestId == f.request.id,
-      );
-      expect(
-        operations.every(
-          (o) => o.sshContext?.kind == 'run' && !o.materialClaimed,
-        ),
-        isTrue,
-      );
-      expect(
-        b.repo.credentialBatches
-            .singleWhere((r) => r.id == f.request.id)
-            .items
-            .single
-            .destination
-            .ssh!
-            .host,
-        'example.test',
-      );
-    },
-  );
-  test(
-    'native snapshots use format 30 and incremental operations remain inactive on the replica',
-    () async {
-      final root = await Directory.systemTemp.createTemp('native-batch-sync-');
-      final now = DateTime.utc(2026, 11, 14);
-      final a = _Replica('${root.path}/a', () => now),
-          b = _Replica('${root.path}/b', () => now);
-      await a.open();
-      await b.open();
-      addTearDown(() async {
-        await a.close();
-        await b.close();
-        await root.delete(recursive: true);
-      });
-      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
-      await a.runtime.run(() async {
-        await f.open(program: false);
-        f.input = CredentialBatchInput.fromJson({
-          ...f.input.toJson(),
-          'items': [
-            {
-              ...f.input.items.single.toJson(),
-              'destination': {'via': 'native', 'target': nativeTargetFixture()},
-            },
-          ],
-        });
-        f.request = await a.runtime.service.agent.requestCredentialBatch(
-          f.session,
-          'A' * 22,
-          f.input,
-          operationId: 'native-sync-submit',
-        );
-        f.request = await a.runtime.service.owner.decideCredentialBatch(
-          f.request.id,
-          operationId: 'native-sync-approve',
-          revision: 1,
-          approvedItems: ['b1'],
-        );
-        await f.append('native-first');
-      });
-      expect(await _initial(a, b), 30);
-      _assertArchive(b, f, program: false, count: 1);
-      expect(
-        b.repo.credentialBatches
-            .singleWhere((r) => r.id == f.request.id)
-            .items
-            .single
-            .destination
-            .native!
-            .fieldLabel,
-        'Password',
-      );
-      await a.runtime.run(() => f.append('native-second'));
-      for (final entry in await a.after(0)) {
-        expect((await _transfer(a, b, entry.batch)).conflict, false);
-      }
-      _assertArchive(b, f, program: false, count: 2);
-    },
-  );
-
+      },
+    );
+  }
   for (final program in [false, true]) {
     test(
       '${program ? 'program' : 'fill'} source retention synchronizes parent and child deletion without replaying old history',
@@ -626,69 +662,66 @@ void main() {
     );
   }
 
-  test(
-    'upgrading an old live journal seeds pre-existing history exactly once without editing its source rows',
-    () async {
-      final root = await Directory.systemTemp.createTemp('batch-sync-upgrade-');
-      final now = DateTime.utc(2026, 11, 14);
-      final a = _Replica(root.path, () => now);
-      await a.open();
-      addTearDown(() async {
-        await a.close();
-        await root.delete(recursive: true);
-      });
-      await a.snapshot(a.incremental.start);
-      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
-      await a.runtime.run(() => f.open(program: true, count: 1));
-      final source = jsonEncode(a.repo.credentialBatches.single.toJson());
+  test('upgrading an old live journal seeds pre-existing history exactly once without editing its source rows', () async {
+    final root = await Directory.systemTemp.createTemp('batch-sync-upgrade-');
+    final now = DateTime.utc(2026, 11, 14);
+    final a = _Replica(root.path, () => now);
+    await a.open();
+    addTearDown(() async {
       await a.close();
-      final db = sqlite.sqlite3.open('${root.path}/library.db');
-      db.execute(
-        'PRAGMA key = "x\'${a.keys.key!.map((v) => v.toRadixString(16).padLeft(2, '0')).join()}\'"',
-      );
-      for (final table in [
-        'credential_batches',
-        'credential_batch_operations',
-        'credential_program_operations',
-      ]) {
-        for (final suffix in ['insert', 'delete', 'update', 'key']) {
-          db.execute('DROP TRIGGER sync_${table}_$suffix');
-        }
-        db.execute('DELETE FROM library_sync_changes WHERE changes LIKE ?', [
-          '%"table":"$table"%',
-        ]);
+      await root.delete(recursive: true);
+    });
+    await a.snapshot(a.incremental.start);
+    final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+    await a.runtime.run(() => f.open(program: true, count: 1));
+    final source = jsonEncode(a.repo.credentialBatches.single.toJson());
+    await a.close();
+    final db = sqlite.sqlite3.open('${root.path}/library.db');
+    db.execute(
+      'PRAGMA key = "x\'${a.keys.key!.map((v) => v.toRadixString(16).padLeft(2, '0')).join()}\'"',
+    );
+    for (final table in [
+      'credential_batches',
+      'credential_batch_operations',
+      'credential_program_operations',
+    ]) {
+      for (final suffix in ['insert', 'delete', 'update', 'key']) {
+        db.execute('DROP TRIGGER sync_${table}_$suffix');
       }
-      db.close();
-      await a.open();
-      expect(jsonEncode(a.repo.credentialBatches.single.toJson()), source);
-      final entries = await a.after(0);
-      final histories = [
-        for (final entry in entries)
-          for (final change in entry.batch.changes)
-            if (change.key == _history(f.request.id)) change,
-      ];
-      expect(histories, hasLength(1));
-      final operations = [
-        for (final entry in entries)
-          for (final change in entry.batch.changes)
-            if ((change.content?['tables'] as Map?)?.containsKey(
-                  'credential_program_operations',
-                ) ==
-                true)
-              change,
-      ];
-      expect(operations, hasLength(1));
-      expect(
-        ((operations.single.content!['tables']
-                as Map)['credential_program_operations']
-            as List),
-        hasLength(1),
-      );
-      final last = entries.last.cursor;
-      await a.close();
-      await a.open();
-      expect(await a.after(last), isEmpty);
-      expect(jsonEncode(a.repo.credentialBatches.single.toJson()), source);
-    },
-  );
+      db.execute('DELETE FROM library_sync_changes WHERE changes LIKE ?', [
+        '%"table":"$table"%',
+      ]);
+    }
+    db.close();
+    await a.open();
+    expect(jsonEncode(a.repo.credentialBatches.single.toJson()), source);
+    final entries = await a.after(0);
+    final histories = [
+      for (final entry in entries)
+        for (final change in entry.batch.changes)
+          if (change.key == _history(f.request.id)) change,
+    ];
+    expect(histories, hasLength(1));
+    final operations = [
+      for (final entry in entries)
+        for (final change in entry.batch.changes)
+          if ((change.content?['tables'] as Map?)?.containsKey(
+                'credential_program_operations',
+              ) ==
+              true)
+            change,
+    ];
+    expect(operations, hasLength(1));
+    expect(
+      ((operations.single.content!['tables']
+              as Map)['credential_program_operations']
+          as List),
+      hasLength(1),
+    );
+    final last = entries.last.cursor;
+    await a.close();
+    await a.open();
+    expect(await a.after(last), isEmpty);
+    expect(jsonEncode(a.repo.credentialBatches.single.toJson()), source);
+  });
 }

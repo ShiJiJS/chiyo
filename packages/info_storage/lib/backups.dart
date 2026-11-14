@@ -550,6 +550,13 @@ class InformationBackups {
                     .any((i) => i.destination.native != null),
           ) ??
           false;
+      final hasNativeV2History =
+          tables['credential_batches']?.any(
+            (row) =>
+                _storedBatch(row).items
+                    .any((i) => i.destination.native?.requiresV2 ?? false),
+          ) ??
+          false;
       final hasProgramBatchHistory =
           tables['credential_batches']?.any(
             (row) => _storedBatch(row).programPlan != null,
@@ -659,6 +666,8 @@ class InformationBackups {
       if (detachedHistory || portableFills || extendedColumns) {
         formatVersion = hasSshHistory
             ? 32
+            : hasNativeV2History
+            ? 31
             : hasNativeHistory
             ? 30
             : hasProgramBatchHistory
@@ -1281,6 +1290,9 @@ class InformationBackups {
           await _repository._requireAdmissionFormat(
             _sshInteractiveLibraryFormat,
           );
+        }
+        if (contents.formatVersion >= 31) {
+          await _repository._requireAdmissionFormat(_nativeFillV2LibraryFormat);
         }
         if (contents.formatVersion >= 30) {
           await _repository._requireAdmissionFormat(_nativeFillLibraryFormat);

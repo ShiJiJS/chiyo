@@ -136,7 +136,7 @@ class OwnerWorkspaceCredentialBatches {
       return "SSH · ${ssh.user}@${ssh.host}:${ssh.port}\n${ssh.credentialUse == 'sudo' ? 'sudo 认证' : '登录并持续执行命令'} · ${ssh.authentication == 'publickey' ? '私钥' : '密码'}";
     }
     if (d.native case final target?) {
-      return '原生后台填写 · ${target.appName}\n窗口：${target.windowTitle}\n密码框：${target.fieldLabel}\n${target.application.executable}\n仅确认原生控件接受输入，不代表登录成功。';
+      return '原生后台填写 · ${target.appName}\n窗口：${target.windowTitle}\n密码框：${target.fieldLabel}\n${target.application.executable}\n通过后台接口填写，知予不主动切换窗口或焦点。批准本身不输入；目标失效后需重新选择。\n控件接受密码不代表登录或应用业务已成功。';
     }
     if (d.program case final program?) {
       final binding = program.binding;

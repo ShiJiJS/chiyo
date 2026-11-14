@@ -412,6 +412,8 @@ void main() {
         ]),
       );
       expect(capabilities, contains('credential-batches.v3'));
+      expect(capabilities, contains('credential-native-fill.v2'));
+      expect(capabilities, isNot(contains('credential-native-fill.v1')));
     },
   );
 

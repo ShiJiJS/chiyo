@@ -120,7 +120,7 @@ import Darwin
         guard let result = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { exit(4) }
         print(String(data: data, encoding: .utf8)!); fflush(stdout)
         let valid = (result["state"] as? String == "ready" && (result["targets"] as? [Any])?.isEmpty == true) ||
-          (result["state"] as? String == "refused" && result["errorCode"] as? String == "access_denied")
+          (result["state"] as? String == "refused" && ["access_denied", "target_unavailable"].contains(result["errorCode"] as? String ?? ""))
         exit(valid ? 0 : 2)
       }
       withExtendedLifetime(client) { RunLoop.main.run() }

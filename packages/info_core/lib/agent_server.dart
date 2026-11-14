@@ -404,7 +404,7 @@ class AgentProtocol {
               'credential-batches.v3',
             if (enableCredentialBatches) 'ssh-interactive-sessions.v1',
             if (enableCredentialBatches && _agent.credentialBatchesAvailable)
-              'credential-native-fill.v1',
+              'credential-native-fill.v2',
             if (enableCredentialBatches && _agent.credentialProgramsAvailable)
               'credential-programs.v3',
             'credential-catalog-search.v1',

@@ -11,6 +11,7 @@ private final class Fixture: NSObject, NSApplicationDelegate {
   var last = ""
   var expected = ""
   var web: WKWebView?
+  var markedWeb: NSView?
   var contextLabel: NSTextField?
   init(_ root: URL, cover: Bool) { self.root = root; self.cover = cover }
   func save(_ name: String, _ value: [String: Any]) {
@@ -57,6 +58,11 @@ private final class Fixture: NSObject, NSApplicationDelegate {
       view.isInspectable = false
       window.contentView!.addSubview(view)
       view.loadHTMLString("<input id='web-password' type='password' aria-label='Password'>", baseURL: nil)
+      let marked = NSView(frame: NSRect(x: 10, y: 10, width: 400, height: 70))
+      marked.setAccessibilityElement(true); marked.setAccessibilityRole(NSAccessibility.Role(rawValue: "AXWebArea"))
+      let password = NSSecureTextField(frame: NSRect(x: 20, y: 20, width: 300, height: 30))
+      password.setAccessibilityIdentifier("marked-web-password"); password.placeholderString = "Web password"
+      marked.addSubview(password); window.contentView!.addSubview(marked); markedWeb = marked
       web = view; windows.append(window); window.orderFrontRegardless()
     }
     save((cover ? "cover" : "target") + "-pid.json", ["pid": getpid()])
@@ -74,6 +80,38 @@ private final class Fixture: NSObject, NSApplicationDelegate {
     case "show-web": windows.last!.makeKeyAndOrderFront(nil); NSApp.activate()
     case "minimize": windows[0].miniaturize(nil)
     case "hide": NSApp.hide(nil)
+    case "replace-window":
+      let previous = windows[0]
+      let window = NSWindow(contentRect: previous.frame, styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+      window.title = previous.title; window.setAccessibilityIdentifier("native-0"); window.isReleasedWhenClosed = false
+      for j in 0..<2 {
+        let id = "field-0-\(j)", field = makeField(id, row: j)
+        fields[id] = field; window.contentView!.addSubview(field)
+      }
+      previous.close(); windows[0] = window; window.orderBack(nil)
+    case "missing-identifiers":
+      for window in windows { window.setAccessibilityIdentifier(nil) }
+      for field in fields.values { field.setAccessibilityIdentifier(nil) }
+    case "language":
+      for (i, window) in windows.enumerated() { window.title = "Connexion native \(i) — 密码" }
+    case "disable-all": for field in fields.values { field.isEnabled = false }
+    case "readonly-all": for field in fields.values { field.isEditable = false }
+    case "plain":
+      for (id, field) in fields {
+        let normal = NSTextField(frame: field.frame)
+        normal.placeholderString = id; normal.setAccessibilityIdentifier(id)
+        let parent = field.superview; field.removeFromSuperview(); parent?.addSubview(normal); fields[id] = normal
+      }
+      windows.last?.close()
+    case "web-only": windows[0].close(); windows[1].close()
+    case "wk-only":
+      markedWeb?.removeFromSuperview(); markedWeb = nil
+      windows[0].close(); windows[1].close()
+    case "mixed-wk": markedWeb?.removeFromSuperview(); markedWeb = nil; perform("mixed-web")
+    case "mixed-web":
+      if let web { web.removeFromSuperview(); web.frame = NSRect(x: 380, y: 10, width: 75, height: 60); windows[0].contentView!.addSubview(web) }
+      if let markedWeb { markedWeb.removeFromSuperview(); markedWeb.frame = NSRect(x: 380, y: 80, width: 75, height: 60); windows[0].contentView!.addSubview(markedWeb) }
+      windows.last?.close()
     case "disable": fields["field-0-0"]!.isEnabled = false
     case "readonly": fields["field-0-0"]!.isEditable = false
     case "close": windows[0].close()

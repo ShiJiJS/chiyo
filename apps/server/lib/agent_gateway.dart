@@ -204,7 +204,7 @@ final class AgentGateway {
               'credential-batches.v3',
             if (_deviceCredentials.credentialBatchesAvailable) 'ssh-interactive-sessions.v1',
             if (_deviceCredentials.credentialBatchesAvailable)
-              'credential-native-fill.v1',
+              'credential-native-fill.v2',
             if (_deviceCredentials.credentialProgramsAvailable)
               'credential-programs.v3',
             'credential-device-execution.v1',
