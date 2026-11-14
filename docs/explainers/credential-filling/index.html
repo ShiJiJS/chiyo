@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agent 遇到密码框后，知予怎样接着填写？</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23007764'/%3E%3Cpath d='M11 12h18v16H11zM16 17v6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
+</head>
+<body x-data="tutorial">
+<a class="skip" href="#main">跳到正文</a>
+<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 填写机制图解</span></a><nav aria-label="章节"><a href="#web">网页</a><a href="#native">普通应用</a><a href="#platform">系统 API</a><a href="#chiyo">整体关系</a></nav></div></header>
+<main id="main">
+  <div class="intro">
+    <h1><span class="keep-phrase">Agent 遇到密码框后，</span><wbr><span class="keep-phrase">知予怎样接着填写？</span></h1>
+    <p>用户让 Agent“登录项目工作台”。Agent 打开页面，遇到了一个需要填写的密码框；密码保存在知予里。接下来，它要先弄清楚这是哪个页面、哪个输入框，再把目标与凭据使用申请交给知予。获批之后，知予才安排相应的填写代码执行。</p>
+    <p>这篇文章把整段交互连起来讲：<strong>Agent 怎样告诉知予“用哪份凭据、填到哪里”？知予怎样执行这次操作，又通过什么 API 找到输入框并送入文字？</strong></p>
+
+    <p class="caption">本文按已确认的新设计讲解：统一使用 chiyo，网页批准限定到指定表单和字段，并加入 Chrome 页面填写。开发正在推进；下文命令为设计示例，最终参数以实现后的帮助为准。</p>
+
+    <div class="intro-scope" aria-labelledby="scope-title">
+      <h2 id="scope-title">先确定讨论范围</h2>
+      <dl class="scope-list">
+        <div><dt>浏览器中的网页</dt><dd>例如网站登录页里的密码框，可以从页面元素和浏览器的控制入口入手。</dd></div>
+        <div><dt>普通桌面应用</dt><dd>例如桌面客户端的密码框，需要考虑应用向操作系统提供的控件信息与输入接口。</dd></div>
+      </dl>
+      <p>两类目标都要考虑 <strong>macOS 和 Windows</strong>。本文从 Agent 选择目标、提交请求讲到知予获准后操作网页或桌面应用；会展开影响目标选择的申请与授权信息，凭据如何加密存储则作为背景。</p>
+    </div>
+
+    <div class="reading-route" aria-labelledby="route-title">
+      <h2 id="route-title">接下来怎么讲</h2>
+      <ol>
+        <li><a href="#web">先讲网页</a>：确定页面和输入框 → 从知予的目录选出密码 → 提交申请并获得许可 → 发起填写。随后展开知予的内置填写模块怎样连接浏览器、发送具体操作。</li>
+        <li><a href="#native">再扩展到普通应用</a>：看 Agent 怎样通过点击表达目标，辅助程序怎样通过系统查询控件，再把文字交给系统投递；具体调用处分别展开 Mac 与 Windows。</li>
+        <li><a href="#chiyo">最后看各方的分工</a>：Agent 选择目标，知予管理密码和批准；网页由内置模块操作，普通应用通过本机辅助程序输入。</li>
+      </ol>
+    </div>
+  </div>
+
+  <section id="web" class="chapter first">
+    <div class="reading"><h2><span class="section-num">01</span><span class="keep-phrase">Agent 遇到登录页，</span><wbr><span class="keep-phrase">先确定要填哪里</span></h2><p>Agent 已经通过浏览器工具打开了项目工作台。工具返回页面内容或快照，Agent 结合“登录”这个任务，判断需要填写哪一个密码框。若页面同时有登录、注册或修改密码区域，Agent 还要结合区域标题、字段标签等信息，选择与登录任务对应的密码框。</p><p>然后，它把这个判断变成可定位的信息。浏览器把 HTML 组织成<strong>元素树（DOM）</strong>；Agent 可以让浏览器工具查询元素属性，确认选择器只指向所需的框。这一步得到的是目标位置，随后会用于向知予提交填写计划。</p></div>
+    <div class="web-lab enter" aria-label="网页元素与代码对照">
+      <div class="web-pair">
+        <div class="browser-window"><div class="browser-chrome"><span class="tab-title">项目工作台</span><span class="address">workspace.example/login</span></div>
+          <iframe x-ref="demo" id="web-demo" title="教学登录表单" @load="readyDemo()"></iframe>
+        </div>
+        <div class="html-pane"><div class="pane-title">页面的 HTML <span>点击元素行，查看对应位置</span></div>
+          <div class="code-lines" aria-label="表单 HTML">
+            <button class="code-line" :class="{'picked':selected==='form'}" @click="inspect('form')"><span class="ln">1</span><code>&lt;<b>form</b> id=<em>"login"</em>&gt;</code></button>
+            <div class="code-line"><span class="ln">2</span><code>  &lt;label for="account"&gt;账号&lt;/label&gt;</code></div>
+            <button class="code-line" :class="{'picked':selected==='account','matched':matches.includes('account')}" @click="inspect('account')"><span class="ln">3</span><code>  &lt;<b>input</b> id=<em>"account"</em> type="text"&gt;</code></button>
+            <div class="code-line"><span class="ln">4</span><code>  &lt;label for="password"&gt;密码&lt;/label&gt;</code></div>
+            <button class="code-line" :class="{'picked':selected==='password','matched':matches.includes('password')}" @click="inspect('password')"><span class="ln">5</span><code>  &lt;<b>input</b> id=<em>"password"</em> type="password"&gt;</code></button>
+            <button class="code-line" :class="{'picked':selected==='button'}" @click="inspect('button')"><span class="ln">6</span><code>  &lt;<b>button</b> type="button"&gt;登录&lt;/button&gt;</code></button>
+            <div class="code-line"><span class="ln">7</span><code>&lt;/form&gt;</code></div>
+          </div>
+          <p class="element-note" x-text="elementNote"></p>
+        </div>
+      </div>
+      <div class="query-workbench">
+        <div class="query-options"><span class="control-label">选择匹配条件</span><div class="choice-row" aria-label="选择器">
+          <button data-selector="password" :aria-pressed="selector==='#password'" @click="chooseSelector('#password')"><code>#password</code></button>
+          <button data-selector="type" :aria-pressed="selector==='input[type=&quot;password&quot;]'" @click="chooseSelector('input[type=&quot;password&quot;]')"><code>input[type="password"]</code></button>
+          <button data-selector="broad" :aria-pressed="selector==='input'" @click="chooseSelector('input')"><code>input</code></button>
+        </div></div>
+        <div class="query-run"><code>document.querySelectorAll(<strong x-text="`'${selector}'`"></strong>)</code><div class="query-actions"><button class="secondary" id="query-button" @click="query()">查找元素</button></div></div>
+        <div class="query-result" aria-live="polite"><span class="result-word">返回</span><code x-text="queryResult"></code><span class="match-count" x-show="queried" x-text="`${matches.length} 个匹配`"></span></div>
+      </div>
+    </div>
+    <div class="below-lab"><p><code>#password</code> 表示“id 等于 password 的元素”；<code>input[type="password"]</code> 表示“类型是密码的 input”。试试只写 <code>input</code>：它会同时找到两个框。<a class="source-ref" href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll" target="_blank" rel="noreferrer">DOM 查询 API ↗</a></p></div>
+    <p class="caption">这一步产出的是位置：在当前页面中，<code>#password</code> 能唯一定位登录密码框。它位于 <code>id="login"</code> 的表单里；后面的申请会一起指定表单 <code>#login</code> 和字段 <code>#password</code>。<code>id</code> 的名字由网站开发者决定，Agent 要从实际页面取得它。这里的 DOM 查询规则适用于不同浏览器。</p>
+
+    <div id="browser-page-location">
+      <div class="reading connection-entry" id="browser-identity">
+        <h3>页面里的框已经找到了，怎样标明它在哪张页面？</h3>
+        <p>刚才，Agent 已经在当前页面中确认：<code>#password</code> 唯一指向要填写的密码框。现在要把这个位置交给知予，还需要补上<strong>这张页面的标识，让知予的浏览器填写模块知道应该在哪张页面里使用这个选择器。</strong></p>
+        <p>浏览器会为打开的页面分配标识，浏览器工具也可能提供便于操作的页面标记。Agent 把刚才查看、查询的那张页面所对应的标识一并交出，知予的浏览器填写模块才能回到同一张页面。标题和网址可以帮助核对，但同一网站能打开多个标签页，因此还需要能区分这些页面的标识。</p>
+        <p>下面分别看 ego 和 Chrome 怎样表示页面的位置。此处沿用 Agent 已经选定并正在操作的浏览器。</p>
+        <h3>ego 怎样给页面标明位置？</h3>
+        <p>Agent 做一项任务时，可能同时打开登录页、帮助页等多个标签页。ego 可以把这项任务使用的标签页组织在同一个组里，这个组叫<strong>工作区（TaskSpace）</strong>。工作区有自己的编号；组内被工具管理的页面，又分别有 <code>p1</code>、<code>p2</code> 这样的标记。</p>
+        <p>例如，这次登录任务使用工作区 <code>7</code>，刚才查找密码框的页面标记是 <code>p1</code>：</p>
+
+    <figure class="browser-map ego-map" id="ego-location-map">
+      <div class="map-window" role="img" aria-label="ego 工作区7包含p1登录页和p2帮助页，p1中的密码框id为password">
+        <div class="map-window-title"><b>ego-browser</b><span>本次操作的浏览器</span></div>
+        <div class="map-window-body">
+      <aside class="map-spaces"><span class="map-kicker">工作区</span>
+        <div class="map-space selected"><span class="map-marker">1</span><div><b>7 · 登录任务</b><small>本次使用的标签页组</small></div></div>
+        <div class="map-space"><span class="map-space-number">8</span><div><b>另一项任务</b><small>有自己的页面组</small></div></div>
+      </aside>
+          <div class="map-page">
+            <div class="map-tabs">
+        <div class="map-tab current"><span class="map-marker">2</span><div><b>项目工作台</b><code>页面标记 p1</code></div></div>
+        <div class="map-tab"><div><b>使用帮助</b><code>页面标记 p2</code></div></div></div>
+            <div class="map-address"><span>网址</span><code>https://workspace.example/login</code></div>
+            <div class="map-page-record"><b>当前页面</b><span>工作区 <code>7</code> / 页面 <code>p1</code></span></div>
+            <div class="map-content"><h4>登录项目工作台</h4><p class="figure-note">登录表单 <code>id="login"</code></p>
+              <div class="map-input-label">账号 <code>id="account"</code></div><div class="map-input">lin@example.com</div>
+              <div class="map-input-label">密码 <code>id="password"</code></div>
+              <div class="map-target"><div class="map-input password"><span class="map-caret"></span></div><div class="map-target-note"><span class="map-marker">3</span><span>元素选择器 <code>#password</code></span></div></div>
+              <span class="map-login">登录</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption><code>7</code> 找到工作区，<code>p1</code> 找到其中的登录页，<code>#password</code> 找到页内密码框。</figcaption>
+    </figure>
+        <p>定位时，<strong>工作区编号先确定哪一组标签页，页面标记再确定组里的哪一张。</strong>不同工作区都可能有各自的 <code>p1</code>，所以这里要一起交出 <code>7</code> 和 <code>p1</code>。这些值来自浏览器工具提供的工作区信息与页面列表。</p>
+        <p class="sources-inline"><a href="https://github.com/citrolabs/ego-lite/wiki/Ego-Native-API-Reference" target="_blank" rel="noreferrer">ego 的工作区与页面信息 ↗</a></p>
+        <h3>Chrome 怎样给页面标明位置？</h3><p>Agent 还需要知道怎样连接这个 Chrome。这里沿用浏览器工具提供的本机控制地址 <code>http://127.0.0.1:9222</code>，通过知予列出该实例的页面：</p><pre class="plan-fragment"><code>chiyo browsers list --via chrome \
+  --browser http://127.0.0.1:9222 --json</code></pre><p>页面列表返回标识、标题和网址，Agent 从中选定自己正在操作的登录页。控制地址表示哪一个浏览器；页面标识表示其中哪一页。</p>    <details id="chrome-entry"><summary>Chrome 的本机调试入口怎样准备？</summary><div class="detail-body"><p>可以由浏览器工具启动一个开放控制入口的 Chrome，也可以按浏览器提供的设置允许外部工具连接。这里选用开放调试端口、从页面列表取得连接地址的方式。</p><p>使用调试端口启动时，Chrome 136 起要求配合独立的用户数据目录。较新的 Chrome 还提供由用户启用、工具请求并由用户确认的连接方式。<a href="https://developer.chrome.com/blog/remote-debugging-port" target="_blank" rel="noreferrer">调试端口配置 ↗</a> · <a href="https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session" target="_blank" rel="noreferrer">连接已有 Chrome ↗</a></p></div></details>
+        <p>通过本文采用的 Chrome 控制方式，工具可以取得各个打开页面的记录。每条记录包含该页面的标识、标题和网址。假设 Agent 刚才操作的登录页标识是 <code>A7C93D1E8B624F06B3D28AC572E4910F</code>，把它交给知予的浏览器填写模块，就能在所操作的 Chrome 中指定这张页面。</p>
+        <p>即使另一个标签页打开了相同网址，它也有自己的页面标识。因此，知予的浏览器填写模块用 <code>A7C93D1E8B624F06B3D28AC572E4910F</code> 确定具体页面，再用网址核对是否仍是预期的网站。图中使用完整的示例页面标识，并在后续连接与填写步骤中沿用。<a class="source-ref" href="https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/Target.pdl" target="_blank" rel="noreferrer">Chrome 的页面信息字段 ↗</a></p>
+
+    <figure class="browser-map chrome-map" id="chrome-location-map">
+      <div class="map-window" role="img" aria-label="Chrome两个登录标签页具有不同标识，选中A7C93D1E8B624F06B3D28AC572E4910F页面内id为password的输入框">
+        <div class="map-window-title"><b>Chrome</b><span>本次操作的浏览器</span></div>
+        <div class="map-window-body">
+          <div class="map-page">
+            <div class="map-tabs">
+        <div class="map-tab current"><span class="map-marker">2</span><div><b>项目工作台</b><code>A7C93D1E…72E4910F</code></div></div>
+        <div class="map-tab"><div><b>项目工作台</b><code>C4B870DA…9CB72451</code></div></div></div>
+            <div class="map-address"><span>网址</span><code>https://workspace.example/login</code></div>
+            <div class="map-page-record"><b>当前页面标识</b><code>A7C93D1E8B624F06B3D28AC572E4910F</code></div>
+            <div class="map-content"><h4>登录项目工作台</h4><p class="figure-note">登录表单 <code>id="login"</code></p>
+              <div class="map-input-label">账号 <code>id="account"</code></div><div class="map-input">lin@example.com</div>
+              <div class="map-input-label">密码 <code>id="password"</code></div>
+              <div class="map-target"><div class="map-input password"><span class="map-caret"></span></div><div class="map-target-note"><span class="map-marker">3</span><span>元素选择器 <code>#password</code></span></div></div>
+              <span class="map-login">登录</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption>两个标签页可以打开同一网址；不同的页面标识区分它们。绿色标签页的完整标识会继续出现在下面的消息中。</figcaption>
+    </figure>
+        <h3>把页面标识与刚才的元素位置合在一起</h3>
+        <p>现在，已经有了“哪张页面”与“页面里的哪个框”这两部分信息：</p>
+      </div>
+      <div class="browser-addresses" role="region" aria-label="页面身份与元素位置的完整交接信息">
+        <table><thead><tr><th scope="col">所操作的浏览器</th><th scope="col">哪张页面</th><th scope="col">哪个表单里的哪个框</th></tr></thead><tbody>
+          <tr><th scope="row">ego-browser</th><td>工作区 <code>7</code> → 页面 <code>p1</code></td><td><code>#login</code> 内的 <code>#password</code></td></tr>
+          <tr><th scope="row">Chrome</th><td>页面标识 <code>A7C93D1E8B624F06B3D28AC572E4910F</code></td><td><code>#login</code> 内的 <code>#password</code></td></tr>
+        </tbody></table>
+      </div>
+      <div class="reading"><p>到这里，Agent 已经能完整表达“填到哪里”。还缺两件事：<strong>知予里哪一份密码适用于这个网站，以及用户是否允许把它用于这次操作。</strong>下一节先把这两件事和提交申请的过程接起来。</p></div>
+    </div>
+  </section>
+
+  <section id="connection" class="chapter">
+    <div class="reading"><h2><span class="section-num">02</span>目标找到了，怎样向知予申请使用密码？</h2><p>目标位置已经确定，但密码由知予管理，Agent 需要先取得使用许可。它通过知予提供的命令行工具 <code>chiyo</code>，提交一份<strong>密码使用申请</strong>，由用户在知予 App 中审批。</p>
+      <h3 id="credential-selection">先查知予里保存了哪些密码</h3><p>例如，查找“项目工作台”的密码记录：</p></div>
+    <figure class="credential-discovery" id="credential-discovery"><figcaption class="figure-heading">调用 chiyo，按名称查找密码</figcaption><pre class="plan-fragment"><code>chiyo credentials list --query "项目工作台" --json</code></pre>
+      <div class="catalog-result"><div><span class="catalog-label">返回的条目之一，摘取相关信息</span><pre><code>{
+  "name": "项目工作台登录密码",
+  "publicPurpose": "登录 workspace.example 项目工作台",
+  "credentialId": "cred-workspace-01",
+  "version": 1
+}</code></pre></div><div class="catalog-meaning"><h4>按名称和用途选中这条记录</h4><p>Agent 正在登录 <code>workspace.example</code>，这条记录的说明与任务对应，因此选中它。名称和用途来自保存密码时填写的说明；无法区分时，仍要请用户指明。</p><p>后面直接使用知予返回的编号 <code>cred-workspace-01</code> 和版本 <code>1</code>。查询结果说明是哪份密码，不返回密码原文。<code>--json</code> 表示用方便程序读取的格式返回结果。</p></div></div>
+    </figure>
+    <div class="reading"><h3 id="submit-browser-request">提交一份密码使用申请</h3><p>选中密码记录后，Agent 需要在申请中说明凭据、用途和允许的使用位置。上节取得的页面、表单和字段信息，在这里作为<strong>用户审批的使用范围</strong>：</p><blockquote class="request-in-words"><b>本次密码使用申请</b><br>申请使用的凭据：项目工作台登录密码，编号 <code>cred-workspace-01</code>，第 <code>1</code> 版。<br>用途：登录项目工作台。<br>申请允许的使用位置：ego 工作区 <code>7</code>、页面 <code>p1</code> 中，<code>#login</code> 区域的 <code>#password</code> 字段。</blockquote><p>Agent 根据所用浏览器，调用下面一种命令创建申请。<code>fill request</code> 中的 <code>request</code> 表示提交申请；命令返回的是供审批的申请记录：</p></div>
+    <figure class="handoff-board" id="agent-browser-target"><figcaption class="figure-heading">Agent 通过 chiyo 创建密码使用申请</figcaption>
+      <div class="actor-line"><div class="actor-node"><b>Agent</b><span>提供凭据、用途和允许范围</span></div><div class="data-arrow"><span>提交使用申请</span><i aria-hidden="true">→</i></div><div class="actor-node"><b>chiyo</b><span>知予的 CLI</span></div><div class="data-arrow"><span>创建申请记录</span><i aria-hidden="true">→</i></div><div class="actor-node"><b>知予 App</b><span>展示申请，等待用户审批</span></div></div>
+      <div class="packet-layout"><div class="packet-paper"><div class="packet-title"><b>ego 页面：提交使用申请</b><span>申请命令</span></div><pre><code>chiyo fill request \
+  --credential cred-workspace-01 --version 1 \
+  --via ego --space 7 --page p1 \
+  --url https://workspace.example/login \
+  --form '#login' --selector '#password' \
+  --purpose "登录项目工作台" --json</code></pre></div>
+        <div class="packet-notes"><div><h4>申请使用的凭据</h4><p><code>--credential</code> 和 <code>--version</code> 说明申请使用哪条密码记录的哪个版本。</p></div><div><h4>申请用途</h4><p><code>--purpose "登录项目工作台"</code> 说明本次申请的任务目的，供用户审批。</p></div><div><h4>申请允许的使用范围</h4><p><code>--space 7 --page p1</code>、<code>--form '#login'</code> 和 <code>--selector '#password'</code> 一起限定这份申请允许使用密码的位置。</p></div></div>
+      </div>
+      <div class="packet-layout" id="chrome-handoff"><div class="packet-paper"><div class="packet-title"><b>Chrome 页面：提交使用申请</b><span>申请命令</span></div><pre><code>chiyo fill request \
+  --credential cred-workspace-01 --version 1 \
+  --via chrome --browser http://127.0.0.1:9222 \
+  --tab A7C93D1E8B624F06B3D28AC572E4910F \
+  --url https://workspace.example/login \
+  --form '#login' --selector '#password' \
+  --purpose "登录项目工作台" --json</code></pre></div><div class="packet-notes"><div><h4>申请使用的凭据</h4><p>同样用 <code>--credential</code> 和 <code>--version</code> 说明申请使用的密码记录及版本。</p></div><div><h4>申请用途</h4><p><code>--purpose "登录项目工作台"</code> 说明本次申请的任务目的，供用户审批。</p></div><div><h4>申请允许的使用范围</h4><p><code>--browser</code>、<code>--tab</code> 和 <code>--url</code> 确定申请对应的浏览器页面；<code>--form</code> 和 <code>--selector</code> 限定申请允许使用密码的区域和字段。</p></div></div></div>
+    </figure>
+    <div class="reading"><h3>提交后，知予生成一条待批准的申请</h3><p>知予查询目标，记录申请对应的凭据版本、页面以及表单和字段信息，再返回申请编号，例如 <code>REQ-42</code>。这些信息与申请一同保存，后续审批和执行都引用这条记录。</p><pre class="plan-fragment"><code>申请编号：REQ-42
+审批状态：待批准</code></pre></div>
+    <div class="reading connection-entry" id="credential-approval"><h3>用户在知予 App 中审批，Agent 等待结果</h3><p>用户查看申请中的凭据、用途和允许范围，选择批准或拒绝。批准范围限定为这份申请列出的页面、区域和字段；注册表单、修改密码表单或其他字段需要另行申请。</p><p>Agent 用申请编号等待审批结果：</p><pre class="plan-fragment"><code>chiyo requests wait REQ-42 --timeout 60 --json</code></pre><p>申请获批后，Agent 才能按这条记录发起执行。下一节从执行命令开始，展开知予怎样实际操作浏览器。</p></div>
+    <details><summary>一次申请包含多份密码时，怎样批准？</summary><div class="detail-body"><p>申请可以列出多条凭据，分别说明填哪个表单、哪个字段。用户可以只批准其中几项。某次操作同时需要 A 和 B，就要等 A、B 都获批；只使用 A 的独立操作，可以在 A 获批后执行。</p></div></details>
+  </section>
+
+  <section id="browser-execution" class="chapter">
+    <div class="reading"><h2><span class="section-num">03</span>获批后，知予怎样实际填入密码？</h2><p>现在申请 <code>REQ-42</code> 已获批准，接下来才执行。Agent 按申请编号发出命令：</p><pre class="plan-fragment" id="credential-execution"><code>chiyo fill run --request REQ-42 --json</code></pre><p>知予取出申请里保存的目标，检查批准仍有效、密码版本仍相符，再把保存的目标和获准使用的密码交给内置的浏览器填写模块。这是知予中负责连接浏览器、查询页面和写入文字的代码；它拿到数据后，仍要检查实际目标，才能写入网页。</p><p>这次操作有自己的编号，例如 <code>OP-42</code>，用于后续查询结果。收到操作编号只表示可以追踪这次操作；下面继续看文字怎样真正进入网页。</p></div>
+    <div class="reading connection-entry" id="browser-connection"><h3>知予的填写模块怎样接上指定的浏览器？</h3><p>执行时，填写模块要通过连接向目标浏览器发送操作。申请阶段查询目标也使用这套连接方式；这里展开它具体怎样工作。ego 和 Chrome 提供的连接方式不同，下面分别看知予的填写模块怎样调用它们。</p></div>
+    <div class="destination-plan browser-connection-pair" id="connection-methods">
+      <div class="outer-process"><div class="process-label">ego：由配套命令行工具建立连接</div><h3>启动一个能连接 ego 的程序</h3><p>ego 主程序提供了供配套工具接入的本机通信入口。知予的填写模块启动 <code>ego-browser</code>，指定 <code>nodejs</code> 模式；这个命令行工具负责接入入口，与正在运行的 ego 主程序建立连接。</p><pre><code>ego-browser nodejs</code></pre><p>知予的填写模块把要执行的 JavaScript 代码传给 <code>ego-browser nodejs</code>。ego 主程序收到后，会安排一个 <strong>Node.js 执行环境</strong>来运行脚本——也就是能执行 JavaScript、并能调用 ego 操作功能的环境。</p><p><strong>连接建立后：</strong>知予的填写模块可以提交控制脚本，脚本的输出和执行结果也能沿原通道返回。网页和标签页仍由浏览器管理。</p><a class="source-ref" href="https://github.com/citrolabs/ego-lite/wiki/Ego-Browser-CLI-Architecture" target="_blank" rel="noreferrer">ego 的连接与脚本执行机制 ↗</a></div>
+      <div class="outer-process" id="chrome-execution"><div class="process-label">Chrome：连接目标页面的消息地址</div><h3>从页面列表取得地址，再建立连接</h3><p>前面的申请已经指定 Chrome 的控制地址 <code>http://127.0.0.1:9222</code>。这个 Chrome 需要已开放供外部程序操作页面的入口，准备方式见第 1 节的<a href="#chrome-entry">展开说明</a>。执行时，填写模块访问该入口的页面列表：</p><pre><code>http://127.0.0.1:9222/json/list</code></pre><p>地址中的 <code>127.0.0.1</code> 表示本机，<code>9222</code> 是这个入口使用的端口号，<code>/json/list</code> 表示查询页面列表。找到 Agent 选定的页面 <code>A7C93D1E8B624F06B3D28AC572E4910F</code> 后，取出该记录的 <code>webSocketDebuggerUrl</code>。这个字段就是用来连接此页面的消息地址。</p><pre><code>{
+  "id": "A7C93D1E8B624F06B3D28AC572E4910F",
+  "url": "https://workspace.example/login",
+  "webSocketDebuggerUrl":
+    "ws://127.0.0.1:9222/devtools/page/A7C93D1E8B624F06B3D28AC572E4910F"
+}</code></pre><p>知予的填写模块连接这个地址，等待连接成功。这里使用 <strong>WebSocket</strong>：一种建立后可以持续双向收发消息的连接。</p><p><strong>连接建立后：</strong>知予的填写模块通过这条连接发送命令，命令就交给页面 <code>A7C93D1E8B624F06B3D28AC572E4910F</code> 处理；浏览器的回复从同一连接返回。</p><a class="source-ref" href="https://chromium.googlesource.com/chromium/src/+/main/content/browser/devtools/devtools_http_handler.cc#1104" target="_blank" rel="noreferrer">Chrome 页面列表与连接处理 ↗</a></div>
+    </div>
+    <p class="caption">上面分别得到“能提交 ego 控制脚本的通道”和“能向 Chrome 目标页面发送消息的通道”。本机地址、端口与页面编号用于说明对应关系。</p>
+
+
+    <div class="reading connection-entry" id="operation-content"><h3>连上浏览器后，要发送哪些操作？</h3><p>连接建立后，知予还要告诉浏览器“执行哪段网页代码”。ego 和 Chrome 在这里使用同一套命令约定，叫 <strong>CDP（Chrome DevTools Protocol）</strong>：消息说明操作名称和参数，浏览器再返回回复。其中，<code>Runtime.evaluate</code> 表示让页面运行一段 JavaScript。</p><p>ego 的控制脚本通过 <code>page.cdp()</code> 发送这条命令；Chrome 由知予沿刚建立的 WebSocket 发送。两边先执行查询，再决定能否写入。</p><p>申请时保存的是当时的页面情况。在等待批准期间，页面可能跳转，登录表单也可能改变。因此，即使这是第一次执行，也要把现在的目标与申请时的记录比较，确认仍可按原申请填写。</p><p>下面先展开查询和判断，再说明写入动作。</p></div>
+
+    <div class="reading connection-entry" id="verify-destination"><h3>先检查：页面现在仍然是预期的目标吗？</h3><p>比较分两层：先确认还是申请时的浏览器和标签页，且网址一致；再在这张页面中找到唯一的 <code>#login</code>，确认其中只有一个符合条件的 <code>#password</code>，并把区域和字段的结构与申请时保存的记录比较。例如，申请时保存的是密码输入框，执行时同一位置变成普通文本框，就不能继续。即使编号仍叫 password，也不算通过检查。</p><p>例如，下面这次查询仍与申请记录一致，就可以进入写入步骤：</p><div class="target-comparison"><table aria-label="申请记录与执行时目标的对照"><colgroup><col class="comparison-label"><col><col></colgroup><thead><tr><th scope="col">核对内容</th><th scope="col">申请时保存</th><th scope="col">执行时查到</th></tr></thead><tbody><tr><th scope="row">页面</th><td>ego 工作区 <code>7</code> / 页面 <code>p1</code><br>网址：<code>workspace.example/login</code></td><td>仍是同一浏览器中的 <code>7 / p1</code>，网址相同</td></tr><tr><th scope="row">登录区域</th><td><code>#login</code><br>包含账号框、密码框和登录按钮</td><td><code>#login</code> 唯一，区域结构仍相符</td></tr><tr><th scope="row">密码字段</th><td>区域内的 <code>#password</code><br><code>type=password</code></td><td>该区域内唯一匹配<br>仍为可编辑的密码框</td></tr></tbody></table></div><p>Chrome 对应比较申请里保存的浏览器实例和标签页标识，其余区域、字段检查相同。若页面身份、区域结构或字段条件不符，就停止本次操作。</p><p>知予的填写模块先安排一次<strong>查询操作</strong>：读取页面现在的网址，并检查 <code>#login</code> 是否唯一、它里面的 <code>#password</code> 是否也唯一。查询使用的还是前面讲过的 DOM 方法；这里要解释的是它怎样被送到浏览器里执行。</p></div>
+    <div class="destination-plan browser-connection-pair" id="query-methods">
+      <div class="outer-process"><div class="process-label">ego：提交一段查询脚本</div><h3>脚本选中页面，再请求页面执行查询</h3><p>知予的填写模块调用 <code>ego-browser nodejs</code>，传入下面的脚本。脚本在 ego 安排的 Node.js 环境中运行。<code>page</code> 是代表 p1 页面的操作对象。</p><pre><code>const task = await taskSpace(7);
+const page = task.page('p1');
+
+const queryCode = `({
+  url: location.href,
+  forms: document.querySelectorAll('#login').length,
+  matches: document.querySelectorAll(
+    '#login #password'
+  ).length
+})`;
+const reply = await page.cdp('Runtime.evaluate', {
+  expression: queryCode,
+  returnByValue: true
+});
+const state = reply.result.value;</code></pre><p><code>page.cdp()</code> 把命令交给 p1 对应的页面。<code>expression</code> 放要执行的代码，<code>returnByValue</code> 要求带回查询值。因此 <code>location</code> 和 <code>document</code> 指向网页里的对象；返回的 <code>state</code> 留给控制脚本作判断。<code>await</code> 表示等待结果。</p></div>
+      <div class="outer-process"><div class="process-label">Chrome：发送一条查询消息</div><h3>把查询代码放进消息，沿已建立的连接发送</h3><p>Chrome 通过 WebSocket 接收同一条 <code>Runtime.evaluate</code> 命令。下面用 JSON——按“字段名：值”组织的文本——表达一次查询：</p><pre><code>{
+  "id": 1,
+  "method": "Runtime.evaluate",
+  "params": {
+    "expression": "({url: location.href, forms: document.querySelectorAll('#login').length, matches: document.querySelectorAll('#login #password').length})",
+    "returnByValue": true
+  }
+}</code></pre><p>知予的填写模块把这段文本发送到上一步建立的 WebSocket。<code>method</code> 表示“执行页面代码”，<code>expression</code> 是代码内容；<code>returnByValue</code> 要求把查询到的值带回来。<code>id</code> 给这次查询编号，帮助对应回复。</p></div>
+    </div>
+    <div class="reading"><h3>浏览器返回现况，控制代码决定是否继续</h3><p>两边都能从查询结果中取出下面几个值：</p><pre class="plan-fragment"><code>{
+  "url": "https://workspace.example/login",
+  "forms": 1,
+  "matches": 1
+}</code></pre><p>控制代码把返回的网址与 Agent 提交的预期网址比较，并确认只匹配一个登录区域及其中的一个字段。<strong>网址不同，或者匹配数量不是 1，就停止这次填写。</strong>在 ego 例子中，判断写在刚才提交的控制脚本里；直接操作 Chrome 时，判断写在收取消息回复的知予的填写模块里。</p><p>上面的查询只展示网址和匹配数量。完整填写还要核对申请中保存的表单及字段信息，并检查密码框类型、是否可编辑等条件；仅凭网址相同、同名框唯一，还不足以确认是原先批准的目标。比较通过才进入写入步骤；无法确认一致时，知予停止这次操作。</p></div>
+    <p class="caption">这里展开网址与匹配数量，便于看清“发起查询 → 浏览器执行 → 取回结果 → 决定是否继续”的关系。<a href="https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-evaluate" target="_blank" rel="noreferrer">Chrome 执行页面代码的命令 ↗</a></p>
+
+    <details><summary>同一份批准下再次填写，检查会省略吗？</summary><div class="detail-body"><p>不会。批准仍有效时，再次发起填写仍要检查浏览器、页面、网址及表单和字段。页面刷新后，只有页面身份和保存的结构信息仍符合时才能继续；换了标签页、表单发生变化或无法确认时就停止。这里的检查针对每次执行，第一次填写也一样。</p></div></details>
+    <div class="reading connection-entry" id="send-fill"><h3>检查通过后，把密码写入确认过的框</h3><p>目标检查通过后，填写模块才把获准密码写入网页。下面用公开文字 <code>hello</code> 代表这次写入的密码，先对照它与目标的关系，再展开填写方法：</p></div>
+    <figure class="delivery-board" id="browser-delivery-diagram"><figcaption class="figure-heading">本次写入使用的目标与文字</figcaption>
+      <div class="delivery-grid"><div class="delivery-origin"><b>检查已经通过</b><span>使用获批版本的密码</span></div><div class="delivery-streams"><div class="delivery-stream"><b>要填哪里</b><code>ego：7 / p1<br>表单：#login<br>字段：#password<br>网址：workspace.example/login</code><span class="stream-tip" aria-hidden="true">→</span></div><div class="delivery-stream secret-stream"><b>要填什么</b><code>hello</code><span>从知予保存的密码记录取得</span><span class="stream-tip" aria-hidden="true">→</span></div></div><div class="delivery-receiver"><b>内置浏览器填写模块</b><span>知予负责执行与结果</span><dl><dt>ego</dt><dd>由控制脚本向选定页面发送写入代码</dd><dt>Chrome</dt><dd>通过已建立的连接发送相同的写入代码</dd></dl><span class="next-operation">下一步：向确认过的元素写入文字 ↓</span></div></div>
+      <p class="figure-note">Agent 的命令只带密码记录编号。图中的 hello 是知予交给填写模块的密码，不是 Agent 在命令里写出的密码。</p>
+    </figure>
+    <div class="reading"><h3>两种浏览器都执行同一段网页写入代码</h3><p>知予把“再次检查目标”和“修改这个元素”放进同一次页面调用中。下面先看准备发送的写入代码节选；此时还没有发送。代码运行时，<code>field</code> 指向刚通过检查的 <code>#login</code> 内的 <code>#password</code>：</p><pre class="plan-fragment"><code>// 取出浏览器为 input 提供的 value 写入方法
+const setValue = Object.getOwnPropertyDescriptor(
+  HTMLInputElement.prototype, 'value'
+).set;
+
+// 把文字写入已经确认的这个元素
+setValue.call(field, 'hello');
+field.dispatchEvent(new Event('input', { bubbles: true }));
+field.dispatchEvent(new Event('change', { bubbles: true }));</code></pre><p><code>value</code> 保存输入框当前的文字。<code>setValue.call(field, 'hello')</code> 调用浏览器原有的写入方法，把这个框的值设为 hello。后两行通知网页“输入内容发生了变化”，让网页处理相应更新；<code>bubbles: true</code> 让外层表单也能收到通知。</p><p>知予把完整的检查及写入代码保存为字符串 <code>fillCode</code>，再按下面两种方式之一发送。实际执行还会核对：收到代码的是否仍是刚才检查的那一版页面。无法确认是否已经写入时，知予报告“结果未知”。</p></div>
+    <div class="destination-plan browser-connection-pair" id="fill-methods">
+      <div class="outer-process"><div class="process-label">ego：由控制脚本发送写入命令</div><h3>让选定页面执行这段代码</h3><pre><code>// fillCode 是上面说明的完整检查及写入代码
+await page.cdp('Runtime.evaluate', {
+  expression: fillCode,
+  returnByValue: true
+});</code></pre><p>控制脚本已经通过 <code>ego-browser nodejs</code> 在 ego 的执行环境中运行；<code>page</code> 代表工作区 7 的 p1 页面。脚本用与查询相同的 <code>page.cdp()</code> 发送命令，让该页面执行 <code>fillCode</code> 并返回结果。供程序调用的这种方法，就是<strong>API</strong>。</p><a class="source-ref" href="#source-bridge">知予通过 ego 执行页面代码的实现 ↓</a><div class="execution-picture"><div class="execution-arrow"><span>控制脚本 → page.cdp() → 选定页面执行写入代码</span><b aria-hidden="true">↓</b></div><div class="result-browser" role="img" aria-label="ego收到操作后在同一页面的password框填入hello"><div class="result-tab"><b>项目工作台</b><code>工作区 7 / 页面 p1</code></div><div class="result-address">https://workspace.example/login</div><div class="result-field"><span>密码框 <code>id="password"</code></span><div>•••••</div><code>#login #password → input.value = "hello"</code></div></div></div></div>
+      <div class="outer-process" id="protocol"><div class="process-label">Chrome：直接发送写入消息</div><h3>沿已连接的 WebSocket 发送相同代码</h3><p>知予组装同一条 <code>Runtime.evaluate</code> 命令，将 <code>fillCode</code> 放进消息：</p><pre><code>const message = {
+  id: 2,
+  method: 'Runtime.evaluate',
+  params: { expression: fillCode, returnByValue: true }
+};
+// 转成 JSON 文本，发送到目标页面的连接
+socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面 <code>A7C93D1E8B624F06B3D28AC572E4910F</code>。Chrome 执行代码，修改选定的元素，再返回执行结果。真实密码由知予内部放入代码，不能写入普通日志；回复也只报告状态。</p><div class="execution-picture"><div class="execution-arrow"><span>填写消息 → 已连接的页面 WebSocket → Chrome</span><b aria-hidden="true">↓</b></div><div class="result-browser" role="img" aria-label="chrome收到操作后在同一页面的password框填入hello"><div class="result-tab"><b>项目工作台</b><code>A7C93D1E8B624F06B3D28AC572E4910F</code></div><div class="result-address">https://workspace.example/login</div><div class="result-field"><span>密码框 <code>id="password"</code></span><div>•••••</div><code>#login #password → input.value = "hello"</code></div></div></div></div>
+    </div>
+    <p class="caption">代码节选用于说明怎样写入元素。完整实现还要核对页面身份、网址及表单结构，并在填写后检查结果。网页收到事件后可能重新渲染；无法确认结果时报告“结果未知”。填写完成不代表已经提交登录。<a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/value" target="_blank" rel="noreferrer">input 的 value 属性 ↗</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent" target="_blank" rel="noreferrer">通知网页处理事件 ↗</a></p>
+
+    <div class="fill-example" id="browser-fill-demo"><div><h3>把检查和填写连起来看</h3><p>这个演示沿用第 1 节选定的条件，并把填写结果显示在本节。完整执行还要检查批准和表单范围。点击按钮后，先检查是否唯一匹配密码框：匹配两个输入框就停止；匹配唯一密码框才填入 hello。</p><p class="demo-target">选定条件：<code x-text="selector"></code> · <a href="#web">返回调整定位条件</a></p></div><div class="fill-action"><button id="fill-button" class="primary" @click="demoBrowserFill()">检查目标并填入 hello</button><button class="text-button" @click="resetWeb()">重置表单</button><output class="fill-preview" aria-label="教学密码框结果" x-text="filled ? '•••••' : '尚未填写'"></output><p class="live-status" aria-live="polite" x-text="fillStatus"></p><code class="value-readout" x-show="filled">input.value = "hello"</code></div></div>
+    <details><summary>为什么 HTML 里没有出现 hello？</summary><div class="detail-body"><p>HTML 声明元素的初始结构。填写改变的是这个输入元素当前的 <code>value</code> 属性，原来的 HTML 标签可以保持不变。密码框把字符画成圆点，实际文字保存在元素当前的值中。</p><p>普通 <code>div</code> 或 <code>span</code> 通常用来组织内容；<code>input</code>、<code>textarea</code> 或启用了 <code>contenteditable</code> 的元素提供对应的编辑方式。本例使用 <code>type="password"</code> 的 <code>input</code>。</p></div></details>
+    <div class="reading connection-entry" id="browser-result"><h3>操作做完了，Agent 怎样接着完成登录？</h3><p>知予的填写模块把填写结果返回知予的执行端，Agent 用 <code>chiyo operations show OP-42 --json</code> 查询这次操作的结果。它还要观察页面是否处于预期状态，再决定提交登录；网站接受账号密码并进入登录后的页面，才说明登录任务完成。填写命令的回复只解决了其中的输入步骤。</p></div>
+    <div class="platform-common"><div class="platform-names"><span>macOS</span><span>Windows</span></div><div><h3>这条网页填写主线适用于两个系统</h3><p>网页的元素与选择器规则相同，跨平台浏览器工具也可以提供相同的页面操作方法。系统差异主要落在浏览器启动、控制连接的建立以及工具安装配置上。</p></div></div>
+  </section>
+
+
+  <section id="native" class="chapter">
+    <div class="reading"><h2><span class="section-num">04</span>换成普通应用，怎样指定要填的框？</h2>
+      <p>网页这条路径已经走通：Agent 指定页面与元素，知予核对许可，由内置填写模块通过浏览器入口操作网页。现在，把目标换成项目工作台的桌面客户端。凭据仍可从知予的目录选择，但<strong>怎样表达输入框的位置、通过什么入口操作它</strong>，需要重新考虑。</p>
+      <p>不同应用使用不同的界面技术，不能普遍沿用网页里的 HTML 选择器。操作系统提供了另一个共同入口：查询应用中的输入框、按钮等界面元素。这些元素称为<strong>控件</strong>；其中，当前接收键盘输入的控件具有<strong>输入焦点</strong>。</p>
+      <p>下面沿着一种具体方式展开：<strong>Agent 点中密码框，让它取得输入焦点；知予的辅助程序再向系统查询此刻的焦点控件，并向它送入文字。</strong>这条方式称为“本机焦点填充”。先看目标如何表达，再讲系统查询和输入调用。</p>
+    </div>
+    <div class="reading connection-entry" id="native-select"><h3>点击怎样把 Agent 选中的框变成输入目标？</h3>
+      <p>Agent 让桌面操作工具把目标窗口切到前台，再点击密码框。工具把点击交给操作系统，系统把鼠标操作送到对应窗口；应用处理点击后，通常会把输入焦点移到这个框。此后送给应用的键盘文字，就由它的输入处理逻辑交给焦点控件。</p>
+      <p>这次点击产生了一个可查询的桌面状态：“前台是项目工作台，焦点在密码框”。下图可切换账号框与密码框，观察这个状态如何变化。</p>
+    </div>
+    <div class="native-anatomy">
+      <div class="native-window"><div class="native-title">项目工作台 · 桌面客户端</div><div class="native-body"><h3>连接工作区</h3><label>账号</label><button class="native-field" :class="{'focused':nativeFocus==='account'}" @click="changeFocus('account')" aria-label="将模拟焦点移到账号框">lin@example.com<span x-show="nativeFocus==='account'" class="caret"></span></button><label>密码</label><button class="native-field" :class="{'focused':nativeFocus==='password'}" @click="changeFocus('password')" aria-label="将模拟焦点移到密码框"><span x-text="nativeValue ? '•••••' : ''"></span><span x-show="nativeFocus==='password'" class="caret"></span></button><span class="native-login">连接</span></div></div>
+      <div class="tree-panel"><div class="pane-title">系统可查询的控件信息 <span>简化为当前关注的控件</span></div><div class="tree"><div>应用</div><div class="branch">窗口「连接工作区」</div><div class="branch leaf" :class="{'current':nativeFocus==='account'}">文本框「账号」<span x-show="nativeFocus==='account'">当前焦点</span></div><div class="branch leaf" :class="{'current':nativeFocus==='password'}">文本框「密码」<span x-show="nativeFocus==='password'">当前焦点</span></div><div class="branch leaf">按钮「连接」</div></div><div class="property-readout"><span>当前焦点控件的属性</span><dl><dt>用途</dt><dd x-text="nativeFocus==='password'?'密码输入':'普通文字输入'"></dd><dt>可用</dt><dd>是</dd><dt>具有焦点</dt><dd>是</dd></dl></div></div>
+    </div>
+
+    <p class="caption">控件树表示应用、窗口和输入框之间的关系；真实应用可能有更多层。高亮表示当前焦点。这里演示的点击和查询都只作用于教学图。</p>
+    <div class="reading connection-entry" id="native-handoff"><h3>为客户端提交一份密码使用申请</h3><p>Agent 申请使用同一条密码记录 <code>cred-workspace-01</code> 第 <code>1</code> 版，用途是登录项目工作台客户端，允许范围是这个客户端应用。它通过知予的 <code>chiyo</code> 提交申请；<code>--via focus</code> 让知予根据当前前台应用确定申请对应的应用身份。</p><p>Agent 点中客户端的密码框后，在后台创建申请，避免操作终端时把焦点移走：</p><pre class="plan-fragment"><code>chiyo fill request \
+  --via focus \
+  --credential cred-workspace-01 --version 1 \
+  --purpose "登录项目工作台客户端" --json</code></pre><p>知予向系统查询此刻的前台应用和焦点控件，核对申请对应的应用及控件条件，并保存应用身份，返回待批准的申请 <code>REQ-43</code>。</p><p>这次查询不会把焦点锁住。系统焦点方式按执行时实际选中的密码框填写；它能核对所属应用，不能像网页选择器那样指定某个表单和字段。</p></div>
+    <div class="reading"><h3>等待用户审批客户端的使用申请</h3><p>用户在知予 App 中核对申请的凭据、用途和应用范围，决定批准或拒绝。Agent 用 <code>REQ-43</code> 等待结果：</p><pre class="plan-fragment"><code>chiyo requests wait REQ-43 --timeout 60 --json</code></pre><p>申请获批后，Agent 可以按这份许可发起执行。下一节展开实际操作。</p></div>
+    <details><summary>有多个密码框时，哪个框会成为目标？</summary><div class="detail-body"><p>由 Agent 根据任务点中的那个框决定。目标查询只观察当时的状态，不预留焦点；批准记录也只限定应用，并未绑定其中某一个密码框。</p><p>因此，Agent 发起填写前必须确认实际焦点仍在预期位置。如果此时已移到同一应用的另一个合格密码框，辅助程序可能把后者捕获为目标。捕获后的变化检查，只能检查“是否仍是刚才捕获的控件”，不能替 Agent 判断任务原本想填哪个框。</p><p>这里的 <code>--via focus</code> 申请限定应用，不接受网页网址、表单或字段选择器；系统控件信息本身也不证明网页登录来源。</p></div></details>
+  </section>
+
+  <section id="platform" class="chapter">
+    <div class="reading"><h2><span class="section-num">05</span>获批后，辅助程序怎样通过系统完成填写？</h2><p>申请获批后，Agent 先让客户端回到前台，确认空密码框并重新点中它。</p></div>
+    <div class="focus-command" id="agent-native-target"><div><h3>恢复密码框焦点，再发起执行</h3><pre><code>chiyo fill run --request REQ-43 --json</code></pre><p>命令在后台执行，避免终端抢走焦点。知予先检查批准和密码版本，然后联系本机辅助程序。这次操作返回自己的编号，例如 <code>OP-43</code>，用于查询执行结果。</p></div><div class="focus-context"><h3>此刻实际选中的控件</h3><dl><dt>当前焦点</dt><dd x-text="nativeFocus==='password'?'密码框':'账号框'"></dd><dt>控件用途</dt><dd x-text="nativeFocus==='password'?'密码输入':'普通文字输入'"></dd></dl><p aria-live="polite" x-text="nativeFocus==='password'?'继续检查应用和控件是否仍符合批准。':'这是普通文本框，不能把密码填到这里。'"></p></div></div>
+    <div class="reading">
+      <h3 id="native-helper-channel">知予 App 怎样让辅助程序开始工作？</h3><p>Mac 和 Windows 都由知予 App 联系随软件安装的辅助程序；具体联系方法不同：</p></div>
+    <div class="helper-contact" id="helper-contact">
+      <div><h4>Mac：通过 XPC 调用辅助程序的方法</h4><p>App 调用苹果提供的 <code>NSXPCConnection</code>，按辅助程序的服务名建立连接。<strong>XPC</strong> 负责把方法调用和参数送到另一个程序执行，再带回回复。</p><dl><div><dt>先调用 <code>prepare(...)</code></dt><dd>传入用户批准的应用信息，请辅助程序检查当前密码框。</dd></div></dl></div>
+      <div><h4>Windows：启动程序，给它发送数据</h4><p>知予 App 启动自己的辅助程序：</p><pre><code>info-focus-broker.exe --broker-v1</code></pre><p>App 先把用户批准的应用信息发给它，请它检查当前焦点控件。此时还没有发送密码。</p><p>这里仍使用程序的标准输入和标准输出：App 向辅助程序写入本次检查的要求，辅助程序读出并处理，再写回检查结果。</p></div>
+    </div>
+    <p class="caption">这一步联系的是知予自己的辅助程序。接下来，辅助程序通过系统函数查询和操作目标应用。<a href="#source-helper-channels">对应调用代码 ↓</a></p>
+    <div class="reading connection-entry"><h3 id="native-system-entry">辅助程序怎样知道选中的是密码框？</h3><p>应用会通过操作系统的<strong>辅助功能</strong>报告界面信息，例如有哪些输入框、哪个框正在接收键盘输入、它是不是密码框。常见的界面框架已经替标准控件提供了这些信息；自绘控件需要应用开发者补上。</p><p>辅助程序调用系统函数，询问“当前选中的是哪个框”。系统查询应用提供的信息，返回一个代表这个框的对象。代码把它放在 <code>field</code> 中，随后还能继续询问：“这个框是不是密码框？现在能不能编辑？”</p><p>苹果提供的这组查询功能简称 <strong>AX</strong>，微软提供的叫 <strong>UI Automation（UIA）</strong>。辅助程序能否使用它们，还要满足当前电脑的系统权限要求；知予批准使用密码，并不会替它取得系统权限。</p><p class="sources-inline"><a href="https://developer.apple.com/library/archive/documentation/Accessibility/Conceptual/AccessibilityMacOSX/OSXAXmodel.html" target="_blank" rel="noreferrer">Apple 的控件查询机制 ↗</a> · <a href="https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-uiautomationoverview" target="_blank" rel="noreferrer">Windows 的控件查询机制 ↗</a></p></div>
+    <div class="os-selector" role="group" aria-label="查看系统接口"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
+    <div class="os-workspace" :data-os="os">
+      <div class="api-step" id="native-query">
+        <div class="step-heading"><span>1</span><h3>调用系统函数，查出当前选中的框</h3></div>
+        <div class="step-content"><div class="api-explain">
+          <p x-text="os==='mac'?'要查询某个应用，先取得它的进程编号 PID——系统用这个编号区分正在运行的程序。frontmostApplication 给出当前前台应用；AXUIElementCreateApplication(pid) 创建一个代表它的查询对象 app。':'辅助程序先用 CoCreateInstance 创建系统提供的 UIA 查询对象 automation。这个对象提供查控件的方法；调用 GetFocusedElement，便能向系统询问当前的焦点控件。'"></p>
+          <p x-text="os==='mac'?'再调用 AXUIElementCopyAttributeValue，指定查询 app 的“焦点控件”属性；系统把查到的控件放入 field。':'系统通过目标应用的辅助功能取得答案，把查到的控件放入 field。接下来就可以继续查这个框的属性。'"></p>
+          <p class="return-description">查询结果：<code>field</code> 代表此刻的焦点控件。它的类型是 <code x-text="os==='mac'?'AXUIElement':'IUIAutomationElement*'"></code>；后续用它指定要查哪个控件。</p>
+        </div><pre class="api-code"><code x-html="highlight(queryCode)"></code></pre></div>
+      </div>
+      <div class="api-step" id="native-inspect">
+        <div class="step-heading"><span>2</span><h3>拿到的是一个控件，还要确认它适合填密码</h3></div>
+        <div class="step-content"><div class="api-explain">
+          <p>焦点也可能落在账号框或其他应用里。辅助程序因此要核对：所属应用是否获准，控件是否为可用、可编辑的密码框。系统返回属性，<strong>辅助程序根据这些值作决定</strong>。</p>
+          <p x-text="os==='mac'?'例如，把 field 和“子角色”属性名传给 AXUIElementCopyAttributeValue，就能区分普通文本框与安全文本框。':'例如，在 field 上调用 get_CurrentIsPassword，系统会返回它是否为密码控件。'"></p>
+          <p>符合条件才保存本次捕获的应用、窗口和控件信息，并回复知予“目标已准备好”。不符合条件则返回拒绝结果。下面列出其中几项属性。</p>
+        </div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>查询属性</span><span>密码框的典型返回</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
+      </div>
+      <div class="reading connection-entry" id="native-material"><h3>目标准备好后，App 把密码交给辅助程序</h3><p>收到“目标已准备好”的回复后，知予 App 取得获准版本的密码。Mac 通过刚才的 XPC 连接调用 <code>send(...)</code>，传入密码和本次操作的信息；Windows 将密码数据写给已启动的辅助程序，由辅助程序读取。</p><p>辅助程序现在才拿到待填文字。接下来，它还要检查发送前的焦点是否变化。</p></div>
+      <div class="focus-story" id="native-recheck">
+        <div><h3>准备好文字时，目标会不会已经变了？</h3><p>从捕获控件到取得密码、准备发送，中间仍有时间间隔。用户或应用可能把焦点移到另一个框。如果输入接口按此刻的焦点投递，文字就可能落到新位置。</p><p>因此，<strong>辅助程序在实际发送前再次查询应用、窗口和焦点控件，与准备阶段捕获的目标比较</strong>。发现变化就停止；只有检查通过，才调用下一步的输入接口。</p><p>这个检查缩短了变化可能发生的间隔，但没有锁住桌面。检查完成到输入被处理之间，焦点仍可能变化。</p></div>
+        <div class="focus-experiment"><div class="focus-state"><span>准备时选中</span><b x-text="nativeFocus==='password'?'密码框':'账号框'"></b><span>发送前查到</span><b x-text="focusChanged||nativeFocus==='account'?'账号框':'密码框'" :class="{'changed':focusChanged}"></b></div><label class="checkbox-row"><input type="checkbox" x-model="focusChanged" @change="resetDelivery()">发送前，焦点移到账号框</label><button class="secondary" id="check-target" @click="checkTarget()">只比较目标</button><p class="delivery-result" :class="{'refused':delivery==='refused'}" aria-live="polite" x-text="targetCheckText"></p></div>
+      </div>
+      <div class="api-step" id="native-send">
+        <div class="step-heading"><span>3</span><h3>检查通过后，怎样把文字交给系统？</h3></div>
+        <div class="step-content"><div class="api-explain">
+          <p>查到密码框，还没有把文字填进去。辅助程序接着创建包含 <code>hello</code> 的<strong>文字输入事件</strong>，调用系统函数发送。目标应用收到事件后，再由正在接收输入的框处理这些文字。</p>
+          <p x-text="os==='mac'?'Mac：辅助程序用 CGEvent 创建输入事件，用 keyboardSetUnicodeString 放入密码文字，再调用 postToPid(targetPID)，指定把事件送到哪个应用。':'Windows：辅助程序用 INPUT 记录要输入的文字，再调用 SendInput，把这些事件加入系统输入流。'"></p>
+          <p class="delivery-key" x-text="os==='mac'?'postToPid 能指定应用，但具体哪个框接收文字，仍取决于这个应用的焦点。因此，发送前要再次确认密码框仍被选中。':'SendInput 没有“哪个窗口、哪个框”的参数，文字会送往当时的前台输入位置。因此，发送前要再次确认应用与密码框。'"></p>
+        </div><details id="native-event-code"><summary>展开看文字事件的数据和底层代码</summary><div class="detail-body"><p>这里用 UTF-16 数值表示文字，例如 h 对应十六进制的 <code>0x0068</code>。代码为按下、释放分别创建事件，再交给系统。</p><div class="event-payload"><span class="event-name" x-text="os==='mac'?'CGEvent 里的文字数据':'INPUT 里的文字数据'"></span><code x-text="os==='mac'?'hello → 0068 0065 006C 006C 006F':'h → wScan: 0x0068'"></code><span x-text="os==='mac'?'按下和释放两个记录都装入这段文字':'hello 共 5 个 UTF-16 单元，组成 10 个事件'"></span></div><pre class="api-code"><code x-html="highlight(sendCode)"></code></pre></div></details></div>
+      </div>
+      <div class="reading"><button class="secondary" id="send-events" @click="demoSend()">按上面的目标状态演示发送事件</button><p aria-live="polite" x-text="deliveryText"></p></div>
+      <div class="os-footnote"><p x-text="os==='mac'?'调用前，辅助程序需要获得系统的辅助功能访问和事件投递权限。AXIsProcessTrusted() 与 CGPreflightPostEventAccess() 用于检查；这与知予批准使用哪份密码是两层不同的许可。':'Windows 按权限等级限制程序间的输入操作，称为完整性级别。普通权限的辅助程序向更高权限窗口送入文字可能被系统阻止；知予的密码使用批准不会改变这个系统限制。'"></p><a :href="os==='mac'?'https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/macos/focused_input/SystemFocusEnvironment.swift#L76':'https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/windows/focused_input/focus_snapshot.cpp#L117'" target="_blank" rel="noreferrer">对应调用源码 ↗</a></div>
+    </div>
+    <p class="caption">代码展示关键调用，省略错误处理、部分变量声明及完整目标校验。Windows 还通过 GetForegroundWindow、GetGUIThreadInfo 核对前台窗口与系统焦点，避免只凭 UIA 的一个属性决定发送。</p>
+    <div class="reading connection-entry" id="native-result"><h3>系统接收输入后，应用怎样把它显示出来？</h3>
+      <p>目标应用的输入处理代码接收事件，再由当前编辑控件处理文字、更新内容。密码控件按自己的显示规则画成圆点；如果窗口或控件不接受这些输入，事件提交也不意味着文字已经填好。</p>
+      <p x-text="os==='mac'?'Mac 的 postToPid 调用没有返回应用实际收下多少文字。辅助程序可以报告事件已提交，但不能据此确认控件内容已经更新。':'Windows 的 SendInput 返回成功加入输入流的事件数量。这只能说明事件已经发送，仍不证明应用已处理完毕。'"></p>
+      <p>辅助程序把本次操作状态返回知予。Agent 再用 <code>chiyo operations show OP-43 --json</code> 查询这次操作的结果。例如状态为 <code>sent</code>，意思是输入事件已经发出。Agent 还要观察目标界面，才能决定是否继续点击“连接”。填入密码、提交表单、登录成功是不同的结果。<a class="source-ref" href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput" target="_blank" rel="noreferrer">SendInput 的参数与返回值 ↗</a></p>
+    </div>
+    <details><summary>查到这个框后，能直接修改它的内容吗？</summary><div class="detail-body"><p>有些控件开放了直接设值的能力。Mac 可以用 <code>AXUIElementSetAttributeValue</code> 设置允许写入的属性；Windows 可以对支持相应能力的控件调用 <code>ValuePattern.SetValue</code>。这类调用把“哪个控件、什么值”一起交给辅助功能机制，由应用负责这个控件的代码处理。</p><p>是否支持直接设值，取决于控件类型、实现和权限。上文展开的焦点填充路径采用“查询控件 → 核对目标 → 发送输入事件”；它的输入去向受焦点影响，因此需要讲清发送前的目标检查。</p><p class="sources-inline"><a href="https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue" target="_blank" rel="noreferrer">Apple 设置属性 API</a> · <a href="https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationvaluepattern-setvalue" target="_blank" rel="noreferrer">Microsoft 设置值 API</a></p></div></details>
+  </section>
+
+  <section id="chiyo" class="chapter final-chapter">
+    <div class="reading"><h2><span class="section-num">06</span>回顾：Agent、知予和辅助程序分别做什么？</h2><p>Agent 选出要用的密码和要填的框，用户决定是否允许使用。知予检查批准是否仍有效：网页由内置填写模块连接浏览器，普通应用由 App 联系随包安装的本机辅助程序。下面把两条做法放在一起看：</p></div>
+    <details id="source-credential-handoff"><summary>密码目录、申请与批准的依据</summary><div class="detail-body"><p><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_core/lib/credential_access.dart#L548" target="_blank" rel="noreferrer">凭据目录返回的名称、用途、编号与版本</a>；<a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/integrations/codex/skills/agent-info-access/references/credential-use.md#L52" target="_blank" rel="noreferrer">选择凭据、申请、查询批准状态与执行操作</a>；<a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/docs/adr/0031-device-credential-delivery-and-reveal.md" target="_blank" rel="noreferrer">允许哪个程序以什么方式接收密码</a>。</p></div></details>
+    <div class="implementation-map">
+      <div class="request-and-material"><div class="agent-planner"><strong>Agent</strong><span>选择凭据与目标<br>调用 chiyo 提交申请</span></div><div class="request-direction">Agent 向知予提交申请与操作</div><div class="material-source"><strong>知予</strong><span>检查凭据使用授权<br>把密码发给填写程序</span></div></div>
+      <div class="implementation-routes">
+        <div class="implementation-route"><div class="pipe"><code>页面位置 + 密码</code><span>交给内置填写模块 →</span></div><div><h3>通过浏览器接口填写</h3><p>按接入信息找到指定页面，复核 URL 与元素，再调用填写接口。工具负责把操作请求送到对应页面。</p><a href="#source-bridge">对应源码 ↓</a></div></div>
+        <div class="implementation-route"><div class="pipe"><code>先准备目标<br>通过后发送密码</code><span>本机 App 与辅助程序交接 →</span></div><div><h3>本机焦点填充</h3><p>AX / UIA 先捕获并核验实际控件；通过后才发送密码，发送前再复查目标，最后用 CGEvent / SendInput 发送文字。</p><a href="#source-native">对应源码 ↓</a></div></div>
+      </div>
+    </div>
+    <div class="reading"><p>服务器模式下，服务器保存批准记录和密码，本机 App 或本机执行器负责与目标软件交互。目标页面和当前焦点都在 Agent 所在的电脑上核对。</p><h3>另一种选择：浏览器也能用系统焦点填写</h3><p>浏览器如果向系统提供了网页密码框的信息，也可以使用第 4、5 节的方法：Agent 点击网页密码框，再通过 <code>chiyo</code> 申请并发起系统焦点填写。辅助程序向系统查询当前选中的框，检查通过后发送密码。这时，它按当前焦点填写，不使用 <code>#password</code> 这样的选择器。系统返回的信息能帮助判断这是密码框，但不能单凭这些信息确认它属于哪个网站。</p></div>
+    <details id="source-native"><summary>接口与源码参考</summary><div class="detail-body source-list"><p>以下已有源码以 <code>8a70642c</code> 为参考，用于解释底层机制；新 CLI 与 Chrome 适配以设计文件和后续实现为准。讲解图中的界面、PID 和 hello 用于说明机制，不是对用户真实应用的操作。</p><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/macos/focused_input/SystemFocusEnvironment.swift#L76" target="_blank" rel="noreferrer"><b>Mac：捕获目标、检查属性、投递事件</b><span>SystemFocusEnvironment.swift · capture / check / post</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/windows/focused_input/focus_snapshot.cpp#L117" target="_blank" rel="noreferrer"><b>Windows：前台窗口与 UIA 焦点控件</b><span>focus_snapshot.cpp</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/windows/focused_input/broker_main.cpp#L107" target="_blank" rel="noreferrer"><b>Windows：Unicode INPUT 与 SendInput</b><span>broker_main.cpp</span></a><a id="source-browser-plan" href="../../design/cli-redesign-review.md"><b>新 CLI、表单批准范围和 Chrome 适配的设计依据</b><span>cli-redesign-review.md</span></a><a id="source-agent-fill" href="../../design/cli-redesign-review.md"><b>统一申请、执行和操作结果查询</b><span>新 CLI 设计合同</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_cli/lib/device_focused_fill_host.dart#L442" target="_blank" rel="noreferrer"><b>本机 App 在正式填写时捕获目标并取得材料</b><span>device_focused_fill_host.dart · driver.prepare / material</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_cli/lib/credential_runtime_client.dart#L1307" target="_blank" rel="noreferrer"><b>既有执行器的凭据传递机制（实现参考）</b><span>credential_runtime_client.dart · argv / targetStdin</span></a><a id="source-helper-channels" href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/apps/desktop/macos/focused_input/FocusedFillXPC.swift#L84" target="_blank" rel="noreferrer"><b>Mac：知予 App 连接随包辅助程序</b><span>FocusedFillXPC.swift · NSXPCConnection</span></a><a href="https://github.com/ShiJiJS/chiyo/blob/8a70642cb870b55cfff2835cf992ee2d2263a0d1/packages/info_cli/lib/windows_focused_fill.dart#L22" target="_blank" rel="noreferrer"><b>Windows：启动辅助程序并传递操作与文字数据</b><span>windows_focused_fill.dart · Process.start / stdin</span></a><a id="source-bridge" href="https://github.com/ShiJiJS/chiyo/blob/296ba1c893cb5ee3131f2d9e25c5039202b465e1/packages/info_cli/lib/ego_browser_fill.dart#L203" target="_blank" rel="noreferrer"><b>知予经 ego 发送页面检查和写入代码</b><span>page.cdp / Runtime.evaluate</span></a><p>网页例子采用主页面中的普通密码 input。iframe、Shadow DOM 和自绘控件涉及额外的页面上下文或定位规则。上述源码用于对照凭据交付、目标检查与系统 API；Chrome 的协议示例对应正文所列的官方接口资料。</p></div></details>
+  </section>
+  <footer><span>知予 · 跨应用填写图解</span><a href="#main">回到开头 ↑</a></footer>
+</main>
+</body>
+</html>
