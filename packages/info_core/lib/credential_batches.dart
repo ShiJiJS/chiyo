@@ -14,14 +14,29 @@ class CredentialBatchDestination {
     this.application, [
     this.program,
     this.native,
+    this.ssh,
   ]);
   final String via;
   final BrowserFormTarget? browser;
   final FocusedFillApplication? application;
   final CredentialProgramDestination? program;
   final NativeFillTarget? native;
+  final SshSessionTarget? ssh;
   factory CredentialBatchDestination.fromJson(Map<String, dynamic> json) {
     final via = json['via'];
+    if (via == 'ssh') {
+      _useShape(json, {'via', 'target'});
+      return CredentialBatchDestination._(
+        'ssh',
+        null,
+        null,
+        null,
+        null,
+        SshSessionTarget.fromJson(
+          Map<String, dynamic>.from(json['target'] as Map),
+        ),
+      );
+    }
     if (via == 'native') {
       _useShape(json, {'via', 'target'});
       if (json['target'] is! Map<String, dynamic>) {
@@ -81,6 +96,7 @@ class CredentialBatchDestination {
     'via': via,
     if (browser != null) 'target': browser!.toJson(),
     if (native != null) 'target': native!.toJson(),
+    if (ssh != null) 'target': ssh!.toJson(),
     if (application != null) 'application': application!.toJson(),
     if (program != null) 'program': program!.toJson(),
   };
@@ -288,9 +304,14 @@ class CredentialBatchItem {
       throw const CredentialUseFailure('invalid_plan');
     }
     final expiresAt = _batchDate(json['expiresAt'], optional: true);
+    final destination = CredentialBatchDestination.fromJson(
+      json['destination'] as Map<String, dynamic>,
+    );
+    final sessionBound = destination.ssh?.validity == 'session';
     if ((decision == CredentialBatchItemDecision.approved ||
-            decision == CredentialBatchItemDecision.revoked) !=
-        (expiresAt != null)) {
+            decision == CredentialBatchItemDecision.revoked)
+        ? expiresAt == null && !sessionBound
+        : expiresAt != null) {
       throw const CredentialUseFailure('invalid_plan');
     }
     return CredentialBatchItem(
@@ -304,9 +325,7 @@ class CredentialBatchItem {
       ),
       version: json['version'] as int,
       useGeneration: json['useGeneration'] as int,
-      destination: CredentialBatchDestination.fromJson(
-        json['destination'] as Map<String, dynamic>,
-      ),
+      destination: destination,
       decision: decision,
       expiresAt: expiresAt,
     );
@@ -349,9 +368,8 @@ class CredentialBatchDecisionReceipt {
   };
   factory CredentialBatchDecisionReceipt.fromJson(Map<String, dynamic> json) {
     _useShape(json, {'operationId', 'fingerprint', 'at'}, {'ownerReceipt'});
-    if (!RegExp(
-      r'^sha256:[0-9a-f]{64}$',
-    ).hasMatch(json['fingerprint'] as String? ?? '')) {
+    if (!RegExp(r'^sha256:[0-9a-f]{64}$')
+        .hasMatch(json['fingerprint'] as String? ?? '')) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final receipt = json['ownerReceipt'] == null
@@ -468,12 +486,10 @@ class CredentialUseBatch {
         (json['items'] as List).length > 20 ||
         json['decisions'] is! List ||
         (json['decisions'] as List).length > 21 ||
-        !RegExp(
-          r'^[A-Za-z0-9_-]{22}$',
-        ).hasMatch(json['deviceId'] as String? ?? '') ||
-        !RegExp(
-          r'^sha256:[0-9a-f]{64}$',
-        ).hasMatch(json['submissionDigest'] as String? ?? '')) {
+        !RegExp(r'^[A-Za-z0-9_-]{22}$')
+            .hasMatch(json['deviceId'] as String? ?? '') ||
+        !RegExp(r'^sha256:[0-9a-f]{64}$')
+            .hasMatch(json['submissionDigest'] as String? ?? '')) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final items = (json['items'] as List)
@@ -684,9 +700,8 @@ class CredentialBatchOperation {
         (json['itemIds'] as List).isEmpty ||
         (json['itemIds'] as List).length > 20 ||
         json['itemResults'] is! Map<String, dynamic> ||
-        !RegExp(
-          r'^sha256:[0-9a-f]{64}$',
-        ).hasMatch(json['fingerprint'] as String? ?? '')) {
+        !RegExp(r'^sha256:[0-9a-f]{64}$')
+            .hasMatch(json['fingerprint'] as String? ?? '')) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final ids = (json['itemIds'] as List)

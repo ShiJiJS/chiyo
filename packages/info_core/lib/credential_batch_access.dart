@@ -41,8 +41,14 @@ extension _CredentialBatchService on InformationService {
     if (item.decision != CredentialBatchItemDecision.approved) {
       throw const CredentialUseFailure('scope_not_approved');
     }
-    if (!_clock().isBefore(item.expiresAt!)) {
+    if (item.expiresAt != null && !_clock().isBefore(item.expiresAt!)) {
       throw const CredentialUseFailure('grant_expired');
+    }
+    if (item.destination.ssh case final ssh?) {
+      if (ssh.trustId != _sshHostTrust?.id ||
+          ssh.trustHash != _sshHostTrust?.sha256) {
+        throw const CredentialUseFailure('receiver_not_ready');
+      }
     }
     _guardUseEligibility(
       item.credentialId,
@@ -228,6 +234,10 @@ extension CredentialBatchAgentAccess on AgentAccess {
         if (!program.binding.acceptsForm(c.form)) {
           throw const CredentialUseFailure('invalid_reference');
         }
+      } else if (candidate.destination.ssh case final ssh?) {
+        if (!ssh.accepts(c.form) || _service._sshHostTrust == null) {
+          throw const CredentialUseFailure('receiver_not_ready');
+        }
       } else if (c.form != CredentialForm.string) {
         throw const CredentialUseFailure('invalid_reference');
       }
@@ -238,7 +248,16 @@ extension CredentialBatchAgentAccess on AgentAccess {
           credentialName: c.name,
           version: c.version,
           useGeneration: c.useGeneration,
-          destination: candidate.destination.program == null
+          destination: candidate.destination.ssh != null
+              ? CredentialBatchDestination._(
+                  'ssh',
+                  null,
+                  null,
+                  null,
+                  null,
+                  candidate.destination.ssh!.trusted(_service._sshHostTrust!),
+                )
+              : candidate.destination.program == null
               ? candidate.destination
               : CredentialBatchDestination._(
                   'program',
@@ -700,7 +719,7 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     required String operationId,
     required int revision,
     required Iterable<String> approvedItems,
-    Duration lifetime = AccessTiming.defaultLifetime,
+    Duration? lifetime = AccessTiming.defaultLifetime,
     String? reviewToken,
     String? commandDigest,
     void Function()? validateReview,
@@ -754,7 +773,9 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
     final selected = itemIds.toList()..sort();
     if (selected.toSet().length != selected.length ||
         selected.length > 20 ||
-        action == 'approve' && !AccessTiming.isGrant(lifetime!) ||
+        action == 'approve' &&
+            lifetime != null &&
+            !AccessTiming.isGrant(lifetime) ||
         action == 'revoke' && selected.isEmpty) {
       throw const CredentialUseFailure('invalid_plan');
     }
@@ -787,6 +808,13 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
         r.archived ||
         selected.any((id) => !r.items.any((i) => i.id == id))) {
       throw const CredentialUseFailure('operation_conflict');
+    }
+    if (action == 'approve' &&
+        lifetime == null &&
+        r.items
+            .where((i) => selected.contains(i.id))
+            .any((i) => i.destination.ssh?.validity != 'session')) {
+      throw const CredentialUseFailure('invalid_plan');
     }
     final now = _batchTime(_service._clock());
     void validate() {
@@ -821,7 +849,9 @@ extension CredentialBatchOwnerAccess on OwnerAccess {
                 selected.contains(item.id)
                     ? CredentialBatchItemDecision.approved
                     : CredentialBatchItemDecision.denied,
-                selected.contains(item.id) ? now.add(lifetime!) : null,
+                selected.contains(item.id) && lifetime != null
+                    ? now.add(lifetime)
+                    : null,
               )
             : selected.contains(item.id)
             ? item.decided(CredentialBatchItemDecision.revoked, item.expiresAt)

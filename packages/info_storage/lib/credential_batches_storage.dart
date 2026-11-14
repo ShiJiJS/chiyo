@@ -75,7 +75,8 @@ void _validateBackupCredentialBatches(
     for (final row
         in tables['credential_batches'] ?? const <Map<String, Object?>>[]) {
       final r = _storedBatch(row);
-      if (r.programPlan != null && formatVersion < 29 ||
+      if (r.items.any((i) => i.destination.ssh != null) && formatVersion < 31 ||
+          r.programPlan != null && formatVersion < 29 ||
           r.items.any((i) => i.destination.native != null) &&
               formatVersion < 30 ||
           !r.archived ||
@@ -159,6 +160,10 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
               )
               .get()) {
         final batch = _storedBatch(row.data);
+        if (batch.items.any((i) => i.destination.ssh != null) &&
+            marker < _sshInteractiveLibraryFormat) {
+          throw const StorageFailure('unsupported_schema');
+        }
         if (batch.items.any((i) => i.destination.native != null) &&
             marker < _nativeFillLibraryFormat) {
           throw const StorageFailure('unsupported_schema');
@@ -242,6 +247,9 @@ extension _EncryptedCredentialBatches on EncryptedInformationRepository {
     try {
       await _writeMetadata(() async {
         await _createCredentialBatchTables();
+        if (request.items.any((i) => i.destination.ssh != null)) {
+          await _requireAdmissionFormat(_sshInteractiveLibraryFormat);
+        }
         if (request.items.any((i) => i.destination.native != null)) {
           await _requireAdmissionFormat(_nativeFillLibraryFormat);
         }

@@ -103,6 +103,8 @@ part 'credential_material_access.dart';
 part 'credential_history_access.dart';
 part 'credential_batch_history.dart';
 part 'ssh_host_trust.dart';
+part 'ssh_session_target.dart';
+part 'ssh_session_access.dart';
 part 'proposal_access.dart';
 part 'proposal_operations.dart';
 part 'additional_approval_operations.dart';
