@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_core/protocol_json.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/automatic_connection.dart';
+
 import 'chrome_browser_fill.dart';
 import 'ego_browser_fill.dart';
 import 'private_device_state.dart';
@@ -618,7 +620,14 @@ final class DeviceCredentialBatchHost {
     Map<String, dynamic> locator,
   ) async {
     if (locator['via'] != 'focus') {
-      final checked = await browser.inspect(locator);
+      final BrowserFormInspection checked;
+      try {
+        checked = await browser.inspect(locator);
+      } on BrowserFillFailure catch (error) {
+        // Inspection cannot submit an approval or dispatch input. Preserve its
+        // public refusal instead of making the CLI report an unknown submit.
+        throw CredentialUseFailure(browserDispatchError(error));
+      }
       final target = checked.target;
       if (target.provider != locator['via'] ||
           target.url != locator['url'] ||

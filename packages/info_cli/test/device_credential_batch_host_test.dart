@@ -4,7 +4,10 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:crypto/crypto.dart';
+import 'package:info_cli/chiyo_cli.dart';
+import 'package:info_cli/chiyo_context.dart';
 import 'package:info_cli/device_credential_batch_host.dart';
 import 'package:info_cli/chrome_browser_fill.dart';
 import 'package:info_cli/private_device_state.dart';
@@ -13,6 +16,7 @@ import 'package:info_core/info_core.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/automatic_connection.dart';
 import 'package:test/test.dart';
+
 import '../../../apps/server/test/support/tls_fixture.dart';
 
 void main() {
@@ -23,6 +27,211 @@ void main() {
   tearDown(() async {
     await f.close();
   });
+
+  test(
+    'browser inspection refusals reach the CLI before any request or material preparation',
+    () async {
+      final context = File('${f.root.path}/chat/context.json');
+      await ChiyoContext(
+        chatId: 'synthetic-preflight',
+        agentName: 'Synthetic Agent',
+        secret: f.session,
+        port: f.profile.address.port,
+        connection: f.profile,
+      ).saveNew(context);
+      var caseNumber = 0;
+      for (final via in ['ego', 'chrome']) {
+        for (final (code, expected, exit) in [
+          ('ambiguous_form', 'ambiguous_form', 2),
+          ('unavailable_target', 'unavailable_target', 2),
+          ('browser_unavailable', 'browser_unavailable', 3),
+          ('browser_timeout', 'browser_operation_failed', 2),
+          ('RAW_PRIVATE_BROWSER_DETAIL', 'browser_operation_failed', 2),
+        ]) {
+          f.browser.inspectionError = code;
+          final operation = 'preflight-$via-${++caseNumber}';
+          final result =
+              await ChiyoCli(
+                environment: {
+                  'CHIYO_CONTEXT': context.path,
+                  'CHIYO_CONNECTION_DIRECTORY': f.root.path,
+                },
+              ).run([
+                'fill',
+                'request',
+                '--credential',
+                f.a,
+                '--via',
+                via,
+                if (via == 'ego') ...[
+                  '--space',
+                  '7',
+                  '--page',
+                  'p1',
+                ] else ...[
+                  '--browser',
+                  'http://127.0.0.1:9222',
+                  '--tab',
+                  'synthetic-tab',
+                ],
+                '--url',
+                'https://example.test/login',
+                '--form',
+                '#login',
+                '--selector',
+                '#password',
+                '--purpose',
+                'Inspect synthetic login',
+                '--operation',
+                operation,
+                '--json',
+              ]);
+          expect((result.output['error'] as Map)['code'], expected);
+          expect(result.exitCode, exit, reason: result.render());
+          if (code == 'browser_unavailable') {
+            expect((result.output['error'] as Map)['message'], contains('浏览器'));
+          }
+          final data = result.output['data'] as Map;
+          expect(data['operationId'], operation);
+          expect(data['requestId'], isNull);
+          expect(data['status'], isNot('request_unknown'));
+          expect(
+            result.render(),
+            isNot(contains('RAW_PRIVATE_BROWSER_DETAIL')),
+          );
+        }
+      }
+      expect(f.browser.inspections, 10);
+      expect(f.count('request'), 0);
+      expect(f.count('begin'), 0);
+      expect(f.count('material'), 0);
+      expect(f.service.owner.credentialBatches, isEmpty);
+      expect(f.service.owner.credentialBatchOperations, isEmpty);
+      expect(await f.journals(), isEmpty);
+      expect(f.browser.materials, isEmpty);
+      expect(f.browser.fills, 0);
+      expect(f.native.sent, 0);
+    },
+  );
+
+  test(
+    'successful history queries retain partial expiry while new execution and waiting still fail',
+    () async {
+      final id = await f.request(native: true);
+      final pending = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'pending-fill',
+      ]);
+      expect(pending.exitCode, 4);
+      expect((pending.output['error'] as Map)['code'], 'request_pending');
+      final wait = await f.cli(['requests', 'wait', id, '--timeout', '0']);
+      expect(wait.exitCode, 6);
+      expect((wait.output['data'] as Map)['status'], 'pending');
+      expect(f.count('begin'), 0);
+      expect(f.count('material'), 0);
+      expect(f.native.sent, 0);
+
+      await f.approve(id, ['b1']);
+      f.now = f.now.add(
+        AccessTiming.defaultLifetime - const Duration(seconds: 1),
+      );
+      f.native.afterBatch = () async {
+        f.now = f.now.add(const Duration(seconds: 1));
+      };
+      final started = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'partial-expiry',
+      ]);
+      expect(started.exitCode, 0, reason: started.render());
+      final done = await f.done('partial-expiry');
+      expect(done['executionState'], 'partial');
+      expect(done['errorCode'], 'grant_expired');
+      expect(f.native.sent, 1);
+      for (final verb in ['show', 'retry']) {
+        final query = await f.cli(['operations', verb, 'partial-expiry']);
+        expect(query.exitCode, 0, reason: query.render());
+        expect(query.output['ok'], true);
+        final data = query.output['data'] as Map;
+        expect(data['status'], 'ok');
+        expect(data['executionState'], 'partial');
+        expect(data['errorCode'], 'grant_expired');
+        expect(data['operationId'], 'partial-expiry');
+        expect(data['itemResults'], done['itemResults']);
+        expect(data['finishedAt'], done['finishedAt']);
+      }
+      final originalRun = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'partial-expiry',
+      ]);
+      expect(originalRun.exitCode, 4);
+      expect((originalRun.output['data'] as Map)['executionState'], 'partial');
+      final expired = await f.cli([
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'new-expired-fill',
+      ]);
+      expect(expired.exitCode, 4, reason: expired.render());
+      expect((expired.output['error'] as Map)['code'], 'scope_not_approved');
+      expect(f.count('begin'), 1);
+      expect(f.count('material'), 1);
+      expect(f.native.sent, 1);
+      expect(f.service.owner.credentialBatchOperations, hasLength(1));
+
+      f.support = false;
+      final unavailable = await f.cli(['operations', 'show', 'partial-expiry']);
+      expect(unavailable.exitCode, 3);
+      expect(unavailable.output['ok'], false);
+      expect(
+        (unavailable.output['error'] as Map)['code'],
+        'unsupported_capability',
+      );
+    },
+  );
+
+  test(
+    'browser unavailability after dispatch remains unknown instead of a capability refusal',
+    () async {
+      final id = await f.request();
+      await f.approve(id, ['b1', 'b2']);
+      f.browser.result = {'status': 'unknown', 'code': 'browser_unavailable'};
+      final arguments = [
+        'fill',
+        'run',
+        '--request',
+        id,
+        '--operation',
+        'disconnected-fill',
+      ];
+      expect((await f.cli(arguments)).exitCode, 0);
+      final done = await f.done('disconnected-fill');
+      expect(done['executionState'], 'unknown');
+      expect(done['errorCode'], 'browser_unavailable');
+      final execution = await f.cli(arguments);
+      expect(execution.exitCode, 7, reason: execution.render());
+      final query = await f.cli(['operations', 'show', 'disconnected-fill']);
+      expect(query.exitCode, 0, reason: query.render());
+      final data = query.output['data'] as Map;
+      expect(data['executionState'], 'unknown');
+      expect(data['errorCode'], 'browser_unavailable');
+      expect(f.browser.fills, 1);
+      expect(f.count('material'), 1);
+    },
+  );
 
   test(
     'one private request contains multiple inspected destinations and does not execute on approval',
@@ -572,6 +781,7 @@ void main() {
 
 class _Browser implements DeviceCredentialBatchBrowser {
   int inspections = 0, fills = 0;
+  String? inspectionError;
   String digest = 'a' * 64;
   final received = <String>[], materials = <List<int>>[];
   Map<String, Object?> result = {'status': 'filled'};
@@ -579,6 +789,7 @@ class _Browser implements DeviceCredentialBatchBrowser {
   @override
   Future<BrowserFormInspection> inspect(Map<String, dynamic> locator) async {
     inspections++;
+    if (inspectionError case final code?) throw BrowserFillFailure(code);
     final ego = locator['via'] == 'ego';
     final target = BrowserFormTarget.fromJson({
       'provider': locator['via'],
@@ -763,7 +974,12 @@ class _Fixture {
       if (path == '/capabilities') {
         result = {
           'status': 'ok',
-          'capabilities': [if (support) 'credential-batches.v3'],
+          'capabilities': [
+            if (support) ...[
+              'credential-batches.v3',
+              'agent-record-queries.v1',
+            ],
+          ],
         };
       } else if (path == '/session/check') {
         result = {
@@ -773,6 +989,11 @@ class _Fixture {
         };
       } else if (path == '/operations/show') {
         result = service.agent.showOwnOperation(
+          body['sessionSecret'] as String,
+          body['id'] as String,
+        );
+      } else if (path == '/requests/show') {
+        result = service.agent.showOwnRequest(
           body['sessionSecret'] as String,
           body['id'] as String,
         );
@@ -864,6 +1085,25 @@ class _Fixture {
     profile,
     directory: root,
   ).execute(session ?? this.session, input);
+  Future<ChiyoRunResult> cli(List<String> arguments) async {
+    final context = File('${root.path}/chat/context.json');
+    if (!await context.exists()) {
+      await ChiyoContext(
+        chatId: 'synthetic-history',
+        agentName: 'Synthetic Agent',
+        secret: session,
+        port: profile.address.port,
+        connection: profile,
+      ).saveNew(context);
+    }
+    return ChiyoCli(
+      environment: {
+        'CHIYO_CONTEXT': context.path,
+        'CHIYO_CONNECTION_DIRECTORY': root.path,
+      },
+    ).run([...arguments, '--json']);
+  }
+
   Future<String> request({bool native = false}) async {
     final result = await call({
       'command': 'batch-request',
