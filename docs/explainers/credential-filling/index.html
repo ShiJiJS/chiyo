@@ -283,7 +283,9 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
     </div>
 
     <div class="reading connection-entry" id="native-select"><h3>让知予列出这个应用里可以填写的密码框</h3>
-      <p>Agent 从任务和界面判断需要哪个密码框，但知予还需要一个能实际操作的控件对象。Agent 因此调用 <code>chiyo fill targets</code>，指定目标应用，让知予的本机辅助程序查询它的窗口和密码控件。</p>
+      <p>网页例子中，Agent 提供 <code>#login</code> 和 <code>#password</code> 这样的查询条件；提交申请时，知予会先进入指定页面，查找并检查匹配的元素，确认可以填写才保存计划。这条网页流程把目标查询放在提交申请的过程中。</p>
+      <p>原生后台填写把取得目标单独放在申请之前：Agent 先调用 <code>chiyo fill targets</code>，指定应用，让辅助程序查询它的窗口和密码控件。这一步同时做两件事：<strong>检查哪些控件属于知予支持的填写范围；取得并保存这些具体控件的系统对象，为它们生成目标编号。</strong>Agent 再根据返回的窗口和字段说明，选出任务需要的那个目标，把编号写进申请。</p>
+      <p>即使 Agent 已经从界面或其他工具认出了密码框，这条原生路径仍要求知予自己的辅助程序取得并保存原对象；控件的名称、位置或应用提供的标识不能替代它。后面会展开对象怎样查到，以及编号怎样返回。</p>
       <p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。Windows 这里用程序的完整路径，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。这些信息只用来选择查询范围，知予还会核对实际运行程序的身份。</p>
     </div>
     <div class="os-selector" role="group" aria-label="查看原生控件的系统接口"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
