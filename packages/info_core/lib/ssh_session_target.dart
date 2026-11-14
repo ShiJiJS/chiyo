@@ -73,3 +73,52 @@ class SshSessionTarget {
     if (trustHash != null) 'trustHash': trustHash,
   };
 }
+
+class SshSessionOperationContext {
+  SshSessionOperationContext({
+    required this.kind,
+    required this.sessionId,
+    required this.digest,
+    this.runId,
+    this.actionId,
+    this.byteLength,
+  }) {
+    if (!{'open', 'run', 'input', 'credential'}.contains(kind) ||
+        !RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(sessionId) ||
+        !RegExp(r'^sha256:[0-9a-f]{64}$').hasMatch(digest) ||
+        (kind == 'open' ? runId != null : runId == null) ||
+        (kind == 'credential') != (actionId != null) ||
+        byteLength != null && (byteLength! < 0 || byteLength! > 65536)) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
+    if (runId != null) _batchOperationId(runId);
+    if (actionId != null) _batchOperationId(actionId);
+  }
+  final String kind, sessionId, digest;
+  final String? runId, actionId;
+  final int? byteLength;
+  bool get requiresMaterial => kind == 'open' || kind == 'credential';
+  factory SshSessionOperationContext.fromJson(Map<String, dynamic> json) {
+    _useShape(
+      json,
+      {'kind', 'sessionId', 'digest'},
+      {'runId', 'actionId', 'byteLength'},
+    );
+    return SshSessionOperationContext(
+      kind: json['kind'] as String,
+      sessionId: json['sessionId'] as String,
+      digest: json['digest'] as String,
+      runId: json['runId'] as String?,
+      actionId: json['actionId'] as String?,
+      byteLength: json['byteLength'] as int?,
+    );
+  }
+  Map<String, Object?> toJson() => {
+    'kind': kind,
+    'sessionId': sessionId,
+    'digest': digest,
+    'runId': ?runId,
+    'actionId': ?actionId,
+    'byteLength': ?byteLength,
+  };
+}

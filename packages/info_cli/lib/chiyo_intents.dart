@@ -61,6 +61,12 @@ class ChiyoIntentStore {
     'proposal-check',
     'reveal-request',
     'reveal-read',
+    'ssh-request',
+    'ssh-open',
+    'ssh-run',
+    'ssh-input',
+    'ssh-credential-request',
+    'ssh-credential-use',
   };
   static const maxRecordBytes = 100 * 1024;
   // Checks retain public template definitions, never source contents/material.

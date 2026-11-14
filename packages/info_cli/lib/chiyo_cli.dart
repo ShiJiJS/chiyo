@@ -17,6 +17,7 @@ part 'chiyo_fill.dart';
 part 'chiyo_proposals.dart';
 part 'chiyo_reveal.dart';
 part 'chiyo_exec.dart';
+part 'chiyo_ssh.dart';
 
 class ChiyoRunResult {
   const ChiyoRunResult(
@@ -278,6 +279,7 @@ class ChiyoCli {
     ChiyoInvocation i,
     AgentClient client,
   ) async {
+    if (i.path.startsWith('ssh ')) return _sshCommand(i, client);
     final o = i.options;
     final id = o.rest.isEmpty ? null : o.rest.single;
     switch (i.path) {
@@ -863,7 +865,9 @@ class ChiyoCli {
               }.contains(code)
               ? 7
               : 8,
-        'request_unknown' || 'operation_unknown' => 7,
+        'request_unknown' || 'operation_unknown' || 'session_lost' => 7,
+        'stale_run' || 'stale_receiver' || 'session_closed' => 8,
+        'busy' => 6,
         'request_denied' || 'scope_not_approved' || 'grant_expired' => 4,
         _ =>
           status.startsWith('invalid_')
@@ -963,6 +967,14 @@ class ChiyoCli {
     }
     if (!{
       'ok',
+      if (i.path.startsWith('ssh ')) ...[
+        'ready',
+        'delivered',
+        'duplicate',
+        'sent',
+        'draining',
+        'closed',
+      ],
       'accepted',
       'pending',
       'approved',

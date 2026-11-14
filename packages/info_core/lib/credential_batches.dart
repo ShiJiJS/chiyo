@@ -368,8 +368,9 @@ class CredentialBatchDecisionReceipt {
   };
   factory CredentialBatchDecisionReceipt.fromJson(Map<String, dynamic> json) {
     _useShape(json, {'operationId', 'fingerprint', 'at'}, {'ownerReceipt'});
-    if (!RegExp(r'^sha256:[0-9a-f]{64}$')
-        .hasMatch(json['fingerprint'] as String? ?? '')) {
+    if (!RegExp(
+      r'^sha256:[0-9a-f]{64}$',
+    ).hasMatch(json['fingerprint'] as String? ?? '')) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final receipt = json['ownerReceipt'] == null
@@ -486,10 +487,12 @@ class CredentialUseBatch {
         (json['items'] as List).length > 20 ||
         json['decisions'] is! List ||
         (json['decisions'] as List).length > 21 ||
-        !RegExp(r'^[A-Za-z0-9_-]{22}$')
-            .hasMatch(json['deviceId'] as String? ?? '') ||
-        !RegExp(r'^sha256:[0-9a-f]{64}$')
-            .hasMatch(json['submissionDigest'] as String? ?? '')) {
+        !RegExp(
+          r'^[A-Za-z0-9_-]{22}$',
+        ).hasMatch(json['deviceId'] as String? ?? '') ||
+        !RegExp(
+          r'^sha256:[0-9a-f]{64}$',
+        ).hasMatch(json['submissionDigest'] as String? ?? '')) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final items = (json['items'] as List)
@@ -631,6 +634,7 @@ class CredentialBatchOperation {
     this.errorCode,
     this.attentionOperationId,
     this.attentionAcknowledgedAt,
+    this.sshContext,
   }) : itemIds = List.unmodifiable(itemIds),
        itemResults = Map.unmodifiable(itemResults);
   final String operationId, requestId, sessionBinding, fingerprint;
@@ -639,12 +643,14 @@ class CredentialBatchOperation {
   final bool materialClaimed;
   final int revision;
   final Map<String, String> itemResults;
+  final SshSessionOperationContext? sshContext;
   final String? errorCode;
   final String? attentionOperationId;
   final DateTime? attentionAcknowledgedAt;
   final DateTime createdAt;
   final DateTime? finishedAt;
   Map<String, Object?> toJson() => {
+    if (sshContext != null) 'sshContext': sshContext!.toJson(),
     'operationId': operationId,
     'requestId': requestId,
     'sessionBinding': sessionBinding,
@@ -662,6 +668,7 @@ class CredentialBatchOperation {
   };
   Map<String, Object?> toPublicJson() => {
     'status': 'ok',
+    if (sshContext != null) 'sshContext': sshContext!.toJson(),
     'operationId': operationId,
     'requestId': requestId,
     'itemIds': itemIds,
@@ -673,22 +680,31 @@ class CredentialBatchOperation {
     'attentionAcknowledgedAt': _useTimestamp(attentionAcknowledgedAt),
   };
   factory CredentialBatchOperation.fromJson(Map<String, dynamic> json) {
-    _useShape(json, {
-      'operationId',
-      'requestId',
-      'sessionBinding',
-      'fingerprint',
-      'itemIds',
-      'state',
-      'materialClaimed',
-      'revision',
-      'createdAt',
-      'finishedAt',
-      'itemResults',
-      'errorCode',
-      'attentionOperationId',
-      'attentionAcknowledgedAt',
-    });
+    _useShape(
+      json,
+      {
+        'operationId',
+        'requestId',
+        'sessionBinding',
+        'fingerprint',
+        'itemIds',
+        'state',
+        'materialClaimed',
+        'revision',
+        'createdAt',
+        'finishedAt',
+        'itemResults',
+        'errorCode',
+        'attentionOperationId',
+        'attentionAcknowledgedAt',
+      },
+      {'sshContext'},
+    );
+    final sshContext = json['sshContext'] == null
+        ? null
+        : SshSessionOperationContext.fromJson(
+            Map<String, dynamic>.from(json['sshContext'] as Map),
+          );
     final state = CredentialBatchOperationState.values
         .where((s) => s.name == json['state'])
         .firstOrNull;
@@ -700,8 +716,9 @@ class CredentialBatchOperation {
         (json['itemIds'] as List).isEmpty ||
         (json['itemIds'] as List).length > 20 ||
         json['itemResults'] is! Map<String, dynamic> ||
-        !RegExp(r'^sha256:[0-9a-f]{64}$')
-            .hasMatch(json['fingerprint'] as String? ?? '')) {
+        !RegExp(
+          r'^sha256:[0-9a-f]{64}$',
+        ).hasMatch(json['fingerprint'] as String? ?? '')) {
       throw const CredentialUseFailure('invalid_plan');
     }
     final ids = (json['itemIds'] as List)
@@ -737,12 +754,14 @@ class CredentialBatchOperation {
             finished == null ||
         finished != null && finished.isBefore(created) ||
         state == CredentialBatchOperationState.dispatched &&
-            json['materialClaimed'] != true ||
+            json['materialClaimed'] != true &&
+            sshContext?.requiresMaterial != false ||
         {
               CredentialBatchOperationState.filled,
               CredentialBatchOperationState.partial,
             }.contains(state) &&
-            json['materialClaimed'] != true ||
+            json['materialClaimed'] != true &&
+            sshContext?.requiresMaterial != false ||
         state == CredentialBatchOperationState.filled &&
             (results.length != ids.length ||
                 results.values.any((v) => v != 'filled' && v != 'sent')) ||
@@ -758,6 +777,7 @@ class CredentialBatchOperation {
       throw const CredentialUseFailure('invalid_plan');
     }
     return CredentialBatchOperation(
+      sshContext: sshContext,
       operationId: _batchOperationId(json['operationId']),
       requestId: _useId(json['requestId'], 'requestId'),
       sessionBinding: _useId(json['sessionBinding'], 'sessionBinding'),
@@ -785,6 +805,7 @@ class CredentialBatchOperation {
     String? attentionOperationId,
     DateTime? attentionAcknowledgedAt,
   }) => CredentialBatchOperation(
+    sshContext: sshContext,
     operationId: operationId,
     requestId: requestId,
     sessionBinding: sessionBinding,
@@ -945,6 +966,8 @@ void validateCredentialBatchCommit(
     };
     if (operation.revision != previousOperation.revision + 1 ||
         operation.fingerprint != previousOperation.fingerprint ||
+        _useFingerprint(operation.sshContext?.toJson()) !=
+            _useFingerprint(previousOperation.sshContext?.toJson()) ||
         operation.requestId != previousOperation.requestId ||
         operation.sessionBinding != previousOperation.sessionBinding ||
         operation.createdAt != previousOperation.createdAt ||
