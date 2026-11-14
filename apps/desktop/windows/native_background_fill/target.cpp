@@ -7,6 +7,7 @@
 #include <wtsapi32.h>
 #include <array>
 #include <atomic>
+#include <cwctype>
 #include <map>
 #include <mutex>
 #include <thread>
@@ -157,13 +158,41 @@ std::vector<int> RuntimeId(IUIAutomationElement* element) {
   return result;
 }
 bool StringProperty(IUIAutomationElement* element, PROPERTYID id,
-                    std::wstring* result) {
+                    std::wstring* result, HRESULT* failure = nullptr) {
   VARIANT value{};
   const auto hr = element->GetCurrentPropertyValue(id, &value);
-  const bool ok = SUCCEEDED(hr) && value.vt == VT_BSTR;
-  if (ok) result->assign(value.bstrVal, SysStringLen(value.bstrVal));
+  const bool ok = SUCCEEDED(hr) && (value.vt == VT_BSTR || value.vt == VT_EMPTY);
+  if (ok) {
+    result->clear();
+    if (value.vt == VT_BSTR) result->assign(value.bstrVal, SysStringLen(value.bstrVal));
+  }
+  if (failure) *failure = FAILED(hr) ? hr : ok ? S_OK : E_FAIL;
   VariantClear(&value);
   return ok;
+}
+std::string UiaError(HRESULT error) {
+  return error == E_ACCESSDENIED ? "access_denied" : "element_unavailable";
+}
+struct Metadata {
+  int pid = 0, type = 0;
+  BOOL enabled = FALSE;
+  std::wstring name, id, framework, class_name;
+};
+std::string ReadMetadata(IUIAutomationElement* element, Metadata* metadata) {
+  HRESULT hr = element->get_CurrentProcessId(&metadata->pid);
+  if (FAILED(hr)) return UiaError(hr);
+  hr = element->get_CurrentControlType(&metadata->type);
+  if (FAILED(hr)) return UiaError(hr);
+  hr = element->get_CurrentIsEnabled(&metadata->enabled);
+  if (FAILED(hr)) return UiaError(hr);
+  for (const auto& property : {
+      std::make_pair(UIA_NamePropertyId, &metadata->name),
+      std::make_pair(UIA_AutomationIdPropertyId, &metadata->id),
+      std::make_pair(UIA_FrameworkIdPropertyId, &metadata->framework),
+      std::make_pair(UIA_ClassNamePropertyId, &metadata->class_name)}) {
+    if (!StringProperty(element, property.first, property.second, &hr)) return UiaError(hr);
+  }
+  return "";
 }
 std::wstring WindowClass(HWND window) {
   wchar_t name[256]{};
@@ -172,9 +201,11 @@ std::wstring WindowClass(HWND window) {
 bool BrowserClass(const std::wstring& name) {
   // Positive native-field checks below are primary; these additionally reject
   // known embedded-browser roots/hosts even when a native child is exposed.
-  for (const wchar_t* marker : {L"Chrome_", L"Chrome_Widget", L"Chrome_Render",
-       L"Cef", L"WebView", L"Internet Explorer_Server", L"Mozilla"}) {
-    if (name.find(marker) != std::wstring::npos) return true;
+  auto lower = name;
+  for (auto& c : lower) c = static_cast<wchar_t>(towlower(c));
+  for (const wchar_t* marker : {L"chrome", L"chromium", L"cef", L"webview",
+       L"internet explorer", L"mozilla"}) {
+    if (lower.find(marker) != std::wstring::npos) return true;
   }
   return false;
 }
@@ -309,6 +340,20 @@ bool InspectExecutable(const std::wstring& path, std::wstring* canonical,
   *canonical = pin->path; *sha256 = pin->digest;
   return true;
 }
+std::string CheckProcessAccess(DWORD process_id, unsigned long long created_at) {
+  Handle process(OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, process_id));
+  if (!process.get()) return GetLastError() == ERROR_ACCESS_DENIED ? "access_denied" : "application_changed";
+  if (WaitForSingleObject(process.get(), 0) != WAIT_TIMEOUT || ProcessCreatedAt(process.get()) != created_at) {
+    return "application_changed";
+  }
+  Security target, own;
+  if (!ReadSecurity(process.get(), process_id, &target) ||
+      !ReadSecurity(GetCurrentProcess(), GetCurrentProcessId(), &own) ||
+      target.sid != own.sid || target.session != own.session || target.integrity > own.integrity) {
+    return "access_denied";
+  }
+  return DesktopStatus();
+}
 bool ValidSecret(const wchar_t* units, size_t count) {
   if (!units || count == 0 || count > 4096) return false;
   for (size_t i = 0; i < count; ++i) {
@@ -342,8 +387,11 @@ struct Target::Impl {
   std::unique_ptr<LifetimeWatch> lifetime;
   std::vector<int> root_id, element_id;
   std::vector<std::vector<int>> ancestry;
-  std::wstring root_class, root_name, field_name, field_label, framework, control_class;
+  std::vector<ComPtr<IUIAutomationElement>> ancestry_elements;
+  std::vector<std::wstring> group_labels;
+  std::wstring root_class, root_name, window_label, field_name, field_id, field_label, framework, control_class;
   HWND native_control = nullptr;
+  bool edit_limit = false;
   std::string family_name, retired;
   ULONGLONG expires = 0;
   DWORD owner_thread = GetCurrentThreadId();
@@ -356,36 +404,48 @@ struct Target::Impl {
 
   std::string InspectAncestry(bool capture) {
     ComPtr<IUIAutomationTreeWalker> walker;
-    if (FAILED(automation->get_RawViewWalker(&walker))) return "automation_unavailable";
+    auto hr = automation->get_RawViewWalker(&walker);
+    if (FAILED(hr)) return UiaError(hr);
     std::vector<std::vector<int>> current;
+    std::vector<ComPtr<IUIAutomationElement>> objects;
+    std::vector<std::wstring> groups;
     ComPtr<IUIAutomationElement> node = element;
     for (int depth = 0; depth < 64 && node; ++depth) {
-      int pid = 0, type = 0;
-      BOOL enabled = FALSE;
-      std::wstring framework_id, class_name;
-      if (FAILED(node->get_CurrentProcessId(&pid)) ||
-          FAILED(node->get_CurrentControlType(&type)) ||
-          FAILED(node->get_CurrentIsEnabled(&enabled)) ||
-          !StringProperty(node.Get(), UIA_FrameworkIdPropertyId, &framework_id) ||
-          !StringProperty(node.Get(), UIA_ClassNamePropertyId, &class_name)) {
-        return "element_unavailable";
-      }
-      if (pid != static_cast<int>(selection.process_id) || !enabled) return "target_changed";
-      if (type == UIA_DocumentControlTypeId || BrowserClass(class_name) ||
-          (framework_id != L"Win32" && framework_id != L"WinForm" && framework_id != L"WPF")) {
+      Metadata metadata;
+      const auto read = ReadMetadata(node.Get(), &metadata);
+      if (!read.empty()) return read;
+      if (metadata.pid != static_cast<int>(selection.process_id)) return "target_changed";
+      if (!metadata.enabled) return "target_disabled";
+      if (metadata.type == UIA_DocumentControlTypeId || BrowserClass(metadata.class_name) ||
+          BrowserClass(metadata.framework)) {
         return "unsupported_target";
       }
       auto id = RuntimeId(node.Get());
       if (id.empty()) return "element_unavailable";
       current.push_back(std::move(id));
+      objects.push_back(node);
+      if (!capture) {
+        BOOL original = FALSE;
+        if (objects.size() > ancestry_elements.size()) return "target_changed";
+        hr = automation->CompareElements(node.Get(), ancestry_elements[objects.size() - 1].Get(), &original);
+        if (FAILED(hr)) return UiaError(hr);
+        if (!original) return "target_changed";
+      }
       BOOL root = FALSE;
-      if (FAILED(automation->CompareElements(node.Get(), window.Get(), &root))) return "element_unavailable";
+      hr = automation->CompareElements(node.Get(), window.Get(), &root);
+      if (FAILED(hr)) return UiaError(hr);
       if (root) {
-        if (capture) ancestry = current;
-        return current == ancestry ? "" : "target_changed";
+        if (capture) { ancestry = current; ancestry_elements = objects; group_labels = groups; }
+        return current == ancestry && groups == group_labels ? "" : "target_changed";
+      }
+      if (depth > 0 && (metadata.type == UIA_GroupControlTypeId || metadata.type == UIA_PaneControlTypeId)) {
+        std::wstring label = metadata.name;
+        if (!metadata.id.empty()) label += L" [" + metadata.id + L"]";
+        if (!label.empty()) groups.push_back(std::move(label));
       }
       ComPtr<IUIAutomationElement> parent;
-      if (FAILED(walker->GetParentElement(node.Get(), &parent))) return "element_unavailable";
+      hr = walker->GetParentElement(node.Get(), &parent);
+      if (FAILED(hr)) return UiaError(hr);
       node = parent;
     }
     return "target_changed";
@@ -415,46 +475,49 @@ struct Target::Impl {
     if (native_control) {
       UIA_HWND current_native = nullptr;
       DWORD control_pid = 0;
+      const auto native_result = element->get_CurrentNativeWindowHandle(&current_native);
+      if (FAILED(native_result)) return UiaError(native_result);
       if (!IsWindow(native_control) ||
           !GetWindowThreadProcessId(native_control, &control_pid) ||
           control_pid != selection.process_id ||
           GetAncestor(native_control, GA_ROOT) != selection.window ||
           !IsWindowVisible(native_control) ||
-          FAILED(element->get_CurrentNativeWindowHandle(&current_native)) ||
           reinterpret_cast<HWND>(current_native) != native_control) return "target_changed";
     }
     if (lease->invalidated) return "target_invalidated";
     if (RuntimeId(window.Get()) != root_id || RuntimeId(element.Get()) != element_id) return "target_changed";
-    std::wstring title, field_name_now, current_framework, current_class;
-    if (!StringProperty(window.Get(), UIA_NamePropertyId, &title) ||
-        !StringProperty(element.Get(), UIA_NamePropertyId, &field_name_now) ||
-        !StringProperty(element.Get(), UIA_FrameworkIdPropertyId, &current_framework) ||
-        !StringProperty(element.Get(), UIA_ClassNamePropertyId, &current_class)) return "element_unavailable";
-    if (title != root_name || field_name_now != field_name || current_framework != framework || current_class != control_class) return "target_changed";
+    ComPtr<IUIAutomationElement> live_window;
+    BOOL original_window = FALSE;
+    auto hr = automation->ElementFromHandle(selection.window, &live_window);
+    if (FAILED(hr) || !live_window) return UiaError(hr);
+    hr = automation->CompareElements(window.Get(), live_window.Get(), &original_window);
+    if (FAILED(hr)) return UiaError(hr);
+    if (!original_window) return "window_changed";
+    Metadata root, field;
+    auto metadata_error = ReadMetadata(window.Get(), &root);
+    if (metadata_error.empty()) metadata_error = ReadMetadata(element.Get(), &field);
+    if (!metadata_error.empty()) return metadata_error;
+    if (root.name != root_name || field.name != field_name || field.id != field_id ||
+        field.framework != framework || field.class_name != control_class) return "target_changed";
     int provider = 0, type = 0;
     BOOL password = FALSE, enabled = FALSE, readonly = TRUE, auto_focus = TRUE;
-    if (FAILED(element->get_CurrentProcessId(&provider)) ||
-        FAILED(element->get_CurrentControlType(&type)) ||
-        FAILED(element->get_CurrentIsPassword(&password)) ||
-        FAILED(element->get_CurrentIsEnabled(&enabled)) ||
-        FAILED(value->get_CurrentIsReadOnly(&readonly)) ||
-        FAILED(automation->get_AutoSetFocus(&auto_focus))) return "element_unavailable";
+    if (FAILED(hr = element->get_CurrentProcessId(&provider)) ||
+        FAILED(hr = element->get_CurrentControlType(&type)) ||
+        FAILED(hr = element->get_CurrentIsPassword(&password)) ||
+        FAILED(hr = element->get_CurrentIsEnabled(&enabled)) ||
+        FAILED(hr = value->get_CurrentIsReadOnly(&readonly)) ||
+        FAILED(hr = automation->get_AutoSetFocus(&auto_focus))) return UiaError(hr);
     if (provider != static_cast<int>(selection.process_id) || type != UIA_EditControlTypeId || !password || auto_focus) return "unsupported_target";
     if (!enabled) return "target_disabled";
     if (readonly) return "target_readonly";
-    std::string error;
-    const auto resolved = Resolve(automation.Get(), window.Get(), selection.path, &error);
-    if (!resolved) return error;
-    BOOL same = FALSE;
-    if (FAILED(automation->CompareElements(element.Get(), resolved.Get(), &same)) ||
-        !same || RuntimeId(resolved.Get()) != element_id) return "target_changed";
     return InspectAncestry(false);
   }
 };
 
 Target::Target(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
 Target::~Target() = default;
-std::shared_ptr<Target> Target::Capture(const Selection& selection, std::string* error) {
+std::shared_ptr<Target> Target::Capture(const Selection& selection, std::string* error,
+                                        IUIAutomationElement* observed_element) {
   *error = "unsupported_target";
   APTTYPE apartment; APTTYPEQUALIFIER qualifier;
   if (FAILED(CoGetApartmentType(&apartment, &qualifier)) || apartment != APTTYPE_MTA) {
@@ -462,7 +525,7 @@ std::shared_ptr<Target> Target::Capture(const Selection& selection, std::string*
   }
   if (selection.approved_executable.empty() || selection.approved_sha256.size() != 64 ||
       !selection.process_id || !selection.process_created_at || !selection.window ||
-      selection.path.empty() || selection.path.size() > 16 ||
+      (!observed_element && selection.path.empty()) || selection.path.size() > 16 ||
       !selection.lease_milliseconds || selection.lease_milliseconds > 300000) return nullptr;
   for (const auto& step : selection.path) {
     if (step.automation_id.empty() || step.automation_id.size() > 256 || step.control_type <= 0) return nullptr;
@@ -472,7 +535,10 @@ std::shared_ptr<Target> Target::Capture(const Selection& selection, std::string*
   auto impl = std::make_unique<Impl>(OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION,
                                                FALSE, selection.process_id));
   impl->selection = selection;
-  if (!impl->process.get() || ProcessCreatedAt(impl->process.get()) != selection.process_created_at ||
+  if (!impl->process.get()) {
+    *error = GetLastError() == ERROR_ACCESS_DENIED ? "access_denied" : "application_changed"; return nullptr;
+  }
+  if (ProcessCreatedAt(impl->process.get()) != selection.process_created_at ||
       WaitForSingleObject(impl->process.get(), 0) != WAIT_TIMEOUT) {
     *error = "application_changed"; return nullptr;
   }
@@ -489,58 +555,70 @@ std::shared_ptr<Target> Target::Capture(const Selection& selection, std::string*
       impl->security.integrity > own.integrity) { *error = "access_denied"; return nullptr; }
   DWORD root_pid = 0;
   if (!IsWindow(selection.window) || GetWindowThreadProcessId(selection.window, &root_pid) == 0 ||
-      root_pid != selection.process_id || GetAncestor(selection.window, GA_ROOT) != selection.window) return nullptr;
+      root_pid != selection.process_id || GetAncestor(selection.window, GA_ROOT) != selection.window) {
+    *error = "window_changed"; return nullptr;
+  }
   impl->root_class = WindowClass(selection.window);
   if (!IsWindowVisible(selection.window)) { *error = "target_not_visible"; return nullptr; }
   if (impl->root_class.empty() || BrowserClass(impl->root_class)) return nullptr;
-  if (FAILED(CoCreateInstance(__uuidof(CUIAutomation8), nullptr, CLSCTX_INPROC_SERVER,
-                              IID_PPV_ARGS(&impl->automation))) ||
-      FAILED(impl->automation->put_AutoSetFocus(FALSE)) ||
-      FAILED(impl->automation->put_ConnectionTimeout(500)) ||
-      FAILED(impl->automation->put_TransactionTimeout(500)) ||
-      FAILED(impl->automation->ElementFromHandle(selection.window, &impl->window))) {
-    *error = "automation_unavailable"; return nullptr;
+  auto hr = CoCreateInstance(__uuidof(CUIAutomation8), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&impl->automation));
+  if (FAILED(hr) || FAILED(hr = impl->automation->put_AutoSetFocus(FALSE)) ||
+      FAILED(hr = impl->automation->put_ConnectionTimeout(500)) ||
+      FAILED(hr = impl->automation->put_TransactionTimeout(500)) ||
+      FAILED(hr = impl->automation->ElementFromHandle(selection.window, &impl->window))) {
+    *error = hr == E_ACCESSDENIED ? "access_denied" : "automation_unavailable"; return nullptr;
   }
-  impl->element = Resolve(impl->automation.Get(), impl->window.Get(), selection.path, error);
+  // Discovery supplies the retained object itself. Developer IDs are optional
+  // descriptions, never a recipe for rebuilding an expired field reference.
+  impl->element = observed_element ? ComPtr<IUIAutomationElement>(observed_element) :
+      Resolve(impl->automation.Get(), impl->window.Get(), selection.path, error);
   if (!impl->element) return nullptr;
   impl->root_id = RuntimeId(impl->window.Get()); impl->element_id = RuntimeId(impl->element.Get());
   if ((!selection.observed_window_runtime_id.empty() && selection.observed_window_runtime_id != impl->root_id) ||
       (!selection.observed_element_runtime_id.empty() && selection.observed_element_runtime_id != impl->element_id)) {
     *error = "target_changed"; return nullptr;
   }
-  if (impl->root_id.empty() || impl->element_id.empty() ||
-      !StringProperty(impl->window.Get(), UIA_NamePropertyId, &impl->root_name) ||
-      !StringProperty(impl->element.Get(), UIA_NamePropertyId, &impl->field_name) ||
-      !StringProperty(impl->element.Get(), UIA_FrameworkIdPropertyId, &impl->framework) ||
-      !StringProperty(impl->element.Get(), UIA_ClassNamePropertyId, &impl->control_class)) {
+  if (impl->root_id.empty() || impl->element_id.empty()) {
     *error = "element_unavailable"; return nullptr;
   }
-  impl->field_label = L"[";
-  for (const auto& step : selection.path) {
-    if (impl->field_label.size() > 1) impl->field_label += L"/";
-    impl->field_label += step.automation_id;
-  }
-  impl->field_label += L"] " + (impl->field_name.empty() ? std::wstring(L"Password") : impl->field_name);
+  Metadata root_metadata, field_metadata;
+  *error = ReadMetadata(impl->window.Get(), &root_metadata);
+  if (error->empty()) *error = ReadMetadata(impl->element.Get(), &field_metadata);
+  if (!error->empty()) return nullptr;
+  impl->root_name = root_metadata.name; impl->field_name = field_metadata.name;
+  impl->field_id = field_metadata.id; impl->framework = field_metadata.framework;
+  impl->control_class = field_metadata.class_name;
+  impl->window_label = impl->root_name.empty() ? L"Window [" + impl->root_class + L"]" : impl->root_name;
+  impl->field_label = impl->field_id.empty() ? L"" : L"[" + impl->field_id + L"] ";
+  impl->field_label += impl->field_name.empty() ? L"Password" : impl->field_name;
   UIA_HWND native = nullptr;
-  if (FAILED(impl->element->get_CurrentNativeWindowHandle(&native))) return nullptr;
+  hr = impl->element->get_CurrentNativeWindowHandle(&native);
+  if (FAILED(hr)) { *error = UiaError(hr); return nullptr; }
   const HWND control = reinterpret_cast<HWND>(native);
   impl->native_control = control;
   if (impl->framework == L"Win32" && Same(impl->control_class, L"Edit") &&
       control && Same(WindowClass(control), L"Edit")) {
     impl->family_name = "win32-password-edit";
+    impl->edit_limit = true;
   } else if (impl->framework == L"WinForm" && control &&
       WindowClass(control).rfind(L"WindowsForms10.EDIT.", 0) == 0) {
     impl->family_name = "winforms-password-textbox";
+    impl->edit_limit = true;
   } else if (impl->framework == L"WPF" && impl->control_class == L"PasswordBox" &&
       impl->root_class.rfind(L"HwndWrapper[", 0) == 0) {
     impl->family_name = "wpf-passwordbox";
   } else {
-    *error = "unsupported_target"; return nullptr;
+    impl->family_name = "uia-password-edit";
   }
-  if (FAILED(impl->element->GetCurrentPatternAs(UIA_ValuePatternId,
-                                               IID_PPV_ARGS(&impl->value))) || !impl->value) return nullptr;
+  const auto pattern = impl->element->GetCurrentPatternAs(UIA_ValuePatternId, IID_PPV_ARGS(&impl->value));
+  if (FAILED(pattern) || !impl->value) {
+    *error = pattern == E_ACCESSDENIED ? "access_denied" : "unsupported_target"; return nullptr;
+  }
   *error = impl->InspectAncestry(true);
   if (!error->empty()) return nullptr;
+  for (auto group = impl->group_labels.rbegin(); group != impl->group_labels.rend(); ++group) {
+    impl->field_label += L" / " + *group;
+  }
   *error = "unsupported_target";
   std::vector<HWND> handles{selection.window};
   if (control) {
@@ -585,11 +663,13 @@ bool Target::Retain(std::string* error) {
 }
 void Target::Invalidate() { impl_->retired = "target_invalidated"; }
 bool Target::SameInstance(const Target& other) const {
+  BOOL same = FALSE;
   return impl_->selection.process_id == other.impl_->selection.process_id &&
       impl_->selection.process_created_at == other.impl_->selection.process_created_at &&
       impl_->root_id == other.impl_->root_id && impl_->element_id == other.impl_->element_id &&
       impl_->executable->digest == other.impl_->executable->digest &&
-      Same(impl_->executable->path, other.impl_->executable->path);
+      Same(impl_->executable->path, other.impl_->executable->path) &&
+      SUCCEEDED(impl_->automation->CompareElements(impl_->element.Get(), other.impl_->element.Get(), &same)) && same;
 }
 Prepared::Prepared(std::shared_ptr<Target> target) : target_(std::move(target)) {}
 Prepared::~Prepared() { Close(); }
@@ -602,7 +682,7 @@ Result Prepared::Replace(const wchar_t* units, size_t count) {
   }
   auto error = target_->Recheck();
   if (!error.empty()) { result_ = {Outcome::kRefused, error}; return result_; }
-  if (target_->impl_->native_control) {
+  if (target_->impl_->edit_limit) {
     // Read only the standard Edit's declared input limit. Never read its value
     // or use a window message as a writing fallback.
     DWORD_PTR limit = 0;
@@ -637,7 +717,7 @@ void Prepared::Close() {
   target_->impl_->busy = false;
 }
 const std::string& Target::family() const { return impl_->family_name; }
-const std::wstring& Target::window_description() const { return impl_->root_name; }
+const std::wstring& Target::window_description() const { return impl_->window_label; }
 const std::wstring& Target::field_description() const { return impl_->field_label; }
 
 }  // namespace native_background_fill

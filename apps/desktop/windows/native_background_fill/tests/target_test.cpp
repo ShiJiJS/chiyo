@@ -3,6 +3,7 @@
 #include <UIAutomation.h>
 #include <bcrypt.h>
 #include <wrl/client.h>
+#include <sddl.h>
 #include <atomic>
 #include <iomanip>
 #include <iostream>
@@ -262,9 +263,122 @@ void Suite(const std::string& family, const std::wstring& executable,
   Check(family, "process_restart", result.outcome == nb::Outcome::kRefused &&
         Has(replacement.Command("verify"), "empty=1"), result.error);
 }
+
+unsigned long long Fact(const std::string& facts, const std::string& key) {
+  const auto offset = facts.find(key + "=");
+  if (offset == std::string::npos) return 0;
+  return std::stoull(facts.substr(offset + key.size() + 1));
+}
+void CapabilityCase(const std::wstring& executable, const std::wstring& mode,
+                    Child& typing, const std::string& mutation = "") {
+  std::string name;
+  for (auto c : mode) name += static_cast<char>(c);
+  Child receiver(executable, mode);
+  auto secret = Secret();
+  receiver.Command("expect " + Hex(secret));
+  Check("custom-native-uia", name + "_business_locked_before_fill", receiver.Command("submit") == "accepted=0");
+  const auto selection = receiver.Select();
+  if (mode == L"enum-error") receiver.Command("arm-enumeration-exit");
+  std::string error;
+  auto found = nb::DiscoverNativeFields(selection.approved_executable, receiver.window, 64, &error);
+  if (mode == L"plain-text") {
+    Check("custom-native-uia", "ordinary_text_is_not_a_password_candidate", found.empty() && error.empty(), error);
+    Check("custom-native-uia", "ordinary_text_never_written_or_read", Has(receiver.Command("verify"), "valueReads=0") &&
+        receiver.Command("submit") == "accepted=0");
+    SecureZeroMemory(secret.data(), secret.size() * sizeof(wchar_t)); return;
+  }
+  const bool unsupported = mode == L"readonly" || mode == L"disabled" || mode == L"no-value" ||
+      mode == L"web-target" || mode == L"unknown-web-target" || mode == L"ambiguous";
+  if (unsupported || mode == L"deny-pattern" || mode == L"enum-error") {
+    Check("custom-native-uia", name, found.empty() && !error.empty() &&
+        (mode != L"deny-pattern" || error == "unsupported_target"), error);
+    SecureZeroMemory(secret.data(), secret.size() * sizeof(wchar_t)); return;
+  }
+  if (found.size() != 2 || !error.empty()) {
+    Check("custom-native-uia", name + "_discovery", false, error);
+    SecureZeroMemory(secret.data(), secret.size() * sizeof(wchar_t)); return;
+  }
+  auto target = found.front().target;
+  Check("custom-native-uia", name + "_not_legacy_framework", target->family() == "uia-password-edit");
+  if (mode == L"missing-id") Check("custom-native-uia", "no_developer_id_still_descriptive",
+      target->field_description() == L"Archive password");
+  auto ticket = target->Prepare(&error);
+  if (!ticket) { Check("custom-native-uia", name, false, error); return; }
+  if (!mutation.empty()) receiver.Command(mutation);
+  if (mode == L"minimized") receiver.Command("minimize");
+  if (!Front(typing)) { Check("custom-native-uia", name, false, "test_foreground_unavailable"); return; }
+  Observer observer(typing.window, receiver.window);
+  observer.Begin();
+  LARGE_INTEGER before{}, after{}; QueryPerformanceCounter(&before);
+  const auto result = ticket->Replace(secret.data(), secret.size());
+  QueryPerformanceCounter(&after);
+  const bool unchanged = observer.End();
+  const auto facts = receiver.Command("verify");
+  const bool sent = mutation.empty();
+  const bool covered = !sent || (Fact(facts, "setterStarted") >= static_cast<unsigned long long>(before.QuadPart) &&
+      Fact(facts, "setterEnded") <= static_cast<unsigned long long>(after.QuadPart));
+  const bool pass = result.outcome == (sent ? nb::Outcome::kSent : nb::Outcome::kRefused) &&
+      Has(facts, sent ? "match=1" : "empty=1") && Has(facts, "others=1") &&
+      Has(facts, "valueReads=0") && Has(facts, "focusCalls=0") && Has(facts, "limitMessages=0") &&
+      unchanged && covered;
+  Check("custom-native-uia", name + (mutation.empty() ? "" : "_" + mutation), pass, result.error);
+  const auto business = receiver.Command("submit");
+  Check("custom-native-uia", name + "_separate_receiver_business",
+      sent ? business == "accepted=1 payloadSha256=4d4ced12374f78cc0929d87f36d62246eb168b935267e31696feb99d2c528a8b" : business == "accepted=0");
+  std::cout << "{\"framework\":\"custom-native-uia\",\"case\":\"" << name << "_setter_facts\","
+      << "\"sent\":" << Bool(result.outcome == nb::Outcome::kSent)
+      << ",\"noInterference\":" << Bool(unchanged) << ",\"setterCompletelyCovered\":" << Bool(covered)
+      << ",\"noPasswordRead\":" << Bool(Has(facts, "valueReads=0"))
+      << ",\"noEditMessage\":" << Bool(Has(facts, "limitMessages=0")) << "}" << std::endl;
+  const auto original = facts;
+  ticket->Replace(L"different synthetic", 19);
+  Check("custom-native-uia", name + "_ticket_never_replays", receiver.Command("verify") == original);
+  SecureZeroMemory(secret.data(), secret.size() * sizeof(wchar_t));
+}
+void Capabilities(const std::wstring& executable, Child& typing) {
+  for (const auto* mode : {L"normal", L"missing-id", L"native-hwnd", L"web-sibling", L"minimized"}) {
+    CapabilityCase(executable, mode, typing);
+  }
+  for (const auto& mutation : {"recreate", "readonly", "disable", "deny", "retitle", "hide"}) {
+    CapabilityCase(executable, L"normal", typing, mutation);
+  }
+  for (const auto* mode : {L"readonly", L"disabled", L"no-value", L"deny-pattern", L"web-target", L"unknown-web-target", L"plain-text", L"ambiguous", L"enum-error"}) {
+    CapabilityCase(executable, mode, typing);
+  }
+  Child secured(executable, L"normal");
+  wchar_t self[32768]{}; GetModuleFileNameW(nullptr, self, 32768);
+  Child restricted(self, L"--low-access-check " + std::to_wstring(secured.process.dwProcessId) +
+      L" " + std::to_wstring(nb::ProcessCreatedAt(secured.process.hProcess)));
+  const auto denied = Line(restricted.output);
+  Check("security", "lower_integrity_probe_cannot_access_normal_target", denied == "access_denied", denied);
+}
+int LowAccessCheck(DWORD process_id, unsigned long long created_at) {
+  std::cout << "ready 0" << std::endl;
+  HANDLE token = nullptr; PSID sid = nullptr;
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_DEFAULT | TOKEN_QUERY, &token) ||
+      !ConvertStringSidToSidW(L"S-1-16-4096", &sid)) {
+    if (token) CloseHandle(token);
+    std::cout << "probe_setup_failed" << std::endl; return 1;
+  }
+  TOKEN_MANDATORY_LABEL label{};
+  label.Label.Attributes = SE_GROUP_INTEGRITY; label.Label.Sid = sid;
+  const auto lowered = SetTokenInformation(token, TokenIntegrityLevel, &label,
+      static_cast<DWORD>(sizeof(label) + GetLengthSid(sid)));
+  LocalFree(sid); CloseHandle(token);
+  if (!lowered) { std::cout << "probe_setup_failed" << std::endl; return 1; }
+  // Only this disposable child's own token is lowered. No UAC, policy, user
+  // permission or target token is changed, and the probe exits immediately.
+  const auto result = nb::CheckProcessAccess(process_id, created_at);
+  std::cout << result << std::endl;
+  return result == "access_denied" ? 0 : 1;
+}
 }
 int wmain(int argc, wchar_t** argv) {
-  if (argc != 3 && argc != 4) return 64;
+  if (argc == 4 && std::wstring(argv[1]) == L"--low-access-check") {
+    return LowAccessCheck(static_cast<DWORD>(std::stoul(argv[2])), std::stoull(argv[3]));
+  }
+  const bool capabilities = argc == 5 && std::wstring(argv[4]) == L"capabilities";
+  if (argc != 3 && argc != 4 && !capabilities) return 64;
   const bool limits_only = argc == 4 && std::wstring(argv[3]) == L"limits";
   if (argc == 4 && !limits_only) return 64;
   if (FAILED(CoInitializeEx(nullptr, COINIT_MULTITHREADED))) return 70;
@@ -273,7 +387,7 @@ int wmain(int argc, wchar_t** argv) {
     Child typing(argv[1], L"--typing");
     if (!Front(typing)) {
       std::cout << "{\"case\":\"waiting_for_test_foreground\"}" << std::endl;
-      for (int i = 0; i < 300 && GetForegroundWindow() != typing.window; ++i) Sleep(100);
+      for (int i = 0; i < 900 && GetForegroundWindow() != typing.window; ++i) Sleep(100);
     }
     if (!Front(typing)) { Check("observer", "precondition", false, "test_foreground_unavailable"); }
     else {
@@ -283,7 +397,9 @@ int wmain(int argc, wchar_t** argv) {
       const bool detected = !observer.End() && observer.foreground_events() > 0;
       Check("observer", "actual_foreground_change_detected", detected);
       Front(typing); observer.Begin(); Sleep(20); Check("observer", "stable_control", observer.End());
-      if (limits_only) {
+      if (capabilities) {
+        Capabilities(argv[3], typing);
+      } else if (limits_only) {
         Case("Win32", "declared_limit_refused", argv[1], L"", typing, "limit", nb::Outcome::kRefused, false);
         Case("WinForms", "declared_limit_refused", argv[2], L"forms", typing, "limit", nb::Outcome::kRefused, false);
         Case("WPF", "programmatic_password_ignores_typing_limit", argv[2], L"wpf", typing, "limit", nb::Outcome::kSent, true);

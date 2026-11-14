@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+struct IUIAutomationElement;
+
 namespace native_background_fill {
 
 // Private host-to-helper selection. These hints are never authorization:
@@ -40,7 +42,8 @@ class Prepared;
 class Target final : public std::enable_shared_from_this<Target> {
  public:
   static std::shared_ptr<Target> Capture(const Selection& selection,
-                                       std::string* error);
+                                       std::string* error,
+                                       IUIAutomationElement* observed_element = nullptr);
   ~Target();
   Target(const Target&) = delete;
   Target& operator=(const Target&) = delete;
@@ -83,6 +86,7 @@ class Prepared final {
 bool InspectExecutable(const std::wstring& path, std::wstring* canonical_path,
                        std::string* sha256);
 unsigned long long ProcessCreatedAt(HANDLE process);
+std::string CheckProcessAccess(DWORD process_id, unsigned long long created_at);
 bool ValidSecret(const wchar_t* units, size_t count);
 const char* OutcomeName(Outcome outcome);
 

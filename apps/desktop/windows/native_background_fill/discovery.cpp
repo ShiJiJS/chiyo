@@ -1,11 +1,14 @@
 #include "discovery.h"
 #include <UIAutomation.h>
 #include <wrl/client.h>
-#include <algorithm>
+#include <set>
 
 namespace native_background_fill {
 namespace {
 using Microsoft::WRL::ComPtr;
+std::string UiaError(HRESULT hr) {
+  return hr == E_ACCESSDENIED ? "access_denied" : "element_unavailable";
+}
 bool EqualPath(const std::wstring& a, const std::wstring& b) {
   return !a.empty() && !b.empty() && CompareStringOrdinal(a.c_str(), -1, b.c_str(), -1, TRUE) == CSTR_EQUAL;
 }
@@ -14,69 +17,57 @@ std::wstring Path(HANDLE process) {
   if (!QueryFullProcessImageNameW(process, 0, path.data(), &length)) return {};
   path.resize(length); return path;
 }
-std::wstring AutomationId(IUIAutomationElement* element) {
-  BSTR value = nullptr;
-  if (FAILED(element->get_CurrentAutomationId(&value)) || !value) return {};
-  std::wstring text(value, SysStringLen(value)); SysFreeString(value); return text;
-}
-std::vector<int> RuntimeId(IUIAutomationElement* element) {
+HRESULT RuntimeId(IUIAutomationElement* element, std::vector<int>* result) {
   SAFEARRAY* array = nullptr;
-  if (FAILED(element->GetRuntimeId(&array)) || !array) return {};
-  std::vector<int> result;
+  const auto hr = element->GetRuntimeId(&array);
+  if (FAILED(hr)) return hr;
+  if (!array) return E_FAIL;
   LONG first = 0, last = -1;
-  if (SafeArrayGetDim(array) == 1 && SUCCEEDED(SafeArrayGetLBound(array, 1, &first)) &&
-      SUCCEEDED(SafeArrayGetUBound(array, 1, &last)) && last >= first && last - first < 128) {
-    for (LONG i = first; i <= last; ++i) {
-      int value = 0;
-      if (FAILED(SafeArrayGetElement(array, &i, &value))) { result.clear(); break; }
-      result.push_back(value);
-    }
+  bool valid = SafeArrayGetDim(array) == 1 && SUCCEEDED(SafeArrayGetLBound(array, 1, &first)) &&
+      SUCCEEDED(SafeArrayGetUBound(array, 1, &last)) && last >= first && last - first < 128;
+  for (LONG i = first; valid && i <= last; ++i) {
+    int value = 0;
+    valid = SUCCEEDED(SafeArrayGetElement(array, &i, &value));
+    if (valid) result->push_back(value);
   }
-  SafeArrayDestroy(array); return result;
+  SafeArrayDestroy(array);
+  if (!valid) result->clear();
+  return valid ? S_OK : E_FAIL;
 }
 struct WindowSearch {
   std::wstring executable;
   HWND selected_window;
   std::vector<Selection> windows;
+  std::string error;
+  bool hidden = false;
 };
 BOOL CALLBACK Window(HWND window, LPARAM parameter) {
   auto* search = reinterpret_cast<WindowSearch*>(parameter);
-  if (search->windows.size() >= 64) return FALSE;
-  if (!IsWindowVisible(window) || GetAncestor(window, GA_ROOT) != window ||
+  if (GetAncestor(window, GA_ROOT) != window ||
       (search->selected_window && search->selected_window != window)) return TRUE;
   DWORD pid = 0;
-  GetWindowThreadProcessId(window, &pid);
+  if (!GetWindowThreadProcessId(window, &pid)) {
+    if (search->selected_window) search->error = "window_changed";
+    return TRUE;
+  }
   HANDLE process = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-  if (!process) return TRUE;
+  if (!process) {
+    // Unrelated protected processes are not candidates. A retained explicit
+    // window's query failure, however, must not become an empty result.
+    if (search->selected_window) search->error = "access_denied";
+    return TRUE;
+  }
   Selection selection;
   selection.process_created_at = ProcessCreatedAt(process);
   const auto executable = Path(process);
   CloseHandle(process);
-  if (!selection.process_created_at || !EqualPath(executable, search->executable)) return TRUE;
+  if (!EqualPath(executable, search->executable)) return TRUE;
+  if (!selection.process_created_at) { search->error = "application_unavailable"; return FALSE; }
+  if (!IsWindowVisible(window)) { search->hidden = true; return TRUE; }
+  if (search->windows.size() >= 64) { search->error = "busy"; return FALSE; }
   selection.process_id = pid; selection.window = window;
   search->windows.push_back(std::move(selection));
   return TRUE;
-}
-std::vector<SelectorStep> PathWithin(IUIAutomation2* automation,
-    IUIAutomationElement* root, IUIAutomationElement* element) {
-  ComPtr<IUIAutomationTreeWalker> walker;
-  if (FAILED(automation->get_RawViewWalker(&walker))) return {};
-  ComPtr<IUIAutomationElement> current = element;
-  std::vector<SelectorStep> path;
-  for (int depth = 0; depth < 64 && current; ++depth) {
-    BOOL at_root = FALSE;
-    if (FAILED(automation->CompareElements(root, current.Get(), &at_root))) return {};
-    if (at_root) { std::reverse(path.begin(), path.end()); return path; }
-    const auto id = AutomationId(current.Get());
-    int type = 0;
-    if (FAILED(current->get_CurrentControlType(&type))) return {};
-    if (depth == 0 && id.empty()) return {};
-    if (!id.empty()) path.push_back({id, type});
-    ComPtr<IUIAutomationElement> parent;
-    if (FAILED(walker->GetParentElement(current.Get(), &parent))) return {};
-    current = parent;
-  }
-  return {};
 }
 }
 std::vector<DiscoveredTarget> DiscoverNativeFields(const std::wstring& executable,
@@ -86,52 +77,87 @@ std::vector<DiscoveredTarget> DiscoverNativeFields(const std::wstring& executabl
   if (limit == 0 || limit > 64) return result;
   std::wstring canonical;
   std::string digest;
+  SetLastError(ERROR_SUCCESS);
   if (!InspectExecutable(executable, &canonical, &digest)) {
-    *error = "application_unavailable"; return result;
+    *error = GetLastError() == ERROR_ACCESS_DENIED ? "access_denied" : "application_unavailable";
+    return result;
   }
   ComPtr<IUIAutomation2> automation;
-  if (FAILED(CoCreateInstance(__uuidof(CUIAutomation8), nullptr, CLSCTX_INPROC_SERVER,
-      IID_PPV_ARGS(&automation))) || FAILED(automation->put_AutoSetFocus(FALSE)) ||
-      FAILED(automation->put_ConnectionTimeout(500)) ||
-      FAILED(automation->put_TransactionTimeout(500))) {
-    *error = "automation_unavailable"; return result;
+  auto hr = CoCreateInstance(__uuidof(CUIAutomation8), nullptr, CLSCTX_INPROC_SERVER,
+      IID_PPV_ARGS(&automation));
+  if (FAILED(hr) || FAILED(hr = automation->put_AutoSetFocus(FALSE)) ||
+      FAILED(hr = automation->put_ConnectionTimeout(500)) ||
+      FAILED(hr = automation->put_TransactionTimeout(500))) {
+    *error = hr == E_ACCESSDENIED ? "access_denied" : "automation_unavailable"; return result;
   }
-  WindowSearch search{canonical, selected_window, {}};
-  EnumWindows(Window, reinterpret_cast<LPARAM>(&search));
+  WindowSearch search{canonical, selected_window, {}, "", false};
+  const auto enumerated = EnumWindows(Window, reinterpret_cast<LPARAM>(&search));
+  if (!search.error.empty() || !enumerated) {
+    *error = search.error.empty() ? "automation_unavailable" : search.error; return {};
+  }
+  if (search.windows.empty()) {
+    *error = search.hidden ? "target_not_visible" : "application_unavailable"; return {};
+  }
   VARIANT password{}; password.vt = VT_BOOL; password.boolVal = VARIANT_TRUE;
   ComPtr<IUIAutomationCondition> condition;
-  if (FAILED(automation->CreatePropertyCondition(UIA_IsPasswordPropertyId, password, &condition))) {
-    *error = "automation_unavailable"; return result;
-  }
+  hr = automation->CreatePropertyCondition(UIA_IsPasswordPropertyId, password, &condition);
+  if (FAILED(hr)) { *error = UiaError(hr); return {}; }
+  error->clear();
+  std::string unsupported;
   for (auto& selection : search.windows) {
+    *error = CheckProcessAccess(selection.process_id, selection.process_created_at);
+    if (!error->empty()) return {};
     ComPtr<IUIAutomationElement> root;
     ComPtr<IUIAutomationElementArray> fields;
-    if (FAILED(automation->ElementFromHandle(selection.window, &root)) || !root ||
-        FAILED(root->FindAll(TreeScope_Descendants, condition.Get(), &fields)) || !fields) continue;
+    hr = automation->ElementFromHandle(selection.window, &root);
+    if (FAILED(hr) || !root) { *error = UiaError(hr); return {}; }
+    hr = root->FindAll(TreeScope_Subtree, condition.Get(), &fields);
+    if (FAILED(hr) || !fields) { *error = UiaError(hr); return {}; }
     int count = 0;
-    if (FAILED(fields->get_Length(&count)) || count > 256) continue;
+    hr = fields->get_Length(&count);
+    if (FAILED(hr)) { *error = UiaError(hr); return {}; }
+    // UIA may normalize a disappearing provider to an empty collection.
+    // A process/window lost during enumeration is still an explicit failure.
+    *error = CheckProcessAccess(selection.process_id, selection.process_created_at);
+    DWORD current_pid = 0;
+    if (!error->empty()) return {};
+    if (!IsWindow(selection.window) || !GetWindowThreadProcessId(selection.window, &current_pid) ||
+        current_pid != selection.process_id) { *error = "window_changed"; return {}; }
+    if (count < 0 || count > 256) { *error = "busy"; return {}; }
     selection.approved_executable = canonical; selection.approved_sha256 = digest;
-    selection.observed_window_runtime_id = RuntimeId(root.Get());
-    if (selection.observed_window_runtime_id.empty()) continue;
-    for (int i = 0; i < count && result.size() < limit; ++i) {
+    hr = RuntimeId(root.Get(), &selection.observed_window_runtime_id);
+    if (FAILED(hr)) { *error = UiaError(hr); return {}; }
+    for (int i = 0; i < count; ++i) {
       ComPtr<IUIAutomationElement> field;
-      if (FAILED(fields->GetElement(i, &field)) || !field) continue;
-      selection.path = PathWithin(automation.Get(), root.Get(), field.Get());
-      selection.observed_element_runtime_id = RuntimeId(field.Get());
-      if (selection.path.empty() || selection.observed_element_runtime_id.empty()) continue;
+      hr = fields->GetElement(i, &field);
+      if (FAILED(hr) || !field) { *error = UiaError(hr); return {}; }
+      selection.observed_element_runtime_id.clear();
+      hr = RuntimeId(field.Get(), &selection.observed_element_runtime_id);
+      if (FAILED(hr)) { *error = UiaError(hr); return {}; }
       std::string refused;
-      auto target = Target::Capture(selection, &refused);
-      if (!target) { *error = refused.empty() ? "unsupported_target" : refused; continue; }
-      if (target->field_description().size() > 256) { *error = "unsupported_target"; continue; }
-      // Capture compared the two observed runtime IDs before retaining the
-      // unique candidate. These are private identities, never field values.
+      // Hold the discovered object, including providers without HWND or ID.
+      // Descriptive developer IDs never rebuild an expired field reference.
+      auto target = Target::Capture(selection, &refused, field.Get());
+      if (!target) {
+        if (refused == "unsupported_target" || refused == "target_disabled" || refused == "target_readonly") {
+          unsupported = "unsupported_target"; continue;
+        }
+        *error = refused.empty() ? "unsupported_target" : refused; return {};
+      }
+      if (target->field_description().size() > 256) { unsupported = "unsupported_target"; continue; }
       const auto stable = target->Recheck();
-      if (!stable.empty()) { *error = stable; continue; }
+      if (!stable.empty()) { *error = stable; return {}; }
+      if (result.size() >= limit) { *error = "busy"; return {}; }
       result.push_back({std::move(target), selection.window, canonical, digest});
     }
-    if (result.size() >= limit) break;
   }
-  if (!result.empty()) error->clear();
+  std::set<std::pair<std::wstring, std::wstring>> descriptions;
+  for (const auto& candidate : result) {
+    if (!descriptions.insert({candidate.target->window_description(), candidate.target->field_description()}).second) {
+      *error = "unsupported_target"; return {};
+    }
+  }
+  if (result.empty()) *error = unsupported;
   return result;
 }
 }  // namespace native_background_fill

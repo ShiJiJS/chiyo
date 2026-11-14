@@ -122,6 +122,7 @@ JsonObject State(const wchar_t* state) {
 }
 const wchar_t* PublicError(const std::string& error) {
   if (error == "application_changed") return L"application_changed";
+  if (error == "application_unavailable") return L"target_unavailable";
   if (error == "access_denied" || error == "security_context_changed") return L"access_denied";
   if (error == "busy") return L"busy";
   if (error == "unsupported_secret") return L"unsupported_secret";
@@ -221,8 +222,7 @@ class Registry final {
     for (const auto& pair : items_) if (pair.second.scope == scope && !pair.second.retained) ++unused;
     std::string error;
     auto found = nb::DiscoverNativeFields(app, selected, 64, &error);
-    if (found.empty() && (error == "access_denied" || error == "automation_unavailable" ||
-        error.find("desktop_") == 0 || error == "session_unavailable")) return Refused(PublicError(error));
+    if (!error.empty()) return Refused(PublicError(error));
     // Distinct opaque IDs alone are not enough to let a user identify a field.
     // Reject discovery when two roots still have the same complete public
     // window/field description; never make the Agent guess between them.
@@ -265,10 +265,7 @@ class Registry final {
       target.Insert(L"windowId", JsonValue::CreateStringValue(window_id));
       target.Insert(L"windowTitle", JsonValue::CreateStringValue(Label(candidate.target->window_description())));
       target.Insert(L"fieldLabel", JsonValue::CreateStringValue(Label(candidate.target->field_description())));
-      const auto& family = candidate.target->family();
-      const wchar_t* kind = family == "win32-password-edit" ? L"win32_password" :
-          family == "winforms-password-textbox" ? L"winforms_password" : L"wpf_password";
-      target.Insert(L"controlKind", JsonValue::CreateStringValue(kind));
+      target.Insert(L"controlKind", JsonValue::CreateStringValue(L"windows_uia_password"));
       targets.Append(target);
       items_.emplace(id, Item{scope, candidate.window, std::move(candidate.target), target,
           GetTickCount64() + 300000, false});
@@ -404,7 +401,7 @@ int Run() {
 }
 }
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, wchar_t* arguments, int) {
-  if (std::wstring(arguments) != L"--native-background-v1") return 64;
+  if (std::wstring(arguments) != L"--native-background-v2") return 64;
   try {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
     const int result = Run(); winrt::uninit_apartment(); return result;
