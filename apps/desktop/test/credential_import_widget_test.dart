@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -43,7 +44,48 @@ void main() {
       late ProposalsController model;
       late String id;
       late OwnerProposalPasswords passwords;
-      await t.runAsync(() async {
+      // Owner I/O can sit behind a background refresh queued in fake async.
+      // Keep pumping frames while real I/O runs, including during assertions.
+      Future<T> withPumps<T>(Future<T> Function() work) async {
+        late T value;
+        Object? failure;
+        StackTrace? failureStack;
+        var completed = false;
+        await t.runAsync(() async {
+          unawaited(
+            work().then<void>(
+              (result) {
+                value = result;
+                completed = true;
+              },
+              onError: (Object error, StackTrace stack) {
+                failure = error;
+                failureStack = stack;
+                completed = true;
+              },
+            ),
+          );
+        });
+        final watch = Stopwatch()..start();
+        while (!completed && watch.elapsed < const Duration(seconds: 20)) {
+          await t.pump();
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 1)),
+          );
+        }
+        expect(
+          completed,
+          isTrue,
+          reason:
+              'Owner operation did not finish while pumping queued refreshes',
+        );
+        if (failure != null) {
+          Error.throwWithStackTrace(failure!, failureStack!);
+        }
+        return value;
+      }
+
+      await withPumps(() async {
         root = await Directory.systemTemp.createTemp('credential-owner-ui-');
         repo = await EncryptedInformationRepository.open(root.path, _Keys());
         service = core.InformationService(repository: repo);
@@ -185,7 +227,7 @@ void main() {
       );
       await t.tap(visibility);
       await t.pumpAndSettle();
-      final before = await t.runAsync(
+      final before = await withPumps(
         () => cli.execute({'command': 'import-status', 'proposalId': id}),
       );
       expect(jsonEncode(before), isNot(contains('PRIVATE-OWNER-WIDGET')));
@@ -203,7 +245,7 @@ void main() {
         utf8.decode(repo.credentialMaterials.single.bytes),
         'PRIVATE-OWNER-WIDGET-PASSWORD',
       );
-      await t.runAsync(() async {
+      await withPumps(() async {
         final status = await cli.execute({
           'command': 'import-status',
           'proposalId': id,
@@ -248,7 +290,7 @@ void main() {
       });
       for (final kind in ['accountPassword', 'token', 'file']) {
         late String proposalId;
-        await t.runAsync(() async {
+        await withPumps(() async {
           final template =
               (await cli.execute({
                     'command': 'template-read',
@@ -302,7 +344,7 @@ void main() {
       await t.pumpWidget(const SizedBox());
       model.dispose();
       passwords.dispose();
-      await t.runAsync(() async {
+      await withPumps(() async {
         cli.close();
         await library.dispose();
         await server.close();
