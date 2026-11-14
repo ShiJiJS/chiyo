@@ -64,16 +64,23 @@ def main():
         package = source / 'build/package'
         verified = json.loads((package / 'verification.json').read_text())
         manifest = json.loads((package / 'chiyo/manifest.json').read_text())
+        native = json.loads((package / 'native-product-verification.json').read_text())
         if (not verified.get('complete') or manifest['sourceCommit'] != commit
                 or manifest['sourceDirty'] is not False or not all(p['exit'] == 0 for p in verified['phases'])):
             raise RuntimeError('Missing fixed-source package verification')
+        if (native.get('passed') is not True or native.get('sourceCommit') != commit
+                or native.get('target') != 'lib/main.dart'
+                or native.get('appExecuted') is not False
+                or native.get('helperExecuted') is not False):
+            raise RuntimeError('Missing same-source read-only native product verification')
         report['package'] = verified
+        report['nativeProduct'] = native
         report['release'] = manifest['release']
         # The package verifier has already compared the extracted tree byte for
         # byte. Keep only its evidence, one usable payload, and the archive.
         for name in ['chiyo', verified['archive'], verified['archive'] + '.sha256',
                      verified['diskImage'], verified['diskImage'] + '.sha256',
-                     'verification.json', 'logs']:
+                     'verification.json', 'native-product-verification.json', 'logs']:
             shutil.move(str(package / name), str(out / name))
         if digest(out / verified['archive']) != verified['archiveSha256']:
             raise RuntimeError('Moved archive differs')

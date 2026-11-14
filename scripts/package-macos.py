@@ -263,6 +263,13 @@ def main():
             ["/usr/bin/codesign", "-d", "--entitlements", ":-", str(app)], stderr=subprocess.DEVNULL))
         run("sign-app-integration", ["/usr/bin/codesign", "--force", "--sign", "-",
             "--entitlements", str(entitlement_file), str(app)])
+        # The ordinary-main build metadata exists only in this isolated source
+        # checkout. Record read-only native payload checks before it is removed;
+        # downstream platform acceptance must not rebuild main just to recover it.
+        run("native-product-readonly", [sys.executable,
+            str(ROOT / "scripts/qa/check-macos-native-product.py"), str(app),
+            "--output", str(output / "native-product-verification.json")])
+        facts["nativeProductReadOnlyReport"] = "native-product-verification.json"
         notice_archives = list(app.rglob("NOTICES.Z"))
         if len(notice_archives) != 1:
             raise RuntimeError("Expected Flutter's bundled license registry")
