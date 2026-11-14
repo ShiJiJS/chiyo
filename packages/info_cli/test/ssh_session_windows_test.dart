@@ -18,6 +18,15 @@ void main() {
   final python =
       Platform.environment['D7_WINDOWS_SSH_PYTHON'] ??
       '$root/build/ssh-session/qa-venv/Scripts/python.exe';
+  if (!File(helper).existsSync() || !File(python).existsSync()) {
+    test(
+      'Windows SSH native acceptance',
+      () {},
+      skip:
+          'Build native helper and isolated QA Python first; see windows/ssh_session/README.md',
+    );
+    return;
+  }
   final fixtureDirectory = Directory(
     '$root/build/ssh-session/fixture-${DateTime.now().microsecondsSinceEpoch}',
   );
@@ -231,6 +240,28 @@ void main() {
     expect(observed.code, 255);
     expect(observed.output, isEmpty);
     expect(challenges, 1);
+  });
+
+  test('SSH stdin backpressure cannot block a pending ASKPASS reply', () async {
+    final requested = Completer<void>();
+    final reply = Completer<List<int>?>();
+    final transport = await start(
+      password: true,
+      command: 'echo',
+      challenge: (_) {
+        requested.complete();
+        return reply.future;
+      },
+    );
+    final result = collect(transport);
+    await requested.future.timeout(const Duration(seconds: 10));
+    final payload = 'bootstrap-data' * 12000;
+    await transport.send(utf8.encode(payload));
+    reply.complete(utf8.encode('synthetic-login-password'));
+    await transport.closeInput();
+    final observed = await result;
+    expect(observed.code, 0, reason: observed.diagnostics);
+    expect(observed.output, 'ready\n$payload');
   });
 
   test(

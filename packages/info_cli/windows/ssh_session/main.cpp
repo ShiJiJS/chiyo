@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
+#include <deque>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -164,8 +165,11 @@ struct State {
   uint64_t identity = 0;
   std::wstring helper;
   std::atomic<bool> stopped{false};
-  std::mutex outputMutex, replyMutex;
-  std::condition_variable replyReady;
+  std::mutex outputMutex, replyMutex, inputMutex;
+  std::condition_variable replyReady, inputReady;
+  std::deque<Bytes> inputQueue;
+  size_t queuedBytes = 0;
+  bool inputEof = false;
   std::string pending;
   Bytes reply;
   bool answered = false;
@@ -246,8 +250,18 @@ void Input(std::shared_ptr<State> state) {
     frame.resize(size);
     if (!read(frame.data(), size)) break;
     BYTE kind = frame[0];
-    if (kind == 2 && state->input.load()) Write(state->input.load(), frame.data() + 1, static_cast<DWORD>(frame.size() - 1));
-    else if (kind == 3 && state->input.load()) { CloseHandle(state->input.exchange(nullptr)); }
+    if (kind == 2) {
+      std::lock_guard<std::mutex> lock(state->inputMutex);
+      if (state->inputEof || state->queuedBytes + frame.size() > kLimit) {
+        state->Error("ssh_input_backpressure"); break;
+      }
+      state->inputQueue.emplace_back(frame.begin() + 1, frame.end());
+      state->queuedBytes += frame.size() - 1;
+      state->inputReady.notify_one();
+    } else if (kind == 3) {
+      std::lock_guard<std::mutex> lock(state->inputMutex);
+      state->inputEof = true; state->inputReady.notify_one();
+    }
     else if (kind == 4) { TerminateProcess(state->ssh, 255); break; }
     else if (kind == 5 && frame.size() >= 34) {
       std::lock_guard<std::mutex> lock(state->replyMutex);
@@ -261,6 +275,29 @@ void Input(std::shared_ptr<State> state) {
   }
   if (!frame.empty()) SecureZeroMemory(frame.data(), frame.size());
   if (state->Live()) TerminateProcess(state->ssh, 255);
+}
+void SshInput(std::shared_ptr<State> state) {
+  // SSH may not consume stdin until authentication finishes. Never let that
+  // backpressure block the independent ASKPASS response/control reader.
+  while (!state->stopped) {
+    Bytes bytes;
+    {
+      std::unique_lock<std::mutex> lock(state->inputMutex);
+      state->inputReady.wait(lock, [&] { return state->stopped || state->inputEof || !state->inputQueue.empty(); });
+      if (state->stopped) break;
+      if (state->inputQueue.empty() && state->inputEof) {
+        CloseHandle(state->input.exchange(nullptr)); return;
+      }
+      bytes.swap(state->inputQueue.front()); state->inputQueue.pop_front();
+      state->queuedBytes -= bytes.size();
+    }
+    bool ok = Write(state->input.load(), bytes.data(), static_cast<DWORD>(bytes.size()));
+    if (!bytes.empty()) SecureZeroMemory(bytes.data(), bytes.size());
+    if (!ok) { if (state->Live()) TerminateProcess(state->ssh, 255); break; }
+  }
+  std::lock_guard<std::mutex> lock(state->inputMutex);
+  for (auto& bytes : state->inputQueue) if (!bytes.empty()) SecureZeroMemory(bytes.data(), bytes.size());
+  state->inputQueue.clear(); state->queuedBytes = 0;
 }
 void Pump(std::shared_ptr<State> state, HANDLE pipe, BYTE type) {
   BYTE bytes[32768]; DWORD count = 0;
@@ -358,15 +395,16 @@ int Broker() {
   std::thread stderrThread(Pump, state, errors.value, BYTE(0x12));
   state->Text(0x10, std::to_string(state->pid));
   std::thread inputThread(Input, state);
+  std::thread sshInputThread(SshInput, state);
   ResumeThread(thread.value);
   WaitForSingleObject(ssh.value, INFINITE);
-  state->stopped = true; state->replyReady.notify_one();
+  state->stopped = true; state->replyReady.notify_one(); state->inputReady.notify_one();
   // Repeat cancellation to cover a thread moving from an identity check into a
   // synchronous pipe read while shutdown starts. No thread outlives its handles.
-  for (HANDLE worker : {authentication.native_handle(), inputThread.native_handle()}) {
+  for (HANDLE worker : {authentication.native_handle(), inputThread.native_handle(), sshInputThread.native_handle()}) {
     while (WaitForSingleObject(worker, 10) == WAIT_TIMEOUT) CancelSynchronousIo(worker);
   }
-  authentication.join(); inputThread.join();
+  authentication.join(); inputThread.join(); sshInputThread.join();
   // Stop remaining ASKPASS children before draining output handles inherited by
   // those children. This job belongs solely to this transport.
   TerminateJobObject(job.value, 255);
