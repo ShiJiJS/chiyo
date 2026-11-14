@@ -102,6 +102,9 @@ const _agentSubmissionLibraryFormat = 66;
 const _credentialProgramBatchLibraryFormat = 67;
 const _deleteSubmissionLibraryFormat = 68;
 const _nativeFillLibraryFormat = 69;
+// First admission of capability-based AX/UIA target snapshots, not an eager
+// upgrade of ordinary libraries or a reinterpretation of legacy native grants.
+const _nativeFillV2LibraryFormat = 70;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -732,7 +735,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _nativeFillLibraryFormat) {
+      if (headerVersion > _nativeFillV2LibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -747,8 +750,7 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) >
-                _nativeFillLibraryFormat ||
+            (marker.single['version'] as int) > _nativeFillV2LibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }

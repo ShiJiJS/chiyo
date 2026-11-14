@@ -6,8 +6,7 @@ import 'package:info_storage/info_storage.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
 import '../../info_core/test_support/operation_history.dart';
-import '../../info_core/test_support/native_fill.dart'
-    show nativeTargetFixture;
+import '../../info_core/test_support/native_fill.dart' show nativeTargetFixture;
 import 'storage_test.dart' show TestKeyStore;
 
 class _Replica {
@@ -68,8 +67,9 @@ Future<int> _initial(_Replica a, _Replica b) async {
 Future<LibrarySyncReceipt> _transfer(
   _Replica a,
   _Replica b,
-  LibrarySyncBatch batch,
-) async {
+  LibrarySyncBatch batch, {
+  int? contentFormat,
+}) async {
   final file = File('${a.path}/delta.encrypted');
   final prepared = await a.snapshot(
     () => a.incremental.exportDelta(
@@ -78,6 +78,9 @@ Future<LibrarySyncReceipt> _transfer(
       operationId: batch.operationId,
     ),
   );
+  if (contentFormat != null) {
+    expect(prepared.transfer.archive.contentFormat, contentFormat);
+  }
   try {
     final receipt = await b.snapshot(
       () => b.incremental.installDelta(
@@ -219,66 +222,100 @@ void _assertArchive(
 }
 
 void main() {
-  test(
-    'native snapshots use format 30 and incremental operations remain inactive on the replica',
-    () async {
-      final root = await Directory.systemTemp.createTemp('native-batch-sync-');
-      final now = DateTime.utc(2026, 11, 14);
-      final a = _Replica('${root.path}/a', () => now),
-          b = _Replica('${root.path}/b', () => now);
-      await a.open();
-      await b.open();
-      addTearDown(() async {
-        await a.close();
-        await b.close();
-        await root.delete(recursive: true);
-      });
-      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
-      await a.runtime.run(() async {
-        await f.open(program: false);
-        f.input = CredentialBatchInput.fromJson({
-          ...f.input.toJson(),
-          'items': [
-            {
-              ...f.input.items.single.toJson(),
-              'destination': {'via': 'native', 'target': nativeTargetFixture()},
-            },
-          ],
+  for (final nativeKind in [
+    'appkit_secure_text',
+    'macos_ax_password',
+    'windows_uia_password',
+  ]) {
+    final format = nativeKind == 'appkit_secure_text' ? 30 : 31;
+    test(
+      '$nativeKind snapshots use format $format and incremental operations remain inactive on the replica',
+      () async {
+        final root = await Directory.systemTemp.createTemp(
+          'native-batch-sync-',
+        );
+        final now = DateTime.utc(2026, 11, 14);
+        final a = _Replica('${root.path}/a', () => now),
+            b = _Replica('${root.path}/b', () => now);
+        await a.open();
+        await b.open();
+        addTearDown(() async {
+          await a.close();
+          await b.close();
+          await root.delete(recursive: true);
         });
-        f.request = await a.runtime.service.agent.requestCredentialBatch(
-          f.session,
-          'A' * 22,
-          f.input,
-          operationId: 'native-sync-submit',
+        final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+        await a.runtime.run(() async {
+          await f.open(program: false);
+          f.input = CredentialBatchInput.fromJson({
+            ...f.input.toJson(),
+            'items': [
+              {
+                ...f.input.items.single.toJson(),
+                'destination': {
+                  'via': 'native',
+                  'target': nativeTargetFixture(controlKind: nativeKind),
+                },
+              },
+            ],
+          });
+          f.request = await a.runtime.service.agent.requestCredentialBatch(
+            f.session,
+            'A' * 22,
+            f.input,
+            operationId: 'native-sync-submit',
+          );
+          f.request = await a.runtime.service.owner.decideCredentialBatch(
+            f.request.id,
+            operationId: 'native-sync-approve',
+            revision: 1,
+            approvedItems: ['b1'],
+          );
+          await f.append('native-first');
+        });
+        expect(await _initial(a, b), format);
+        _assertArchive(b, f, program: false, count: 1);
+        expect(
+          b.repo.credentialBatches
+              .singleWhere((r) => r.id == f.request.id)
+              .items
+              .single
+              .destination
+              .native!
+              .fieldLabel,
+          'Password',
         );
-        f.request = await a.runtime.service.owner.decideCredentialBatch(
-          f.request.id,
-          operationId: 'native-sync-approve',
-          revision: 1,
-          approvedItems: ['b1'],
+        await a.runtime.run(() => f.append('native-second'));
+        final operations = await a.after(0);
+        for (final entry in operations) {
+          expect(
+            (await _transfer(a, b, entry.batch, contentFormat: 28)).conflict,
+            false,
+          );
+        }
+        _assertArchive(b, f, program: false, count: 2);
+        await a.runtime.run(
+          () => a.runtime.service.owner.revokeCredentialBatch(
+            f.request.id,
+            operationId: 'native-revoke',
+            revision: f.request.revision,
+            itemIds: ['b1'],
+          ),
         );
-        await f.append('native-first');
-      });
-      expect(await _initial(a, b), 30);
-      _assertArchive(b, f, program: false, count: 1);
-      expect(
-        b.repo.credentialBatches
-            .singleWhere((r) => r.id == f.request.id)
-            .items
-            .single
-            .destination
-            .native!
-            .fieldLabel,
-        'Password',
-      );
-      await a.runtime.run(() => f.append('native-second'));
-      for (final entry in await a.after(0)) {
-        expect((await _transfer(a, b, entry.batch)).conflict, false);
-      }
-      _assertArchive(b, f, program: false, count: 2);
-    },
-  );
-
+        final snapshots = await a.after(operations.last.cursor);
+        expect(snapshots, hasLength(1));
+        expect(
+          (await _transfer(
+            a,
+            b,
+            snapshots.single.batch,
+            contentFormat: format,
+          )).conflict,
+          false,
+        );
+      },
+    );
+  }
   for (final program in [false, true]) {
     test(
       '${program ? 'program' : 'fill'} source retention synchronizes parent and child deletion without replaying old history',
