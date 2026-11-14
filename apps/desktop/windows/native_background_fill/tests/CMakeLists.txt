@@ -2,7 +2,7 @@ add_executable(native_background_fixture WIN32 fixture_main.cpp)
 target_compile_features(native_background_fixture PRIVATE cxx_std_17)
 target_compile_definitions(native_background_fixture PRIVATE UNICODE _UNICODE NOMINMAX)
 target_compile_options(native_background_fixture PRIVATE /W4 /WX /EHsc /utf-8)
-target_link_libraries(native_background_fixture PRIVATE user32)
+target_link_libraries(native_background_fixture PRIVATE user32 shell32 windowsapp)
 
 set(CSC "$ENV{WINDIR}/Microsoft.NET/Framework64/v4.0.30319/csc.exe")
 set(FRAMEWORK "$ENV{WINDIR}/Microsoft.NET/Framework64/v4.0.30319")
@@ -15,6 +15,7 @@ add_custom_command(OUTPUT "${MANAGED_OUTPUT}"
   COMMAND "${CMAKE_COMMAND}" -E env "LIB=" "${CSC}" /nologo /target:exe /platform:x64 "/out:${MANAGED_OUTPUT_NATIVE}"
     "/reference:${FRAMEWORK_NATIVE}\\System.dll"
     "/reference:${FRAMEWORK_NATIVE}\\System.Core.dll"
+    "/reference:${FRAMEWORK_NATIVE}\\System.Web.Extensions.dll"
     "/reference:${FRAMEWORK_NATIVE}\\System.Xaml.dll"
     "/reference:${FRAMEWORK_NATIVE}\\System.Windows.Forms.dll"
     "/reference:${FRAMEWORK_NATIVE}\\System.Drawing.dll"
