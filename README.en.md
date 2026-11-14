@@ -2,7 +2,7 @@
 <p align="center"><img src="apps/desktop/assets/branding/chiyo-icon.png" alt="Chiyo icon" width="160" /></p>
 <p align="center">Keep your information organized. Let AI request what it needs. You decide.</p>
 <p align="center"><a href="README.md">简体中文</a> · <strong>English</strong></p>
-<p align="center"><a href="https://github.com/ShiJiJS/chiyo/releases">Downloads</a> · <a href="docs/deployment.en.md">Installation & deployment</a> · <a href="docs/usage.md">User guide (中文)</a> · <a href="docs/README.md">Documentation</a> · <a href="https://github.com/ShiJiJS/chiyo/issues">Issues</a></p>
+<p align="center"><a href="https://github.com/ShiJiJS/chiyo/releases">Downloads</a> · <a href="docs/deployment.en.md">Installation & deployment</a> · <a href="docs/usage.md">User guide (中文)</a> · <a href="docs/explainers/credential-filling/README.md">How filling works (中文)</a> · <a href="docs/README.md">Documentation</a> · <a href="https://github.com/ShiJiJS/chiyo/issues">Issues</a></p>
 
 Chiyo is a **personal information manager with approval-based AI access**. Keep documents, personal profiles, server details, and account credentials together. When an AI needs information, it submits a request; you review its purpose and choose what to share in the desktop App.
 
@@ -56,7 +56,10 @@ Keep encrypted backups and recovery keys separately. See [installation and deplo
 
 - [Installation, Docker deployment, and connection](docs/deployment.en.md) · [简体中文](docs/deployment.md)
 - [Information, proposals, approvals, and sync (中文)](docs/usage.md)
+- [How Agents fill passwords in websites and apps: interactive explainer (中文)](docs/explainers/credential-filling/README.md)
 - [AI / Codex integration (中文)](integrations/codex/README.md) · [CLI reference (中文)](docs/cli.md)
 - [Development and repository layout (中文)](docs/development/README.md) · [Documentation index](docs/README.md)
+
+The explainer shows how an Agent locates a password field, requests approval, and fills it through browser or native Mac/Windows interfaces. After downloading or cloning the repository, open [docs/explainers/credential-filling/index.html](docs/explainers/credential-filling/index.html) in a browser and keep its companion files in place. GitHub displays HTML files as source code.
 
 Report problems and feature requests through [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues).

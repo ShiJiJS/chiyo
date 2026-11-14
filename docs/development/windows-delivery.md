@@ -26,6 +26,8 @@ Windows 固定安装位置为 `C:\Software\AgentInfoManage`：`current` 保存�
 
 `chiyo`、旧 `info`/`info-codex`、hook、准备工具及 worker 同源编译并随包交付；旧入口保持原协议和宿主职责，不把旧 JSON-lines 命令隐式重解释成新子命令。仅产包不修改用户 PATH、公开登记或聊天配置。
 
+安装后通过桌面“知予”快捷方式启动正式 App，再从 Codex 调用 CLI。Windows MSIX 版 Codex 直接以子进程运行 App 时，曾将新建的本机填写服务目录重定向到 Codex 的 `LocalCache`，触发路径身份校验失败；通过桌面快捷方式启动后，普通 Codex CLI 的连接已通过实测。验收时用全新、未授权的诊断会话检查 `doctor` 的 `fill.appAvailable` 及所需 provider，再结束诊断会话；`targetChecked=false` 只表示尚未检查具体输入框，不能作为实际填写成功的证明。
+
 单独安装已核对的归档：
 
 ```powershell

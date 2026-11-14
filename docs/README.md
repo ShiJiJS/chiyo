@@ -8,6 +8,7 @@
 | --- | --- |
 | [安装与部署](deployment.md) · [English](deployment.en.md) | Mac / Windows 安装、本地模式、Docker、证书与服务器连接 |
 | [使用指南](usage.md) | 资料、目录、提案、密码填写、审批、同步和备份 |
+| [跨应用填写机制图解](explainers/credential-filling/README.md) | Agent 怎样定位密码框、申请使用密码，以及浏览器和 Mac／Windows 原生应用怎样执行填写；含可在本机浏览器打开的交互页面 |
 | [服务器维护](../apps/server/OPERATIONS.md) | 升级、停机备份、迁移、恢复与回退 |
 | [AI 接入](../integrations/codex/README.md) | 配套 CLI、Skill 和聊天接入；链接同版本平台说明 |
 | [CLI 命令](cli.md) | 查询模板、提交提案、请求与获准使用 |
