@@ -1,6 +1,9 @@
 import 'package:info_core/access_timing.dart';
+
 import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
+
 import 'workspace_records.dart';
 import 'workspace_files.dart';
 import 'workspace_credentials.dart';
@@ -148,6 +151,9 @@ class WorkspaceApprovalDetail {
     Map<String, int> fileVersions = const {},
     this.credential,
     this.credentialBatch = false,
+    this.sshSession = false,
+    this.batchSupportsSessionValidity = false,
+    this.batchSessionBound = false,
     this.programPlan,
     this.operationTotal,
     this.operationsCursor,
@@ -181,6 +187,10 @@ class WorkspaceApprovalDetail {
   final Map<String, int> fileVersions;
   final WorkspaceCredentialUseRequest? credential;
   final bool credentialBatch;
+  final bool sshSession, batchSupportsSessionValidity, batchSessionBound;
+  bool get supportsSessionValidity =>
+      batchSupportsSessionValidity ||
+      credential?.supportsSessionValidity == true;
   final DateTime? decidedAt, fieldExpiresAt, credentialExpiresAt;
   final String? approveUnavailableReason, fileVersionPolicy;
 
@@ -196,6 +206,9 @@ class WorkspaceApprovalDetail {
         fileVersions: fileVersions,
         credential: credential,
         credentialBatch: credentialBatch,
+        sshSession: sshSession,
+        batchSupportsSessionValidity: batchSupportsSessionValidity,
+        batchSessionBound: batchSessionBound,
         programPlan: programPlan,
         operationTotal: operationTotal,
         operationsCursor: operationsCursor,
@@ -222,6 +235,9 @@ class WorkspaceApprovalDetail {
     fileVersions: fileVersions,
     credential: credential,
     credentialBatch: credentialBatch,
+    sshSession: sshSession,
+    batchSupportsSessionValidity: batchSupportsSessionValidity,
+    batchSessionBound: batchSessionBound,
     programPlan: programPlan,
     operationTotal: operationTotal,
     operationsCursor: operationsCursor,
@@ -248,6 +264,9 @@ class WorkspaceApprovalDetail {
     fileVersions: fileVersions,
     credential: credential,
     credentialBatch: credentialBatch,
+    sshSession: sshSession,
+    batchSupportsSessionValidity: batchSupportsSessionValidity,
+    batchSessionBound: batchSessionBound,
     programPlan: programPlan,
     operationTotal: operationTotal,
     operationsCursor: operationsCursor,
@@ -294,6 +313,9 @@ class WorkspaceApprovalDetail {
       fileVersions: fileVersions,
       credential: credential,
       credentialBatch: credentialBatch,
+      sshSession: sshSession,
+      batchSupportsSessionValidity: batchSupportsSessionValidity,
+      batchSessionBound: batchSessionBound,
       programPlan: programPlan,
       decidedAt: decidedAt,
       fieldExpiresAt: fieldExpiresAt,
@@ -309,7 +331,8 @@ class WorkspaceApprovalDetail {
     );
   }
 
-  bool get credentialSessionBound => credential?.sessionBound == true;
+  bool get credentialSessionBound =>
+      batchSessionBound || credential?.sessionBound == true;
   bool get canApprove =>
       request.state == WorkspaceApprovalState.pending &&
       scopes.any((s) => s.available) &&
