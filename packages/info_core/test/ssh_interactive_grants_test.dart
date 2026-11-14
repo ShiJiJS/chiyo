@@ -136,6 +136,87 @@ void main() {
       expect(duplicate.privateProof, isNull);
       expect(duplicate.operation.materialClaimed, isFalse);
       expect(duplicate.operation.sshContext!.kind, 'run');
+      final sudoRequest = await service.agent.requestCredentialBatch(
+        session,
+        device,
+        CredentialBatchInput.fromJson({
+          'protocolVersion': 3,
+          'purpose': 'Synthetic sudo',
+          'agentName': 'Test Agent',
+          'externalChatId': 'ssh-test',
+          'items': [
+            {
+              'credentialId': credential.id,
+              'version': credential.version,
+              'destination': {
+                'via': 'ssh',
+                'target': SshSessionTarget(
+                  host: 'example.test',
+                  port: 22,
+                  user: 'fixture',
+                  authentication: 'password',
+                  credentialUse: 'sudo',
+                  validity: 'session',
+                ).toJson(),
+              },
+            },
+          ],
+        }),
+        operationId: 'sudo-request',
+      );
+      final sudoApproved = await service.owner.decideCredentialBatch(
+        sudoRequest.id,
+        operationId: 'sudo-approve',
+        revision: sudoRequest.revision,
+        approvedItems: ['b1'],
+        lifetime: null,
+      );
+      final sudoOperation = await service.agent.beginCredentialBatchOperation(
+        session,
+        device,
+        sudoRequest.id,
+        operationId: 'sudo-use',
+        sshContext: SshSessionOperationContext(
+          kind: 'credential',
+          sessionId: 'ssh-test',
+          runId: 'run-one',
+          actionId: 'action-one',
+          digest: 'sha256:${'b' * 64}',
+        ),
+      );
+      await service.agent.claimCredentialBatchMaterials(
+        device,
+        sudoOperation.privateProof!,
+        {'b1': sudoApproved.items.single.destination},
+      );
+      await expectLater(
+        service.agent.authorizeCredentialBatchInput(
+          device,
+          sudoOperation.privateProof!,
+        ),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      await service.agent.authorizeCredentialBatchInput(
+        device,
+        sudoOperation.privateProof!,
+        sshLoginSession: session,
+        sshLoginRequestId: request.id,
+      );
+      await service.owner.revokeCredentialBatch(
+        sudoRequest.id,
+        operationId: 'sudo-revoke',
+        revision: sudoApproved.revision,
+        itemIds: ['b1'],
+      );
+      await expectLater(
+        service.agent.authorizeCredentialBatchInput(
+          device,
+          sudoOperation.privateProof!,
+          sshLoginSession: session,
+          sshLoginRequestId: request.id,
+        ),
+        throwsA(isA<CredentialUseFailure>()),
+      );
       await service.owner.configureSshKnownHosts(
         'replacement',
         knownHostBytes(),

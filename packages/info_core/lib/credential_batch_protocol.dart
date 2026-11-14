@@ -90,12 +90,16 @@ final class CredentialBatchProtocol {
         if (body['includeTrust'] != null && body['includeTrust'] is! bool) {
           throw const CredentialUseFailure('invalid_type');
         }
-        return agent.checkSshSessionGrant(
-          _text(body, 'sessionSecret'),
-          deviceId,
-          _text(body, 'requestId'),
-          includeTrust: body['includeTrust'] == true,
-        );
+        try {
+          return agent.checkSshSessionGrant(
+            _text(body, 'sessionSecret'),
+            deviceId,
+            _text(body, 'requestId'),
+            includeTrust: body['includeTrust'] == true,
+          );
+        } on CredentialUseFailure catch (error) {
+          return {'status': error.code};
+        }
       case '$base/status':
         _shape(body, {'sessionSecret', 'requestId'});
         return agent.credentialBatchStatus(
@@ -160,10 +164,20 @@ final class CredentialBatchProtocol {
           ),
         };
       case '$base/authorize':
-        _shape(body, {'privateProof'});
+        _shape(
+          body,
+          {'privateProof'},
+          {'sshLoginSession', 'sshLoginRequestId'},
+        );
         await agent.authorizeCredentialBatchInput(
           deviceId,
           _text(body, 'privateProof'),
+          sshLoginSession: body.containsKey('sshLoginSession')
+              ? _text(body, 'sshLoginSession')
+              : null,
+          sshLoginRequestId: body.containsKey('sshLoginRequestId')
+              ? _text(body, 'sshLoginRequestId')
+              : null,
         );
         return {'protocolVersion': 3, 'status': 'ok'};
       case '$base/finish':

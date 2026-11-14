@@ -867,7 +867,8 @@ class ChiyoCli {
               : 8,
         'request_unknown' || 'operation_unknown' || 'session_lost' => 7,
         'stale_run' || 'stale_receiver' || 'session_closed' => 8,
-        'busy' => 6,
+        'busy' || 'input_backpressure' when i.path.startsWith('ssh ') => 6,
+        'input_limit' when i.path.startsWith('ssh ') => 2,
         'request_denied' || 'scope_not_approved' || 'grant_expired' => 4,
         _ =>
           status.startsWith('invalid_')

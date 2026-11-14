@@ -1,3 +1,5 @@
+import 'package:info_core/info_core.dart' as core;
+
 import 'workspace_approvals.dart';
 import 'workspace_records.dart';
 import 'workspace_files.dart';
@@ -104,6 +106,9 @@ Map<String, Object?> approvalDetailToJson(
   if (!{1, 2, 3, 4, 5, 6}.contains(version)) {
     throw const FormatException('Invalid approval version');
   }
+  if (d.sshSession != (d.sshTarget != null)) {
+    throw const FormatException('Missing SSH destination');
+  }
   if (d.sshSession && version < 6 ||
       d.credentialBatch && version < 3 ||
       d.programPlan != null && version < 4) {
@@ -140,6 +145,7 @@ Map<String, Object?> approvalDetailToJson(
     },
     if (version >= 6) ...{
       'sshSession': d.sshSession,
+      if (d.sshTarget != null) 'sshTarget': d.sshTarget!.toJson(),
       'batchSupportsSessionValidity': d.batchSupportsSessionValidity,
       'batchSessionBound': d.batchSessionBound,
     },
@@ -197,6 +203,7 @@ WorkspaceApprovalDetail approvalDetailFromJson(
               j['batchSessionBound'] is! bool) ||
       version < 6 &&
           (j.containsKey('sshSession') ||
+              j.containsKey('sshTarget') ||
               j.containsKey('batchSupportsSessionValidity') ||
               j.containsKey('batchSessionBound')) ||
       version >= 2 && !j.containsKey('credential') ||
@@ -265,6 +272,11 @@ WorkspaceApprovalDetail approvalDetailFromJson(
     operationsCursor: version >= 5 ? j['operationsCursor'] as String? : null,
     credentialBatch: version >= 3 && j['credentialBatch'] == true,
     sshSession: version >= 6 && j['sshSession'] == true,
+    sshTarget: version >= 6 && j['sshTarget'] != null
+        ? core.SshSessionTarget.fromJson(
+            Map<String, dynamic>.from(j['sshTarget'] as Map),
+          )
+        : null,
     batchSupportsSessionValidity:
         version >= 6 && j['batchSupportsSessionValidity'] == true,
     batchSessionBound: version >= 6 && j['batchSessionBound'] == true,
@@ -294,7 +306,11 @@ WorkspaceApprovalDetail approvalDetailFromJson(
         ? (j['executions'] as List).map(approvalExecutionFromJson)
         : const [],
   );
-  if ((result.sshSession &&
+  if (result.sshSession != (result.sshTarget != null) ||
+      result.batchOperations.any(
+        (o) => (o.sshContext != null) != result.sshSession,
+      ) ||
+      (result.sshSession &&
           (!result.credentialBatch || result.programPlan != null)) ||
       (!result.sshSession &&
           (result.batchSupportsSessionValidity || result.batchSessionBound)) ||

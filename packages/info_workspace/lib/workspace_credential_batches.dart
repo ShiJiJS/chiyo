@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:info_core/info_core.dart' as core;
+
 /// Content-free owner view of a real batch operation. It never carries a
 /// material proof, password, private process handle or command output.
 class WorkspaceCredentialBatchOperation {
@@ -14,6 +18,7 @@ class WorkspaceCredentialBatchOperation {
     this.attentionAcknowledgedAt,
     this.attentionOperationId,
     this.fromBackup = false,
+    this.sshContext,
     Map<String, String> itemResults = const {},
   }) : itemIds = List.unmodifiable(itemIds),
        itemResults = Map.unmodifiable(itemResults);
@@ -25,6 +30,14 @@ class WorkspaceCredentialBatchOperation {
   final DateTime? finishedAt, attentionAcknowledgedAt;
   final String? errorCode, attentionOperationId;
   final bool fromBackup;
+  final core.SshSessionOperationContext? sshContext;
+  String get operationLabel => switch (sshContext?.kind) {
+    'open' => '使用凭据登录服务器',
+    'run' => '发送远程命令',
+    'input' => '发送交互输入',
+    'credential' => '提供 sudo 密码',
+    _ => '填写凭据',
+  };
   static const states = {
     'checking',
     'dispatched',
@@ -55,29 +68,62 @@ class WorkspaceCredentialBatchOperation {
     'failed' => '填写失败',
     _ => '填写结果未知',
   };
-  String get summaryLabel =>
-      state == 'filled' &&
-          itemResults.isNotEmpty &&
-          itemResults.values.any((result) => result == 'sent')
+  String itemResultLabel(String result) {
+    if (sshContext == null) return resultLabel(result);
+    return switch (result) {
+      'checking' => '正在检查许可',
+      'dispatched' => '正在处理，结果待确认',
+      'sent' || 'filled' => switch (sshContext!.kind) {
+        'open' => '凭据已交给连接程序',
+        'credential' => '密码已发送',
+        'input' => '输入已发送',
+        _ => '命令已发送',
+      },
+      'refused' || 'not_attempted' => '未发送',
+      'failed' => '操作失败',
+      'partial' => '部分完成',
+      _ => '操作结果尚未确认',
+    };
+  }
+
+  String get summaryLabel => sshContext != null
+      ? itemResultLabel(state)
+      : state == 'filled' &&
+            itemResults.isNotEmpty &&
+            itemResults.values.any((result) => result == 'sent')
       ? resultLabel('sent')
       : resultLabel(state);
-  String? get errorLabel => switch (errorCode) {
-    null => null,
-    'destination_changed' || 'form_changed' || 'focus_changed' => '填写目标已变化。',
-    'grant_revoked' ||
-    'credential_disabled' ||
-    'credential_deleted' => '许可或凭据已失效。',
-    'grant_expired' => '使用期限已到。',
-    'credential_version_changed' => '凭据已更新，需要重新申请。',
-    'permission_required' => '这台电脑尚未允许此填写方式。',
-    'browser_unavailable' || 'unavailable_target' => '浏览器或目标密码框不可用。',
-    'unsupported_target' || 'not_password_field' => '此目标不支持密码填写。',
-    'ambiguous_form' || 'ambiguous_field' => '无法确定唯一的表单或密码框。',
-    'fill_unknown' ||
-    'execution_unknown' ||
-    'fill_needs_attention' => '结果尚未确认，请核对目标和原操作。',
-    _ => '本次填写未能完成。',
-  };
+  String? get errorLabel => sshContext != null
+      ? switch (errorCode) {
+          null => null,
+          'grant_revoked' => '许可已撤销，不能继续发送。',
+          'grant_expired' => '使用期限已到。',
+          'credential_version_changed' => '凭据已更新，需要重新申请。',
+          'credential_disabled' || 'credential_deleted' => '凭据已不可用。',
+          'session_lost' || 'session_closed' => 'SSH 连接已断开或关闭。',
+          'stale_run' || 'stale_receiver' => '原命令或密码接收程序已结束，未继续发送。',
+          'execution_unknown' => '尚不能确认原操作的结果，请刷新状态。',
+          _ => '本次操作未能确认完成，请查看原连接的状态。',
+        }
+      : switch (errorCode) {
+          null => null,
+          'destination_changed' ||
+          'form_changed' ||
+          'focus_changed' => '填写目标已变化。',
+          'grant_revoked' ||
+          'credential_disabled' ||
+          'credential_deleted' => '许可或凭据已失效。',
+          'grant_expired' => '使用期限已到。',
+          'credential_version_changed' => '凭据已更新，需要重新申请。',
+          'permission_required' => '这台电脑尚未允许此填写方式。',
+          'browser_unavailable' || 'unavailable_target' => '浏览器或目标密码框不可用。',
+          'unsupported_target' || 'not_password_field' => '此目标不支持密码填写。',
+          'ambiguous_form' || 'ambiguous_field' => '无法确定唯一的表单或密码框。',
+          'fill_unknown' ||
+          'execution_unknown' ||
+          'fill_needs_attention' => '结果尚未确认，请核对目标和原操作。',
+          _ => '本次填写未能完成。',
+        };
   bool get valid =>
       revision > 0 &&
       states.contains(state) &&
@@ -106,6 +152,8 @@ class WorkspaceCredentialBatchOperation {
       operationId == old.operationId &&
       createdAt == old.createdAt &&
       fromBackup == old.fromBackup &&
+      jsonEncode(sshContext?.toJson()) ==
+          jsonEncode(old.sshContext?.toJson()) &&
       itemIds.length == old.itemIds.length &&
       itemIds.every(old.itemIds.contains) &&
       !observedAt.isBefore(old.observedAt) &&
@@ -151,6 +199,7 @@ class WorkspaceCredentialBatchOperation {
         .toIso8601String(),
     'attentionOperationId': attentionOperationId,
     'fromBackup': fromBackup,
+    if (sshContext != null) 'sshContext': sshContext!.toJson(),
   };
   factory WorkspaceCredentialBatchOperation.fromJson(
     Map<String, dynamic> json,
@@ -171,6 +220,7 @@ class WorkspaceCredentialBatchOperation {
             'attentionAcknowledgedAt',
             'attentionOperationId',
             'fromBackup',
+            'sshContext',
           }.contains(k),
         ) ||
         json['status'] != 'ok') {
@@ -209,6 +259,11 @@ class WorkspaceCredentialBatchOperation {
           : id(json['attentionOperationId']),
       errorCode: json['errorCode'] as String?,
       fromBackup: json['fromBackup'] as bool,
+      sshContext: json['sshContext'] == null
+          ? null
+          : core.SshSessionOperationContext.fromJson(
+              Map<String, dynamic>.from(json['sshContext'] as Map),
+            ),
       itemResults: Map<String, String>.from(json['itemResults'] as Map),
     );
     if (!result.valid ||
