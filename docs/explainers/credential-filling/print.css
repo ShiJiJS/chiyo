@@ -1,0 +1,21 @@
+/* Static PDF export only; the interactive HTML does not load this stylesheet. */
+@page { size: A3 portrait; margin: 13mm; }
+html,body{background:#fff!important;scroll-behavior:auto!important}
+body{font-size:16px;line-height:1.7;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page-layout{display:block!important;max-width:none!important;margin:0!important;padding:0!important}
+main{max-width:none!important;width:100%!important;margin:0!important;padding:0!important}
+.intro,.reading{max-width:none!important}
+.intro{padding-top:0}.chapter{break-before:page;margin-top:0!important;padding-top:5px}
+.reading h2{font-size:27px}.reading h3,h3{break-after:avoid}
+p{orphans:3;widows:3}h2,h3,h4,summary{break-after:avoid}
+pre{white-space:pre-wrap!important;overflow-wrap:anywhere!important}
+pre,table,.web-pair,.process-cutaway,.native-channel-map,.native-object-demo,.native-handoff-case,.map-window,.packet-paper,.result-browser{break-inside:avoid}
+.api-step,.step-content,.packet-layout{break-inside:auto}
+details{max-width:none}summary::before{display:none}
+.enter{opacity:1!important;transform:none!important}
+*{animation:none!important;transition:none!important;box-shadow:none!important}
+.pdf-note{padding:16px 20px;background:#e1f3ed;color:#192421!important;border-left:3px solid #007764;margin-top:25px!important}
+.reading-route{break-inside:avoid}.code-line{white-space:pre-wrap!important;min-width:0!important}
+.code-lines{overflow:visible!important}.native-target-list,.native-object-tree{overflow:visible!important;max-height:none!important}
+button{cursor:default!important}.native-selection-controls,.native-demo-controls{display:none!important}
+footer{break-before:avoid}a{word-break:break-word}

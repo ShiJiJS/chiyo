@@ -1,8 +1,8 @@
 <h1 align="center">知予 · chiyo</h1>
 <p align="center"><img src="apps/desktop/assets/branding/chiyo-icon.png" alt="知予图标" width="160" /></p>
-<p align="center">把资料交给知予，让 AI 按需申请，由你决定。</p>
+<p align="center">把资料交给知予，AI 需要什么，你来批准什么。</p>
 <p align="center"><strong>简体中文</strong> · <a href="README.en.md">English</a></p>
-<p align="center"><a href="https://github.com/ShiJiJS/chiyo/releases">下载</a> · <a href="docs/deployment.md">安装与部署</a> · <a href="docs/usage.md">使用指南</a> · <a href="docs/explainers/credential-filling/README.md">填写原理图解</a> · <a href="docs/README.md">文档</a> · <a href="https://github.com/ShiJiJS/chiyo/issues">反馈</a></p>
+<p align="center"><a href="https://github.com/ShiJiJS/chiyo/releases">下载</a> · <a href="docs/deployment.md">安装与部署</a> · <a href="docs/usage.md">使用指南</a> · <a href="docs/explainers/credential-filling/credential-filling.pdf">填写原理图解（PDF）</a> · <a href="docs/README.md">文档</a> · <a href="https://github.com/ShiJiJS/chiyo/issues">反馈</a></p>
 
 知予是一个面向个人的**资料管理与 AI 访问审批工具**。把文档、个人档案、服务器信息和账号凭据整理在一起；AI 需要内容时提出申请，你在 App 中查看用途、选择范围并批准。
 
@@ -56,10 +56,10 @@ CLI 与 Skill 随开发包提供，接入步骤见[AI 接入说明](integrations
 
 - [安装、Docker 部署与连接](docs/deployment.md) · [English](docs/deployment.en.md)
 - [资料、提案、审批和同步的使用方式](docs/usage.md)
-- [Agent 怎样把密码填进网页和应用：交互图解](docs/explainers/credential-filling/README.md)
+- [Agent 怎样把密码填进网页和应用：PDF 图解](docs/explainers/credential-filling/credential-filling.pdf) · [交互版](docs/explainers/credential-filling/README.md)
 - [AI / Codex 接入](integrations/codex/README.md) · [CLI 命令](docs/cli.md)
 - [开发入口与仓库结构](docs/development/README.md) · [完整文档导航](docs/README.md)
 
-交互图解说明 Agent 如何定位密码框、申请使用密码，以及浏览器和 Mac／Windows 原生应用怎样执行填写。下载或克隆仓库后，用浏览器打开 [docs/explainers/credential-filling/index.html](docs/explainers/credential-filling/index.html)，并保留同目录的配套文件；GitHub 上的 HTML 文件显示为源码。
+图解说明 Agent 如何定位密码框、申请使用密码，以及浏览器和 Mac／Windows 原生应用怎样执行填写。PDF 可直接在 GitHub 预览或下载，Mac 与 Windows 的示例均已展开。体验交互版时，下载或克隆仓库，用浏览器打开 [docs/explainers/credential-filling/index.html](docs/explainers/credential-filling/index.html)，并保留同目录的配套文件；GitHub 上的 HTML 文件显示为源码。
 
 欢迎通过 [GitHub Issues](https://github.com/ShiJiJS/chiyo/issues) 反馈问题或提出需求。
