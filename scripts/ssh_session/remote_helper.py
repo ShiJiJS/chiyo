@@ -197,7 +197,6 @@ class Broker:
         for action in list(self.actions.values()):
             if action['runId'] == current:
                 self.end_action(action)
-        emit({'type': 'exited', 'runId': current, 'exitCode': code})
         if self.shell.poll() is None:
             # Freeze the only process allowed to create a new run. Kernel child
             # lists plus subreaper adoption account for ordinary, setsid, and
@@ -217,10 +216,14 @@ class Broker:
                 if leftovers:
                     self.draining = True
                     self.unusable = True
-                    emit({'type': 'unusable', 'reason': 'terminal_descendants_active'})
+
             finally:
                 os.kill(self.shell.pid, signal.SIGCONT)
 
+
+        emit({'type': 'exited', 'runId': current, 'exitCode': code, 'reusable': not self.draining})
+        if self.unusable:
+            emit({'type': 'unusable', 'reason': 'terminal_descendants_active'})
 
     def drain_terminal(self, run_id):
         while True:

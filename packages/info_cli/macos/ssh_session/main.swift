@@ -210,12 +210,15 @@ final class Broker {
   }
 }
 signal(SIGPIPE, SIG_IGN)
+// Establish the observable consumer group before reading the launch gate.
+if setsid() < 0 { exit(70) }
 let broker = Broker()
 do {
   guard let launch = object(line(STDIN_FILENO)) else { exit(64) }
   try broker.start(launch)
   while let value = object(line(STDIN_FILENO)) { broker.consume(value) }
   if broker.process.isRunning { broker.process.terminate() }
+  broker.process.waitUntilExit()
   broker.clean()
 } catch {
   broker.emit(["type": "failure", "code": "transport_unavailable"])
