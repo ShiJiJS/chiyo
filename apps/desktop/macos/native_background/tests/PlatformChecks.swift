@@ -107,7 +107,7 @@ private func focus() -> (pid_t, AXUIElement?) {
       var application = try selected.application(appID)
       if kind == "wrong-file" { application = try MacFocusApplication(executable: application.executable, sha256: String(repeating:"0",count:64)) }
       if kind == "permission-before" { permission = false }
-      let action = ["missing-identifiers":"missing-identifiers", "language":"language", "mixed-web":"mixed-web", "mixed-wk", "partial-disabled":"disable", "partial-readonly":"readonly", "no-password":"plain", "all-disabled":"disable-all", "all-readonly":"readonly-all", "web-only":"web-only", "wk-only":"wk-only", "ambiguous":"duplicate"][kind]
+      let action = ["missing-identifiers":"missing-identifiers", "language":"language", "mixed-web":"mixed-web", "mixed-wk":"mixed-wk", "partial-disabled":"disable", "partial-readonly":"readonly", "no-password":"plain", "all-disabled":"disable-all", "all-readonly":"readonly-all", "web-only":"web-only", "wk-only":"wk-only", "ambiguous":"duplicate"][kind]
       if let action { try command("target", action); pump(0.25) }
       try save("ax-metadata-"+kind+".json",metadata(target!.processIdentifier))
       let controller = MacNativeBackgroundController(environment:selected,connected:{true})
