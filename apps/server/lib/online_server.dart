@@ -1017,7 +1017,7 @@ final class OnlineServer {
               200,
               approvalDetailToJson(
                 detail,
-                version: detail.credentialBatch ? 5 : 2,
+                version: detail.sshSession ? 6 : detail.credentialBatch ? 5 : 2,
               ),
             );
           } else if (path.length == 4 && request.method == 'GET') {
