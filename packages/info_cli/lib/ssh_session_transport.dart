@@ -13,9 +13,8 @@ class SshLoginChallenge {
   final int processId;
 }
 
-typedef SshLoginChallengeHandler = Future<List<int>?> Function(
-  SshLoginChallenge challenge,
-);
+typedef SshLoginChallengeHandler =
+    Future<List<int>?> Function(SshLoginChallenge challenge);
 
 class SshTransportLaunch {
   const SshTransportLaunch({
@@ -23,12 +22,18 @@ class SshTransportLaunch {
     required this.arguments,
     required this.environment,
     required this.onLoginChallenge,
+    this.onProcessCreated,
   });
   final String executable;
   final List<String> arguments;
+
   /// Nonsecret environment only. The authentication response uses private IPC.
   final Map<String, String> environment;
   final SshLoginChallengeHandler onLoginChallenge;
+
+  /// Register the native broker before it may start SSH or consume key files.
+  final Future<void> Function(int processId, String processIdentity)?
+  onProcessCreated;
 }
 
 abstract interface class SshTransportLauncher {

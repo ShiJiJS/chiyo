@@ -127,7 +127,9 @@ extension _CredentialBatchService on InformationService {
         )
       : operation;
   String _batchDestinationKey(CredentialBatchDestination destination) =>
-      destination.native != null
+      destination.ssh != null
+      ? _useFingerprint(destination.toJson())
+      : destination.native != null
       ? _useFingerprint({
           'via': 'native',
           'helper': destination.native!.helperInstanceId,
@@ -367,6 +369,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
     String requestId, {
     required String operationId,
     Iterable<String>? itemIds,
+    SshSessionOperationContext? sshContext,
   }) => _service.owner._serialize(() async {
     _batchOperationId(operationId);
     final r = _service._sessionBatch(session, deviceId, requestId);
@@ -374,9 +377,18 @@ extension CredentialBatchAgentAccess on AgentAccess {
       throw const CredentialUseFailure('unsupported_receiver');
     }
     final selected = _service._selectedBatchItems(r, itemIds);
+    final ssh = selected.length == 1 ? selected.single.destination.ssh : null;
+    if ((sshContext != null) != (ssh != null) ||
+        sshContext != null &&
+            (sshContext.kind == 'credential'
+                ? ssh!.credentialUse != 'sudo'
+                : ssh!.credentialUse != 'login')) {
+      throw const CredentialUseFailure('invalid_plan');
+    }
     final ids = selected.map((i) => i.id).toList()..sort();
     final fingerprint = _useFingerprint({
       'requestId': r.id,
+      if (sshContext != null) 'sshContext': sshContext.toJson(),
       'itemIds': ids,
       'destinations': [for (final item in selected) item.destination.toJson()],
     });
@@ -411,7 +423,10 @@ extension CredentialBatchAgentAccess on AgentAccess {
     final targets = selected
         .map((i) => _service._batchDestinationKey(i.destination))
         .toSet();
-    for (final active in _service._batchRepository.credentialBatchOperations) {
+    for (final active
+        in sshContext != null
+            ? <CredentialBatchOperation>[]
+            : _service._batchRepository.credentialBatchOperations) {
       if (active.attentionAcknowledgedAt != null) continue;
       final observedState = _service._batchOperationForDisplay(active).state;
       if (!{
@@ -442,6 +457,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
     }
     final now = _batchTime(_service._clock());
     final operation = CredentialBatchOperation(
+      sshContext: sshContext,
       operationId: operationId,
       requestId: r.id,
       sessionBinding: r.sessionBinding,
@@ -490,7 +506,8 @@ extension CredentialBatchAgentAccess on AgentAccess {
     Map<String, CredentialBatchDestination> observations,
   ) => _service.owner._serialize(() async {
     final (_, r, operation) = _service._batchProof(deviceId, proof);
-    if (operation.materialClaimed ||
+    if (operation.sshContext?.requiresMaterial == false ||
+        operation.materialClaimed ||
         operation.state != CredentialBatchOperationState.checking) {
       throw const CredentialUseFailure('execution_unknown');
     }
@@ -533,7 +550,8 @@ extension CredentialBatchAgentAccess on AgentAccess {
   Future<void> authorizeCredentialBatchInput(String deviceId, String proof) =>
       _service.owner._serialize(() async {
         final (_, r, operation) = _service._batchProof(deviceId, proof);
-        if (!operation.materialClaimed) {
+        if (!operation.materialClaimed &&
+            operation.sshContext?.requiresMaterial != false) {
           throw const CredentialUseFailure('material_prepare_failed');
         }
         void validate() {

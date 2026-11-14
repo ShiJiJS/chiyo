@@ -18,6 +18,15 @@ void main() {
   final python =
       Platform.environment['D7_WINDOWS_SSH_PYTHON'] ??
       '$root/build/ssh-session/qa-venv/Scripts/python.exe';
+  if (!File(helper).existsSync() || !File(python).existsSync()) {
+    test(
+      'Windows SSH native acceptance',
+      () {},
+      skip:
+          'Build native helper and isolated QA Python first; see windows/ssh_session/README.md',
+    );
+    return;
+  }
   final fixtureDirectory = Directory(
     '$root/build/ssh-session/fixture-${DateTime.now().microsecondsSinceEpoch}',
   );
@@ -62,8 +71,9 @@ void main() {
   tearDownAll(() async {
     await fixture.stdin.close();
     expect(await fixture.exitCode.timeout(const Duration(seconds: 8)), 0);
-    if (await fixtureDirectory.exists())
+    if (await fixtureDirectory.exists()) {
       await fixtureDirectory.delete(recursive: true);
+    }
   });
 
   Future<SshTransportProcess> start({
@@ -150,7 +160,7 @@ void main() {
     'actual key authentication and remote nonzero exit preserve result',
     () async {
       final result = await collect(await start(command: 'nonzero'));
-    expect(result.code, 7, reason: result.diagnostics);
+      expect(result.code, 7, reason: result.diagnostics);
       expect(result.output, 'fixture-output\n');
     },
   );
@@ -231,4 +241,60 @@ void main() {
     expect(observed.output, isEmpty);
     expect(challenges, 1);
   });
+
+  test('SSH stdin backpressure cannot block a pending ASKPASS reply', () async {
+    final requested = Completer<void>();
+    final reply = Completer<List<int>?>();
+    final transport = await start(
+      password: true,
+      command: 'echo',
+      challenge: (_) {
+        requested.complete();
+        return reply.future;
+      },
+    );
+    final result = collect(transport);
+    await requested.future.timeout(const Duration(seconds: 10));
+    final payload = 'bootstrap-data' * 12000;
+    await transport.send(utf8.encode(payload));
+    reply.complete(utf8.encode('synthetic-login-password'));
+    await transport.closeInput();
+    final observed = await result;
+    expect(observed.code, 0, reason: observed.diagnostics);
+    expect(observed.output, 'ready\n$payload');
+  });
+
+  test(
+    'abnormal broker termination removes its owned Windows OpenSSH job',
+    () async {
+      var sshPid = 0;
+      final transport = await start(
+        password: true,
+        command: 'wait',
+        challenge: (challenge) async {
+          sshPid = challenge.processId;
+          return utf8.encode('synthetic-login-password');
+        },
+      );
+      final ready = Completer<void>();
+      transport.output.listen((bytes) {
+        if (!ready.isCompleted) ready.complete();
+      });
+      unawaited(transport.diagnostics.drain<void>());
+      await ready.future.timeout(const Duration(seconds: 10));
+      expect(sshPid, greaterThan(0));
+      await transport.terminate();
+      final observed = await Process.run('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        'if (Get-Process -Id $sshPid -ErrorAction SilentlyContinue) { exit 1 } else { exit 0 }',
+      ]);
+      expect(
+        observed.exitCode,
+        0,
+        reason: 'Owned SSH child must end after its broker is gone',
+      );
+    },
+  );
 }

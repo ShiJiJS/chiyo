@@ -14,6 +14,8 @@ final class CredentialBatchProtocol {
     '$base/status',
     '$base/begin',
     '$base/operation',
+    '$base/ssh-check',
+    '$base/ssh-reuse',
   };
   static const proofPaths = {
     '$base/material',
@@ -69,6 +71,31 @@ final class CredentialBatchProtocol {
           operationId: _text(body, 'operationId'),
         );
         return agent.credentialBatchStatus(session, deviceId, request.id);
+      case '$base/ssh-reuse':
+        _shape(body, {'sessionSecret', 'credentialId', 'version', 'target'});
+        if (body['version'] is! int || body['target'] is! Map) {
+          throw const CredentialUseFailure('invalid_type');
+        }
+        return agent.reusableSshSessionGrant(
+          _text(body, 'sessionSecret'),
+          deviceId,
+          _text(body, 'credentialId'),
+          body['version'] as int,
+          SshSessionTarget.fromJson(
+            Map<String, dynamic>.from(body['target'] as Map),
+          ),
+        );
+      case '$base/ssh-check':
+        _shape(body, {'sessionSecret', 'requestId'}, {'includeTrust'});
+        if (body['includeTrust'] != null && body['includeTrust'] is! bool) {
+          throw const CredentialUseFailure('invalid_type');
+        }
+        return agent.checkSshSessionGrant(
+          _text(body, 'sessionSecret'),
+          deviceId,
+          _text(body, 'requestId'),
+          includeTrust: body['includeTrust'] == true,
+        );
       case '$base/status':
         _shape(body, {'sessionSecret', 'requestId'});
         return agent.credentialBatchStatus(
@@ -80,7 +107,7 @@ final class CredentialBatchProtocol {
         _shape(
           body,
           {'sessionSecret', 'requestId', 'operationId'},
-          {'itemIds'},
+          {'itemIds', 'sshContext'},
         );
         final claim = await agent.beginCredentialBatchOperation(
           _text(body, 'sessionSecret'),
@@ -88,6 +115,11 @@ final class CredentialBatchProtocol {
           _text(body, 'requestId'),
           operationId: _text(body, 'operationId'),
           itemIds: body.containsKey('itemIds') ? _ids(body['itemIds']) : null,
+          sshContext: body['sshContext'] == null
+              ? null
+              : SshSessionOperationContext.fromJson(
+                  Map<String, dynamic>.from(body['sshContext'] as Map),
+                ),
         );
         return {
           ...claim.toPublicJson(),

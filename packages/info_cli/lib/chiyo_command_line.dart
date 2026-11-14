@@ -262,6 +262,80 @@ class ChiyoCommandLine {
     _page(operations);
     _command('operations show', '查询原操作的结果，不执行。', argument: 'ID');
     _command('operations retry', '恢复原操作；无法确认已发送结果时不再次填写。', argument: 'ID');
+    _command('ssh', '后台持续 SSH；同一 Shell 保留 cd/export，支持普通输入和受管 sudo。');
+    _command('ssh capabilities', '查看本机后台及远端所需能力，不发起认证。');
+    final sshRequest = _command('ssh request', '申请 SSH 登录凭据；批准不代表已经连接。');
+    _credential(sshRequest);
+    _operation(sshRequest);
+    for (final name in ['host', 'user']) {
+      sshRequest.addOption(name);
+    }
+    sshRequest.addOption('port', defaultsTo: '22');
+    sshRequest.addOption('auth', allowed: ['password', 'publickey']);
+    sshRequest.addOption(
+      'validity',
+      allowed: ['limited', 'session'],
+      defaultsTo: 'session',
+    );
+    final sshOpen = _command('ssh open', '打开获批连接；同一操作编号只查询原结果，不重新连接。');
+    _request(sshOpen);
+    _operation(sshOpen);
+    for (final action in [
+      'run',
+      'input',
+      'status',
+      'output',
+      'interrupt',
+      'close',
+    ]) {
+      final parser = _command('ssh $action', switch (action) {
+        'run' => '在原 Shell 执行命令；busy 时拒绝，不隐式排队。',
+        'input' => '向指定运行发送普通文本或按键；结束后的输入不能落到下一运行。',
+        'output' => '按游标查询有界输出；gap 表示旧片段已丢弃。',
+        'interrupt' => '中断当前运行，随后查询实际退出状态。',
+        'close' => '停止新命令并自然关闭；--force 明确断开，未完成结果可能未知。',
+        _ => '查询会话、运行和可信凭据接收状态。',
+      });
+      parser.addOption('session', help: 'ssh open 返回的 sessionId；仅编号不授予控制权。');
+      if (action != 'close' && action != 'run') {
+        parser.addOption('run', help: '原 runId。');
+      }
+      if (action == 'run') {
+        _operation(parser);
+        parser.addOption('command');
+      }
+      if (action == 'input') {
+        _operation(parser);
+        parser.addOption('text');
+        parser.addFlag('enter', negatable: false);
+        parser.addOption('key', allowed: ['enter', 'tab', 'eof']);
+      }
+      if (action == 'output') parser.addOption('cursor', defaultsTo: '0');
+      if (action == 'close') parser.addFlag('force', negatable: false);
+    }
+    _command('ssh credential', '当前运行的受管 sudo 密码，和 SSH 登录分别批准。');
+    final sudoRequest = _command(
+      'ssh credential request',
+      '绑定当前运行与可信 sudo 接收动作申请密码；普通 Password 提示不接收凭据。',
+    );
+    _credential(sudoRequest);
+    _operation(sudoRequest);
+    sudoRequest.addOption(
+      'validity',
+      allowed: ['limited', 'session'],
+      defaultsTo: 'session',
+    );
+    final sudoUse = _command(
+      'ssh credential use',
+      '向原 sudo ASKPASS 接收动作交付获批密码；结果不含秘密。',
+    );
+    _request(sudoUse);
+    _operation(sudoUse);
+    for (final parser in [sudoRequest, sudoUse]) {
+      for (final name in ['session', 'run', 'action']) {
+        parser.addOption(name);
+      }
+    }
     final doctor = _command('doctor', '检查连接和当前电脑能力；不弹权限、不申请资料、不执行填写。');
     doctor.addOption(
       'via',

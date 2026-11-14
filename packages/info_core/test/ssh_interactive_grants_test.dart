@@ -96,6 +96,46 @@ void main() {
         ),
         throwsA(isA<CredentialUseFailure>()),
       );
+      final context = SshSessionOperationContext(
+        kind: 'run',
+        sessionId: 'ssh-test',
+        runId: 'run-one',
+        digest: 'sha256:${'a' * 64}',
+        byteLength: 9,
+      );
+      final run = await service.agent.beginCredentialBatchOperation(
+        session,
+        device,
+        request.id,
+        operationId: 'run-one',
+        sshContext: context,
+      );
+      await expectLater(
+        service.agent.claimCredentialBatchMaterials(device, run.privateProof!, {
+          'b1': request.items.single.destination,
+        }),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      await service.agent.authorizeCredentialBatchInput(
+        device,
+        run.privateProof!,
+      );
+      await service.agent.finishCredentialBatchOperation(
+        device,
+        run.privateProof!,
+        CredentialBatchOperationState.filled,
+        itemResults: {'b1': 'sent'},
+      );
+      final duplicate = await service.agent.beginCredentialBatchOperation(
+        session,
+        device,
+        request.id,
+        operationId: 'run-one',
+        sshContext: context,
+      );
+      expect(duplicate.privateProof, isNull);
+      expect(duplicate.operation.materialClaimed, isFalse);
+      expect(duplicate.operation.sshContext!.kind, 'run');
       await service.owner.configureSshKnownHosts(
         'replacement',
         knownHostBytes(),

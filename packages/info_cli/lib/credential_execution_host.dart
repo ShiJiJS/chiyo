@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:info_core/info_core.dart';
 import 'agent_client.dart';
+import 'ssh_session_host.dart';
 import 'package:info_remote/agent_connection.dart';
 
 /// A resident owner of CLI executions for one-command adapters. It stores only
@@ -28,6 +29,7 @@ class CredentialExecutionHost {
   Timer? _timer;
   int _reservations = 0;
   bool _closed = false;
+  SshSessionHost? _ssh;
 
   AgentClient _client(String session) => AgentClient(
     port,
@@ -40,10 +42,12 @@ class CredentialExecutionHost {
 
   /// Inspection does not cancel or forget an active operation.
   bool get canStop =>
-      _reservations == 0 && _entries.values.every((e) => e.finishedAt != null);
+      (_ssh?.canStop ?? true) &&
+      _reservations == 0 &&
+      _entries.values.every((e) => e.finishedAt != null);
   bool get isIdle {
     _prune();
-    return _reservations == 0 && _entries.isEmpty;
+    return (_ssh?.isIdle ?? true) && _reservations == 0 && _entries.isEmpty;
   }
 
   void _remove(String id) {
@@ -81,6 +85,18 @@ class CredentialExecutionHost {
           'service_unavailable',
         ).toJson(protocolVersion: input['protocolVersion'] == 2 ? 2 : 1),
       );
+    }
+    if ((input['command'] as String? ?? '').startsWith('ssh-')) {
+      if (connection == null || deviceFileStateDirectory == null) {
+        return {'status': 'service_unavailable'};
+      }
+      _ssh ??= SshSessionHost(
+        connection!,
+        Directory(
+          '${deviceFileStateDirectory!.absolute.parent.path}/ssh-sessions',
+        ),
+      );
+      return _ssh!.execute(session, input);
     }
     _prune();
     final command = input['command'];
@@ -210,6 +226,7 @@ class CredentialExecutionHost {
   void close() {
     if (_closed) return;
     _closed = true;
+    if (_ssh != null) unawaited(_ssh!.close());
     _timer?.cancel();
     _timer = null;
     for (final entry in _entries.values) {

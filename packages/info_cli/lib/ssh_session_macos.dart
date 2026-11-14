@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:info_core/info_core.dart';
 
 import 'ssh_session_transport.dart';
 
@@ -17,6 +18,19 @@ class MacOsSshTransportLauncher implements SshTransportLauncher {
       includeParentEnvironment: false,
       environment: {'PATH': '/usr/bin:/bin', 'TMPDIR': '/tmp'},
     );
+    final identity = CredentialProcessIdentity.capture(process.pid);
+    try {
+      if (identity == null) {
+        throw const SshTransportFailure('process_identity_unavailable');
+      }
+      await launch.onProcessCreated?.call(process.pid, identity.value);
+    } on Object {
+      process.kill();
+      await process.stdin.close();
+      rethrow;
+    } finally {
+      identity?.close();
+    }
     final result = _MacProcess(process, launch);
     result.initialize();
     await result.write({
@@ -79,17 +93,20 @@ class _MacProcess implements SshTransportProcess {
           onDone: () async {
             final code = await process.exitCode;
             _ended = true;
-            if (!started.isCompleted)
+            if (!started.isCompleted) {
               started.completeError(
                 const SshTransportFailure('transport_unavailable'),
               );
+            }
             await _output.close();
             await _diagnostics.close();
             if (!_exit.isCompleted) _exit.complete(_reportedExit ?? code);
           },
         );
     // Native diagnostics never bypass the common secret filter.
-    process.stderr.listen(_diagnostics.add, onError: (_) {});
+    process.stderr.listen((bytes) {
+      if (!_ended) _diagnostics.add(bytes);
+    }, onError: (_) {});
   }
 
   void _fail() {
