@@ -312,14 +312,9 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
 
     <div class="reading connection-entry"><h3>把这个控件对应的目标编号返回 Agent</h3><p>辅助程序保存刚才查到的应用、窗口和具体控件对象，为它生成一个目标编号。Agent 得到编号及可读说明，用窗口标题和字段标签选择需要的那个框。</p></div>
     <figure class="native-object-map">
-      <div class="native-object-window"><div class="native-title" x-text="os==='mac'?'归档实用工具 · 目标窗口':'7-Zip · 目标窗口'"></div><div class="native-body"><p>本次任务的压缩文件</p><b>NativeBackgroundProof.zip</b><label>密码</label><div class="native-field object-target"><span>尚未填写</span><code x-text="os==='mac'?'AXIdentifier: _NS:280':'密码控件 · 字段标签与 AutomationId'"></code></div><p class="caption">窗口与控件均为示意</p></div></div>
+      <div class="native-object-window"><div class="native-title" x-text="os==='mac'?'归档实用工具 · 目标窗口':'7-Zip · 目标窗口'"></div><div class="native-body"><p>本次任务的压缩文件</p><b>NativeBackgroundProof.zip</b><label>密码</label><div class="native-field object-target"><span>尚未填写</span><code x-text="os==='mac'?'AXIdentifier: _NS:280':'AutomationId: 120'"></code></div><p class="caption">窗口与控件均为示意</p></div></div>
       <div class="native-object-link"><span>辅助程序保存的对应关系</span><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code><b aria-hidden="true">→</b><p>这一运行进程<br>这一窗口对象<br><strong>这一密码控件对象 field</strong></p></div>
-      <div class="native-object-result"><b>Agent 收到的目标描述</b><pre><code>{
-  "targetId": "tgt_W8Jk2Nx6fR9qP4vL7cY1sA",
-  "windowTitle": "本次压缩文件的密码窗口",
-  "fieldLabel": "密码",
-  "controlKind": "…"
-}</code></pre><p>这里节选返回字段，说明文字随真实应用变化。编号由辅助程序生成，Agent 不自己编造。</p></div>
+      <div class="native-object-result"><b>Agent 收到的目标描述</b><pre><code x-text="nativeTargetPreview"></code></pre><p>这里节选返回字段，窗口说明随真实应用变化。编号由辅助程序生成，Agent 不自己编造。</p></div>
       <figcaption>目标编号让 Agent 在下一条命令中指定这个框；真正的系统控件对象一直保存在本机辅助程序中。</figcaption>
     </figure>
     <p class="caption">多个密码框必须能通过窗口、标签和控件标识等说明区分。如果返回的说明无法分辨目标，就停止并重新确认，不能仅靠随机编号猜一个。</p>

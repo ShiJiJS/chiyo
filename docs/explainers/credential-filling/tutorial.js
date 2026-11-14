@@ -66,6 +66,11 @@ document.addEventListener('alpine:init', () => {
       if(this.delivery==='sent')return '向原密码控件设置了 hello；用户当前窗口和输入焦点保持不变。这是教学模拟，业务结果仍需另查。';
       return '尚未写值。用户当前使用哪个窗口，不改变保存的目标对象。';
     },
+    get nativeTargetPreview(){return JSON.stringify({
+      targetId:'tgt_W8Jk2Nx6fR9qP4vL7cY1sA',
+      windowTitle:'本次压缩文件的密码窗口',
+      fieldLabel:this.os==='mac'?'密码 [AXIdentifier=_NS:280]':'密码 [AutomationId=120]'
+    },null,2);},
     get nativeDiscoverCommand(){return this.os==='mac'?`chiyo fill targets --via native \\\n  --app com.apple.archiveutility --json`:`chiyo fill targets --via native --app "C:\\Program Files\\7-Zip\\7zFM.exe" --json`;},
     get queryCode(){return this.os==='mac'?`// Swift：pid 来自指定应用的运行进程
 let app = AXUIElementCreateApplication(pid)
