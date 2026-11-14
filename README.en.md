@@ -45,7 +45,7 @@ Compare the original information with the AI's proposed changes before saving th
 3. Add information manually, or configure the bundled CLI and Skill using the matching integration instructions so the AI can submit proposals.
 4. Review proposals and fill in missing passwords in the App. Handle AI access requests under **Access approvals**.
 
-The source supports **macOS 14+ on Apple Silicon** and **Windows x64**. This is a development preview. The release page currently offers an earlier Mac package; Windows adaptation and the latest features are in `main` and can be [built from source](docs/development/README.md). Check each release's actual attachments and manifest for its version and platform. The current App interface is in Chinese.
+[v0.5.0](https://github.com/ShiJiJS/chiyo/releases/tag/v0.5.0) provides packages for **macOS 14+ on Apple Silicon**, **Windows x64**, and a **Linux amd64 Docker server**. Desktop packages include the matching CLI. Verify the SHA-256 files and check the manifest for the source commit and platform. The Mac package is locally signed and not notarized. Other architectures can be [built from source](docs/development/README.md). The current App interface is in Chinese.
 
 ### Two modes
 

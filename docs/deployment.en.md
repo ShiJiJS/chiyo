@@ -6,7 +6,7 @@ The desktop App works independently. Deploy a server only when you want NAS sync
 
 ## Install the desktop App
 
-Choose an attachment actually available for your platform on [Releases](https://github.com/ShiJiJS/chiyo/releases) and verify its SHA-256. Packages may lag behind the source: Windows adaptation and the latest features are in `main`, while the release page currently offers an earlier Mac development package. To use the latest source, follow the [development guide (中文)](development/README.md).
+Choose the matching platform attachment on [Releases](https://github.com/ShiJiJS/chiyo/releases) and verify its SHA-256. v0.5.0 provides Mac ARM64, Windows x64, and a Linux amd64 Docker server, each recording its source commit. For other architectures, follow the [development guide (中文)](development/README.md).
 
 | Platform | Installation |
 | --- | --- |

@@ -6,7 +6,7 @@ App 可以独立使用；只有需要 NAS 持续接收 AI 申请或同步资料�
 
 ## 安装桌面 App
 
-从 [Releases](https://github.com/ShiJiJS/chiyo/releases) 选择实际提供的平台附件，核对同目录的 SHA-256。源码与下载包可能不同步：当前 Windows 适配和最新功能已合入 `main`，发布页仍为较早的 Mac 开发包。需要最新版本时按[开发指南](development/README.md)构建。
+从 [Releases](https://github.com/ShiJiJS/chiyo/releases) 选择对应平台的附件，核对同目录的 SHA-256。v0.5.0 提供 Mac ARM64、Windows x64 及 Linux amd64 Docker 服务端，均记录源码提交。其他架构按[开发指南](development/README.md)构建。
 
 | 平台 | 安装方式 |
 | --- | --- |

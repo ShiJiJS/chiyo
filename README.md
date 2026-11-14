@@ -45,7 +45,7 @@ AI 提交修改后，先对照原内容和拟修改内容，再决定是否保�
 3. 手动添加资料，或按同版本接入说明让 AI 使用随包的 CLI 和 Skill 提交提案。
 4. 在 App 中核对提案、补填密码；AI 申请使用资料时，到「访问审批」处理。
 
-源码支持 **macOS 14+ / Apple Silicon** 和 **Windows x64**。当前为开发预览：发布页目前提供较早的 Mac 包，Windows 适配和最新功能已合入 `main`，可按[开发指南](docs/development/README.md)构建。下载包的实际版本和平台以附件及其 manifest 为准。
+[v0.5.0](https://github.com/ShiJiJS/chiyo/releases/tag/v0.5.0) 提供 **macOS 14+ / Apple Silicon**、**Windows x64** 和 **Linux amd64 Docker 服务端**安装包。桌面包包含同版本 CLI；下载后核对 SHA-256，源码提交与平台见包内 manifest。Mac 包使用本机签名，尚未公证；其他架构可按[开发指南](docs/development/README.md)构建。
 
 ### 两种模式
 
