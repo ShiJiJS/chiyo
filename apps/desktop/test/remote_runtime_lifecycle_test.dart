@@ -90,10 +90,15 @@ void main() {
       final fixture = await DeviceCredentialFixture.create();
       final platform = NativeDesktopFixture();
       final entered = Completer<void>(), gate = Completer<void>();
+      final releasing = Completer<void>();
       late RemoteWorkspaceRuntime runtime;
       final desktop = OnlineDesktopRuntime(
         platform: platform,
-        beforeExit: () => runtime.release(),
+        beforeExit: () {
+          final release = runtime.release();
+          if (!releasing.isCompleted) releasing.complete();
+          return release;
+        },
         onResume: () async {},
       );
       final directory = '${fixture.root.path}/runtime-client';
@@ -125,6 +130,11 @@ void main() {
         );
         await _lockAvailable(lock, false);
         quit = desktop.quit();
+        await releasing.future;
+        await expectLater(
+          runtime.status().timeout(const Duration(seconds: 2)),
+          throwsA(isA<WorkspaceFailure>()),
+        );
         // The child probe is an independent I/O turn, not a timing allowance.
         // The blocked read must retain ownership and delay native termination.
         await _lockAvailable(lock, false);

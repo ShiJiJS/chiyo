@@ -8,9 +8,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:info_cli/chiyo_context.dart';
-import 'package:info_cli/private_device_state.dart';
 import 'package:info_core/info_core.dart';
+import 'package:info_desktop/desktop_runtime.dart';
 import 'package:info_desktop/storage_desktop_launcher.dart';
+import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_remote/automatic_connection.dart';
 import 'package:info_remote/connection_profile.dart';
 import 'package:info_workspace/approval_transport.dart';
@@ -22,6 +23,26 @@ import '../test/support/online_ui_harness.dart';
 import 'support/native_semantics_lifetime.dart';
 
 class _RealHttp extends HttpOverrides {}
+
+/// Retains the native platform and production helper factories. Only the final
+/// OS process termination is deferred so Flutter can return the test receipt.
+class _TestAppPlatform extends NativeDesktopPlatform {
+  Future<void> Function(DesktopEvent)? events;
+  bool terminationReached = false;
+
+  @override
+  Future<DesktopAvailability> initialize(
+    Future<void> Function(DesktopEvent) onEvent,
+  ) {
+    events = onEvent;
+    return super.initialize(onEvent);
+  }
+
+  @override
+  Future<void> terminate() async {
+    terminationReached = true;
+  }
+}
 
 /// Test-only receiver protocol; replies contain descriptions and booleans only.
 class _Receiver {
@@ -115,7 +136,8 @@ void main() {
 
       DeviceCredentialFixture? fixture;
       _Receiver? receiver;
-      File? hostEndpoint;
+      final platform = _TestAppPlatform();
+      var mounted = false;
       try {
         expect(
           cli.isNotEmpty &&
@@ -180,9 +202,6 @@ void main() {
         final f = await ui.resolve(DeviceCredentialFixture.create);
         fixture = f;
         final appDirectory = Directory('${f.root.path}/native-app');
-        hostEndpoint = File(
-          '${appDirectory.path}/credential-batch-host/endpoint.json',
-        );
         await ui.resolve(
           () => AutomaticConnectionStore(appDirectory.path).publish(
             ConnectionProfile(
@@ -235,14 +254,17 @@ void main() {
         await tester.pumpWidget(
           StorageDesktopLauncher(
             profiles: PrivateConnectionProfileStore(appDirectory.path),
+            platform: platform,
             localBuilder: (_) => const SizedBox.shrink(),
           ),
         );
+        mounted = true;
         await ui.until(
           () => File(
             '${appDirectory.path}/credential-batch-host/endpoint.json',
           ).existsSync(),
         );
+        await ui.until(() => find.byType(WorkspaceApp).evaluate().length == 1);
         final environment = Map<String, String>.from(Platform.environment)
           ..removeWhere(
             (key, _) => key.startsWith('CHIYO_') || key.startsWith('CODEX_'),
@@ -441,21 +463,18 @@ void main() {
         });
       } finally {
         try {
-          await tester.pumpWidget(const SizedBox.shrink());
-          final endpoint = hostEndpoint;
-          if (endpoint != null) {
-            await ui.resolve(() async {
-              for (var i = 0; i < 150; i++) {
-                if (!await endpoint.exists()) break;
-                final state = await readPrivateDeviceState(endpoint);
-                if (state?['phase'] == 'closed') break;
-                await Future<void>.delayed(const Duration(milliseconds: 30));
-              }
-            });
+          if (mounted) {
+            await ui.until(() => platform.events != null);
+            // Normal quit joins fill Hosts and the online source's journals.
+            // A closed locator is not proof that their handles have closed.
+            await ui.resolve(() => platform.events!(DesktopEvent.quit));
+            expect(platform.terminationReached, true);
           }
+          await tester.pumpWidget(const SizedBox.shrink());
           if (receiver != null) await ui.resolve(receiver.close);
         } finally {
           try {
+            await tester.pumpWidget(const SizedBox.shrink());
             if (fixture != null) await ui.resolve(fixture.dispose);
           } finally {
             try {
