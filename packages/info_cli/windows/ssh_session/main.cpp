@@ -30,6 +30,12 @@ struct Handle {
   Handle(const Handle&) = delete;
   Handle& operator=(const Handle&) = delete;
 };
+struct EnvironmentKeyLess {
+  bool operator()(const std::wstring& left, const std::wstring& right) const {
+    return CompareStringOrdinal(left.data(), static_cast<int>(left.size()), right.data(),
+        static_cast<int>(right.size()), TRUE) == CSTR_LESS_THAN;
+  }
+};
 bool Read(HANDLE h, BYTE* data, DWORD size) {
   while (size) {
     DWORD n = 0;
@@ -132,6 +138,15 @@ int Askpass(const std::wstring& prompt) {
   const auto name = Env(L"CHIYO_SSH_ASKPASS_PIPE");
   if (name.rfind(L"\\\\.\\pipe\\chiyo-ssh-", 0) != 0) return 1;
   Handle pipe(CreateFileW(name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr));
+  ULONG serverPid = 0;
+  const DWORD sshPid = Parent(GetCurrentProcessId());
+  GetNamedPipeServerProcessId(pipe.value, &serverPid);
+  Handle server(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, FALSE, serverPid));
+  Handle ssh(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, FALSE, sshPid));
+  if (!serverPid || Parent(sshPid) != serverPid ||
+      WaitForSingleObject(server.value, 0) != WAIT_TIMEOUT || WaitForSingleObject(ssh.value, 0) != WAIT_TIMEOUT ||
+      !Identity(server.value) || Identity(server.value) > Identity(ssh.value) ||
+      !SameFile(Image(server.value), Image(GetCurrentProcess()))) return 1;
   const std::string category = Utf8(Category(prompt));
   if (!WriteFrame(pipe.value, reinterpret_cast<const BYTE*>(category.data()), static_cast<DWORD>(category.size()))) return 1;
   Bytes reply;
@@ -183,6 +198,7 @@ void Authentication(std::shared_ptr<State> state) {
       else {
         used = true;
         const std::string id = Utf8(Random());
+        if (id.empty()) { state->Error("ssh_challenge_identity_failed"); break; }
         JsonObject challenge;
         challenge.SetNamedValue(L"challengeId", JsonValue::CreateStringValue(Wide(id)));
         challenge.SetNamedValue(L"processId", JsonValue::CreateNumberValue(state->pid));
@@ -208,8 +224,27 @@ void Authentication(std::shared_ptr<State> state) {
   }
 }
 void Input(std::shared_ptr<State> state) {
+  // Dart's stdio pipe can be opened for overlapped I/O by its creator. Polling
+  // availability avoids an uncancellable synchronous read during job shutdown.
+  auto read = [&](BYTE* bytes, DWORD size) {
+    while (size && !state->stopped) {
+      DWORD available = 0, received = 0;
+      if (!PeekNamedPipe(GetStdHandle(STD_INPUT_HANDLE), nullptr, 0, nullptr, &available, nullptr)) return false;
+      if (!available) { Sleep(2); continue; }
+      DWORD count = (std::min)(available, size);
+      if (!ReadFile(GetStdHandle(STD_INPUT_HANDLE), bytes, count, &received, nullptr) || !received) return false;
+      bytes += received; size -= received;
+    }
+    return size == 0;
+  };
   Bytes frame;
-  while (!state->stopped && ReadFrame(GetStdHandle(STD_INPUT_HANDLE), frame)) {
+  while (!state->stopped) {
+    BYTE head[4];
+    if (!read(head, 4)) break;
+    DWORD size = head[0] | (DWORD(head[1]) << 8) | (DWORD(head[2]) << 16) | (DWORD(head[3]) << 24);
+    if (!size || size > kLimit) break;
+    frame.resize(size);
+    if (!read(frame.data(), size)) break;
     BYTE kind = frame[0];
     if (kind == 2 && state->input.load()) Write(state->input.load(), frame.data() + 1, static_cast<DWORD>(frame.size() - 1));
     else if (kind == 3 && state->input.load()) { CloseHandle(state->input.exchange(nullptr)); }
@@ -242,7 +277,12 @@ int Broker() {
   std::wstring command = Quote(executable);
   for (auto arg : launch.GetNamedArray(L"arguments")) command += L" " + Quote(std::wstring(arg.GetString()));
   state->helper = Image(GetCurrentProcess());
-  auto pipeName = L"\\\\.\\pipe\\chiyo-ssh-" + Random();
+  // Keep the image path pinned while authenticating child image identities.
+  Handle helperImage(CreateFileW(state->helper.c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ,
+      nullptr, OPEN_EXISTING, 0, nullptr));
+  const auto nonce = Random();
+  if (helperImage.value == INVALID_HANDLE_VALUE || nonce.empty()) return 2;
+  auto pipeName = L"\\\\.\\pipe\\chiyo-ssh-" + nonce;
   Handle token; OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token.value);
   DWORD size = 0; GetTokenInformation(token.value, TokenUser, nullptr, 0, &size);
   Bytes user(size);
@@ -258,7 +298,7 @@ int Broker() {
   LocalFree(descriptor);
   if (auth.value == INVALID_HANDLE_VALUE) return 2;
   state->auth = auth.value;
-  std::map<std::wstring, std::wstring> environment;
+  std::map<std::wstring, std::wstring, EnvironmentKeyLess> environment;
   LPWCH block = GetEnvironmentStringsW();
   for (LPWCH p = block; p && *p; p += wcslen(p) + 1) {
     std::wstring pair(p); auto separator = pair.find(L'=', pair[0] == L'=' ? 1 : 0);
@@ -309,6 +349,7 @@ int Broker() {
     TerminateProcess(ssh.value, 255); state->Error("ssh_process_job_failed"); return 2;
   }
   state->ssh = ssh.value; state->pid = process.dwProcessId; state->identity = Identity(ssh.value); state->input = input.value;
+  if (!state->identity) { TerminateProcess(ssh.value, 255); return 2; }
   CloseHandle(childInput.value); childInput.value = INVALID_HANDLE_VALUE;
   CloseHandle(childOutput.value); childOutput.value = INVALID_HANDLE_VALUE;
   CloseHandle(childErrors.value); childErrors.value = INVALID_HANDLE_VALUE;
@@ -316,11 +357,16 @@ int Broker() {
   std::thread stdoutThread(Pump, state, output.value, BYTE(0x11));
   std::thread stderrThread(Pump, state, errors.value, BYTE(0x12));
   state->Text(0x10, std::to_string(state->pid));
-  std::thread(Input, state).detach();
+  std::thread inputThread(Input, state);
   ResumeThread(thread.value);
   WaitForSingleObject(ssh.value, INFINITE);
   state->stopped = true; state->replyReady.notify_one();
-  CancelSynchronousIo(authentication.native_handle()); authentication.join();
+  // Repeat cancellation to cover a thread moving from an identity check into a
+  // synchronous pipe read while shutdown starts. No thread outlives its handles.
+  for (HANDLE worker : {authentication.native_handle(), inputThread.native_handle()}) {
+    while (WaitForSingleObject(worker, 10) == WAIT_TIMEOUT) CancelSynchronousIo(worker);
+  }
+  authentication.join(); inputThread.join();
   // Stop remaining ASKPASS children before draining output handles inherited by
   // those children. This job belongs solely to this transport.
   TerminateJobObject(job.value, 255);
@@ -337,7 +383,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
     int argc = 0; LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     bool broker = argc == 2 && std::wstring(argv[1]) == L"--broker";
+    bool capabilities = argc == 2 && std::wstring(argv[1]) == L"--capabilities";
     std::wstring prompt = argc > 1 ? argv[1] : L""; LocalFree(argv);
+    if (capabilities) {
+      const std::string json = "{\"transport\":1,\"askpass\":1,\"headless\":true}\n";
+      return Write(GetStdHandle(STD_OUTPUT_HANDLE), reinterpret_cast<const BYTE*>(json.data()), static_cast<DWORD>(json.size())) ? 0 : 2;
+    }
     return broker ? Broker() : Askpass(prompt);
   } catch (...) { return 2; }
 }

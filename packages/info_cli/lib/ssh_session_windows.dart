@@ -98,8 +98,9 @@ class _WindowsSshTransport implements SshTransportProcess {
   Future<int> get exitCode => _exit.future;
 
   Future<void> _write(int type, List<int> bytes) {
-    if (_ended)
+    if (_ended) {
       return Future.error(const SshTransportFailure('ssh_transport_closed'));
+    }
     if (bytes.length >= 1024 * 1024) {
       return Future.error(const SshTransportFailure('ssh_frame_too_large'));
     }
