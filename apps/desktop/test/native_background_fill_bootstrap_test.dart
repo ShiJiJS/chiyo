@@ -11,6 +11,8 @@ import 'package:info_cli/private_device_state.dart';
 import 'package:info_core/info_core.dart';
 import 'package:info_desktop/storage_desktop_launcher.dart';
 import 'package:info_desktop/desktop_bootstrap.dart';
+import 'package:info_desktop/desktop_runtime.dart' show DesktopEvent;
+import 'package:info_desktop/workspace/workspace_app.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:info_remote/automatic_connection.dart';
 import 'package:info_remote/connection_profile.dart';
@@ -142,6 +144,7 @@ void main() {
           '${fixture.root.path}/app-native-bootstrap',
         );
         final native = _Native();
+        final platform = NativeDesktopFixture();
         try {
           await ui.resolve(
             () => AutomaticConnectionStore(directory.path).publish(
@@ -168,7 +171,7 @@ void main() {
           await tester.pumpWidget(
             StorageDesktopLauncher(
               profiles: PrivateConnectionProfileStore(directory.path),
-              platform: NativeDesktopFixture(),
+              platform: platform,
               focusedFillDriver: _Focus(),
               openNativeFillDriver: () async => available ? native : null,
               localBuilder: (_) => const SizedBox.shrink(),
@@ -178,6 +181,9 @@ void main() {
             () => File(
               '${directory.path}/credential-batch-host/endpoint.json',
             ).existsSync(),
+          );
+          await ui.until(
+            () => find.byType(WorkspaceApp).evaluate().length == 1,
           );
           final capability = await ui.resolve(
             () => DeviceCredentialBatchClient(
@@ -198,19 +204,17 @@ void main() {
           );
           expect(native.disposals, 0);
         } finally {
-          await tester.pumpWidget(const SizedBox.shrink());
-          await ui.resolve(() async {
-            for (var i = 0; i < 100; i++) {
-              final record = await readPrivateDeviceState(
-                File('${directory.path}/credential-batch-host/endpoint.json'),
-              );
-              if (record?['phase'] == 'closed') break;
-              await Future<void>.delayed(const Duration(milliseconds: 10));
-            }
-          });
           try {
+            // Widget disposal cannot await the online source's file stores.
+            // The normal quit path awaits both fill Hosts and source disposal;
+            // an endpoint's closed phase is published before its lock closes.
+            expect(platform.events, isNotNull);
+            await ui.resolve(() => platform.events!(DesktopEvent.quit));
+            expect(platform.terminated, true);
+            await tester.pumpWidget(const SizedBox.shrink());
             expect(native.disposals, available ? 1 : 0);
           } finally {
+            await tester.pumpWidget(const SizedBox.shrink());
             await ui.resolve(fixture.dispose);
           }
         }
