@@ -38,7 +38,6 @@ def main():
     parser.add_argument('output', type=Path, help='Owned QA directory under this checkout build/')
     parser.add_argument('--cli', type=Path, help='Explicit same-source AOT chiyo under build/')
     parser.add_argument('--connection-directory', type=Path, help='Exact named synthetic profile directory')
-    parser.add_argument('--app-id', default='com.apple.archiveutility', help='Actual synthetic archive receiver bundle ID (request only)')
     args = parser.parse_args()
     out = args.output.absolute()
     out.parent.resolve().relative_to((ROOT / 'build').resolve())
@@ -107,7 +106,7 @@ def main():
             parser.error('Expected the named synthetic local library')
         if state.get('requestAttempted'):
             parser.error('Request already attempted; query its stable operation instead of creating another')
-        state.update(cli=str(cli), cliSHA256=digest(cli), appId=args.app_id, connectionDirectory=str(connection),
+        state.update(cli=str(cli), cliSHA256=digest(cli), connectionDirectory=str(connection),
                      agentConnectionFile=str(agent), libraryId=identity['libraryId'])
         write(out / 'qa.json', state)
     cli = Path(state['cli'])
@@ -149,9 +148,9 @@ def main():
         if (len(catalog) != 1 or catalog[0]['name'] != state['credentialName'] or
                 catalog[0].get('form') != 'string' or catalog[0].get('availability') != 'available'):
             raise RuntimeError('Expected only the one synthetic public credential')
-        targets = successful('targets', ['fill', 'targets', '--via', 'native', '--app', state['appId']])['targets']
-        if len(targets) != 1 or state['archiveName'] not in (targets[0]['windowTitle'] + ' ' + targets[0]['fieldLabel']):
-            raise RuntimeError('Expected only the live synthetic archive password prompt, identified by window/field description')
+        targets = successful('targets', ['fill', 'targets', '--via', 'native', '--app', 'com.apple.archiveutility'])['targets']
+        if len(targets) != 1 or state['archiveName'] not in targets[0]['fieldLabel']:
+            raise RuntimeError('Expected only the live synthetic archive password prompt')
         state['requestAttempted'] = True
         write(out / 'qa.json', state)  # Freeze the stable submission ID before RPC.
         code, reply = call('request', ['fill', 'request', '--credential', catalog[0]['credentialId'],

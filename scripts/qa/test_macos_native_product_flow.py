@@ -37,7 +37,7 @@ if key=='chat start':
  Path(args[args.index('--context-out')+1]).write_text('{}'); data={'status':'created'}
 elif args[0]=='doctor': data={'fill':{'native':{'available':True}}}
 elif key=='credentials list': data={'credentials':[{'name':state['credentialName'],'credentialId':'synthetic','version':1,'form':'string','availability':'available'}]}
-elif key=='fill targets': data={'targets':[{'targetId':'synthetic-opaque-target-reference','windowTitle':state['archiveName'],'fieldLabel':'Password'}]}
+elif key=='fill targets': data={'targets':[{'targetId':'synthetic-opaque-target-reference','fieldLabel':state['archiveName']}]}
 elif key=='fill request': data={'status':'pending','requestId':'synthetic-request'}; code=6
 elif key=='requests wait': data={'status':'approved'}
 elif key=='fill run': data={'executionState':'unknown','operationId':state['runOperation']}; code=7
@@ -50,8 +50,8 @@ print(json.dumps({'ok':code==0,'data':data})); sys.exit(code)
     def run_flow(self, stage, *args):
         return subprocess.run([sys.executable, FLOW, stage, self.out, *map(str, args)], capture_output=True, text=True)
 
-    def request(self, app_id='com.apple.archiveutility'):
-        result = self.run_flow('request', '--cli', self.cli, '--connection-directory', self.connection, '--app-id', app_id)
+    def request(self):
+        result = self.run_flow('request', '--cli', self.cli, '--connection-directory', self.connection)
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_pending_request_and_unknown_write_are_not_replayed(self):
@@ -64,12 +64,6 @@ print(json.dumps({'ok':code==0,'data':data})); sys.exit(code)
         self.assertEqual(calls[-1][:2], ['operations', 'show'])
         shutil.copyfile(self.out / 'input/native-background-proof.txt', self.out / 'native-background-proof.txt')
         self.assertNotEqual(self.run_flow('business').returncode, 0, 'unknown cannot become business success')
-
-    def test_receiver_selector_uses_actual_app_without_registry(self):
-        self.request('synthetic.previously-unregistered.receiver')
-        calls = [json.loads(x) for x in (self.root / 'calls.jsonl').read_text().splitlines()]
-        target_call = next(x for x in calls if x[:2] == ['fill', 'targets'])
-        self.assertEqual(target_call[target_call.index('--app') + 1], 'synthetic.previously-unregistered.receiver')
 
     def test_default_profile_is_refused_before_any_cli_call(self):
         wrong = self.root / 'profiles/default'

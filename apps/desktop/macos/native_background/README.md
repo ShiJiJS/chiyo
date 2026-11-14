@@ -47,7 +47,7 @@ python3 scripts/qa/check-macos-focused-xpc.py --native-status
 
 ## 历史真实软件证据（不参与运行资格）
 
-首轮 Archive Utility 10.15(178)、OS build 26A434、中文合成 ZIP 已验证实际解压与原文哈希；旧 b857/434/9619 回执保留原归属。Preview PDF 密码场景曾出现 setter 接受、UI 就绪但业务未打开，失败证据保留。二者都不再是支持名单：本次新通用路径的第三方软件、版本、来源和实际结果必须在 #144 另行记录。
+首轮 Archive Utility 10.15(178)、OS build 26A434、中文合成 ZIP 已验证实际解压与原文哈希；旧 b857/434/9619 回执保留原归属。Preview PDF 密码场景曾出现 setter 接受、UI 就绪但业务未打开，失败证据保留。二者都不再是支持名单：真实软件的版本、来源和实际结果只在用户另行明确要求的独立验收中记录。第三方业务测试不属于默认的夹具验收，不为验收自行下载或启动外部软件。
 
 真实软件验收使用公开测试口令 `Synthetic-Zip-42!` 和唯一名 `NativeBackgroundProofSigned.zip`，只在本工作树 build 下生成固定文本与加密 ZIP，先由测试操作者在归档工具打开该 ZIP。随后可运行：
 
@@ -60,6 +60,8 @@ python3 scripts/qa/check-macos-focused-xpc.py --native-archive-target
 本轮已验证签名的沙盒合成宿主和实际 XPC helper 的真实填写；正式完整 Flutter AppHost/CLI 装配、最终分发签名和升级后的 TCC 归属仍须在统筹冻结候选上验收。原生后台仅需要 helper 辅助功能权限，不需要键盘或录屏权限；本路径从不请求/修改系统权限。
 
 ## 普通产品构建和后续完整流程
+
+以下为需要另行明确授权的产品交付参考，不是默认平台夹具检查的后续步骤；不自动启动普通 App、创建 UI 资料库或开展外部软件业务测试。
 
 普通 `lib/main.dart` Release 构建、helper 同包和签名检查：
 
