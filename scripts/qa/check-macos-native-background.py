@@ -31,7 +31,7 @@ def main():
     common = ['xcrun', 'swiftc', '-parse-as-library', '-swift-version', '5', '-warnings-as-errors',
               '-target', 'arm64-apple-macos14.0']
     model = [FOCUS / 'FocusedFillContract.swift', SOURCE / 'NativeBackgroundTypes.swift', SOURCE / 'NativeBackgroundController.swift']
-    system = model + [FOCUS / 'FocusProcessIdentity.swift', SOURCE / 'SystemNativeBackgroundEnvironment.swift', SOURCE / 'NativeBackgroundWire.swift']
+    system = model + [FOCUS / 'FocusProcessIdentity.swift', SOURCE / 'SystemNativeBackgroundEnvironment.swift', SOURCE / 'NativeBackgroundWire.swift', SOURCE / 'NativeBackgroundCompatibility.swift']
     report = {'platformRequested': args.platform, 'publicRPCEnabled': False,
               'formalSignedHelperTCCVerified': False, 'startedAt': time.time()}
     with tempfile.TemporaryDirectory(prefix='candidate-', dir=output) as work:
@@ -52,8 +52,9 @@ def main():
         if args.platform:
             compile([SOURCE / 'tests/NativeFixture.swift'], work / 'fixture')
             compile(system + [SOURCE / 'tests/PlatformChecks.swift'], work / 'platform')
+            compile(model + [SOURCE / 'tests/DispatchObserver.swift'], work / 'observer')
             (work / 'fixture.log').touch()
-            for prefix in ['target', 'cover']:
+            for prefix in ['target', 'alternate', 'cover']:
                 contents = work / (prefix + '.app') / 'Contents'
                 (contents / 'MacOS').mkdir(parents=True)
                 shutil.copy(work / 'fixture', contents / 'MacOS/NativeFixture')
@@ -74,10 +75,12 @@ def main():
                     for _ in range(200):
                         if (work / 'cover-state.json').exists(): break
                         time.sleep(.02)
-                    result = subprocess.run([work / 'platform', work], capture_output=True, text=True, timeout=150)
+                    result = subprocess.run([work / 'platform', work], capture_output=True, text=True, timeout=300)
                     (output / 'platform-log.txt').write_text(result.stdout + result.stderr)
-                    for name in ['calibration.json', 'platform-results.json', 'foreground-typing.json', 'wire-results.json', 'result.json']:
+                    for name in ['calibration.json', 'platform-results.json', 'foreground-typing.json', 'wire-results.json', 'stage.json', 'result.json']:
                         if (work / name).exists(): shutil.copy(work / name, output / name)
+                    for observer in list(work.glob('observer-*.json')) + list(work.glob('ax-metadata-*.json')):
+                        shutil.copy(observer, output / observer.name)
                     report['platformExit'] = result.returncode
                     report['platform'] = json.loads((work / 'result.json').read_text()) if (work / 'result.json').exists() else {'passed': False}
                 finally:

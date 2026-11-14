@@ -102,8 +102,7 @@ private final class MacFocusPrivateSession: NSObject, MacNativeBackgroundPrivate
     DispatchQueue.main.async { [self] in
       let result: Data
       if live() && ProcessInfo.processInfo.systemUptime - received < 0.15 {
-        if native == nil { native = MacNativeBackgroundWire(profiles: MacNativeBackgroundCompatibility.profiles,
-          live: { [weak self] in self?.live() ?? false }) }
+        if native == nil { native = MacNativeBackgroundWire(live: { [weak self] in self?.live() ?? false }) }
         result = native!.handle(request)
       } else {
         result = (try? JSONSerialization.data(withJSONObject: ["format": 1, "state": "refused", "errorCode": "session_unavailable"])) ?? Data()
