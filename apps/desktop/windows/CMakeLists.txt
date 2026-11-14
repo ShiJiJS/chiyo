@@ -52,6 +52,8 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 add_subdirectory("focused_input")
+set(CHIYO_NATIVE_BACKGROUND_BUILD_BROKER ON)
+add_subdirectory("native_background_fill")
 
 # Bind this configuration's broker bytes into the desktop EXE. An always-run
 # target checks the linked file, but only changes the header when its hash changes.
@@ -65,6 +67,19 @@ add_custom_target(focused_fill_identity
   VERBATIM)
 add_dependencies(${BINARY_NAME} focused_fill_identity)
 target_include_directories(${BINARY_NAME} PRIVATE "${FOCUSED_IDENTITY_DIR}")
+
+# Keep native background fill separate from the existing focused-input helper.
+# The selected configuration's exact helper bytes are bound into the runner.
+set(NATIVE_BACKGROUND_IDENTITY_DIR "${CMAKE_BINARY_DIR}/native-background-fill-identity/$<CONFIG>")
+add_custom_target(native_background_fill_identity
+  COMMAND "${CMAKE_COMMAND}"
+    "-DBROKER=$<TARGET_FILE:native_background_broker>"
+    "-DOUTPUT_DIR=${NATIVE_BACKGROUND_IDENTITY_DIR}"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/native_background_fill/write_identity.cmake"
+  DEPENDS native_background_broker "${CMAKE_CURRENT_SOURCE_DIR}/native_background_fill/write_identity.cmake"
+  VERBATIM)
+add_dependencies(${BINARY_NAME} native_background_fill_identity)
+target_include_directories(${BINARY_NAME} PRIVATE "${NATIVE_BACKGROUND_IDENTITY_DIR}")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
@@ -88,6 +103,8 @@ set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 install(TARGETS focus_broker RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+install(TARGETS native_background_broker RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
