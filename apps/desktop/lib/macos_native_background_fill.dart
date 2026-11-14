@@ -291,7 +291,7 @@ NativeFillTarget _target(Object? raw) {
   final target = NativeFillTarget.fromJson(
     jsonDecode(jsonEncode(raw)) as Map<String, dynamic>,
   );
-  if (target.platform != 'macos') {
+  if (target.platform != 'macos' || target.controlKind != 'macos_ax_password') {
     throw const CredentialUseFailure('unsupported_target');
   }
   return target;

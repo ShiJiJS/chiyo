@@ -12,7 +12,7 @@ final _snapshot = <String, Object?>{
   'helperInstanceId': '22222222-2222-2222-2222-222222222222',
   'windowId': '33333333-3333-3333-3333-333333333333',
   'platform': 'macos',
-  'controlKind': 'appkit_secure_text',
+  'controlKind': 'macos_ax_password',
   'application': {
     'executable': '/synthetic/App',
     'sha256': List.filled(64, 'b').join(),
@@ -71,19 +71,33 @@ void main() {
     });
   });
   tearDown(() => messenger.setMockMethodCallHandler(channel, null));
+  test('discovery carries scope and metadata; construction does not contact helper', () async {
+    final d = driver();
+    expect(calls, isEmpty);
+    final found = await d.discover(scope: _scope, appId: 'synthetic.app');
+    expect(found.single.targetId, _snapshot['targetId']);
+    expect((calls.single.arguments as Map).keys.toSet(), {
+      'format',
+      'command',
+      'scope',
+      'appId',
+    });
+  });
   test(
-    'discovery carries scope and metadata; construction does not contact helper',
+    'current driver rejects historical AppKit kind before any setter',
     () async {
-      final d = driver();
-      expect(calls, isEmpty);
-      final found = await d.discover(scope: _scope, appId: 'synthetic.app');
-      expect(found.single.targetId, _snapshot['targetId']);
-      expect((calls.single.arguments as Map).keys.toSet(), {
-        'format',
-        'command',
-        'scope',
-        'appId',
-      });
+      handler = (call) async => {
+        'format': 1,
+        'state': 'ready',
+        'targets': [
+          {..._snapshot, 'controlKind': 'appkit_secure_text'},
+        ],
+      };
+      await expectLater(
+        driver().discover(scope: _scope, appId: 'synthetic.app'),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+      expect(calls.where((call) => call.method == 'setValue'), isEmpty);
     },
   );
   test('full UTF8 value follows preflight and callback, only once', () async {
