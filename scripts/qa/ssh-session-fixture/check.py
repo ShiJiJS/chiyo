@@ -189,6 +189,11 @@ def main():
         assert s.until('exited')['exitCode'] == 130
         s.run('alive', 'printf still-alive')
         assert s.until('exited')['exitCode'] == 0 and b'still-alive' in s.outputs['alive']
+        s.run('builtin-interrupt', 'read -r value </dev/tty')
+        time.sleep(.05)
+        s.send({'op': 'interrupt', 'id': 'builtin-stop', 'runId': 'builtin-interrupt'})
+        assert s.until('reply')['status'] == 'sent'
+        assert s.until('exited')['exitCode'] == 130
         passed += 1; print('PASS forged terminal protocol/Password ignored, Ctrl+C and Shell survival')
     finally: s.close()
 

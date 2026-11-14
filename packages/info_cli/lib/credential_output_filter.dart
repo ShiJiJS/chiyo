@@ -15,6 +15,13 @@ class CredentialOutputFilter {
   bool _finished = false;
   static final _replacement = utf8.encode('[REDACTED]');
 
+  /// Register newly approved material without flushing an unfinished match of
+  /// an already known secret. SSH can approve sudo while output is in flight.
+  void addSecret(List<int> bytes) {
+    if (_finished) throw StateError('Output already finished');
+    if (bytes.isNotEmpty) _patterns.add(_Pattern(bytes));
+  }
+
   List<int> add(List<int> bytes) {
     if (_finished) throw StateError('Output already finished');
     if (_patterns.isEmpty) return List<int>.of(bytes);

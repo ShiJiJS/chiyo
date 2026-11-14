@@ -547,35 +547,68 @@ extension CredentialBatchAgentAccess on AgentAccess {
     return CredentialBatchMaterials(bytes);
   });
 
-  Future<void> authorizeCredentialBatchInput(String deviceId, String proof) =>
-      _service.owner._serialize(() async {
-        final (_, r, operation) = _service._batchProof(deviceId, proof);
-        if (!operation.materialClaimed &&
-            operation.sshContext?.requiresMaterial != false) {
-          throw const CredentialUseFailure('material_prepare_failed');
+  Future<void> authorizeCredentialBatchInput(
+    String deviceId,
+    String proof, {
+    String? sshLoginSession,
+    String? sshLoginRequestId,
+  }) => _service.owner._serialize(() async {
+    final (_, r, operation) = _service._batchProof(deviceId, proof);
+    if (!operation.materialClaimed &&
+        operation.sshContext?.requiresMaterial != false) {
+      throw const CredentialUseFailure('material_prepare_failed');
+    }
+    void validate() {
+      if (operation.sshContext?.kind == 'credential') {
+        if (sshLoginSession == null || sshLoginRequestId == null) {
+          throw const CredentialUseFailure('scope_not_approved');
         }
-        void validate() {
-          final current = _service._batchRequest(r.id);
-          for (final item in _service._selectedBatchItems(
-            current,
-            operation.itemIds,
-          )) {
-            _service._requireBatchItem(current, item);
-          }
-        }
-
-        validate();
-        if (operation.state == CredentialBatchOperationState.dispatched) return;
-        await _service._batchRepository.commitCredentialBatch(
-          r,
-          expectedRevision: r.revision,
-          operation: operation.changed(
-            state: CredentialBatchOperationState.dispatched,
-          ),
-          expectedOperationRevision: operation.revision,
-          validate: validate,
+        final login = _service._sessionBatch(
+          sshLoginSession,
+          deviceId,
+          sshLoginRequestId,
         );
-      });
+        if (login.items.length != 1 || login.sessionBinding != r.sessionBinding) {
+          throw const CredentialUseFailure('session_mismatch');
+        }
+        final loginTarget = login.items.single.destination.ssh;
+        final sudoTarget = r.items.single.destination.ssh;
+        if (loginTarget == null ||
+            sudoTarget == null ||
+            loginTarget.credentialUse != 'login' ||
+            sudoTarget.credentialUse != 'sudo' ||
+            loginTarget.host != sudoTarget.host ||
+            loginTarget.port != sudoTarget.port ||
+            loginTarget.user != sudoTarget.user ||
+            loginTarget.trustId != sudoTarget.trustId ||
+            loginTarget.trustHash != sudoTarget.trustHash) {
+          throw const CredentialUseFailure('scope_not_approved');
+        }
+        _service._requireBatchItem(login, login.items.single);
+      } else if (sshLoginSession != null || sshLoginRequestId != null) {
+        throw const CredentialUseFailure('invalid_plan');
+      }
+      final current = _service._batchRequest(r.id);
+      for (final item in _service._selectedBatchItems(
+        current,
+        operation.itemIds,
+      )) {
+        _service._requireBatchItem(current, item);
+      }
+    }
+
+    validate();
+    if (operation.state == CredentialBatchOperationState.dispatched) return;
+    await _service._batchRepository.commitCredentialBatch(
+      r,
+      expectedRevision: r.revision,
+      operation: operation.changed(
+        state: CredentialBatchOperationState.dispatched,
+      ),
+      expectedOperationRevision: operation.revision,
+      validate: validate,
+    );
+  });
 
   Future<CredentialBatchOperation> finishCredentialBatchOperation(
     String deviceId,
