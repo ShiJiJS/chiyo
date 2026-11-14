@@ -4,12 +4,37 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agent 遇到密码框后，知予怎样接着填写？</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23007764'/%3E%3Cpath d='M11 12h18v16H11zM16 17v6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css">
-  <script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css"><link rel="stylesheet" href="reading-nav.css">
+  <script defer src="reading-nav.js"></script><script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
 </head>
 <body x-data="tutorial">
 <a class="skip" href="#main">跳到正文</a>
-<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 填写机制图解</span></a><nav aria-label="章节"><a href="#web">网页</a><a href="#native">普通应用</a><a href="#platform">系统 API</a><a href="#chiyo">整体关系</a></nav></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 填写机制图解</span></a><button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="false" aria-controls="reading-toc"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>目录</button></div></header>
+<div class="page-layout">
+  <aside class="reading-toc" id="reading-toc" aria-labelledby="toc-title">
+    <div class="toc-heading"><span id="toc-title">本文目录</span><button class="toc-close" type="button" aria-label="关闭目录"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+    <nav class="toc-nav" aria-label="文章目录">
+      <a class="toc-overview" href="#main">开篇说明</a>
+      <ol class="toc-chapters">
+        <li data-toc-group="web"><a class="toc-chapter" href="#web"><span class="toc-number">01</span><span>网页：找到密码框</span></a>
+          <ul class="toc-sections"><li><a href="#browser-page-location">页面标识与定位</a></li></ul>
+        </li>
+        <li data-toc-group="connection"><a class="toc-chapter" href="#connection"><span class="toc-number">02</span><span>申请使用密码</span></a>
+          <ul class="toc-sections"><li><a href="#credential-selection">查找凭据</a></li><li><a href="#submit-browser-request">提交申请</a></li><li><a href="#credential-approval">等待用户批准</a></li></ul>
+        </li>
+        <li data-toc-group="browser-execution"><a class="toc-chapter" href="#browser-execution"><span class="toc-number">03</span><span>网页：执行填写</span></a>
+          <ul class="toc-sections"><li><a href="#browser-connection">连接浏览器</a></li><li><a href="#verify-destination">复核页面与字段</a></li><li><a href="#send-fill">写入密码</a></li><li><a href="#browser-result">获取填写结果</a></li></ul>
+        </li>
+        <li data-toc-group="native"><a class="toc-chapter" href="#native"><span class="toc-number">04</span><span>应用：查询目标</span></a>
+          <ul class="toc-sections"><li><a href="#native-select">网页与原生的差异</a></li><li><a href="#native-helper-channel">联系辅助程序</a></li><li><a href="#native-system-entry">扫描控件、选择目标</a></li><li><a href="#native-handoff">提交申请</a></li></ul>
+        </li>
+        <li data-toc-group="platform"><a class="toc-chapter" href="#platform"><span class="toc-number">05</span><span>应用：执行填写</span></a>
+          <ul class="toc-sections"><li><a href="#native-recheck">复核与设值</a></li><li><a href="#native-background-scenario">能继续在别处打字吗？</a></li><li><a href="#native-result">获取填写结果</a></li></ul>
+        </li>
+      </ol>
+    </nav>
+  </aside>
+  <button class="toc-scrim" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
 <main id="main">
   <div class="intro">
     <h1><span class="keep-phrase">Agent 遇到密码框后，</span><wbr><span class="keep-phrase">知予怎样接着填写？</span></h1>
@@ -32,7 +57,6 @@
       <ol>
         <li><a href="#web">先讲网页</a>：确定页面和输入框 → 从知予的目录选出密码 → 提交申请并获得许可 → 发起填写。随后展开知予的内置填写模块怎样连接浏览器、发送具体操作。</li>
         <li><a href="#native">再扩展到普通应用</a>：从应用的控件树取得固定目标编号，申请批准后再直接设值；查询控件和写值的 API 分别展开 Mac 与 Windows。</li>
-        <li><a href="#chiyo">最后看各方的分工</a>：Agent 选择目标，知予管理密码和批准；网页由内置模块操作，普通应用通过本机辅助程序向固定控件设值。</li>
       </ol>
     </div>
   </div>
@@ -107,7 +131,7 @@
     </figure>
         <p>定位时，<strong>工作区编号先确定哪一组标签页，页面标记再确定组里的哪一张。</strong>不同工作区都可能有各自的 <code>p1</code>，所以这里要一起交出 <code>7</code> 和 <code>p1</code>。这些值来自浏览器工具提供的工作区信息与页面列表。</p>
         <p class="sources-inline"><a href="https://github.com/citrolabs/ego-lite/wiki/Ego-Native-API-Reference" target="_blank" rel="noreferrer">ego 的工作区与页面信息 ↗</a></p>
-        <h3>Chrome 怎样给页面标明位置？</h3><p>Agent 还需要知道怎样连接这个 Chrome。这里沿用浏览器工具提供的本机控制地址 <code>http://127.0.0.1:9222</code>，通过知予列出该实例的页面：</p><pre class="plan-fragment"><code>chiyo browsers list --via chrome \
+        <h3>Chrome 怎样给页面标明位置？</h3><p>Agent 还需要知道怎样连接这个 Chrome。这里沿用浏览器工具提供的本机控制地址 <code>http://127.0.0.1:9222</code>，调用知予提供的命令行工具 <code>chiyo</code>，列出这个浏览器中的页面：</p><pre class="plan-fragment"><code>chiyo browsers list --via chrome \
   --browser http://127.0.0.1:9222 --json</code></pre><p>页面列表返回标识、标题和网址，Agent 从中选定自己正在操作的登录页。控制地址表示哪一个浏览器；页面标识表示其中哪一页。</p>    <details id="chrome-entry"><summary>Chrome 的本机调试入口怎样准备？</summary><div class="detail-body"><p>可以由浏览器工具启动一个开放控制入口的 Chrome，也可以按浏览器提供的设置允许外部工具连接。这里选用开放调试端口、从页面列表取得连接地址的方式。</p><p>使用调试端口启动时，Chrome 136 起要求配合独立的用户数据目录。较新的 Chrome 还提供由用户启用、工具请求并由用户确认的连接方式。<a href="https://developer.chrome.com/blog/remote-debugging-port" target="_blank" rel="noreferrer">调试端口配置 ↗</a> · <a href="https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session" target="_blank" rel="noreferrer">连接已有 Chrome ↗</a></p></div></details>
         <p>通过本文采用的 Chrome 控制方式，工具可以取得各个打开页面的记录。每条记录包含该页面的标识、标题和网址。假设 Agent 刚才操作的登录页标识是 <code>A7C93D1E8B624F06B3D28AC572E4910F</code>，把它交给知予的浏览器填写模块，就能在所操作的 Chrome 中指定这张页面。</p>
         <p>即使另一个标签页打开了相同网址，它也有自己的页面标识。因此，知予的浏览器填写模块用 <code>A7C93D1E8B624F06B3D28AC572E4910F</code> 确定具体页面，再用网址核对是否仍是预期的网站。图中使用完整的示例页面标识，并在后续连接与填写步骤中沿用。<a class="source-ref" href="https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/Target.pdl" target="_blank" rel="noreferrer">Chrome 的页面信息字段 ↗</a></p>
@@ -147,7 +171,7 @@
   </section>
 
   <section id="connection" class="chapter">
-    <div class="reading"><h2><span class="section-num">02</span>目标找到了，怎样向知予申请使用密码？</h2><p>目标位置已经确定，但密码由知予管理，Agent 需要先取得使用许可。它通过知予提供的命令行工具 <code>chiyo</code>，提交一份<strong>密码使用申请</strong>，由用户在知予 App 中审批。</p>
+    <div class="reading"><h2><span class="section-num">02</span>目标找到了，怎样向知予申请使用密码？</h2><p>目标位置已经确定，但密码由知予管理，Agent 需要先取得使用许可。它继续通过 <code>chiyo</code> 提交一份<strong>密码使用申请</strong>，由用户在知予 App 中审批。</p>
       <h3 id="credential-selection">先查知予里保存了哪些密码</h3><p>例如，查找“项目工作台”的密码记录：</p></div>
     <figure class="credential-discovery" id="credential-discovery"><figcaption class="figure-heading">调用 chiyo，按名称查找密码</figcaption><pre class="plan-fragment"><code>chiyo credentials list --query "项目工作台" --json</code></pre>
       <div class="catalog-result"><div><span class="catalog-label">返回的条目之一，摘取相关信息</span><pre><code>{
@@ -183,7 +207,7 @@
   </section>
 
   <section id="browser-execution" class="chapter">
-    <div class="reading"><h2><span class="section-num">03</span>获批后，知予怎样实际填入密码？</h2><p>现在申请 <code>REQ-42</code> 已获批准，接下来才执行。Agent 按申请编号发出命令：</p><pre class="plan-fragment" id="credential-execution"><code>chiyo fill run --request REQ-42 --json</code></pre><p>知予取出申请里保存的目标，检查批准仍有效、密码版本仍相符，再把保存的目标和获准使用的密码交给内置的浏览器填写模块。这是知予中负责连接浏览器、查询页面和写入文字的代码；它拿到数据后，仍要检查实际目标，才能写入网页。</p><p>这次操作有自己的编号，例如 <code>OP-42</code>，用于后续查询结果。收到操作编号只表示可以追踪这次操作；下面继续看文字怎样真正进入网页。</p></div>
+    <div class="reading"><h2><span class="section-num">03</span>获批后，知予怎样实际填入密码？</h2><p>现在申请 <code>REQ-42</code> 已获批准，接下来才执行。Agent 按申请编号发出命令：</p><pre class="plan-fragment" id="credential-execution"><code>chiyo fill run --request REQ-42 --json</code></pre><p>知予先检查批准仍有效、密码版本仍相符，再把申请里保存的目标交给内置的浏览器填写模块。这段代码负责连接浏览器、查询页面和写入文字；它先检查现在的页面和表单，检查通过后才会收到本次获准的密码并执行写入。</p><p>CLI 在首次发送执行请求前，为这次操作生成并保存编号，例如 <code>OP-42</code>，随后在命令回复中返回它，供 Agent 查询结果。收到操作编号只表示可以追踪这次操作；下面继续看文字怎样真正进入网页。</p></div>
     <div class="reading connection-entry" id="browser-connection"><h3>知予的填写模块怎样接上指定的浏览器？</h3><p>执行时，填写模块要通过连接向目标浏览器发送操作。申请阶段查询目标也使用这套连接方式；这里展开它具体怎样工作。ego 和 Chrome 提供的连接方式不同，下面分别看知予的填写模块怎样调用它们。</p></div>
     <div class="destination-plan browser-connection-pair" id="connection-methods">
       <div class="outer-process"><div class="process-label">ego：由配套命令行工具建立连接</div><h3>启动一个能连接 ego 的程序</h3><p>ego 主程序提供了供配套工具接入的本机通信入口。知予的填写模块启动 <code>ego-browser</code>，指定 <code>nodejs</code> 模式；这个命令行工具负责接入入口，与正在运行的 ego 主程序建立连接。</p><pre><code>ego-browser nodejs</code></pre><p>知予的填写模块把要执行的 JavaScript 代码传给 <code>ego-browser nodejs</code>。ego 主程序收到后，会安排一个 <strong>Node.js 执行环境</strong>来运行脚本——也就是能执行 JavaScript、并能调用 ego 操作功能的环境。</p><p><strong>连接建立后：</strong>知予的填写模块可以提交控制脚本，脚本的输出和执行结果也能沿原通道返回。网页和标签页仍由浏览器管理。</p><a class="source-ref" href="https://github.com/citrolabs/ego-lite/wiki/Ego-Browser-CLI-Architecture" target="_blank" rel="noreferrer">ego 的连接与脚本执行机制 ↗</a></div>
@@ -197,7 +221,7 @@
     <p class="caption">上面分别得到“能提交 ego 控制脚本的通道”和“能向 Chrome 目标页面发送消息的通道”。本机地址、端口与页面编号用于说明对应关系。</p>
 
 
-    <div class="reading connection-entry" id="operation-content"><h3>连上浏览器后，要发送哪些操作？</h3><p>连接建立后，知予还要告诉浏览器“执行哪段网页代码”。ego 和 Chrome 在这里使用同一套命令约定，叫 <strong>CDP（Chrome DevTools Protocol）</strong>：消息说明操作名称和参数，浏览器再返回回复。其中，<code>Runtime.evaluate</code> 表示让页面运行一段 JavaScript。</p><p>ego 的控制脚本通过 <code>page.cdp()</code> 发送这条命令；Chrome 由知予沿刚建立的 WebSocket 发送。两边先执行查询，再决定能否写入。</p><p>申请时保存的是当时的页面情况。在等待批准期间，页面可能跳转，登录表单也可能改变。因此，即使这是第一次执行，也要把现在的目标与申请时的记录比较，确认仍可按原申请填写。</p><p>下面先展开查询和判断，再说明写入动作。</p></div>
+    <div class="reading connection-entry" id="operation-content"><h3>连上浏览器后，要发送哪些操作？</h3><p>连接建立后，知予还要告诉浏览器“执行哪段网页代码”。软件提供给其他程序调用的操作接口，称为 <strong>API</strong>：调用者按约定指定操作和参数，软件处理后返回结果。浏览器也提供这样的接口。</p><p>ego 和 Chrome 在这里使用同一套命令约定，叫 <strong>CDP（Chrome DevTools Protocol）</strong>：消息说明操作名称和参数，浏览器再返回回复。其中，<code>Runtime.evaluate</code> 表示让页面运行一段 JavaScript。</p><p>ego 的控制脚本通过 <code>page.cdp()</code> 发送这条命令；Chrome 由知予沿刚建立的 WebSocket 发送。两边先执行查询，再决定能否写入。</p><p>申请时保存的是当时的页面情况。在等待批准期间，页面可能跳转，登录表单也可能改变。因此，即使这是第一次执行，也要把现在的目标与申请时的记录比较，确认仍可按原申请填写。</p><p>下面先展开查询和判断，再说明写入动作。</p></div>
 
     <div class="reading connection-entry" id="verify-destination"><h3>先检查：页面现在仍然是预期的目标吗？</h3><p>比较分两层：先确认还是申请时的浏览器和标签页，且网址一致；再在这张页面中找到唯一的 <code>#login</code>，确认其中只有一个符合条件的 <code>#password</code>，并把区域和字段的结构与申请时保存的记录比较。例如，申请时保存的是密码输入框，执行时同一位置变成普通文本框，就不能继续。即使编号仍叫 password，也不算通过检查。</p><p>例如，下面这次查询仍与申请记录一致，就可以进入写入步骤：</p><div class="target-comparison"><table aria-label="申请记录与执行时目标的对照"><colgroup><col class="comparison-label"><col><col></colgroup><thead><tr><th scope="col">核对内容</th><th scope="col">申请时保存</th><th scope="col">执行时查到</th></tr></thead><tbody><tr><th scope="row">页面</th><td>ego 工作区 <code>7</code> / 页面 <code>p1</code><br>网址：<code>workspace.example/login</code></td><td>仍是同一浏览器中的 <code>7 / p1</code>，网址相同</td></tr><tr><th scope="row">登录区域</th><td><code>#login</code><br>包含账号框、密码框和登录按钮</td><td><code>#login</code> 唯一，区域结构仍相符</td></tr><tr><th scope="row">密码字段</th><td>区域内的 <code>#password</code><br><code>type=password</code></td><td>该区域内唯一匹配<br>仍为可编辑的密码框</td></tr></tbody></table></div><p>Chrome 对应比较申请里保存的浏览器实例和标签页标识，其余区域、字段检查相同。若页面身份、区域结构或字段条件不符，就停止本次操作。</p><p>知予的填写模块先安排一次<strong>查询操作</strong>：读取页面现在的网址，并检查 <code>#login</code> 是否唯一、它里面的 <code>#password</code> 是否也唯一。查询使用的还是前面讲过的 DOM 方法；这里要解释的是它怎样被送到浏览器里执行。</p></div>
     <div class="destination-plan browser-connection-pair" id="query-methods">
@@ -233,12 +257,17 @@ const state = reply.result.value;</code></pre><p><code>page.cdp()</code> 把命�
     <p class="caption">这里展开网址与匹配数量，便于看清“发起查询 → 浏览器执行 → 取回结果 → 决定是否继续”的关系。<a href="https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-evaluate" target="_blank" rel="noreferrer">Chrome 执行页面代码的命令 ↗</a></p>
 
     <details><summary>同一份批准下再次填写，检查会省略吗？</summary><div class="detail-body"><p>不会。批准仍有效时，再次发起填写仍要检查浏览器、页面、网址及表单和字段。页面刷新后，只有页面身份和保存的结构信息仍符合时才能继续；换了标签页、表单发生变化或无法确认时就停止。这里的检查针对每次执行，第一次填写也一样。</p></div></details>
-    <div class="reading connection-entry" id="send-fill"><h3>检查通过后，把密码写入确认过的框</h3><p>目标检查通过后，填写模块才把获准密码写入网页。下面用公开文字 <code>hello</code> 代表这次写入的密码，先对照它与目标的关系，再展开填写方法：</p></div>
+    <div class="reading connection-entry" id="send-fill"><h3>检查通过后，把密码写入确认过的框</h3><p>目标检查通过后，知予取得申请指定版本的密码，交给填写模块写入网页。下面用公开文字 <code>hello</code> 代表这次写入的密码，先对照它与目标的关系，再展开填写方法：</p></div>
     <figure class="delivery-board" id="browser-delivery-diagram"><figcaption class="figure-heading">本次写入使用的目标与文字</figcaption>
       <div class="delivery-grid"><div class="delivery-origin"><b>检查已经通过</b><span>使用获批版本的密码</span></div><div class="delivery-streams"><div class="delivery-stream"><b>要填哪里</b><code>ego：7 / p1<br>表单：#login<br>字段：#password<br>网址：workspace.example/login</code><span class="stream-tip" aria-hidden="true">→</span></div><div class="delivery-stream secret-stream"><b>要填什么</b><code>hello</code><span>从知予保存的密码记录取得</span><span class="stream-tip" aria-hidden="true">→</span></div></div><div class="delivery-receiver"><b>内置浏览器填写模块</b><span>知予负责执行与结果</span><dl><dt>ego</dt><dd>由控制脚本向选定页面发送写入代码</dd><dt>Chrome</dt><dd>通过已建立的连接发送相同的写入代码</dd></dl><span class="next-operation">下一步：向确认过的元素写入文字 ↓</span></div></div>
       <p class="figure-note">Agent 的命令只带密码记录编号。图中的 hello 是知予交给填写模块的密码，不是 Agent 在命令里写出的密码。</p>
     </figure>
-    <div class="reading"><h3>两种浏览器都执行同一段网页写入代码</h3><p>知予把“再次检查目标”和“修改这个元素”放进同一次页面调用中。下面先看准备发送的写入代码节选；此时还没有发送。代码运行时，<code>field</code> 指向刚通过检查的 <code>#login</code> 内的 <code>#password</code>：</p><pre class="plan-fragment"><code>// 取出浏览器为 input 提供的 value 写入方法
+    <div class="reading"><h3>两种浏览器都执行同一段网页写入代码</h3><p>知予把“再次检查目标”和“修改这个元素”放进同一次页面调用中。下面先看准备发送的写入代码节选；此时还没有发送。代码将在网页里重新取得 <code>#login</code> 表单，再从该表单中取得 <code>#password</code>，分别用 <code>form</code> 和 <code>field</code> 引用它们：</p><pre class="plan-fragment"><code>// 完整代码先确认唯一匹配，再取得对应元素
+const form = document.querySelectorAll('#login')[0];
+const field = form.querySelectorAll('#password')[0];
+// 省略类型、可编辑性和结构检查；全部通过后才继续
+
+// 取出浏览器为 input 提供的 value 写入方法
 const setValue = Object.getOwnPropertyDescriptor(
   HTMLInputElement.prototype, 'value'
 ).set;
@@ -246,13 +275,13 @@ const setValue = Object.getOwnPropertyDescriptor(
 // 把文字写入已经确认的这个元素
 setValue.call(field, 'hello');
 field.dispatchEvent(new Event('input', { bubbles: true }));
-field.dispatchEvent(new Event('change', { bubbles: true }));</code></pre><p><code>value</code> 保存输入框当前的文字。<code>setValue.call(field, 'hello')</code> 调用浏览器原有的写入方法，把这个框的值设为 hello。后两行通知网页“输入内容发生了变化”，让网页处理相应更新；<code>bubbles: true</code> 让外层表单也能收到通知。</p><p>知予把完整的检查及写入代码保存为字符串 <code>fillCode</code>，再按下面两种方式之一发送。实际执行还会核对：收到代码的是否仍是刚才检查的那一版页面。无法确认是否已经写入时，知予报告“结果未知”。</p></div>
+field.dispatchEvent(new Event('change', { bubbles: true }));</code></pre><p><code>[0]</code> 取出已确认唯一匹配的那个元素。这些元素对象留在网页里；前面的查询回复只把网址和数量带回控制代码，这里的 <code>field</code> 则由写入代码在网页内重新取得。</p><p><code>value</code> 保存输入框当前的文字。<code>setValue.call(field, 'hello')</code> 调用浏览器原有的写入方法，把这个框的值设为 hello。后两行通知网页“输入内容发生了变化”，让网页处理相应更新；<code>bubbles: true</code> 让外层表单也能收到通知。</p><p>知予把完整的检查及写入代码保存为字符串 <code>fillCode</code>，再按下面两种方式之一发送。实际执行还会核对：收到代码的是否仍是刚才检查的那一版页面。无法确认是否已经写入时，知予报告“结果未知”；Agent 应继续查询原操作 <code>OP-42</code>，不能自动发起新操作重填。</p></div>
     <div class="destination-plan browser-connection-pair" id="fill-methods">
       <div class="outer-process"><div class="process-label">ego：由控制脚本发送写入命令</div><h3>让选定页面执行这段代码</h3><pre><code>// fillCode 是上面说明的完整检查及写入代码
 await page.cdp('Runtime.evaluate', {
   expression: fillCode,
   returnByValue: true
-});</code></pre><p>控制脚本已经通过 <code>ego-browser nodejs</code> 在 ego 的执行环境中运行；<code>page</code> 代表工作区 7 的 p1 页面。脚本用与查询相同的 <code>page.cdp()</code> 发送命令，让该页面执行 <code>fillCode</code> 并返回结果。供程序调用的这种方法，就是<strong>API</strong>。</p><a class="source-ref" href="#source-bridge">知予通过 ego 执行页面代码的实现 ↓</a><div class="execution-picture"><div class="execution-arrow"><span>控制脚本 → page.cdp() → 选定页面执行写入代码</span><b aria-hidden="true">↓</b></div><div class="result-browser" role="img" aria-label="ego收到操作后在同一页面的password框填入hello"><div class="result-tab"><b>项目工作台</b><code>工作区 7 / 页面 p1</code></div><div class="result-address">https://workspace.example/login</div><div class="result-field"><span>密码框 <code>id="password"</code></span><div>•••••</div><code>#login #password → input.value = "hello"</code></div></div></div></div>
+});</code></pre><p>控制脚本已经通过 <code>ego-browser nodejs</code> 在 ego 的执行环境中运行；<code>page</code> 代表工作区 7 的 p1 页面。脚本用与查询相同的 <code>page.cdp()</code> 发送命令，让该页面执行 <code>fillCode</code> 并返回结果。</p><a class="source-ref" href="#source-bridge">知予通过 ego 执行页面代码的实现 ↓</a><div class="execution-picture"><div class="execution-arrow"><span>控制脚本 → page.cdp() → 选定页面执行写入代码</span><b aria-hidden="true">↓</b></div><div class="result-browser" role="img" aria-label="ego收到操作后在同一页面的password框填入hello"><div class="result-tab"><b>项目工作台</b><code>工作区 7 / 页面 p1</code></div><div class="result-address">https://workspace.example/login</div><div class="result-field"><span>密码框 <code>id="password"</code></span><div>•••••</div><code>#login #password → input.value = "hello"</code></div></div></div></div>
       <div class="outer-process" id="protocol"><div class="process-label">Chrome：直接发送写入消息</div><h3>沿已连接的 WebSocket 发送相同代码</h3><p>知予组装同一条 <code>Runtime.evaluate</code> 命令，将 <code>fillCode</code> 放进消息：</p><pre><code>const message = {
   id: 2,
   method: 'Runtime.evaluate',
@@ -277,71 +306,165 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
       <p>这里先解决目标从哪里来、怎样交给 Agent，再申请使用密码。Mac 与 Windows 的申请过程相同，查询控件和最后写值所用的系统 API 分别展开。</p>
     </div>
 
-    <div class="reading connection-entry" id="native-select"><h3>让知予列出这个应用里可以填写的密码框</h3>
-      <p>Agent 从任务和界面判断需要哪个密码框，但知予还需要一个能实际操作的控件对象。Agent 因此调用 <code>chiyo fill targets</code>，指定目标应用，让知予的本机辅助程序查询它的窗口和密码控件。</p>
-      <p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。Windows 这里用程序的完整路径，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。这些信息只用来选择查询范围，知予还会核对实际运行程序的身份。</p>
+    <div class="connection-entry native-handoff-compare" id="native-select">
+      <div class="reading"><h3>网页与原生，怎样把目标交给知予？</h3><p>网页的目标定位信息已由 Agent 从浏览器工具取得；原生先取得目标列表，再用选中的目标编号申请。</p></div>
+      <div class="os-selector" role="group" aria-label="选择下文原生查询与设值的系统"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
+      <figure class="native-handoff-board" aria-label="Agent 与知予在网页和原生申请中的命令、参数和返回信息对照">
+        <section class="native-handoff-case" aria-labelledby="native-handoff-web-title">
+          <h4 id="native-handoff-web-title">网页：把页面与元素位置放进申请</h4>
+          <div class="native-handoff-parties"><b>Agent</b><b>知予 <span>处理 chiyo 命令</span></b></div>
+          <div class="native-handoff-flow">
+            <div class="native-handoff-packet"><code class="native-handoff-command">chiyo fill request</code><dl class="native-handoff-data"><div><dt>页面</dt><dd>Ego 工作区 <code>7</code> / 页面 <code>p1</code></dd></div><div><dt>URL</dt><dd><code>https://workspace.example/login</code></dd></div><div><dt>表单 / 字段</dt><dd><code>#login</code> 内的 <code>#password</code></dd></div></dl></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-action"><strong>查询并核验目标<br>保存填写计划</strong></div>
+          </div>
+          <p class="native-handoff-return"><span aria-hidden="true">←</span>知予返回 <code>REQ-42</code><span class="native-handoff-pending">待批准</span><span class="native-handoff-return-next">Agent 用申请号等待审批结果</span></p>
+        </section>
+        <section class="native-handoff-case" aria-labelledby="native-handoff-native-title">
+          <h4 id="native-handoff-native-title">原生：先查询目标，再用编号申请</h4>
+          <div class="native-handoff-parties"><b>Agent</b><b>知予 <span>处理 chiyo 命令</span></b></div>
+          <div class="native-handoff-flow">
+            <div class="native-handoff-packet"><div class="native-handoff-command-row"><code class="native-handoff-command">chiyo fill targets</code><span x-text="nativeAppName"></span></div><dl class="native-handoff-data"><div><dt>应用标识</dt><dd><code x-text="nativeAppId"></code></dd></div></dl></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-action native-scan-summary"><strong>helper 限定指定应用，逐项扫描筛选</strong><p>进程／窗口 → 控件树 → 密码语义<br>→ 支持、可用与直接设值检查 → targets</p></div>
+          </div>
+          <p class="native-example-assumption">以下假设指定应用内发现两个已通过支持检查、可区分的密码窗口。窗口名称、属性与层级为教学示意；实际支持仍以已验证应用、版本和结构为准。</p>
+          <div class="native-handoff-flow native-handoff-back native-multi-return" id="native-targets-result">
+            <div class="native-agent-choice">
+              <span class="native-handoff-label">Agent 的任务</span><strong>为 <code x-text="nativeTaskTarget.file"></code> 输入密码</strong>
+              <div class="native-mini-window"><div x-text="nativeTaskTarget.windowTitle"></div><b x-text="nativeTaskTarget.file"></b><span>密码</span><i>尚未填写</i><small>□ 记住本次设置 <em>取消　确定</em></small></div>
+              <p>对照窗口与字段说明，选中<strong>第二项</strong>：文件名与任务一致，字段是密码框。</p><p class="native-choice-other"><code>OtherArchive.zip</code> 属于另一文件，不用于本任务。</p>
+              <span class="native-handoff-down" aria-hidden="true">↓</span>
+            </div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-returned-targets">
+              <div class="native-target-list-heading"><b><code>targets</code> · 本次目标列表</b><span>2 项 · <span x-text="nativeAppName"></span></span></div>
+              <template x-for="(target,index) in nativeTargets" :key="target.key"><div class="native-returned-item" :class="{'is-task':target.key==='task'}">
+                <div class="native-target-item-top"><b x-text="'候选 '+(index+1)"></b><span x-show="target.key==='task'">← Agent 按任务选中</span></div>
+                <dl class="native-handoff-data"><div><dt>窗口</dt><dd x-text="target.windowTitle"></dd></div><div><dt>字段</dt><dd x-text="target.fieldLabel"></dd></div><div class="native-handoff-target-id"><dt>targetId</dt><dd><code x-text="target.targetId"></code></dd></div></dl>
+              </div></template>
+              <p class="native-target-list-note">targets 是本次查询通过支持检查的候选密码框集合，可能有 0、1 或多项；候选不代表已批准。</p>
+            </div>
+          </div>
+          <div class="native-handoff-flow">
+            <div class="native-handoff-packet"><code class="native-handoff-command">chiyo fill request</code><dl class="native-handoff-data"><div class="native-handoff-target-id"><dt>--target</dt><dd><code x-text="nativeTaskTarget.targetId"></code></dd></div></dl></div>
+            <span class="native-handoff-arrow" aria-hidden="true"></span>
+            <div class="native-handoff-action"><strong>核验选中的目标<br>保存申请</strong></div>
+          </div>
+          <p class="native-handoff-return"><span aria-hidden="true">←</span>知予返回 <code>REQ-43</code><span class="native-handoff-pending">待批准</span><span class="native-handoff-return-next">Agent 用申请号等待审批结果</span></p>
+        </section>
+        <figcaption>两条申请仍需凭据编号、版本和用途。列表没有密码或系统控件对象；说明不足以区分候选时，查询应拒绝歧义，Agent 不能凭随机编号猜测。两条申请均待批准，尚未写入密码。</figcaption>
+      </figure>
+      <div class="reading"><template x-if="os==='mac'"><p>Mac 用应用的 <strong>bundle ID</strong> 指定查询哪个应用，例如归档实用工具的 <code>com.apple.archiveutility</code>；这是应用声明的名称标识。</p></template><template x-if="os==='win'"><p>Windows 这里用程序的完整路径指定查询哪个应用，例如 <code>C:\Program Files\7-Zip\7zFM.exe</code>。</p></template><p>应用标识只选择查询范围，知予还会核对实际运行程序的身份。</p></div>
     </div>
-    <div class="os-selector" role="group" aria-label="查看原生控件的系统接口"><span class="os-slider" :class="{'to-win':os==='win'}"></span><button id="mac-tab" :aria-pressed="os==='mac'" @click="setOS('mac')">macOS</button><button id="win-tab" :aria-pressed="os==='win'" @click="setOS('win')">Windows</button></div>
     <figure class="handoff-figure native-target-command">
       <figcaption>Agent 请求查询目标，命令里还没有密码</figcaption>
       <pre><code x-text="nativeDiscoverCommand"></code></pre>
-      <p class="caption">应用需已经运行，相关密码窗口需已经存在。路径采用示例安装位置，实际调用以本机程序位置为准。发现目标不会申请凭据、写值或自动弹出系统权限请求。</p>
+      <p class="caption">应用需已经运行，相关密码窗口需已经存在。发现目标不会申请凭据、写值或自动弹出系统权限请求。<span x-show="os==='win'">路径采用示例安装位置，实际调用以本机程序位置为准。</span></p>
     </figure>
 
-    <div class="reading connection-entry" id="native-helper-channel"><h3>知予怎样把查询交给本机辅助程序？</h3>
-      <p><code>chiyo</code> 把查询交给本机正在运行的知予 App。真正调用系统接口的是随 App 安装的辅助程序；Mac 和 Windows 联系它的方式不同。</p>
+    <div class="reading connection-entry" id="native-helper-channel"><h3>知予怎样把查询交给辅助程序？</h3>
+      <p>现在已经看到了 Agent 会收到的目标列表，接下来展开它怎样产生。<code>fill targets</code> 只查询可操作控件：<code>chiyo</code> 把查询交给本机知予 App，App 再把查询消息交给辅助程序。辅助程序查询目标应用并返回控件说明。</p>
+      <p><strong>凭据使用申请仍由后面的 <code>fill request</code> 提交，由知予保存、交用户审批，并在实际执行前检查许可。</strong>辅助程序负责查询、核验控件和获批后的设值，不创建或批准申请。</p>
+      <template x-if="os==='mac'"><div class="native-platform-copy"><p>App 内的 Dart 代码通过 <code>MethodChannel</code> 把查询交给同一 App 内的 Swift 桥接代码；MethodChannel 负责这两种语言之间的调用。Swift 再通过 <code>NSXPCConnection</code> 联系独立辅助程序。</p><p><strong>XPC</strong> 是 macOS 提供的跨程序通信机制。App 核验辅助程序身份后，通过私有连接发送 <code>nativeRequest</code> 消息，其中包含 <code>command=discover</code> 和 <code>appId</code>，辅助程序处理后沿原路返回目标列表。MethodChannel 在 App 内部，XPC 连接跨到辅助程序。</p></div></template>
+      <template x-if="os==='win'"><div class="native-platform-copy"><p>App 先核对同包的 <code>info-native-background-broker.exe</code>，首次需要时启动它，并保持只有双方使用的输入／输出连接。</p><p>App 通过这条连接发送含 <code>command=discover</code> 和 <code>appId</code>（程序完整路径）的消息；辅助程序调用 UIA 查询目标应用，把目标列表沿原连接返回。后续查询与执行复用这条连接。</p></div></template>
     </div>
-    <div class="helper-contact" id="helper-contact">
-      <div><h4>Mac：建立 XPC 连接，再调用查询方法</h4><p>App 用 <code>NSXPCConnection</code> 连接随包安装的辅助服务。<strong>XPC</strong> 是苹果让两个程序互相调用方法、传参数和取回回复的机制。知予先验证连接的程序身份，再把应用标识交给辅助程序的 <code>discover</code> 方法。</p></div>
-      <div><h4>Windows：启动专用辅助程序，再发送查询</h4><p>App 核对包内 <code>info-native-background-broker.exe</code> 的路径与文件摘要，启动它并保持私有连接。随后发送带有应用路径的 <code>discover</code> 消息，辅助程序处理后返回目标列表。</p></div>
-    </div>
-    <p class="caption">连接在 App 使用期间保留，后面的申请和执行继续使用它。一次 CLI 命令结束不会丢掉控件引用；辅助程序重启后，原来的目标编号会失效。<a href="#source-helper-channels">辅助程序的连接实现 ↓</a></p>
+    <figure class="native-channel-map" id="helper-contact" :aria-label="os==='mac'?'Mac 知予 App 经 XPC 联系辅助程序，辅助程序经 AX 查询目标应用':'Windows 知予 App 经私有输入输出连接联系辅助程序，辅助程序经 UIA 查询目标应用'">
+      <div class="native-boundary native-app-boundary"><div class="native-boundary-title">知予 App</div><div class="native-boundary-body"><p>安排查询<br>接回目标列表</p><template x-if="os==='mac'"><div class="native-app-bridge"><code>Dart</code><span>↓ MethodChannel</span><code>Swift 桥接代码</code></div></template><template x-if="os==='win'"><p class="native-internal-note">核验同包 helper<br>首次需要时启动</p></template></div></div>
+      <div class="native-channel-link"><b x-text="os==='mac'?'XPC':'私有输入／输出'"></b><code x-show="os==='mac'">NSXPCConnection</code><span class="native-map-message">查询 →</span><code>command=discover<br>appId=应用标识</code><span class="native-map-response">← 控件说明</span></div>
+      <div class="native-boundary native-helper-boundary"><div class="native-boundary-title">独立辅助程序</div><div class="native-boundary-body"><p>调用系统查询 API</p><p>保留应用、窗口和<br>密码框的原对象</p><p class="native-internal-note">返回编号与可读说明</p></div></div>
+      <div class="native-system-link"><b x-text="os==='mac'?'macOS · AX':'Windows · UIA'"></b><span>查询 →</span><span>← 控件对象</span></div>
+      <div class="native-boundary native-target-boundary"><div class="native-boundary-title">目标应用 · <span x-text="nativeAppName"></span></div>
+        <div class="native-query-window"><div class="native-query-window-title" x-text="nativeTaskTarget.windowTitle"></div><div class="native-query-window-body">
+          <b x-text="nativeTaskTarget.file"></b><label>输出目录</label><div class="native-ordinary-field">文档 / 本次解压</div>
+          <label>密码</label><div class="native-query-field"><span>尚未填写</span><code>field</code></div>
+          <div class="native-window-check">□ 记住本次设置</div><div class="native-window-actions"><span>取消</span><span>确定</span></div>
+        </div></div>
+      </div>
+      <figcaption>Agent 发出 <code>chiyo fill targets</code> 后，查询按图中方向交接；目标说明沿原路返回。目标窗口展示同一任务文件及多种组件，用于随后与控件树对应；窗口为教学示意，图中没有读取密码或设值。</figcaption>
+    </figure>
+    <p class="caption">连接由运行中的 App 保留，一条 CLI 命令退出不会丢掉 helper 中的控件对象；helper 重启会使原目标编号失效。<a href="#source-helper-channels">辅助程序的连接实现 ↓</a></p>
 
-    <div class="reading connection-entry" id="native-system-entry"><h3>辅助程序怎样从另一个应用中查到控件？</h3>
-      <p>应用通过系统的<strong>辅助功能</strong>提供界面信息，例如窗口里有哪些输入框、它们的标签和类型。标准界面框架通常已经为控件实现了这些查询，例如 Mac 的原生界面框架 AppKit。Mac 的这组接口简称 <strong>AX</strong>；Windows 的叫 <strong>UI Automation，简称 UIA</strong>。</p>
-      <p>系统返回一个代表目标应用中具体控件的对象，辅助程序可以继续对它查询属性或请求设值；系统再把请求交给目标应用处理。它能不能这样做，还取决于系统权限和控件实际提供的能力。</p>
+    <div class="reading connection-entry" id="native-system-entry"><h3>辅助程序怎样找到窗口里的密码控件？</h3>
+      <p>辅助程序通过操作系统的<strong>辅助功能接口</strong>查询应用的界面结构。系统返回代表窗口、按钮、输入框的对象；辅助程序沿对象关系查询，筛出支持的密码控件对象；每个候选都有自己的说明与目标编号。</p>
+      <p x-text="os==='mac'?'Mac 的这组接口简称 AX。AXWindows 表示“应用有哪些窗口”，AXChildren 表示“这个对象内部有哪些控件”。下图把系统返回的对象与窗口组件对应起来。':'Windows 的这组接口叫 UI Automation，简称 UIA。先取得窗口的根对象 root，再在它的后代控件中查询 IsPassword=true 的对象。下图把系统返回的对象与窗口组件对应起来。'"></p>
     </div>
     <div class="os-workspace" :data-os="os">
-      <div class="api-step" id="native-query"><div class="step-heading"><span>1</span><h3>从应用的窗口，查到其中的密码控件</h3></div>
-        <div class="step-content"><div class="api-explain"><p x-text="os==='mac'?'辅助程序根据应用标识找到运行进程，用它的进程编号创建 AX 查询对象 app。然后读出应用的窗口，再沿窗口的子控件关系查找输入框。':'辅助程序枚举指定进程的窗口，用 ElementFromHandle 取得一个窗口的 UIA 对象 root，再在这个窗口内部查询密码控件。'"></p><p x-text="os==='mac'?'AXWindows 表示应用有哪些窗口，AXChildren 表示控件内部有哪些子控件。查询返回的 field 代表具体密码框，并非当前焦点。':'FindAll 的条件 IsPassword=true 只筛选密码控件。辅助程序还会读取标签、AutomationId 等信息来区分候选，再取得代表具体密码框的 field。'"></p></div><pre class="api-code"><code x-html="highlight(queryCode)"></code></pre></div>
+      <div class="api-step" id="native-query"><div class="step-heading"><span>1</span><h3>从多个组件筛出候选，再由 Agent 按任务选择</h3></div>
+        <figure class="native-control-query" id="native-query-map">
+          <div class="native-inspector">
+            <div class="native-inspector-heading"><div><b>窗口组件 ↔ 系统提供的控件树</b><span>点击任一侧，查看对应对象与属性</span></div><span class="native-stage-label" x-text="['结构初态','helper：已筛选','Agent：已选择'][nativeStage]"></span></div>
+            <div class="native-inspector-grid">
+              <div class="native-inspector-window-pane">
+                <div class="native-window-tabs" role="group" aria-label="查看哪个教学窗口"><template x-for="target in nativeTargets" :key="target.key"><button type="button" :aria-pressed="nativeWindow===target.key" :class="{'is-active':nativeWindow===target.key}" @click="inspectNative(target.key,nativeComponent)" x-text="target.key==='task'?'任务文件窗口':'另一文件窗口'"></button></template></div>
+                <div class="native-demo-window" :class="{'is-target-window':nativeStage===2&&nativeWindow==='task'}">
+                  <div class="native-demo-title"><span class="native-window-dots" aria-hidden="true">● ● ●</span><span x-text="nativeViewedTarget.windowTitle"></span></div>
+                  <div class="native-demo-body"><template x-for="control in nativeControls" :key="control.key"><button type="button" class="native-demo-control" :class="{...nativeControlClass(nativeWindow,control.key),['native-control-'+control.kind]:true}" @click="inspectNative(nativeWindow,control.key)" :aria-label="'查看'+control.label+'的系统属性'" :aria-pressed="nativeComponent===control.key">
+                    <template x-if="control.kind==='text'"><span class="native-demo-filename" x-text="nativeViewedTarget.file"></span></template>
+                    <template x-if="control.kind==='edit'"><span class="native-demo-edit"><span class="native-field-label" x-text="control.label"></span><span class="native-field-box"><span x-text="control.key==='password'?'尚未填写':'文档 / 本次解压'"></span><code x-show="control.key==='password'" x-text="os==='mac'?nativeViewedTarget.macId:nativeViewedTarget.winId"></code></span></span></template>
+                    <template x-if="control.kind==='check'"><span class="native-demo-check">□ <span x-text="control.label"></span></span></template>
+                    <template x-if="control.kind==='action'"><span class="native-demo-button" x-text="control.label"></span></template>
+                  </button></template></div>
+                </div>
+                <p class="native-window-help">点击是在查看教学对象，不会向应用写入密码或点击“确定”。</p>
+              </div>
+              <div class="native-inspector-tree-pane">
+                <div class="native-tree-app"><code x-text="os==='mac'?'app · 应用对象':'指定应用的窗口集合'"></code><span x-text="nativeAppName"></span></div>
+                <p class="native-tree-api" x-text="os==='mac'?'AXWindows → 各窗口；AXChildren → 逐层查询子控件':'各 hwnd → ElementFromHandle → root；查询其后代控件'"></p>
+                <div class="native-object-tree"><template x-for="target in nativeTargets" :key="target.key"><div class="native-object-window">
+                  <button type="button" class="native-object-window-title" :class="{'is-task-window':nativeStage===2&&target.key==='task'}" @click="inspectNative(target.key,'password')"><code x-text="os==='mac'?'window':'root'"></code><span x-text="target.windowTitle"></span></button>
+                  <div class="native-object-children"><template x-for="control in nativeTreeControls(target.key)" :key="control.key"><button type="button" class="native-object-row" :class="nativeControlClass(target.key,control.key)" @click="inspectNative(target.key,control.key)" :aria-pressed="nativeWindow===target.key&&nativeComponent===control.key">
+                    <span class="native-object-description"><code x-text="nativeRole(control)"></code><span x-text="control.label"></span><small x-show="control.key==='password'" x-text="os==='mac'?target.macId:target.winId"></small></span><span class="native-object-status" x-text="nativeControlStatus(target.key,control.key)"></span>
+                  </button></template></div>
+                </div></template></div>
+              </div>
+            </div>
+            <div class="native-object-properties"><div><span class="native-properties-label">正在查看的对象</span><b><span x-text="nativeInspectedControl.label"></span><span class="native-property-window" x-text="' · '+nativeViewedTarget.file"></span></b><p x-text="nativeInspectionNote"></p></div><dl><template x-for="row in nativeInspectedAttributes" :key="row[0]"><div><dt x-text="row[0]"></dt><dd x-text="row[1]"></dd></div></template></dl></div>
+            <div class="native-selection-process">
+              <div class="native-demo-task"><span>Agent 的任务</span><b>为 <code x-text="nativeTaskTarget.file"></code> 输入密码</b></div>
+              <div class="native-selection-actions"><button type="button" id="native-scan-button" class="primary" @click="scanNativeTargets()" :disabled="nativeStage>=1">1 · 扫描并筛选</button><span aria-hidden="true">→</span><button type="button" id="native-choose-button" class="primary" @click="selectNativeTask()" :disabled="nativeStage!==1">2 · 按任务选择目标</button><button type="button" class="text-button" @click="resetNativeSelection()">重置</button></div>
+              <p class="native-selection-live" aria-live="polite" x-text="nativeSelectionStatus"></p>
+              <div class="native-filter-result" x-show="nativeStage>=1" x-cloak><div class="native-filter-result-heading"><b>helper 返回 <code>targets</code> · 2 项</b><span>候选不代表已批准</span></div><div class="native-filter-targets"><template x-for="(target,index) in nativeTargets" :key="target.key"><button type="button" class="native-filter-item" :class="{'is-selected':nativeStage===2&&target.key==='task','is-viewed':nativeWindow===target.key&&nativeComponent==='password'}" @click="inspectNative(target.key,'password')">
+                <span class="native-filter-item-heading"><b x-text="'候选 '+(index+1)"></b><em x-text="nativeStage===2&&target.key==='task'?'Agent 按任务选中':'可填写候选'"></em></span><strong x-text="target.windowTitle"></strong><span x-text="target.fieldLabel"></span><code x-text="target.targetId"></code>
+              </button></template></div><p class="native-selected-command" x-show="nativeStage===2">下一步申请使用 <code>--target <span x-text="nativeTaskTarget.targetId"></span></code>，仍须等待用户批准。</p></div>
+            </div>
+          </div>
+          <div class="native-api-path"><template x-if="os==='mac'"><div><p><b>Mac 的查询入口</b> <code>bundle ID → pid → AXUIElementCreateApplication(pid) → app</code></p><p><code>AXWindows</code> 返回窗口；对窗口与下层容器读取 <code>AXChildren</code>。helper 逐项保留支持的候选原对象，返回说明与 targetId。</p></div></template><template x-if="os==='win'"><div><p><b>Windows 的查询入口</b> <code>exe 路径核对进程 → EnumWindows → hwnd → ElementFromHandle → root</code></p><p>先 <code>CreatePropertyCondition(IsPassword=true)</code> 准备条件，再 <code>FindAll(TreeScope_Descendants,…)</code> 查询匹配项；创建条件没有取得控件。helper 逐项完成其余支持检查并返回候选，Agent 再按任务选择。</p></div></template></div>
+          <figcaption>窗口、属性值和中间层级均为教学简化；另一窗口在树中只展开密码节点，切换后可查看其全部组件。演示不调用系统、不写值、不申请或批准凭据。<span x-text="os==='mac'?'pid':'hwnd'"></span> 留在 helper 内，不能作为写入授权。</figcaption>
+        </figure>
+        <details class="native-query-code"><summary x-text="os==='mac'?'查看对应的 Swift 查询代码节选':'查看对应的 C++ 查询代码节选'"></summary><pre class="api-code"><code x-html="highlight(queryCode)"></code></pre></details>
       </div>
       <div class="api-step" id="native-inspect"><div class="step-heading"><span>2</span><h3>确认它属于支持的原生密码控件</h3></div>
-        <div class="step-content"><div class="api-explain"><p>找到“看起来是密码框”的元素还不够。辅助程序核对应用与窗口身份、控件类型、可用性和是否支持直接写值；遇到内嵌网页、无法区分的候选或不支持的控件就拒绝。</p><p x-text="os==='mac'?'Mac 读取角色和子角色，检查 AXValue 是否可写，并结合经过验证的应用版本和窗口结构确认兼容。AXSecureTextField 这个名字本身不能证明任意应用都能正确接收密码。':'Windows 检查密码属性、可编辑性以及 ValuePattern 设值能力，限定经验证的 Win32、WinForms、WPF 原生控件；密码值不会被读回。'"></p></div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>检查属性</span><span>本例符合的条件</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
+        <div class="step-content"><div class="api-explain"><p>上图“扫描并筛选”会先完成下面这些支持检查，再形成 <code>targets</code> 交给 Agent 选择。</p><p x-text="os==='mac'?'AXRole、AXSubrole、AXIdentifier 是属性名，分别描述控件种类、细分种类和应用／控件框架提供的标识。_NS:280 是本例的属性值，不是知予生成的 targetId。':'ControlType、IsPassword、AutomationId 是 UIA 属性，分别描述控件种类、是否为密码控件，以及应用／界面框架提供的标识。120 是 AutomationId 的本例值，不是 helper 返回的 targetId。'"></p><p>找到密码框还不够。扫描时，辅助程序还要核对应用与窗口身份、控件可用性和直接写值的能力；遇到无法区分的候选或不支持的控件就拒绝。</p><p x-text="os==='mac'?'Mac 检查 AXValue 是否可写，并结合经过验证的应用版本和窗口结构确认兼容。AXSecureTextField 这个名字本身不能证明任意应用都能接收密码。':'Windows 限定经验证的 Win32、WinForms、WPF 原生控件，并检查 ValuePattern 设值能力。本轮查询不读取密码值。'"></p></div><div><pre class="api-code"><code x-html="highlight(propertyCode)"></code></pre><div class="attribute-table"><div class="attr-head"><span>继续检查</span><span>本例符合的条件</span></div><template x-for="row in attributes" :key="row[0]"><div class="attr-row"><code x-text="row[0]"></code><code x-text="row[1]"></code></div></template></div></div></div>
       </div>
     </div>
 
-    <div class="reading connection-entry"><h3>把这个控件对应的目标编号返回 Agent</h3><p>辅助程序保存刚才查到的应用、窗口和具体控件对象，为它生成一个目标编号。Agent 得到编号及可读说明，用窗口标题和字段标签选择需要的那个框。</p></div>
-    <figure class="native-object-map">
-      <div class="native-object-window"><div class="native-title" x-text="os==='mac'?'归档实用工具 · 目标窗口':'7-Zip · 目标窗口'"></div><div class="native-body"><p>本次任务的压缩文件</p><b>NativeBackgroundProof.zip</b><label>密码</label><div class="native-field object-target"><span>尚未填写</span><code x-text="os==='mac'?'AXIdentifier: _NS:280':'AutomationId: 120'"></code></div><p class="caption">窗口与控件均为示意</p></div></div>
-      <div class="native-object-link"><span>辅助程序保存的对应关系</span><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code><b aria-hidden="true">→</b><p>这一运行进程<br>这一窗口对象<br><strong>这一密码控件对象 field</strong></p></div>
-      <div class="native-object-result"><b>Agent 收到的目标描述</b><pre><code x-text="nativeTargetPreview"></code></pre><p>这里节选返回字段，窗口说明随真实应用变化。编号由辅助程序生成，Agent 不自己编造。</p></div>
-      <figcaption>目标编号让 Agent 在下一条命令中指定这个框；真正的系统控件对象一直保存在本机辅助程序中。</figcaption>
-    </figure>
-    <p class="caption">多个密码框必须能通过窗口、标签和控件标识等说明区分。如果返回的说明无法分辨目标，就停止并重新确认，不能仅靠随机编号猜一个。</p>
+    <div class="reading connection-entry" id="native-object-map"><h3>把原对象留在 helper，把目标编号返回 Agent</h3><p>helper 保存应用、窗口和 <code>field</code> 的原对象，为该目标生成 <code>targetId</code>。名称与字段说明帮助 Agent 选择；真正的系统控件对象继续留在 helper。</p><div class="native-retained-target"><div><span>Agent 下一条命令使用</span><code x-text="nativeTaskTarget.targetId"></code></div><b aria-hidden="true">→</b><div><span>helper 保留并复核</span><strong>原应用／窗口／密码控件 field</strong></div></div><p>后续申请用这个编号，批准后执行仍须复核原对象。</p></div>
 
-    <div class="reading connection-entry" id="native-handoff"><h3>用目标编号申请使用密码，再等待批准</h3><p>本例改用知予目录中选出的“压缩文件密码”，编号 <code>cred-archive-01</code>、第 <code>1</code> 版。Agent 将它和刚才的目标编号放进同一份申请：</p><pre class="plan-fragment"><code>chiyo fill request --via native \
+    <div class="reading connection-entry" id="native-handoff"><h3>用目标编号申请使用密码，再等待批准</h3><p>本例改用知予目录中选出的“压缩文件密码”，编号 <code>cred-archive-01</code>、第 <code>1</code> 版。Agent 将它和第二个候选（<code>NativeBackgroundProof.zip</code> 的密码框）的目标编号放进同一份申请：</p><pre class="plan-fragment"><code>chiyo fill request --via native \
   --target tgt_W8Jk2Nx6fR9qP4vL7cY1sA \
   --credential cred-archive-01 --version 1 \
   --purpose "为本次压缩文件输入密码" --json</code></pre><p>知予向辅助程序确认这个编号仍指向原控件，把凭据版本、应用、窗口和字段说明保存为待批准申请 <code>REQ-43</code>。<strong>这一步只申请，不把密码写入应用。</strong></p><p>用户在知予 App 中查看并决定是否批准。Agent 继续查询这一份申请：</p><pre class="plan-fragment"><code>chiyo requests wait REQ-43 --timeout 60 --json</code></pre><p>批准允许按这份申请向固定目标使用密码；换成另一个框，需要新的目标和相应批准。获得许可后，才进入下一节的执行。</p></div>
   </section>
 
   <section id="platform" class="chapter">
-    <div class="reading"><h2><span class="section-num">05</span>获批后，怎样向固定控件写入密码？</h2><p>现在已有一份获批申请，以及辅助程序保存的具体控件对象。Agent 发起执行；知予需要先确认许可和控件都仍有效，再取得密码交给辅助程序，最后调用系统设值接口。</p><pre class="plan-fragment"><code>chiyo fill run --request REQ-43 --json</code></pre></div>
-    <div class="reading connection-entry" id="native-recheck"><h3>先复核原来的控件，再取得获准密码</h3><p>知予检查原聊天和设备、批准期限、凭据版本以及操作是否已经执行。辅助程序则用保存的对象复核：应用进程是否仍是原来的那次运行、窗口与字段是否仍存在、控件是否仍可写，窗口上下文是否仍符合原申请。</p><p>这次检查不查询“用户现在点中了哪里”。用户把焦点切到别的应用不会把目标改掉；目标窗口关闭、密码框被销毁重建或辅助程序重启，会使原目标失效。即使新框使用同一个名称，也不能据此接着用旧批准填写。</p></div>
-    <div class="reading" id="native-material"><h3>知予把获准密码交给已准备好的辅助程序</h3><p>目标和许可检查通过后，知予取得申请指定版本的密码，通过前面建立的私有连接交给辅助程序，并在写值前再次核对许可。密码不会作为普通 CLI 回复交给 Agent。</p><p>Mac 的 XPC 连接和 Windows 的私有连接传递的都是“本次准备好的目标 + 完整密码”。辅助程序在紧邻写值时再次检查目标，随后只调用一次设值方法。下面用公开文字 <code>hello</code> 代替密码展示调用。</p></div>
+    <div class="reading"><h2><span class="section-num">05</span>获批后，怎样向固定控件写入密码？</h2><p>现在已有一份获批申请，以及辅助程序保存的具体控件对象。Agent 发起执行；知予需要先确认许可和控件都仍有效，再取得密码交给辅助程序，最后调用系统设值接口。</p><pre class="plan-fragment"><code>chiyo fill run --request REQ-43 --json</code></pre><p>CLI 同样在发送执行请求前生成并保存操作编号，例如 <code>OP-43</code>，再通过命令回复返回它，供后续查询。申请编号 <code>REQ-43</code> 指向用户批准的记录，操作编号则对应这一次具体填写。</p></div>
+    <div class="reading connection-entry" id="native-recheck"><h3>先复核原来的控件，再取得获准密码</h3><p>知予检查原聊天和设备、批准期限、凭据版本以及操作是否已经执行。辅助程序则用保存的对象复核：应用进程是否仍是原来的那次运行、窗口与字段是否仍存在、控件是否仍可写，窗口上下文是否仍符合原申请。</p><p id="native-target-replaced">切换到邮件或编辑器，不会改变已选定的目标。需要重新确认目标的一个具体场景是：Agent 找到解压密码弹窗后，你点了“取消”关闭它，稍后又重新尝试解压，应用再次弹出密码窗口。原来保存的是第一次弹窗里的控件引用；新弹窗即使标题、位置相同，也不能继续沿用旧目标，需要重新查询并取得对应批准。辅助程序重启同样会使原引用失效。</p></div>
+    <div class="reading" id="native-material"><h3>知予把获准密码交给已准备好的辅助程序</h3><p>目标和许可检查通过后，知予取得申请指定版本的密码，通过前面建立的私有连接交给辅助程序，并在写值前再次核对许可。密码不会作为普通 CLI 回复交给 Agent。</p><p><span x-text="os==='mac'?'Mac 的 XPC 私有连接':'Windows 的私有输入／输出连接'"></span>传递“本次准备好的目标 + 完整密码”。辅助程序在紧邻写值时再次检查目标，随后只调用一次设值方法。下面用公开文字 <code>hello</code> 代替密码展示调用。</p></div>
     <div class="api-step" id="native-send"><div class="step-heading"><span>3</span><h3>通过系统 API，直接设置这个框的值</h3></div><div class="step-content"><div class="api-explain"><p x-text="os==='mac'?'Mac 把保存的 field、属性名 AXValue 和 hello 一起传给 AXUIElementSetAttributeValue。系统把设值请求交给该控件，由目标应用自己的控件代码处理。':'Windows 先关闭 UIA 的自动设置焦点选项，再从保存的 field 取得 ValuePattern，调用 SetValue。ValuePattern 是这个控件提供的“读取或设置值”能力，这里只使用设值。'"></p><p x-text="os==='mac'?'知予操作的是那个 AX 控件对象，不需要先点击它或给它键盘焦点。':'AutoSetFocus=false 很关键：UIA 的部分操作默认会先给控件设置焦点；这条后台路径显式关闭它。'"></p><p>调用成功只说明控件接受了设值请求，是否更新业务状态还取决于应用。<a :href="os==='mac'?'https://developer.apple.com/documentation/applicationservices/1460434-axuielementsetattributevalue':'https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationvaluepattern-setvalue'" target="_blank" rel="noreferrer">对应系统 API ↗</a></p></div><pre class="api-code"><code x-html="highlight(sendCode)"></code></pre></div></div>
-    <p class="caption">代码为机制节选，省略错误处理、完整兼容检查与私有连接细节。Windows 的焦点设置行为见 <a href="https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomation2-put_autosetfocus" target="_blank" rel="noreferrer">AutoSetFocus 文档</a>。</p>
+    <p class="caption">代码为机制节选，省略错误处理、完整兼容检查与私有连接细节。<span x-show="os==='win'">Windows 的焦点设置行为见 <a href="https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomation2-put_autosetfocus" target="_blank" rel="noreferrer">AutoSetFocus 文档</a>。</span></p>
 
-    <div class="reading connection-entry"><h3>用户在别处打字时，密码会填到哪里？</h3><p>下面的交互只模拟对象关系。目标仍是先前固定的密码控件；切换用户正在使用的应用，不会改变它。也可以模拟密码框被重建：这时原对象失效，知予应停止，而不是转去填写新框。</p></div>
-    <div class="background-demo" id="agent-native-target"><div class="background-controls"><label>用户当前正在使用 <select x-model="userApplication"><option value="editor">文本编辑器</option><option value="mail">邮件应用</option></select></label><label class="target-toggle"><input type="checkbox" x-model="targetRebuilt" @change="resetDelivery()">模拟原密码控件已被销毁重建</label></div><div class="background-windows"><div class="background-target"><span class="process-label">被操作的后台窗口</span><b>NativeBackgroundProof.zip · 密码</b><code>tgt_W8Jk2Nx6fR9qP4vL7cY1sA</code><output x-text="delivery==='sent'?'•••••':'尚未填写'"></output><small x-text="targetRebuilt?'原对象已失效，新框不能承接原编号':'辅助程序仍持有原控件对象'"></small></div><div class="foreground-user"><span class="process-label">用户正在使用的前台窗口</span><b x-text="userApplication==='editor'?'文本编辑器':'邮件应用'"></b><p>这里是用户自己的内容<span class="caret"></span></p><small>填写操作不向这个窗口发送文字</small></div></div><div class="background-demo-action"><button class="primary" @click="demoSend()">模拟向固定目标写入 hello</button><button class="text-button" @click="resetDelivery()">重置演示</button><p class="live-status" aria-live="polite" x-text="deliveryText"></p></div></div>
-    <div class="reading connection-entry" id="native-result"><h3>查询结果，再决定是否提交应用里的操作</h3><p>Agent 用 <code>chiyo operations show OP-43 --json</code> 查询本次操作。<code>sent</code> 表示系统设值调用已被接受；明确未写入时返回拒绝。若写值后失联，无法确定有没有写入，就报告 <code>unknown</code>，不能自动重试。</p><p>填写和点击“确定”仍是两个动作。Agent 还要检查界面，并在需要时另行提交。真实软件验收也必须检查业务结果，例如压缩包能否用这个密码正常处理，不能只凭 <code>sent</code> 就判定任务完成。</p></div>
+    <div class="reading connection-entry" id="native-background-scenario"><h3>Agent 填密码时，用户能继续在别的窗口工作吗？</h3><p id="agent-native-target"><strong>能。</strong>对于本文支持的原生密码控件，只要批准和原目标仍有效，就可以在后台填写，不切换前台应用，也不改变你当前的输入焦点和打字光标。</p></div>
+    <div class="reading connection-entry" id="native-result">
+      <h3>Agent 如何获取填写结果？</h3>
+      <p>辅助程序完成设值调用后，把结果沿前面建立的私有连接返回知予 App。知予再通过刚才的 <code>chiyo fill run</code> 命令回复，把本次操作编号 <code>OP-43</code> 和填写结果交给 Agent。回复说明执行情况，不包含密码原文。</p>
+      <p>Agent 后续还可以用同一个操作编号查询结果；如果刚才没有收到执行回复，也先查询这次操作。这条命令只查询，不会再次填写：</p>
+      <pre class="plan-fragment"><code>chiyo operations show OP-43 --json</code></pre>
+      <p>对于本例的原生密码框，<code>sent</code> 表示系统设值调用已被接受；明确没有写入时，知予返回拒绝结果和原因。如果写值期间失联，无法确定有没有写入，就返回 <code>unknown</code>，Agent 不能据此自动重试。</p>
+      <p>收到 <code>sent</code> 后，Agent 还要检查应用界面。填写密码和点击“确定”是两个动作，需要提交时再另行操作；压缩包是否成功解压，则要根据应用的后续结果判断。</p>
+    </div>
     <details><summary>哪些普通应用可以这样填写？</summary><div class="detail-body"><p>需要应用提供可查询、可设值的原生密码控件，还要通过实际兼容验证。Mac 使用 AppKit 的标准安全文本框是可行路径，但不能推广到全部 AppKit 应用；首批产品兼容配置仅包括已验证的系统归档实用工具、系统版本和窗口结构。Windows 验证覆盖 Win32、WinForms、WPF 原生密码控件，以及真实 7-Zip 场景。</p><p>内嵌网页、WKWebView 和 Electron 暂不通过这条原生路径填写。浏览器继续用前面讲过的专用接口。即使外观相同，系统返回的控件能力和应用处理设值的方式也可能不同。</p><p>最后一次检查和实际设值不是一个能锁住目标 App 的事务：应用仍可能在两者之间关闭窗口或改变业务状态。后台填写解决的是固定控件和避免依赖全局焦点，不能保证任意应用的所有业务变化都可由外部检测。</p></div></details>
-  </section>
 
-  <section id="chiyo" class="chapter final-chapter">
-    <div class="reading"><h2><span class="section-num">06</span>Agent、知予和辅助程序分别负责什么？</h2><p>Agent 根据任务选择凭据和目标，用户决定是否批准。知予保存批准并在执行时检查；真正与外部软件交互的部分，再按目标类型选择接口。</p></div>
-    <div class="implementation-map"><div class="request-and-material"><div class="agent-planner"><strong>Agent</strong><span>选择密码与具体目标<br>提交申请、查询结果</span></div><div class="request-direction">提交申请 → 用户批准 → 发起执行</div><div class="material-source"><strong>知予</strong><span>检查批准与目标<br>取得指定版本密码</span></div></div><div class="implementation-routes"><div class="implementation-route"><div class="pipe"><code>页面 + 表单 + 字段</code><span>交给浏览器填写模块 →</span></div><div><h3>浏览器中的网页</h3><p>按浏览器接入方式连接指定页面，复核页面与元素，再让页面执行写入代码。Ego 和 Chrome 的连接方式不同，普通 HTML 密码框的 DOM 写入原理相同。</p></div></div><div class="implementation-route"><div class="pipe"><code>目标编号 → 固定控件对象</code><span>交给本机辅助程序 →</span></div><div><h3>支持的原生应用</h3><p>发现阶段保存具体控件对象；批准后复核并直接设值。Mac 用 AXValue，Windows 用 UIA ValuePattern，写入不依赖用户当前的输入焦点。</p></div></div></div></div>
-    <div class="reading"><p>服务器模式下，服务器保存凭据、批准和操作记录，目标查询与实际填写仍发生在 Agent 所在电脑上的知予 App。无论哪条路径，填写结果都要与提交动作、登录或其他业务成功分别判断。</p></div>
     <details id="source-credential-handoff"><summary>申请与目标范围的设计依据</summary><div class="detail-body"><p><a href="../../design/cli-redesign-review.md">统一 CLI、网页表单和字段批准范围</a>；<a href="../../design/native-background-fill-contract.md">原生后台填写合同：目标发现、申请、执行和生命周期</a>；<a href="../../adr/0032-native-background-credential-fill.md">固定原生控件对象的领域决策</a>。</p></div></details>
     <details id="source-native"><summary>接口与源码参考</summary><div class="detail-body source-list"><p>示意代码用于解释调用关系，省略完整错误处理。示例编号、界面和 hello 都是教学数据。</p>
       <a id="source-browser-plan" href="../../design/cli-redesign-review.md"><b>浏览器填写和表单范围</b><span>CLI 与批准合同</span></a>
@@ -358,5 +481,6 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
   </section>
   <footer><span>知予 · 跨应用填写图解</span><a href="#main">回到开头 ↑</a></footer>
 </main>
+</div>
 </body>
 </html>
