@@ -333,6 +333,7 @@ class OwnerWorkspaceCredentialBatches {
       scopes: scopes,
       credentialBatch: true,
       sshSession: r.items.any((i) => i.destination.ssh != null),
+      sshTarget: r.items.map((i) => i.destination.ssh).nonNulls.firstOrNull,
       batchSupportsSessionValidity: r.items.every(
         (i) => i.destination.ssh?.validity == 'session',
       ),

@@ -77,6 +77,10 @@ void main() {
           Map<String, dynamic>.from(approvalDetailToJson(detail, version: 6)),
         );
         expect(wire.sshSession, isTrue);
+        expect(wire.sshTarget!.host, 'example.test');
+        expect(wire.sshTarget!.port, 2222);
+        expect(wire.sshTarget!.user, 'fixture');
+        expect(wire.sshTarget!.credentialUse, use);
         expect(wire.supportsSessionValidity, isTrue);
         await owner.change(
           WorkspaceApprovalChange(
@@ -107,6 +111,73 @@ void main() {
           )['status'],
           'ok',
         );
+        if (use == 'login') {
+          final context = core.SshSessionOperationContext(
+            kind: 'run',
+            sessionId: 'ssh-synthetic',
+            runId: 'run-synthetic',
+            digest: 'sha256:${'a' * 64}',
+            byteLength: 10,
+          );
+          final run = await service.agent.beginCredentialBatchOperation(
+            session,
+            'A' * 22,
+            request.id,
+            operationId: 'run-synthetic',
+            sshContext: context,
+          );
+          final before = (await owner.read(request.id)).batchOperations.single;
+          await service.agent.authorizeCredentialBatchInput(
+            'A' * 22,
+            run.privateProof!,
+          );
+          await service.agent.finishCredentialBatchOperation(
+            'A' * 22,
+            run.privateProof!,
+            core.CredentialBatchOperationState.filled,
+            itemResults: {'b1': 'sent'},
+          );
+          final observed = await owner.read(request.id);
+          final encoded = Map<String, dynamic>.from(
+            approvalDetailToJson(observed, version: 6),
+          );
+          final decoded = approvalDetailFromJson(encoded);
+          final operation = decoded.batchOperations.single;
+          expect(operation.sshContext!.toJson(), context.toJson());
+          expect(operation.updates(before), isTrue);
+          expect(operation.summaryLabel, '命令已发送');
+          expect(operation.itemResultLabel('sent'), '命令已发送');
+          expect(operation.operationLabel, '发送远程命令');
+          expect(
+            encoded.toString(),
+            isNot(contains('NEVER-RENDER-SSH-SECRET')),
+          );
+          expect(
+            decoded.withBatchOperation(operation).sshTarget!.host,
+            'example.test',
+          );
+          final changed = Map<String, dynamic>.from(operation.toJson());
+          changed['sshContext'] = {
+            ...context.toJson(),
+            'sessionId': 'another-connection',
+          };
+          expect(
+            WorkspaceCredentialBatchOperation.fromJson(
+              changed,
+            ).updates(operation),
+            isFalse,
+          );
+          changed['sshContext'] = {
+            ...context.toJson(),
+            'text': 'must-not-cross-transport',
+          };
+          expect(
+            () => WorkspaceCredentialBatchOperation.fromJson(changed),
+            throwsA(anything),
+          );
+          encoded['sshTarget'] = null;
+          expect(() => approvalDetailFromJson(encoded), throwsFormatException);
+        }
         await owner.change(
           WorkspaceApprovalChange(
             operationId: 'revoke',

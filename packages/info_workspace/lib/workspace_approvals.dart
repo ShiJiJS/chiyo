@@ -1,4 +1,5 @@
 import 'package:info_core/access_timing.dart';
+import 'package:info_core/info_core.dart' as core;
 
 import 'dart:convert';
 
@@ -152,6 +153,7 @@ class WorkspaceApprovalDetail {
     this.credential,
     this.credentialBatch = false,
     this.sshSession = false,
+    this.sshTarget,
     this.batchSupportsSessionValidity = false,
     this.batchSessionBound = false,
     this.programPlan,
@@ -188,6 +190,7 @@ class WorkspaceApprovalDetail {
   final WorkspaceCredentialUseRequest? credential;
   final bool credentialBatch;
   final bool sshSession, batchSupportsSessionValidity, batchSessionBound;
+  final core.SshSessionTarget? sshTarget;
   bool get supportsSessionValidity =>
       batchSupportsSessionValidity ||
       credential?.supportsSessionValidity == true;
@@ -207,6 +210,7 @@ class WorkspaceApprovalDetail {
         credential: credential,
         credentialBatch: credentialBatch,
         sshSession: sshSession,
+        sshTarget: sshTarget,
         batchSupportsSessionValidity: batchSupportsSessionValidity,
         batchSessionBound: batchSessionBound,
         programPlan: programPlan,
@@ -236,6 +240,7 @@ class WorkspaceApprovalDetail {
     credential: credential,
     credentialBatch: credentialBatch,
     sshSession: sshSession,
+    sshTarget: sshTarget,
     batchSupportsSessionValidity: batchSupportsSessionValidity,
     batchSessionBound: batchSessionBound,
     programPlan: programPlan,
@@ -265,6 +270,7 @@ class WorkspaceApprovalDetail {
     credential: credential,
     credentialBatch: credentialBatch,
     sshSession: sshSession,
+    sshTarget: sshTarget,
     batchSupportsSessionValidity: batchSupportsSessionValidity,
     batchSessionBound: batchSessionBound,
     programPlan: programPlan,
@@ -314,6 +320,7 @@ class WorkspaceApprovalDetail {
       credential: credential,
       credentialBatch: credentialBatch,
       sshSession: sshSession,
+      sshTarget: sshTarget,
       batchSupportsSessionValidity: batchSupportsSessionValidity,
       batchSessionBound: batchSessionBound,
       programPlan: programPlan,
