@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:info_core/info_core.dart';
 
 import 'ssh_session_transport.dart';
 
@@ -35,6 +36,31 @@ class WindowsSshTransportLauncher implements SshTransportLauncher {
       throw const SshTransportFailure('ssh_launch_invalid');
     }
     final process = await Process.start(helperPath, const ['--broker']);
+    CredentialProcessIdentity? identity;
+    try {
+      identity = CredentialProcessIdentity.capture(process.pid);
+      if (identity == null) {
+        throw const SshTransportFailure('process_identity_unavailable');
+      }
+      // The broker is blocked reading its first frame. Register this exact
+      // consumer before it may start SSH or open managed authentication files.
+      await launch.onProcessCreated?.call(process.pid, identity.value);
+      if (CredentialProcessIdentity.isActive(process.pid, identity.value) !=
+          true) {
+        throw const SshTransportFailure('ssh_broker_identity_ended');
+      }
+    } on Object {
+      process.kill();
+      await process.stdin.close();
+      await Future.wait([
+        process.stdout.drain<void>(),
+        process.stderr.drain<void>(),
+        process.exitCode,
+      ]);
+      rethrow;
+    } finally {
+      identity?.close();
+    }
     final transport = _WindowsSshTransport(process, launch.onLoginChallenge);
     try {
       await transport._write(

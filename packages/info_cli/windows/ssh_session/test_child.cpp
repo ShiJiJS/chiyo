@@ -44,6 +44,14 @@ int Child(const std::wstring& program, const std::wstring& argument, bool receiv
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
   int argc = 0; LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
   std::wstring mode = argc > 1 ? argv[1] : L""; LocalFree(argv);
+  if (mode == L"mark") {
+    auto path = Env(L"CHIYO_QA_STARTED_RECEIPT");
+    HANDLE file = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (file == INVALID_HANDLE_VALUE) return 2;
+    DWORD count = 0; const char* value = "started\n";
+    bool ok = WriteFile(file, value, 8, &count, nullptr) && count == 8;
+    CloseHandle(file); Output("started\n"); return ok ? 0 : 2;
+  }
   if (mode == L"headless") { Output(GetConsoleWindow() ? "console-present\n" : "headless\n"); return 0; }
   auto helper = Env(L"SSH_ASKPASS");
   if (mode == L"relay") {
