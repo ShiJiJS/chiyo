@@ -1,21 +1,23 @@
 # 原生后台填写完整 App 验收
 
-对应 [#144](https://github.com/ShiJiJS/chiyo/issues/144) 和[公共合同](../design/native-background-fill-contract.md)。只使用独立构建目录的合成接收程序、临时加密资料库、临时 HTTPS 服务和独立 App 配置。此脚本不连接真实资料库，不操作用户应用。
+对应 [#144](https://github.com/ShiJiJS/chiyo/issues/144) 和[公共合同](../design/native-background-fill-contract.md)。只使用合成资料、临时加密资料库和专属 App 配置，不连接真实资料库或操作用户文档。验收使用同一候选源码构建的正式驱动、helper 和公开 CLI。
 
-入口为 `apps/desktop/integration_test/native_background_fill_test.dart`。必须等统一 native 分支装配两端真实 adapter 后运行；未装配时 native targets 明确失败，不能用注入的假 driver 或 focus shim 通过此项。
+## Windows：三类合成控件完整链路
 
-在平台正常的 Flutter 集成测试命令上提供以下 dart-define：
+入口为 [native_background_fill_test.dart](../../apps/desktop/integration_test/native_background_fill_test.dart)，使用合成 receiver 和临时 HTTPS 服务。Windows 的 `win32_password`、`winforms_password`、`wpf_password` 必须各运行一次；不能用注入的假 driver 或 focus shim 通过此项。
+
+在 Windows 正常的 Flutter 集成测试命令上提供以下 dart-define：
 
 - `NATIVE_FILL_CLI`：同一提交构建的公开 chiyo/chiyo.exe 绝对路径。
-- `NATIVE_FILL_RECEIVER`：`build/` 下合成接收程序的实际可执行文件路径，Mac 使用 bundle 内实际程序。
-- `NATIVE_FILL_KIND`：Mac 为 `appkit_secure_text`；Windows 分别为 `win32_password`、`winforms_password`、`wpf_password` 各跑一次。
+- `NATIVE_FILL_RECEIVER`：`build/` 下对应 Win32、WinForms 或 WPF 合成接收程序的实际可执行文件路径。
+- `NATIVE_FILL_KIND`：本次运行的 `win32_password`、`winforms_password` 或 `wpf_password`。
 - `NATIVE_FILL_EVIDENCE`：本工作树 `build/` 下本次公开回执目录。
 
-未给参数时此项显式跳过，不视为真实平台通过。不运行旧全套验收，不构建或替换 #143 的冻结安装包。
+未给参数时此项显式跳过，不视为真实平台通过。清理等待正常 quit 的资源关闭 Future；测试只延后最终 OS 进程终止，以便 Flutter 返回回执，原生驱动仍由正式工厂加载。
 
-## 合成接收程序接口
+## Windows 合成接收程序接口
 
-平台会话提供对应原生控件的 receiver；该接口仅用于测试，不进入产品 helper wire。进程参数为 `--native-fill-fixture --nonce NONCE --kind KIND`。应创建可见且不激活的原生根窗口及密码框；窗口标题必须包含 nonce。不能读取或操作其他 App。标准输出只写 JSON-lines，不输出密码或字节。
+receiver 提供对应原生控件；该接口仅用于测试，不进入产品 helper wire。进程参数为 `--native-fill-fixture --nonce NONCE --kind KIND`。应创建可见且不激活的原生根窗口及密码框；窗口标题必须包含 nonce。不能读取或操作其他 App。标准输出只写 JSON-lines，不输出密码或字节。
 
 1. 就绪回执：`{"state":"ready","nonce":"...","appId":"...","windowTitle":"...","fieldIdentifier":"...","controlKind":"..."}`。fieldIdentifier 对应已知 AXIdentifier/AutomationId，须能在 helper 的可见字段描述中找到。
 2. 私有 stdin `{"command":"expect","bytes":[...]}`：只设置接收程序内部的比较目标、清空测试观察计数，不向控件写值；返回 `{"state":"armed"}`。密码不在程序参数、普通 CLI 输出或证据文件中。
@@ -23,12 +25,25 @@
 4. `{"command":"rebuild"}`：销毁并重建原密码控件，保留同名标识和窗口说明；返回 `{"state":"rebuilt"}`。旧目标必须失效，不可按名字恢复旧批准。
 5. stdin EOF 退出并清理合成接收程序。若退出迟滞，测试只终止自己启动的 receiver 进程，不终止用户 App。
 
-现有平台探针若使用不同测试接口，可由平台会话适配上述 receiver 外壳；生产 NativeFillDriver 的接口和 wire 不因此变化。
+使用不同测试接口的探针须适配上述 receiver 外壳；生产 NativeFillDriver 的接口和 wire 不因此变化。
 
-## 验证事实
+## Windows 验证事实
 
 脚本实际启动 StorageDesktopLauncher，公开 CLI 发现唯一描述匹配且真实程序路径一致的控件，提交 native 申请，经与 App 相同的 owner 审批 HTTP 端点作出决定，再从 CLI 执行。审批界面的实际显示与按钮另由 `native_background_fill_approval_widget_test.dart` 覆盖。
 
 批准前和批准后、执行前，接收程序均须报告未收到密码。执行后真实 setter 的逐项回执为 sent，接收程序准确匹配包含首尾空格、中文和 emoji 的合成密码，期间没有激活或获得键盘焦点。重复操作编号不得新增执行记录；控件重建后，旧批准的执行返回目标失效且不能领取新材料。公共输出扫描拒绝密码、私密聊天证明、设备凭证、管理 Token 及 privateProof。证据文件仅保留公开编号、结果和布尔见证，不保留密码或配置。
 
 公开 sent 仅表示 setter 接受；接收程序的 matched 是合成夹具的独立验真，不扩大生产 helper 对任意 App 业务识别的承诺。
+
+## Mac：普通主入口与归档实用工具
+
+Mac 生产兼容名单目前仅包含经验证版本的系统归档实用工具（Archive Utility，AU），具体版本、系统构建与身份条件见 [Mac 原生后台填写说明](../../apps/desktop/macos/native_background/README.md#首批真实兼容范围)。自建 AppKit receiver 不在生产名单内，不能按上面的通用 fixture harness 宣称 Mac 产品验收通过，也不能为跑绿测试放宽兼容名单。
+
+使用普通 `lib/main.dart` App、同源 AOT `chiyo`、本次唯一的 `--connection-profile <profileName>`，按 [Mac 产品完整流程](../../apps/desktop/macos/native_background/README.md#普通产品构建和后续完整流程) 和 [macos-native-product-flow.py](../../scripts/qa/macos-native-product-flow.py) 执行：
+
+1. `prepare` 在本工作树 `build/` 下创建合成 ZIP 和唯一 profileName、credentialName；在普通 App 的该命名 profile 中通过正常 UI 新建合成库及凭据。
+2. 用真实 AU 打开该 ZIP。`request` 使用公开 CLI 发现唯一合成目标并申请，在普通 App 的真实审批界面核对并批准；批准后尚未填写。
+3. 完成独立观察器校准后运行一次 `run`，用 `status` 确认 `b1: sent` 及有效的后台观察。超时或 unknown 后只查询原操作，不重放 setter 或更换操作编号。
+4. 结束观察区间后，独立在 AU 提交，再用 `business` 核对解压内容与 SHA-256。sent 本身不代表解压成功。
+
+签名、helper 权限归属、命名 profile 的定位及正常退出清理要求均以 Mac 说明为准；脚本不伪造批准，不读取密码控件值。
