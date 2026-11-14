@@ -394,6 +394,7 @@ final class _AttachmentBackupManifest {
           28,
           29,
           30,
+          31,
         }.contains(json['version'])) {
       throw const StorageFailure('unsupported_backup');
     }

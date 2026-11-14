@@ -544,6 +544,13 @@ class InformationBackups {
             ).items.any((i) => i.destination.native != null),
           ) ??
           false;
+      final hasNativeV2History =
+          tables['credential_batches']?.any(
+            (row) => _storedBatch(
+              row,
+            ).items.any((i) => i.destination.native?.requiresV2 ?? false),
+          ) ??
+          false;
       final hasProgramBatchHistory =
           tables['credential_batches']?.any(
             (row) => _storedBatch(row).programPlan != null,
@@ -652,7 +659,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = hasNativeHistory
+        formatVersion = hasNativeV2History
+            ? 31
+            : hasNativeHistory
             ? 30
             : hasProgramBatchHistory
             ? 29
@@ -1270,6 +1279,9 @@ class InformationBackups {
         if (contents.formatVersion >= 28) {
           await _repository._createCredentialBatchTables();
         }
+        if (contents.formatVersion >= 31) {
+          await _repository._requireAdmissionFormat(_nativeFillV2LibraryFormat);
+        }
         if (contents.formatVersion >= 30) {
           await _repository._requireAdmissionFormat(_nativeFillLibraryFormat);
         }
@@ -1384,6 +1396,7 @@ class InformationBackups {
           28,
           29,
           30,
+          31,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1410,7 +1423,7 @@ class InformationBackups {
       25 => _v25Columns,
       26 || 27 => _v26Columns,
       28 => _v28Columns,
-      29 || 30 => _v29Columns,
+      29 || 30 || 31 => _v29Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

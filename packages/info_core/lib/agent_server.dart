@@ -403,7 +403,7 @@ class AgentProtocol {
             if (enableCredentialBatches && _agent.credentialBatchesAvailable)
               'credential-batches.v3',
             if (enableCredentialBatches && _agent.credentialBatchesAvailable)
-              'credential-native-fill.v1',
+              'credential-native-fill.v2',
             if (enableCredentialBatches && _agent.credentialProgramsAvailable)
               'credential-programs.v3',
             'credential-catalog-search.v1',

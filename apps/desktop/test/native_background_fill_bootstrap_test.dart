@@ -115,7 +115,7 @@ void main() {
         expect(capability['providers'], isNot(contains('focus')));
         expect(
           capability['capabilities'],
-          contains('credential-native-fill.v1'),
+          contains('credential-native-fill.v2'),
         );
         final targets = await ui.resolve(
           () => DeviceCredentialBatchClient(profile, directory: root).execute(
@@ -198,7 +198,7 @@ void main() {
           );
           expect(
             (capability['capabilities'] as List).contains(
-              'credential-native-fill.v1',
+              'credential-native-fill.v2',
             ),
             available,
           );

@@ -6,11 +6,10 @@ import 'package:test/test.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'storage_test.dart' show TestKeyStore;
 import 'backup_setup.dart';
-import '../../info_core/test_support/native_fill.dart'
-    show nativeTargetFixture;
+import '../../info_core/test_support/native_fill.dart' show nativeTargetFixture;
 
 const _device = 'AAAAAAAAAAAAAAAAAAAAAA';
-CredentialBatchInput _input(String id, {bool native = false}) =>
+CredentialBatchInput _input(String id, {String? nativeKind}) =>
     CredentialBatchInput.fromJson({
       'protocolVersion': 3,
       'purpose': 'Synthetic login',
@@ -19,8 +18,11 @@ CredentialBatchInput _input(String id, {bool native = false}) =>
       'items': [
         {
           'credentialId': id,
-          'destination': native
-              ? {'via': 'native', 'target': nativeTargetFixture()}
+          'destination': nativeKind != null
+              ? {
+                  'via': 'native',
+                  'target': nativeTargetFixture(controlKind: nativeKind),
+                }
               : {
                   'via': 'ego',
                   'target': {
@@ -55,14 +57,21 @@ Future<ManagedCredential> _credential(InformationService service) async {
 }
 
 void main() {
-  for (final native in [false, true]) {
-    _tests(native);
+  for (final kind in [
+    null,
+    'appkit_secure_text',
+    'macos_ax_password',
+    'windows_uia_password',
+  ]) {
+    _tests(kind);
   }
 }
 
-void _tests(bool native) {
+void _tests(String? nativeKind) {
+  final native = nativeKind != null;
+  final v2 = native && nativeKind != 'appkit_secure_text';
   test(
-    '${native ? 'native ' : ''}encrypted batches preserve live server grants, not an interrupted input capability',
+    '${native ? '$nativeKind ' : ''}encrypted batches preserve live server grants, not an interrupted input capability',
     () async {
       final root = await Directory.systemTemp.createTemp('encrypted-batches-');
       addTearDown(() => root.delete(recursive: true));
@@ -80,7 +89,7 @@ void _tests(bool native) {
         () => runtime.service.agent.requestCredentialBatch(
           session,
           _device,
-          _input(c.id, native: native),
+          _input(c.id, nativeKind: nativeKind),
           operationId: 'submit-1',
         ),
       );
@@ -109,9 +118,34 @@ void _tests(bool native) {
       database.execute('PRAGMA key = "x\'$keyHex\'"');
       expect(
         database.select('PRAGMA user_version').single.values.single,
-        native ? 69 : 65,
+        v2
+            ? 70
+            : native
+            ? 69
+            : 65,
       );
+      if (v2) {
+        database.execute('PRAGMA user_version=69');
+        database.execute('UPDATE library_format SET version=69');
+      }
       database.close();
+      if (v2) {
+        await expectLater(
+          EncryptedInformationRepository.openOnline(root.path, keys),
+          throwsA(
+            isA<StorageFailure>().having(
+              (error) => error.code,
+              'code',
+              'unsupported_schema',
+            ),
+          ),
+        );
+        final repair = sqlite.sqlite3.open('${root.path}/library.db');
+        repair.execute('PRAGMA key = "x\'$keyHex\'"');
+        repair.execute('PRAGMA user_version=70');
+        repair.execute('UPDATE library_format SET version=70');
+        repair.close();
+      }
       repo = await EncryptedInformationRepository.openOnline(root.path, keys);
       runtime = await OnlineInformationRuntime.open(repository: repo);
       addTearDown(() async {
@@ -164,7 +198,7 @@ void _tests(bool native) {
   );
 
   test(
-    '${native ? 'native ' : ''}portable backup keeps decided batch history, drops pending work, and restores no usable grant',
+    '${native ? '$nativeKind ' : ''}portable backup keeps decided batch history, drops pending work, and restores no usable grant',
     () async {
       final root = await Directory.systemTemp.createTemp('batch-backup-');
       addTearDown(() => root.delete(recursive: true));
@@ -182,7 +216,7 @@ void _tests(bool native) {
       final r = await service.agent.requestCredentialBatch(
         session,
         _device,
-        _input(c.id, native: native),
+        _input(c.id, nativeKind: nativeKind),
         operationId: 'submit-1',
       );
       await service.owner.decideCredentialBatch(
@@ -194,7 +228,7 @@ void _tests(bool native) {
       await service.agent.requestCredentialBatch(
         session,
         _device,
-        _input(c.id, native: native),
+        _input(c.id, nativeKind: nativeKind),
         operationId: 'pending-2',
       );
       final operation = await service.agent.beginCredentialBatchOperation(
@@ -212,7 +246,45 @@ void _tests(bool native) {
       );
       expect(repo.credentialBatches, hasLength(2));
       final preview = await repo.backups.inspect(path, recovery);
-      expect(preview.formatVersion, native ? 30 : 28);
+      expect(
+        preview.formatVersion,
+        v2
+            ? 31
+            : native
+            ? 30
+            : 28,
+      );
+      if (v2) {
+        final keyHex = base64Url
+            .decode(recovery.substring('aim-recovery-v1:'.length))
+            .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+            .join();
+        final archive = sqlite.sqlite3.open(path);
+        archive.execute('PRAGMA key = "x\'$keyHex\'"');
+        final original =
+            archive
+                    .select('SELECT payload FROM backup_snapshot')
+                    .single['payload']
+                as String;
+        archive.execute('UPDATE backup_snapshot SET payload=?', [
+          jsonEncode({...jsonDecode(original) as Map, 'version': 30}),
+        ]);
+        archive.close();
+        await expectLater(
+          repo.backups.inspect(path, recovery),
+          throwsA(
+            isA<StorageFailure>().having(
+              (error) => error.code,
+              'code',
+              'invalid_backup',
+            ),
+          ),
+        );
+        final repair = sqlite.sqlite3.open(path);
+        repair.execute('PRAGMA key = "x\'$keyHex\'"');
+        repair.execute('UPDATE backup_snapshot SET payload=?', [original]);
+        repair.close();
+      }
       expect(preview.credentialUseHistoryCount, 1);
       expect(preview.credentialExecutionCount, 1);
       final target = await EncryptedInformationRepository.open(

@@ -4,6 +4,43 @@ import 'package:test/test.dart';
 import '../test_support/native_fill.dart';
 
 void main() {
+  test('capability kinds remain distinct from legacy approved snapshots', () {
+    for (final kind in ['macos_ax_password', 'windows_uia_password']) {
+      final json = nativeTargetFixture(controlKind: kind);
+      final target = NativeFillTarget.fromJson(json);
+      expect(target.toJson(), json);
+      expect(target.requiresV2, isTrue);
+      for (final legacy
+          in kind == 'macos_ax_password'
+              ? ['appkit_secure_text']
+              : ['win32_password', 'winforms_password', 'wpf_password']) {
+        final old = NativeFillTarget.fromJson({...json, 'controlKind': legacy});
+        expect(old.requiresV2, isFalse);
+        expect(old.matches(target), isFalse);
+        expect(
+          CredentialBatchDestination.fromJson({
+            'via': 'native',
+            'target': old.toJson(),
+          }).matches(
+            CredentialBatchDestination.fromJson({
+              'via': 'native',
+              'target': json,
+            }),
+          ),
+          isFalse,
+        );
+      }
+      expect(
+        () => NativeFillTarget.fromJson({
+          ...json,
+          'controlKind': kind == 'macos_ax_password'
+              ? 'windows_uia_password'
+              : 'macos_ax_password',
+        }),
+        throwsA(isA<CredentialUseFailure>()),
+      );
+    }
+  });
   test(
     'legal AppKit and all three Windows snapshot kinds parse their field values',
     () {
