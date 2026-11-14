@@ -180,7 +180,7 @@ class _WorkspaceAppState extends State<_WorkspaceSession> {
     unawaited(_settings.load());
     unawaited(_plugins.load());
     _summaryChanges = _source.changes.listen(
-      (_) => unawaited(_controller.refresh()),
+      (_) => unawaited(_controller.refresh(background: true)),
     );
     _desktopNavigation = (page) {
       if (_controller.navigationLocked) return;

@@ -43,10 +43,11 @@ void main() {
             .then((_) => settled = true);
         source.notifyExternalChange();
         await Future<void>.delayed(Duration.zero);
-        expect(source.reads, hasLength(2));
+        expect(source.reads, hasLength(1));
         source.reads.first.complete(catalog);
         await Future<void>.delayed(Duration.zero);
         expect(settled, isFalse);
+        expect(source.reads, hasLength(2));
         source.reads.last.complete(catalog);
         await loading;
         expect(controller.selection, ref);

@@ -90,6 +90,48 @@ void main() {
     s.dispose();
   });
   test(
+    'background bursts cannot starve detail reads or supersede navigation',
+    () async {
+      m.dispose();
+      final changes = StreamController<WorkspaceRecordRef?>.broadcast();
+      m = ProposalsController(port, changes.stream);
+      final reads = <Completer<WorkspaceProposalDetail>>[];
+      port.readOverride = (id) {
+        if (id != 'import') return port.inner.read(id);
+        final read = Completer<WorkspaceProposalDetail>();
+        reads.add(read);
+        return read.future;
+      };
+      final opening = m.open('import');
+      await Future<void>.delayed(Duration.zero);
+      for (var i = 0; i < 10; i++) {
+        changes.add(null);
+      }
+      await Future<void>.delayed(Duration.zero);
+      expect(reads, hasLength(1));
+      reads.first.complete(await port.inner.read('import'));
+      await Future<void>.delayed(Duration.zero);
+      expect(m.detail?.summary.id, 'import');
+      expect(reads, hasLength(2));
+      expect(m.backgroundLoading, isTrue);
+      changes.add(null);
+      await Future<void>.delayed(Duration.zero);
+      await m.select('update');
+      reads.last.completeError(const WorkspaceFailure('offline', '旧请求失败'));
+      await opening;
+      expect(
+        reads,
+        hasLength(2),
+        reason: 'New navigation supersedes queued background reads',
+      );
+      expect(m.detail?.summary.id, 'update');
+      expect(m.readFailure, isNull);
+      expect(m.loading, isFalse);
+      expect(m.canConfirm, isTrue);
+      await changes.close();
+    },
+  );
+  test(
     'each proposal retains its own edits, active item and reading position across pages and query changes',
     () async {
       m.limit = 1;

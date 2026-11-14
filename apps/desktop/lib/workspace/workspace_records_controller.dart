@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'workspace_refresh.dart';
 import 'package:flutter/foundation.dart';
 import 'workspace_source.dart';
 
@@ -14,7 +15,9 @@ class WorkspaceRecordsController extends ChangeNotifier {
                 : source.changes)
             .listen((_) {
               if (!_disposed && saveState != WorkspaceSaveState.saving) {
-                unawaited(load(query, keepSelection: selection));
+                unawaited(
+                  load(query, keepSelection: selection, background: true),
+                );
               }
             });
   }
@@ -35,9 +38,17 @@ class WorkspaceRecordsController extends ChangeNotifier {
   bool _disposed = false;
   Future<void>? _latestRead;
 
-  Future<void> load(WorkspaceQuery next, {WorkspaceRecordRef? keepSelection}) {
+  final _refresh = WorkspaceRefresh();
+  Future<void> load(
+    WorkspaceQuery next, {
+    WorkspaceRecordRef? keepSelection,
+    bool background = false,
+  }) {
     if (_disposed) return Future.value();
-    final read = _load(next, keepSelection: keepSelection);
+    final read = _refresh.run(
+      () => _load(next, keepSelection: keepSelection),
+      background: background,
+    );
     _latestRead = read;
     return _settle(read);
   }
@@ -177,6 +188,7 @@ class WorkspaceRecordsController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _refresh.dispose();
     _disposed = true;
     ++_queryGeneration;
     ++_detailGeneration;
