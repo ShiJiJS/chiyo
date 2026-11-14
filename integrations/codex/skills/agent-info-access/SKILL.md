@@ -18,6 +18,7 @@ App 管理资料和审批，CLI 查询、提案和使用获准内容。模板格
 | 用户给文件，要求新增或更新资料 | 读[来源整理与文件例子](references/information-file-intake.md)，查 `directories list`、`catalog list`、`credentials list`，再查 `templates list/show/examples` |
 | 阅读已保存的普通字段 | 从 `catalog list` 选准确资料与字段，用 `access request`；等待原申请后 `access read` |
 | 读取或上传已保存的普通附件 | 读[普通附件](references/information-files.md)，用 `access request` 申请 file 字段，获准后 `files fetch/status/release` |
+| 持续 SSH、保留目录环境、安装确认或 sudo | 读[SSH 持续交互](references/ssh-sessions.md)，使用 `ssh request/open/run/input/credential` |
 | 密码、Token、私钥用于登录或程序 | 读[凭据使用](references/credential-use.md)，先确定真正目的地，再查 `doctor`，使用 `fill` 或 `exec` |
 | 继续旧版整理任务 | 按下方兼容说明使用原聊天的旧协议；不要换聊天继承批准 |
 
