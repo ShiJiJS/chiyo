@@ -123,7 +123,30 @@ Future<void> suite(
   try {
     var found = await driver.discover(scope: scope, appId: executable);
     check(family, 'discover_native_fields', found.length == 2);
+    check(
+      family,
+      'new_discovery_uses_generic_kind',
+      found.every((target) => target.controlKind == 'windows_uia_password'),
+    );
     var target = firstField(found);
+    if (family == 'CustomUIA') {
+      final legacy = NativeFillTarget.fromJson({
+        ...target.toJson(),
+        'controlKind': 'win32_password',
+      });
+      check(
+        family,
+        'legacy_snapshot_is_not_a_live_v2_target',
+        await refusal(
+              () => driver.prepare(
+                scope: scope,
+                targetId: target.targetId,
+                expected: legacy,
+              ),
+            ) ==
+            'target_unavailable',
+      );
+    }
     check(
       family,
       'field_metadata_distinguishes_controls',
@@ -290,12 +313,28 @@ Future<void> suite(
         await fixture.command('recreate');
       },
     );
+    final rebuiltOracle = await fixture.command('verify');
     check(
       family,
-      'recreated_object_refused_after_callback',
-      rebuilt.state == NativeFillState.refused &&
-          (await fixture.command('verify')).contains('empty=1'),
+      'recreated_object_never_retargets_after_callback',
+      (rebuilt.state == NativeFillState.refused ||
+              rebuilt.state == NativeFillState.unknown) &&
+          rebuiltOracle.contains('empty=1'),
       rebuilt.errorCode,
+    );
+    var replayedCallback = false;
+    final rebuiltAgain = await prepared.setValue(
+      bytes,
+      beforeDispatch: () async {
+        replayedCallback = true;
+      },
+    );
+    check(
+      family,
+      'recreated_target_ticket_never_replays',
+      !replayedCallback &&
+          rebuiltAgain.state == rebuilt.state &&
+          await fixture.command('verify') == rebuiltOracle,
     );
     found = await driver.discover(scope: scope, appId: executable);
     target = firstField(found);
@@ -390,9 +429,22 @@ Future<void> suite(
     );
     final decoy = await Fixture.start(executable, args);
     try {
-      final ambiguous = await refusal(
+      var ambiguous = await refusal(
         () => driver.discover(scope: scope, appId: executable),
       );
+      final readyDeadline = DateTime.now().add(const Duration(seconds: 2));
+      while ({
+            'target_unavailable',
+            'application_changed',
+          }.contains(ambiguous) &&
+          DateTime.now().isBefore(readyDeadline)) {
+        // A newly shown fixture may precede its UIA provider registration.
+        // Retry discovery only, never a setter; ambiguity must still be proven.
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+        ambiguous = await refusal(
+          () => driver.discover(scope: scope, appId: executable),
+        );
+      }
       check(
         family,
         'indistinguishable_same_title_windows_refused',
@@ -557,12 +609,158 @@ Future<void> suite(
   }
 }
 
+Future<void> capabilityWire(
+  FocusedFillApplication helper,
+  String executable,
+) async {
+  const scope =
+      'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
+  for (final mode in [
+    'missing-id',
+    'web-sibling',
+    'ambiguous',
+    'readonly',
+    'disabled',
+    'no-value',
+    'web-target',
+    'unknown-web-target',
+    'plain-text',
+    'enum-error',
+  ]) {
+    final driver = WindowsNativeFillDriver(helper: helper);
+    final fixture = await Fixture.start(executable, [mode]);
+    final bytes = secret();
+    try {
+      if (mode == 'enum-error') await fixture.command('arm-enumeration-exit');
+      if (mode == 'plain-text') {
+        final found = await driver.discover(scope: scope, appId: executable);
+        check(
+          'custom-wire',
+          'ordinary_text_is_not_a_password_target',
+          found.isEmpty &&
+              (await fixture.command('verify')).contains('empty=1'),
+        );
+        continue;
+      }
+      if (mode != 'missing-id' && mode != 'web-sibling') {
+        final error = await refusal(
+          () => driver.discover(scope: scope, appId: executable),
+        );
+        check(
+          'custom-wire',
+          '${mode}_is_explicit_refusal',
+          mode == 'enum-error'
+              ? {'target_unavailable', 'application_changed'}.contains(error)
+              : error == 'unsupported_target',
+          error,
+        );
+        continue;
+      }
+      final found = await driver.discover(scope: scope, appId: executable);
+      check(
+        'custom-wire',
+        '${mode}_new_kind',
+        found.length == 2 &&
+            found.every((t) => t.controlKind == 'windows_uia_password'),
+      );
+      final target = found.singleWhere(
+        (t) => mode == 'missing-id'
+            ? t.fieldLabel == 'Archive password'
+            : t.fieldLabel.startsWith('[101]'),
+      );
+      await fixture.expect(bytes);
+      check(
+        'custom-wire',
+        '${mode}_business_initially_locked',
+        await fixture.command('submit') == 'accepted=0',
+      );
+      final prepared = await driver.prepare(
+        scope: scope,
+        targetId: target.targetId,
+        expected: target,
+      );
+      var callbacks = 0;
+      final result = await prepared.setValue(
+        bytes,
+        beforeDispatch: () async {
+          callbacks++;
+        },
+      );
+      final oracle = await fixture.command('verify');
+      check(
+        'custom-wire',
+        '${mode}_native_setter',
+        result.state == NativeFillState.sent &&
+            callbacks == 1 &&
+            oracle.contains('match=1') &&
+            oracle.contains('others=1') &&
+            oracle.contains('valueReads=0') &&
+            oracle.contains('focusCalls=0'),
+        result.errorCode,
+      );
+      check(
+        'custom-wire',
+        '${mode}_separate_business_unlock',
+        await fixture.command('submit') ==
+            'accepted=1 payloadSha256=4d4ced12374f78cc0929d87f36d62246eb168b935267e31696feb99d2c528a8b',
+      );
+      await prepared.setValue(
+        bytes,
+        beforeDispatch: () async {
+          callbacks++;
+        },
+      );
+      check(
+        'custom-wire',
+        '${mode}_no_replay',
+        callbacks == 1 && await fixture.command('verify') == oracle,
+      );
+      await prepared.close();
+      final next = await driver.prepare(
+        scope: scope,
+        targetId: target.targetId,
+        expected: target,
+      );
+      final refused = await next.setValue(
+        bytes,
+        beforeDispatch: () async {
+          await fixture.command('recreate');
+        },
+      );
+      check(
+        'custom-wire',
+        '${mode}_same_name_rebuild_refused',
+        refused.state == NativeFillState.refused &&
+            (await fixture.command('verify')).contains('empty=1'),
+        refused.errorCode,
+      );
+    } on CredentialUseFailure catch (e) {
+      check('custom-wire', '${mode}_unexpected_failure', false, e.code);
+    } finally {
+      bytes.fillRange(0, bytes.length, 0);
+      await driver.dispose();
+      await fixture.stop();
+    }
+  }
+}
+
 Future<void> main(List<String> args) async {
-  if (args.length != 3 && args.length != 4) {
+  if (args.length < 3 ||
+      args.length > 5 ||
+      args.length == 4 && !{'Win32', 'WinForms', 'WPF'}.contains(args[3]) ||
+      args.length == 5 && args[3] != 'CustomUIA') {
     exitCode = 64;
     return;
   }
   final helper = await identity(args[0]);
+  final legacy = await Process.run(helper.executable, const [
+    '--native-background-v1',
+  ]);
+  check(
+    'protocol',
+    'v1_entrypoint_cannot_access_v2_helper',
+    legacy.exitCode == 64 && (legacy.stdout as String).isEmpty,
+  );
   final native = File(args[1]).absolute.path;
   final managed = File(args[2]).absolute.path;
   if (args.length == 3 || args[3] == 'Win32') {
@@ -573,6 +771,11 @@ Future<void> main(List<String> args) async {
   }
   if (args.length == 3 || args[3] == 'WPF') {
     await suite('WPF', helper, managed, const ['wpf']);
+  }
+  if (args.length == 5) {
+    final custom = File(args[4]).absolute.path;
+    await suite('CustomUIA', helper, custom, const []);
+    await capabilityWire(helper, custom);
   }
   stdout.writeln(
     jsonEncode({'case': 'summary', 'checks': _checks, 'failures': _failures}),

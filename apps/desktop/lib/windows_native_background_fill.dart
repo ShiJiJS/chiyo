@@ -66,7 +66,7 @@ class WindowsNativeFillDriver implements NativeFillDriver {
       await inspectFocusedFillApplication(helper);
       process = await Process.start(
         helper.executable,
-        const ['--native-background-v1'],
+        const ['--native-background-v2'],
         workingDirectory: File(helper.executable).parent.path,
         environment: {
           for (final key in ['SystemRoot', 'WINDIR'])
@@ -144,6 +144,7 @@ class WindowsNativeFillDriver implements NativeFillDriver {
       final ids = <String>{};
       for (final target in targets) {
         if (target.platform != 'windows' ||
+            target.controlKind != 'windows_uia_password' ||
             target.appId != appId ||
             target.helperInstanceId != broker.instance ||
             windowId != null && target.windowId != windowId ||
@@ -228,6 +229,7 @@ Future<(NativeFillTarget, String)> _prepare(
 ) async {
   if (expected != null &&
       (expected.platform != 'windows' ||
+          expected.controlKind != 'windows_uia_password' ||
           expected.helperInstanceId != broker.instance)) {
     throw const CredentialUseFailure('target_unavailable');
   }
@@ -247,6 +249,7 @@ Future<(NativeFillTarget, String)> _prepare(
     }
     final target = NativeFillTarget.fromJson(_map(reply['target']));
     if (target.platform != 'windows' ||
+        target.controlKind != 'windows_uia_password' ||
         target.targetId != targetId ||
         target.helperInstanceId != broker.instance ||
         expected != null && !target.matches(expected)) {
