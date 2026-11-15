@@ -5,6 +5,8 @@ import '../anchored_surface.dart';
 import 'grant_history_filters.dart';
 import '../ui_palette.dart';
 import 'approval_executions.dart';
+import 'request_presentation.dart';
+import 'program_plan.dart';
 import 'grant_history_controller.dart';
 import 'grant_history_dialog.dart';
 import 'library_widgets.dart';
@@ -349,7 +351,16 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
           overflow: TextOverflow.ellipsis,
           style: libraryText(context, 14, weight: FontWeight.w600),
         ),
-        const SizedBox(height: 8),
+        if (h.purpose.isNotEmpty) ...[
+          const SizedBox(height: 5),
+          Text(
+            h.purpose,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: libraryText(context, 12, color: c.muted, height: 1.65),
+          ),
+        ],
+        const SizedBox(height: 10),
         Text(
           [h.kind.label, h.agentClaim].where((v) => v.isNotEmpty).join(' · '),
           style: libraryText(context, 12, color: c.muted, height: 1.7),
@@ -463,6 +474,10 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
       );
     }
     final h = d.summary;
+    final linked = m.linkedDecision ? m.decision.detail : null;
+    final structured =
+        linked != null &&
+        (linked.programPlan != null || linked.sshTarget != null);
     return SingleChildScrollView(
       key: const ValueKey('grant-history-detail-scroll'),
       controller: _detail,
@@ -472,9 +487,13 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: LibraryPill(
+            RequestHeading(
+              title: h.title,
+              summary: h.purpose,
+              agent: h.agentClaim,
+              chat: h.chatClaim,
+              time: libraryLocalDateTime(h.recordedAt),
+              status: LibraryPill(
                 h.state.label,
                 color: _color(context, h.state),
                 background: h.state == WorkspaceGrantState.active
@@ -482,26 +501,24 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                     : c.nav,
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              h.title,
-              style: libraryText(
+            if (structured)
+              _section(
                 context,
-                21,
-                weight: FontWeight.w700,
-                height: 1.5,
+                linked.programPlan != null ? '申请中的程序与凭据' : '申请中的 SSH 连接与凭据',
+                [
+                  if (linked.programPlan case final plan?)
+                    ProgramPlan(
+                      factsOnly: true,
+                      plan: plan,
+                      names: {
+                        for (final scope in linked.scopes)
+                          scope.record.id: scope.recordName,
+                      },
+                    )
+                  else
+                    SshRequestFacts(detail: linked),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              [
-                h.agentClaim,
-                h.chatClaim,
-              ].where((v) => v.isNotEmpty).join(' · '),
-              style: libraryText(context, 13, color: c.muted, height: 1.8),
-            ),
-            const SizedBox(height: 10),
-            Text(h.purpose, style: libraryText(context, 14, height: 1.9)),
             if (d.fieldExpiresAt != null)
               Text(
                 '普通范围至 ${libraryLocalDateTime(d.fieldExpiresAt!)}',
@@ -518,6 +535,10 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                 style: libraryText(context, 13, color: c.muted, height: 1.8),
               ),
             _section(context, '批准范围', [
+              if (structured) ...[
+                CredentialGrantBoundary(detail: linked),
+                const SizedBox(height: 14),
+              ],
               if (d.scopes.isEmpty)
                 Text(
                   '本次没有批准任何资料。',
@@ -549,7 +570,14 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                           ),
                         ),
                       Text(
-                        '• ${scope.label}${scope.fileVersion == null ? '' : ' · 附件v${scope.fileVersion}'}',
+                        structured && linked.programPlan != null
+                            ? programScopeDescription(
+                                linked.programPlan!,
+                                scope.id,
+                                scope.record.id,
+                                scope.materialVersion ?? 0,
+                              )
+                            : '• ${scope.label}${scope.fileVersion == null ? '' : ' · 附件v${scope.fileVersion}'}',
                         style: libraryText(context, 14, height: 1.8),
                       ),
                       Text(
@@ -595,6 +623,14 @@ class _GrantHistoryPageState extends State<GrantHistoryPage> {
                   style: libraryText(context, 12, color: c.muted, height: 1.8),
                 ),
             ]),
+            if (structured && linked.programPlan != null)
+              ProgramExactPlan(
+                plan: linked.programPlan!,
+                names: {
+                  for (final scope in linked.scopes)
+                    scope.record.id: scope.recordName,
+                },
+              ),
             if (m.linkedDecision &&
                 (m.decision.detail!.credentialBatch ||
                     m.decision.detail!.credentialExpiresAt != null ||

@@ -52,7 +52,7 @@ extension _ChiyoExec on ChiyoCli {
         : await DeviceCredentialLaunch.prepareProgram(plan);
     final intent = await _intents.remember('exec-request', {
       'command': 'program-request',
-      'purpose': requested.purpose,
+      ...requested.presentation.toProtocolJson(),
       'launch': plan.toJson(),
       'prepared': prepared.toPrivateJson(),
       'agentName': _activeContext.agentName,

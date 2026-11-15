@@ -130,6 +130,41 @@ void main() {
   tearDown(() => service.close());
 
   test(
+    'title and summary survive decisions and belong to the immutable submission',
+    () async {
+      final input = CredentialBatchInput.fromJson({
+        ...plan().toJson(),
+        'title': '检查两个服务',
+      });
+      final r = await request(input: input);
+      expect(r.title, '检查两个服务');
+      expect(r.summary, input.purpose);
+      final accepted = await approve(r, ['b1', 'b2']);
+      expect(accepted.title, r.title);
+      expect(
+        CredentialUseBatch.fromJson(
+          Map<String, dynamic>.from(accepted.toJson()),
+        ).title,
+        r.title,
+      );
+      expect(
+        service.agent.credentialBatchStatus(session, device, r.id)['title'],
+        r.title,
+      );
+      await expectLater(
+        request(
+          input: CredentialBatchInput.fromJson({
+            ...plan().toJson(),
+            'title': '换一个任务',
+          }),
+        ),
+        failure('operation_conflict'),
+      );
+      expect(plan().toJson().containsKey('title'), false);
+    },
+  );
+
+  test(
     'one request has multiple real destinations and stable versions without aliases',
     () async {
       final r = await request(input: plan(explicitVersions: false));

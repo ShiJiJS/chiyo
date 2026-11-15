@@ -286,11 +286,11 @@ void main() {
     (tester) async {
       final model = await show(tester, _Source(_detail()));
       expect(find.textContaining('SCRIPT-LINE-99'), findsNothing);
-      expect(find.textContaining('环境变量 CODE_HOST_TOKEN。'), findsOneWidget);
-      expect(find.textContaining('在程序启动时提供输入（stdin）。'), findsOneWidget);
+      expect(find.textContaining('环境变量 CODE_HOST_TOKEN'), findsWidgets);
+      expect(find.textContaining('程序启动时的输入（stdin）'), findsWidgets);
       expect(find.textContaining('参数 4（临时凭据文件路径）'), findsWidgets);
-      expect(find.textContaining('Agent 可以换用其他脚本、参数和工作目录'), findsOneWidget);
-      expect(find.text('Agent 说明：核对任务状态并汇总失败原因。'), findsOneWidget);
+      expect(find.textContaining('可更换脚本、参数和工作目录'), findsOneWidget);
+      expect(find.text('核对任务状态并汇总失败原因。'), findsWidgets);
       final choose = find.byKey(const ValueKey('approval-choose-credentials'));
       expect(choose.hitTestable(), findsOneWidget);
       expect(find.text('可在申请范围取消勾选，只批准部分凭据。'), findsOneWidget);

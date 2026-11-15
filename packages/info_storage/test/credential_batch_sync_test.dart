@@ -335,6 +335,61 @@ void main() {
     );
   });
 
+  test(
+    'structured titles survive incremental history transfer without transferring authority',
+    () async {
+      final root = await Directory.systemTemp.createTemp('structured-sync-');
+      final now = DateTime.utc(2026, 11, 14);
+      final a = _Replica('${root.path}/a', () => now),
+          b = _Replica('${root.path}/b', () => now);
+      await a.open();
+      await b.open();
+      addTearDown(() async {
+        await a.close();
+        await b.close();
+        await root.delete(recursive: true);
+      });
+      await _initial(a, b);
+      final f = OperationHistoryFixture(a.runtime.service, a.repo, now);
+      await a.runtime.run(() async {
+        await f.open(program: false);
+        f.input = CredentialBatchInput.fromJson({
+          ...f.input.toJson(),
+          'title': '登录测试工作台',
+          'purpose': '处理测试项目。',
+        });
+        f.request = await a.runtime.service.agent.requestCredentialBatch(
+          f.session,
+          'A' * 22,
+          f.input,
+          operationId: 'structured-sync-submit',
+        );
+        f.request = await a.runtime.service.owner.decideCredentialBatch(
+          f.request.id,
+          operationId: 'structured-sync-approve',
+          revision: 1,
+          approvedItems: ['b1'],
+        );
+        await f.append('structured-first');
+      });
+      for (final entry in await a.after(0)) {
+        expect((await _transfer(a, b, entry.batch)).conflict, false);
+      }
+      final history = b.repo.credentialBatches.singleWhere(
+        (r) => r.id == f.request.id,
+      );
+      expect(history.title, '登录测试工作台');
+      expect(history.summary, '处理测试项目。');
+      expect(history.archived, true);
+      _assertArchive(b, f, program: false, count: 1);
+      final archive = File('${root.path}/titled-initial.encrypted');
+      final initial = await a.snapshot(
+        () => a.incremental.exportInitialWithBaseline(archive.path),
+      );
+      expect(initial.initial.transfer.contentFormat, 33);
+    },
+  );
+
   for (final nativeKind in [
     'appkit_secure_text',
     'macos_ax_password',

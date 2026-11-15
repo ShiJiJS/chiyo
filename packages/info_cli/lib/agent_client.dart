@@ -196,6 +196,7 @@ class AgentClient {
       'ssh-request',
       'ssh-credential-request',
     };
+    Map<String, dynamic>? submissionSupport;
     if (_session != null &&
         (requireSubmissionMetadata || input.containsKey('submissionVersion')) &&
         submissions.contains(command)) {
@@ -224,7 +225,7 @@ class AgentClient {
           'fieldErrors': errors,
         };
       }
-      final support = await _call('/capabilities', {});
+      final support = submissionSupport = await _call('/capabilities', {});
       if (support['status'] != 'ok') return support;
       if (!(support['capabilities'] as List? ?? []).contains(
         'submission-metadata.v1',
@@ -232,6 +233,23 @@ class AgentClient {
         return {
           'status': 'unsupported_capability',
           'message': '服务器暂不支持新的提交说明，请更新服务器后重试。',
+        };
+      }
+    }
+    if (const {
+          'program-request',
+          'ssh-request',
+          'ssh-credential-request',
+        }.contains(command) &&
+        input.containsKey('title')) {
+      final support = submissionSupport ?? await _call('/capabilities', {});
+      if (support['status'] != 'ok') return support;
+      if (!(support['capabilities'] as List? ?? []).contains(
+        RequestPresentation.capability,
+      )) {
+        return {
+          'status': 'unsupported_capability',
+          'message': '服务端暂不能保存申请标题和概要，请先升级服务端。',
         };
       }
     }

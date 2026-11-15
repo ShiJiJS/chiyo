@@ -12,6 +12,7 @@ import 'approvals_controller.dart';
 import 'approval_executions.dart';
 import 'approval_directory_location.dart';
 import 'program_plan.dart';
+import 'request_presentation.dart';
 import 'approval_presentation.dart';
 import 'workspace_source.dart';
 
@@ -167,7 +168,19 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(scope.label, style: libraryText(context, 14)),
+                      Text(
+                        current.programPlan != null &&
+                                scope.kind ==
+                                    WorkspaceApprovalScopeKind.credential
+                            ? programScopeDescription(
+                                current.programPlan!,
+                                scope.id,
+                                scope.record.id,
+                                scope.recordVersion,
+                              )
+                            : scope.label,
+                        style: libraryText(context, 14),
+                      ),
                       if (!scope.available && scope.unavailableReason != null)
                         Text(
                           scope.unavailableReason!,
@@ -444,121 +457,39 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
     );
   }
 
-  Widget _credentialBoundary(BuildContext context) {
-    final d = model.detail!, c = UiPalette.of(context);
-    final program =
-        d.programPlan != null ||
-        d.credential != null &&
-            !{
-              WorkspaceCredentialDelivery.focus,
-              WorkspaceCredentialDelivery.reveal,
-              WorkspaceCredentialDelivery.storage,
-            }.contains(d.credential!.delivery);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(left: BorderSide(color: c.line, width: 2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            '这次批准允许什么',
-            style: libraryText(context, 15, weight: FontWeight.w600),
-          ),
-          const SizedBox(height: 9),
-          Text(
-            d.sshSession
-                ? d.sshTarget?.credentialUse == 'sudo'
-                      ? '在有效期内，将所选凭据用于指定服务器和账号的 sudo 认证。'
-                      : '在有效期内登录这个服务器账号，连续执行命令，并把输出返回 Agent。'
-                : program
-                ? '在有效期内，让这个程序通过指定接收位置使用所选版本的凭据。'
-                : '在有效期内，通过批准的方式和目标使用所选凭据。',
-            style: libraryText(context, 14, color: c.accent, height: 1.8),
-          ),
-          const SizedBox(height: 9),
-          if (d.sshSession)
-            Text(
-              '操作受服务器账号权限约束，不限于 Agent 说明的任务。sudo 密码需另行申请；已有的免密码权限仍可使用。',
-              style: libraryText(context, 14, height: 1.8),
-            ),
-          if (program)
-            Text(
-              'Agent 可以换用其他脚本、参数和工作目录，再次使用凭据。许可并不只限于上面这次命令。',
-              style: libraryText(context, 14, height: 1.8),
-            ),
-          const SizedBox(height: 9),
-          Text(
-            program || d.sshSession
-                ? '用途由 Agent 提供，不限制程序实际能执行的操作。批准后，仍由 Agent 发起${d.sshSession ? '连接或认证' : '执行'}。凭据不会作为普通回复交给 Agent。'
-                : '批准后，仍由 Agent 发起使用；每次操作分别记录结果。',
-            style: libraryText(context, 13, color: c.muted, height: 1.8),
-          ),
-          if (d.sshSession)
-            Text(
-              '撤销会禁止新命令和输入；当前命令结束后断开。',
-              style: libraryText(context, 13, color: c.muted, height: 1.8),
-            ),
-        ],
-      ),
-    );
-  }
+  Widget _credentialBoundary(BuildContext context) =>
+      CredentialGrantBoundary(detail: model.detail!);
 
-  Widget _credentialPresentation(BuildContext context, bool sideBySide) {
+  Widget _credentialPresentation(BuildContext context) {
     final d = model.detail!;
     final Widget summary;
     if (d.programPlan case final plan?) {
       summary = ProgramPlan(
+        factsOnly: true,
         plan: plan,
         names: {
           for (final scope in d.scopes) scope.record.id: scope.recordName,
         },
       );
-    } else if (d.sshTarget case final target?) {
-      summary = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ApprovalDetailRow(
-            label: '连接到',
-            value: '${target.host}\n登录账号 ${target.user} · 端口 ${target.port}',
-          ),
-          ApprovalDetailRow(
-            label: '怎样连接',
-            value:
-                '通过 SSH ${target.authentication == 'publickey' ? '私钥' : '密码'}${target.credentialUse == 'sudo' ? '提供 sudo 认证' : '登录'}\n由 AI 所在电脑保持连接，可连续执行命令。',
-          ),
-          for (final scope in d.scopes.where(
-            (scope) => scope.kind == WorkspaceApprovalScopeKind.credential,
-          ))
-            CredentialBindingCard(
-              name: scope.recordName,
-              version: scope.recordVersion,
-              destination: target.credentialUse == 'sudo'
-                  ? '用于这个服务器账号的 sudo 认证。'
-                  : '用于这个服务器账号的 SSH 登录。',
-            ),
-        ],
-      );
+    } else if (d.sshTarget != null) {
+      summary = SshRequestFacts(detail: d);
     } else {
       summary = _credential(context, d.credential!);
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (sideBySide)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(flex: 5, child: summary),
-              const SizedBox(width: 24),
-              Expanded(flex: 4, child: _credentialBoundary(context)),
-            ],
-          )
-        else ...[
-          summary,
-          const SizedBox(height: 20),
-          _credentialBoundary(context),
+        summary,
+        const SizedBox(height: 20),
+        _credentialBoundary(context),
+        if (d.programPlan case final plan?) ...[
+          const SizedBox(height: 14),
+          ProgramExactPlan(
+            plan: plan,
+            names: {
+              for (final scope in d.scopes) scope.record.id: scope.recordName,
+            },
+          ),
         ],
         Align(
           alignment: Alignment.centerLeft,
@@ -826,39 +757,25 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: 10,
-            runSpacing: 8,
-            children: [
-              LibraryPill(
-                d.request.state.label,
-                color: d.request.state == WorkspaceApprovalState.pending
-                    ? c.warning
-                    : d.request.state == WorkspaceApprovalState.approved
-                    ? c.success
-                    : c.muted,
-                background: d.request.state == WorkspaceApprovalState.pending
-                    ? c.credentialSurface
-                    : d.request.state == WorkspaceApprovalState.approved
-                    ? c.successSurface
-                    : c.rail,
-              ),
-              Text(
-                [
-                  d.request.agentClaim,
-                  d.request.chatClaim,
-                ].where((v) => v.isNotEmpty).join(' · '),
-                style: libraryText(context, 12, color: c.muted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          Text(d.request.title, style: libraryHeading(context, 28)),
-          const SizedBox(height: 14),
-          Text(
-            '${d.programPlan != null || d.sshSession || d.credential != null ? 'Agent 说明：' : ''}${d.request.purpose}',
-            style: libraryText(context, 14, height: 1.95),
+          RequestHeading(
+            title: d.request.title,
+            summary: d.request.purpose,
+            agent: d.request.agentClaim,
+            chat: d.request.chatClaim,
+            time: '${libraryLocalDateTime(d.request.submittedAt)} 申请',
+            status: LibraryPill(
+              d.request.state.label,
+              color: d.request.state == WorkspaceApprovalState.pending
+                  ? c.accent
+                  : d.request.state == WorkspaceApprovalState.approved
+                  ? c.success
+                  : c.muted,
+              background: d.request.state == WorkspaceApprovalState.pending
+                  ? c.selected
+                  : d.request.state == WorkspaceApprovalState.approved
+                  ? c.successSurface
+                  : c.rail,
+            ),
           ),
           if (d.programPlan != null ||
               d.sshSession ||
@@ -871,9 +788,9 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
             _section(
               context,
               d.sshSession ? 'SSH 连接与凭据' : '程序与凭据',
-              _credentialPresentation(context, !fold && width >= 1050),
+              _credentialPresentation(context),
             ),
-            _section(context, '申请范围', _scopes(context)),
+            _section(context, '选择允许使用的凭据', _scopes(context)),
           ] else
             _section(
               context,
@@ -1113,13 +1030,27 @@ class _ApprovalsPageState extends State<ApprovalsPage> {
                                 const SizedBox(height: 9),
                                 Text(
                                   r.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: libraryText(
                                     context,
                                     15,
                                     weight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 6),
+                                Text(
+                                  r.purpose,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: libraryText(
+                                    context,
+                                    12,
+                                    color: c.muted,
+                                    height: 1.65,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
                                 Wrap(
                                   alignment: WrapAlignment.spaceBetween,
                                   spacing: 8,

@@ -22,6 +22,22 @@ chiyo chat start --agent "Example Agent" --id ACTUAL_CHAT_ID --label "核对 NAS
 
 `connection show` / `chat show` 展示当前库、审批位置、执行设备和状态，不打印私密证明。隔离运行可在 `chat start` 使用 `--connection` 指定准确的设备配置；默认发现只读取 App 已准备的当前连接。
 
+## 用模板准备凭据申请
+
+先生成业务 JSON，填好后提交。模板不需要 App 或聊天连接，也不会创建申请：
+
+```sh
+chiyo exec template --via env --out request.json
+# 填写 request.json 后：
+chiyo exec request --input request.json --json
+```
+
+`title` 是 1–80 字的单行任务标题；`summary` 是 1–600 字的用途概要。实际程序、参数和凭据引用放在 `launch` 中，不塞进标题或概要。软件分别展示说明、实际使用的凭据和批准范围，完整命令可展开查看。
+
+`exec template --via stdin|file` 可生成其他程序接收方式；`ssh template --out FILE` 生成 SSH 登录申请；`fill template --via ego|chrome|native --out FILE` 生成填写申请。按模板替换凭据编号、版本及真实目标；`--out` 拒绝覆盖已有文件。省略 `--out` 时返回 `template` 对象；使用 `--json` 会带 CLI 结果封装，提交时只取其中的业务模板。
+
+单项参数同样支持 `--title` 和 `--summary`。旧 `--purpose` 与旧 JSON 仍可使用；summary 和 purpose 只能选一个。新标题需要同版本 App、CLI 和服务端支持，旧服务会明确拒绝。程序使用与填写获批后仍需另行发起执行，SSH 的具体命令在连接建立后通过 `ssh run` 提交。
+
 ## 常用流程
 
 | 任务 | 命令与下一步 |

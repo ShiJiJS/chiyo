@@ -7,6 +7,8 @@ import 'package:info_core/info_core.dart';
 import 'package:info_core/agent_server.dart';
 import 'package:info_remote/agent_connection.dart';
 import 'package:test/test.dart';
+import '../../info_core/test/fixtures/ssh_session_fixture.dart'
+    show knownHostBytes;
 
 void main() {
   test(
@@ -199,6 +201,84 @@ void main() {
       await service.close();
       await root.delete(recursive: true);
     });
+
+    test(
+      'SSH template submits separate display fields and rejects mixed input',
+      () async {
+        await server.close();
+        server = await AgentServer.start(
+          service.agent,
+          port: profile.address.port,
+          connectionToken: profile.deviceToken,
+          libraryId: profile.serverId,
+          enableCredentialBatches: true,
+        );
+        await service.owner.configureSshKnownHosts(
+          'Synthetic trust',
+          knownHostBytes(),
+        );
+        var credential = await service.owner.createStringCredential(
+          name: '测试 SSH 密码',
+          publicPurpose: '',
+          secret: 'SYNTHETIC_LOGIN_ONLY',
+        );
+        credential = await service.owner.updateCredentialMetadata(
+          credential.id,
+          credential.revision,
+          name: credential.name,
+          publicPurpose: '',
+          privateNote: '',
+          suggestedBinding: 'password',
+          discoverable: true,
+        );
+        final template = await call(['ssh', 'template']);
+        final business = Map<String, dynamic>.from(
+          (template.output['data'] as Map)['template'] as Map,
+        );
+        business.addAll({
+          'title': '检查测试服务器',
+          'summary': '连接测试服务器，查询任务状态。',
+          'credentialId': credential.id,
+        });
+        business['target'] = <String, dynamic>{
+          ...Map<String, dynamic>.from(business['target'] as Map),
+          'host': 'test.beichen.example',
+          'port': 2222,
+        };
+        final file = File('${root.path}/ssh-request.json');
+        await file.writeAsString(jsonEncode(business));
+        final mixed = await call([
+          'ssh',
+          'request',
+          '--input',
+          file.path,
+          '--title',
+          '其他标题',
+        ]);
+        expect(mixed.exitCode, 2);
+        expect(service.owner.credentialBatches, isEmpty);
+        final result = await call([
+          'ssh',
+          'request',
+          '--input',
+          file.path,
+          '--operation',
+          'structured-ssh',
+        ]);
+        expect(result.exitCode, 0, reason: result.render());
+        final request = service.owner.credentialBatches.single;
+        expect(request.title, '检查测试服务器');
+        expect(request.summary, '连接测试服务器，查询任务状态。');
+        expect(
+          request.items.single.destination.ssh!.host,
+          'test.beichen.example',
+        );
+        expect(request.items.single.destination.ssh!.port, 2222);
+        expect(request.items.single.destination.ssh!.validity, 'session');
+        expect(result.render(), isNot(contains('SYNTHETIC_LOGIN_ONLY')));
+        expect(request.decisions, isEmpty);
+      },
+    );
 
     test(
       'an existing private context from another host chat reports the mismatch without exposing either identity or changing it',

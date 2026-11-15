@@ -15,13 +15,13 @@
 Ego 使用当前任务受控 TaskSpace 的数字 ID、Page 标签、完整 URL 及 CSS：
 
 ```sh
-chiyo fill request --credential CREDENTIAL_ID --version 1 --via ego --space 7 --page p1 --url https://service.example/login --form '#login' --selector '#password' --purpose "登录指定服务" --json
+chiyo fill request --credential CREDENTIAL_ID --version 1 --via ego --space 7 --page p1 --url https://service.example/login --form '#login' --selector '#password' --title "登录指定服务" --summary "使用已保存凭据继续处理业务。" --json
 ```
 
 Chrome 使用调用方已经明确取得的本机控制入口，不扫描端口或用户资料。先 `browsers list --via chrome --browser http://127.0.0.1:9222 --json` 查准确标签页 ID，再提交：
 
 ```sh
-chiyo fill request --credential CREDENTIAL_ID --via chrome --browser http://127.0.0.1:9222 --tab TARGET_ID --url https://service.example/login --form '#login' --selector '#password' --purpose "登录指定服务" --json
+chiyo fill request --credential CREDENTIAL_ID --via chrome --browser http://127.0.0.1:9222 --tab TARGET_ID --url https://service.example/login --form '#login' --selector '#password' --title "登录指定服务" --summary "使用已保存凭据继续处理业务。" --json
 ```
 
 以上值都是虚构例子。browser 是浏览器控制地址，url 是实际网页，不能混用。Chrome 没有可用控制入口时报告这个条件，不能把原生焦点方式记成 Chrome 表单方式已经验收。
@@ -50,7 +50,7 @@ chiyo fill targets --via native --app APP_ID --json
 结合返回的 appName、windowTitle、fieldLabel 和 controlKind 选择唯一的实际密码框，使用该项的 targetId。编号由本机辅助程序产生并绑定原进程、窗口和控件对象；不要自编编号或用 PID、句柄、坐标代替。候选无法区分时先澄清目标，不猜随机编号；没有目标时确认窗口是否已存在及兼容条件。
 
 ```sh
-chiyo fill request --via native --target TARGET_ID --credential CREDENTIAL_ID --version 1 --purpose "为指定应用填写密码" --json
+chiyo fill request --via native --target TARGET_ID --credential CREDENTIAL_ID --version 1 --title "登录指定应用" --summary "为目标应用中的密码框填写已保存密码。" --json
 chiyo requests wait REQUEST_ID --timeout 60 --json
 chiyo fill run --request REQUEST_ID --json
 chiyo operations show OPERATION_ID --json
@@ -70,11 +70,12 @@ chiyo operations show OPERATION_ID --json
 
 ## 一份申请包含多项凭据
 
-用 `fill request --input FILE`，文件只写 purpose 和 items。每项直接引用 credentialId、可选 version 与 destination，不另起密码别名。例如：
+用 `fill request --input FILE`，文件写 title、summary 和 items。每项直接引用 credentialId、可选 version 与 destination，不另起密码别名。例如：
 
 ```json
 {
-  "purpose": "登录两个业务入口",
+  "title": "登录业务入口",
+  "summary": "继续处理两个入口中的业务。",
   "items": [
     {"credentialId": "credential-a", "destination": {"via": "ego", "space": 7, "page": "p1", "url": "https://a.example/login", "form": "#login", "selector": "#password"}},
     {"credentialId": "credential-b", "version": 2, "destination": {"via": "chrome", "browser": "http://127.0.0.1:9222", "tab": "TARGET_ID", "url": "https://b.example/login", "form": "#login", "selector": "#password"}}
@@ -91,16 +92,17 @@ chiyo operations show OPERATION_ID --json
 先核对程序真实接口和本机安装位置。单份凭据用参数，复杂组合用 --input。凭据原文不放 argv；业务程序的环境变量名和文件参数位置是真实接收要求，不能省略成软件猜测。
 
 ```sh
-chiyo exec request --credential CREDENTIAL_ID --via env --variable SERVICE_TOKEN --executable /absolute/project-tool --cwd /absolute/work --arg status --purpose "查询项目状态" --json
+chiyo exec request --credential CREDENTIAL_ID --via env --variable SERVICE_TOKEN --executable /absolute/project-tool --cwd /absolute/work --arg status --title "查询项目状态" --summary "核对项目最近一次任务的运行情况。" --json
 ```
 
 stdin 交准确 UTF-8 字节与 EOF，不加换行、不拼接多份密码；只有程序确实从标准输入读凭据才选它，OpenSSH 密码登录不直接读取 stdin。file 交软件管理的私有临时文件，可用 --variable NAME 给其路径，或用 --file-argument INDEX 插入普通参数列表；位置从0开始。路径由软件分配，不是 Agent 指定密码临时文件名。
 
-多凭据业务文件为 purpose 和 launch，例如：
+多凭据业务文件为 title、summary 和 launch，例如：
 
 ```json
 {
-  "purpose": "同步指定项目",
+  "title": "同步指定项目",
+  "summary": "更新本地项目的服务数据。",
   "launch": {
     "executable": "/absolute/project-tool",
     "cwd": "/absolute/work",

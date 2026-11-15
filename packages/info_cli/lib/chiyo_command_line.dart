@@ -191,6 +191,7 @@ class ChiyoCommandLine {
           "chiyo fill request --credential CREDENTIAL_ID --via ego --space 7 --page p1 --url https://example.test/login --form '#login' --selector '#password' --purpose '登录服务'",
     );
     _credential(fill);
+    _presentation(fill);
     _input(fill);
     _operation(fill);
     fill.addOption(
@@ -230,6 +231,7 @@ class ChiyoCommandLine {
     final exec = _command('exec request', '提交真实业务程序和凭据接收位置；不暴露内部填写程序。');
     _input(exec);
     _credential(exec);
+    _presentation(exec);
     exec.addOption(
       'via',
       allowed: ['stdin', 'env', 'file'],
@@ -266,6 +268,8 @@ class ChiyoCommandLine {
     _command('ssh capabilities', '查看本机后台及远端所需能力，不发起认证。');
     final sshRequest = _command('ssh request', '申请 SSH 登录凭据；批准不代表已经连接。');
     _credential(sshRequest);
+    _presentation(sshRequest);
+    _input(sshRequest);
     _operation(sshRequest);
     for (final name in ['host', 'user']) {
       sshRequest.addOption(name);
@@ -319,6 +323,7 @@ class ChiyoCommandLine {
       '绑定当前运行与可信 sudo 接收动作申请密码；普通 Password 提示不接收凭据。',
     );
     _credential(sudoRequest);
+    _presentation(sudoRequest);
     _operation(sudoRequest);
     sudoRequest.addOption(
       'validity',
@@ -343,6 +348,22 @@ class ChiyoCommandLine {
       help: '检查特定填写途径。',
     );
     doctor.addOption('browser', help: '检查 Chrome 时明确提供本机控制地址。');
+    for (final kind in ['exec', 'ssh', 'fill']) {
+      final template = _command(
+        '$kind template',
+        '输出标题、概要与实际参数分开的申请模板；不连接 App 或提交申请。',
+      );
+      template.addOption('out', help: '写入新的 JSON 文件；不覆盖现有文件。省略时返回模板内容。');
+      if (kind != 'ssh') {
+        template.addOption(
+          'via',
+          allowed: kind == 'exec'
+              ? ['env', 'stdin', 'file']
+              : ['ego', 'chrome', 'native'],
+          defaultsTo: kind == 'exec' ? 'env' : 'chrome',
+        );
+      }
+    }
   }
 
   final _root = ArgParser();
@@ -397,6 +418,11 @@ class ChiyoCommandLine {
 
   void _input(ArgParser p) =>
       p.addOption('input', help: '复杂业务内容的 JSON 文件；- 表示数据 stdin，不含上下文。');
+  void _presentation(ArgParser p) {
+    p.addOption('title', help: '1–80 字的简短任务标题，单行。');
+    p.addOption('summary', help: '1–600 字的用途概要，与实际命令分开；不填写凭据原文。');
+  }
+
   void _purpose(ArgParser p) =>
       p.addOption('purpose', help: '本次使用目的，不填写密码、Token 或私钥原文。');
   void _operation(ArgParser p) =>
@@ -470,7 +496,9 @@ class ChiyoCommandLine {
 
   void _validate(String path, ArgResults options) {
     void required(String key) {
-      final value = options[key] as String?;
+      final value = key == 'purpose' && options.options.contains('summary')
+          ? (options['summary'] ?? options['purpose']) as String?
+          : options[key] as String?;
       if (value == null || value.trim().isEmpty) {
         throw ChiyoUsageFailure('缺少 --$key；请查看此命令的 --help。');
       }
@@ -484,6 +512,14 @@ class ChiyoCommandLine {
       }
     }
 
+    if (options.options.contains('summary')) {
+      if (options['summary'] != null && options['purpose'] != null) {
+        throw const ChiyoUsageFailure('--summary 和 --purpose 不能同时提供。');
+      }
+      if (options['summary'] != null && options['title'] == null) {
+        throw const ChiyoUsageFailure('使用 --summary 时请同时提供 --title。');
+      }
+    }
     number('limit', 1, 100);
     number('offset', 0, 1000000);
     number('timeout', 0, 300);
@@ -544,6 +580,8 @@ class ChiyoCommandLine {
         'credential',
         'version',
         'purpose',
+        'title',
+        'summary',
         'via',
         'executable',
         'cwd',
@@ -600,6 +638,8 @@ class ChiyoCommandLine {
         'credential',
         'version',
         'purpose',
+        'title',
+        'summary',
         'via',
         'target',
         'space',

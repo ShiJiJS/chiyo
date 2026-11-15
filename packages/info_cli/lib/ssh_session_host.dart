@@ -722,6 +722,7 @@ class SshSessionHost {
         'input': {
           'protocolVersion': 3,
           'purpose': input['purpose'],
+          if (input.containsKey('title')) 'title': input['title'],
           'agentName': input['agentName'],
           'externalChatId': input['externalChatId'],
           'items': [

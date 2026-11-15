@@ -5,8 +5,10 @@ import 'chiyo_command_line.dart';
 /// launch contract. This module never probes a tool, asks for approval or reads
 /// credential material. The real device Host will freeze the executable.
 class ChiyoProgramRequest {
-  const ChiyoProgramRequest._(this.purpose, this.launch);
-  final String purpose;
+  const ChiyoProgramRequest._(this.presentation, this.launch);
+  final RequestPresentation presentation;
+  String get purpose => presentation.summary;
+  String get title => presentation.title;
   final CredentialProgramPlan launch;
   factory ChiyoProgramRequest.fromInvocation(
     ChiyoInvocation invocation, {
@@ -44,7 +46,11 @@ class ChiyoProgramRequest {
             : credential;
       }
       business = {
-        'purpose': options['purpose'],
+        if (options['title'] != null) 'title': options['title'],
+        if (options['summary'] != null)
+          'summary': options['summary']
+        else
+          'purpose': options['purpose'],
         'launch': {
           'executable': options['executable'],
           'cwd': options['cwd'],
@@ -54,25 +60,28 @@ class ChiyoProgramRequest {
         },
       };
     }
-    final purpose = business['purpose'];
-    if (business.length != 2 ||
-        !business.keys.toSet().containsAll({'purpose', 'launch'}) ||
-        purpose is! String ||
-        purpose.trim().isEmpty ||
-        purpose.length > 2000 ||
-        !validSubmissionMetadata(purpose: purpose) ||
+    if (business.keys.any(
+          (key) => !{'title', 'summary', 'purpose', 'launch'}.contains(key),
+        ) ||
         business['launch'] is! Map<String, dynamic>) {
-      throw const ChiyoUsageFailure('程序业务文件只填写 purpose 和 launch。');
+      throw const ChiyoUsageFailure(
+        '程序申请只填写 title、summary 和 launch；旧 purpose 仍可使用。',
+      );
     }
-    return ChiyoProgramRequest._(
-      purpose,
-      CredentialProgramPlan.fromJson(
-        business['launch'] as Map<String, dynamic>,
-      ),
-    );
+    try {
+      return ChiyoProgramRequest._(
+        RequestPresentation.fromJson(business),
+        CredentialProgramPlan.fromJson(
+          business['launch'] as Map<String, dynamic>,
+        ),
+      );
+    } on FormatException catch (error) {
+      throw ChiyoUsageFailure(error.message);
+    }
   }
+
   Map<String, Object?> toJson() => {
-    'purpose': purpose,
+    ...presentation.toJson(),
     'launch': launch.toJson(),
   };
 }

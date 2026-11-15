@@ -118,6 +118,7 @@ extension _ProgramClient on AgentClient {
           'command',
           'operationId',
           'purpose',
+          'title',
           'launch',
           'agentName',
           'externalChatId',
@@ -170,6 +171,7 @@ extension _ProgramClient on AgentClient {
           'input': {
             for (final key in [
               'purpose',
+              'title',
               'launch',
               'agentName',
               'externalChatId',

@@ -301,6 +301,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
       agentName: input.agentName,
       externalChatId: input.externalChatId,
       purpose: input.purpose,
+      title: input.title,
       createdAt: now,
       requestExpiresAt: now.add(_service._requestLifetime),
       items: items,
@@ -341,6 +342,7 @@ extension CredentialBatchAgentAccess on AgentAccess {
       'requestId': r.id,
       'operationId': r.operationId,
       'purpose': r.purpose,
+      if (r.title.isNotEmpty) ...{'title': r.title, 'summary': r.purpose},
       if (r.programPlan != null) 'programPlan': r.programPlan!.toJson(),
       'revision': r.revision,
       'createdAt': _useTimestamp(r.createdAt),
@@ -568,7 +570,8 @@ extension CredentialBatchAgentAccess on AgentAccess {
           deviceId,
           sshLoginRequestId,
         );
-        if (login.items.length != 1 || login.sessionBinding != r.sessionBinding) {
+        if (login.items.length != 1 ||
+            login.sessionBinding != r.sessionBinding) {
           throw const CredentialUseFailure('session_mismatch');
         }
         final loginTarget = login.items.single.destination.ssh;

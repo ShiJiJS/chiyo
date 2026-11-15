@@ -488,6 +488,13 @@ final class DeviceCredentialBatchHost {
       )) {
         throw const CredentialUseFailure('unsupported_capability');
       }
+      if (command == 'batch-request' &&
+          _map(input['input']).containsKey('title') &&
+          !(support['capabilities'] as List? ?? []).contains(
+            RequestPresentation.capability,
+          )) {
+        throw const CredentialUseFailure('unsupported_capability');
+      }
       if (command == 'capabilities') {
         return {
           'status': 'ok',
@@ -1287,13 +1294,16 @@ void _validateInput(Map<String, dynamic> value) {
   }
   _shape(value, {'command', 'operationId', 'input'});
   final raw = _map(value['input']);
-  _shape(raw, {
-    'purpose',
-    'agentName',
-    'externalChatId',
-    'submissionVersion',
-    'items',
-  });
+  _shape(
+    raw,
+    {'purpose', 'agentName', 'externalChatId', 'submissionVersion', 'items'},
+    {'title'},
+  );
+  try {
+    RequestPresentation.fromJson(raw);
+  } on FormatException {
+    throw const CredentialUseFailure('invalid_submission_metadata');
+  }
   if (raw['submissionVersion'] != 1 ||
       submissionMetadataErrors(raw).isNotEmpty) {
     throw const CredentialUseFailure('invalid_submission_metadata');
@@ -1322,6 +1332,8 @@ Map<String, dynamic> _public(Map<String, dynamic> value) {
     'requestId',
     'operationId',
     'purpose',
+    'title',
+    'summary',
     'revision',
     'createdAt',
     'requestExpiresAt',

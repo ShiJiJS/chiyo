@@ -25,7 +25,11 @@ extension _ChiyoFill on ChiyoCli {
     } else {
       final via = _required(i, 'via');
       body = {
-        'purpose': _required(i, 'purpose'),
+        if (o['title'] != null) 'title': o['title'],
+        if (o['summary'] != null)
+          'summary': o['summary']
+        else
+          'purpose': _required(i, 'purpose'),
         'items': [
           {
             'credentialId': _required(i, 'credential'),
@@ -51,6 +55,14 @@ extension _ChiyoFill on ChiyoCli {
         ],
       };
     }
+    final RequestPresentation presentation;
+    try {
+      presentation = RequestPresentation.fromJson(body);
+    } on FormatException catch (error) {
+      throw ChiyoUsageFailure(error.message);
+    }
+    body.remove('summary');
+    body.addAll(presentation.toProtocolJson());
     _validateFillBusiness(body);
     final intent = await _intents.remember('fill-request', {
       'input': {
@@ -110,10 +122,10 @@ extension _ChiyoFill on ChiyoCli {
 
 void _validateFillBusiness(Map<String, dynamic> body) {
   Never invalid() => throw const ChiyoUsageFailure(
-    '填写文件只包含 purpose 和 items；每项指定 credentialId、可选 version 和 destination。目标仅填写真实浏览器位置或 focus，不提供密码、内部程序或已准备的证明。',
+    '填写文件只包含 title、summary 和 items（兼容旧 purpose）；每项指定 credentialId、可选 version 和 destination。目标仅填写真实浏览器位置或 focus，不提供密码、内部程序或已准备的证明。',
   );
   final purpose = body['purpose'], items = body['items'];
-  if (body.length != 2 ||
+  if (body.keys.any((key) => !{'purpose', 'title', 'items'}.contains(key)) ||
       purpose is! String ||
       purpose.trim().isEmpty ||
       purpose.length > 2000 ||

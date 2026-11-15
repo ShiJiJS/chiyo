@@ -368,9 +368,9 @@ class InformationBackups {
   }
 
   static void _key(sqlite.Database db, String recoveryKey) {
-    final hex = _decodeKey(recoveryKey)
-        .map((b) => b.toRadixString(16).padLeft(2, '0'))
-        .join();
+    final hex = _decodeKey(
+      recoveryKey,
+    ).map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     final cipher = db.select('PRAGMA cipher_version');
     if (cipher.isEmpty ||
         !(cipher.first.values.first as String).startsWith('4.')) {
@@ -545,18 +545,22 @@ class InformationBackups {
           false;
       final hasNativeHistory =
           tables['credential_batches']?.any(
-            (row) =>
-                _storedBatch(row).items
-                    .any((i) => i.destination.native != null),
+            (row) => _storedBatch(
+              row,
+            ).items.any((i) => i.destination.native != null),
           ) ??
           false;
       final hasNativeV2History =
           tables['credential_batches']?.any(
-            (row) =>
-                _storedBatch(row).items
-                    .any((i) => i.destination.native?.requiresV2 ?? false),
+            (row) => _storedBatch(
+              row,
+            ).items.any((i) => i.destination.native?.requiresV2 ?? false),
           ) ??
           false;
+      final hasPresentation =
+          (tables['credential_batches'] ?? const <Map<String, Object?>>[]).any(
+            (row) => _storedBatch(row).title.isNotEmpty,
+          );
       final hasProgramBatchHistory =
           tables['credential_batches']?.any(
             (row) => _storedBatch(row).programPlan != null,
@@ -566,12 +570,16 @@ class InformationBackups {
         tables.remove('credential_batches');
         tables.remove('credential_batch_operations');
       }
-      if (!hasProgramBatchHistory && !hasNativeHistory && !hasSshHistory)
+      if (!hasPresentation &&
+          !hasProgramBatchHistory &&
+          !hasNativeHistory &&
+          !hasSshHistory)
         tables.remove('credential_program_operations');
       final sessionSshGrants = tables['credential_use_requests']!.any(
         (row) =>
-            CredentialUseRequest.fromJson(_backupJson(row))
-                .credentialValidity ==
+            CredentialUseRequest.fromJson(
+              _backupJson(row),
+            ).credentialValidity ==
             CredentialUseValidity.session,
       );
       final portableFills = _hasPortableFocusedFill(
@@ -664,7 +672,9 @@ class InformationBackups {
           accountMetadata ||
           longTermAttachments;
       if (detachedHistory || portableFills || extendedColumns) {
-        formatVersion = hasSshHistory
+        formatVersion = hasPresentation
+            ? 33
+            : hasSshHistory
             ? 32
             : hasNativeV2History
             ? 31
@@ -710,7 +720,10 @@ class InformationBackups {
             ? 11
             : 10;
         for (final table
-            in (hasProgramBatchHistory || hasNativeHistory || hasSshHistory
+            in (hasPresentation ||
+                        hasProgramBatchHistory ||
+                        hasNativeHistory ||
+                        hasSshHistory
                     ? _v29Columns
                     : hasBatchHistory
                     ? _v28Columns
@@ -1286,6 +1299,11 @@ class InformationBackups {
         if (contents.formatVersion >= 28) {
           await _repository._createCredentialBatchTables();
         }
+        if (contents.formatVersion >= 33) {
+          await _repository._requireAdmissionFormat(
+            _requestPresentationLibraryFormat,
+          );
+        }
         if (contents.formatVersion >= 32) {
           await _repository._requireAdmissionFormat(
             _sshInteractiveLibraryFormat,
@@ -1410,6 +1428,7 @@ class InformationBackups {
           30,
           31,
           32,
+          33,
         ].contains(decoded['version'])) {
       throw const StorageFailure('unsupported_backup');
     }
@@ -1436,7 +1455,7 @@ class InformationBackups {
       25 => _v25Columns,
       26 || 27 => _v26Columns,
       28 => _v28Columns,
-      29 || 30 || 31 || 32 => _v29Columns,
+      29 || 30 || 31 || 32 || 33 => _v29Columns,
       _ => _allColumns,
     };
     final data = decoded['tables'] as Map<String, dynamic>;

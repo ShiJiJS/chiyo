@@ -12,11 +12,14 @@ import 'chiyo_context.dart';
 import 'chrome_browser_fill.dart';
 import 'chiyo_intents.dart';
 import 'chiyo_programs.dart';
+import 'chiyo_request_templates.dart';
+import 'package:info_core/new_file_publish.dart' as file_publication;
 import 'device_credential_batch_host.dart';
 part 'chiyo_fill.dart';
 part 'chiyo_proposals.dart';
 part 'chiyo_reveal.dart';
 part 'chiyo_exec.dart';
+part 'chiyo_templates.dart';
 part 'chiyo_ssh.dart';
 
 class ChiyoRunResult {
@@ -74,6 +77,13 @@ class ChiyoCli {
           help: invocation.help,
           json: invocation.json,
         );
+      }
+      if (const {
+        'exec template',
+        'ssh template',
+        'fill template',
+      }.contains(invocation.path)) {
+        return await _requestTemplate(invocation);
       }
       if (invocation.path == 'chat start') return await _start(invocation);
       if (invocation.path == 'browsers list') {

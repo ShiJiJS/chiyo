@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:info_core/info_core.dart';
+import 'package:info_core/credential_program_protocol.dart';
 import 'package:test/test.dart';
 
 class Fixture {
@@ -133,6 +134,37 @@ void main() {
     await f.open();
   });
   tearDown(() => f.service.close());
+
+  test('structured title survives the private protocol and approval', () async {
+    final plan = f.plan();
+    final protocol = CredentialProgramProtocol(f.service.agent, Fixture.device);
+    final response = await protocol.dispatch(
+      '${CredentialProgramProtocol.base}/request',
+      {
+        'sessionSecret': f.session,
+        'operationId': 'structured-program',
+        'input': {
+          'title': '检查测试服务',
+          'purpose': '确认服务运行状态。',
+          'launch': plan.toJson(),
+        },
+        'prepared': f.prepared(plan).toPrivateJson(),
+      },
+    );
+    expect(response['title'], '检查测试服务');
+    expect(response['summary'], '确认服务运行状态。');
+    final request = f.repo.credentialBatches.singleWhere(
+      (r) => r.title.isNotEmpty,
+    );
+    final approved = await f.service.owner.decideCredentialBatch(
+      request.id,
+      operationId: 'approve-structured',
+      revision: 1,
+      approvedItems: ['b1'],
+    );
+    expect(approved.title, '检查测试服务');
+    expect(approved.summary, '确认服务运行状态。');
+  });
 
   test(
     'all required approvals precede material delivery; an independent approved subset may launch alone',

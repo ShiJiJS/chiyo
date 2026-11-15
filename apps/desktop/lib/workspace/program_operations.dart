@@ -52,7 +52,7 @@ class _ProgramOperationsState extends State<ProgramOperations> {
         children: [
           Text(
             '程序执行记录',
-            style: libraryText(context, 17, weight: FontWeight.w700),
+            style: libraryText(context, 15, weight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
           Text(
@@ -109,9 +109,11 @@ class _ProgramOperationsState extends State<ProgramOperations> {
         : c.accent;
     return Container(
       key: ValueKey('program-operation-${operation.operationId}'),
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: c.line)),
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -122,17 +124,16 @@ class _ProgramOperationsState extends State<ProgramOperations> {
             runSpacing: 6,
             children: [
               Text(
-                operation.plan.executable.split(RegExp(r'[/\\]')).last,
+                '运行 ${operation.plan.programName}',
                 style: libraryText(context, 15, weight: FontWeight.w600),
               ),
-              Text(
+              LibraryPill(
                 operation.resultLabel,
-                style: libraryText(
-                  context,
-                  14,
-                  color: color,
-                  weight: FontWeight.w600,
-                ),
+                color: color,
+                background:
+                    operation.state == 'exited' && operation.exitCode == 0
+                    ? c.successSurface
+                    : c.rail,
               ),
             ],
           ),

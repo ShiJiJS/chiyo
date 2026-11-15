@@ -107,6 +107,8 @@ const _nativeFillLibraryFormat = 69;
 const _nativeFillV2LibraryFormat = 70;
 // SSH uses the next admission format after capability-based native targets.
 const _sshInteractiveLibraryFormat = 71;
+// Display titles must survive history, sync and restore without old-reader loss.
+const _requestPresentationLibraryFormat = 72;
 
 class StorageFailure implements Exception {
   const StorageFailure(this.code);
@@ -737,7 +739,7 @@ class EncryptedInformationRepository
           native.select('PRAGMA user_version').single.values.single as int;
       var openingFormat = _libraryFormat;
       var captureOnOpen = false;
-      if (headerVersion > _sshInteractiveLibraryFormat) {
+      if (headerVersion > _requestPresentationLibraryFormat) {
         throw const StorageFailure('unsupported_schema');
       }
       if (native
@@ -752,7 +754,8 @@ class EncryptedInformationRepository
             marker.single['singleton'] != 1 ||
             marker.single['version'] is! int ||
             (marker.single['version'] as int) < 17 ||
-            (marker.single['version'] as int) > _sshInteractiveLibraryFormat ||
+            (marker.single['version'] as int) >
+                _requestPresentationLibraryFormat ||
             headerVersion > (marker.single['version'] as int)) {
           throw const StorageFailure('unsupported_schema');
         }
@@ -1357,11 +1360,12 @@ class EncryptedInformationRepository
     return List.unmodifiable(_tags.values);
   }
 
-  Future<void> _writeDirectory(InformationDirectory directory) =>
-      _db.customStatement(
-        'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
-        [directory.id, directory.name, directory.parentId, directory.version],
-      );
+  Future<void> _writeDirectory(
+    InformationDirectory directory,
+  ) => _db.customStatement(
+    'INSERT INTO information_directories(id,name,parent_id,version) VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,parent_id=excluded.parent_id,version=excluded.version',
+    [directory.id, directory.name, directory.parentId, directory.version],
+  );
   Future<void> _writeTag(InformationTag tag) => _db.customStatement(
     'INSERT INTO information_tags(id,name,version) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,version=excluded.version',
     [tag.id, tag.name, tag.version],
@@ -2518,8 +2522,9 @@ class _InformationDatabase extends GeneratedDatabase {
   );
 
   Future<void> _createInformationLayout() async {
-    final columns = await customSelect('PRAGMA table_info(information_items)')
-        .get();
+    final columns = await customSelect(
+      'PRAGMA table_info(information_items)',
+    ).get();
     if (columns.any((r) => r.read<String>('name') == 'layout_json')) {
       // Development/legacy fixtures can carry the empty additive column, but a
       // downgraded marker must never hide already persisted layout content.

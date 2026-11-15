@@ -156,7 +156,11 @@ class _ApprovalExactDetailsState extends State<ApprovalExactDetails> {
                       primary: false,
                       child: SelectableText(
                         widget.text,
-                        style: libraryText(context, 13, height: 1.8),
+                        style: libraryText(
+                          context,
+                          13,
+                          height: 1.8,
+                        ).copyWith(fontFamily: 'monospace'),
                       ),
                     ),
                   ),

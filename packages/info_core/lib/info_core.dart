@@ -40,6 +40,8 @@ export 'revisions.dart';
 import 'revisions.dart';
 import 'access_timing.dart';
 export 'access_timing.dart';
+import 'request_presentation.dart';
+export 'request_presentation.dart';
 import 'submission_metadata.dart';
 export 'submission_metadata.dart';
 part 'organization_access.dart';

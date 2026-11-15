@@ -42,7 +42,9 @@ class OwnerWorkspaceCredentialBatches {
     core.CredentialUseBatch r,
   ) => WorkspaceApprovalSummary(
     id: r.id,
-    title: r.items.any((i) => i.destination.ssh != null)
+    title: r.title.isNotEmpty
+        ? r.title
+        : r.items.any((i) => i.destination.ssh != null)
         ? "SSH · ${r.items.first.credentialName}"
         : r.programPlan != null
         ? '${r.programPlan!.path.split(RegExp(r'[/\\]')).last} · 程序使用'

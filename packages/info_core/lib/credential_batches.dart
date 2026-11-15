@@ -147,8 +147,10 @@ class CredentialBatchInput {
     this.externalChatId,
     Iterable<CredentialBatchCandidate> items, [
     this.programPlan,
+    this.title = '',
   ]) : items = List.unmodifiable(items);
-  final String purpose, agentName, externalChatId;
+  final String purpose, agentName, externalChatId, title;
+  String get summary => purpose;
   final List<CredentialBatchCandidate> items;
   final CredentialProgramPlan? programPlan;
   factory CredentialBatchInput.fromJson(
@@ -161,6 +163,7 @@ class CredentialBatchInput {
       {
         'agentName',
         'externalChatId',
+        'title',
         'submissionVersion',
         if (allowProgram) 'programPlan',
       },
@@ -173,6 +176,11 @@ class CredentialBatchInput {
         (json['items'] as List).length > 20 ||
         (json['items'] as List).any((v) => v is! Map<String, dynamic>)) {
       throw const CredentialUseFailure('limit_exceeded');
+    }
+    try {
+      RequestPresentation.fromJson(json);
+    } on FormatException {
+      throw const CredentialUseFailure('invalid_submission_metadata');
     }
     final purpose = _useText(
       json['purpose'],
@@ -214,15 +222,24 @@ class CredentialBatchInput {
         utf8.encode(jsonEncode(json)).length > 262144) {
       throw const CredentialUseFailure('invalid_plan');
     }
-    return CredentialBatchInput._(purpose, agent, chat, items, program);
+    return CredentialBatchInput._(
+      purpose,
+      agent,
+      chat,
+      items,
+      program,
+      json['title'] as String? ?? '',
+    );
   }
   factory CredentialBatchInput.forProgram(
     CredentialProgramPlan plan, {
     required String purpose,
+    String title = '',
     String agentName = '',
     String externalChatId = '',
   }) => CredentialBatchInput.fromJson({
     'protocolVersion': 3,
+    if (title.isNotEmpty) 'title': title,
     'purpose': purpose,
     'agentName': agentName,
     'externalChatId': externalChatId,
@@ -231,6 +248,7 @@ class CredentialBatchInput {
   }, allowProgram: true);
   Map<String, Object?> toJson() => {
     'protocolVersion': 3,
+    if (title.isNotEmpty) 'title': title,
     'purpose': purpose,
     'agentName': agentName,
     'externalChatId': externalChatId,
@@ -409,13 +427,15 @@ class CredentialUseBatch {
     required this.requestExpiresAt,
     required Iterable<CredentialBatchItem> items,
     this.programPlan,
+    this.title = '',
     this.revision = 1,
     this.archived = false,
     Iterable<CredentialBatchDecisionReceipt> decisions = const [],
   }) : items = List.unmodifiable(items),
        decisions = List.unmodifiable(decisions);
   final String id, sessionBinding, deviceId, operationId, submissionDigest;
-  final String chatLabel, agentName, externalChatId, purpose;
+  final String chatLabel, agentName, externalChatId, purpose, title;
+  String get summary => purpose;
   final DateTime createdAt, requestExpiresAt;
   final List<CredentialBatchItem> items;
   final CredentialProgramPlan? programPlan;
@@ -446,6 +466,7 @@ class CredentialUseBatch {
     'chatLabel': chatLabel,
     'agentName': agentName,
     'externalChatId': externalChatId,
+    if (title.isNotEmpty) 'title': title,
     'purpose': purpose,
     'createdAt': _useTimestamp(createdAt),
     'requestExpiresAt': _useTimestamp(requestExpiresAt),
@@ -476,8 +497,13 @@ class CredentialUseBatch {
         'items',
         'decisions',
       },
-      {'programPlan'},
+      {'programPlan', 'title'},
     );
+    try {
+      RequestPresentation.fromJson(json);
+    } on FormatException {
+      throw const CredentialUseFailure('invalid_submission_metadata');
+    }
     if (json['protocolVersion'] != 3 ||
         json['revision'] is! int ||
         (json['revision'] as int) < 1 ||
@@ -576,6 +602,7 @@ class CredentialUseBatch {
         max: 200,
       ),
       purpose: _useText(json['purpose'], 'purpose', max: 2000, empty: false),
+      title: json['title'] as String? ?? '',
       createdAt: created,
       requestExpiresAt: expiry,
       items: items,
@@ -598,6 +625,7 @@ class CredentialUseBatch {
     agentName: agentName,
     externalChatId: externalChatId,
     purpose: purpose,
+    title: title,
     createdAt: createdAt,
     requestExpiresAt: requestExpiresAt,
     items: next,

@@ -65,10 +65,15 @@ final class CredentialProgramProtocol {
         _shape(
           input,
           {'purpose', 'launch'},
-          {'agentName', 'externalChatId', 'submissionVersion'},
+          {'agentName', 'externalChatId', 'submissionVersion', 'title'},
         );
         if (input.containsKey('submissionVersion') &&
             input['submissionVersion'] != 1) {
+          throw const CredentialUseFailure('invalid_submission_metadata');
+        }
+        try {
+          RequestPresentation.fromJson(input);
+        } on FormatException {
           throw const CredentialUseFailure('invalid_submission_metadata');
         }
         final launch = CredentialProgramPlan.fromJson(
@@ -85,6 +90,7 @@ final class CredentialProgramProtocol {
           CredentialBatchInput.forProgram(
             prepared.resolveProgram(launch),
             purpose: _text(input, 'purpose'),
+            title: input['title'] as String? ?? '',
             agentName: input.containsKey('agentName')
                 ? _text(input, 'agentName')
                 : '',

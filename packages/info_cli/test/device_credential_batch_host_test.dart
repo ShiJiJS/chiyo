@@ -630,6 +630,36 @@ void main() {
     },
   );
   test(
+    'the public fill template preserves title through inspection, approval and history status',
+    () async {
+      final file = File('${f.root.path}/structured.json');
+      final business = <String, dynamic>{'items': f.plan()['items']};
+      business['title'] = '登录测试工作台';
+      business['summary'] = '继续处理测试项目。';
+      await file.writeAsString(jsonEncode(business));
+      final result = await f.cli([
+        'fill',
+        'request',
+        '--input',
+        file.path,
+        '--operation',
+        'structured-fill',
+      ]);
+      expect(result.exitCode, 0, reason: result.render());
+      final request = f.service.owner.credentialBatches.single;
+      expect(request.title, '登录测试工作台');
+      expect(request.summary, '继续处理测试项目。');
+      expect(f.browser.inspections, 2);
+      await f.approve(request.id, ['b1']);
+      expect(f.service.owner.credentialBatches.single.title, request.title);
+      expect(f.browser.fills, 0);
+      final status = await f.cli(['requests', 'show', request.id]);
+      expect(status.render(), contains('登录测试工作台'));
+      expect(status.render(), isNot(contains(_Fixture.aSecret)));
+    },
+  );
+
+  test(
     'one private request contains multiple inspected destinations and does not execute on approval',
     () async {
       final id = await f.request();
@@ -1500,6 +1530,7 @@ class _Fixture {
           'capabilities': [
             if (support) ...[
               'credential-batches.v3',
+              RequestPresentation.capability,
               'agent-record-queries.v1',
               if (backgroundSupport) nativeCapability,
             ],

@@ -7,7 +7,7 @@
 以下值均为示例占位；使用本聊天的私有配置、实际目标与凭据 ID：
 
 ```sh
-chiyo ssh request --host HOST --port 22 --user USER --auth password --credential LOGIN_ID --purpose "部署指定服务" --validity session --operation login-request-01 --json
+chiyo ssh request --host HOST --port 22 --user USER --auth password --credential LOGIN_ID --title "部署指定服务" --summary "连接服务器，完成服务部署和检查。" --validity session --operation login-request-01 --json
 chiyo requests wait REQUEST_ID --timeout 60 --json
 chiyo ssh open --request REQUEST_ID --operation open-01 --json
 chiyo ssh run --session SESSION_ID --operation run-01 --command 'cd /approved/work && export MODE=test' --json
@@ -30,7 +30,7 @@ chiyo ssh input --session SESSION_ID --run RUN_ID --text y --enter --operation i
 使用会话提供的普通 `sudo command`（也可用 `chiyo_sudo`），软件管理专用 ASKPASS 接收，保留调用方管道与重定向。只有当前 `run.credentialReceiver` 给出的可信 `actionId` 才能申请密码；免密码 sudo 不会产生接收动作。绝对路径 sudo、`command sudo` 或外部脚本内自行调用的 sudo 不经过这个函数，普通 `Password:` 提示不证明可受管接收；此时报告具体条件，不把密码当普通 input，也不自动改读原文。
 
 ```sh
-chiyo ssh credential request --session SESSION_ID --run RUN_ID --action ACTION_ID --credential SUDO_ID --purpose "为当前安装步骤认证" --operation sudo-request-01 --json
+chiyo ssh credential request --session SESSION_ID --run RUN_ID --action ACTION_ID --credential SUDO_ID --title "为安装步骤认证" --summary "给当前等待输入的 sudo 命令提供密码。" --operation sudo-request-01 --json
 chiyo requests wait SUDO_REQUEST_ID --timeout 60 --json
 chiyo ssh credential use --session SESSION_ID --run RUN_ID --action ACTION_ID --request SUDO_REQUEST_ID --operation sudo-use-01 --json
 ```

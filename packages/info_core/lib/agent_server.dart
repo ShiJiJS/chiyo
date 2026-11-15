@@ -410,6 +410,8 @@ class AgentProtocol {
             'credential-catalog-search.v1',
             'information-request-operations.v1',
             'submission-metadata.v1',
+            if (enableCredentialBatches && _agent.credentialBatchesAvailable)
+              RequestPresentation.capability,
             if (enableReusableCredentialUse) 'credential-use-reuse.v1',
             if (enableReusableCredentialUse) 'credential-reveal.v1',
             if (enableReusableCredentialUse) 'credential-reveal-operations.v1',

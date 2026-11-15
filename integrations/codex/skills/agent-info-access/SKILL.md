@@ -9,7 +9,7 @@ App 管理资料和审批，CLI 查询、提案和使用获准内容。模板格
 
 ## 入口与当前聊天
 
-本包的 `Bundle executable` 是统一入口 `chiyo`（Windows 为 `chiyo.exe`）。使用定位器已经核对的完整路径，先看 `--help`，再看所用子命令的 `--help`。帮助不需要 App、连接或私有配置。普通任务使用参数，复杂批量内容使用 `--input`；机器结果加 `--json`。
+本包的 `Bundle executable` 是统一入口 `chiyo`（Windows 为 `chiyo.exe`）。使用定位器已经核对的完整路径，先看 `--help`，再看所用子命令的 `--help`。帮助不需要 App、连接或私有配置。普通任务使用参数，复杂批量内容使用 `--input`；机器结果加 `--json`。凭据使用申请先取 `exec/ssh/fill template`，填写简短 title、用途 summary 与独立执行参数，再 `request --input FILE`；模板离线可用，`--out FILE` 只写新文件。
 
 先读[聊天、连接与恢复](references/remote-connection.md)。已有本聊天私有上下文时复用，没有时 Agent 自动建立一次新的未授权聊天，无需用户单独确认。不能用公开聊天 ID 或最近一次聊天找回权限。配置固定原资料库和执行设备，断网不换库，不随 App 模式切换搬运旧批准。普通终端可接入，不要求安装 Codex hooks。
 

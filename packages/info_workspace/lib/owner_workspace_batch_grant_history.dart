@@ -36,7 +36,7 @@ extension _BatchGrantHistory on OwnerWorkspaceGrantHistory {
       WorkspaceGrantSummary(
         id: 'request:${r.id}',
         requestId: r.id,
-        title: r.purpose,
+        title: OwnerWorkspaceCredentialBatches(owner).summary(r).title,
         kind: WorkspaceApprovalKind.credential,
         state: _batchHistoryState(r),
         agentClaim: r.agentName,
@@ -103,8 +103,9 @@ extension _BatchGrantHistory on OwnerWorkspaceGrantHistory {
           for (final operation in operations)
             (() {
               final view = owner.credentialBatchOperationView(operation);
-              final metadata = OwnerWorkspaceCredentialBatches(owner)
-                  .operationView(r, operation);
+              final metadata = OwnerWorkspaceCredentialBatches(
+                owner,
+              ).operationView(r, operation);
               final result = <String>[
                 _batchResult(view['executionState'] as String),
                 if (metadata.errorLabel != null) metadata.errorLabel!,
