@@ -76,16 +76,36 @@ private final class MacFocusPrivateSession: NSObject, MacNativeBackgroundPrivate
     watch.resume()
   }
 
-  deinit { close() }
+  deinit {
+    ownerExit?.cancel()
+    controller?.close()
+    // Creating a weak reference to an NSObject already in deinit aborts.
+    // Retain only the main-thread-owned wire until its cleanup can run.
+    let remaining = native
+    if Thread.isMainThread { remaining?.close() }
+    else { DispatchQueue.main.async { remaining?.close() } }
+  }
 
   func close() {
     state.lock()
+    guard !ended else { state.unlock(); return }
     ended = true
     let active = controller
+    controller = nil
+    let watch = ownerExit
+    ownerExit = nil
     state.unlock()
-    ownerExit?.cancel()
+    watch?.cancel()
     active?.close()
-    DispatchQueue.main.async { [weak self] in self?.native?.close(); self?.native = nil }
+    if Thread.isMainThread { closeNative() }
+    else { DispatchQueue.main.async { [self] in closeNative() } }
+  }
+
+  private func closeNative() {
+    precondition(Thread.isMainThread)
+    let current = native
+    native = nil
+    current?.close()
   }
 
   func nativeRequest(_ request: Data, reply: @escaping (Data) -> Void) {
