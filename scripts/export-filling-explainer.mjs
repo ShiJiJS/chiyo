@@ -50,9 +50,11 @@ await page.evaluate(({mac, win}) => {
     section.querySelectorAll('[id]').forEach(e => e.id += '-windows');
     section.id += '-windows'; main.append(section);
   }
-  // Shared security limits and references conclude both native platform examples.
-  const security = main.querySelector('#security-boundary');
-  if (security) main.append(security);
+  // Shared command execution and security chapters follow both native platform examples.
+  for (const id of ['command-execution', 'security-boundary']) {
+    const section = main.querySelector('#'+id);
+    if (section) main.append(section);
+  }
   document.querySelectorAll('footer,.topbar,.reading-toc,.toc-scrim,.skip,.os-selector,.native-window-tabs,.native-demo-actions,.choice-row,.query-run button,.fill-action button,.text-button').forEach(e=>e.remove());
   // Repository references must remain usable after downloading the PDF.
   main.querySelectorAll('a[href]').forEach(a => {
@@ -63,7 +65,7 @@ await page.evaluate(({mac, win}) => {
   });
   document.querySelectorAll('details').forEach(e=>e.open=true);
   const note=document.createElement('p');note.className='pdf-note';
-  note.textContent='静态阅读版 · 网页演示已展开为查询与填写结果；原生控件示例已展开为候选筛选与目标选择。第 04、05 章先呈现 Mac，再呈现 Windows。完整交互请打开配套 HTML 页面。';
+  note.textContent='静态阅读版 · 网页演示已展开为查询与填写结果；原生控件示例已展开为候选筛选与目标选择。第 04、05 章先呈现 Mac，再呈现 Windows；第 06 章合并说明单次命令、SSH 私钥登录与 SSH 密码长连接，第 07 章说明安全边界。专用 SSH 内置密码适配与持续 Shell 仍为待实现设计；通用执行配合 Expect 的密码登录已有能力。完整交互请打开配套 HTML 页面。';
   main.querySelector('.intro').append(note);
 }, {mac,win});
 const css=await fs.readFile(path.join(dir,'print.css'),'utf8');
@@ -76,7 +78,7 @@ const pdf=await page.cdp('Page.printToPDF',{
   marginTop:.5,marginBottom:.55,marginLeft:.5,marginRight:.5,
   displayHeaderFooter:true,
   headerTemplate:'<div></div>',
-  footerTemplate:'<div style="font:9px sans-serif;width:100%;text-align:center;color:#56645f">知予 · 跨应用填写机制图解　<span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+  footerTemplate:'<div style="font:9px sans-serif;width:100%;text-align:center;color:#56645f">知予 · 凭据使用机制图解　<span class="pageNumber"></span> / <span class="totalPages"></span></div>',
   generateDocumentOutline:true
 });
 await fs.writeFile(path.join(dir,'credential-filling.pdf'),Buffer.from(pdf.data,'base64'));

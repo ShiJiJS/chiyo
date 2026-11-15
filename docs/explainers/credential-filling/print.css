@@ -9,7 +9,7 @@ main{max-width:none!important;width:100%!important;margin:0!important;padding:0!
 .reading h2{font-size:27px}.reading h3,h3{break-after:avoid}
 p{orphans:3;widows:3}h2,h3,h4,summary{break-after:avoid}
 pre{white-space:pre-wrap!important;overflow-wrap:anywhere!important}
-pre,table,.web-pair,.process-cutaway,.native-channel-map,.native-object-demo,.native-handoff-case,.map-window,.packet-paper,.result-browser{break-inside:avoid}
+pre,table,.web-pair,.process-cutaway,.native-channel-map,.native-object-demo,.native-handoff-case,.map-window,.packet-paper,.result-browser,.ssh-execution-map{break-inside:avoid}
 .api-step,.step-content,.packet-layout{break-inside:auto}
 details{max-width:none}summary::before{display:none}
 .enter{opacity:1!important;transform:none!important}
@@ -19,3 +19,8 @@ details{max-width:none}summary::before{display:none}
 .code-lines{overflow:visible!important}.native-target-list,.native-object-tree{overflow:visible!important;max-height:none!important}
 button{cursor:default!important}.native-selection-controls,.native-demo-controls{display:none!important}
 footer{break-before:avoid}a{word-break:break-word}
+#source-ssh,#source-command-execution-design{margin-top:12px;padding-bottom:8px}
+#source-ssh .detail-body,#source-command-execution-design .detail-body{padding-top:3px;font-size:14px;line-height:1.5}
+#source-ssh .detail-body>p,#source-command-execution-design .detail-body>p{max-width:none}
+#source-ssh .detail-body p+p,#source-command-execution-design .detail-body p+p{margin-top:7px}
+#command-execution p:has(+pre){break-after:avoid}

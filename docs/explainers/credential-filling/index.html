@@ -2,14 +2,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Agent 遇到密码框后，知予怎样接着填写？</title>
+  <title>Agent 需要密码或私钥时，知予怎样接着处理？</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23007764'/%3E%3Cpath d='M11 12h18v16H11zM16 17v6' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css"><link rel="stylesheet" href="reading-nav.css">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="native-background.css"><link rel="stylesheet" href="reading-nav.css"><link rel="stylesheet" href="ssh-execution.css"><link rel="stylesheet" href="execution-design.css">
   <script defer src="reading-nav.js"></script><script defer src="tutorial.js"></script><script defer src="vendor/alpine.min.js"></script>
 </head>
 <body x-data="tutorial">
 <a class="skip" href="#main">跳到正文</a>
-<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 填写机制图解</span></a><button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="false" aria-controls="reading-toc"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>目录</button></div></header>
+<header class="topbar"><div class="top-inner"><a class="brand" href="#main">知予 <span>/ 凭据使用机制图解</span></a><button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="false" aria-controls="reading-toc"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>目录</button></div></header>
 <div class="page-layout">
   <aside class="reading-toc" id="reading-toc" aria-labelledby="toc-title">
     <div class="toc-heading"><span id="toc-title">本文目录</span><button class="toc-close" type="button" aria-label="关闭目录"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
@@ -31,16 +31,19 @@
         <li data-toc-group="platform"><a class="toc-chapter" href="#platform"><span class="toc-number">05</span><span>应用：执行填写</span></a>
           <ul class="toc-sections"><li><a href="#native-recheck">复核与设值</a></li><li><a href="#native-background-scenario">能继续在别处打字吗？</a></li><li><a href="#native-result">获取填写结果</a></li></ul>
         </li>
-        <li data-toc-group="security-boundary"><a class="toc-chapter" href="#security-boundary"><span class="toc-number">06</span><span>安全边界：信任 Agent</span></a></li>
+        <li data-toc-group="command-execution"><a class="toc-chapter" href="#command-execution"><span class="toc-number">06</span><span>需要凭据的命令执行</span></a>
+          <ul class="toc-sections"><li><a href="#execution-single-program">一、单次命令</a></li><li><a href="#execution-via-env">环境变量怎样注入</a></li><li><a href="#ssh-execution">二、SSH 私钥登录</a></li><li><a href="#execution-persistent-ssh">三、SSH 密码长连接</a></li><li><a href="#execution-same-shell">多次调用，同一个 Shell</a></li><li><a href="#execution-session-lifecycle">命令结果与会话关闭</a></li></ul>
+        </li>
+        <li data-toc-group="security-boundary"><a class="toc-chapter" href="#security-boundary"><span class="toc-number">07</span><span>安全边界：信任 Agent</span></a></li>
       </ol>
     </nav>
   </aside>
   <button class="toc-scrim" type="button" aria-label="关闭目录" tabindex="-1" hidden></button>
 <main id="main">
   <div class="intro">
-    <h1><span class="keep-phrase">Agent 遇到密码框后，</span><wbr><span class="keep-phrase">知予怎样接着填写？</span></h1>
+    <h1><span class="keep-phrase">Agent 需要密码或私钥时，</span><wbr><span class="keep-phrase">知予怎样接着处理？</span></h1>
     <p>用户让 Agent“登录项目工作台”。Agent 打开页面，遇到了一个需要填写的密码框；密码保存在知予里。接下来，它要先弄清楚这是哪个页面、哪个输入框，再把目标与凭据使用申请交给知予。获批之后，知予才安排相应的填写代码执行。</p>
-    <p>这篇文章把整段交互连起来讲：<strong>Agent 怎样告诉知予“用哪份凭据、填到哪里”？知予怎样执行这次操作，又通过什么 API 找到输入框并送入文字？</strong></p>
+    <p>这篇文章把整段交互连起来讲：<strong>Agent 怎样告诉知予“用哪份凭据、交给哪里”？知予怎样执行网页与应用填写，又怎样让程序使用凭据完成任务并返回结果？</strong>命令执行部分按单次命令、SSH 私钥登录、SSH 密码长连接三个场景展开。</p>
 
     <p class="caption">命令中的页面、目标和操作编号均为示例。网页以普通 HTML 密码框为例；普通应用部分限定于通过兼容验证的原生密码控件。</p>
 
@@ -49,8 +52,9 @@
       <dl class="scope-list">
         <div><dt>浏览器中的网页</dt><dd>例如网站登录页里的密码框，可以从页面元素和浏览器的控制入口入手。</dd></div>
         <div><dt>普通桌面应用</dt><dd>例如桌面客户端的密码框，需要考虑应用向操作系统提供的控件信息与输入接口。</dd></div>
+        <div><dt>需要凭据的命令执行</dt><dd>例如用密码备份数据库、用私钥登录服务器，或在 SSH 长会话中连续操作同一个远端 Shell。已有能力与拟议接口会分别标明。</dd></div>
       </dl>
-      <p>两类目标都要考虑 <strong>macOS 和 Windows</strong>。本文从 Agent 选择目标、提交请求讲到知予获准后操作网页或桌面应用；会展开影响目标选择的申请与授权信息，凭据如何加密存储则作为背景。</p>
+      <p>这些使用场景都要考虑 <strong>macOS 和 Windows</strong>。本文从 Agent 选择目标、提交请求讲到知予获准后填写网页、操作桌面应用或启动本机程序，再说明后续内置 SSH 认证与持续 Shell 的设计；会展开影响使用范围的申请与授权信息，凭据如何加密存储则作为背景。</p>
     </div>
 
     <div class="reading-route" aria-labelledby="route-title">
@@ -58,6 +62,7 @@
       <ol>
         <li><a href="#web">先讲网页</a>：确定页面和输入框 → 从知予的目录选出密码 → 提交申请并获得许可 → 发起填写。随后展开知予的内置填写模块怎样连接浏览器、发送具体操作。</li>
         <li><a href="#native">再扩展到普通应用</a>：从应用的控件树取得固定目标编号，申请批准后再直接设值；查询控件和写值的 API 分别展开 Mac 与 Windows。</li>
+        <li><a href="#command-execution">接着讲需要凭据的命令执行</a>：先看一次启动完成备份，再看本机 SSH 使用私钥、远端运行 <code>df -h</code>，最后说明怎样按 <code>SSH-7</code> 连续调用同一个远端 Shell，保留 <code>cd</code> 和 <code>export</code> 的效果。</li>
       </ol>
     </div>
   </div>
@@ -468,10 +473,228 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
 
   </section>
 
+  <section id="command-execution" class="chapter execution-design">
+    <span id="command-execution-design" class="execution-compat-anchor" aria-hidden="true"></span>
+    <div class="reading">
+      <h2><span class="section-num">06</span>需要使用凭据执行命令时，知予怎样处理？</h2>
+      <p>前面讲的是把密码填进网页或应用。还有一些任务没有等待填写的输入框：用户希望 Agent 备份数据库，或登录服务器检查项目。这时需要让程序使用密码、Token 或私钥完成操作，再把执行结果交给 Agent。</p>
+      <p>下面按三种使用场景展开：单次命令、SSH 私钥登录、SSH 密码长连接。先看一次启动就能完成的任务，再看私钥如何用于远端命令，最后说明用密码登录后怎样保留连接与同一个 Shell，让后续命令延续前面的目录和变量。</p>
+    </div>
+    <div class="execution-scenarios" aria-label="三种使用场景概要">
+      <table>
+        <thead><tr><th scope="col">使用场景</th><th scope="col">例子</th><th scope="col">本节要讲清的区别</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><a href="#execution-single-program">一、单次命令</a></th><td>用数据库密码完成一次备份</td><td>凭据交给指定程序；本次程序结束，操作就结束</td></tr>
+          <tr><th scope="row"><a href="#ssh-execution">二、SSH 私钥登录</a></th><td>用已保存的私钥执行 <code>df -h</code></td><td>私钥交给本机 SSH，命令在服务器上运行</td></tr>
+          <tr><th scope="row"><a href="#execution-persistent-ssh">三、SSH 密码长连接</a></th><td>登录后依次执行 <code>cd</code>、<code>pwd</code>、<code>git status</code></td><td>知予保留同一个远端 Shell，后续通过会话编号继续执行</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="reading execution-scenario-note"><p>“私钥／密码”区分登录方式，“单次／长会话”区分执行状态是否继续保留。因此下面是三种常见场景，不是三种互斥的底层模式；后续的 SSH 长会话也可以使用私钥登录。</p></div>
+    <aside class="execution-design-status" aria-labelledby="execution-status-title">
+      <h3 id="execution-status-title">当前能力与后续替代方向</h3>
+      <p>已有的 <code>chiyo exec</code> 可以把凭据交给程序的标准输入、指定环境变量或受管文件，再管理程序执行；现有 <code>ssh_identity</code> 专用路径支持私钥登录。通用执行配合 Expect 脚本，也已经能够用 SSH 密码登录：知予把密码注入 Expect，脚本启动 SSH，识别密码提示后发送密码，执行完这一批命令就退出。</p>
+      <p>后续专用 SSH 功能将替代由 Agent 临时编写 Expect 脚本的用法，统一处理私钥或密码登录，并提供持续会话。继续复用知予现有的审批、凭据交付和执行记录；通用单次命令能力保留。下面的 <code>chiyo ssh</code> 命令是拟议接口，内置密码适配和持续 Shell 管理仍待实现，当前脚本路径尚未因这份设计而停用。</p>
+    </aside>
+
+    <section class="execution-scenario" id="execution-single-program" aria-labelledby="execution-single-title">
+      <div class="reading">
+        <h3 class="execution-scenario-title" id="execution-single-title"><span>一</span><span>单次命令<small>把凭据交给程序，完成本次任务</small></span></h3>
+      <p>单次命令支持三种凭据交付方式：标准输入、环境变量和受管临时文件。选择哪一种，取决于目标程序从哪里读取凭据；它们使用同一套申请、批准和执行流程。</p>
+      <h4 id="execution-via-stdin">标准输入：程序从输入管道读取密码</h4>
+      <p>例如，用户要备份项目数据库。假设本机工具 <code>/opt/example/db-backup</code> 支持 <code>--password-stdin</code>：它从标准输入读取完整密码，收到输入结束信号后开始备份。这是教学工具及参数，不代表系统自带它。</p>
+      <p>Agent 用 <code>chiyo exec request</code> 提交计划，写明程序、参数、工作目录，以及凭据 <code>cred-db-01</code> 第 1 版应交给 <code>stdin</code>。凭据编号指向知予保存的密码，计划里没有真实密码。下面先申请，再在用户批准后执行；<code>REQ-45</code> 代表申请返回的示例编号：</p>
+      <pre class="plan-fragment"><code>chiyo exec request \
+  --credential cred-db-01 --version 1 \
+  --via stdin \
+  --executable /opt/example/db-backup \
+  --cwd /opt/example/work \
+  --arg=--password-stdin \
+  --purpose "备份项目数据库"
+
+# REQ-45 获得用户批准后
+chiyo exec run --request REQ-45</code></pre>
+      <p>知予的本机执行组件检查程序身份与批准范围，启动备份程序，通过它的标准输入交付密码。程序用密码连接数据库并写出备份；知予收集输出与退出状态，供 Agent 按本次操作编号查询。Agent 结合这些结果判断备份是否成功，不能把“操作已登记”或“进程已启动”当成备份成功。</p>
+      </div>
+    <figure class="execution-once-figure" aria-labelledby="execution-once-title">
+      <h4 class="figure-heading" id="execution-once-title">一次启动，完成这次备份</h4>
+      <ol class="execution-once-flow" aria-label="单次程序从启动、输出到结束">
+        <li><b>启动本机程序</b><code>db-backup</code><span>获准密码 → 标准输入</span></li>
+        <li><b>执行备份任务</b><span>连接数据库并写出备份<br>知予收集输出</span></li>
+        <li class="execution-ended"><b>程序结束</b><span>核对输出与退出状态<br>这次操作结束</span></li>
+      </ol>
+      <figcaption>“单次”指一次程序启动；下一次独立启动，不继承上一次 Shell 的目录和变量。</figcaption>
+    </figure>
+    <div class="reading">
+      <p>知予交付凭据的原始 UTF-8 字节后关闭这条输入管道，表示输入结束，不自动添加换行。只有程序确实从标准输入读取凭据时才用这种方式；看到“请输入密码”的提示，并不能说明它读取的是标准输入，例如 SSH 登录密码就需要专门的认证适配。</p>
+      <h4 id="execution-via-env">环境变量：启动程序时，把凭据放进指定变量</h4>
+      <p>假设本机工具 <code>/opt/example/project-tool</code> 用来查询项目状态，约定从环境变量 <code>API_TOKEN</code> 读取服务 Token。这也是教学工具；实际使用时要填写已安装程序的真实路径、变量名和工作目录。</p>
+      <p><strong>Agent 怎样申请：</strong>选择知予保存的 Token <code>cred-token-01</code> 第 1 版，声明接收方式为 <code>env</code>、变量名为 <code>API_TOKEN</code>，并提供程序及参数。申请里只有凭据引用，没有 Token 原文：</p>
+      <pre class="plan-fragment"><code>chiyo exec request \
+  --credential cred-token-01 --version 1 \
+  --via env --variable API_TOKEN \
+  --executable /opt/example/project-tool \
+  --cwd /opt/example/work \
+  --arg status \
+  --purpose "查询项目状态"
+
+# 假设返回 REQ-47；用户批准后执行
+chiyo exec run --request REQ-47</code></pre>
+      <p><strong>知予怎样注入：</strong>执行时先检查原批准、程序身份和凭据版本，再取出获准 Token，放进本次启动程序的环境映射中，变量名就是 <code>API_TOKEN</code>。知予带着这份环境启动 <code>project-tool status</code>，所以程序启动后就能读取该变量。Agent 不需要先读取 Token，也不需要在自己的终端执行 <code>export API_TOKEN=...</code>。</p>
+      <p><strong>程序怎样拿到：</strong>如果这个教学工具用 Python 编写，内部读取变量的片段就是：</p>
+      <pre class="plan-fragment"><code>import os
+
+token = os.environ["API_TOKEN"]
+# 用 token 向项目服务认证，再查询状态；不打印 token。</code></pre>
+      <p>这里的 <code>token</code> 是目标程序运行时拿到的真实值，供程序自己使用；Agent 只拿到程序输出的项目状态和执行结果。<code>API_TOKEN</code> 是程序约定的变量名，<code>cred-token-01</code> 是知予中的凭据编号，两者通过申请对应起来，不能把凭据编号本身当成 Token。</p>
+      <p>这份环境交给由知予启动的程序，<strong>不会修改 Agent 当前 Shell 或系统的全局环境变量</strong>。程序创建的子进程可能继承它；获批程序也能读取真实凭据，因此这种交付方式仍须信任接收程序，不能当作阻止恶意程序泄露密码的隔离措施。</p>
+      <h4 id="execution-via-file">临时文件：程序接收路径，再读取文件内容</h4>
+      <p>另一些程序只支持从文件读取密码。假设前面的备份工具还支持 <code>--password-file</code>，后面必须跟密码文件路径。Agent 仍然引用 <code>cred-db-01</code>，并让知予把受管文件路径插入参数列表：</p>
+      <pre class="plan-fragment"><code>chiyo exec request \
+  --credential cred-db-01 --version 1 \
+  --via file --file-argument 1 \
+  --executable /opt/example/db-backup \
+  --cwd /opt/example/work \
+  --arg=--password-file \
+  --purpose "通过密码文件备份项目数据库"
+
+# 假设返回 REQ-48；用户批准后执行
+chiyo exec run --request REQ-48</code></pre>
+      <p>参数位置从 <code>0</code> 开始：位置 <code>0</code> 是 <code>--password-file</code>，位置 <code>1</code> 留给知予生成的路径。获批执行时，知予把凭据写入私有受管临时文件，再按下面的形状启动程序：</p>
+      <pre class="plan-fragment"><code>db-backup --password-file &lt;知予分配的文件路径&gt;</code></pre>
+      <p>程序收到的是路径，再自行打开文件读取密码。Agent 不需要取出密码或自己创建明文文件；实际路径由知予分配，不是把占位文字直接当作路径。确认整个受管进程树结束后，知予再清理该文件。若程序要求从环境变量获得文件路径，也可使用 <code>--via file --variable 变量名</code>；这种情况下变量里放的是路径，和上面的 <code>env</code> 直接交付 Token 不同。</p>
+      <p>三种方式都要匹配程序的真实接口。知予根据申请中的凭据引用与接收位置交付材料，不会随意把密码替换进普通命令字符串。</p>
+      <p>这里的“单次”指一次程序启动，可以运行较久，也可以在内部完成多步工作。它不会为下一次启动保留同一个 Shell。程序运行中可查询输出；确认相关受管进程结束后，再清理临时材料。同一聊天可以在批准仍有效且范围相符时提交下一次独立操作，不必每次重新审批。</p>
+      </div>
+    </section>
+
+    <section class="execution-scenario" id="ssh-execution" aria-labelledby="execution-key-title">
+      <div class="reading">
+        <h3 class="execution-scenario-title" id="execution-key-title"><span>二</span><span>SSH 私钥登录<small>本机使用私钥，远端执行命令</small></span></h3>
+      <p>现在换成“查看测试服务器还剩多少磁盘空间”。本例使用知予保存的文件凭据“测试服务器 SSH 私钥”，编号 <code>cred-ssh-01</code>、第 1 版，登录 <code>ops@ops.example.net</code>，执行 <code>df -h</code>。服务器已配置对应公钥，私钥须能用于非交互认证；地址和编号都是教学示例。</p>
+      <h4 id="ssh-request">Agent 提交什么，用户批准什么？</h4>
+      <p>Agent 提交启动计划，说明本机 SSH 程序、服务器与账号、远端命令，以及私钥应放在 <code>-i</code> 参数之后。申请只带私钥引用，不带原文。用户批准申请 <code>REQ-44</code> 后，当前聊天才可以在批准的主机、程序和凭据接收范围内使用这一版私钥。</p>
+      <p>同一聊天可以在许可有效时继续提交其他远端命令，每次都有独立操作编号。例如 <code>OP-44</code> 标记本次提交，避免重试把同一次操作启动两遍。许可复用不等于保留 SSH 连接，也不表示知予会判断后续每条命令是否安全；换主机、程序身份或私钥接收位置，需要重新批准。</p>
+      <h4 id="ssh-launch">私钥怎样交给 SSH，结果怎样回来？</h4>
+      <p>发起执行后，知予复核批准、凭据版本、主机信任和程序身份，将获准私钥写入受管临时文件，把路径放到 <code>ssh -i</code> 后面，再由本机执行程序启动并跟踪 SSH。简化后相当于：</p>
+      <pre class="plan-fragment"><code>ssh -i &lt;知予分配的私钥文件&gt; ops@ops.example.net df -h</code></pre>
+      </div>
+    <figure class="ssh-execution-map" aria-labelledby="ssh-map-title" aria-describedby="ssh-map-caption">
+      <h4 id="ssh-map-title" class="figure-heading">私钥留在本机，命令在远端运行</h4>
+      <div class="ssh-map-grid">
+        <section class="ssh-machine ssh-local-machine" aria-label="Agent 所在电脑">
+          <h5 class="ssh-machine-title">Agent 所在电脑</h5>
+          <div class="ssh-local-body">
+            <div class="ssh-agent"><b>Agent</b><span>任务：查看 <code>ops@ops.example.net</code> 的剩余磁盘空间</span></div>
+            <div class="ssh-agent-exchange"><span><b aria-hidden="true">↓</b> 获批后提交操作 <code>OP-44</code></span><span><b aria-hidden="true">↑</b> 按 <code>EX-44</code> 查询执行结果</span></div>
+            <div class="ssh-local-chain">
+              <div class="ssh-map-node ssh-executor"><b>知予本机执行组件</b><span>取得获准私钥<br>启动并跟踪 SSH</span></div>
+              <div class="ssh-local-arrow"><span>写入</span><b aria-hidden="true">→</b></div>
+              <div class="ssh-map-node ssh-key-file"><b>受管私钥文件</b><code>cred-ssh-01 · v1</code><span>保留在本机</span></div>
+              <div class="ssh-local-arrow"><span>路径交给 <code>-i</code></span><b aria-hidden="true">→</b></div>
+              <div class="ssh-map-node ssh-client"><b>OpenSSH 客户端</b><span>在本机读取私钥<br>连接并认证</span></div>
+            </div>
+            <div class="ssh-local-return"><b aria-hidden="true">←</b><span>本机 SSH 的输出、错误和退出码，由执行组件收集</span></div>
+          </div>
+        </section>
+        <div class="ssh-network" aria-label="SSH 连接中的命令与结果">
+          <b>SSH 连接</b>
+          <div class="ssh-network-send"><span>发送命令</span><code>df -h</code><i aria-hidden="true">→</i></div>
+          <div class="ssh-network-return"><i aria-hidden="true">←</i><span>返回输出、错误<br>与结束状态</span></div>
+        </div>
+        <section class="ssh-machine ssh-remote-machine" aria-label="目标服务器">
+          <h5 class="ssh-machine-title">目标服务器</h5>
+          <div class="ssh-remote-body"><code>ops.example.net</code><div class="ssh-map-node"><b>SSH 服务</b><span>以登录账号 <code>ops</code><br>启动远端命令</span><strong><code>df -h</code></strong><span>在这台服务器上运行</span></div></div>
+        </section>
+      </div>
+      <figcaption id="ssh-map-caption">跨机器传递的是 SSH 连接中的命令与结果。私钥文件留在 Agent 所在电脑，由本机 SSH 读取；它不会作为文件传给服务器，也不会作为普通回复交给 Agent。</figcaption>
+    </figure>
+    <div class="reading">
+      <p>SSH 在本机读取私钥用于认证，不把私钥文件上传到服务器。认证成功后，远端 SSH 服务以账号 <code>ops</code> 启动 <code>df -h</code>；命令在服务器上运行。输出、错误和结束状态沿连接回到本机 SSH，再由知予收集，供 Agent 查询。</p>
+      <p id="ssh-host-check">私钥证明登录者的身份，服务器也需要证明自己的身份。现有专用路径使用事先确认的 <code>known_hosts</code> 主机信任记录，严格核对服务器的主机密钥；陌生或不匹配的密钥不能在执行时自动接受。这条路径使用非交互私钥认证，不弹出登录密码提示。</p>
+      <p id="ssh-result">知予返回本次执行编号 <code>EX-44</code>，Agent 用它查询状态和输出。例如 <code>df -h</code> 的 <code>/</code> 挂载点一行显示 <code>Avail</code> 为 <code>20G</code>，且执行正常结束，才能据此回答剩余空间约为 20G。查询输出不会重启 SSH；结果未知时应查原操作，不能直接换编号重跑。</p>
+      <p>确认本次受管进程树结束后，知予才清理临时私钥和配套配置。一条 CLI 调用结束不代表 SSH 已结束。现有许可的撤销会阻止新使用，但不会自动终止已经运行的远端任务。</p>
+      </div>
+      <details id="ssh-protocol"><summary>现有私钥调用与后续入口</summary><div class="detail-body">
+      <p>当前私钥专用路径使用 <code>ssh_identity</code> 和已有的 <code>request-use</code>、<code>run-use</code>、<code>execution-status</code>、<code>execution-output</code> 协议。查询本次执行可表示为：</p>
+      <pre class="plan-fragment"><code>{&quot;command&quot;:&quot;execution-status&quot;,&quot;executionId&quot;:&quot;EX-44&quot;}
+{&quot;command&quot;:&quot;execution-output&quot;,&quot;executionId&quot;:&quot;EX-44&quot;,&quot;cursor&quot;:0,&quot;limit&quot;:16}</code></pre>
+      <p>这些是现有协议的请求示例；后续计划以专用 SSH 入口统一表达私钥与密码认证。此处展示现有机制，不意味着私钥只能用于单次命令；需要持续工作时，私钥登录也可接入下一节的长会话设计。</p>
+      </div></details>
+    </section>
+
+    <section class="execution-scenario" id="execution-persistent-ssh" aria-labelledby="execution-password-title">
+      <div class="reading">
+        <h3 class="execution-scenario-title" id="execution-password-title"><span>三</span><span>SSH 密码长连接<small>登录一次，后面的命令继续执行</small></span></h3>
+      <p>用户希望 Agent 进入服务器的项目目录，再检查仓库状态。若每次重新登录并启动 Shell，上一条 <code>cd</code> 的效果就不会自动延续。为此，知予需要在登录后保留 SSH 连接和同一个远端 Shell，并返回一个会话编号。</p>
+      <p>Agent 使用密码凭据 <code>cred-ssh-password-01</code> 申请连接 <code>ops@ops.example.net</code>，说明端口、登录账号、认证方式、凭据版本、用途和预期操作。用户批准后再打开会话。以下是拟议接口：</p>
+      <pre class="plan-fragment"><code># 申请长会话，返回 REQ-46，等待用户批准
+chiyo ssh request \
+  --credential cred-ssh-password-01 \
+  --version 1 --auth password \
+  --host ops.example.net --port 22 \
+  --user ops \
+  --purpose &quot;检查服务器项目&quot;
+
+# 获批后登录，会话准备就绪时返回 SSH-7
+chiyo ssh open --request REQ-46</code></pre>
+      <h4 id="execution-ssh-password">密码怎样用于登录？</h4>
+      <p>打开会话时，知予核对批准与服务器身份，再由内置认证组件把本次获准密码交给 SSH 客户端完成登录。Agent 只提交凭据编号；正常流程不把密码放进命令参数、普通日志或返回结果。</p>
+      <p>后续不再要求 Agent 自己写“等待密码提示、发送密码”的 Expect 脚本。内置组件承担登录适配，知予的持续执行组件负责登录后的连接和 Shell。私钥登录也可以进入同一套会话管理；具体密码认证接口在本节末尾的补充说明中展开。</p>
+      <h4 id="execution-same-shell">会话编号怎样让 cd 的效果保留下来？</h4>
+      <p>准备就绪后，知予返回 <code>SSH-7</code>，表示它保存的这条连接与远端 Shell。这个编号不包含密码，也不能单凭编号取得权限；每次后续调用仍要核对原聊天和有效批准。</p>
+      <p>本机执行组件持续运行，不随一条 CLI 调用结束。第一次 <code>run</code> 把 <code>cd /srv/project</code> 送入那个 Shell，改变其当前目录；第二次 <code>run</code> 把 <code>pwd</code> 送入同一个 Shell，所以输出 <code>/srv/project</code>；第三次 <code>git status</code> 继续在该目录中执行。</p>
+      </div>
+    <figure class="execution-shell-figure" aria-labelledby="execution-shell-title">
+      <h4 class="figure-heading" id="execution-shell-title">三次调用，都送到 SSH-7 保留的同一个 Shell</h4>
+      <p class="execution-figure-label">拟议接口 · 下列 chiyo ssh 命令仍待实现</p>
+      <div class="execution-shell-grid">
+        <div class="execution-shell-calls">
+          <div class="execution-shell-call"><span>第 1 次调用 · 改变目录</span><pre><code>chiyo ssh run --session SSH-7 \
+  --command "cd /srv/project"</code></pre></div>
+          <div class="execution-shell-call"><span>第 2 次调用 · 查询当前目录</span><pre><code>chiyo ssh run --session SSH-7 \
+  --command "pwd"</code></pre></div>
+          <div class="execution-shell-call"><span>第 3 次调用 · 继续检查项目</span><pre><code>chiyo ssh run --session SSH-7 \
+  --command "git status"</code></pre></div>
+          <p>每次 <code>run</code> 可返回并退出；知予的本机执行组件继续维持连接，转交下一条命令。</p>
+        </div>
+        <div class="execution-remote-shell">
+          <div class="execution-shell-titlebar"><b>同一个远端 Shell</b><span><code>SSH-7</code> · <code>ops@ops.example.net</code></span></div>
+          <div class="execution-shell-transcript">
+            <div class="execution-shell-entry"><span class="execution-shell-step">1</span><div><code class="execution-shell-command">$ cd /srv/project</code><span class="execution-shell-context">当前目录变为 <code>/srv/project</code></span></div></div>
+            <div class="execution-shell-entry"><span class="execution-shell-step">2</span><div><code class="execution-shell-command">$ pwd</code><code class="execution-shell-output">/srv/project</code></div></div>
+            <div class="execution-shell-entry"><span class="execution-shell-step">3</span><div><code class="execution-shell-command">$ git status</code><span class="execution-shell-context">在 <code>/srv/project</code> 中查询仓库状态</span></div></div>
+          </div>
+          <div class="execution-shell-retained"><b>目录仍为 <code>/srv/project</code></b><span>没有在每次调用时新建 Shell</span></div>
+        </div>
+      </div>
+      <figcaption>这是拟议会话的教学示意；Shell 窗口只展示 <code>pwd</code> 的预期输出。关键是三条命令进入原来的 Shell，所以 <code>cd</code> 的效果能够延续。</figcaption>
+    </figure>
+    <div class="reading">
+      <p><code>export</code> 设置的环境变量也能延续。例如先执行 <code>export PROJECT_ENV=staging</code>，后续在该会话执行 <code>printenv PROJECT_ENV</code>，仍得到 <code>staging</code>。只复用网络连接不够，还必须保留原来的 Shell；每条命令另开 Shell 就不能保留这些状态。后续命令仍由知予代执行，Agent 根据结果决定下一步，无须接管密码或 SSH 进程。</p>
+      <h4 id="execution-session-lifecycle">Agent 怎样取得每条命令的结果，又怎样结束会话？</h4>
+      <p><code>SSH-7</code> 标识整个会话，每条命令另有独立操作编号，分别记录是否送达、输出、完成状态与退出码。一个会话先按顺序执行，前一条未结束时，不把下一条误送给正在运行的程序。知予需要可靠区分每条命令的开始和结束，不能把 Shell 提示符或整个 SSH 进程的退出当成每条命令的完成信号；这部分执行约定仍待实现。</p>
+      <p>Agent 完成任务后调用拟议的 <code>chiyo ssh close --session SSH-7</code>。如果断线或本机组件丢失原连接，原会话应标为失效或结果未知，不自动重发命令，也不悄悄新建 Shell 沿用旧编号，因为目录和变量可能已经丢失。关闭连接不能保证所有远端程序都停止。</p>
+      <p>第一阶段围绕 <code>cd</code>、<code>export</code>、文件查询和普通脚本设计。<code>vim</code>、<code>top</code> 或 <code>sudo</code> 再次询问密码等交互，需要额外的终端、输入和中断能力，不能算作已经支持。撤销、到期或聊天结束后拒绝新命令；运行中任务、空闲连接如何中断与回收，仍需在实现前确定。</p>
+      </div>
+      <details class="execution-auth-detail"><summary>密码认证的实现方向</summary><div class="detail-body">
+      <p>一个实现方向是沿用系统 OpenSSH，通过 <code>ASKPASS</code> 调用知予随包的认证辅助程序，再由它经本机私有通道取得本次获准密码并交给 SSH。这里只用它说明密码请求怎样交给本机组件；私有交付通道、进程核验和 Mac／Windows 兼容性仍待实现与验证。登录适配与后续 Shell 管理是两部分工作。</p>
+      </div></details>
+    </section>
+    <div class="reading connection-entry"><p>无论采用哪种场景，实际连接与执行都发生在 Agent 所在电脑。资料库存放在 NAS 时，NAS 上的知予服务负责保存资料、审批和授权核对，本机组件负责启动程序、连接目标服务器与收取输出。正常流程不返回凭据原文，仍不代表能防止恶意 Agent 或获批程序主动泄露凭据，安全边界见<a href="#security-boundary">下一章</a>。</p></div>
+    <details id="source-ssh"><summary>现有命令执行与 SSH 实现参考</summary><div class="detail-body">
+      <p><a href="../../cli.md">当前 CLI 与凭据执行协议</a>；<a href="../../adr/0010-reusable-credential-use-grants.md">ADR0010：有效期内复用与单次操作防重放</a>；<a href="../../adr/0031-device-credential-delivery-and-reveal.md">ADR0031：按实际使用位置交付凭据</a>。</p>
+      <p><a href="../../../packages/info_cli/lib/chiyo_exec.dart">通用命令申请与执行</a>；<a href="../../../packages/info_cli/lib/credential_program_client.dart">程序接收凭据及输出收集</a>；<a href="../../../packages/info_core/lib/credential_file_receivers.dart">SSH 私钥接收与主机核验</a>；<a href="../../../packages/info_cli/lib/credential_runtime_client.dart">提交执行、查询状态与输出</a>；<a href="../../adr/0024-online-multidevice-service.md">资料、审批与本机执行的边界</a>。</p>
+    </div></details>
+    <details id="source-command-execution-design"><summary>后续 SSH 认证与会话的协议参考</summary><div class="detail-body">
+      <p><a href="https://man.openbsd.org/ssh.1#SSH_ASKPASS" target="_blank" rel="noreferrer">OpenSSH 的 ASKPASS 认证接口 ↗</a>；<a href="https://man.openbsd.org/ssh_config.5#ControlMaster" target="_blank" rel="noreferrer">OpenSSH 的连接复用 ↗</a>；<a href="https://www.rfc-editor.org/rfc/rfc4254.html#section-6.5" target="_blank" rel="noreferrer">RFC 4254：Shell 与命令执行 ↗</a>。持久 Shell 仍需设计逐条命令的结束标记。</p>
+    </div></details>
+  </section>
+
   <section id="security-boundary" class="chapter">
     <div class="reading">
-      <h2><span class="section-num">06</span>知予能防止恶意 Agent 窃取密码吗？</h2>
-      <p><strong>不能保证。</strong>无论网页还是原生填写，知予都可以避免密码通过正常填写命令的回复进入 Agent 上下文，减少正常协作中的意外暴露；这不等于 Agent 无法从其他途径取得密码。</p>
+      <h2><span class="section-num">07</span>知予能防止恶意 Agent 窃取密码吗？</h2>
+      <p><strong>不能保证。</strong>无论网页、原生填写还是程序执行，知予都可以避免凭据原文通过正常操作命令的回复进入 Agent 上下文，减少正常协作中的意外暴露；这不等于 Agent 无法从其他途径取得密码或私钥。SSH 程序会实际读取私钥；知予也不能保证它对具备相应权限的其他本机进程隐藏。</p>
       <p>填写后，密码已经进入目标页面或应用。如果 Agent 还具备足够的页面脚本执行或应用控制能力，仍可能从目标一侧取得内容。例如，网页密码框显示为圆点，并不阻止有相应权限的页面脚本读取其值；原生密码控件是否可被其他工具读取，则取决于系统、应用和工具能力。</p>
       <p>恶意 Agent 也可能谎报任务用途，诱导用户批准向不符合真实意图的页面或应用填写。前文的身份核验、固定目标与审批仍然有效，但它们不能判断 Agent 的真实意图，也不能约束 Agent 通过其他工具进行的操作。</p>
       <p>因此，<strong>应使用可以信任的 Agent，并核对申请中的用途与目标。</strong>通俗地说，这更接近“防君子不防小人”：它能降低正常流程中的密码暴露风险，不能作为隔离恶意 Agent 的安全保证。</p>
@@ -491,7 +714,7 @@ socket.send(JSON.stringify(message));</code></pre><p>这条消息仍发往页面
       <p>网页例子采用主页面中的普通密码 input。iframe、Shadow DOM 和自绘控件涉及额外上下文或定位规则，本文不展开。</p>
     </div></details>
   </section>
-  <footer><span>知予 · 跨应用填写图解</span><a href="#main">回到开头 ↑</a></footer>
+  <footer><span>知予 · 凭据使用机制图解</span><a href="#main">回到开头 ↑</a></footer>
 </main>
 </div>
 </body>
