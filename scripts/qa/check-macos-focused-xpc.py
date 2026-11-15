@@ -29,9 +29,12 @@ def main():
     parser.add_argument("--synthetic-target", action="store_true", help="Focus a temporary AppKit secure field and send a fixed synthetic value")
     parser.add_argument("--plain-target", action="store_true", help="Verify an ordinary text field is refused without input")
     parser.add_argument("--native-status", action="store_true", help="Query frozen native wire from the signed sandboxed owner; no input")
+    parser.add_argument("--permission-lifecycle", action="store_true", help="Three read-only permission connections must not break an authenticated anchor")
     parser.add_argument("--native-archive-target", action="store_true", help="Fill only the pre-opened NativeBackgroundProofSigned.zip synthetic prompt")
     parser.add_argument("--dispatch-gate", action="store_true", help="Native archive QA only: wait for an independent observer's gate")
     args = parser.parse_args()
+    if args.permission_lifecycle and any([args.synthetic_target, args.plain_target, args.native_status, args.native_archive_target, args.dispatch_gate]):
+        parser.error("permission lifecycle is a separate read-only check")
     if args.plain_target:
         args.synthetic_target = True
     if args.native_status and args.synthetic_target:
@@ -47,6 +50,9 @@ def main():
         output.mkdir(parents=True, exist_ok=True)
     if args.native_archive_target:
         output = ROOT / "build/macos-adaptation/native-background-archive-check"
+        output.mkdir(parents=True, exist_ok=True)
+    if args.permission_lifecycle:
+        output = ROOT / "build/macos-adaptation/permission-lifecycle-check"
         output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="run-", dir=output) as temporary:
         work = Path(temporary)
@@ -164,6 +170,8 @@ import Darwin
   }
 }
 ''')
+        if args.permission_lifecycle:
+            fixture = SOURCE / "tests/PermissionLifecycleProbe.swift"
         command = ["xcrun", "swiftc", "-target", "arm64-apple-macos14.0", "-swift-version", "5", "-warnings-as-errors",
                    "-module-cache-path", str(work / "modules")]
         subprocess.run(command + [str(SOURCE / name) for name in ["FocusedFillContract.swift", "FocusProcessIdentity.swift",
