@@ -80,6 +80,49 @@ private enum ControllerChecks {
         try check(MacFocusPermissionStatus.decode(encoded) == nil)
       }
     }
+    try scenario("permission details keep accessibility and event posting independent") {
+      for (ax, events) in [(true, false), (false, true), (true, true), (false, false)] {
+        let object: [String: Any] = ["format": 2, "platform": "macos", "state": "checked",
+                                     "accessibilityTrusted": ax, "postEventsTrusted": events]
+        let data = try JSONSerialization.data(withJSONObject: object)
+        let decoded = MacFocusPermissionDetails.decode(data)
+        try check(decoded?.state == "checked" && decoded?.accessibilityTrusted == ax && decoded?.postEventsTrusted == events)
+      }
+    }
+    try scenario("permission details reject extra flags, numeric booleans and mixed failure shapes") {
+      let valid: [String: Any] = ["format": 2, "platform": "macos", "state": "checked",
+                                 "accessibilityTrusted": true, "postEventsTrusted": false]
+      var invalid = [valid.merging(["flags": ["prompt": true]]) { _, b in b },
+                     valid.merging(["accessibilityTrusted": 1]) { _, b in b },
+                     valid.merging(["postEventsTrusted": 0]) { _, b in b },
+                     valid.merging(["applicationPath": "/untrusted.app"]) { _, b in b },
+                     valid.merging(["errorCode": "busy"]) { _, b in b },
+                     valid.merging(["format": 1]) { _, b in b }]
+      var missing = valid
+      missing.removeValue(forKey: "postEventsTrusted")
+      invalid.append(missing)
+      invalid.append(["format": 2, "platform": "macos", "state": "unavailable",
+                      "errorCode": "unknown", "accessibilityTrusted": false])
+      for value in invalid {
+        let encoded = try JSONSerialization.data(withJSONObject: value)
+        try check(MacFocusPermissionDetails.decode(encoded) == nil)
+      }
+      for failure in [MacFocusPermissionDetails.unavailable, .busy] {
+        try check(Set(failure.wire.keys) == ["format", "platform", "state", "errorCode"])
+        let value = MacFocusPermissionDetails.decode(try JSONSerialization.data(withJSONObject: failure.wire))
+        try check(value?.state == "unavailable" && value?.accessibilityTrusted == nil && value?.postEventsTrusted == nil)
+      }
+    }
+    try scenario("permission read is inert and an explicit native request asks only for accessibility") {
+      var axReads = 0, eventReads = 0, requests = 0
+      let probe = MacFocusPermissionProbe(accessibility: { axReads += 1; return false },
+        postEvents: { eventReads += 1; return true }, requestAccessibility: { requests += 1 })
+      let read = probe.read(requestNative: false)
+      try check(read.accessibilityTrusted == false && read.postEventsTrusted == true)
+      try check(axReads == 1 && eventReads == 1 && requests == 0)
+      _ = probe.read(requestNative: true)
+      try check(axReads == 2 && eventReads == 2 && requests == 1)
+    }
     try scenario("application identity is exact and bounded") {
       try check(app.wire.count == 2)
       for sha in [String(repeating: "a", count: 64) + "\n", String(repeating: "A", count: 64), "123"] {

@@ -33,15 +33,28 @@ sent 只表示 setter 返回成功，不代表登录、提交或业务接收。s
 
 最后检查后窗口关闭、业务状态改变或撤销仍可能与 setter 竞态；不能保证原子撤止。可见上下文变化可拒绝，但不可见语义变化、同名文件复用等不能由外部 AX 证明；严格业务事务需要应用合作接口。内部焦点改变不会把定向 AXValue 写入 B。
 
+## 本机权限与升级
+
+兼容焦点和原生后台使用同一个已校验签名的内嵌 XPC helper。原生 AX setter 只要求 AX；兼容键盘焦点路径还要求事件发送权限，不能用两者合并后的结果代替原生 AX 状态。权限预检在实际 helper 内执行，不以系统设置中的 App 开关或 provider 已装配推断成功。
+
+Owner 的 `agent_info_manage/focused_fill` channel 提供无参数的 `permissionDetails` 与 `requestNativePermissionDetails`。前者只读，后者仅显式请求 AX，均通过同名私有 XPC selector 返回 format-2 的 `checked` 及独立 `accessibilityTrusted`、`postEventsTrusted` 布尔值；失败为 `unavailable` 与 `busy` 或 `session_unavailable`，不混入权限布尔值。Owner 追加当前 `applicationName`、`applicationPath`。旧 `permissions`、`requestPermission` 及 format-1 结构保持兼容。
+
+显式 UI 操作 `openAccessibilitySettings` 只打开系统辅助功能设置，`revealApplication` 只定位当前主 App；均无路径或 URL 参数，返回布尔回执。系统授权提示异步完成，点击申请按钮本身不表示已获准，回到 App 后须重新预检。ad-hoc 更新会改变代码要求，旧版本的授权记录可能不匹配当前构建；同名或同 bundle ID 的开关不能证明新版本有效。保留回退材料，由用户在系统界面核对当前 App 并重新允许，不改写 TCC、重置授权或放宽签名要求。
+
+每个权限查询只关闭自己的短连接，不为刷新权限终止 helper 或清理其他连接的原目标。XPC session 析构不再创建指向正在析构对象的弱引用；控制器幂等释放，native wire 始终在主线程清理。
+
 ## 验证
 
 ```sh
 python3 scripts/qa/check-macos-native-background.py
 python3 scripts/qa/check-macos-native-background.py --platform
 python3 scripts/qa/check-macos-focused-xpc.py --native-status
+python3 scripts/qa/check-macos-focused-xpc.py --permission-lifecycle
 ```
 
 默认运行无系统输入的控制器断言及系统/桥接源码类型检查。`--platform` 启动两个不同 bundle 身份/路径的合成 AppKit 接收器、原生前台 Cover 和 WK 子树。覆盖后台/遮挡/最小化/隐藏、无 AXIdentifier、语言变更、原生与网页混合、部分/全部禁用和只读、普通文本、歧义、重建/关闭/重启、回调期间变化、权限拒绝及文件身份不匹配。权限拒绝通过收紧的测试 seam 验证，不改系统权限。
+
+`--permission-lifecycle` 用真实沙盒合成 Owner 和同源 helper 保持一条认证连接，再依次结束三条只读权限短连接。format-2 与旧 format-1 查询均须成功，锚点仍须可用；它能发现短连接析构导致的 helper 崩溃，不申请系统权限、不访问其他 App、不发送输入。
 
 独立进程观察器持续采样前台、真实焦点对象/PID、鼠标及剪贴板，开始就绪后才允许进入 controller.write，结束标记在 write 返回之后；测试断言采样时间覆盖整个调用区间，nil 焦点不算保持。先校准稳定、焦点切换及前台切换。窗口轮换测试超过256次；wire 测试覆盖新 kind/format1、scope、保留/释放、helper重启及dispose。测试夹具/临时可执行文件与缓存清理，回执和源哈希留在 `build/native-background-macos/`。这些不是正式产品签名/TCC或最终业务验收。
 
@@ -57,7 +70,7 @@ python3 scripts/qa/check-macos-focused-xpc.py --native-archive-target
 
 它只接受包含该合成归档名的唯一目标；不读取用户资料，不自动提交。需要独立前台/焦点/鼠标/剪贴板观测时加 `--dispatch-gate`，并按 `tests/DispatchObserver.swift` 驱动合成 Cover 和 gate；gate 超时不会输入。提交仍是独立 UI 步骤，之后必须比较解压内容哈希，不能只看 sent。测试生成物与一次性程序均放 build，不正式安装。
 
-本轮已验证签名的沙盒合成宿主和实际 XPC helper 的真实填写；正式完整 Flutter AppHost/CLI 装配、最终分发签名和升级后的 TCC 归属仍须在统筹冻结候选上验收。原生后台仅需要 helper 辅助功能权限，不需要键盘或录屏权限；本路径从不请求/修改系统权限。
+本轮已验证签名的沙盒合成宿主和实际 XPC helper 的真实填写；正式完整 Flutter AppHost/CLI 装配、最终分发签名和升级后的 TCC 归属仍须在统筹冻结候选上验收。原生后台只需实际 helper 的 AX 权限，不需要事件发送或录屏权限；发现和填写路径不弹授权提示，只有设置中的显式动作请求 AX。
 
 ## 普通产品构建和后续完整流程
 

@@ -8,6 +8,8 @@ import Security
 protocol MacFocusPrivateProtocol {
   func permissions(reply: @escaping (Data) -> Void)
   func requestPermission(reply: @escaping (Data) -> Void)
+  func permissionDetails(reply: @escaping (Data) -> Void)
+  func requestNativePermissionDetails(reply: @escaping (Data) -> Void)
   func inspect(reply: @escaping (Data) -> Void)
   func prepare(_ application: Data, reply: @escaping (Data) -> Void)
   func send(_ batch: Data, lease: String, sequence: Int, reply: @escaping (Data) -> Void)

@@ -146,17 +146,43 @@ final class MacFocusOwnerClient {
 /// Short-lived authenticated permission connection. It never owns a target or
 /// retries an RPC; the bridge retains it until completion or app shutdown.
 final class MacFocusPermissionClient {
+  private enum Completion {
+    case legacy((MacFocusPermissionStatus) -> Void)
+    case details((MacFocusPermissionDetails) -> Void)
+    func resolve(_ data: Data?) {
+      switch self {
+      case .legacy(let reply): reply(data.flatMap(MacFocusPermissionStatus.decode) ?? .unavailable)
+      case .details(let reply): reply(data.flatMap(MacFocusPermissionDetails.decode) ?? .unavailable)
+      }
+    }
+  }
   private let connection: NSXPCConnection
   private let queue = DispatchQueue(label: "org.shijijs.agent-info.focus-permissions")
-  private var completion: ((MacFocusPermissionStatus) -> Void)?
+  private var completion: Completion?
   private var ended = false
 
   init() throws { connection = try MacFocusPrivateConnection.open() }
   deinit { connection.invalidate() }
 
   func query(prompt: Bool, reply: @escaping (MacFocusPermissionStatus) -> Void) {
+    start(.legacy(reply)) { proxy, received in
+      if prompt { proxy.requestPermission(reply: received) }
+      else { proxy.permissions(reply: received) }
+    }
+  }
+
+  func permissionDetails(reply: @escaping (MacFocusPermissionDetails) -> Void) {
+    start(.details(reply)) { proxy, received in proxy.permissionDetails(reply: received) }
+  }
+
+  func requestNativePermissionDetails(reply: @escaping (MacFocusPermissionDetails) -> Void) {
+    start(.details(reply)) { proxy, received in proxy.requestNativePermissionDetails(reply: received) }
+  }
+
+  private func start(_ reply: Completion,
+                     invoke: @escaping (MacFocusPrivateProtocol, @escaping (Data) -> Void) -> Void) {
     queue.async { [self] in
-      guard !ended, completion == nil else { reply(.unavailable); return }
+      guard !ended, completion == nil else { reply.resolve(nil); return }
       completion = reply
       connection.invalidationHandler = { [weak self] in self?.finish(nil) }
       connection.interruptionHandler = { [weak self] in self?.finish(nil) }
@@ -165,8 +191,7 @@ final class MacFocusPermissionClient {
         as? MacFocusPrivateProtocol else { finish(nil); return }
       queue.asyncAfter(deadline: .now() + 5) { [weak self] in self?.finish(nil) }
       let received: (Data) -> Void = { [weak self] data in self?.finish(data) }
-      if prompt { proxy.requestPermission(reply: received) }
-      else { proxy.permissions(reply: received) }
+      invoke(proxy, received)
     }
   }
 
@@ -178,7 +203,7 @@ final class MacFocusPermissionClient {
       let reply = completion
       completion = nil
       connection.invalidate()
-      reply?(data.flatMap(MacFocusPermissionStatus.decode) ?? .unavailable)
+      reply?.resolve(data)
     }
   }
 }

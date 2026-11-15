@@ -147,6 +147,17 @@ final class SystemMacFocusEnvironment: MacFocusEnvironment {
       : MacFocusPermissionStatus(state: "permission_required", errorCode: "permission_required")
   }
 
+  static func permissionDetails(promptNative: Bool) -> MacFocusPermissionDetails {
+    let probe = MacFocusPermissionProbe(accessibility: { AXIsProcessTrusted() },
+      postEvents: { CGPreflightPostEventAccess() }, requestAccessibility: {
+      let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+      _ = AXIsProcessTrustedWithOptions(options)
+    })
+    // Native AX setters do not need event-posting access. Always preflight both
+    // facts independently, even while AX is denied. Prompting is asynchronous.
+    return probe.read(requestNative: promptNative)
+  }
+
   private func begin() throws {
     guard Thread.isMainThread else { throw MacFocusFailure("unsupported_desktop") }
     guard connected() else { throw MacFocusFailure("session_unavailable") }
