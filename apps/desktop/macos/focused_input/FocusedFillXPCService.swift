@@ -179,6 +179,19 @@ private final class MacFocusPrivateSession: NSObject, MacNativeBackgroundPrivate
 
   func permissions(reply: @escaping (Data) -> Void) { permissionStatus(prompt: false, reply: reply) }
   func requestPermission(reply: @escaping (Data) -> Void) { permissionStatus(prompt: true, reply: reply) }
+  func permissionDetails(reply: @escaping (Data) -> Void) { permissionDetails(promptNative: false, reply: reply) }
+  func requestNativePermissionDetails(reply: @escaping (Data) -> Void) { permissionDetails(promptNative: true, reply: reply) }
+
+  private func permissionDetails(promptNative: Bool, reply: @escaping (Data) -> Void) {
+    DispatchQueue.main.async { [self] in
+      state.lock()
+      let busy = pending
+      state.unlock()
+      let result: MacFocusPermissionDetails = !live() ? .unavailable : busy ? .busy :
+        SystemMacFocusEnvironment.permissionDetails(promptNative: promptNative)
+      reply((try? JSONSerialization.data(withJSONObject: result.wire)) ?? Data())
+    }
+  }
 
   private func permissionStatus(prompt: Bool, reply: @escaping (Data) -> Void) {
     DispatchQueue.main.async { [self] in

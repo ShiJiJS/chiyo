@@ -8,12 +8,14 @@ enum PermissionLifecycleProbe {
   private static var anchor: NSXPCConnection?
   private static var client: MacFocusPermissionClient?
   private static var completed = 0
+  private static var detailsChecked = false
   private static var finished = false
 
   private static func finish(_ state: String) {
     guard !finished else { return }
     finished = true
     let result: [String: Any] = ["state": state, "rounds": completed,
+                               "detailsChecked": detailsChecked,
                                "permissionPrompted": false, "inputAttempted": false]
     print(String(data: try! JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]), encoding: .utf8)!)
     fflush(stdout)
@@ -46,18 +48,33 @@ enum PermissionLifecycleProbe {
     do {
       let current = try MacFocusPermissionClient()
       client = current
+      if completed == 0 {
+        current.permissionDetails { details in
+          DispatchQueue.main.async {
+            guard details.state == "checked", details.accessibilityTrusted != nil,
+                  details.postEventsTrusted != nil else { finish("details_unavailable"); return }
+            detailsChecked = true
+            completeRound()
+          }
+        }
+        return
+      }
       current.query(prompt: false) { status in
         DispatchQueue.main.async {
           guard ["ready", "permission_required"].contains(status.state) else {
             finish("short_connection_unavailable"); return
           }
-          completed += 1
-          client = nil
-          // Let invalidation reach the helper before the next independent query.
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { next() }
+          completeRound()
         }
       }
     } catch { finish("initialization_failed") }
+  }
+
+  private static func completeRound() {
+    completed += 1
+    client = nil
+    // Let invalidation reach the helper before the next independent query.
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { next() }
   }
 
   static func main() {

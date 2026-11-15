@@ -1,4 +1,5 @@
 import Foundation
+import CoreFoundation
 
 struct MacFocusApplication: Equatable {
   let executable: String
@@ -90,5 +91,72 @@ struct MacFocusPermissionStatus {
           (state == "permission_required" && code == "permission_required") ||
           (state == "unavailable" && ["session_unavailable", "busy"].contains(code)) else { return nil }
     return MacFocusPermissionStatus(state: state, errorCode: code)
+  }
+}
+
+/// Helper-owned preflights are separate facts; neither boolean implies that a
+/// target exists or that any credential may be delivered.
+struct MacFocusPermissionDetails {
+  let accessibilityTrusted: Bool?
+  let postEventsTrusted: Bool?
+  let errorCode: String?
+  var state: String { errorCode == nil ? "checked" : "unavailable" }
+
+  init(accessibilityTrusted: Bool, postEventsTrusted: Bool) {
+    self.accessibilityTrusted = accessibilityTrusted
+    self.postEventsTrusted = postEventsTrusted
+    errorCode = nil
+  }
+  private init(errorCode: String) {
+    accessibilityTrusted = nil
+    postEventsTrusted = nil
+    self.errorCode = errorCode
+  }
+  static let unavailable = MacFocusPermissionDetails(errorCode: "session_unavailable")
+  static let busy = MacFocusPermissionDetails(errorCode: "busy")
+
+  var wire: [String: Any] {
+    var result: [String: Any] = ["format": 2, "platform": "macos", "state": state]
+    if let errorCode { result["errorCode"] = errorCode }
+    else {
+      result["accessibilityTrusted"] = accessibilityTrusted!
+      result["postEventsTrusted"] = postEventsTrusted!
+    }
+    return result
+  }
+
+  static func decode(_ data: Data) -> MacFocusPermissionDetails? {
+    guard data.count <= 1024,
+          let value = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+          value["format"] as? Int == 2, value["platform"] as? String == "macos" else { return nil }
+    if value["state"] as? String == "checked" {
+      guard Set(value.keys) == ["format", "platform", "state", "accessibilityTrusted", "postEventsTrusted"],
+            let ax = boolean(value["accessibilityTrusted"]), let events = boolean(value["postEventsTrusted"]) else { return nil }
+      return MacFocusPermissionDetails(accessibilityTrusted: ax, postEventsTrusted: events)
+    }
+    guard value["state"] as? String == "unavailable",
+          Set(value.keys) == ["format", "platform", "state", "errorCode"],
+          let code = value["errorCode"] as? String, ["busy", "session_unavailable"].contains(code) else { return nil }
+    return MacFocusPermissionDetails(errorCode: code)
+  }
+
+  private static func boolean(_ value: Any?) -> Bool? {
+    guard let value, CFGetTypeID(value as CFTypeRef) == CFBooleanGetTypeID() else { return nil }
+    return value as? Bool
+  }
+}
+
+/// The OS boundary offers a request for AX only. Event posting is a separate
+/// preflight, never a side effect of requesting native AX setter access.
+struct MacFocusPermissionProbe {
+  let accessibility: () -> Bool
+  let postEvents: () -> Bool
+  let requestAccessibility: () -> Void
+
+  func read(requestNative: Bool) -> MacFocusPermissionDetails {
+    if requestNative { requestAccessibility() }
+    let ax = accessibility()
+    let events = postEvents()
+    return MacFocusPermissionDetails(accessibilityTrusted: ax, postEventsTrusted: events)
   }
 }

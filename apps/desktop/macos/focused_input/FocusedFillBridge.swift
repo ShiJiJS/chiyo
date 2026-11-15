@@ -1,5 +1,6 @@
 import FlutterMacOS
 import Foundation
+import AppKit
 
 /// Owner bridge; constructing it only registers the private method channel.
 /// The connection ID is local cancellation bookkeeping;
@@ -27,7 +28,54 @@ final class MacFocusedFillBridge {
   }
 
   private func handle(_ call: FlutterMethodCall, _ reply: @escaping FlutterResult) {
-    guard !closed else { refused("session_unavailable", reply); return }
+    guard !closed else {
+      if call.method == "permissionDetails" || call.method == "requestNativePermissionDetails" {
+        reply(Self.ownerDetails(.unavailable))
+      } else if call.method == "openAccessibilitySettings" || call.method == "revealApplication" {
+        reply(false)
+      } else { refused("session_unavailable", reply) }
+      return
+    }
+    if call.method == "openAccessibilitySettings" || call.method == "revealApplication" {
+      guard noArguments(call) else { reply(false); return }
+      DispatchQueue.main.async {
+        if call.method == "openAccessibilitySettings" {
+          let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+          reply(NSWorkspace.shared.open(url))
+        } else {
+          let application = Bundle.main.bundleURL
+          guard application.pathExtension == "app" else { reply(false); return }
+          NSWorkspace.shared.activateFileViewerSelecting([application])
+          reply(true)
+        }
+      }
+      return
+    }
+    if call.method == "permissionDetails" || call.method == "requestNativePermissionDetails" {
+      guard noArguments(call) else { reply(Self.ownerDetails(.unavailable)); return }
+      guard !permissionOpening, permissionClient == nil, active == nil else {
+        reply(Self.ownerDetails(.busy)); return
+      }
+      permissionOpening = true
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        let client = try? MacFocusPermissionClient()
+        DispatchQueue.main.async {
+          guard let self else { client?.close(); reply(Self.ownerDetails(.unavailable)); return }
+          self.permissionOpening = false
+          guard !self.closed, let client else { reply(Self.ownerDetails(.unavailable)); return }
+          self.permissionClient = client
+          let completed: (MacFocusPermissionDetails) -> Void = { [weak self] details in
+            DispatchQueue.main.async {
+              self?.permissionClient = nil
+              reply(Self.ownerDetails(self?.closed == false ? details : .unavailable))
+            }
+          }
+          if call.method == "requestNativePermissionDetails" { client.requestNativePermissionDetails(reply: completed) }
+          else { client.permissionDetails(reply: completed) }
+        }
+      }
+      return
+    }
     if call.method == "permissions" || call.method == "requestPermission" {
       guard call.arguments == nil || (call.arguments as? [String: Any])?.isEmpty == true else {
         reply(MacFocusPermissionStatus.unavailable.wire); return
@@ -136,5 +184,19 @@ final class MacFocusedFillBridge {
 
   private func refused(_ code: String, _ reply: FlutterResult) {
     reply(MacFocusReply(state: "refused", errorCode: code).wire)
+  }
+
+  private func noArguments(_ call: FlutterMethodCall) -> Bool {
+    call.arguments == nil || (call.arguments as? [String: Any])?.isEmpty == true
+  }
+
+  private static func ownerDetails(_ details: MacFocusPermissionDetails) -> [String: Any] {
+    var result = details.wire
+    let bundle = Bundle.main
+    result["applicationName"] = (bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String)
+      ?? (bundle.object(forInfoDictionaryKey: "CFBundleName") as? String)
+      ?? bundle.bundleURL.deletingPathExtension().lastPathComponent
+    result["applicationPath"] = bundle.bundleURL.path
+    return result
   }
 }
