@@ -202,6 +202,8 @@ final class AgentGateway {
           if (_deviceCredentials != null) ...[
             if (_deviceCredentials.credentialBatchesAvailable)
               'credential-batches.v3',
+            if (_deviceCredentials.credentialBatchesAvailable)
+              RequestPresentation.capability,
             if (_deviceCredentials.credentialBatchesAvailable) 'ssh-interactive-sessions.v1',
             if (_deviceCredentials.credentialBatchesAvailable)
               'credential-native-fill.v2',

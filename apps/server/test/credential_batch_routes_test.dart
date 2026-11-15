@@ -45,6 +45,10 @@ void main() {
       final f = await DeviceCredentialFixture.create();
       addTearDown(f.dispose);
       final a = f.agents.first;
+      expect(
+        (await a.call('/capabilities', {}))['capabilities'],
+        contains(RequestPresentation.capability),
+      );
       final session = (await a.call('/session/lifecycle', {
         'chatLabel': 'Synthetic App review',
       }))['sessionSecret'];
@@ -76,6 +80,7 @@ void main() {
         'operationId': 'app-submit',
         'input': {
           'protocolVersion': 3,
+          'title': '登录合成服务',
           'purpose': 'Synthetic App workflow',
           'agentName': 'Trial Agent',
           'externalChatId': 'trial-chat',
@@ -103,6 +108,8 @@ void main() {
       expect(raw['operationsCursor'], isNull);
       noPrivate(raw);
       final detail = approvalDetailFromJson(raw);
+      expect(detail.request.title, '登录合成服务');
+      expect(detail.request.purpose, 'Synthetic App workflow');
       expect(detail.credentialBatch, true);
       expect(detail.scopes, hasLength(2));
       expect(
@@ -166,6 +173,7 @@ void main() {
           '/v1/owner/approvals/details/${Uri.encodeComponent(id)}',
         ),
       );
+      expect(after.request.title, '登录合成服务');
       expect(after.credentialExpiresAt, decided.credentialExpiresAt);
       final revoke = WorkspaceApprovalChange(
         operationId: 'app-revoke',
